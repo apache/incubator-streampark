@@ -23,6 +23,7 @@ import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.exception.ApiDetailException;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -123,7 +124,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
   @Override
   public void addResource(Resource resource) throws Exception {
     String resourceStr = resource.getResource();
-    ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
+    PremisesUtils.throwIfNull(
+        resourceStr, "Please add pom or jar resource.", ApiAlertException.class);
 
     // check
     Dependency dependency = Dependency.toDependency(resourceStr);
@@ -156,7 +158,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   private static void processConnectorResource(Resource resource) throws JsonProcessingException {
     String connector = resource.getConnector();
-    ApiAlertException.throwIfNull(connector, "the flink connector is null.");
+    PremisesUtils.throwIfNull(connector, "the flink connector is null.");
     FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
     resource.setResourceName(connectorResource.getFactoryIdentifier());
     Optional.ofNullable(connectorResource.getRequiredOptions())
@@ -197,9 +199,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     String resourceName = resource.getResourceName();
     if (resourceName != null) {
-      ApiAlertException.throwIfFalse(
+      PremisesUtils.throwIfFalse(
           resourceName.equals(findResource.getResourceName()),
-          "Please make sure the resource name is not changed.");
+          "Please make sure the resource name is not changed.",
+          ApiAlertException.class);
 
       Dependency dependency = Dependency.toDependency(resource.getResource());
       if (!dependency.getJar().isEmpty()) {
@@ -348,7 +351,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       // get jarFile error
       return buildExceptResponse(e, 1);
     }
-    ApiAlertException.throwIfTrue(jarFile == null, "flink app jar must exist.");
+    PremisesUtils.throwIfTrue(
+        jarFile == null, "flink app jar must exist.", ApiAlertException.class);
     Map<String, Serializable> resp = new HashMap<>(0);
     resp.put(STATE, 0);
     if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
@@ -449,18 +453,21 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
     File localJar = new File(resourcePath);
     File teamUploadJar = new File(teamUploads, localJar.getName());
-    ApiAlertException.throwIfFalse(
-        localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
+    PremisesUtils.throwIfFalse(
+        localJar.exists(),
+        "Missing file: " + resourcePath + ", please upload again",
+        ApiAlertException.class);
     FsOperator.lfs()
         .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
   }
 
   private void checkOrElseAlert(Resource resource) {
-    ApiAlertException.throwIfNull(resource, "The resource does not exist.");
+    PremisesUtils.throwIfNull(resource, "The resource does not exist.", ApiAlertException.class);
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         isDependByApplications(resource),
-        "Sorry, the resource is still in use, cannot be removed.");
+        "Sorry, the resource is still in use, cannot be removed.",
+        ApiAlertException.class);
   }
 
   private boolean isDependByApplications(Resource resource) {

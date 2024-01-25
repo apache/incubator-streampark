@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.CommonService;
@@ -60,8 +61,10 @@ public class CommonServiceImpl implements CommonService {
   public String getSqlClientJar(FlinkEnv flinkEnv) {
     if (sqlClientJar == null) {
       File localClient = WebUtils.getAppClientDir();
-      ApiAlertException.throwIfFalse(
-          localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
+      PremisesUtils.throwIfFalse(
+          localClient.exists(),
+          "[StreamPark] " + localClient + " no exists. please check.",
+          ApiAlertException.class);
       List<String> jars =
           Arrays.stream(Objects.requireNonNull(localClient.list()))
               .filter(
@@ -70,13 +73,15 @@ public class CommonServiceImpl implements CommonService {
                           "streampark-flink-sqlclient_" + flinkEnv.getScalaVersion() + "-.*\\.jar"))
               .collect(Collectors.toList());
 
-      ApiAlertException.throwIfTrue(
+      PremisesUtils.throwIfTrue(
           jars.isEmpty(),
-          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient,
+          ApiAlertException.class);
 
-      ApiAlertException.throwIfTrue(
+      PremisesUtils.throwIfTrue(
           jars.size() > 1,
-          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient,
+          ApiAlertException.class);
 
       sqlClientJar = jars.get(0);
     }

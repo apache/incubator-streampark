@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.common.exception.AlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -51,9 +52,9 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
             .orElseThrow(() -> new AlertException("Please configure the email sender first"));
     String contacts =
         alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-    if (!StringUtils.hasLength(contacts)) {
-      throw new AlertException("Please configure a valid contacts");
-    }
+
+    PremisesUtils.throwIfFalse(
+        StringUtils.hasLength(contacts), "Please configure a valid contacts", AlertException.class);
     String[] emails = contacts.split(",");
     return sendEmail(emailConfig, template, emails);
   }

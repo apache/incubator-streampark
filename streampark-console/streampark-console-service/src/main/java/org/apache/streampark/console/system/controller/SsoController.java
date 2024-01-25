@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.entity.User;
@@ -67,9 +68,10 @@ public class SsoController {
   public RestResponse token() throws Exception {
 
     // Check SSO enable status
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         !ssoEnable,
-        "Single Sign On (SSO) is not available, please contact the administrator to enable");
+        "Single Sign On (SSO) is not available, please contact the administrator to enable",
+        ApiAlertException.class);
 
     Subject subject = SecurityUtils.getSubject();
     PrincipalCollection principals = subject.getPrincipals();
@@ -84,8 +86,10 @@ public class SsoController {
     principal = new Pac4jPrincipal(profiles, principalNameAttribute);
 
     // Check Principal name
-    ApiAlertException.throwIfNull(
-        principal.getName(), "Please configure the correct Principal Name Attribute");
+    PremisesUtils.throwIfNull(
+        principal.getName(),
+        "Please configure the correct Principal Name Attribute",
+        ApiAlertException.class);
 
     User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
 

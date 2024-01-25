@@ -19,6 +19,7 @@ package org.apache.streampark.console.base.interceptor;
 
 import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
@@ -56,14 +57,17 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
       Map<String, MultipartFile> files = multipartRequest.getFileMap();
       for (String file : files.keySet()) {
         MultipartFile multipartFile = multipartRequest.getFile(file);
-        ApiAlertException.throwIfNull(
-            multipartFile, "File to upload can't be null. Upload file failed.");
+        PremisesUtils.throwIfNull(
+            multipartFile,
+            "File to upload can't be null. Upload file failed.",
+            ApiAlertException.class);
         boolean isJarOrPyFile =
             FileUtils.isJarFileType(multipartFile.getInputStream())
                 || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
-        ApiAlertException.throwIfFalse(
+        PremisesUtils.throwIfFalse(
             isJarOrPyFile,
-            "Illegal file type, Only support standard jar files. Upload file failed.");
+            "Illegal file type, Only support standard jar files. Upload file failed.",
+            ApiAlertException.class);
       }
     }
     return true;

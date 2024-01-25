@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
@@ -41,8 +42,10 @@ public class AuthenticatorImpl implements Authenticator {
   public User authenticate(String username, String password, String loginType) throws Exception {
     LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
 
-    ApiAlertException.throwIfNull(
-        loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
+    PremisesUtils.throwIfNull(
+        loginTypeEnum,
+        String.format("the login type [%s] is not supported.", loginType),
+        ApiAlertException.class);
 
     switch (loginTypeEnum) {
       case PASSWORD:
@@ -60,18 +63,21 @@ public class AuthenticatorImpl implements Authenticator {
   private User passwordAuthenticate(String username, String password) {
     User user = usersService.getByUsername(username);
 
-    ApiAlertException.throwIfNull(user, String.format("User [%s] does not exist", username));
+    PremisesUtils.throwIfNull(
+        user, String.format("User [%s] does not exist", username), ApiAlertException.class);
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         user.getLoginType() != LoginTypeEnum.PASSWORD,
-        "user [%s] can not login with PASSWORD",
-        username);
+        String.format("user [%s] can not login with PASSWORD", username),
+        ApiAlertException.class);
 
     String salt = user.getSalt();
     password = ShaHashUtils.encrypt(salt, password);
 
-    ApiAlertException.throwIfFalse(
-        StringUtils.equals(user.getPassword(), password), "Incorrect password");
+    PremisesUtils.throwIfFalse(
+        StringUtils.equals(user.getPassword(), password),
+        "Incorrect password",
+        ApiAlertException.class);
 
     return user;
   }

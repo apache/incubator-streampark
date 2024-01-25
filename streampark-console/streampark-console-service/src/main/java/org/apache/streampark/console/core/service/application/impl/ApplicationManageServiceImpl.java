@@ -25,6 +25,7 @@ import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ObjectUtils;
@@ -319,8 +320,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @SneakyThrows
   @Override
   public boolean create(Application appParam) {
-    ApiAlertException.throwIfNull(
-        appParam.getTeamId(), "The teamId can't be null. Create application failed.");
+    PremisesUtils.throwIfNull(
+        appParam.getTeamId(),
+        "The teamId can't be null. Create application failed.",
+        ApiAlertException.class);
     appParam.setUserId(commonService.getUserId());
     appParam.setState(FlinkAppStateEnum.ADDED.getValue());
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
@@ -331,9 +334,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
     boolean success = validateQueueIfNeeded(appParam);
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         success,
-        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()),
+        ApiAlertException.class);
 
     appParam.doSetHotParams();
     if (appParam.isUploadJob()) {
@@ -362,18 +366,16 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       }
     }
 
-    if (save(appParam)) {
-      if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
-        FlinkSql flinkSql = new FlinkSql(appParam);
-        flinkSqlService.create(flinkSql);
-      }
-      if (appParam.getConfig() != null) {
-        configService.create(appParam, true);
-      }
-      return true;
-    } else {
-      throw new ApiAlertException("create application failed");
+    boolean saved = save(appParam);
+    PremisesUtils.throwIfFalse(saved, "create application failed", ApiAlertException.class);
+    if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
+      FlinkSql flinkSql = new FlinkSql(appParam);
+      flinkSqlService.create(flinkSql);
     }
+    if (appParam.getConfig() != null) {
+      configService.create(appParam, true);
+    }
+    return true;
   }
 
   private boolean shouldHandleK8sName(Application app) {
@@ -391,9 +393,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @SneakyThrows
   public Long copy(Application appParam) {
     boolean existsByJobName = this.existsByJobName(appParam.getJobName());
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         !existsByJobName,
-        "[StreamPark] Application names can't be repeated, copy application failed.");
+        "[StreamPark] Application names can't be repeated, copy application failed.",
+        ApiAlertException.class);
 
     Application oldApp = getById(appParam.getId());
     Application newApp = new Application();
@@ -447,31 +450,30 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setHadoopUser(oldApp.getHadoopUser());
 
     boolean saved = save(newApp);
-    if (saved) {
-      if (newApp.isFlinkSqlJob()) {
-        FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
-        newApp.setFlinkSql(copyFlinkSql.getSql());
-        newApp.setTeamResource(copyFlinkSql.getTeamResource());
-        newApp.setDependency(copyFlinkSql.getDependency());
-        FlinkSql flinkSql = new FlinkSql(newApp);
-        flinkSqlService.create(flinkSql);
-      }
-      ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
-      if (copyConfig != null) {
-        ApplicationConfig config = new ApplicationConfig();
-        config.setAppId(newApp.getId());
-        config.setFormat(copyConfig.getFormat());
-        config.setContent(copyConfig.getContent());
-        config.setCreateTime(new Date());
-        config.setVersion(1);
-        configService.save(config);
-        configService.setLatestOrEffective(true, config.getId(), newApp.getId());
-      }
-      return newApp.getId();
-    } else {
-      throw new ApiAlertException(
-          "create application from copy failed, copy source app: " + oldApp.getJobName());
+    PremisesUtils.throwIfFalse(
+        saved,
+        "create application from copy failed, copy source app: " + oldApp.getJobName(),
+        ApiAlertException.class);
+    if (newApp.isFlinkSqlJob()) {
+      FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
+      newApp.setFlinkSql(copyFlinkSql.getSql());
+      newApp.setTeamResource(copyFlinkSql.getTeamResource());
+      newApp.setDependency(copyFlinkSql.getDependency());
+      FlinkSql flinkSql = new FlinkSql(newApp);
+      flinkSqlService.create(flinkSql);
     }
+    ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+    if (copyConfig != null) {
+      ApplicationConfig config = new ApplicationConfig();
+      config.setAppId(newApp.getId());
+      config.setFormat(copyConfig.getFormat());
+      config.setContent(copyConfig.getContent());
+      config.setCreateTime(new Date());
+      config.setVersion(1);
+      configService.save(config);
+      configService.setLatestOrEffective(true, config.getId(), newApp.getId());
+    }
+    return newApp.getId();
   }
 
   @Override
@@ -485,17 +487,19 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       case YARN_SESSION:
       case KUBERNETES_NATIVE_SESSION:
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfFalse(
+        PremisesUtils.throwIfFalse(
             flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
-            "[StreamPark] update failed, because bind flink cluster not running");
+            "[StreamPark] update failed, because bind flink cluster not running",
+            ApiAlertException.class);
         break;
       default:
     }
 
     boolean success = validateQueueIfNeeded(application, appParam);
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         success,
-        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+        String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()),
+        ApiAlertException.class);
 
     application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
@@ -633,8 +637,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     } else {
       // get previous flink sql and decode
       FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
-      ApiAlertException.throwIfNull(
-          copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
+      PremisesUtils.throwIfNull(
+          copySourceFlinkSql,
+          "Flink sql is null, update flink sql job failed.",
+          ApiAlertException.class);
       copySourceFlinkSql.decode();
 
       // get submit flink sql

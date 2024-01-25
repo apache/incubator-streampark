@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.security.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,8 +74,8 @@ public class LdapService {
    * @return boolean ldapLoginStatus
    */
   public boolean ldapLogin(String userId, String userPwd) {
-    ApiAlertException.throwIfFalse(
-        enable, "ldap is not enabled, Please check the configuration: ldap.enable");
+    PremisesUtils.throwIfFalse(
+        enable, "ldap is not enabled, Please check the configuration: ldap.enable", ApiAlertException.class);
     renderLdapEnv();
     try {
       NamingEnumeration<SearchResult> results = getSearchResults(userId);

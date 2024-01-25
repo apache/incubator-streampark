@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
@@ -98,9 +99,10 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     FlinkEnv flinkEnv = getById(id);
     checkOrElseAlert(flinkEnv);
     Long count = this.baseMapper.selectCount(null);
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         !(count > 1 && flinkEnv.getIsDefault()),
-        "The flink home is set as default, please change it first.");
+        "The flink home is set as default, please change it first.",
+        ApiAlertException.class);
 
     this.baseMapper.deleteById(id);
   }
@@ -157,16 +159,19 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   private void checkOrElseAlert(FlinkEnv flinkEnv) {
 
     // 1.check exists
-    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
+    PremisesUtils.throwIfNull(
+        flinkEnv, "The flink home does not exist, please check.", ApiAlertException.class);
 
     // 2.check if it is being used by any flink cluster
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
-        "The flink home is still in use by some flink cluster, please check.");
+        "The flink home is still in use by some flink cluster, please check.",
+        ApiAlertException.class);
 
     // 3.check if it is being used by any application
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
-        "The flink home is still in use by some application, please check.");
+        "The flink home is still in use by some application, please check.",
+        ApiAlertException.class);
   }
 }

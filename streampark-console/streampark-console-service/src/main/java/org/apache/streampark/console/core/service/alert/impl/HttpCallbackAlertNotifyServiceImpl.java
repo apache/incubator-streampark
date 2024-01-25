@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.common.exception.AlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertHttpCallbackParams;
@@ -100,9 +101,10 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
           String.format("Failed to request httpCallback alert,%nurl:%s", url), e);
     }
 
-    if (response == null) {
-      throw new AlertException(String.format("Failed to request httpCallback alert,%nurl:%s", url));
-    }
+    PremisesUtils.throwIfNull(
+        response,
+        String.format("Failed to request httpCallback alert,%nurl:%s", url),
+        AlertException.class);
   }
 
   @Nonnull

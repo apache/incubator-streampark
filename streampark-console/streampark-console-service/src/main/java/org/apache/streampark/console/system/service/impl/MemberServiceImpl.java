@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -75,7 +76,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public IPage<Member> getPage(Member member, RestRequest request) {
-    ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
+    PremisesUtils.throwIfNull(
+        member.getTeamId(), "The team id is required.", ApiAlertException.class);
     Page<Member> page = MybatisPager.getPage(request);
     return baseMapper.selectPage(page, member);
   }
@@ -100,7 +102,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   private Member findByUserId(Long teamId, Long userId) {
-    ApiAlertException.throwIfNull(teamId, "The team id is required.");
+    PremisesUtils.throwIfNull(teamId, "The team id is required.", ApiAlertException.class);
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)
@@ -119,17 +121,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public void createMember(Member member) {
     User user = userService.getByUsername(member.getUserName());
-    ApiAlertException.throwIfNull(user, "The username [%s] not found", member.getUserName());
-
-    ApiAlertException.throwIfNull(
-        roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+    PremisesUtils.throwIfNull(user, "The username [%s] not found", member.getUserName(), ApiAlertException.class);
+    
+    PremisesUtils.throwIfNull(
+        roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId(), ApiAlertException.class);
     Team team = teamService.getById(member.getTeamId());
-    ApiAlertException.throwIfNull(team, "The teamId [%s] not found", member.getTeamId());
-    ApiAlertException.throwIfNotNull(
+    PremisesUtils.throwIfNull(team, "The teamId [%s] not found", member.getTeamId(), ApiAlertException.class);
+    PremisesUtils.throwIfNotNull(
         findByUserId(member.getTeamId(), user.getUserId()),
         "The user [%s] has been added the team [%s], please don't add it again.",
-        member.getUserName(),
-        team.getTeamName());
+        member.getUserName(), team.getTeamName(),
+       ApiAlertException.class);
 
     member.setId(null);
     member.setUserId(user.getUserId());

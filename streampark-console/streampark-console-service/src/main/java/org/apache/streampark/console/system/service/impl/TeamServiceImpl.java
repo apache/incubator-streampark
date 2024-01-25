@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
@@ -79,11 +80,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   @Override
   public void createTeam(Team team) {
     Team existedTeam = getByName(team.getTeamName());
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         existedTeam == null,
         String.format(
             "Team name [%s] exists already. Create team failed. Please rename and try again.",
-            team.getTeamName()));
+            team.getTeamName()),
+        ApiAlertException.class);
     team.setId(null);
     Date date = new Date();
     team.setCreateTime(date);
@@ -96,22 +98,26 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
     Team team = this.getById(teamId);
 
-    ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);
+    PremisesUtils.throwIfNull(
+        team, String.format("The team[Id=%s] doesn't exist.", teamId), ApiAlertException.class);
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         applicationInfoService.existsByTeamId(teamId),
-        "Please delete the applications under the team[name=%s] first!",
-        team.getTeamName());
+        String.format(
+            "Please delete the applications under the team[name=%s] first!", team.getTeamName()),
+        ApiAlertException.class);
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         projectService.existsByTeamId(teamId),
-        "Please delete the projects under the team[name=%s] first!",
-        team.getTeamName());
+        String.format(
+            "Please delete the projects under the team[name=%s] first!", team.getTeamName()),
+        ApiAlertException.class);
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         variableService.existsByTeamId(teamId),
-        "Please delete the variables under the team[name=%s] first!",
-        team.getTeamName());
+        String.format(
+            "Please delete the variables under the team[name=%s] first!", team.getTeamName()),
+        ApiAlertException.class);
 
     memberService.removeByTeamId(teamId);
     userService.clearLastTeam(teamId);

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.common.exception.AlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertDingTalkParams;
@@ -143,16 +144,18 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
       throw new AlertException(
           String.format("Failed to request DingTalk robot alert,%nurl:%s", url), e);
     }
-    if (robotResponse == null) {
-      throw new AlertException(
-          String.format("Failed to request DingTalk robot alert,%nurl:%s", url));
-    }
-    if (robotResponse.getErrcode() != 0) {
-      throw new AlertException(
-          String.format(
-              "Failed to request DingTalk robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
-              url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
-    }
+
+    PremisesUtils.throwIfNull(
+        robotResponse,
+        String.format("Failed to request DingTalk robot alert,%nurl:%s", url),
+        AlertException.class);
+
+    PremisesUtils.throwIfTrue(
+        robotResponse.getErrcode() != 0,
+        String.format(
+            "Failed to request DingTalk robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
+            url, robotResponse.getErrcode(), robotResponse.getErrmsg()),
+        AlertException.class);
   }
 
   /**

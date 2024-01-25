@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.common.exception.AlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
@@ -78,12 +79,12 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     long count =
         applicationInfoService.count(
             new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
-    if (count > 0) {
-      throw new AlertException(
-          String.format(
-              "AlertId:%d, this is bound by application. Please clear the configuration first",
-              id));
-    }
+
+    PremisesUtils.throwIfTrue(
+        count > 0,
+        String.format(
+            "AlertId:%d, this is bound by application. Please clear the configuration first", id),
+        AlertException.class);
     return super.removeById(id);
   }
 }

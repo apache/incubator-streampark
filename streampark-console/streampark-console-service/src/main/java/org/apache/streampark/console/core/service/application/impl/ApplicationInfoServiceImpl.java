@@ -28,6 +28,7 @@ import org.apache.streampark.common.exception.ApplicationException;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -236,9 +237,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
         FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
         boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
-        if (!conned) {
-          throw new ApiAlertException("the target cluster is unavailable, please check!");
-        }
+        PremisesUtils.throwIfFalse(
+            conned, "the target cluster is unavailable, please check!", ApiAlertException.class);
       }
       return true;
     } catch (Exception e) {
@@ -388,11 +388,14 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
     Application application = getById(id);
-    ApiAlertException.throwIfNull(
-        application, String.format("The application id=%s can't be found.", id));
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfNull(
+        application,
+        String.format("The application id=%s can't be found.", id),
+        ApiAlertException.class);
+    PremisesUtils.throwIfFalse(
         FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
-        "Job executionMode must be kubernetes-session|kubernetes-application.");
+        "Job executionMode must be kubernetes-session|kubernetes-application.",
+        ApiAlertException.class);
 
     CompletableFuture<String> future =
         CompletableFuture.supplyAsync(

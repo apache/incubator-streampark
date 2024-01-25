@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -74,9 +75,10 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public void createVariable(Variable variable) {
 
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
-        "Sorry, the variable code already exists.");
+        "Sorry, the variable code already exists.",
+        ApiAlertException.class);
 
     variable.setCreatorId(commonService.getUserId());
     this.save(variable);
@@ -84,8 +86,10 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
   @Override
   public void remove(Variable variable) {
-    ApiAlertException.throwIfTrue(
-        isDependByApplications(variable), "Sorry, the variable is actually used.");
+    PremisesUtils.throwIfTrue(
+        isDependByApplications(variable),
+        "Sorry, the variable is actually used.",
+        ApiAlertException.class);
     this.removeById(variable);
   }
 
@@ -119,12 +123,15 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public void updateVariable(Variable variable) {
     // region update variable
-    ApiAlertException.throwIfNull(variable.getId(), "Sorry, the variable id cannot be null.");
+    PremisesUtils.throwIfNull(
+        variable.getId(), "Sorry, the variable id cannot be null.", ApiAlertException.class);
     Variable findVariable = this.baseMapper.selectById(variable.getId());
-    ApiAlertException.throwIfNull(findVariable, "Sorry, the variable does not exist.");
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfNull(
+        findVariable, "Sorry, the variable does not exist.", ApiAlertException.class);
+    PremisesUtils.throwIfFalse(
         findVariable.getVariableCode().equals(variable.getVariableCode()),
-        "Sorry, the variable code cannot be updated.");
+        "Sorry, the variable code cannot be updated.",
+        ApiAlertException.class);
     this.baseMapper.updateById(variable);
     // endregion
 

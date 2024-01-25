@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.domain.ResponseCode;
 import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -148,15 +149,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void updatePassword(User userParam) {
     User user = getById(userParam.getUserId());
-    ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfNull(
+        user, "User is null. Update password failed.", ApiAlertException.class);
+    PremisesUtils.throwIfFalse(
         user.getLoginType() == LoginTypeEnum.PASSWORD,
-        "Can only update password for user who sign in with PASSWORD");
+        "Can only update password for user who sign in with PASSWORD",
+        ApiAlertException.class);
 
     String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         StringUtils.equals(user.getPassword(), saltPassword),
-        "Old password error. Update password failed.");
+        "Old password error. Update password failed.",
+        ApiAlertException.class);
 
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
@@ -222,9 +226,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     if (user.getLastTeamId() == null) {
       List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
 
-      ApiAlertException.throwIfTrue(
+      PremisesUtils.throwIfTrue(
           CollectionUtils.isEmpty(teams),
-          "The current user does not belong to any team, please contact the administrator!");
+          "The current user does not belong to any team, please contact the administrator!",
+          ApiAlertException.class);
 
       if (teams.size() == 1) {
         Team team = teams.get(0);

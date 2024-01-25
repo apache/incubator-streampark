@@ -22,6 +22,7 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.exception.ApiDetailException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -149,8 +150,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @VisibleForTesting
   public boolean internalCreate(FlinkCluster flinkCluster) {
     boolean successful = validateQueueIfNeeded(flinkCluster);
-    ApiAlertException.throwIfFalse(
-        successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
+    PremisesUtils.throwIfFalse(
+        successful,
+        String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()),
+        ApiAlertException.class);
     flinkCluster.setCreateTime(new Date());
     if (FlinkExecutionMode.isRemoteMode(flinkCluster.getFlinkExecutionModeEnum())) {
       flinkCluster.setClusterState(ClusterState.RUNNING.getState());
@@ -174,9 +177,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     FlinkCluster flinkCluster = getById(cluster.getId());
     try {
       DeployResponse deployResponse = deployInternal(flinkCluster);
-      ApiAlertException.throwIfNull(
+      PremisesUtils.throwIfNull(
           deployResponse,
-          "Deploy cluster failed, unknown reason，please check you params or StreamPark error log");
+          "Deploy cluster failed, unknown reason，please check you params or StreamPark error log",
+          ApiAlertException.class);
       if (FlinkExecutionMode.isYarnSessionMode(flinkCluster.getFlinkExecutionModeEnum())) {
         String address =
             String.format(
@@ -208,8 +212,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   public void update(FlinkCluster paramOfCluster) {
     FlinkCluster flinkCluster = getById(paramOfCluster.getId());
     boolean success = validateQueueIfNeeded(flinkCluster, paramOfCluster);
-    ApiAlertException.throwIfFalse(
-        success, String.format(ERROR_CLUSTER_QUEUE_HINT, paramOfCluster.getYarnQueue()));
+    PremisesUtils.throwIfFalse(
+        success,
+        String.format(ERROR_CLUSTER_QUEUE_HINT, paramOfCluster.getYarnQueue()),
+        ApiAlertException.class);
 
     flinkCluster.setClusterName(paramOfCluster.getClusterName());
     flinkCluster.setAlertId(paramOfCluster.getAlertId());
@@ -257,7 +263,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     try {
       ShutDownResponse shutDownResponse =
           shutdownInternal(flinkCluster, flinkCluster.getClusterId());
-      ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
+      PremisesUtils.throwIfNull(
+          shutDownResponse, "Get shutdown response failed", ApiAlertException.class);
       flinkCluster.setClusterState(ClusterState.CANCELED.getState());
       flinkCluster.setEndTime(new Date());
       updateById(flinkCluster);
@@ -275,8 +282,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     FlinkCluster flinkCluster = this.getById(cluster.getId());
     // 1) check mode
     String clusterId = flinkCluster.getClusterId();
-    ApiAlertException.throwIfTrue(
-        StringUtils.isBlank(clusterId), "The clusterId can not be empty!");
+    PremisesUtils.throwIfTrue(
+        StringUtils.isBlank(clusterId), "The clusterId can not be empty!", ApiAlertException.class);
 
     // 2) check cluster is active
     checkActiveIfNeeded(flinkCluster);
@@ -284,14 +291,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     // 3) check job if running on cluster
     if (shouldWatchForK8s(cluster)) {
       boolean existActiveJobs = flinkK8sObserver.existActiveJobsOnFlinkCluster(flinkCluster);
-      ApiAlertException.throwIfTrue(
+      PremisesUtils.throwIfTrue(
           existActiveJobs,
-          "Due to the presence of active jobs on the cluster, the cluster should not be shutdown");
+          "Due to the presence of active jobs on the cluster, the cluster should not be shutdown",
+          ApiAlertException.class);
     } else {
       boolean existsRunningJob =
           applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
-      ApiAlertException.throwIfTrue(
-          existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
+      PremisesUtils.throwIfTrue(
+          existsRunningJob,
+          "Some app is running on this cluster, the cluster cannot be shutdown",
+          ApiAlertException.class);
     }
     return true;
   }

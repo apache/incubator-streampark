@@ -32,6 +32,7 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -176,8 +177,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   public void revoke(Long appId) throws ApplicationException {
     Application application = getById(appId);
-    ApiAlertException.throwIfNull(
-        application, String.format("The application id=%s not found, revoke failed.", appId));
+    PremisesUtils.throwIfNull(
+        application,
+        String.format("The application id=%s not found, revoke failed.", appId),
+        ApiAlertException.class);
 
     // 1) delete files that have been published to workspace
     application.getFsOperator().delete(application.getAppHome());
@@ -275,11 +278,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
       if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfNull(
+        PremisesUtils.throwIfNull(
             cluster,
             String.format(
                 "The yarn session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
+                application.getFlinkClusterId()),
+            ApiAlertException.class);
         clusterId = cluster.getClusterId();
       } else {
         clusterId = application.getAppId();
@@ -290,12 +294,13 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-      ApiAlertException.throwIfNull(
+      PremisesUtils.throwIfNull(
           cluster,
           String.format(
               "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
                   + "the cluster has been deleted. Please contact the Admin.",
-              application.getFlinkClusterId()));
+              application.getFlinkClusterId()),
+          ApiAlertException.class);
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
@@ -382,8 +387,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     // 1) check application
     final Application application = getById(appParam.getId());
     Utils.requireNotNull(application);
-    ApiAlertException.throwIfTrue(
-        !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
+    PremisesUtils.throwIfTrue(
+        !application.isCanBeStart(),
+        "[StreamPark] The application cannot be started repeatedly.",
+        ApiAlertException.class);
 
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
         || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
@@ -391,16 +398,20 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
-      ApiAlertException.throwIfTrue(
+
+      PremisesUtils.throwIfTrue(
           !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
-          "[StreamPark] The same task name is already running in the yarn queue");
+          "[StreamPark] The same task name is already running in the yarn queue",
+          ApiAlertException.class);
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
     Utils.requireNotNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-    ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
+
+    PremisesUtils.throwIfNull(
+        flinkEnv, "[StreamPark] can no found flink version", ApiAlertException.class);
 
     // if manually started, clear the restart flag
     if (!auto) {
@@ -626,8 +637,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     FlinkExecutionMode executionModeEnum = application.getFlinkExecutionMode();
     ApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
-    ApiAlertException.throwIfNull(
-        executionModeEnum, "ExecutionMode can't be null, start application failed.");
+    PremisesUtils.throwIfNull(
+        executionModeEnum,
+        "ExecutionMode can't be null, start application failed.",
+        ApiAlertException.class);
 
     String flinkUserJar = null;
     String appConf = null;
@@ -654,15 +667,20 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         Resource resource =
             resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
-        ApiAlertException.throwIfNull(
-            resource, "pyflink file can't be null, start application failed.");
+        PremisesUtils.throwIfNull(
+            resource,
+            "pyflink file can't be null, start application failed.",
+            ApiAlertException.class);
 
-        ApiAlertException.throwIfNull(
-            resource.getFilePath(), "pyflink file can't be null, start application failed.");
+        PremisesUtils.throwIfNull(
+            resource.getFilePath(),
+            "pyflink file can't be null, start application failed.",
+            ApiAlertException.class);
 
-        ApiAlertException.throwIfFalse(
+        PremisesUtils.throwIfFalse(
             resource.getFilePath().endsWith(Constant.PYTHON_SUFFIX),
-            "pyflink format error, must be a \".py\" suffix, start application failed.");
+            "pyflink format error, must be a \".py\" suffix, start application failed.",
+            ApiAlertException.class);
 
         flinkUserJar = resource.getFilePath();
         break;
@@ -734,24 +752,26 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     Map<String, Object> properties = new HashMap<>(application.getOptionMap());
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-      ApiAlertException.throwIfNull(
+      PremisesUtils.throwIfNull(
           cluster,
           String.format(
               "The clusterId=%s can't be find, maybe the clusterId is wrong or "
                   + "the cluster has been deleted. Please contact the Admin.",
-              application.getFlinkClusterId()));
+              application.getFlinkClusterId()),
+          ApiAlertException.class);
       URI activeAddress = cluster.getRemoteURI();
       properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     } else if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
       if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfNull(
+        PremisesUtils.throwIfNull(
             cluster,
             String.format(
                 "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or "
                     + "the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
+                application.getFlinkClusterId()),
+            ApiAlertException.class);
         properties.put(ConfigKeys.KEY_YARN_APP_ID(), cluster.getClusterId());
       } else {
         String yarnQueue =
@@ -837,15 +857,18 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   /* check flink cluster before job start job */
   private void checkBeforeStart(Application application) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(application.getId());
-    ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
+    PremisesUtils.throwIfNull(
+        flinkEnv, "[StreamPark] can no found flink version", ApiAlertException.class);
 
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
-        "[StreamPark] The flink cluster don't exist, please check it");
+        "[StreamPark] The flink cluster don't exist, please check it",
+        ApiAlertException.class);
 
     FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
-        "[StreamPark] The flink cluster not running, please start it");
+        "[StreamPark] The flink cluster not running, please start it",
+        ApiAlertException.class);
   }
 }

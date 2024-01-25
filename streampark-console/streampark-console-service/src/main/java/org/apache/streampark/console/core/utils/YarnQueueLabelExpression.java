@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.utils;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -86,7 +87,8 @@ public class YarnQueueLabelExpression {
 
   // Visible for test.
   public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
-    ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_FORMAT_HINTS);
+    PremisesUtils.throwIfFalse(
+        isValid(queueLabelExpr, false), ERR_FORMAT_HINTS, ApiAlertException.class);
     String[] strs = queueLabelExpr.split(AT);
     if (strs.length == 2) {
       return new YarnQueueLabelExpression(strs[0], strs[1]);
@@ -98,8 +100,8 @@ public class YarnQueueLabelExpression {
       @Nonnull String queue, @Nullable String labelExpression) {
     YarnQueueLabelExpression queueLabelExpression =
         new YarnQueueLabelExpression(queue, labelExpression);
-    ApiAlertException.throwIfFalse(
-        isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
+    PremisesUtils.throwIfFalse(
+        isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS, ApiAlertException.class);
     return queueLabelExpression;
   }
 

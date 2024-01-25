@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.domain.ResponseCode;
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.PermissionAction;
@@ -147,7 +148,8 @@ public class UserController {
       return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
     }
     User user = commonService.getCurrentUser();
-    ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
+    PremisesUtils.throwIfNull(
+        user, "Current login user is null, set team failed.", ApiAlertException.class);
     // 1) set the latest team
     userService.setLastTeam(teamId, user.getUserId());
 

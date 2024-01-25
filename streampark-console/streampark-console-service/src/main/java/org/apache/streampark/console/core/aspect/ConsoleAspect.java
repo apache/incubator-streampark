@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.common.exception.ApiAlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
@@ -77,9 +78,11 @@ public class ConsoleAspect {
         (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
     if (Objects.nonNull(isApi) && isApi) {
       ApiAccess apiAccess = methodSignature.getMethod().getAnnotation(ApiAccess.class);
-      if (Objects.isNull(apiAccess) || !apiAccess.value()) {
-        throw new ApiAlertException("api accessToken authentication failed!");
-      }
+
+      PremisesUtils.throwIfTrue(
+          Objects.isNull(apiAccess) || !apiAccess.value(),
+          "api accessToken authentication failed!",
+          ApiAlertException.class);
     }
     return (RestResponse) joinPoint.proceed();
   }
@@ -118,21 +121,25 @@ public class ConsoleAspect {
 
       switch (permissionTypeEnum) {
         case USER:
-          ApiAlertException.throwIfTrue(
+          PremisesUtils.throwIfTrue(
               !currentUser.getUserId().equals(paramId),
-              "Permission denied, only user himself can access this permission");
+              "Permission denied, only user himself can access this permission",
+              ApiAlertException.class);
           break;
         case TEAM:
-          ApiAlertException.throwIfTrue(
-              memberService.getByTeamIdUserName(paramId, currentUser.getUsername()) == null,
-              "Permission denied, only user belongs to this team can access this permission");
+          PremisesUtils.throwIfNull(
+              memberService.getByTeamIdUserName(paramId, currentUser.getUsername()),
+              "Permission denied, only user belongs to this team can access this permission",
+              ApiAlertException.class);
           break;
         case APP:
           Application app = applicationManageService.getById(paramId);
-          ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          ApiAlertException.throwIfTrue(
-              memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername()) == null,
-              "Permission denied, only user belongs to this team can access this permission");
+          PremisesUtils.throwIfNull(
+              app, "Invalid operation, application is null", ApiAlertException.class);
+          PremisesUtils.throwIfNull(
+              memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername()),
+              "Permission denied, only user belongs to this team can access this permission",
+              ApiAlertException.class);
           break;
         default:
           throw new IllegalArgumentException(

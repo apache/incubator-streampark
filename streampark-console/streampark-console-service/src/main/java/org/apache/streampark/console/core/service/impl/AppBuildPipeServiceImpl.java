@@ -27,6 +27,7 @@ import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -274,9 +275,10 @@ public class AppBuildPipeServiceImpl
                 for (String jar : app.getDependencyObject().getJar()) {
                   File localJar = new File(WebUtils.getAppTempDir(), jar);
                   File uploadJar = new File(localUploads, jar);
-                  if (!localJar.exists() && !uploadJar.exists()) {
-                    throw new ApiAlertException("Missing file: " + jar + ", please upload again");
-                  }
+                  PremisesUtils.throwIfTrue(
+                      !localJar.exists() && !uploadJar.exists(),
+                      "Missing file: " + jar + ", please upload again",
+                      ApiAlertException.class);
                   if (localJar.exists()) {
                     checkOrElseUploadJar(
                         FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(), localUploads);
@@ -415,18 +417,23 @@ public class AppBuildPipeServiceImpl
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
     boolean checkVersion = env.getFlinkVersion().checkVersion(false);
-    ApiAlertException.throwIfFalse(
-        checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+    PremisesUtils.throwIfFalse(
+        checkVersion,
+        "Unsupported flink version:" + env.getFlinkVersion().version(),
+        ApiAlertException.class);
 
     // 2) check env
     boolean envOk = applicationInfoService.checkEnv(app);
-    ApiAlertException.throwIfFalse(
-        envOk, "Check flink env failed, please check the flink version of this job");
+    PremisesUtils.throwIfFalse(
+        envOk,
+        "Check flink env failed, please check the flink version of this job",
+        ApiAlertException.class);
 
     // 3) Whether the application can currently start a new building progress
-    ApiAlertException.throwIfTrue(
+    PremisesUtils.throwIfTrue(
         !forceBuild && !allowToBuildNow(appId),
-        "The job is invalid, or the job cannot be built while it is running");
+        "The job is invalid, or the job cannot be built while it is running",
+        ApiAlertException.class);
   }
 
   /** create building pipeline instance */

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.alert.impl;
 
 import org.apache.streampark.common.exception.AlertException;
+import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertLarkParams;
@@ -116,15 +117,17 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
           String.format("Failed to request Lark robot alert,%nurl:%s", url), e);
     }
 
-    if (robotResponse == null) {
-      throw new AlertException(String.format("Failed to request Lark robot alert,%nurl:%s", url));
-    }
-    if (robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0) {
-      throw new AlertException(
-          String.format(
-              "Failed to request Lark robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
-              url, robotResponse.getCode(), robotResponse.getMsg()));
-    }
+    PremisesUtils.throwIfNull(
+        robotResponse,
+        String.format("Failed to request Lark robot alert,%nurl:%s", url),
+        AlertException.class);
+
+    PremisesUtils.throwIfTrue(
+        robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0,
+        String.format(
+            "Failed to request Lark robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
+            url, robotResponse.getCode(), robotResponse.getMsg()),
+        AlertException.class);
   }
 
   /**
