@@ -23,11 +23,28 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
-public interface RoleMenuServie extends IService<RoleMenu> {
+/** This interface is used to handle the relationship between permissions and menus */
+public interface RoleMenuService extends IService<RoleMenu> {
 
+  /**
+   * Remove the association of RoleMenu by role id
+   *
+   * @param roleId role id
+   */
   void removeByRoleId(Long roleId);
 
+  /**
+   * Remove the association of RoleMenu by menu Ids
+   *
+   * @param menuIds list of menu id
+   */
   void removeByMenuIds(String[] menuIds);
 
+  /**
+   * List the association of RoleMenu by role id
+   *
+   * @param roleId role id
+   * @return
+   */
   List<RoleMenu> listByRoleId(String roleId);
 }

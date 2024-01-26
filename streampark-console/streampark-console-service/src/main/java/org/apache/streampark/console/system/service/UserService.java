@@ -96,21 +96,74 @@ public interface UserService extends IService<User> {
    */
   Set<String> listPermissions(Long userId, @Nullable Long teamId);
 
+  /**
+   * List all users without tokens
+   *
+   * @return List of User
+   */
   List<User> listNoTokenUser();
 
+  /**
+   * Populate the LastTeam field in User
+   *
+   * @param teamId team id
+   * @param userId user id
+   */
   void setLastTeam(Long teamId, Long userId);
 
+  /**
+   * Clean the LastTeam field in User
+   *
+   * @param userId user id
+   * @param teamId team id
+   */
   void clearLastTeam(Long userId, Long teamId);
 
+  /**
+   * Clean the LastTeam field in User
+   *
+   * @param teamId team id
+   */
   void clearLastTeam(Long teamId);
 
+  /**
+   * Populate team information for users
+   *
+   * @param user User
+   */
   void fillInTeam(User user);
 
+  /**
+   * List all Users by team id
+   *
+   * @param teamId team id
+   * @return List of user
+   */
   List<User> listByTeamId(Long teamId);
 
+  /**
+   * Generate user information for the front end
+   *
+   * @param user User
+   * @param teamId team id
+   * @param token JWTToken
+   * @return
+   */
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
+  /**
+   * transfer user resources to specified users
+   *
+   * @param userId The user ID sending the resource
+   * @param targetUserId The user ID receiving the resource
+   */
   void transferResource(Long userId, Long targetUserId);
 
+  /**
+   * Get login user information
+   *
+   * @param user User
+   * @return RestResponse
+   */
   RestResponse getLoginUserInfo(User user);
 }

@@ -21,6 +21,7 @@ import lombok.Getter;
 
 import java.util.Arrays;
 
+/** Option status */
 @Getter
 public enum OptionStateEnum {
 

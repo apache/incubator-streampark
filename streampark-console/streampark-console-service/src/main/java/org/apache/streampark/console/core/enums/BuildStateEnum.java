@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
+/** Describe the construction status of Project */
 public enum BuildStateEnum {
 
   /** has changed, need rebuild */

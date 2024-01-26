@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
-import org.apache.streampark.console.system.service.RoleMenuServie;
+import org.apache.streampark.console.system.service.RoleMenuService;
 import org.apache.streampark.console.system.service.RoleService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class RoleController {
 
   @Autowired private RoleService roleService;
-  @Autowired private RoleMenuServie roleMenuServie;
+  @Autowired private RoleMenuService roleMenuService;
 
   @Operation(summary = "List roles")
   @PostMapping("list")
@@ -72,7 +72,7 @@ public class RoleController {
   @Operation(summary = "List role menus")
   @PostMapping("menu")
   public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-    List<RoleMenu> roleMenuList = this.roleMenuServie.listByRoleId(roleId);
+    List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(roleId);
     List<String> menuIdList =
         roleMenuList.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))

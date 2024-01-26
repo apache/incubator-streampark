@@ -589,6 +589,12 @@ public class AppBuildPipeServiceImpl
         new LambdaQueryWrapper<AppBuildPipeline>().eq(AppBuildPipeline::getAppId, appId));
   }
 
+  /**
+   * save or update build pipeline
+   *
+   * @param pipe application build pipeline
+   * @return value after the save or update
+   */
   public boolean saveEntity(AppBuildPipeline pipe) {
     AppBuildPipeline old = getById(pipe.getAppId());
     if (old == null) {
@@ -597,6 +603,14 @@ public class AppBuildPipeServiceImpl
     return updateById(pipe);
   }
 
+  /**
+   * Check if the jar exists, and upload a copy if it does not exist
+   *
+   * @param fsOperator
+   * @param localJar
+   * @param targetJar
+   * @param targetDir
+   */
   private void checkOrElseUploadJar(
       FsOperator fsOperator, File localJar, String targetJar, String targetDir) {
     if (!fsOperator.exists(targetJar)) {
@@ -609,6 +623,12 @@ public class AppBuildPipeServiceImpl
     }
   }
 
+  /**
+   * Gets and parses dependencies on the application
+   *
+   * @param application
+   * @return DependencyInfo
+   */
   private DependencyInfo getMergedDependencyInfo(Application application) {
     DependencyInfo dependencyInfo = application.getDependencyInfo();
     if (StringUtils.isBlank(application.getTeamResource())) {

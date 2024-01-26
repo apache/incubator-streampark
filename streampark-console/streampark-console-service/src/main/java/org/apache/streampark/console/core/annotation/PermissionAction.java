@@ -24,6 +24,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * In the controller({@link org.apache.streampark.console.core.controller}), If the method contains
+ * this annotation, it means that this method requires certain permissions to be called.
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PermissionAction {

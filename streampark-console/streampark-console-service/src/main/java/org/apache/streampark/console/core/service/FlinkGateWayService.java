@@ -23,12 +23,37 @@ import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+/** Connecting to Flink Gateway service */
 public interface FlinkGateWayService extends IService<FlinkGateWay> {
+
+  /**
+   * Create flink gateway
+   *
+   * @param flinkGateWay FlinkGateWay
+   */
   void create(FlinkGateWay flinkGateWay);
 
+  /**
+   * Update flink gateway
+   *
+   * @param flinkGateWay FlinkGateWay
+   */
   void update(FlinkGateWay flinkGateWay);
 
+  /**
+   * Check gateway exists by gateway name
+   *
+   * @param name gateway name
+   * @return Whether it exists
+   */
   boolean existsByGatewayName(String name);
 
+  /**
+   * Get gateway version
+   *
+   * @param address
+   * @return gateway type
+   * @throws JsonProcessingException
+   */
   GatewayTypeEnum getGatewayVersion(String address) throws JsonProcessingException;
 }

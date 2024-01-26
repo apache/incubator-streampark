@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
+/** Describe the status of Check Point */
 public enum CheckPointStatusEnum {
   /** IN_PROGRESS */
   IN_PROGRESS(1),

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
+/** Application status, whether it exists, and where it exists */
 public enum AppExistsStateEnum {
 
   /** no exists */

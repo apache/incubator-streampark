@@ -22,6 +22,7 @@ import lombok.Getter;
 
 import java.util.Arrays;
 
+/** Flink GateWay Type */
 @Getter
 public enum GatewayTypeEnum {
 

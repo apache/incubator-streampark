@@ -35,6 +35,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Collections;
 
+/** Provide interface documentation externally */
 @EnableKnife4j
 @Configuration
 @ConditionalOnWebApplication

@@ -45,7 +45,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/** */
+/** used to build project and project build task */
 public class GitUtils {
 
   private GitUtils() {}

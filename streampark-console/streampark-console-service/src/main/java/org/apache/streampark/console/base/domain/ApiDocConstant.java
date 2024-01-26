@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.domain;
 
+/** Interface document constants */
 public class ApiDocConstant {
 
   public static final String FLINK_APP_OP_TAG = "FLINK_APPLICATION_OPERATION_TAG";

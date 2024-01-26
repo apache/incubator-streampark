@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 import java.util.Map;
 
+/** This interface is used to control the menu of the page */
 public interface MenuService extends IService<Menu> {
 
   /**
@@ -36,9 +37,29 @@ public interface MenuService extends IService<Menu> {
    */
   List<String> listPermissions(Long userId, Long teamId);
 
+  /**
+   * * List menus based on user id and team id
+   *
+   * @param userId user id
+   * @param teamId team id
+   * @return List of Menu
+   */
   List<Menu> listMenus(Long userId, Long teamId);
 
+  /**
+   * List menus map based on menu
+   *
+   * @param menu Menu
+   * @return Menus Map
+   */
   Map<String, Object> listMenuMap(Menu menu);
 
+  /**
+   * List Menu Routers based on user id and team id
+   *
+   * @param userId user id
+   * @param teamId team id
+   * @return List of Menu VueRouter
+   */
   List<VueRouter<Menu>> listRouters(Long userId, Long teamId);
 }

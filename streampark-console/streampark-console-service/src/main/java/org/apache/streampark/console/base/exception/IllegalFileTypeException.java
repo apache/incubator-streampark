@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.exception;
 
+/** This exception is thrown when there is an error in the file type */
 public class IllegalFileTypeException extends ApiAlertException {
   public IllegalFileTypeException(String message) {
     super(message);
