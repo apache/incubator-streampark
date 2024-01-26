@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
-import org.apache.streampark.common.exception.AlertException;
-import org.apache.streampark.common.util.PremisesUtils;
+import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.FreemarkerUtils;
+import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertHttpCallbackParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;

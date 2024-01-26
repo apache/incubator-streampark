@@ -15,17 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.domain;
+package org.apache.streampark.console.base.exception;
 
-public interface ResponseCode {
+import org.apache.streampark.common.util.ExceptionUtils;
 
-  Long CODE_SUCCESS = 200L;
+public class AlertException extends ApiAlertException {
+  public AlertException(String message) {
+    super(message);
+  }
 
-  Long CODE_FAIL = 500L;
+  public AlertException(Throwable cause) {
+    super(ExceptionUtils.stringifyException(cause));
+  }
 
-  Long CODE_FORBIDDEN = 403L;
-
-  Long CODE_FAIL_ALERT = 501L;
-
-  Long CODE_FAIL_DETAIL = 502L;
+  public AlertException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

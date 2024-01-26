@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.util;
+package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.exception.AbstractApiException;
+import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;

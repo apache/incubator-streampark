@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.steampark.common.utils;
+package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.exception.AbstractApiException;
-import org.apache.streampark.common.exception.AlertException;
-import org.apache.streampark.common.exception.ApiAlertException;
-import org.apache.streampark.common.exception.ApiDetailException;
-import org.apache.streampark.common.exception.ApplicationException;
-import org.apache.streampark.common.exception.IllegalFileTypeException;
-import org.apache.streampark.common.util.PremisesUtils;
+import org.apache.streampark.console.base.exception.AbstractApiException;
+import org.apache.streampark.console.base.exception.AlertException;
+import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.base.exception.ApplicationException;
+import org.apache.streampark.console.base.exception.IllegalFileTypeException;
 
 import org.junit.jupiter.api.Test;
 

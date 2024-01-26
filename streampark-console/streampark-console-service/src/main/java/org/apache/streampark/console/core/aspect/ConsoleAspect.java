@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.aspect;
 
-import org.apache.streampark.common.exception.ApiAlertException;
-import org.apache.streampark.common.util.PremisesUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.entity.Application;

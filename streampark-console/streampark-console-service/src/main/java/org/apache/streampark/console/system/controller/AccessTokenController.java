@@ -17,10 +17,10 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.common.exception.InternalException;
 import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.AccessToken;

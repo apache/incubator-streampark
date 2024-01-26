@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.application;
 
-import org.apache.streampark.common.exception.ApplicationException;
+import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 
