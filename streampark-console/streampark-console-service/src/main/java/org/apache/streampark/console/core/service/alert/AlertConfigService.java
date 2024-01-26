@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.alert;
 
-import org.apache.streampark.common.exception.AlertException;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
 

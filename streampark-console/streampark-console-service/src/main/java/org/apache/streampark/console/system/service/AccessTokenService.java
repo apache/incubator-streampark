@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.common.exception.InternalException;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;

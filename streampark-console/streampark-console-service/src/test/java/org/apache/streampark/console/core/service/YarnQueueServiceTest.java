@@ -18,9 +18,9 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;

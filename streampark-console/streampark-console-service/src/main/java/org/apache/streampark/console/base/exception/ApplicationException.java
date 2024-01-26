@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.exception;
+package org.apache.streampark.console.base.exception;
 
-import org.apache.streampark.common.util.ExceptionUtils;
-
-public class AlertException extends ApiAlertException {
-  public AlertException(String message) {
+/** Applies to all application exceptions */
+public class ApplicationException extends ApiAlertException {
+  public ApplicationException(String message) {
     super(message);
   }
 
-  public AlertException(Throwable cause) {
-    super(ExceptionUtils.stringifyException(cause));
-  }
-
-  public AlertException(String message, Throwable cause) {
-    super(message, cause);
+  public ApplicationException(Throwable cause) {
+    super(cause.getMessage());
   }
 }

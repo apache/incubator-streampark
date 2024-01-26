@@ -17,10 +17,10 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.exception.AlertException;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.AlertConfig;

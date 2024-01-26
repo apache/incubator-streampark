@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.exception.ApiAlertException;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.system.entity.Member;
@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -144,8 +145,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public void remove(Long id) {
-    Member member = this.getById(id);
-    ApiAlertException.throwIfNull(member, "The member [id=%s] not found", id);
+    Member member =
+        Optional.ofNullable(this.getById(id))
+            .orElseThrow(
+                () -> new ApiAlertException(String.format("The member [id=%s] not found", id)));
     this.removeById(member);
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }
