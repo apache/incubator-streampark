@@ -58,7 +58,7 @@ class DorisConfig(parameters: Properties) {
 
   val sinkOfferTimeout: Long = sinkOption.sinkOfferTimeout.get()
 
-  val lablePrefix: String = sinkOption.lablePrefix.get()
+  val labelPrefix: String = sinkOption.labelPrefix.get()
 
   val semantic: String = sinkOption.semantic.get()
 
