@@ -47,7 +47,6 @@ class IngressStrategyV1 extends IngressStrategy {
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
         }.get
     }
-
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
