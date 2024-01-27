@@ -29,15 +29,15 @@ object IngressController extends Logger {
 
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
 
+  private lazy val clusterVersion = using(new DefaultKubernetesClient()) {
+    client => VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
+  }
+
   private lazy val ingressStrategy: IngressStrategy = {
-    using(new DefaultKubernetesClient()) {
-      client =>
-        val version = VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
-        if (version >= 1.19) {
-          new IngressStrategyV1()
-        } else {
-          new IngressStrategyV1beta1()
-        }
+    if (clusterVersion >= 1.19) {
+      new IngressStrategyV1()
+    } else {
+      new IngressStrategyV1beta1()
     }
   }
 
