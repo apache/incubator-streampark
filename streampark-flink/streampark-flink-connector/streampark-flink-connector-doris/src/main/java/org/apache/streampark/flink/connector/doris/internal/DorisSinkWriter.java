@@ -166,7 +166,7 @@ public class DorisSinkWriter implements Serializable {
       final String bufferKey = String.format("%s.%s", database, table);
       final DorisSinkBufferEntry bufferEntity =
           bufferMap.computeIfAbsent(
-              bufferKey, k -> new DorisSinkBufferEntry(database, table, dorisConfig.lablePrefix()));
+              bufferKey, k -> new DorisSinkBufferEntry(database, table, dorisConfig.labelPrefix()));
       for (String record : records) {
         byte[] bts = record.getBytes(StandardCharsets.UTF_8);
         bufferEntity.addToBuffer(bts);
