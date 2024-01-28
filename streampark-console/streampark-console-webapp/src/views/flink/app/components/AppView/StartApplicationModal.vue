@@ -59,47 +59,36 @@
     schemas: [
       {
         field: 'startSavePointed',
-        label: 'from savepoint',
+        label: t('flink.app.view.fromSavepoint'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'conf-switch' },
-            'restore the application from savepoint or latest checkpoint',
-          ),
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointTip')),
       },
       {
         field: 'startSavePoint',
-        label: 'savepoint',
+        label: 'Savepoint',
         component:
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'conf-switch' },
-            'restore the application from savepoint or latest checkpoint',
-          ),
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointInput')),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed,
         required: true,
       },
       {
         field: 'allowNonRestoredState',
-        label: 'ignore restored',
+        label: t('flink.app.view.ignoreRestored'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'ignore savepoint then cannot be restored'),
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.ignoreRestoredTip')),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },

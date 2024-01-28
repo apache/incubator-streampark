@@ -166,6 +166,12 @@ export default {
     start: 'Start Application',
     stop: 'Stop application',
     savepoint: 'Trigger Savepoint',
+    fromSavepoint: 'From savepoint',
+    savepointTip: 'Restore the job from savepoint or latest checkpoint',
+    savepointInput:
+      'Select or manually specify the savepoint/checkpoint path, Same as：-allowNonRestoredState(-n)',
+    ignoreRestored: 'Ignore failed',
+    ignoreRestoredTip: 'ignore savepoint then cannot be restored,',
     recheck: 'the associated project has changed and this job need to be rechecked',
     changed: 'the application has changed.',
   },

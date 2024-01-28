@@ -84,15 +84,16 @@ public class FlinkK8sChangeEventListener {
     TrackId trackId = event.trackId();
     // get pre application record
     Application app = applicationService.getById(trackId.appId());
-    if (app == null) {
+    if (app == null || FlinkAppState.isEndState(app.getState())) {
       return;
     }
+
     // update application record
     setByJobStatusCV(app, jobStatus);
     applicationService.persistMetrics(app);
 
-    // email alerts when necessary
     FlinkAppState state = FlinkAppState.of(app.getState());
+    // email alerts when necessary
     if (FlinkAppState.FAILED.equals(state)
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
