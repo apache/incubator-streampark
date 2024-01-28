@@ -17,8 +17,6 @@
         :sider="false"
       />
       <LayoutBreadcrumb v-if="getShowContent && getShowBread" :theme="getHeaderTheme" />
-      <!-- slogan -->
-      <Slogan class="hidden xl:block" />
     </div>
     <!-- left end -->
 
@@ -92,7 +90,6 @@
     Notify,
     ErrorAction,
     Github,
-    Slogan,
     LockScreen,
   } from './components';
   import { useAppInject } from '/@/hooks/web/useAppInject';
@@ -117,7 +114,6 @@
       Notify,
       ErrorAction,
       Github,
-      Slogan,
       LockScreen,
       Divider,
       AppDarkModeToggle,

@@ -10,7 +10,7 @@
     </div>
     <template #title>
       <span :class="[`${prefixCls}-sub-title`]">
-        {{ getI18nName }}
+        <span style="margin-left: 15px">{{ getI18nName }}</span>
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
     </template>
@@ -46,14 +46,13 @@
 
   import { defineComponent, computed } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import Icon from '/@/components/Icon/index';
 
   import MenuItem from './components/MenuItem.vue';
   import SubMenu from './components/SubMenuItem.vue';
   import { propTypes } from '/@/utils/propTypes';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
-  import SvgIcon from "/@/components/Icon/src/SvgIcon.vue";
+  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 
   export default defineComponent({
     name: 'SimpleSubMenu',
@@ -62,7 +61,6 @@
       SubMenu,
       MenuItem,
       SimpleMenuTag: createAsyncComponent(() => import('./SimpleMenuTag.vue')),
-      Icon,
     },
     props: {
       item: {
@@ -79,9 +77,6 @@
       const { prefixCls } = useDesign('simple-menu');
 
       const getShowMenu = computed(() => !props.item?.meta?.hidden);
-      const getIcon = computed(() =>
-        props.item?.icon ? `ant-design:${props.item?.icon}-outlined` : '',
-      );
       const getI18nName = computed(() => t(props.item?.name));
       const getShowSubTitle = computed(() => !props.collapse || !props.parent);
       const getIsCollapseParent = computed(() => !!props.collapse && !!props.parent);
@@ -107,7 +102,6 @@
         prefixCls,
         menuHasChildren,
         getShowMenu,
-        getIcon,
         getI18nName,
         getShowSubTitle,
         getLevelClass,

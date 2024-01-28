@@ -50,9 +50,10 @@ insert into `t_flink_sql` values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1AYIHT5s94
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
-insert into `t_menu` values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', 1, 1, now(), now());
-insert into `t_menu` values (120000, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', 1, 2, now(), now());
-insert into `t_menu` values (130000, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', 1, 5, now(), now());
+insert into `t_menu` values (110000, 0, 'menu.system', '/system', 'PageView', null, null, '0', 1, 3, now(), now());
+insert into `t_menu` values (120000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', 1, 1, now(), now());
+insert into `t_menu` values (130000, 0, 'menu.setting', '/setting', 'PageView', null, null, '0', 1, 2, now(), now());
+
 insert into `t_menu` values (110100, 110000, 'menu.userManagement', '/system/user', 'system/user/User', null, 'user', '0', 1, 1, now(), now());
 insert into `t_menu` values (110200, 110000, 'menu.roleManagement', '/system/role', 'system/role/Role', null, 'smile', '0', 1, 2, now(), now());
 insert into `t_menu` values (110300, 110000, 'menu.menuManagement', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', 1, 3, now(), now());

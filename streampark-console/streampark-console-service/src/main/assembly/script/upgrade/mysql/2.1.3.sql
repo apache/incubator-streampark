@@ -20,6 +20,10 @@ use streampark;
 set names utf8mb4;
 set foreign_key_checks = 0;
 
+update `t_menu` set menu_name='Apache Flink',order_num=1 where menu_id = 120000;
+update `t_menu` set order_num=3 where menu_id = 110000;
+update `t_menu` set order_num=2 where menu_id = 130000;
+
 alter table `t_flink_app`
     modify column `args` longtext,
     modify column `dynamic_properties` longtext,
