@@ -29,7 +29,7 @@ object IngressController extends Logger {
 
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
 
-  private lazy val clusterVersion = using(new DefaultKubernetesClient()) {
+  lazy val clusterVersion = using(new DefaultKubernetesClient()) {
     client => VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
   }
 
