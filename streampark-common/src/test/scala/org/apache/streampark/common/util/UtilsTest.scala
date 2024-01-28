@@ -17,9 +17,8 @@
 
 package org.apache.streampark.common.util
 
-
-import org.junit.jupiter.api.Assertions.{assertDoesNotThrow, assertEquals, assertFalse, assertThrows, assertTrue}
 import org.junit.jupiter.api.{Assertions, Test}
+import org.junit.jupiter.api.Assertions.{assertDoesNotThrow, assertEquals, assertFalse, assertThrows, assertTrue}
 
 import java.io.IOException
 import java.net.URL
@@ -52,12 +51,12 @@ class UtilsTest {
   }
 
   @Test def requiredTest(): Unit = {
-    assertThrows(classOf[IllegalArgumentException], ()=>Utils.required(false))
+    assertThrows(classOf[IllegalArgumentException], () => Utils.required(false))
   }
 
   @Test def requireCheckJarFileTest(): Unit = {
-    val jar :URL = new URL("http", "host", "file")
-    val ioException = assertThrows(classOf[IOException], ()=>Utils.requireCheckJarFile(jar))
+    val jar: URL = new URL("http", "host", "file")
+    val ioException = assertThrows(classOf[IOException], () => Utils.requireCheckJarFile(jar))
     assertEquals("JAR file path is invalid " + jar.toString, ioException.getMessage)
   }
 
