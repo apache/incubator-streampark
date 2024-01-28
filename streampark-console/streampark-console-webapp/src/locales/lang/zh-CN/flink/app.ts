@@ -158,6 +158,11 @@ export default {
     savepoint: '触发 Savepoint',
     recheck: '关联的项目已更改，需要重新检查此作业',
     changed: '应用程序已更改。',
+    fromSavepoint: 'Savepoint 恢复',
+    savepointTip: '作业从 savepoint 或 checkpoint 恢复状态',
+    savepointInput: '选择或者手动指定 savepoint/checkpoint 路径',
+    ignoreRestored: '跳过恢复失败',
+    ignoreRestoredTip: '当状态恢复失败时跳过错误，作业继续运行, 同参数：-allowNonRestoredState(-n)',
   },
   pod: {
     choice: '选择',

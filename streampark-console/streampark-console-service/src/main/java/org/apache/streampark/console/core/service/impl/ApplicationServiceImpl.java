@@ -247,6 +247,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       if (!teamId.equals(app.getTeamId())) {
         continue;
       }
+      // 1) only yarn-application, yarn-perjob mode
       if (app.getJmMemory() != null) {
         totalJmMemory += app.getJmMemory();
       }
