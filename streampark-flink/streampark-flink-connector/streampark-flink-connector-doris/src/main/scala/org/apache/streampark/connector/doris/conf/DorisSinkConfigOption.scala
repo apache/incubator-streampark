@@ -126,8 +126,8 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
   val maxRetries: ConfigOption[Int] =
     ConfigOption(key = "maxRetries", required = false, defaultValue = 1, classType = classOf[Int])
 
-  val lablePrefix: ConfigOption[String] = ConfigOption(
-    key = "lablePrefix",
+  val labelPrefix: ConfigOption[String] = ConfigOption(
+    key = "labelPrefix",
     required = false,
     defaultValue = "doris",
     classType = classOf[String])
