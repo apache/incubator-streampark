@@ -38,6 +38,9 @@ import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
 import org.apache.streampark.flink.client.bean.KubernetesDeployRequest;
 import org.apache.streampark.flink.client.bean.ShutDownResponse;
+import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
+import org.apache.streampark.flink.kubernetes.model.ClusterKey;
+import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -354,6 +357,22 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     executionModes.stream()
                         .map(ExecutionMode::getMode)
                         .collect(Collectors.toSet())));
+  }
+
+  @Override
+  public List<FlinkCluster> listCluster() {
+    List<FlinkCluster> clusters = list();
+    for (FlinkCluster cluster : clusters) {
+      if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(cluster.getExecutionModeEnum())) {
+        cluster.setAddress(
+            KubernetesRetriever.retrieveFlinkRestUrl(
+                    ClusterKey.of(
+                        TrackId.onSession(
+                            cluster.getK8sNamespace(), cluster.getClusterId(), 0L, null, null)))
+                .getOrElse(cluster::getAddress));
+      }
+    }
+    return clusters;
   }
 
   @Override

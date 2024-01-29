@@ -48,7 +48,7 @@ public class FlinkClusterController {
   @Operation(summary = "List flink clusters")
   @PostMapping("list")
   public RestResponse list() {
-    List<FlinkCluster> flinkClusters = flinkClusterService.list();
+    List<FlinkCluster> flinkClusters = flinkClusterService.listCluster();
     return RestResponse.success(flinkClusters);
   }
 
