@@ -258,8 +258,9 @@ export default {
     appNameExistsInK8sMessage: '该应用程序名称已经在K8S集群中存在，不能重复。请检查',
     appNameValid: '应用程序名称不合法',
     appNameRole: '应用名称必须遵循以下规则：',
+    K8sSessionClusterIdRole: 'K8S集群ID必要遵循以下规则:',
     appNameK8sClusterIdRole:
-      '当前部署模式是 K8s Application模式，会将作业名称作为k8s的 clusterId，因此作业名称要遵循以下规则：',
+      '当前部署模式是 K8s Application模式，会将作业名称作为k8s的 clusterId，因此作业名称要遵循以下规则:',
     appNameK8sClusterIdRoleLength: '不应超过 45 个字符',
     appNameK8sClusterIdRoleRegexp:
       '只能由小写字母、数字、字符、和"-" 组成，必须满足正则格式 [a-z]([-a-z0-9]*[a-z0-9])',

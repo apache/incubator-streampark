@@ -38,6 +38,7 @@ import {
 import { handleFormValue } from '../../flink/app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { renderClusterId } from '/@/views/setting/FlinkCluster/useCluster';
 
 export const useClusterSetting = () => {
   const { createMessage } = useMessage();
@@ -162,11 +163,8 @@ export const useClusterSetting = () => {
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
         defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)[0],
-        render: ({ model, field }) =>
-          renderInputDropdown(model, field, {
-            placeholder: 'default',
-            options: historyRecord.k8sSessionClusterId,
-          }),
+        render: (renderCallbackParams) => renderClusterId(renderCallbackParams),
+        rules: [{ required: true, message: t('setting.flinkCluster.required.clusterId') }],
       },
       {
         field: 'k8sNamespace',

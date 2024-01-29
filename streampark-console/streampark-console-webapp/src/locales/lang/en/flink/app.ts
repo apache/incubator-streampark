@@ -279,6 +279,7 @@ export default {
     kubernetesClusterIdPlaceholder: 'Please enter Kubernetes clusterId',
     appNameValid: 'The job name is invalid',
     appNameRole: 'The job name is invalid',
+    K8sSessionClusterIdRole: 'The K8s clusterId must follow the following rules:',
     appNameK8sClusterIdRole:
       'The current deployment mode is K8s Application mode, and the job name will be used as the clusterId in K8s. Therefore, the job name must follow the following rules:',
     appNameK8sClusterIdRoleLength: 'must be no more than 45 characters',
