@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -39,8 +40,6 @@ import org.apache.streampark.flink.client.bean.DeployResponse;
 import org.apache.streampark.flink.client.bean.KubernetesDeployRequest;
 import org.apache.streampark.flink.client.bean.ShutDownResponse;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
-import org.apache.streampark.flink.kubernetes.model.ClusterKey;
-import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -91,6 +90,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private ApplicationService applicationService;
 
   @Autowired private YarnQueueService yarnQueueService;
+
+  @Autowired private SettingService settingService;
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {
@@ -364,12 +365,14 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     List<FlinkCluster> clusters = list();
     for (FlinkCluster cluster : clusters) {
       if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(cluster.getExecutionModeEnum())) {
-        cluster.setAddress(
-            KubernetesRetriever.retrieveFlinkRestUrl(
-                    ClusterKey.of(
-                        TrackId.onSession(
-                            cluster.getK8sNamespace(), cluster.getClusterId(), 0L, null, null)))
-                .getOrElse(cluster::getAddress));
+        if (StringUtils.isNotBlank(settingService.getIngressModeDefault())) {
+          String namespace = cluster.getK8sNamespace();
+          String clusterId = cluster.getClusterId();
+          String ingressUrl = KubernetesRetriever.getSessionClusterIngressURL(namespace, clusterId);
+          if (ingressUrl != null) {
+            cluster.setAddress(ingressUrl);
+          }
+        }
       }
     }
     return clusters;

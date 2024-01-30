@@ -1421,6 +1421,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public void starting(Application application) {
     application.setState(FlinkAppState.STARTING.getValue());
+    application.setJobManagerUrl(null);
     application.setOptionTime(new Date());
     updateById(application);
   }
@@ -1658,7 +1659,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setJobId(response.jobId());
           }
 
-          if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
+          if (StringUtils.isNotEmpty(response.jobManagerUrl())) {
             application.setJobManagerUrl(response.jobManagerUrl());
             applicationLog.setJobManagerUrl(response.jobManagerUrl());
           }

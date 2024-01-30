@@ -148,4 +148,9 @@ object KubernetesRetriever extends Logger {
         Some(url)
     }
   }
+
+  def getSessionClusterIngressURL(namespace: String, clusterId: String): String = {
+    retrieveFlinkRestUrl(ClusterKey(FlinkK8sExecuteMode.SESSION, namespace, clusterId)).orNull
+  }
+
 }

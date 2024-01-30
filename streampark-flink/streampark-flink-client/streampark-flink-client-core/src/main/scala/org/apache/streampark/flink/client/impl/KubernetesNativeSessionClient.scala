@@ -109,9 +109,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         .getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
-      val url = getClientURL(client, submitRequest.kubernetesNamespace, submitRequest.clusterId)
       val result =
-        SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, url)
+        SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
       logInfo(
         s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
       result
@@ -170,12 +169,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         client =
           clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
-      val url = getClientURL(client, deployRequest.kubernetesNamespace, deployRequest.clusterId)
-      if (url != null) {
-        DeployResponse(address = url, clusterId = client.getClusterId)
-      } else {
-        DeployResponse(error = new RuntimeException("get the cluster getWebInterfaceURL failed."))
-      }
+      DeployResponse(address = client.getWebInterfaceURL, clusterId = client.getClusterId)
     } catch {
       case e: Exception => DeployResponse(error = e)
     } finally {
@@ -239,4 +233,5 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     flinkConf.safeSet(DeploymentOptions.TARGET, ExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doTriggerSavepoint(request, flinkConf)
   }
+
 }
