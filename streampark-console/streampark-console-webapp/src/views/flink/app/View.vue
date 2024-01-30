@@ -351,7 +351,7 @@
       <template #insertTable="{ tableContainer }">
         <AppTableResize
           :table-container="tableContainer"
-          :resize-min="200"
+          :resize-min="100"
           v-model:left="tableColumnWidth.jobName"
         />
       </template>
