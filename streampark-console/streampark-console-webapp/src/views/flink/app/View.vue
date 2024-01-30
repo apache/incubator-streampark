@@ -65,7 +65,6 @@
   });
 
   const appDashboardRef = ref<any>();
-  const ready = ref(false);
 
   const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
@@ -236,7 +235,6 @@
       });
       sessionStorage.removeItem('appPageNo');
     }
-    ready.value = true;
   });
 
   onUnmounted(() => {
@@ -333,8 +331,12 @@
           <TableAction v-bind="getTableActions(record, currentTablePage)" />
         </template>
       </template>
-      <template #insertTable>
-        <AppTableResize v-if="ready" :resize-min="200" v-model:left="tableColumnWidth.jobName" />
+      <template #insertTable="{ tableContainer }">
+        <AppTableResize
+          :table-container="tableContainer"
+          :resize-min="200"
+          v-model:left="tableColumnWidth.jobName"
+        />
       </template>
     </BasicTable>
     <StartApplicationModal @register="registerStartModal" @update-option="handleOptionApp" />
