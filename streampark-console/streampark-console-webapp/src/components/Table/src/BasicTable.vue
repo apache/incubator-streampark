@@ -16,20 +16,27 @@
       </template>
     </BasicForm>
 
-    <Table
-      ref="tableElRef"
-      v-bind="getBindValues"
-      :rowClassName="getRowClassName"
-      v-show="getEmptyDataIsShowTable"
-      @change="handleTableChange"
-    >
-      <template #[item]="data" v-for="item in Object.keys($slots)" :key="item">
-        <slot :name="item" v-bind="data || {}"></slot>
-      </template>
-      <template #headerCell="{ column }">
-        <HeaderCell :column="column" />
-      </template>
-    </Table>
+    <div ref="tableContainerRef" class="relative">
+      <Table
+        ref="tableElRef"
+        v-bind="getBindValues"
+        :rowClassName="getRowClassName"
+        v-show="getEmptyDataIsShowTable"
+        @change="handleTableChange"
+      >
+        <template
+          #[item]="data"
+          v-for="item in omit(Object.keys($slots), 'insertTable')"
+          :key="item"
+        >
+          <slot :name="item" v-bind="data || {}"></slot>
+        </template>
+        <template #headerCell="{ column }">
+          <HeaderCell :column="column" />
+        </template>
+      </Table>
+      <slot name="insertTable" :tableContainer="tableContainerRef"></slot>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -100,6 +107,7 @@
 
       const wrapRef = ref(null);
       const formRef = ref(null);
+      const tableContainerRef = ref(null);
       const innerPropsRef = ref<Partial<BasicTableProps>>();
 
       const { prefixCls } = useDesign('basic-table');
@@ -319,13 +327,19 @@
           return unref(getBindValues).size as SizeType;
         },
       };
-      createTableContext({ ...tableAction, wrapRef, tableFullScreen, getBindValues });
+      createTableContext({
+        ...tableAction,
+        wrapRef,
+        tableFullScreen,
+        getBindValues,
+      });
 
       expose(tableAction);
 
       emit('register', tableAction, formActions);
 
       return {
+        omit,
         formRef,
         tableElRef,
         getBindValues,
@@ -336,6 +350,7 @@
         handleTableChange,
         getRowClassName,
         wrapRef,
+        tableContainerRef,
         tableAction,
         redoHeight,
         getFormProps: getFormProps as any,

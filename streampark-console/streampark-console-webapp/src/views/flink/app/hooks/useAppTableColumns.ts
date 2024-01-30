@@ -40,7 +40,7 @@ export const useAppTableColumns = () => {
     const dataIndexStr = columns?.dataIndex.toString() ?? '';
     if (Reflect.has(tableColumnWidth.value, dataIndexStr)) {
       // when table column width changed, save it to table column width ref
-      tableColumnWidth.value[dataIndexStr] = width;
+      tableColumnWidth.value[dataIndexStr] = width < 100 ? 100 : width;
     }
   }
 
@@ -53,7 +53,7 @@ export const useAppTableColumns = () => {
       resizable: true,
       width: unref(tableColumnWidth).jobName,
     },
-    { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion', width: 110 },
+    { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion' },
     { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
     {
       title: t('flink.app.runStatus'),
@@ -97,5 +97,5 @@ export const useAppTableColumns = () => {
     },
     { title: t('flink.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
   ]);
-  return { getAppColumns, onTableColumnResize };
+  return { getAppColumns, onTableColumnResize, tableColumnWidth };
 };
