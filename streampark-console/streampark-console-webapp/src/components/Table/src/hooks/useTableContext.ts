@@ -6,6 +6,7 @@ const key = Symbol('basic-table');
 
 type Instance = TableActionType & {
   wrapRef: Ref<Nullable<HTMLElement>>;
+  tableContainerRef: Ref<Nullable<HTMLElement>>;
   tableFullScreen: Ref<boolean>;
   getBindValues: ComputedRef<Recordable>;
 };
