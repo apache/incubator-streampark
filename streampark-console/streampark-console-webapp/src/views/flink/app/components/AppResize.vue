@@ -18,18 +18,17 @@
   import { EllipsisOutlined } from '@ant-design/icons-vue';
   import { isNil } from 'lodash-es';
   import { ref, computed, onMounted, onUnmounted } from 'vue';
-  import { useTableContext } from '/@/components/Table/src/hooks/useTableContext';
   defineOptions({ name: 'AppResize' });
   const props = withDefaults(
     defineProps<{
       resizeMin?: number;
       left: number;
+      tableContainer: HTMLElement | null;
     }>(),
     {
       resizeMin: 100,
     },
   );
-  const { tableContainerRef } = useTableContext();
   const emit = defineEmits(['resizeEnd', 'update:left']);
   const domRef = ref<HTMLElement | null>(null);
   const getStyle = computed(() => {
@@ -50,8 +49,8 @@
       return Math.floor(innerOffsetLeft);
     };
 
-    const offsetLeft = getOffsetLeft(tableContainerRef.value);
-    const maxResize = tableContainerRef.value!.getBoundingClientRect().width - 510;
+    const offsetLeft = getOffsetLeft(props.tableContainer);
+    const maxResize = props.tableContainer!.getBoundingClientRect().width - 510;
     let newLeft = e.pageX - offsetLeft;
     if (newLeft > maxResize) newLeft = maxResize;
 

@@ -35,7 +35,7 @@
           <HeaderCell :column="column" />
         </template>
       </Table>
-      <slot name="insertTable"></slot>
+      <slot name="insertTable" :tableContainer="tableContainerRef"></slot>
     </div>
   </div>
 </template>
@@ -330,7 +330,6 @@
       createTableContext({
         ...tableAction,
         wrapRef,
-        tableContainerRef,
         tableFullScreen,
         getBindValues,
       });
