@@ -169,7 +169,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     try {
       // 1) deployRequest
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
-      log.info("deploy cluster request: " + deployRequest);
+      log.info("deploy cluster request: {}", deployRequest);
 
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
