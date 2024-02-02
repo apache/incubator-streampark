@@ -102,19 +102,19 @@ public interface ApplicationManageService extends IService<Application> {
   /**
    * Deletes the given Application from the system.
    *
-   * @param appParam The Application to be deleted.
+   * @param appId The Application's id which need to be deleted.
    * @return True if the deletion was successful, false otherwise.
    */
-  Boolean remove(Application appParam);
+  Boolean remove(Long appId);
 
   /**
    * Retrieves the Application with the specified details from the system.
    *
-   * @param appParam The Application object containing the details of the Application to retrieve.
+   * @param id The Application object's id.
    * @return The Application object that matches the specified details, or null if no matching
    *     Application is found.
    */
-  Application getApp(Application appParam);
+  Application getApp(Long id);
 
   /**
    * Updates the release of the given application.

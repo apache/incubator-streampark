@@ -33,7 +33,7 @@
                 team_id = #{yarnQueue.teamId}
             </if>
             <if test="yarnQueue.queueLabel != null and yarnQueue.queueLabel != ''">
-                and queue_label like '%${yarnQueue.queueLabel}%'
+                and queue_label like concat('%', '${yarnQueue.queueLabel}', '%')
             </if>
             <if test="yarnQueue.createTimeFrom != null and yarnQueue.createTimeFrom !=''">
                 and create_time &gt; #{yarnQueue.createTimeFrom}
@@ -42,9 +42,6 @@
                 and create_time &lt; #{yarnQueue.createTimeTo}
             </if>
         </where>
-        <if test="yarnQueue.sortField != null and yarnQueue.sortField != ''">
-            order by ${yarnQueue.sortField} ${yarnQueue.sortOrder}
-        </if>
     </select>
 
     <select id="existsByQueueLabel" resultType="java.lang.Boolean" parameterType="org.apache.streampark.console.core.entity.YarnQueue">

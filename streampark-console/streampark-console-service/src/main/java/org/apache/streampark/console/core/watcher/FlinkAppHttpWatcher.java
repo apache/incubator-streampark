@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.HttpClientUtils;
-import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -51,6 +51,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -67,9 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -93,6 +92,10 @@ public class FlinkAppHttpWatcher {
   @Autowired private SavePointService savePointService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Qualifier("flinkRestAPIWatchingExecutor")
+  @Autowired
+  private Executor executorService;
 
   // track interval  every 5 seconds
   public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -157,15 +160,6 @@ public class FlinkAppHttpWatcher {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
-  private static final ExecutorService EXECUTOR =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("flink-restapi-watching-executor"));
-
   @PostConstruct
   public void init() {
     WATCHING_APPS.clear();
@@ -216,7 +210,7 @@ public class FlinkAppHttpWatcher {
   }
 
   private void watch(Long id, Application application) {
-    EXECUTOR.execute(
+    executorService.execute(
         () -> {
           try {
             // query status from flink rest api
@@ -436,10 +430,9 @@ public class FlinkAppHttpWatcher {
     if (application.getStartTime() == null || startTime != application.getStartTime().getTime()) {
       application.setStartTime(new Date(startTime));
     }
-    if (endTime != -1) {
-      if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-        application.setEndTime(new Date(endTime));
-      }
+    if (endTime != -1
+        && (application.getEndTime() == null || endTime != application.getEndTime().getTime())) {
+      application.setEndTime(new Date(endTime));
     }
 
     application.setJobId(jobOverview.getId());
@@ -676,19 +669,19 @@ public class FlinkAppHttpWatcher {
 
   private Overview httpOverview(Application application) throws IOException {
     String appId = application.getAppId();
-    if (appId != null) {
-      if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
-          || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode()) {
-        String reqURL;
-        if (StringUtils.isBlank(application.getJobManagerUrl())) {
-          String format = "proxy/%s/overview";
-          reqURL = String.format(format, appId);
-        } else {
-          String format = "%s/overview";
-          reqURL = String.format(format, application.getJobManagerUrl());
-        }
-        return yarnRestRequest(reqURL, Overview.class);
+    if (appId != null
+        && (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
+      String reqURL;
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
+        String format = "%s/overview";
+        reqURL = String.format(format, jmURL);
+      } else {
+        String format = "proxy/%s/overview";
+        reqURL = String.format(format, appId);
       }
+      return yarnRestRequest(reqURL, Overview.class);
     }
     return null;
   }
@@ -698,12 +691,13 @@ public class FlinkAppHttpWatcher {
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isBlank(application.getJobManagerUrl())) {
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
+        String format = "%s/" + flinkUrl;
+        reqURL = String.format(format, jmURL);
+      } else {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId());
-      } else {
-        String format = "%s/" + flinkUrl;
-        reqURL = String.format(format, application.getJobManagerUrl());
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
     }
@@ -732,12 +726,13 @@ public class FlinkAppHttpWatcher {
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.isYarnMode(execMode)) {
       String reqURL;
-      if (StringUtils.isBlank(application.getJobManagerUrl())) {
+      String jmURL = application.getJobManagerUrl();
+      if (StringUtils.isNotBlank(jmURL) && Utils.checkHttpURL(jmURL)) {
+        String format = "%s/" + flinkUrl;
+        reqURL = String.format(format, jmURL, application.getJobId());
+      } else {
         String format = "proxy/%s/" + flinkUrl;
         reqURL = String.format(format, application.getAppId(), application.getJobId());
-      } else {
-        String format = "%s/" + flinkUrl;
-        reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
     }

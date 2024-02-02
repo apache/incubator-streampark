@@ -176,10 +176,10 @@
     }
   }
 
-  function handleSubmitSQL(values: Recordable) {
+  async function handleSubmitSQL(values: Recordable) {
     try {
       // Trigger a pom confirmation operation.
-      unref(dependencyRef)?.handleApplyPom();
+      await unref(dependencyRef)?.handleApplyPom();
       // common params...
       const dependency: { pom?: string; jar?: string } = {};
       const dependencyRecords = unref(dependencyRef)?.dependencyRecords;

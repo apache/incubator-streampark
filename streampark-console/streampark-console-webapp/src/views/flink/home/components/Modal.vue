@@ -29,7 +29,7 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { fetchCheckEnv, fetchFlinkCreate, fetchFlinkUpdate } from '/@/api/flink/flinkEnv';
-
+  import { FlinkEnvCheckEnum } from '/@/enums/flinkEnum';
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);
   const { t } = useI18n();
@@ -100,18 +100,24 @@
       flinkHome: formValue.flinkHome,
     });
     const checkResp = parseInt(resp.data);
-    if (checkResp != 0) {
-      // Environment detection is successful
-      if (checkResp == -1) {
-        Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
-      } else if (checkResp == 1) {
-        Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
-      } else if (checkResp == 2) {
-        Swal.fire(
-          'Failed',
-          'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-          'error',
-        );
+    if (checkResp !== FlinkEnvCheckEnum.OK) {
+      switch (checkResp) {
+        case FlinkEnvCheckEnum.INVALID_PATH:
+          Swal.fire(
+            'Failed',
+            t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'),
+            'error',
+          );
+          break;
+        case FlinkEnvCheckEnum.NAME_REPEATED:
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsRepeated'), 'error');
+          break;
+        case FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND:
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistNotFound'), 'error');
+          break;
+        case FlinkEnvCheckEnum.FLINK_DIST_REPEATED:
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
+          break;
       }
       changeOkLoading(false);
       return;

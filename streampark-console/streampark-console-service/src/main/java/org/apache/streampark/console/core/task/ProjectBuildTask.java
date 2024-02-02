@@ -23,7 +23,6 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
-import org.apache.streampark.console.core.enums.GitCredentialEnum;
 
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
@@ -107,9 +106,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       return true;
     } catch (Exception e) {
       if (e instanceof InvalidRemoteException) {
-        GitCredentialEnum gitCredential = GitCredentialEnum.of(project.getGitCredential());
-        if (gitCredential == GitCredentialEnum.HTTPS) {
-          project.setGitCredential(GitCredentialEnum.SSH.getValue());
+        if (project.isHttpRepositoryUrl()) {
           String url =
               project
                   .getUrl()
@@ -181,7 +178,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         }
       } else {
         // 2) .jar file(normal or official standard flink project)
-        Utils.checkJarFile(app.toURI().toURL());
+        Utils.requireCheckJarFile(app.toURI().toURL());
         String moduleName = app.getName().replace(Constant.JAR_SUFFIX, "");
         File distHome = project.getDistHome();
         File targetDir = new File(distHome, moduleName);

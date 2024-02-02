@@ -26,7 +26,7 @@ export default {
   resource: {
     menu: '资源中心',
     project: '项目管理',
-    upload: '物料管理',
+    upload: '资源上传',
     variable: '变量管理',
   },
   flink: {

@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.mapper.RoleMenuMapper;
-import org.apache.streampark.console.system.service.RoleMenuServie;
+import org.apache.streampark.console.system.service.RoleMenuService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -33,7 +33,7 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
-    implements RoleMenuServie {
+    implements RoleMenuService {
 
   @Override
   @Transactional
@@ -46,9 +46,9 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
   @Override
   @Transactional
   public void removeByMenuIds(String[] menuIds) {
-    List<String> list = Arrays.asList(menuIds);
+    List<String> menuIdList = Arrays.asList(menuIds);
     LambdaQueryWrapper<RoleMenu> queryWrapper =
-        new LambdaQueryWrapper<RoleMenu>().in(RoleMenu::getMenuId, list);
+        new LambdaQueryWrapper<RoleMenu>().in(RoleMenu::getMenuId, menuIdList);
     baseMapper.delete(queryWrapper);
   }
 

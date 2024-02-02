@@ -19,11 +19,11 @@
     :okText="t('common.submitText')"
     @register="registerDrawer"
     showFooter
-    width="650"
+    width="700"
     @ok="handleSubmit"
   >
     <template #title>
-      <Icon icon="ant-design:code-outlined" />
+      <SvgIcon name="resource" />
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
@@ -43,7 +43,6 @@
   import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-  import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Upload from './Upload.vue';
   import { fetchAddResource, fetchUpdateResource, checkResource } from '/@/api/resource/upload';
@@ -55,6 +54,7 @@
   } from '../useUploadRender';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { exceptionPropWidth } from '/@/utils';
+  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -75,6 +75,14 @@
   const getResourceFormSchema = computed((): FormSchema[] => {
     return [
       {
+        field: 'engineType',
+        label: t('flink.resource.engineType'),
+        component: 'Select',
+        render: ({ model }) => renderEngineType({ model }),
+        defaultValue: EngineTypeEnum.FLINK,
+        rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
+      },
+      {
         field: 'resourceType',
         label: t('flink.resource.resourceType'),
         component: 'Select',
@@ -87,19 +95,13 @@
         field: 'resourceName',
         label: t('flink.resource.resourceName'),
         component: 'Input',
-        ifShow: ({ values }) => values?.resourceType !== ResourceTypeEnum.CONNECTOR,
+        ifShow: ({ values }) =>
+          values?.resourceType !== ResourceTypeEnum.CONNECTOR &&
+          values?.resourceType !== ResourceTypeEnum.GROUP,
         componentProps: { placeholder: t('flink.resource.resourceNamePlaceholder') },
         rules: [
           { required: true, message: t('flink.resource.form.resourceNameIsRequiredMessage') },
         ],
-      },
-      {
-        field: 'engineType',
-        label: t('flink.resource.engineType'),
-        component: 'Select',
-        render: ({ model }) => renderEngineType({ model }),
-        defaultValue: EngineTypeEnum.FLINK,
-        rules: [{ required: true, message: t('flink.resource.form.engineTypeIsRequiredMessage') }],
       },
       {
         field: 'resourceName',
@@ -185,7 +187,7 @@
         resourceJson = JSON.stringify(values.resourceGroup);
       } else {
         const resource: { pom?: string; jar?: string } = {};
-        unref(resourceRef).handleApplyPom();
+        await unref(resourceRef).handleApplyPom();
         const dependencyRecords = unref(resourceRef)?.dependencyRecords;
         const uploadJars = unref(resourceRef)?.uploadJars;
         if (unref(dependencyRecords) && unref(dependencyRecords).length > 0) {

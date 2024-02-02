@@ -17,6 +17,9 @@
     },
     {
       "pattern": "^https://opencollective.com"
+    },
+    {
+      "pattern": "^https://twitter.com*"
     }
   ],
   "timeout": "30s",

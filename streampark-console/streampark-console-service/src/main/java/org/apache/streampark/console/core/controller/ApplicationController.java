@@ -86,7 +86,7 @@ public class ApplicationController {
   @PostMapping("get")
   @RequiresPermissions("app:detail")
   public RestResponse get(Application app) {
-    Application application = applicationManageService.getApp(app);
+    Application application = applicationManageService.getApp(app.getId());
     return RestResponse.success(application);
   }
 
@@ -139,8 +139,8 @@ public class ApplicationController {
   @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> map = applicationInfoService.getDashboardDataMap(teamId);
-    return RestResponse.success(map);
+    Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
+    return RestResponse.success(dashboardMap);
   }
 
   @Operation(summary = "List applications")
@@ -167,8 +167,16 @@ public class ApplicationController {
   @PostMapping("revoke")
   @RequiresPermissions("app:release")
   public RestResponse revoke(Application app) {
-    applicationActionService.revoke(app);
+    applicationActionService.revoke(app.getId());
     return RestResponse.success();
+  }
+
+  @PermissionAction(id = "#app.id", type = PermissionTypeEnum.APP)
+  @PostMapping(value = "check_start")
+  @RequiresPermissions("app:start")
+  public RestResponse checkStart(Application app) {
+    AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
+    return RestResponse.success(stateEnum.get());
   }
 
   @Operation(
@@ -278,7 +286,7 @@ public class ApplicationController {
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
   public RestResponse forcedStop(Application app) {
-    applicationActionService.forcedStop(app);
+    applicationActionService.forcedStop(app.getId());
     return RestResponse.success();
   }
 
@@ -291,7 +299,7 @@ public class ApplicationController {
   @Operation(summary = "Get application on yarn name")
   @PostMapping("name")
   public RestResponse yarnName(Application app) {
-    String yarnName = applicationInfoService.getYarnName(app);
+    String yarnName = applicationInfoService.getYarnName(app.getConfig());
     return RestResponse.success(yarnName);
   }
 
@@ -305,7 +313,7 @@ public class ApplicationController {
   @Operation(summary = "Get application conf")
   @PostMapping("readConf")
   public RestResponse readConf(Application app) throws IOException {
-    String config = applicationInfoService.readConf(app);
+    String config = applicationInfoService.readConf(app.getConfig());
     return RestResponse.success(config);
   }
 
@@ -344,7 +352,7 @@ public class ApplicationController {
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
-    Boolean deleted = applicationManageService.remove(app);
+    Boolean deleted = applicationManageService.remove(app.getId());
     return RestResponse.success(deleted);
   }
 
@@ -361,7 +369,7 @@ public class ApplicationController {
   public RestResponse checkjar(String jar) {
     File file = new File(jar);
     try {
-      Utils.checkJarFile(file.toURI().toURL());
+      Utils.requireCheckJarFile(file.toURI().toURL());
       return RestResponse.success(true);
     } catch (IOException e) {
       return RestResponse.success(file).message(e.getLocalizedMessage());
@@ -405,9 +413,8 @@ public class ApplicationController {
     String error = applicationInfoService.checkSavepointPath(app);
     if (error == null) {
       return RestResponse.success(true);
-    } else {
-      return RestResponse.success(false).message(error);
     }
+    return RestResponse.success(false).message(error);
   }
 
   @Operation(summary = "Get application on k8s deploy logs")

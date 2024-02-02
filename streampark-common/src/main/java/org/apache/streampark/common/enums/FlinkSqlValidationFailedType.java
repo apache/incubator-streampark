@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nullable;
+
+/** Flink SQL validation failed type enum. */
 public enum FlinkSqlValidationFailedType {
 
   /** Basic test failed (such as null, etc.) */
@@ -40,6 +43,11 @@ public enum FlinkSqlValidationFailedType {
     this.failedType = failedType;
   }
 
+  /**
+   * Try to resolve the given flink SQL validation failed type value into a known {@link
+   * FlinkSqlValidationFailedType} enum.
+   */
+  @Nullable
   public static FlinkSqlValidationFailedType of(Integer value) {
     for (FlinkSqlValidationFailedType type : values()) {
       if (type.failedType == value) {

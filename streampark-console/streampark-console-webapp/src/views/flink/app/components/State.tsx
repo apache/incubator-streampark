@@ -1,4 +1,4 @@
-/* 
+/*
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -12,16 +12,16 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License. 
+  limitations under the License.
 */
 
-import { defineComponent, toRefs, unref } from 'vue';
+import { computed, defineComponent, toRefs, unref } from 'vue';
 import { Tag, Tooltip } from 'ant-design-vue';
 import './State.less';
 import { AppStateEnum, ReleaseStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 
 /*  state map*/
-const stateMap = {
+export const stateMap = {
   [AppStateEnum.ADDED]: { color: '#2f54eb', title: 'ADDED' },
   [AppStateEnum.INITIALIZING]: {
     color: '#738df8',
@@ -78,7 +78,7 @@ const stateMap = {
   },
 };
 /*  option state map*/
-const optionStateMap = {
+export const optionStateMap = {
   [OptionStateEnum.RELEASING]: {
     color: '#1ABBDC',
     title: 'RELEASING',
@@ -102,7 +102,8 @@ const optionStateMap = {
 };
 
 /* release state map*/
-const releaseStateMap = {
+export const releaseStateMap = {
+  [ReleaseStateEnum.FAILED]: { color: '#f5222d', title: 'FAILED' },
   [ReleaseStateEnum.DONE]: { color: '#52c41a', title: 'DONE' },
   [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: 'WAITING' },
   [ReleaseStateEnum.RELEASING]: {
@@ -113,10 +114,9 @@ const releaseStateMap = {
   [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: 'PENDING' },
   [ReleaseStateEnum.NEED_ROLLBACK]: { color: '#fa8c16', title: 'WAITING' },
 };
-releaseStateMap[-1] = { color: '#f5222d', title: 'FAILED' };
 
 /* build state map*/
-const buildStatusMap = {
+export const buildStatusMap = {
   0: { color: '#99A3A4', title: 'UNKNOWN' },
   1: { color: '#F5B041', title: 'PENDING' },
   2: {
@@ -148,16 +148,41 @@ export default defineComponent({
       type: Object as PropType<Recordable>,
       default: () => ({}),
     },
+    maxTitle: String,
   },
   setup(props) {
     const { data, option } = toRefs(props);
+    const tagWidth = computed(() => {
+      if (props.maxTitle === undefined) return 0;
+      // create a dom to calculate the width of the tag
+      const dom = document.createElement('span');
+      dom.style.display = 'inline-block';
+      dom.style.fontSize = '10px';
+      dom.style.padding = '0 3px';
+      dom.style.borderRadius = '1px';
+      dom.textContent = props.maxTitle;
+      document.body.appendChild(dom);
+      const width = dom.clientWidth + 2;
+      document.body.removeChild(dom);
+      return width;
+    });
+
     const renderTag = (map: Recordable, key: number) => {
       if (!Reflect.has(map, key)) {
         return;
       }
-      return <Tag {...map[key]}>{map[key].title}</Tag>;
+      return (
+        <Tag {...map[key]} style={getStyle.value}>
+          {map[key].title}
+        </Tag>
+      );
     };
-
+    const getStyle = computed(() => {
+      if (tagWidth.value > 0) {
+        return { width: `${tagWidth.value}px`, textAlign: 'center' };
+      }
+      return {};
+    });
     const renderState = () => {
       if (unref(data).optionState === OptionStateEnum.NONE) {
         return <div class="bold-tag">{renderTag(stateMap, unref(data).state)}</div>;

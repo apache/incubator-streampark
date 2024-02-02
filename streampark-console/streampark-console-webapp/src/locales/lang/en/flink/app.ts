@@ -69,6 +69,7 @@ export default {
   status: 'Run Status',
   startTime: 'Start Time',
   endTime: 'End Time',
+  hadoopUser: 'Hadoop User',
   restoreModeTip:
     'restore mode is supported since flink 1.15, usually, you do not have to set this parameter',
   release: {

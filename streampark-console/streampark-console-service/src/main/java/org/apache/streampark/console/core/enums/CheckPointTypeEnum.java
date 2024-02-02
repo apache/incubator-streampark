@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
+/** Describe the type of Check Point */
 public enum CheckPointTypeEnum {
   /** CHECKPOINT */
   CHECKPOINT(1),

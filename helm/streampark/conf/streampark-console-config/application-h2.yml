@@ -6,7 +6,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
 #
-#    https://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,12 +15,16 @@
 # limitations under the License.
 #
 
-security:
-  kerberos:
-    ttl: 2h # unit [s|m|h|d]
-    login:
-      enable: false
-      debug: false
-      principal:
-      krb5:
-      keytab:
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'
+    username: sa
+    password: sa
+  sql:
+    init:
+      data-locations: classpath:db/data-h2.sql
+      continue-on-error: true
+      username: sa
+      password: sa
+      mode: always

@@ -22,7 +22,6 @@
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="git_credential" jdbcType="INTEGER" property="gitCredential"/>
         <result column="url" jdbcType="VARCHAR" property="url"/>
         <result column="repository" jdbcType="INTEGER" property="repository"/>
         <result column="branches" jdbcType="VARCHAR" property="branches"/>
@@ -83,7 +82,7 @@
         <where>
             t.team_id = #{project.teamId}
             <if test="project.name != null and project.name != ''">
-                and t.name like '%${project.name}%'
+                and t.name like concat('%', '${project.name}', '%')
             </if>
             <if test="project.buildState != null">
                 and t.build_state = #{project.buildState}

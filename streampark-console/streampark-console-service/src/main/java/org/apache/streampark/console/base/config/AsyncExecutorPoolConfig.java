@@ -17,16 +17,28 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.streampark.common.util.ThreadUtils;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+/** Create asynchronous thread pools for different services */
 @Configuration
 public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
+
+  /**
+   * Create a standard asynchronous task performer.
+   *
+   * @return Executor
+   */
   @Bean
   public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -38,6 +50,146 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     executor.setThreadNamePrefix("asyncTaskExecutor-");
 
     executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for SavePointService.
+   *
+   * @return Executor
+   */
+  @Bean("triggerSavepointExecutor")
+  public Executor savepointExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("trigger-savepoint-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkAppHttpWatcher.
+   *
+   * @return Executor
+   */
+  @Bean("flinkRestAPIWatchingExecutor")
+  public Executor restAPIWatchingExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("flink-restapi-watching-executor-");
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkClusterWatcher.
+   *
+   * @return Executor
+   */
+  @Bean("flinkClusterWatchingExecutor")
+  public Executor clusterWatchingExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("flink-cluster-watching-executor-");
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolExecutor for AppBuildPipeService.
+   *
+   * @return ExecutorService
+   */
+  @Bean("streamparkBuildPipelineExecutor")
+  public ExecutorService pipelineExecutor() {
+    return new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
+        new ThreadPoolExecutor.AbortPolicy());
+  }
+
+  /**
+   * Create a ThreadPoolExecutor for FlinkClusterService.
+   *
+   * @return ExecutorService
+   */
+  @Bean("streamparkClusterExecutor")
+  public ExecutorService clusterExecutor() {
+    return new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() * 5,
+        Runtime.getRuntime().availableProcessors() * 10,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streampark-cluster-executor"),
+        new ThreadPoolExecutor.AbortPolicy());
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for FlinkK8sChangeEventListener.
+   *
+   * @return Executor
+   */
+  @Bean("streamparkNotifyExecutor")
+  public Executor notifyExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(20);
+    executor.setThreadNamePrefix("streampark-notify-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for ApplicationActionService.
+   *
+   * @return Executor
+   */
+  @Bean("streamparkDeployExecutor")
+  public Executor deployExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-deploy-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+    return executor;
+  }
+
+  /**
+   * Create a ThreadPoolTaskExecutor for ProjectService.
+   *
+   * @return Executor
+   */
+  @Bean("streamparkBuildExecutor")
+  public Executor buildExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 5);
+    executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 10);
+    executor.setQueueCapacity(1024);
+    executor.setKeepAliveSeconds(60);
+    executor.setThreadNamePrefix("streampark-build-executor-");
+    executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
     return executor;
   }
 }

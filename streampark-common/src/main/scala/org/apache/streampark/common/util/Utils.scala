@@ -19,7 +19,7 @@ package org.apache.streampark.common.util
 import org.apache.commons.lang3.StringUtils
 
 import java.io._
-import java.net.URL
+import java.net.{HttpURLConnection, URL}
 import java.time.{Duration, LocalDateTime}
 import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
 import java.util.concurrent.locks.LockSupport
@@ -33,17 +33,17 @@ object Utils extends Logger {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
-  def notNull(obj: Any, message: String): Unit = {
+  def requireNotNull(obj: Any, message: String): Unit = {
     if (obj == null) {
       throw new NullPointerException(message)
     }
   }
 
-  def notNull(obj: Any): Unit = {
-    notNull(obj, "this argument must not be null")
+  def requireNotNull(obj: Any): Unit = {
+    requireNotNull(obj, "this argument must not be null")
   }
 
-  def notEmpty(elem: Any): Boolean = {
+  def requireNotEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
       case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
@@ -56,7 +56,7 @@ object Utils extends Logger {
     }
   }
 
-  def isEmpty(elem: Any): Boolean = !notEmpty(elem)
+  def isEmpty(elem: Any): Boolean = !requireNotEmpty(elem)
 
   def required(expression: Boolean): Unit = {
     if (!expression) {
@@ -73,7 +73,7 @@ object Utils extends Logger {
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   @throws[IOException]
-  def checkJarFile(jar: URL): Unit = {
+  def requireCheckJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x
       case Failure(_) => throw new IOException(s"JAR file path is invalid $jar")
@@ -92,8 +92,16 @@ object Utils extends Logger {
   }
 
   def getJarManifest(jarFile: File): jar.Manifest = {
-    checkJarFile(jarFile.toURL)
+    requireCheckJarFile(jarFile.toURL)
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
+  }
+
+  def getJarManClass(jarFile: File): String = {
+    val manifest = getJarManifest(jarFile)
+    manifest.getMainAttributes.getValue("Main-Class") match {
+      case null => manifest.getMainAttributes.getValue("program-class")
+      case v => v
+    }
   }
 
   def copyProperties(original: Properties, target: Properties): Unit =
@@ -154,6 +162,15 @@ object Utils extends Logger {
         retry(retryCount - 1, interval)(f)
       case Failure(e) => Failure(e)
     }
+  }
+
+  def checkHttpURL(urlString: String) = {
+    Try {
+      val url = new URL(urlString)
+      val connection = url.openConnection.asInstanceOf[HttpURLConnection]
+      connection.setRequestMethod("HEAD")
+      connection.getResponseCode == HttpURLConnection.HTTP_OK
+    }.getOrElse(false)
   }
 
   def printLogo(info: String): Unit = {

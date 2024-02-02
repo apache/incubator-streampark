@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -48,12 +49,10 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   /**
    * two places will be checked: <br>
    * 1) name repeated <br>
-   * 2) flink-dist <br>
-   * -1) invalid path <br>
-   * 0) ok <br>
+   * 2) flink-dist repeated <br>
    */
   @Override
-  public Integer check(FlinkEnv version) {
+  public FlinkEnvCheckEnum check(FlinkEnv version) {
     // 1) check name
     LambdaQueryWrapper<FlinkEnv> queryWrapper =
         new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
@@ -61,21 +60,27 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
       queryWrapper.ne(FlinkEnv::getId, version.getId());
     }
     if (this.count(queryWrapper) > 0) {
-      return 1;
+      return FlinkEnvCheckEnum.NAME_REPEATED;
     }
 
-    // 2) check dist_jar
     String lib = version.getFlinkHome().concat("/lib");
     File flinkLib = new File(lib);
-    if (flinkLib.exists() && flinkLib.isDirectory()) {
-      int distSize = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar")).length;
-      if (distSize > 1) {
-        return 2;
-      }
-    } else {
-      return -1;
+    // 2) flink/lib path exists and is a directory
+    if (!flinkLib.exists() || !flinkLib.isDirectory()) {
+      return FlinkEnvCheckEnum.INVALID_PATH;
     }
-    return 0;
+
+    // 3) check flink-dist
+    File[] files = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
+    if (files == null || files.length == 0) {
+      return FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND;
+    }
+
+    if (files.length > 1) {
+      return FlinkEnvCheckEnum.FLINK_DIST_REPEATED;
+    }
+
+    return FlinkEnvCheckEnum.OK;
   }
 
   @Override
@@ -133,10 +138,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   @Override
   public FlinkEnv getByIdOrDefault(Long id) {
     FlinkEnv flinkEnv = getById(id);
-    if (flinkEnv == null) {
-      return getDefault();
-    }
-    return flinkEnv;
+    return flinkEnv == null ? getDefault() : flinkEnv;
   }
 
   @Override

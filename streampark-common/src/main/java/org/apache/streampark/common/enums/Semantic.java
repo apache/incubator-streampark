@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** Flink consistency semantics */
 public enum Semantic {
 
@@ -31,7 +34,9 @@ public enum Semantic {
   /** After the fault occurs, the counting results may be lost. */
   NONE;
 
-  public static Semantic of(String name) {
+  /** Try to resolve the given semantic name into a known {@link Semantic}. */
+  @Nullable
+  public static Semantic of(@Nonnull String name) {
     for (Semantic semantic : Semantic.values()) {
       if (name.equals(semantic.name())) {
         return semantic;

@@ -59,8 +59,8 @@ object FlinkSessionSubmitHelper extends Logger {
     // upload flink-job jar
     val uploadResult = Request
       .post(s"$jmRestUrl/jars/upload")
-      .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-      .responseTimeout(Timeout.ofSeconds(60))
+      .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+      .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
       .body(
         MultipartEntityBuilder
           .create()
@@ -90,8 +90,8 @@ object FlinkSessionSubmitHelper extends Logger {
     // refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
     val resp = Request
       .post(s"$jmRestUrl/jars/${jarUploadResponse.jarId}/run")
-      .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-      .responseTimeout(Timeout.ofSeconds(60))
+      .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+      .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
       .body(new StringEntity(Serialization.write(new JarRunRequest(flinkConfig))))
       .execute
       .returnContent()

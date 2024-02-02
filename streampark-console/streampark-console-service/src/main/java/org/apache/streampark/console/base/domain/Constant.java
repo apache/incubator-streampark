@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.domain;
 
+/** System constants */
 public class Constant {
 
   // order rules: descend

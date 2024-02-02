@@ -23,9 +23,22 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+/** This interface is used to record application operation logs */
 public interface ApplicationLogService extends IService<ApplicationLog> {
 
+  /**
+   * Retrieves a page of {@link ApplicationLog} objects based on the provided parameters.
+   *
+   * @param applicationLog The {@link ApplicationLog} object containing the search criteria.
+   * @param request The {@link RestRequest} object used for pagination and sorting.
+   * @return An {@link IPage} containing the retrieved {@link ApplicationLog} objects.
+   */
   IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request);
 
+  /**
+   * remove application log by application id
+   *
+   * @param appId The id of the application to be removed
+   */
   void removeByAppId(Long appId);
 }

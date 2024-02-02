@@ -23,6 +23,7 @@ import lombok.Getter;
 
 import scala.Enumeration;
 
+/** Describe the status of Flink Application */
 @Getter
 public enum FlinkAppStateEnum {
 
@@ -155,9 +156,8 @@ public enum FlinkAppStateEnum {
     public static FlinkAppStateEnum fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
       if (FlinkJobStateEnum.K8S_INITIALIZING() == flinkJobState) {
         return INITIALIZING;
-      } else {
-        return of(flinkJobState.toString());
       }
+      return of(flinkJobState.toString());
     }
 
     /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */

@@ -82,7 +82,7 @@ object MavenTool extends Logger {
   }
 
   private val isJarFile = (file: File) =>
-    file.isFile && Try(Utils.checkJarFile(file.toURI.toURL)).isSuccess
+    file.isFile && Try(Utils.requireCheckJarFile(file.toURI.toURL)).isSuccess
 
   /**
    * Build a fat-jar with custom jar libraries.

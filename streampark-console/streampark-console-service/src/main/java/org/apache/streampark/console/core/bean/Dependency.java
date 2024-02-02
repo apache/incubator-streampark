@@ -43,7 +43,7 @@ public class Dependency {
 
   @SneakyThrows
   public static Dependency toDependency(String dependency) {
-    if (Utils.notEmpty(dependency)) {
+    if (Utils.requireNotEmpty(dependency)) {
       return JacksonUtils.read(dependency, new TypeReference<Dependency>() {});
     }
     return new Dependency();

@@ -82,9 +82,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         // This step is very critical. If the same name is not judged and the count is different,
         // then the set collection will default to the same element, and it will be overwritten.
         return this.word.compareTo(other.word) * -1;
-      } else {
-        return num * -1;
       }
+      return num * -1;
     }
 
     @Override
@@ -185,7 +184,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         nowStep = nowStep.get(nowChar).getNext();
         loc += 1;
       }
-      Utils.notNull(preNode);
+      Utils.requireNotNull(preNode);
       preNode.setStop();
       preNode.setCount(count);
     }

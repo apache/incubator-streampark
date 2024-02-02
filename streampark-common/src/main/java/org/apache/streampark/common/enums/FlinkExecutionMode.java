@@ -19,9 +19,16 @@ package org.apache.streampark.common.enums;
 
 import com.google.common.collect.Lists;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.util.List;
 
+/** Flink execution mode enum. */
 public enum FlinkExecutionMode {
+
+  /** Unknown Mode */
+  UNKNOWN(-1, "Unknown"),
 
   /** Local mode */
   LOCAL(0, "local"),
@@ -43,90 +50,156 @@ public enum FlinkExecutionMode {
 
   /** kubernetes application */
   KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
-
   private final Integer mode;
 
   private final String name;
 
-  FlinkExecutionMode(Integer mode, String name) {
+  FlinkExecutionMode(@Nonnull Integer mode, @Nonnull String name) {
     this.mode = mode;
     this.name = name;
   }
 
-  public static FlinkExecutionMode of(Integer value) {
+  /**
+   * Try to resolve the mode value into {@link FlinkExecutionMode}.
+   *
+   * @param value The mode value of potential flink execution mode.
+   * @return The parsed flink execution mode enum.
+   */
+  @Nonnull
+  public static FlinkExecutionMode of(@Nullable Integer value) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.mode.equals(value)) {
         return mode;
       }
     }
-    return null;
+    return FlinkExecutionMode.UNKNOWN;
   }
 
-  public static FlinkExecutionMode of(String name) {
+  /**
+   * Try to resolve the mode name into {@link FlinkExecutionMode}.
+   *
+   * @param name The mode name of potential flink execution mode.
+   * @return The parsed flink execution mode enum.
+   */
+  @Nonnull
+  public static FlinkExecutionMode of(@Nullable String name) {
     for (FlinkExecutionMode mode : values()) {
       if (mode.name.equals(name)) {
         return mode;
       }
     }
-    return null;
+    return FlinkExecutionMode.UNKNOWN;
   }
 
   public int getMode() {
     return mode;
   }
 
+  @Nonnull
   public String getName() {
     return name;
   }
 
-  public static boolean isYarnMode(FlinkExecutionMode mode) {
+  /**
+   * Judge the given mode whether is yarn mode.
+   *
+   * @param mode The given mode.
+   * @return The judged result.
+   */
+  public static boolean isYarnMode(@Nullable FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
   }
 
-  // TODO: We'll inline this method back to the corresponding caller lines
-  //  after dropping the yarn perjob mode.
-  public static boolean isYarnPerJobOrAppMode(FlinkExecutionMode mode) {
+  /**
+   * Judge the given mode whether is yarn per-job or application mode.
+   *
+   * @param mode The given mode.
+   * @return The judged result. TODO: We'll inline this method back to the corresponding caller
+   *     lines after dropping the yarn perjob mode.
+   */
+  public static boolean isYarnPerJobOrAppMode(@Nullable FlinkExecutionMode mode) {
     return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
   }
 
-  public static boolean isYarnSessionMode(FlinkExecutionMode mode) {
+  /**
+   * Judge the given mode whether is yarn session mode.
+   *
+   * @param mode The given mode.
+   * @return The judged result.
+   */
+  public static boolean isYarnSessionMode(@Nullable FlinkExecutionMode mode) {
     return YARN_SESSION == mode;
   }
 
-  public static boolean isYarnMode(Integer value) {
+  /**
+   * Judge the mode value whether is yarn execution mode.
+   *
+   * @param value The mode value of potential flink execution mode.
+   * @return The judged result.
+   */
+  public static boolean isYarnMode(@Nullable Integer value) {
     return isYarnMode(of(value));
   }
 
-  public static boolean isKubernetesSessionMode(Integer value) {
+  /**
+   * Judge the mode value whether is k8s session execution mode.
+   *
+   * @param value The mode value of potential flink execution mode.
+   * @return The judged result.
+   */
+  public static boolean isKubernetesSessionMode(@Nullable Integer value) {
     return KUBERNETES_NATIVE_SESSION == of(value);
   }
 
-  public static boolean isKubernetesMode(FlinkExecutionMode mode) {
+  /**
+   * Judge the mode whether is k8s execution mode.
+   *
+   * @param mode The given flink execution mode.
+   * @return The judged result.
+   */
+  public static boolean isKubernetesMode(@Nullable FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || KUBERNETES_NATIVE_APPLICATION == mode;
   }
 
-  public static boolean isKubernetesMode(Integer value) {
+  /**
+   * Judge the mode value whether is k8s execution mode.
+   *
+   * @param value The mode value of potential flink execution mode.
+   * @return The judged result.
+   */
+  public static boolean isKubernetesMode(@Nullable Integer value) {
     return isKubernetesMode(of(value));
   }
 
-  public static boolean isKubernetesApplicationMode(Integer value) {
+  /**
+   * Judge the mode value whether is k8s application execution mode.
+   *
+   * @param value The mode value of potential flink execution mode.
+   * @return The judged result.
+   */
+  public static boolean isKubernetesApplicationMode(@Nullable Integer value) {
     return KUBERNETES_NATIVE_APPLICATION == of(value);
   }
 
+  /** Get all k8s mode values into a list. */
+  @Nonnull
   public static List<Integer> getKubernetesMode() {
     return Lists.newArrayList(
         KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
   }
 
-  public static boolean isSessionMode(FlinkExecutionMode mode) {
+  /** Judge the given flink execution mode whether is session execution mode. */
+  public static boolean isSessionMode(@Nullable FlinkExecutionMode mode) {
     return KUBERNETES_NATIVE_SESSION == mode || YARN_SESSION == mode;
   }
 
-  public static boolean isRemoteMode(Integer value) {
+  /** Judge the given flink execution mode value whether is remote execution mode. */
+  public static boolean isRemoteMode(@Nullable Integer value) {
     return isRemoteMode(of(value));
   }
 
-  public static boolean isRemoteMode(FlinkExecutionMode mode) {
+  /** Judge the given flink execution mode whether is remote execution mode. */
+  public static boolean isRemoteMode(@Nullable FlinkExecutionMode mode) {
     return REMOTE == mode;
   }
 }

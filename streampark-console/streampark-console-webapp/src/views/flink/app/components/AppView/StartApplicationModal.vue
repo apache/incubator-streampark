@@ -31,8 +31,9 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
-  import { fetchStart } from '/@/api/flink/app';
-  import { RestoreModeEnum } from '/@/enums/flinkEnum';
+  import { fetchCheckStart, fetchForcedStop, fetchStart } from '/@/api/flink/app';
+
+  import { AppExistsEnum, RestoreModeEnum } from '/@/enums/flinkEnum';
   import { fetchFlinkEnv } from '/@/api/flink/flinkEnv';
   import { renderFlinkAppRestoreMode } from '/@/views/flink/app/hooks/useFlinkRender';
 
@@ -121,8 +122,21 @@
     baseColProps: { span: 24 },
   });
 
-  /* submit */
   async function handleSubmit() {
+    // when then app is building, show forced starting modal
+    const resp = await fetchCheckStart({
+      id: receiveData.application.id,
+    });
+    if (resp.data.data === AppExistsEnum.IN_YARN) {
+      await fetchForcedStop({
+        id: receiveData.application.id,
+      });
+    }
+    await handleDoSubmit();
+  }
+
+  /* submit */
+  async function handleDoSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;

@@ -226,3 +226,19 @@ export enum RestoreModeEnum {
   CLAIM = 2,
   LEGACY = 3,
 }
+
+export enum AppExistsEnum {
+  NO = 0,
+  IN_DB = 1,
+  IN_YARN = 2,
+  IN_KUBERNETES = 3,
+  INVALID = 4,
+}
+
+export enum FlinkEnvCheckEnum {
+  INVALID_PATH = -1,
+  OK = 0,
+  NAME_REPEATED = 1,
+  FLINK_DIST_NOT_FOUND = 2,
+  FLINK_DIST_REPEATED = 3,
+}

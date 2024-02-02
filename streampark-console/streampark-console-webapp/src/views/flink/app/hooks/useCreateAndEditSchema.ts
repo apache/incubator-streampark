@@ -489,6 +489,11 @@ export const useCreateAndEditSchema = (
         ifShow: ({ values }) => (edit?.mode ? true : values.jobType != JobTypeEnum.SQL),
       },
       {
+        field: 'hadoopUser',
+        label: t('flink.app.hadoopUser'),
+        component: 'Input',
+      },
+      {
         field: 'description',
         label: t('common.description'),
         component: 'InputTextArea',

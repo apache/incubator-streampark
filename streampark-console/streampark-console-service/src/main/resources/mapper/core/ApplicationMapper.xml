@@ -150,10 +150,10 @@
                 and t.execution_mode = #{app.executionMode}
             </if>
             <if test="app.jobName != null and app.jobName != ''">
-                and t.job_name like '%${app.jobName}%'
+                and t.job_name like concat('%', '${app.jobName}', '%')
             </if>
             <if test="app.projectName != null and app.projectName != ''">
-                and p.name like '%${app.projectName}%'
+                and p.name like concat('%', '${app.projectName}', '%')
             </if>
             <if test="app.appId != null and app.appId != ''">
                 and t.app_id = #{app.appId}
@@ -172,16 +172,16 @@
                 </foreach>
             </if>
             <if test="app.tags != null and app.tags != ''">
-                and t.tags like '%${app.tags}%'
+                and t.tags like concat('%', '${app.tags}', '%')
             </if>
         </where>
     </select>
 
-    <select id="selectApp" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
+    <select id="selectApp" resultType="org.apache.streampark.console.core.entity.Application" parameterType="long">
         select t.*, p.name as projectName
         from t_flink_app t left join t_flink_project p
         on t.project_id = p.id
-        where t.id = #{app.id}
+        where t.id = #{id}
     </select>
 
     <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.Application">
@@ -267,7 +267,7 @@
         from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
-        where t.probing = 1 or (t.tracking = 1 and t.state = 13)
+        where t.probing = true or (t.tracking = 1 and t.state = 13)
     </select>
 
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">

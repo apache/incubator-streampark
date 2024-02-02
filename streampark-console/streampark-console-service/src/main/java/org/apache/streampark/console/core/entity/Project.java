@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.util.CommandUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -43,9 +42,12 @@ import org.eclipse.jgit.lib.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Data
@@ -64,8 +66,6 @@ public class Project implements Serializable {
   private String branches;
 
   private Date lastBuild;
-
-  private Integer gitCredential;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String userName;
@@ -185,24 +185,28 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
-    String mvn = "mvn";
     boolean windows = Utils.isWindows();
-    try {
-      if (windows) {
-        CommandUtils.execute("mvn.cmd --version");
-      } else {
-        CommandUtils.execute("mvn --version");
+    String mvn = windows ? "mvn.cmd" : "mvn";
+
+    String mavenHome = System.getenv("M2_HOME");
+    if (mavenHome == null) {
+      mavenHome = System.getenv("MAVEN_HOME");
+    }
+
+    boolean useWrapper = true;
+    if (mavenHome != null) {
+      mvn = mavenHome + "/bin/" + mvn;
+      try {
+        Process process = Runtime.getRuntime().exec(mvn + " --version");
+        process.waitFor();
+        Utils.required(process.exitValue() == 0);
+        useWrapper = false;
+      } catch (Exception ignored) {
+        log.warn("try using user-installed maven failed, now use maven-wrapper.");
       }
-    } catch (Exception e) {
-      File wrapperJar = new File(WebUtils.getAppHome().concat("/.mvn/wrapper/maven-wrapper.jar"));
-      if (wrapperJar.exists()) {
-        try {
-          JarFile jarFile = new JarFile(wrapperJar, true);
-          jarFile.close();
-        } catch (Exception ignored) {
-          FileUtils.deleteQuietly(wrapperJar);
-        }
-      }
+    }
+
+    if (useWrapper) {
       if (windows) {
         mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
@@ -213,21 +217,59 @@ public class Project implements Serializable {
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
 
     if (StringUtils.isNotBlank(this.buildArgs)) {
+      String args = getIllegalArgs(this.buildArgs);
+      if (args != null) {
+        throw new IllegalArgumentException(
+            String.format(
+                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
+      }
       cmdBuffer.append(this.buildArgs.trim());
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isNotBlank(setting)) {
-      cmdBuffer.append(" --settings ").append(setting);
+      String args = getIllegalArgs(setting);
+      if (args != null) {
+        throw new IllegalArgumentException(
+            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
+      }
+      File file = new File(setting);
+      if (file.exists() && file.isFile()) {
+        cmdBuffer.append(" --settings ").append(setting);
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                setting));
+      }
+    }
+    return cmdBuffer.toString();
+  }
+
+  private String getIllegalArgs(String param) {
+    Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
+    Matcher matcher = pattern.matcher(param);
+    if (matcher.find()) {
+      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    return cmdBuffer.toString();
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
+    String[] argsList = param.split("\\s+");
+    while (iterator.hasNext()) {
+      String chr = iterator.next();
+      for (String arg : argsList) {
+        if (arg.contains(chr)) {
+          return arg;
+        }
+      }
+    }
+    return null;
   }
 
   @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (StringUtils.isNotEmpty(this.getPom())) {
+    if (StringUtils.isNotBlank(this.getPom())) {
       buildHome =
           new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
     }
@@ -251,5 +293,13 @@ public class Project implements Serializable {
   @JsonIgnore
   private String getLogHeader(String header) {
     return "---------------------------------[ " + header + " ]---------------------------------\n";
+  }
+
+  public boolean isHttpRepositoryUrl() {
+    return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
+  }
+
+  public boolean isSshRepositoryUrl() {
+    return url != null && url.trim().startsWith("git@");
   }
 }

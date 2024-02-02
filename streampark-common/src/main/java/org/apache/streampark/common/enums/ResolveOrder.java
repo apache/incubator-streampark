@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** classloader.resolve-order */
 public enum ResolveOrder {
 
@@ -30,12 +33,14 @@ public enum ResolveOrder {
 
   private final Integer order;
 
-  ResolveOrder(String name, Integer order) {
+  ResolveOrder(@Nonnull String name, @Nonnull Integer order) {
     this.name = name;
     this.order = order;
   }
 
-  public static ResolveOrder of(Integer value) {
+  /** Try to resolve the given resolve order value into a known {@link ResolveOrder} enum. */
+  @Nullable
+  public static ResolveOrder of(@Nullable Integer value) {
     for (ResolveOrder order : values()) {
       if (order.order.equals(value)) {
         return order;
@@ -44,10 +49,12 @@ public enum ResolveOrder {
     return null;
   }
 
+  @Nonnull
   public String getName() {
     return name;
   }
 
+  @Nonnull
   public Integer getOrder() {
     return order;
   }

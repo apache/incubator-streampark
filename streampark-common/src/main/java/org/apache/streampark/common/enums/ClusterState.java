@@ -17,7 +17,14 @@
 
 package org.apache.streampark.common.enums;
 
-/** @since 1.2.3 */
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+/**
+ * Cluster state enum.
+ *
+ * @since 1.2.3
+ */
 public enum ClusterState {
 
   /** The cluster was just created but not started */
@@ -49,11 +56,18 @@ public enum ClusterState {
 
   private final Integer state;
 
-  ClusterState(Integer state) {
+  ClusterState(@Nonnull Integer state) {
     this.state = state;
   }
 
-  public static ClusterState of(Integer value) {
+  /**
+   * Try to resolve the value into {@link ClusterState}.
+   *
+   * @param value the state value of potential cluster state.
+   * @return the parsed cluster state enum.
+   */
+  @Nonnull
+  public static ClusterState of(@Nullable Integer value) {
     for (ClusterState clusterState : values()) {
       if (clusterState.state.equals(value)) {
         return clusterState;
@@ -62,7 +76,14 @@ public enum ClusterState {
     return ClusterState.UNKNOWN;
   }
 
-  public static ClusterState of(String name) {
+  /**
+   * Try to resolve the name into {@link ClusterState}.
+   *
+   * @param name The name of potential cluster state.
+   * @return The parsed cluster state enum.
+   */
+  @Nonnull
+  public static ClusterState of(@Nullable String name) {
     for (ClusterState clusterState : values()) {
       if (clusterState.name().equals(name)) {
         return clusterState;
@@ -71,11 +92,19 @@ public enum ClusterState {
     return ClusterState.UNKNOWN;
   }
 
+  /** Get the state value of the current cluster state enum. */
+  @Nonnull
   public Integer getState() {
     return state;
   }
 
-  public static boolean isRunning(ClusterState state) {
+  /**
+   * Judge the given state enum whether is the running state.
+   *
+   * @param state The give state enum to judge.
+   * @return The result of the judging.
+   */
+  public static boolean isRunning(@Nullable ClusterState state) {
     return RUNNING.equals(state);
   }
 }

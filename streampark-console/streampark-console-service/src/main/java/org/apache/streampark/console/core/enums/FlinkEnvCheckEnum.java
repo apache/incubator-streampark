@@ -15,19 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.system.service;
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.console.system.entity.RoleMenu;
+import lombok.Getter;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+/* the flink environment status */
+@Getter
+public enum FlinkEnvCheckEnum {
 
-import java.util.List;
+  /* FLINK_HOME path invalid */
+  INVALID_PATH(-1),
 
-public interface RoleMenuServie extends IService<RoleMenu> {
+  /* this add/update operation ok */
+  OK(0),
 
-  void removeByRoleId(Long roleId);
+  /* flink name repeated */
+  NAME_REPEATED(1),
 
-  void removeByMenuIds(String[] menuIds);
+  /* FLINK_DIST file not found */
 
-  List<RoleMenu> listByRoleId(String roleId);
+  FLINK_DIST_NOT_FOUND(2),
+
+  /* defined flink name repeated */
+  FLINK_DIST_REPEATED(3);
+
+  private final int code;
+
+  FlinkEnvCheckEnum(int code) {
+    this.code = code;
+  }
 }

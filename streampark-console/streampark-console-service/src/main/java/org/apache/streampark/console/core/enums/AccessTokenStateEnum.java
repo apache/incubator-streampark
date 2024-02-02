@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
+/** Used to authenticate access rights */
 public enum AccessTokenStateEnum {
 
   /** not added token */

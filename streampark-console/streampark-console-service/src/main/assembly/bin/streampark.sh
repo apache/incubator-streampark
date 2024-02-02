@@ -270,8 +270,8 @@ print_logo() {
   printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
   printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
   printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
-  printf '      %s   Version:  2.2.0-SNAPSHOT %s\n'                                                $BLUE   $RESET
-  printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                   $BLUE   $RESET
+  printf '      %s   Version:  2.2.0 %s\n'                                                         $BLUE   $RESET
+  printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                  $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }

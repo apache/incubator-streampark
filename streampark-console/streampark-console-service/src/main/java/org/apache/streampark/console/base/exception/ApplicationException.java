@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.exception;
 
+/** Applies to all application exceptions */
 public class ApplicationException extends ApiAlertException {
   public ApplicationException(String message) {
     super(message);

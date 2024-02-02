@@ -250,7 +250,8 @@ create table "public"."t_flink_app" (
   "ingress_template" text collate "pg_catalog"."default",
   "default_mode_ingress" text collate "pg_catalog"."default",
   "tags" varchar(500) collate "pg_catalog"."default",
-  "probing" boolean default false
+  "probing" boolean default false,
+  "hadoop_user" varchar(63) collate "pg_catalog"."default"
 )
 ;
 alter table "public"."t_flink_app" add constraint "t_flink_app_pkey" primary key ("id");
@@ -430,7 +431,6 @@ create table "public"."t_flink_project" (
   "id" int8 not null default nextval('streampark_t_flink_project_id_seq'::regclass),
   "team_id" int8,
   "name" varchar(255) collate "pg_catalog"."default",
-  "git_credential" int2,
   "url" varchar(255) collate "pg_catalog"."default",
   "branches" varchar(64) collate "pg_catalog"."default",
   "user_name" varchar(64) collate "pg_catalog"."default",

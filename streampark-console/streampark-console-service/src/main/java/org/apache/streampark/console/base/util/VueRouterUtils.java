@@ -110,14 +110,14 @@ public final class VueRouterUtils {
           }
         });
 
-    List<VueRouter<T>> list = new ArrayList<>();
+    List<VueRouter<T>> routerList = new ArrayList<>();
     VueRouter<T> root = new VueRouter<>();
     root.setName("Root");
     root.setComponent("BasicView");
     root.setPath("/");
     root.setChildren(topRoutes);
-    list.add(root);
+    routerList.add(root);
 
-    return list;
+    return routerList;
   }
 }

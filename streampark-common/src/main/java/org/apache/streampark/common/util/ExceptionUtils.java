@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.util;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -26,7 +29,14 @@ public class ExceptionUtils {
 
   private ExceptionUtils() {}
 
-  public static String stringifyException(Throwable throwable) {
+  /**
+   * Stringify the exception object.
+   *
+   * @param throwable the target exception to stringify.
+   * @return the result of string-exception.
+   */
+  @Nonnull
+  public static String stringifyException(@Nullable Throwable throwable) {
     if (throwable == null) {
       return "(null)";
     }
@@ -36,6 +46,20 @@ public class ExceptionUtils {
       return stm.toString();
     } catch (IOException e) {
       return e.getClass().getName() + " (error while printing stack trace)";
+    }
+  }
+
+  @FunctionalInterface
+  public interface WrapperRuntimeExceptionHandler<I, O> {
+    O handle(I input) throws Exception;
+  }
+
+  public static <I, O> O wrapRuntimeException(
+      I input, WrapperRuntimeExceptionHandler<I, O> handler) {
+    try {
+      return handler.handle(input);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }

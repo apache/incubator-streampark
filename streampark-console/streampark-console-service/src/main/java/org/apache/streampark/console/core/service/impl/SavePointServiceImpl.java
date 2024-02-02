@@ -20,9 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -61,6 +59,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,9 +73,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -105,15 +102,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private CommonServiceImpl commonService;
 
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("trigger-savepoint-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+  @Qualifier("triggerSavepointExecutor")
+  @Autowired
+  private Executor executorService;
 
   @Override
   public void expire(Long appId) {
@@ -202,7 +193,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public Boolean remove(Long id, Application appParam) throws InternalException {
     SavePoint savePoint = getById(id);
     try {
-      if (StringUtils.isNotEmpty(savePoint.getPath())) {
+      if (StringUtils.isNotBlank(savePoint.getPath())) {
         appParam.getFsOperator().delete(savePoint.getPath());
       }
       return removeById(id);
@@ -213,8 +204,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Override
   public IPage<SavePoint> getPage(SavePoint savePoint, RestRequest request) {
-    Page<SavePoint> page =
-        new MybatisPager<SavePoint>().getPage(request, "trigger_time", Constant.ORDER_DESC);
+    request.setSortField("trigger_time");
+    Page<SavePoint> page = MybatisPager.getPage(request);
     LambdaQueryWrapper<SavePoint> queryWrapper =
         new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, savePoint.getAppId());
     return this.page(page, queryWrapper);
@@ -292,7 +283,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     Map<String, Object> properties = new HashMap<>();
 
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
-      Utils.notNull(
+      Utils.requireNotNull(
           cluster,
           String.format(
               "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
@@ -307,17 +298,17 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private String getClusterId(Application application, FlinkCluster cluster) {
     if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
       return application.getClusterId();
-    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+    }
+    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
       if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
-        Utils.notNull(
+        Utils.requireNotNull(
             cluster,
             String.format(
                 "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         return cluster.getClusterId();
-      } else {
-        return application.getAppId();
       }
+      return application.getAppId();
     }
     return null;
   }
@@ -352,8 +343,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     if (applicationConfig == null) {
       return null;
     }
-    Map<String, String> map = applicationConfig.readConfig();
-    return FlinkUtils.isCheckpointEnabled(map) ? map.get(SAVEPOINT_DIRECTORY.key()) : null;
+    Map<String, String> configMap = applicationConfig.readConfig();
+    return FlinkUtils.isCheckpointEnabled(configMap)
+        ? configMap.get(SAVEPOINT_DIRECTORY.key())
+        : null;
   }
 
   /**
@@ -376,7 +369,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     // At the remote mode, request the flink webui interface to get the savepoint path
     FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-    Utils.notNull(
+    Utils.requireNotNull(
         cluster,
         String.format(
             "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
@@ -441,8 +434,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   private void expire(SavePoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
     Application application = applicationManageService.getById(entity.getAppId());
-    Utils.notNull(flinkEnv);
-    Utils.notNull(application);
+    Utils.requireNotNull(flinkEnv);
+    Utils.requireNotNull(application);
 
     int cpThreshold =
         tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())

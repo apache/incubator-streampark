@@ -8,7 +8,7 @@
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
 #
-#    https://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
@@ -188,65 +188,96 @@ log "$MAVEN_PROJECTBASEDIR"
 # This allows using the maven wrapper in projects that prohibit checking in binary data.
 ##########################################################################################
 wrapperJarPath="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar"
-if [ -r "$wrapperJarPath" ]; then
-    log "Found $wrapperJarPath"
-else
-    log "Couldn't find $wrapperJarPath, downloading it ..."
-
-    if [ -n "$MVNW_REPOURL" ]; then
-      wrapperUrl="$MVNW_REPOURL/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar"
-    else
-      wrapperUrl="https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar"
-    fi
-    while IFS="=" read -r key value; do
-      # Remove '\r' from value to allow usage on windows as IFS does not consider '\r' as a separator ( considers space, tab, new line ('\n'), and custom '=' )
-      safeValue=$(echo "$value" | tr -d '\r')
-      case "$key" in (wrapperUrl) wrapperUrl="$safeValue"; break ;;
-      esac
-    done < "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties"
-    log "Downloading from: $wrapperUrl"
-
-    if $cygwin; then
-      wrapperJarPath=$(cygpath --path --windows "$wrapperJarPath")
-    fi
-
-    if command -v wget > /dev/null; then
-        log "Found wget ... using wget"
-        [ "$MVNW_VERBOSE" = true ] && QUIET="" || QUIET="--quiet"
-        if [ -z "$MVNW_USERNAME" ] || [ -z "$MVNW_PASSWORD" ]; then
-            wget $QUIET "$wrapperUrl" -O "$wrapperJarPath" || rm -f "$wrapperJarPath"
-        else
-            wget $QUIET --http-user="$MVNW_USERNAME" --http-password="$MVNW_PASSWORD" "$wrapperUrl" -O "$wrapperJarPath" || rm -f "$wrapperJarPath"
-        fi
-    elif command -v curl > /dev/null; then
-        log "Found curl ... using curl"
-        [ "$MVNW_VERBOSE" = true ] && QUIET="" || QUIET="--silent"
-        if [ -z "$MVNW_USERNAME" ] || [ -z "$MVNW_PASSWORD" ]; then
-            curl $QUIET -o "$wrapperJarPath" "$wrapperUrl" -f -L || rm -f "$wrapperJarPath"
-        else
-            curl $QUIET --user "$MVNW_USERNAME:$MVNW_PASSWORD" -o "$wrapperJarPath" "$wrapperUrl" -f -L || rm -f "$wrapperJarPath"
-        fi
-    else
-        log "Falling back to using Java to download"
-        javaSource="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/MavenWrapperHelper.java"
-        javaClass="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/MavenWrapperHelper.class"
-        # For Cygwin, switch paths to Windows format before running javac
-        if $cygwin; then
-          javaSource=$(cygpath --path --windows "$javaSource")
-          javaClass=$(cygpath --path --windows "$javaClass")
-        fi
-        if [ -e "$javaSource" ]; then
-            if [ ! -e "$javaClass" ]; then
-                log " - Compiling MavenWrapperHelper.java ..."
-                ("$JAVA_HOME/bin/javac" "$javaSource")
-            fi
-            if [ -e "$javaClass" ]; then
-                log " - Running MavenWrapperHelper.java ..."
-                ("$JAVA_HOME/bin/java" -cp .mvn/wrapper MavenWrapperHelper "download" "$wrapperUrl" "$wrapperJarPath") || rm -f "$wrapperJarPath"
-            fi
-        fi
-    fi
+javaSource="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/MavenWrapperHelper.java"
+javaClass="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/MavenWrapperHelper.class"
+wrapperProperties="$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties"
+# For Cygwin, switch paths to Windows format before running javac
+if $cygwin; then
+  javaSource=$(cygpath --path --windows "$javaSource")
+  javaClass=$(cygpath --path --windows "$javaClass")
 fi
+
+if [ ! -e "$javaSource" ]; then
+  error "ERROR: $javaSource not exists."
+  exit 1
+fi
+
+if [ ! -e "$javaClass" ]; then
+  log " - Compiling $javaClass starting ..."
+  ("$JAVA_HOME/bin/javac" "$javaSource")
+fi
+
+if [ -r "$wrapperJarPath" ]; then
+  log "Found $wrapperJarPath"
+  log "Check found $wrapperJarPath starting"
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_wrapper" "$wrapperJarPath" "$wrapperProperties")
+  if [ $? -eq 1 ]; then
+    echo "WARN: Check found $wrapperJarPath invalided."
+    rm -f $wrapperJarPath
+  fi
+fi
+
+if [ ! -e "$wrapperJarPath" ]; then
+  log " - downloading wrapperJar ..."
+  if [ -n "$MVNW_REPOURL" ]; then
+    wrapperUrl="$MVNW_REPOURL/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar"
+  else
+    wrapperUrl="https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar"
+  fi
+  while IFS="=" read -r key value; do
+    # Remove '\r' from value to allow usage on windows as IFS does not consider '\r' as a separator ( considers space, tab, new line ('\n'), and custom '=' )
+    safeValue=$(echo "$value" | tr -d '\r')
+    case "$key" in (wrapperUrl) wrapperUrl="$safeValue"; break ;;
+    esac
+  done < $wrapperProperties
+  log "Downloading from: $wrapperUrl"
+
+  if $cygwin; then
+    wrapperJarPath=$(cygpath --path --windows "$wrapperJarPath")
+  fi
+
+  if command -v wget > /dev/null; then
+    log "Found wget ... using wget"
+    [ "$MVNW_VERBOSE" = true ] && QUIET="" || QUIET="--quiet"
+    if [ -z "$MVNW_USERNAME" ] || [ -z "$MVNW_PASSWORD" ]; then
+      wget $QUIET "$wrapperUrl" -O "$wrapperJarPath" || rm -f "$wrapperJarPath"
+    else
+      wget $QUIET --http-user="$MVNW_USERNAME" --http-password="$MVNW_PASSWORD" "$wrapperUrl" -O "$wrapperJarPath" || rm -f "$wrapperJarPath"
+    fi
+  elif command -v curl > /dev/null; then
+    log "Found curl ... using curl"
+    [ "$MVNW_VERBOSE" = true ] && QUIET="" || QUIET="--silent"
+    if [ -z "$MVNW_USERNAME" ] || [ -z "$MVNW_PASSWORD" ]; then
+      curl $QUIET -o "$wrapperJarPath" "$wrapperUrl" -f -L || rm -f "$wrapperJarPath"
+    else
+      curl $QUIET --user "$MVNW_USERNAME:$MVNW_PASSWORD" -o "$wrapperJarPath" "$wrapperUrl" -f -L || rm -f "$wrapperJarPath"
+    fi
+  else
+    log "Falling back to using Java to download"
+    log " - Running MavenWrapperHelper.java ..."
+    ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "download" "$wrapperUrl" "$wrapperJarPath")
+    if [ $? -ne 0 ]; then
+      rm -f "$wrapperJarPath"
+      echo "ERROR: download wrapperJar by Java failed, please retry"
+      exit 1;
+    fi
+  fi
+
+  log "Check $wrapperJarPath."
+  ("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_wrapper" "$wrapperJarPath" "$wrapperProperties")
+  if [ $? -eq 1 ]; then
+    echo "ERROR: Check $wrapperJarPath invalided, please retry"
+    exit 1
+  fi
+fi
+
+# check distribution file
+dist_path=`("$JAVA_HOME/bin/java" -cp "$MAVEN_PROJECTBASEDIR/.mvn/wrapper" MavenWrapperHelper "verify_dist" "$wrapperProperties" "$JAVACMD" "$MAVEN_PROJECTBASEDIR")`
+if [ $? -eq 1 ]; then
+  rm -f $dist_path > /dev/null 2>&1
+  echo "WARN: Check $dist_path invalided, forcefully delete the file...."
+fi
+
 ##########################################################################################
 # End of extension
 ##########################################################################################
@@ -256,7 +287,7 @@ wrapperSha256Sum=""
 while IFS="=" read -r key value; do
   case "$key" in (wrapperSha256Sum) wrapperSha256Sum=$value; break ;;
   esac
-done < "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.properties"
+done < $wrapperProperties
 if [ -n "$wrapperSha256Sum" ]; then
   wrapperSha256Result=false
   if command -v sha256sum > /dev/null; then

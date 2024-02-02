@@ -135,6 +135,7 @@
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
+        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
         <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <owasp-dependency-check-maven.version>8.2.1</owasp-dependency-check-maven.version>
@@ -793,6 +794,63 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <!--mvn apache-rat:check-->
+                <plugin>
+                    <groupId>org.apache.rat</groupId>
+                    <artifactId>apache-rat-plugin</artifactId>
+                    <version>${maven-apache-rat-plugin.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>.asf.yaml</exclude>
+                            <exclude>.git-blame-ignore-revs</exclude>
+                            <exclude>.editorconfig</exclude>
+                            <exclude>.git/</exclude>
+                            <exclude>.github/**</exclude>
+                            <exclude>.gitignore</exclude>
+                            <exclude>.licenserc.yaml</exclude>
+                            <exclude>.scalafmt.conf</exclude>
+
+                            <exclude>**/.idea/</exclude>
+                            <exclude>**/*.iml</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>**/*.json</exclude>
+                            <exclude>**/*.md</exclude>
+                            <exclude>**/*.log</exclude>
+                            <exclude>**/.gitkeep</exclude>
+                            <exclude>**/.settings/*</exclude>
+                            <exclude>**/.classpath</exclude>
+                            <exclude>**/.project</exclude>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/out/**</exclude>
+                            <exclude>**/META-INF/**</exclude>
+
+                            <exclude>.mvn/**</exclude>
+                            <exclude>compiler/**</exclude>
+                            <exclude>dist-material/**</exclude>
+                            <exclude>docker/**</exclude>
+                            <exclude>helm/**</exclude>
+                            <exclude>mvnw</exclude>
+                            <exclude>mvnw.cmd</exclude>
+                            <exclude>README.md</exclude>
+
+                            <exclude>src/main/assembly/**</exclude>
+                            <exclude>src/main/resources/alert-template/**</exclude>
+                            <exclude>src/main/resources/*.dict</exclude>
+
+                            <exclude>streampark-console-webapp/**</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>rat-validate</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>validate</phase>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -825,6 +883,11 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
             </plugin>
         </plugins>
 

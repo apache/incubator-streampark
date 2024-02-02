@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -76,9 +77,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public IPage<Member> getPage(Member member, RestRequest request) {
     ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
-    Page<Member> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<Member> page = MybatisPager.getPage(request);
     return baseMapper.selectPage(page, member);
   }
 
@@ -114,8 +113,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   public List<Long> listUserIdsByRoleId(Long roleId) {
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
-    List<Member> list = baseMapper.selectList(queryWrapper);
-    return list.stream().map(Member::getUserId).collect(Collectors.toList());
+    List<Member> memberList = baseMapper.selectList(queryWrapper);
+    return memberList.stream().map(Member::getUserId).collect(Collectors.toList());
   }
 
   @Override
@@ -151,13 +150,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public void remove(Member memberArg) {
+  public void remove(Long id) {
     Member member =
-        Optional.ofNullable(this.getById(memberArg.getId()))
+        Optional.ofNullable(this.getById(id))
             .orElseThrow(
-                () ->
-                    new ApiAlertException(
-                        String.format("The member [id=%s] not found", memberArg.getId())));
+                () -> new ApiAlertException(String.format("The member [id=%s] not found", id)));
     this.removeById(member);
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }

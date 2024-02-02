@@ -17,6 +17,9 @@
 
 package org.apache.streampark.common.enums;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /** kubernetes.rest-service.exposed.type */
 public enum FlinkK8sRestExposedType {
 
@@ -33,12 +36,17 @@ public enum FlinkK8sRestExposedType {
 
   private final Integer type;
 
-  FlinkK8sRestExposedType(String name, Integer type) {
+  FlinkK8sRestExposedType(@Nonnull String name, @Nonnull Integer type) {
     this.name = name;
     this.type = type;
   }
 
-  public static FlinkK8sRestExposedType of(Integer value) {
+  /**
+   * Try to resolve the given Flink K8s Rest-Exposed type value into a known {@link
+   * FlinkK8sRestExposedType} enum.
+   */
+  @Nullable
+  public static FlinkK8sRestExposedType of(@Nullable Integer value) {
     for (FlinkK8sRestExposedType order : values()) {
       if (order.type.equals(value)) {
         return order;
@@ -47,10 +55,12 @@ public enum FlinkK8sRestExposedType {
     return null;
   }
 
+  @Nonnull
   public String getName() {
     return name;
   }
 
+  @Nonnull
   public Integer getType() {
     return type;
   }

@@ -179,26 +179,6 @@ build() {
       printf '\n'
       echo_g """StreamPark project build successful!
       dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""
-    else
-      javaSource="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.java"
-      javaClass="$PRG_DIR/.mvn/wrapper/MavenWrapperHelper.class"
-      wrapperJarPath="$PRG_DIR/.mvn/wrapper/maven-wrapper.jar"
-      # For Cygwin, switch paths to Windows format before running javac
-      if $cygwin; then
-        javaSource=$(cygpath --path --windows "$javaSource")
-        javaClass=$(cygpath --path --windows "$javaClass")
-      fi
-      if [ -e "$javaSource" ]; then
-        [ ! -e "$javaClass" ] && ("$JAVA_HOME/bin/javac" "$javaSource")
-        if [ -e "$javaClass" ]; then
-          ("$JAVA_HOME/bin/java" -cp "$PRG_DIR/.mvn/wrapper" MavenWrapperHelper "verify" "$wrapperJarPath")
-          if [ $? -eq 1 ]; then
-            echo_r "Error: $wrapperJarPath is invalid. retry download it and build project again..."
-            rm -f $wrapperJarPath
-            build
-          fi
-        fi
-      fi
     fi
   else
     echo_r "permission denied: $PRG_DIR/mvnw, please check."

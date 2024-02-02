@@ -81,12 +81,13 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
     // Test for 1st page, size = 2, order by create time desc
     YarnQueue queryParams = new YarnQueue();
     queryParams.setTeamId(targetTeamId);
-    queryParams.setSortField("create_time");
-    queryParams.setSortOrder("desc");
+
     queryParams.setTeamId(targetTeamId);
     RestRequest request = new RestRequest();
     request.setPageSize(2);
     request.setPageNum(1);
+    request.setSortField("create_time");
+    request.setSortOrder("desc");
     IPage<YarnQueue> yarnQueues = yarnQueueService.getPage(queryParams, request);
     assertThat(
             yarnQueues.getRecords().stream()

@@ -20,11 +20,28 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.system.entity.User;
 
+/** Base Service */
 public interface CommonService {
 
+  /**
+   * Get the information of the currently login user
+   *
+   * @return Current user information
+   */
   User getCurrentUser();
 
+  /**
+   * Get the user id of the currently login user
+   *
+   * @return Current user id
+   */
   Long getUserId();
 
+  /**
+   * Get SQL client Jar by flink environment
+   *
+   * @param flinkEnv The FlinkEnv Contains relevant information
+   * @return Jar
+   */
   String getSqlClientJar(FlinkEnv flinkEnv);
 }

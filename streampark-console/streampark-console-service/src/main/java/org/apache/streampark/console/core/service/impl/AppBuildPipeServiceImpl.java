@@ -26,7 +26,6 @@ import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
@@ -96,6 +95,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,8 +111,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -149,15 +147,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ResourceService resourceService;
 
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+  @Qualifier("streamparkBuildPipelineExecutor")
+  @Autowired
+  private ExecutorService executorService;
 
   private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
@@ -206,7 +198,7 @@ public class AppBuildPipeServiceImpl
     FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
     if (app.isFlinkSqlJobOrPyFlinkJob()) {
       FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-      Utils.notNull(flinkSql);
+      Utils.requireNotNull(flinkSql);
       app.setDependency(flinkSql.getDependency());
       app.setTeamResource(flinkSql.getTeamResource());
     }
@@ -517,9 +509,8 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
         if (K8sFlinkConfig.isV2Enabled()) {
           return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
-        } else {
-          return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
         }
+        return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
       default:
         throw new UnsupportedOperationException(
             "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
@@ -598,15 +589,28 @@ public class AppBuildPipeServiceImpl
         new LambdaQueryWrapper<AppBuildPipeline>().eq(AppBuildPipeline::getAppId, appId));
   }
 
+  /**
+   * save or update build pipeline
+   *
+   * @param pipe application build pipeline
+   * @return value after the save or update
+   */
   public boolean saveEntity(AppBuildPipeline pipe) {
     AppBuildPipeline old = getById(pipe.getAppId());
     if (old == null) {
       return save(pipe);
-    } else {
-      return updateById(pipe);
     }
+    return updateById(pipe);
   }
 
+  /**
+   * Check if the jar exists, and upload a copy if it does not exist
+   *
+   * @param fsOperator
+   * @param localJar
+   * @param targetJar
+   * @param targetDir
+   */
   private void checkOrElseUploadJar(
       FsOperator fsOperator, File localJar, String targetJar, String targetDir) {
     if (!fsOperator.exists(targetJar)) {
@@ -619,6 +623,12 @@ public class AppBuildPipeServiceImpl
     }
   }
 
+  /**
+   * Gets and parses dependencies on the application
+   *
+   * @param application
+   * @return DependencyInfo
+   */
   private DependencyInfo getMergedDependencyInfo(Application application) {
     DependencyInfo dependencyInfo = application.getDependencyInfo();
     if (StringUtils.isBlank(application.getTeamResource())) {

@@ -20,9 +20,11 @@ package org.apache.streampark.console.core.service.application.impl;
 import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -51,9 +53,13 @@ import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,12 +71,13 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -175,16 +182,16 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // result json
-    Map<String, Serializable> map = new HashMap<>(8);
-    map.put("task", overview);
-    map.put("jmMemory", totalJmMemory);
-    map.put("tmMemory", totalTmMemory);
-    map.put("totalTM", totalTm);
-    map.put("availableSlot", availableSlot);
-    map.put("totalSlot", totalSlot);
-    map.put("runningJob", runningJob);
+    Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
+    dashboardDataMap.put("task", overview);
+    dashboardDataMap.put("jmMemory", totalJmMemory);
+    dashboardDataMap.put("tmMemory", totalTmMemory);
+    dashboardDataMap.put("totalTM", totalTm);
+    dashboardDataMap.put("availableSlot", availableSlot);
+    dashboardDataMap.put("totalSlot", totalSlot);
+    dashboardDataMap.put("runningJob", runningJob);
 
-    return map;
+    return dashboardDataMap;
   }
 
   @Override
@@ -318,6 +325,45 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
+  public AppExistsStateEnum checkStart(Long id) {
+    Application application = getById(id);
+    if (application == null) {
+      return AppExistsStateEnum.INVALID;
+    }
+    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      boolean exists = !getYarnAppReport(application.getJobName()).isEmpty();
+      return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
+    }
+    // todo on k8s check...
+    return AppExistsStateEnum.NO;
+  }
+
+  @Override
+  public List<ApplicationReport> getYarnAppReport(String appName) {
+    try {
+      YarnClient yarnClient = HadoopUtils.yarnClient();
+      Set<String> types =
+          Sets.newHashSet(
+              ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+      EnumSet<YarnApplicationState> states =
+          EnumSet.of(
+              YarnApplicationState.NEW,
+              YarnApplicationState.NEW_SAVING,
+              YarnApplicationState.SUBMITTED,
+              YarnApplicationState.ACCEPTED,
+              YarnApplicationState.RUNNING);
+      Set<String> yarnTag = Sets.newHashSet("streampark");
+      List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
+      return applications.stream()
+          .filter(report -> report.getName().equals(appName))
+          .collect(Collectors.toList());
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
+    }
+  }
+
+  @Override
   public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
     Application application = getById(id);
     ApiAlertException.throwIfNull(
@@ -362,10 +408,10 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public String getYarnName(Application appParam) {
+  public String getYarnName(String appConfig) {
     String[] args = new String[2];
     args[0] = "--name";
-    args[1] = appParam.getConfig();
+    args[1] = appConfig;
     return ParameterCli.read(args);
   }
 
@@ -403,7 +449,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           return AppExistsStateEnum.IN_YARN;
         }
         // check whether clusterId, namespace, jobId on kubernetes
-        else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
             && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
           return AppExistsStateEnum.IN_KUBERNETES;
         }
@@ -419,7 +465,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         return AppExistsStateEnum.IN_YARN;
       }
       // check whether clusterId, namespace, jobId on kubernetes
-      else if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+      if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
           && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
         return AppExistsStateEnum.IN_KUBERNETES;
       }
@@ -433,8 +479,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   }
 
   @Override
-  public String readConf(Application appParam) throws IOException {
-    File file = new File(appParam.getConfig());
+  public String readConf(String appConfig) throws IOException {
+    File file = new File(appConfig);
     String conf = org.apache.streampark.common.util.FileUtils.readFile(file);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }
@@ -451,8 +497,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
       jarFile = new File(modulePath, appParam.getJar());
     }
-    Manifest manifest = Utils.getJarManifest(jarFile);
-    return manifest.getMainAttributes().getValue("Main-Class");
+    return Utils.getJarManClass(jarFile);
   }
 
   @Override

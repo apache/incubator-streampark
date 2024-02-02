@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
@@ -31,6 +32,7 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
@@ -45,6 +47,7 @@ import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.EffectiveService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -54,6 +57,7 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
@@ -131,6 +135,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
 
+  @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Autowired private FlinkClusterService flinkClusterService;
+
   @PostConstruct
   public void resetOptionState() {
     this.baseMapper.resetOptionState();
@@ -175,9 +183,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Boolean remove(Application appParam) {
+  public Boolean remove(Long appId) {
 
-    Application application = getById(appParam.getId());
+    Application application = getById(appId);
 
     // 1) remove flink sql
     flinkSqlService.removeByAppId(application.getId());
@@ -209,7 +217,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         flinkK8sObserver.unWatchById(application.getId());
       }
     } else {
-      FlinkAppHttpWatcher.unWatching(appParam.getId());
+      FlinkAppHttpWatcher.unWatching(appId);
     }
     return true;
   }
@@ -237,18 +245,17 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     if (appParam.getTeamId() == null) {
       return null;
     }
-    Page<Application> page = new MybatisPager<Application>().getDefaultPage(request);
+    Page<Application> page = MybatisPager.getPage(request);
 
-    if (ArrayUtils.isNotEmpty(appParam.getStateArray())) {
-      if (Arrays.stream(appParam.getStateArray())
-          .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-        Integer[] newArray =
-            ArrayUtils.insert(
-                appParam.getStateArray().length,
-                appParam.getStateArray(),
-                FlinkAppStateEnum.POS_TERMINATED.getValue());
-        appParam.setStateArray(newArray);
-      }
+    if (ArrayUtils.isNotEmpty(appParam.getStateArray())
+        && Arrays.stream(appParam.getStateArray())
+            .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
+      Integer[] newArray =
+          ArrayUtils.insert(
+              appParam.getStateArray().length,
+              appParam.getStateArray(),
+              FlinkAppStateEnum.POS_TERMINATED.getValue());
+      appParam.setStateArray(newArray);
     }
     this.baseMapper.selectPage(page, appParam);
     List<Application> records = page.getRecords();
@@ -317,6 +324,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     appParam.setOptionState(OptionStateEnum.NONE.getValue());
     appParam.setCreateTime(new Date());
+    appParam.setModifyTime(new Date());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
     boolean success = validateQueueIfNeeded(appParam);
@@ -425,12 +433,14 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     newApp.setOptionState(OptionStateEnum.NONE.getValue());
     newApp.setCreateTime(new Date());
+    newApp.setModifyTime(new Date());
     newApp.setHotParams(oldApp.getHotParams());
 
     newApp.setJar(oldApp.getJar());
     newApp.setJarCheckSum(oldApp.getJarCheckSum());
     newApp.setTags(oldApp.getTags());
     newApp.setTeamId(oldApp.getTeamId());
+    newApp.setHadoopUser(oldApp.getHadoopUser());
 
     boolean saved = save(newApp);
     if (saved) {
@@ -464,6 +474,20 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   public boolean update(Application appParam) {
     Application application = getById(appParam.getId());
 
+    /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
+    FlinkExecutionMode flinkExecutionMode = application.getFlinkExecutionMode();
+    switch (flinkExecutionMode) {
+      case REMOTE:
+      case YARN_SESSION:
+      case KUBERNETES_NATIVE_SESSION:
+        FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
+        ApiAlertException.throwIfFalse(
+            flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
+            "[StreamPark] update failed, because bind flink cluster not running");
+        break;
+      default:
+    }
+
     boolean success = validateQueueIfNeeded(application, appParam);
     ApiAlertException.throwIfFalse(
         success,
@@ -492,21 +516,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 2) k8s podTemplate changed.
-    if (application.getBuild()
-        && FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())) {
-      if (ObjectUtils.trimNoEquals(
-              application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
-          || ObjectUtils.trimNoEquals(
-              application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
-          || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage())) {
-        application.setBuild(true);
-      }
+    if (application.getBuild() && isK8sPodTemplateChanged(application, appParam)) {
+      application.setBuild(true);
     }
 
     // 3) flink version changed
@@ -516,13 +527,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     // 4) yarn application mode change
-    if (!application.getBuild()) {
-      if (!application.getExecutionMode().equals(appParam.getExecutionMode())) {
-        if (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
-            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
-          application.setBuild(true);
-        }
-      }
+    if (!application.getBuild() && isYarnApplicationModeChange(application, appParam)) {
+      application.setBuild(true);
     }
 
     appParam.setJobType(application.getJobType());
@@ -556,7 +562,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     switch (appParam.getFlinkExecutionMode()) {
       case YARN_APPLICATION:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case YARN_PER_JOB:
+        application.setHadoopUser(appParam.getHadoopUser());
+        break;
       case KUBERNETES_NATIVE_APPLICATION:
         application.setFlinkClusterId(null);
         break;
@@ -752,10 +762,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public Application getApp(Application appParam) {
-    Application application = this.baseMapper.selectApp(appParam);
-    ApplicationConfig config = configService.getEffective(appParam.getId());
-    config = config == null ? configService.getLatest(appParam.getId()) : config;
+  public Application getApp(Long id) {
+    Application application = this.baseMapper.selectApp(id);
+    ApplicationConfig config = configService.getEffective(id);
+    config = config == null ? configService.getLatest(id) : config;
     if (config != null) {
       config.setToApplication(application);
     }
@@ -840,5 +850,26 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   private boolean isYarnNotDefaultQueue(Application application) {
     return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
         && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
+  }
+
+  private boolean isK8sPodTemplateChanged(Application application, Application appParam) {
+    return FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        && (ObjectUtils.trimNoEquals(
+                application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
+            || ObjectUtils.trimNoEquals(
+                application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
+            || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage()));
+  }
+
+  private boolean isYarnApplicationModeChange(Application application, Application appParam) {
+    return !application.getExecutionMode().equals(appParam.getExecutionMode())
+        && (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
+            || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode());
   }
 }
