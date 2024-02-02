@@ -32,42 +32,41 @@ import org.springframework.core.env.Environment;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class EnvApplicationContextInitializer
+    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    @Override
-    public void initialize(ConfigurableApplicationContext context) {
-        Optional<String> profile =
-            Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
-        if ("test".equals(profile.orElse(null))) {
-            return;
-        }
-
-        String appHome = WebUtils.getAppHome();
-        if (StringUtils.isBlank(appHome)) {
-            throw new ExceptionInInitializerError(
-                String.format(
-                    "[StreamPark] System initialization check failed,"
-                        + " The system initialization check failed. If started local for development and debugging,"
-                        + " please ensure the -D%s parameter is clearly specified,"
-                        + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-                    ConfigKeys.KEY_APP_HOME()));
-        }
-
-        // init InternalConfig
-        initInternalConfig(context.getEnvironment());
+  @Override
+  public void initialize(ConfigurableApplicationContext context) {
+    Optional<String> profile =
+        Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
+    if ("test".equals(profile.orElse(null))) {
+      return;
     }
 
-    private void initInternalConfig(Environment springEnv) {
-        // override config from spring application.yaml
-        InternalConfigHolder.keys().stream()
-            .filter(springEnv::containsProperty)
-            .forEach(
-                key -> {
-                    InternalOption config = InternalConfigHolder.getConfig(key);
-                    Utils.requireNotNull(config);
-                    InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
-                });
+    String appHome = WebUtils.getAppHome();
+    if (StringUtils.isBlank(appHome)) {
+      throw new ExceptionInInitializerError(
+          String.format(
+              "[StreamPark] System initialization check failed,"
+                  + " The system initialization check failed. If started local for development and debugging,"
+                  + " please ensure the -D%s parameter is clearly specified,"
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+              ConfigKeys.KEY_APP_HOME()));
     }
 
+    // init InternalConfig
+    initInternalConfig(context.getEnvironment());
+  }
+
+  private void initInternalConfig(Environment springEnv) {
+    // override config from spring application.yaml
+    InternalConfigHolder.keys().stream()
+        .filter(springEnv::containsProperty)
+        .forEach(
+            key -> {
+              InternalOption config = InternalConfigHolder.getConfig(key);
+              Utils.requireNotNull(config);
+              InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
+            });
+  }
 }
-
