@@ -25,12 +25,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Base64;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @TableName("t_flink_sql")
 public class FlinkSql {
 

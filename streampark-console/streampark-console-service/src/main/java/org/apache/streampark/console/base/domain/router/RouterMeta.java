@@ -19,12 +19,14 @@ package org.apache.streampark.console.base.domain.router;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /** Vue Router Meta */
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterMeta implements Serializable {

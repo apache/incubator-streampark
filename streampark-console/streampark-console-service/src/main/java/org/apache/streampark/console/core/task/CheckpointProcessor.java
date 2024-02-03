@@ -28,7 +28,8 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -199,7 +200,8 @@ public class CheckpointProcessor {
   }
 
   /** Util class for checkpoint key. */
-  @Data
+  @Getter
+  @Setter
   public static class CheckPointKey {
     private Long appId;
     private String jobId;
