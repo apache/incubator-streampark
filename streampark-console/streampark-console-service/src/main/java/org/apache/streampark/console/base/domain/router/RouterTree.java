@@ -20,13 +20,15 @@ package org.apache.streampark.console.base.domain.router;
 import org.apache.streampark.console.system.entity.Menu;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterTree<T> {
 

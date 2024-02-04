@@ -18,13 +18,15 @@
 package org.apache.streampark.console.base.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springdoc.api.annotations.ParameterObject;
 
 import java.io.Serializable;
 
 @ParameterObject
-@Data
+@Getter
+@Setter
 public class RestRequest implements Serializable {
 
   private static final long serialVersionUID = -4869594085374385813L;

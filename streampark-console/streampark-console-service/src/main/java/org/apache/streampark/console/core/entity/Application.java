@@ -45,7 +45,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +62,8 @@ import java.util.Optional;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.of;
 
-@Data
+@Getter
+@Setter
 @TableName("t_flink_app")
 @Slf4j
 public class Application implements Serializable {
@@ -248,22 +250,6 @@ public class Application implements Serializable {
   private transient Integer buildStatus;
 
   private transient AppControl appControl;
-
-  public String getIngressTemplate() {
-    return ingressTemplate;
-  }
-
-  public void setIngressTemplate(String ingressTemplate) {
-    this.ingressTemplate = ingressTemplate;
-  }
-
-  public String getDefaultModeIngress() {
-    return defaultModeIngress;
-  }
-
-  public void setDefaultModeIngress(String defaultModeIngress) {
-    this.defaultModeIngress = defaultModeIngress;
-  }
 
   public void setK8sNamespace(String k8sNamespace) {
     this.k8sNamespace =

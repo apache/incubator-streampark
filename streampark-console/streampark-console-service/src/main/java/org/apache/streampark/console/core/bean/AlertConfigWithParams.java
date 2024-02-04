@@ -24,14 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
 @Schema(name = "AlertConfig")
-@Data
+@Getter
+@Setter
 @Slf4j
 public class AlertConfigWithParams implements Serializable {
 

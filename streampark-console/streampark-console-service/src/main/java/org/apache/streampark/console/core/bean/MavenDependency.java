@@ -26,7 +26,8 @@ import org.apache.streampark.flink.packer.maven.MavenArtifact;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -35,7 +36,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@Setter
 public class MavenDependency {
 
   private Set<MavenPom> pom = Collections.emptySet();
