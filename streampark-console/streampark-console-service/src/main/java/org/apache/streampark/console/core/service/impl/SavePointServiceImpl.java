@@ -70,7 +70,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -303,9 +302,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             customSavepoint,
             application.getK8sNamespace());
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
     CompletableFuture<SavepointResponse> savepointFuture =
-        CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
+        CompletableFuture.supplyAsync(
+            () -> FlinkClient.triggerSavepoint(request), Executors.newSingleThreadExecutor());
 
     handleSavepointResponseFuture(application, applicationLog, savepointFuture);
   }

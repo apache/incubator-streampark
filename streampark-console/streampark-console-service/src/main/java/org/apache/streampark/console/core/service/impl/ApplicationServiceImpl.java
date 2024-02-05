@@ -147,7 +147,6 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -1301,7 +1300,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             customSavepoint,
             namespace);
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
@@ -1592,9 +1590,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             k8sNamespace,
             exposedType);
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
     CompletableFuture<SubmitResponse> future =
-        CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
+        CompletableFuture.supplyAsync(
+            () -> FlinkClient.submit(submitRequest), Executors.newSingleThreadExecutor());
 
     startFutureMap.put(application.getId(), future);
 

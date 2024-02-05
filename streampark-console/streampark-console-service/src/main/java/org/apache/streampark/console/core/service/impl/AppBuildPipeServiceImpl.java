@@ -99,7 +99,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -279,8 +278,7 @@ public class AppBuildPipeServiceImpl
     DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    executorService.submit(pipeline::launch);
+    Executors.newSingleThreadExecutor().submit(pipeline::launch);
     return saved;
   }
 

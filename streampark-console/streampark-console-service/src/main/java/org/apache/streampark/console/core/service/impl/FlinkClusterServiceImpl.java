@@ -56,7 +56,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -154,14 +153,13 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
               + " is already running in the yarn queue, please check!");
     }
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
     try {
       // 1) deployRequest
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
 
       log.info("deploy cluster request: {}", deployRequest);
       Future<DeployResponse> future =
-          executorService.submit(() -> FlinkClient.deploy(deployRequest));
+          Executors.newSingleThreadExecutor().submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(5, TimeUnit.SECONDS);
       if (deployResponse.error() != null) {
         throw new ApiDetailException(
@@ -299,9 +297,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     // 4) shutdown
     DeployRequest deployRequest = getDeployRequest(flinkCluster);
     try {
-      ExecutorService executorService = Executors.newSingleThreadExecutor();
       Future<ShutDownResponse> future =
-          executorService.submit(() -> FlinkClient.shutdown(deployRequest));
+          Executors.newSingleThreadExecutor().submit(() -> FlinkClient.shutdown(deployRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse.error() != null) {
         throw new ApiDetailException(
