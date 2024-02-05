@@ -60,8 +60,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -142,14 +141,8 @@ public class FlinkRESTAPIWatcher {
 
   private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
-  private static final ExecutorService EXECUTOR =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("flink-restapi-watching-executor"));
+  private static final ExecutorService watchExecutor =
+      Executors.newCachedThreadPool(ThreadUtils.threadFactory("flink-restapi-watching-executor"));
 
   @PostConstruct
   public void init() {
@@ -201,7 +194,7 @@ public class FlinkRESTAPIWatcher {
   }
 
   private void watch(Long key, Application application) {
-    EXECUTOR.execute(
+    watchExecutor.execute(
         () -> {
           final StopFrom stopFrom =
               STOP_FROM_MAP.getOrDefault(key, null) == null

@@ -30,7 +30,6 @@ import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -149,8 +148,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -171,16 +169,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
   private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-deploy-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   private static final Pattern JOB_NAME_PATTERN =
       Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
@@ -1313,6 +1301,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             customSavepoint,
             namespace);
 
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
@@ -1603,6 +1592,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             k8sNamespace,
             exposedType);
 
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
     CompletableFuture<SubmitResponse> future =
         CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 

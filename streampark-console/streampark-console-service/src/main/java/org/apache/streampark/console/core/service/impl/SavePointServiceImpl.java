@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -72,8 +71,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -94,16 +92,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Autowired private ApplicationLogService applicationLogService;
 
   @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("trigger-savepoint-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   @Override
   public void expire(Long appId) {
@@ -315,6 +303,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             customSavepoint,
             application.getK8sNamespace());
 
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
     CompletableFuture<SavepointResponse> savepointFuture =
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
 

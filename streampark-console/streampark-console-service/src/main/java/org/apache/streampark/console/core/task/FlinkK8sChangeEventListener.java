@@ -43,9 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import scala.Enumeration;
 
@@ -62,15 +60,8 @@ public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private CheckpointProcessor checkpointProcessor;
 
-  private final ExecutorService executor =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          20L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-notify-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+  private final ExecutorService notifyExecutor =
+      Executors.newCachedThreadPool(ThreadUtils.threadFactory("streampark-notify-executor"));
 
   /**
    * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update
@@ -98,7 +89,7 @@ public class FlinkK8sChangeEventListener {
         || FlinkAppState.LOST.equals(state)
         || FlinkAppState.RESTARTING.equals(state)
         || FlinkAppState.FINISHED.equals(state)) {
-      executor.execute(() -> alertService.alert(app, state));
+      notifyExecutor.execute(() -> alertService.alert(app, state));
     }
   }
 

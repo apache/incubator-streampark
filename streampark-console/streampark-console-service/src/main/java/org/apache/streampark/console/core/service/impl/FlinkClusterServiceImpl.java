@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
-import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -58,9 +57,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -72,16 +70,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
   private static final String ERROR_CLUSTER_QUEUE_HINT =
       "Queue label '%s' isn't available in database, please add it first.";
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-cluster-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   @Autowired private FlinkEnvService flinkEnvService;
 
@@ -166,11 +154,12 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
               + " is already running in the yarn queue, please check!");
     }
 
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
     try {
       // 1) deployRequest
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
-      log.info("deploy cluster request: {}", deployRequest);
 
+      log.info("deploy cluster request: {}", deployRequest);
       Future<DeployResponse> future =
           executorService.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(5, TimeUnit.SECONDS);
@@ -310,6 +299,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     // 4) shutdown
     DeployRequest deployRequest = getDeployRequest(flinkCluster);
     try {
+      ExecutorService executorService = Executors.newSingleThreadExecutor();
       Future<ShutDownResponse> future =
           executorService.submit(() -> FlinkClient.shutdown(deployRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
