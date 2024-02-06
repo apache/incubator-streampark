@@ -30,6 +30,7 @@ import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -77,8 +78,8 @@ import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -125,6 +126,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import java.io.File;
 import java.io.IOException;
@@ -147,7 +149,9 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -208,9 +212,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
+  private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors() * 4);
+
+  private final ExecutorService bootstrapExecutor =
+      new ThreadPoolExecutor(
+          1,
+          CPU_NUM,
+          60L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-flink-app-bootstrap"));
+
   @PostConstruct
   public void resetOptionState() {
     this.baseMapper.resetOptionState();
+  }
+
+  @PreDestroy
+  public void shutdown() {
+    bootstrapExecutor.shutdown();
   }
 
   private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
@@ -230,7 +250,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Integer runningJob = 0;
 
     // stat metrics from other than kubernetes mode
-    for (Application app : FlinkRESTAPIWatcher.getWatchingApps()) {
+    for (Application app : FlinkAppHttpWatcher.getWatchingApps()) {
       if (!teamId.equals(app.getTeamId())) {
         continue;
       }
@@ -437,7 +457,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
-    long cancelUserId = FlinkRESTAPIWatcher.getCanceledJobUserId(appId);
+    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
     long appUserId = application.getUserId();
     return cancelUserId != -1 && cancelUserId != appUserId;
   }
@@ -531,7 +551,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (exists) {
       return true;
     }
-    for (Application application : FlinkRESTAPIWatcher.getWatchingApps()) {
+    for (Application application : FlinkAppHttpWatcher.getWatchingApps()) {
       if (clusterId.equals(application.getFlinkClusterId())
           && FlinkAppState.RUNNING.equals(application.getFlinkAppStateEnum())) {
         return true;
@@ -1225,14 +1245,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     if (application.isKubernetesModeJob()) {
       flinkK8sWatcher.doWatching(k8sWatcherWrapper.toTrackId(application));
     } else {
-      FlinkRESTAPIWatcher.doWatching(application);
+      FlinkAppHttpWatcher.doWatching(application);
     }
     return mapping;
   }
 
   @Override
   public void cancel(Application appParam) throws Exception {
-    FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
+    FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
     Application application = getById(appParam.getId());
     application.setState(FlinkAppState.CANCELLING.getValue());
 
@@ -1244,7 +1264,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     applicationLog.setYarnAppId(application.getClusterId());
 
     if (appParam.getSavePointed()) {
-      FlinkRESTAPIWatcher.addSavepoint(application.getId());
+      FlinkAppHttpWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
     } else {
       application.setOptionState(OptionState.CANCELLING.getValue());
@@ -1255,7 +1275,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     Long userId = serviceHelper.getUserId();
     if (!application.getUserId().equals(userId)) {
-      FlinkRESTAPIWatcher.addCanceledApp(application.getId(), userId);
+      FlinkAppHttpWatcher.addCanceledApp(application.getId(), userId);
     }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -1302,7 +1322,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
-        CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
+        CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), bootstrapExecutor);
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -1334,7 +1354,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               if (application.isKubernetesModeJob()) {
                 flinkK8sWatcher.unWatching(trackId);
               } else {
-                FlinkRESTAPIWatcher.unWatching(application.getId());
+                FlinkAppHttpWatcher.unWatching(application.getId());
               }
             }
             return;
@@ -1591,8 +1611,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             exposedType);
 
     CompletableFuture<SubmitResponse> future =
-        CompletableFuture.supplyAsync(
-            () -> FlinkClient.submit(submitRequest), Executors.newSingleThreadExecutor());
+        CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), bootstrapExecutor);
 
     startFutureMap.put(application.getId(), future);
 
@@ -1619,7 +1638,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 TrackId trackId = k8sWatcherWrapper.toTrackId(application);
                 flinkK8sWatcher.unWatching(trackId);
               } else {
-                FlinkRESTAPIWatcher.unWatching(appParam.getId());
+                FlinkAppHttpWatcher.unWatching(appParam.getId());
               }
             }
             return;
@@ -1680,8 +1699,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
               }
             }
           } else {
-            FlinkRESTAPIWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
-            FlinkRESTAPIWatcher.doWatching(application);
+            FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.STARTING);
+            FlinkAppHttpWatcher.doWatching(application);
           }
           // update app
           updateById(application);
@@ -1774,7 +1793,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       TrackId id = k8sWatcherWrapper.toTrackId(application);
       flinkK8sWatcher.doWatching(id);
     } else {
-      FlinkRESTAPIWatcher.unWatching(application.getId());
+      FlinkAppHttpWatcher.unWatching(application.getId());
     }
     // kill application
     if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {

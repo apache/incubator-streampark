@@ -222,11 +222,11 @@ object YarnUtils extends Logger {
    * @return
    */
   @throws[IOException]
-  def restRequest(url: String): String = {
+  def restRequest(url: String, timeout: Int = 5000): String = {
     if (url == null) return null
     url match {
       case u if u.matches("^http(|s)://.*") =>
-        Try(request(url)) match {
+        Try(request(url, timeout)) match {
           case Success(v) => v
           case Failure(e) =>
             if (hasYarnHttpKerberosAuth) {
@@ -236,11 +236,11 @@ object YarnUtils extends Logger {
             }
         }
       case _ =>
-        Try(request(s"${getRMWebAppURL()}/$url")) match {
+        Try(request(s"${getRMWebAppURL()}/$url", timeout)) match {
           case Success(v) => v
           case Failure(_) =>
             Utils.retry[String](5) {
-              request(s"${getRMWebAppURL(true)}/$url")
+              request(s"${getRMWebAppURL(true)}/$url", timeout)
             } match {
               case Success(v) => v
               case Failure(e) =>
@@ -250,8 +250,8 @@ object YarnUtils extends Logger {
     }
   }
 
-  private[this] def request(reqUrl: String): String = {
-    val config = RequestConfig.custom.setConnectTimeout(5000).build
+  private[this] def request(reqUrl: String, timeout: Int): String = {
+    val config = RequestConfig.custom.setConnectTimeout(timeout).build
     if (hasYarnHttpKerberosAuth) {
       HadoopUtils
         .getUgi()
