@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.annotation;
 
-import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.task.FlinkHttpWatcher;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * application state update, need to add this annotation, This annotation marks which methods will
  * cause the application to be updated, Will work together with {@link
  * org.apache.streampark.console.core.aspect.StreamParkAspect#appUpdated(ProceedingJoinPoint)}, The
- * final purpose will be refresh {@link FlinkAppHttpWatcher#WATCHING_APPS}, Make the state of the
+ * final purpose will be refresh {@link FlinkHttpWatcher#WATCHING_APPS}, Make the state of the
  * job consistent with the database
  */
 @Target(ElementType.METHOD)
