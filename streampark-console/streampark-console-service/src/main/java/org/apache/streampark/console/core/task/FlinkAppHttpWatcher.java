@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 /** This implementation is currently used for tracing flink job on yarn,standalone,remote mode */
 @Slf4j
 @Component
-public class FlinkHttpWatcher {
+public class FlinkAppHttpWatcher {
 
   @Autowired private ApplicationService applicationService;
 
