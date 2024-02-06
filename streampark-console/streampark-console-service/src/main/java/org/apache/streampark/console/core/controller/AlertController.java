@@ -125,7 +125,7 @@ public class AlertController {
     alertTemplate.setStartTime(
         DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-    alertTemplate.setDuration("");
+    alertTemplate.setDuration("-");
     boolean alert =
         alertService.alert(AlertConfigWithParams.of(alertConfigService.getById(id)), alertTemplate);
     return RestResponse.success(alert);

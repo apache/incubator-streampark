@@ -82,7 +82,7 @@ class AlertServiceTest {
     alertTemplate.setStartTime(
         DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-    alertTemplate.setDuration("");
+    alertTemplate.setDuration("-");
   }
 
   void initConfigForSendEmail() {
@@ -110,7 +110,7 @@ class AlertServiceTest {
     alertTemplate.setStartTime(
         DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-    alertTemplate.setDuration("");
+    alertTemplate.setDuration("-");
   }
 
   @Test
