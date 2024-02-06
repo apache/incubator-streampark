@@ -51,7 +51,7 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -89,6 +89,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,19 +132,9 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   @Autowired private ApplicationConfigService applicationConfigService;
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
@@ -153,6 +144,22 @@ public class AppBuildPipeServiceImpl
 
   private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+
+  private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+
+  private final ExecutorService buildPipelineExecutor =
+      new ThreadPoolExecutor(
+          1,
+          CPU_NUM,
+          60L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-flink-buildPipeline"));
+
+  @PreDestroy
+  public void shutdown() {
+    buildPipelineExecutor.shutdown();
+  }
 
   @Override
   public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
@@ -183,8 +190,8 @@ public class AppBuildPipeServiceImpl
             app.setRelease(ReleaseState.RELEASING.get());
             applicationService.updateRelease(app);
 
-            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
-              flinkRESTAPIWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.initialize();
             }
 
             // 1) checkEnv
@@ -257,8 +264,8 @@ public class AppBuildPipeServiceImpl
             }
             applicationService.updateRelease(app);
             applicationLogService.save(applicationLog);
-            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
-              flinkRESTAPIWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.initialize();
             }
           }
         });
@@ -291,8 +298,7 @@ public class AppBuildPipeServiceImpl
     DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
-    // async release pipeline
-    executorService.submit((Runnable) pipeline::launch);
+    buildPipelineExecutor.submit(pipeline::launch);
     return saved;
   }
 

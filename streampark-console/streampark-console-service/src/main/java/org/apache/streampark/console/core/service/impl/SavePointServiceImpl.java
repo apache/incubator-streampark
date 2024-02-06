@@ -43,7 +43,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
@@ -93,17 +93,18 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private final ExecutorService executorService =
+  private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors());
+
+  private final ExecutorService flinkTriggerExecutor =
       new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
+          1,
+          CPU_NUM,
           60L,
           TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("trigger-savepoint-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-flink-savepoint-trigger"));
 
   @Override
   public void expire(Long appId) {
@@ -288,12 +289,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
 
-    FlinkRESTAPIWatcher.addSavepoint(application.getId());
+    FlinkAppHttpWatcher.addSavepoint(application.getId());
 
     application.setOptionState(OptionState.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
     this.applicationService.updateById(application);
-    flinkRESTAPIWatcher.init();
+    flinkAppHttpWatcher.initialize();
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
@@ -316,7 +317,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             application.getK8sNamespace());
 
     CompletableFuture<SavepointResponse> savepointFuture =
-        CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
+        CompletableFuture.supplyAsync(
+            () -> FlinkClient.triggerSavepoint(request), flinkTriggerExecutor);
 
     handleSavepointResponseFuture(application, applicationLog, savepointFuture);
   }
@@ -360,7 +362,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
               applicationService.update(application);
-              flinkRESTAPIWatcher.init();
+              flinkAppHttpWatcher.initialize();
             });
   }
 

@@ -38,7 +38,7 @@ import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import org.apache.flink.configuration.MemorySize;
@@ -80,17 +80,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private ApplicationService applicationService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private final ExecutorService executorService =
+  private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+
+  private final ExecutorService projectBuildExecutor =
       new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
+          1,
+          CPU_NUM,
           60L,
           TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-project-build"));
 
   @Override
   public RestResponse create(Project project) {
@@ -204,7 +205,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
               if (buildState == BuildState.SUCCESSFUL) {
                 baseMapper.updateBuildTime(id);
               }
-              flinkRESTAPIWatcher.init();
+              flinkAppHttpWatcher.initialize();
             },
             fileLogger -> {
               List<Application> applications =
@@ -219,10 +220,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     app.setBuild(true);
                     this.applicationService.updateRelease(app);
                   });
-              flinkRESTAPIWatcher.init();
+              flinkAppHttpWatcher.initialize();
             });
     CompletableFuture<Void> buildTask =
-        CompletableFuture.runAsync(projectBuildTask, executorService);
+        CompletableFuture.runAsync(projectBuildTask, projectBuildExecutor);
     // TODO May need to define parameters to set the build timeout in the future.
     CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
   }

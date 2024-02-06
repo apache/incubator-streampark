@@ -73,16 +73,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   private static final String ERROR_CLUSTER_QUEUE_HINT =
       "Queue label '%s' isn't available in database, please add it first.";
 
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-cluster-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
-
   @Autowired private FlinkEnvService flinkEnvService;
 
   @Autowired private ServiceHelper serviceHelper;
@@ -92,6 +82,17 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private SettingService settingService;
+
+  private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+
+  private final ExecutorService bootstrapExecutor =
+      new ThreadPoolExecutor(
+          1,
+          CPU_NUM,
+          60L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-flink-cluster-bootstrap"));
 
   @Override
   public ResponseResult check(FlinkCluster cluster) {
@@ -169,10 +170,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     try {
       // 1) deployRequest
       DeployRequest deployRequest = getDeployRequest(flinkCluster);
-      log.info("deploy cluster request: {}", deployRequest);
 
+      log.info("deploy cluster request: {}", deployRequest);
       Future<DeployResponse> future =
-          executorService.submit(() -> FlinkClient.deploy(deployRequest));
+          bootstrapExecutor.submit(() -> FlinkClient.deploy(deployRequest));
       DeployResponse deployResponse = future.get(5, TimeUnit.SECONDS);
       if (deployResponse.error() != null) {
         throw new ApiDetailException(
@@ -311,7 +312,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     DeployRequest deployRequest = getDeployRequest(flinkCluster);
     try {
       Future<ShutDownResponse> future =
-          executorService.submit(() -> FlinkClient.shutdown(deployRequest));
+          bootstrapExecutor.submit(() -> FlinkClient.shutdown(deployRequest));
       ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
       if (shutDownResponse.error() != null) {
         throw new ApiDetailException(
