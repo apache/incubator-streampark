@@ -232,7 +232,6 @@ public class FlinkAppHttpWatcher {
         if (StopFrom.NONE.equals(stopFrom)) {
           savePointService.expire(application.getId());
           application.setState(FlinkAppState.LOST.getValue());
-          alertService.alert(application, FlinkAppState.LOST);
         } else {
           application.setState(FlinkAppState.CANCELED.getValue());
         }

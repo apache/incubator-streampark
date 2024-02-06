@@ -81,7 +81,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         Collections.addAll(contactList, contacts.split(","));
       }
       String title = alertTemplate.getTitle();
-      if (contactList.size() > 0) {
+      if (!contactList.isEmpty()) {
         StringJoiner joiner = new StringJoiner(",@", title + " @", "");
         contactList.forEach(joiner::add);
         title = joiner.toString();

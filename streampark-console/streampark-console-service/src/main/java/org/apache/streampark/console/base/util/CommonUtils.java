@@ -587,7 +587,7 @@ public final class CommonUtils implements Serializable {
    */
   public static <T> List<Map<String, Object>> objectsToMaps(List<T> objList) {
     List<Map<String, Object>> list = new ArrayList<>();
-    if (objList != null && objList.size() > 0) {
+    if (objList != null && !objList.isEmpty()) {
       Map<String, Object> map = null;
       T bean = null;
       for (T t : objList) {
@@ -611,7 +611,7 @@ public final class CommonUtils implements Serializable {
   public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz)
       throws InstantiationException, IllegalAccessException {
     List<T> list = new ArrayList<>();
-    if (maps != null && maps.size() > 0) {
+    if (maps != null && !maps.isEmpty()) {
       Map<String, Object> map;
       T bean;
       for (Map<String, Object> stringObjectMap : maps) {
