@@ -24,11 +24,6 @@ import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
 import org.apache.commons.collections.MapUtils;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,6 +64,14 @@ public class ApplicationConfig {
   private transient boolean effective = false;
 
   public void setToApplication(Application application) {
+    String unzipString = DeflaterUtils.unzipString(content);
+    String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+    application.setConfig(encode);
+    application.setConfigId(this.id);
+    application.setFormat(this.format);
+  }
+
+  public void setToApplication(SparkApplication application) {
     String unzipString = DeflaterUtils.unzipString(content);
     String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
     application.setConfig(encode);
