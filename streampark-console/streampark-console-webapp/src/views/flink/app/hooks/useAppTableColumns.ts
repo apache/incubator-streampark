@@ -55,6 +55,7 @@ export const useAppTableColumns = () => {
     },
     { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion' },
     { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
+    { title: t('flink.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
     {
       title: t('flink.app.runStatus'),
       dataIndex: 'state',
@@ -95,7 +96,6 @@ export const useAppTableColumns = () => {
       sorter: true,
       width: unref(tableColumnWidth).modifyTime,
     },
-    { title: t('flink.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
   ]);
   return { getAppColumns, onTableColumnResize, tableColumnWidth };
 };

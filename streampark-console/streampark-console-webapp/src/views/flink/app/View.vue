@@ -200,7 +200,7 @@
       app['optionState'] === OptionStateEnum.SAVEPOINTING
     ) {
       // yarn-per-job|yarn-session|yarn-application
-      handleView(app, unref(yarn));
+      await handleView(app, unref(yarn));
     }
   }
 
