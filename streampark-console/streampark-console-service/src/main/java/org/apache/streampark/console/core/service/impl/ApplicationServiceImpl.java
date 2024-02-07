@@ -453,7 +453,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public boolean checkAlter(Application application) {
     Long appId = application.getId();
-    FlinkAppState state = FlinkAppState.of(application.getState());
+    FlinkAppState state = application.getFlinkAppStateEnum();
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
@@ -700,7 +700,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return AppExistsState.IN_DB;
       }
 
-      FlinkAppState state = FlinkAppState.of(app.getState());
+      FlinkAppState state = app.getFlinkAppStateEnum();
       // has stopped status
       if (state.equals(FlinkAppState.ADDED)
           || state.equals(FlinkAppState.CREATED)
@@ -1569,8 +1569,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String applicationArgs =
         variableService.replaceVariable(application.getTeamId(), application.getArgs());
 
-    String k8sNamespace = null;
-    String k8sClusterId = null;
+    String k8sNamespace;
+    String k8sClusterId;
     FlinkK8sRestExposedType exposedType = null;
     if (application.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
       // For compatibility with historical versions
@@ -1588,6 +1588,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       k8sClusterId = application.getJobName();
       k8sNamespace = application.getK8sNamespace();
       exposedType = application.getK8sRestExposedTypeEnum();
+    } else {
+      k8sNamespace = null;
+      k8sClusterId = null;
     }
 
     SubmitRequest submitRequest =
@@ -1615,7 +1618,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     startFutureMap.put(application.getId(), future);
 
-    String finalK8sClusterId = k8sClusterId;
     future.whenComplete(
         (response, throwable) -> {
           // 1) remove Future
@@ -1688,7 +1690,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
               try {
-                serviceHelper.configureIngress(finalK8sClusterId, application.getK8sNamespace());
+                serviceHelper.configureIngress(k8sClusterId, k8sNamespace);
               } catch (KubernetesClientException e) {
                 log.info("Failed to create ingress, stack info:{}", e.getMessage());
                 applicationLog.setException(e.getMessage());
