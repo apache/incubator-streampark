@@ -17,9 +17,11 @@
 
 package org.apache.streampark.console;
 
+import org.apache.streampark.console.core.runner.EnvApplicationContextInitializer;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -47,6 +49,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class StreamParkConsoleBootstrap {
 
   public static void main(String[] args) {
-    SpringApplication.run(StreamParkConsoleBootstrap.class, args);
+    new SpringApplicationBuilder(StreamParkConsoleBootstrap.class)
+        .initializers(new EnvApplicationContextInitializer())
+        .run(args);
   }
 }
