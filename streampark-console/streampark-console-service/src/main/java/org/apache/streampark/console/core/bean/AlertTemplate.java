@@ -75,7 +75,7 @@ public class AlertTemplate implements Serializable {
           template.setEndTime(
               DateUtils.format(
                   application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-          template.setDuration(DateUtils.toDuration(duration));
+          template.setDuration(DateUtils.toStringDuration(duration));
         } else {
           template.setStartTime("-");
           template.setEndTime("-");
@@ -113,7 +113,7 @@ public class AlertTemplate implements Serializable {
     AlertTemplate template = of(application);
     template.setType(2);
     template.setCpFailureRateInterval(
-        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+        DateUtils.toStringDuration(application.getCpFailureRateInterval() * 1000 * 60));
     template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
     template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
     template.setSubject(

@@ -326,8 +326,7 @@ public class Application implements Serializable {
    * @return true: can start | false: can not start.
    */
   public boolean isCanBeStart() {
-    FlinkAppState state = FlinkAppState.of(getState());
-    switch (state) {
+    switch (getFlinkAppStateEnum()) {
       case ADDED:
       case CREATED:
       case FAILED:
@@ -345,7 +344,7 @@ public class Application implements Serializable {
   }
 
   public boolean shouldBeTrack() {
-    return shouldTracking(FlinkAppState.of(getState())) == 1;
+    return shouldTracking(getFlinkAppStateEnum()) == 1;
   }
 
   @JsonIgnore

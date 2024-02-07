@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -104,6 +105,9 @@ public class FlinkAppHttpWatcher {
    * of the task will be obtained during the first tracking
    */
   private static final Cache<Long, Byte> STARTING_CACHE =
+      Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
+
+  private static final Cache<Long, Date> LOST_CACHE =
       Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
   /** tracking task list */
@@ -205,16 +209,22 @@ public class FlinkAppHttpWatcher {
             try {
               // query status from flink rest api
               getFromFlinkRestApi(application);
+              cleanupLost(application);
             } catch (Exception flinkException) {
               // query status from yarn rest api
               try {
                 getFromYarnRestApi(application);
+                cleanupLost(application);
               } catch (Exception yarnException) {
                 doStateFailed(application);
               }
             }
           });
     }
+  }
+
+  private void cleanupLost(Application application) {
+    LOST_CACHE.invalidate(application.getId());
   }
 
   private void doStateFailed(Application application) {
@@ -230,8 +240,14 @@ public class FlinkAppHttpWatcher {
         log.error(
             "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
         if (StopFrom.NONE.equals(stopFrom)) {
-          savePointService.expire(application.getId());
-          application.setState(FlinkAppState.LOST.getValue());
+          Date lostTime = LOST_CACHE.getIfPresent(application.getId());
+          if (lostTime == null) {
+            LOST_CACHE.put(application.getId(), new Date());
+          } else if (DateUtils.toSecondDuration(lostTime, new Date()) >= 30) {
+            savePointService.expire(application.getId());
+            application.setState(FlinkAppState.LOST.getValue());
+            LOST_CACHE.invalidate(application.getId());
+          }
         } else {
           application.setState(FlinkAppState.CANCELED.getValue());
         }
@@ -245,9 +261,9 @@ public class FlinkAppHttpWatcher {
       cleanSavepoint(application);
       cleanOptioning(optionState, application.getId());
       doPersistMetrics(application, true);
-      FlinkAppState appState = FlinkAppState.of(application.getState());
+      FlinkAppState appState = application.getFlinkAppStateEnum();
       if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
-        alertService.alert(application, FlinkAppState.of(application.getState()));
+        alertService.alert(application, application.getFlinkAppStateEnum());
         if (appState.equals(FlinkAppState.FAILED)) {
           try {
             applicationService.start(application, true);
