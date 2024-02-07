@@ -1615,6 +1615,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     startFutureMap.put(application.getId(), future);
 
+    String finalK8sClusterId = k8sClusterId;
     future.whenComplete(
         (response, throwable) -> {
           // 1) remove Future
@@ -1687,8 +1688,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
               try {
-                serviceHelper.configureIngress(
-                    application.getClusterId(), application.getK8sNamespace());
+                serviceHelper.configureIngress(finalK8sClusterId, application.getK8sNamespace());
               } catch (KubernetesClientException e) {
                 log.info("Failed to create ingress, stack info:{}", e.getMessage());
                 applicationLog.setException(e.getMessage());
