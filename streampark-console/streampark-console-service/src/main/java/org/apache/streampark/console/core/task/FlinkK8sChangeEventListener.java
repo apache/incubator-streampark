@@ -79,7 +79,7 @@ public class FlinkK8sChangeEventListener {
     setByJobStatusCV(app, jobStatus);
     applicationService.persistMetrics(app);
 
-    FlinkAppState state = FlinkAppState.of(app.getState());
+    FlinkAppState state = app.getFlinkAppStateEnum();
     // email alerts when necessary
     if (FlinkAppState.FAILED.equals(state)
         || FlinkAppState.LOST.equals(state)
@@ -143,7 +143,7 @@ public class FlinkK8sChangeEventListener {
     // infer the final flink job state
     Enumeration.Value state =
         FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(FlinkAppState.of(app.getState())));
+            jobStatus.jobState(), toK8sFlinkJobState(app.getFlinkAppStateEnum()));
 
     // corrective start-time / end-time / duration
     long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

@@ -212,7 +212,7 @@ class AlertServiceTest {
     template.setStartTime(
         DateUtils.format(
             application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-    template.setDuration(DateUtils.toDuration(duration));
+    template.setDuration(DateUtils.toStringDuration(duration));
     template.setLink(url);
     template.setEndTime(
         DateUtils.format(
@@ -223,7 +223,7 @@ class AlertServiceTest {
     template.setRestartIndex(application.getRestartCount());
     template.setTotalRestart(application.getRestartSize());
     template.setCpFailureRateInterval(
-        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+        DateUtils.toStringDuration(application.getCpFailureRateInterval() * 1000 * 60));
     template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
 
     return template;

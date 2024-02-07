@@ -453,7 +453,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public boolean checkAlter(Application application) {
     Long appId = application.getId();
-    FlinkAppState state = FlinkAppState.of(application.getState());
+    FlinkAppState state = application.getFlinkAppStateEnum();
     if (!FlinkAppState.CANCELED.equals(state)) {
       return false;
     }
@@ -700,7 +700,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return AppExistsState.IN_DB;
       }
 
-      FlinkAppState state = FlinkAppState.of(app.getState());
+      FlinkAppState state = app.getFlinkAppStateEnum();
       // has stopped status
       if (state.equals(FlinkAppState.ADDED)
           || state.equals(FlinkAppState.CREATED)
