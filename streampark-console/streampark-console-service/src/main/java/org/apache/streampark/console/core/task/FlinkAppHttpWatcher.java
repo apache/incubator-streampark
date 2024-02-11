@@ -45,6 +45,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,6 +60,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -132,6 +135,9 @@ public class FlinkAppHttpWatcher {
    */
   private static final Cache<Long, Byte> CANCELING_CACHE =
       Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
+
+  private static final Cache<Long, StateChangeEvent> PREVIOUS_STATUS =
+      Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
 
   /**
    * Task canceled tracking list, record who cancelled the tracking task Map<applicationId,userId>
@@ -441,7 +447,11 @@ public class FlinkAppHttpWatcher {
     } else {
       WATCHING_APPS.put(application.getId(), application);
     }
-    applicationService.persistMetrics(application);
+    StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
+    StateChangeEvent nowEvent = StateChangeEvent.of(application);
+    if (!nowEvent.equals(event)) {
+      applicationService.persistMetrics(application);
+    }
   }
 
   /**
@@ -800,5 +810,40 @@ public class FlinkAppHttpWatcher {
 
   interface Callback<T, R> {
     R call(T e) throws Exception;
+  }
+
+  @Getter
+  @Setter
+  static class StateChangeEvent {
+    private Long id;
+    private FlinkAppState appState;
+    private OptionState optionState;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof StateChangeEvent)) {
+        return false;
+      }
+      StateChangeEvent event = (StateChangeEvent) o;
+      return Objects.equals(id, event.id)
+          && appState == event.appState
+          && optionState == event.optionState;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(id, appState, optionState);
+    }
+
+    public static StateChangeEvent of(Application application) {
+      StateChangeEvent event = new StateChangeEvent();
+      event.setId(application.getId());
+      event.setOptionState(OptionState.of(application.getOptionState()));
+      event.setAppState(application.getFlinkAppStateEnum());
+      return event;
+    }
   }
 }

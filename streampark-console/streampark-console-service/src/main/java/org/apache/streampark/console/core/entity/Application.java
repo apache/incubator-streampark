@@ -161,6 +161,7 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long duration;
 
   /** checkpoint max failure interval */

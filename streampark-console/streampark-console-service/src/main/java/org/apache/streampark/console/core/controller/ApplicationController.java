@@ -26,7 +26,6 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.annotation.PermissionAction;
-import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.ApplicationLog;
@@ -36,7 +35,6 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.flink.packer.pipeline.PipelineStatus;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -61,9 +59,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Tag(name = "FLINK_APPLICATION_TAG")
 @Slf4j
@@ -152,34 +148,6 @@ public class ApplicationController {
   @RequiresPermissions("app:view")
   public RestResponse list(Application app, RestRequest request) {
     IPage<Application> applicationList = applicationService.page(app, request);
-    List<Application> appRecords = applicationList.getRecords();
-    List<Long> appIds = appRecords.stream().map(Application::getId).collect(Collectors.toList());
-    Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
-
-    // add building pipeline status info and app control info
-    appRecords =
-        appRecords.stream()
-            .peek(
-                e -> {
-                  if (pipeStates.containsKey(e.getId())) {
-                    e.setBuildStatus(pipeStates.get(e.getId()).getCode());
-                  }
-                })
-            .peek(
-                e -> {
-                  AppControl appControl =
-                      new AppControl()
-                          .setAllowBuild(
-                              e.getBuildStatus() == null
-                                  || !PipelineStatus.running.getCode().equals(e.getBuildStatus()))
-                          .setAllowStart(
-                              !e.shouldBeTrack()
-                                  && PipelineStatus.success.getCode().equals(e.getBuildStatus()))
-                          .setAllowStop(e.isRunning());
-                  e.setAppControl(appControl);
-                })
-            .collect(Collectors.toList());
-    applicationList.setRecords(appRecords);
     return RestResponse.success(applicationList);
   }
 
