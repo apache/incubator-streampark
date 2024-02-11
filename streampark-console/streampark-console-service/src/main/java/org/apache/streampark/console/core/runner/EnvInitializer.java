@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.runner;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
@@ -40,6 +41,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -76,20 +78,36 @@ public class EnvInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) throws Exception {
     // init InternalConfig
-    initInternalConfig();
+    initConfig();
+
+    boolean isTest = Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("test");
+    if (!isTest) {
+      // initialize local file system resources
+      storageInitialize(LFS);
+      // Launch the embedded http file server.
+      ZIOExt.unsafeRun(EmbeddedFileServer.launch());
+    }
+  }
+
+  private void initConfig() {
+
+    Environment env = context.getEnvironment();
+    // override config from spring application.yaml
+    InternalConfigHolder.keys().stream()
+        .filter(env::containsProperty)
+        .forEach(
+            key -> {
+              InternalOption config = InternalConfigHolder.getConfig(key);
+              Utils.requireNotNull(config);
+              InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
+            });
+    InternalConfigHolder.log();
+
+    settingService.getMavenConfig().updateConfig();
+
     // overwrite system variable HADOOP_USER_NAME
     String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
     overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
-    // initialize local file system resources
-    storageInitialize(LFS);
-    // Launch the embedded http file server.
-    ZIOExt.unsafeRun(EmbeddedFileServer.launch());
-  }
-
-  private void initInternalConfig() {
-    settingService.getMavenConfig().updateConfig();
-
-    InternalConfigHolder.log();
   }
 
   private void overrideSystemProp(String key, String defaultValue) {
@@ -99,6 +117,17 @@ public class EnvInitializer implements ApplicationRunner {
   }
 
   public synchronized void storageInitialize(StorageType storageType) {
+    String appHome = WebUtils.getAppHome();
+
+    if (StringUtils.isBlank(appHome)) {
+      throw new ExceptionInInitializerError(
+          String.format(
+              "[StreamPark] Workspace path check failed,"
+                  + " The system initialization check failed. If started local for development and debugging,"
+                  + " please ensure the -D%s parameter is clearly specified,"
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+              ConfigKeys.KEY_APP_HOME()));
+    }
 
     if (initialized.contains(storageType)) {
       return;
