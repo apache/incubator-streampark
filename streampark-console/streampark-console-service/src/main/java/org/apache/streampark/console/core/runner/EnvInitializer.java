@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,8 +69,6 @@ public class EnvInitializer implements ApplicationRunner {
 
   private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
-  private boolean isTest = false;
-
   private static final Pattern PATTERN_FLINK_SHIMS_JAR =
       Pattern.compile(
           "^streampark-flink-shims_flink-(1.1[2-8])_(2.12)-(.*).jar$",
@@ -83,6 +80,7 @@ public class EnvInitializer implements ApplicationRunner {
     // init InternalConfig
     initConfig();
 
+    boolean isTest = Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("test");
     if (!isTest) {
       // initialize local file system resources
       storageInitialize(LFS);
@@ -92,13 +90,6 @@ public class EnvInitializer implements ApplicationRunner {
   }
 
   private void initConfig() {
-
-    Optional<String> profile =
-        Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
-
-    if ("test".equals(profile.orElse(null))) {
-      isTest = true;
-    }
 
     Environment env = context.getEnvironment();
     // override config from spring application.yaml
