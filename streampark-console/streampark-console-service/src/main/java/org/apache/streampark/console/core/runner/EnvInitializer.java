@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.runner;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
@@ -40,6 +41,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -48,6 +50,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +70,8 @@ public class EnvInitializer implements ApplicationRunner {
 
   private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
+  private boolean isTest = false;
+
   private static final Pattern PATTERN_FLINK_SHIMS_JAR =
       Pattern.compile(
           "^streampark-flink-shims_flink-(1.1[2-8])_(2.12)-(.*).jar$",
@@ -77,14 +82,38 @@ public class EnvInitializer implements ApplicationRunner {
   public void run(ApplicationArguments args) throws Exception {
     // init InternalConfig
     initConfig();
-    // initialize local file system resources
-    storageInitialize(LFS);
-    // Launch the embedded http file server.
-    ZIOExt.unsafeRun(EmbeddedFileServer.launch());
+
+    if (!isTest) {
+      // initialize local file system resources
+      storageInitialize(LFS);
+      // Launch the embedded http file server.
+      ZIOExt.unsafeRun(EmbeddedFileServer.launch());
+    }
   }
 
   private void initConfig() {
+
+    Optional<String> profile =
+        Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
+
+    if ("test".equals(profile.orElse(null))) {
+      isTest = true;
+    }
+
+    Environment env = context.getEnvironment();
+    // override config from spring application.yaml
+    InternalConfigHolder.keys().stream()
+        .filter(env::containsProperty)
+        .forEach(
+            key -> {
+              InternalOption config = InternalConfigHolder.getConfig(key);
+              Utils.requireNotNull(config);
+              InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
+            });
+    InternalConfigHolder.log();
+
     settingService.getMavenConfig().updateConfig();
+
     // overwrite system variable HADOOP_USER_NAME
     String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
     overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
