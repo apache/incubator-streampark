@@ -17,13 +17,9 @@
 
 package org.apache.streampark.console.core.runner;
 
-import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.util.WebUtils;
-
-import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,41 +28,29 @@ import org.springframework.core.env.Environment;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class EnvApplicationContextInitializer
+public class ConfigInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
   @Override
   public void initialize(ConfigurableApplicationContext context) {
     Optional<String> profile =
         Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
+
     if ("test".equals(profile.orElse(null))) {
       return;
     }
 
-    String appHome = WebUtils.getAppHome();
-    if (StringUtils.isBlank(appHome)) {
-      throw new ExceptionInInitializerError(
-          String.format(
-              "[StreamPark] System initialization check failed,"
-                  + " The system initialization check failed. If started local for development and debugging,"
-                  + " please ensure the -D%s parameter is clearly specified,"
-                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-              ConfigKeys.KEY_APP_HOME()));
-    }
-
-    // init InternalConfig
-    initInternalConfig(context.getEnvironment());
-  }
-
-  private void initInternalConfig(Environment springEnv) {
+    Environment env = context.getEnvironment();
     // override config from spring application.yaml
     InternalConfigHolder.keys().stream()
-        .filter(springEnv::containsProperty)
+        .filter(env::containsProperty)
         .forEach(
             key -> {
               InternalOption config = InternalConfigHolder.getConfig(key);
               Utils.requireNotNull(config);
-              InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
+              InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
             });
+
+    InternalConfigHolder.log();
   }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console;
 
-import org.apache.streampark.console.core.runner.EnvApplicationContextInitializer;
+import org.apache.streampark.console.core.runner.ConfigInitializer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -50,7 +50,7 @@ public class StreamParkConsoleBootstrap {
 
   public static void main(String[] args) {
     new SpringApplicationBuilder(StreamParkConsoleBootstrap.class)
-        .initializers(new EnvApplicationContextInitializer())
+        .initializers(new ConfigInitializer())
         .run(args);
   }
 }
