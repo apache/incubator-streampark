@@ -86,7 +86,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   private final ExecutorService projectBuildExecutor =
       new ThreadPoolExecutor(
-          1,
+          CPU_NUM,
           CPU_NUM,
           60L,
           TimeUnit.SECONDS,

@@ -450,6 +450,7 @@ public class FlinkAppHttpWatcher {
     StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
     StateChangeEvent nowEvent = StateChangeEvent.of(application);
     if (!nowEvent.equals(event)) {
+      PREVIOUS_STATUS.put(application.getId(), nowEvent);
       applicationService.persistMetrics(application);
     }
   }
@@ -816,6 +817,7 @@ public class FlinkAppHttpWatcher {
   @Setter
   static class StateChangeEvent {
     private Long id;
+    private String jobId;
     private FlinkAppState appState;
     private OptionState optionState;
 
@@ -824,18 +826,19 @@ public class FlinkAppHttpWatcher {
       if (this == o) {
         return true;
       }
-      if (!(o instanceof StateChangeEvent)) {
+      if (o == null || getClass() != o.getClass()) {
         return false;
       }
       StateChangeEvent event = (StateChangeEvent) o;
       return Objects.equals(id, event.id)
+          && Objects.equals(jobId, event.jobId)
           && appState == event.appState
           && optionState == event.optionState;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(id, appState, optionState);
+      return Objects.hash(id, jobId, appState, optionState);
     }
 
     public static StateChangeEvent of(Application application) {
@@ -843,6 +846,7 @@ public class FlinkAppHttpWatcher {
       event.setId(application.getId());
       event.setOptionState(OptionState.of(application.getOptionState()));
       event.setAppState(application.getFlinkAppStateEnum());
+      event.setJobId(application.getJobId());
       return event;
     }
   }
