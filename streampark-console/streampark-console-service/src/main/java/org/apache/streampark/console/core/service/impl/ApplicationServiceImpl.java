@@ -505,7 +505,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       return null;
     }
     Page<Application> page = MybatisPager.getPage(request);
-    if (CommonUtils.notEmpty(appParam.getStateArray())) {
+    if (CommonUtils.notEmpty((Object) appParam.getStateArray())) {
       if (Arrays.stream(appParam.getStateArray())
           .anyMatch(x -> x == FlinkAppState.FINISHED.getValue())) {
         Integer[] newArray =
@@ -529,9 +529,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             .peek(
                 record -> {
                   // 1) running Duration
-                  if (record.getTracking() == 1
-                      && record.getFlinkAppStateEnum() == FlinkAppState.RUNNING) {
-                    record.setDuration(now - record.getStartTime().getTime());
+                  if (record.getTracking() == 1) {
+                    FlinkAppState state = record.getFlinkAppStateEnum();
+                    if (state == FlinkAppState.RUNNING
+                        || state == FlinkAppState.CANCELLING
+                        || state == FlinkAppState.MAPPING) {
+                      record.setDuration(now - record.getStartTime().getTime());
+                    }
                   }
                   // 2) k8s restURL
                   if (record.isKubernetesModeJob()) {

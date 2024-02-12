@@ -65,6 +65,7 @@
   });
 
   const appDashboardRef = ref<any>();
+  const noData = ref<boolean>();
 
   const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
@@ -91,6 +92,7 @@
     },
     afterFetch: (dataSource) => {
       const timestamp = new Date().getTime();
+      noData.value = dataSource.length == 0;
       dataSource.forEach((x) => {
         x.expanded = [
           {
@@ -333,8 +335,9 @@
       </template>
       <template #insertTable="{ tableContainer }">
         <AppTableResize
+          v-if="!noData"
           :table-container="tableContainer"
-          :resize-min="100"
+          :resize-min="200"
           v-model:left="tableColumnWidth.jobName"
         />
       </template>
