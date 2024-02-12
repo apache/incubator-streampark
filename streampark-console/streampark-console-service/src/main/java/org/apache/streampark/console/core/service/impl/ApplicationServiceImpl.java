@@ -218,8 +218,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   private final ExecutorService bootstrapExecutor =
       new ThreadPoolExecutor(
-          1,
           CPU_NUM,
+          CPU_NUM * 5,
           60L,
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(),
