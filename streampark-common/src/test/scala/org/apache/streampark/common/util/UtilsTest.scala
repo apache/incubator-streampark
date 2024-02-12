@@ -19,49 +19,57 @@ package org.apache.streampark.common.util
 
 import org.junit.jupiter.api.{Assertions, Test}
 import org.junit.jupiter.api.Assertions.{assertDoesNotThrow, assertEquals, assertFalse, assertThrows, assertTrue}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers._
 
 import java.io.IOException
 import java.net.URL
 import java.util
 
-class UtilsTest {
-  @Test def requiredNotNullTest(): Unit = {
-    val nullPointerException = assertThrows(
-      classOf[NullPointerException],
-      () => Utils.requireNotNull(null, "object can't be null"))
-    assertEquals("object can't be null", nullPointerException.getMessage)
+class UtilsTest extends AnyFunSuite {
+
+  test("requiredNotNull should throw NullPointerException if argument is null") {
+    val nullPointerException = intercept[NullPointerException] {
+      Utils.requireNotNull(null, "object can't be null")
+    }
+    assert(nullPointerException.getMessage == "object can't be null")
   }
 
-  @Test def requireNotEmpty(): Unit = {
-    assertFalse(Utils.requireNotEmpty(null))
-    assertTrue(Utils.requireNotEmpty(new Array[Int](1)))
-    assertTrue(Utils.requireNotEmpty("string"))
-    assertTrue(Utils.requireNotEmpty(Traversable.canBuildFrom("Traversable")))
-    assertTrue(Utils.requireNotEmpty(Iterable.canBuildFrom("Iterable")))
+  test("requireNotEmpty should check if argument is not empty") {
+    assert(!Utils.requireNotEmpty(null))
+    assert(Utils.requireNotEmpty(Array(1)))
+    assert(Utils.requireNotEmpty("string"))
+    assert(Utils.requireNotEmpty(Seq("Traversable")))
+    assert(Utils.requireNotEmpty(Iterable("Iterable")))
 
     val arrayList = new util.ArrayList[String](16)
     arrayList.add("arrayList")
-    assertTrue(Utils.requireNotEmpty(arrayList))
+    assert(Utils.requireNotEmpty(arrayList))
 
     val hashMap = new util.HashMap[String, String](16)
     hashMap.put("hash", "map")
-    assertTrue(Utils.requireNotEmpty(hashMap))
+    assert(Utils.requireNotEmpty(hashMap))
 
-    assertTrue(Utils.requireNotEmpty())
+    assert(Utils.requireNotEmpty())
   }
 
-  @Test def requiredTest(): Unit = {
-    assertThrows(classOf[IllegalArgumentException], () => Utils.required(false))
+  test("required should throw IllegalArgumentException if condition is false") {
+    val illegalArgumentException = intercept[IllegalArgumentException] {
+      Utils.required(false)
+    }
+    assert(illegalArgumentException.getMessage == null)
   }
 
-  @Test def requireCheckJarFileTest(): Unit = {
+  test("requireCheckJarFile should throw IOException if JAR file path is invalid") {
     val jar: URL = new URL("http", "host", "file")
-    val ioException = assertThrows(classOf[IOException], () => Utils.requireCheckJarFile(jar))
-    assertEquals("JAR file path is invalid " + jar.toString, ioException.getMessage)
+    val ioException = intercept[IOException] {
+      Utils.requireCheckJarFile(jar)
+    }
+    assert(ioException.getMessage == s"JAR file path is invalid $jar")
   }
 
-  @Test def checkHttpURLTest(): Unit = {
+  test("checkHttpURL should return false for non-HTTP URL") {
     val url = "http://localhost"
-    assertFalse(Utils.checkHttpURL(url))
+    assert(!Utils.checkHttpURL(url))
   }
 }
