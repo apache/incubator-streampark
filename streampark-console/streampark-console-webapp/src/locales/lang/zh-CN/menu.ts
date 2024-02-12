@@ -20,7 +20,7 @@ export default {
     userManagement: '用户管理',
     roleManagement: '角色管理',
     menuManagement: '菜单管理',
-    tokenManagement: 'Token管理',
+    tokenManagement: '令牌管理',
     teamManagement: '团队管理',
     memberManagement: '成员管理',
     project: '项目管理',
