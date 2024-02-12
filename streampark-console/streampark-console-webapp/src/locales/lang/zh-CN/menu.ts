@@ -32,7 +32,7 @@ export default {
     system: '系统设置',
     alarm: '告警设置',
     flinkHome: 'Flink 版本',
-    flinkCluster: 'Flink集群',
+    flinkCluster: 'Flink 集群',
     externalLink: '扩展链接',
     yarnQueue: 'Yarn 队列',
   },

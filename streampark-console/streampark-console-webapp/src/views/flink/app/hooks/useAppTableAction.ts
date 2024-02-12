@@ -65,12 +65,6 @@ export const useAppTableAction = (
   function getActionList(record: AppListRecord, currentPageNo: number): ActionItem[] {
     return [
       {
-        tooltip: { title: t('flink.app.operation.edit') },
-        auth: 'app:update',
-        icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record, currentPageNo),
-      },
-      {
         tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
@@ -105,6 +99,12 @@ export const useAppTableAction = (
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.edit') },
+        auth: 'app:update',
+        icon: 'clarity:note-edit-line',
+        onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },

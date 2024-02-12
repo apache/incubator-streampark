@@ -98,6 +98,8 @@ public class ApplicationBuildPipelineController {
   public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
     Application app = applicationService.getById(appId);
 
+    ApiAlertException.throwIfNull(
+        app.getVersionId(), "Please bind a Flink version to the current flink job.");
     // 1) check flink version
     FlinkEnv env = flinkEnvService.getById(app.getVersionId());
     boolean checkVersion = env.getFlinkVersion().checkVersion(false);

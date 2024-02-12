@@ -820,25 +820,27 @@ public class FlinkAppHttpWatcher {
     private String jobId;
     private FlinkAppState appState;
     private OptionState optionState;
+    private String jobManagerUrl;
 
     @Override
-    public boolean equals(Object o) {
-      if (this == o) {
+    public boolean equals(Object object) {
+      if (this == object) {
         return true;
       }
-      if (o == null || getClass() != o.getClass()) {
+      if (object == null || getClass() != object.getClass()) {
         return false;
       }
-      StateChangeEvent event = (StateChangeEvent) o;
-      return Objects.equals(id, event.id)
-          && Objects.equals(jobId, event.jobId)
-          && appState == event.appState
-          && optionState == event.optionState;
+      StateChangeEvent that = (StateChangeEvent) object;
+      return Objects.equals(id, that.id)
+          && Objects.equals(jobId, that.jobId)
+          && appState == that.appState
+          && optionState == that.optionState
+          && Objects.equals(jobManagerUrl, that.jobManagerUrl);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(id, jobId, appState, optionState);
+      return Objects.hash(id, jobId, appState, optionState, jobManagerUrl);
     }
 
     public static StateChangeEvent of(Application application) {
@@ -847,6 +849,7 @@ public class FlinkAppHttpWatcher {
       event.setOptionState(OptionState.of(application.getOptionState()));
       event.setAppState(application.getFlinkAppStateEnum());
       event.setJobId(application.getJobId());
+      event.setJobManagerUrl(application.getJobManagerUrl());
       return event;
     }
   }
