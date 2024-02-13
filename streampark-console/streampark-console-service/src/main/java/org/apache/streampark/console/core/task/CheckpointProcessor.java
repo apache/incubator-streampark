@@ -83,7 +83,7 @@ public class CheckpointProcessor {
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
     if (CheckPointStatus.COMPLETED.equals(status)) {
-      if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
+      if (checkSaveAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
         flinkAppHttpWatcher.cleanSavepoint(application);
@@ -91,7 +91,7 @@ public class CheckpointProcessor {
       }
 
       Long latestChkId = getLatestCheckpointedId(appId, checkPointKey.getCheckPointId());
-      if (shouldStoreAsCheckpoint(checkPoint, latestChkId)) {
+      if (checkSaveAsCheckpoint(checkPoint, latestChkId)) {
         checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
         saveSavepoint(checkPoint, application.getId());
       }
@@ -131,12 +131,11 @@ public class CheckpointProcessor {
     }
   }
 
-  private static boolean shouldStoreAsCheckpoint(
-      @Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
+  private boolean checkSaveAsCheckpoint(@Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
     return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
   }
 
-  private boolean shouldStoreAsSavepoint(
+  private boolean checkSaveAsSavepoint(
       CheckPointKey checkPointKey, @Nonnull CheckPoints.CheckPoint checkPoint) {
     if (!checkPoint.getIsSavepoint()) {
       return false;
