@@ -31,7 +31,7 @@ import java.util.Date;
 @Setter
 public class Member implements Serializable {
 
-  private static final long serialVersionUID = -3166012934498268403L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;

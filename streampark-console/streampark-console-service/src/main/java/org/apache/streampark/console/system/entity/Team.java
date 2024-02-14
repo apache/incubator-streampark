@@ -33,7 +33,7 @@ import java.util.Date;
 @TableName("t_team")
 public class Team implements Serializable {
 
-  private static final long serialVersionUID = -1714476694755654924L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;

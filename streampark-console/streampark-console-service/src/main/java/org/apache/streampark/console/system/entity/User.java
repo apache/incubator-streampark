@@ -39,7 +39,7 @@ import java.util.Date;
 @TableName("t_user")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = -4852732617765810959L;
+  private static final long serialVersionUID = 1L;
   /** user status */
   public static final String STATUS_VALID = "1";
 

@@ -32,7 +32,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VueRouter<T> implements Serializable {
 
-  private static final long serialVersionUID = -3327478146308500708L;
+  private static final long serialVersionUID = 1L;
 
   @JsonIgnore private String id;
 

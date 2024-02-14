@@ -27,7 +27,7 @@ import lombok.Setter;
 @Setter
 public class JWTToken implements AuthenticationToken {
 
-  private static final long serialVersionUID = 1282057025599826155L;
+  private static final long serialVersionUID = 1L;
 
   private String token;
 

@@ -37,7 +37,7 @@ import java.util.Date;
 @TableName("t_variable")
 public class Variable implements Serializable {
 
-  private static final long serialVersionUID = -7720746591258904369L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;

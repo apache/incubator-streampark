@@ -34,7 +34,7 @@ import java.util.Date;
 @TableName("t_menu")
 public class Menu implements Serializable {
 
-  private static final long serialVersionUID = 7187628714679791771L;
+  private static final long serialVersionUID = 1L;
 
   public static final String TYPE_MENU = "0";
 
