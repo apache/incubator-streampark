@@ -213,6 +213,12 @@ export default {
     copy: 'Copy Application',
     remapping: 'Remapping Application',
     deleteTip: 'Are you sure delete this job ?',
+    triggerSavePoint: 'Trigger savepoint',
+    enableSavePoint: 'Trigger savepoint before flink job cancel',
+    customSavepoint: 'Specify savepoint path to cancel the job ',
+    enableDrain: 'Send MAX_WATERMARK before taking the savepoint and stopping the pipeline',
+    invalidSavePoint: 'Custom savepoint path invalid: ',
+    canceling: 'The current job is canceling',
   },
   dashboard: {
     availableTaskSlots: 'Available Task Slots',

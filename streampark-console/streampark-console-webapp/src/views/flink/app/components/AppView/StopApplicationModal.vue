@@ -47,7 +47,7 @@
     schemas: [
       {
         field: 'stopSavePointed',
-        label: 'Savepoint',
+        label: t('flink.app.operation.triggerSavePoint'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
@@ -55,17 +55,16 @@
         },
         defaultValue: true,
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, 'trigger savePoint before taking cancel'),
+          h('span', { class: 'conf-switch' }, t('flink.app.operation.enableSavePoint')),
       },
       {
         field: 'customSavepoint',
-        label: 'Custom Savepoint',
+        label: 'Savepoint path',
         component: 'Input',
         componentProps: {
-          placeholder: 'Entry the custom savepoint path',
+          placeholder: t('flink.app.operation.customSavepoint'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, 'cancel job with savepoint path'),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -77,14 +76,15 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: () => h('span', { class: 'conf-switch' }, 'Send max watermark before stopped'),
+        ifShow: ({ values }) => !!values.stopSavePointed,
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.operation.enableDrain')),
       },
     ],
     colon: true,
     showActionButtonGroup: false,
     labelCol: { lg: { span: 7, offset: 0 }, sm: { span: 7, offset: 0 } },
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
-    baseColProps: { span: 24 },
+    baseColProps: { span: 23 },
   });
 
   /* submit */
@@ -104,22 +104,22 @@
             savePoint: customSavepoint,
           });
           if (data.data === false) {
-            createErrorSwal('custom savepoint path is invalid, ' + data.message);
+            await createErrorSwal(t('flink.app.operation.invalidSavePoint') + data.message);
           } else {
-            handleStopAction(stopReq);
+            await handleStopAction(stopReq);
           }
         } else {
           const { data } = await fetchCheckSavepointPath({
             id: app.id,
           });
           if (data.data) {
-            handleStopAction(stopReq);
+            await handleStopAction(stopReq);
           } else {
-            createErrorSwal(data.message);
+            await createErrorSwal(data.message);
           }
         }
       } else {
-        handleStopAction(stopReq);
+        await handleStopAction(stopReq);
       }
       emit('updateOption', {
         type: 'stopping',
@@ -135,7 +135,7 @@
     await fetchCancel(stopReq);
     Swal.fire({
       icon: 'success',
-      title: 'The current job is canceling',
+      title: t('flink.app.operation.canceling'),
       showConfirmButton: false,
       timer: 2000,
     });
@@ -153,6 +153,6 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-30px" />
+    <BasicForm @register="registerForm" class="!pt-40px" />
   </BasicModal>
 </template>
