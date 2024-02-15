@@ -24,7 +24,7 @@
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
-  import { h } from 'vue';
+  import { h, ref } from 'vue';
   import { Select, Input, Tag } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -39,6 +39,8 @@
   const { t } = useI18n();
   const { Swal } = useMessage();
   const router = useRouter();
+  const selectInput = ref<boolean>(false);
+  const selectValue = ref<string>(null);
 
   const emits = defineEmits(['register', 'updateOption']);
   const receiveData = reactive<Recordable>({});
@@ -113,12 +115,18 @@
     await handleDoSubmit();
   }
 
+  async function handleReset() {
+    selectInput.value = false;
+    selectValue.value = null;
+  }
+
   /* submit */
   async function handleDoSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
+      handleReset();
       const { data } = await fetchStart({
         id: receiveData.application.id,
         savePointed,
@@ -128,7 +136,7 @@
       if (data.data) {
         Swal.fire({
           icon: 'success',
-          title: 'The current job is starting',
+          title: t('flink.app.operation.starting'),
           showConfirmButton: false,
           timer: 2000,
         });
@@ -165,12 +173,23 @@
       console.error(error);
     }
   }
+
+  function handleSavepoint(model, field, input) {
+    selectInput.value = input;
+    if (input) {
+      selectValue.value = model[field];
+      model[field] = null;
+    } else {
+      model[field] = selectValue.value;
+    }
+  }
 </script>
 <template>
   <BasicModal
     @register="registerModal"
     :minHeight="100"
     @ok="handleSubmit"
+    @cancel="handleReset"
     :okText="t('common.apply')"
     :cancelText="t('common.cancelText')"
   >
@@ -181,8 +200,12 @@
 
     <BasicForm @register="registerForm" class="!pt-40px">
       <template #savepoint="{ model, field }">
-        <template v-if="receiveData.historySavePoint && receiveData.historySavePoint.length > 0">
-          <Select allow-clear v-model:value="model[field]">
+        <template
+          v-if="
+            !selectInput && receiveData.historySavePoint && receiveData.historySavePoint.length > 0
+          "
+        >
+          <Select v-model:value="model[field]" @dblclick="handleSavepoint(model, field, true)">
             <SelectOption v-for="(k, i) in receiveData.historySavePoint" :key="i" :value="k.path">
               <span style="color: darkgrey">
                 <Icon icon="ant-design:clock-circle-outlined" />
@@ -202,6 +225,7 @@
         </template>
         <Input
           v-else
+          @dblclick="handleSavepoint(model, field, false)"
           type="text"
           placeholder="Please enter savepoint manually"
           v-model:value="model[field]"

@@ -169,9 +169,10 @@ export default {
     fromSavepoint: 'From savepoint',
     savepointTip: 'Restore the job from savepoint or latest checkpoint',
     savepointInput:
-      'Select or manually specify the savepoint/checkpoint path, Same as：-allowNonRestoredState(-n)',
+      'Specify the savepoint/checkpoint path (Double-click to switch between "manual input" and "dropdown selection")',
     ignoreRestored: 'Ignore failed',
-    ignoreRestoredTip: 'ignore savepoint then cannot be restored,',
+    ignoreRestoredTip:
+      'ignore savepoint then cannot be restored, Same as：-allowNonRestoredState(-n)',
     recheck: 'the associated project has changed and this job need to be rechecked',
     changed: 'the application has changed.',
   },
@@ -219,6 +220,7 @@ export default {
     enableDrain: 'Send MAX_WATERMARK before taking the savepoint and stopping the pipeline',
     invalidSavePoint: 'Custom savepoint path invalid: ',
     canceling: 'The current job is canceling',
+    starting: 'The current job is starting',
   },
   dashboard: {
     availableTaskSlots: 'Available Task Slots',

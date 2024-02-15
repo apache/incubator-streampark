@@ -18,7 +18,7 @@ export default {
   title: 'Flink 集群',
   detail: '查看集群详情',
   stop: '停止集群',
-  start: '开启集群',
+  start: '启动集群',
   edit: '编辑集群',
   delete: '确定要删除此集群 ?',
   form: {
