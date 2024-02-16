@@ -168,8 +168,9 @@ export default {
     savepoint: 'Trigger Savepoint',
     fromSavepoint: 'From savepoint',
     savepointTip: 'Restore the job from savepoint or latest checkpoint',
-    savepointInput:
-      'Specify the savepoint/checkpoint path (Double-click to switch between "manual input" and "dropdown selection")',
+    savepointInput: 'Specify the savepoint/checkpoint path',
+    savepointSwitch:
+      'Specify the savepoint/checkpoint path (Double-click to switch between "input" and "select")',
     ignoreRestored: 'Ignore failed',
     ignoreRestoredTip:
       'ignore savepoint then cannot be restored, Same as：-allowNonRestoredState(-n)',

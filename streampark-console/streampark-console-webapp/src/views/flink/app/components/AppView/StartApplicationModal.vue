@@ -55,6 +55,13 @@
     }
   });
 
+  function handleSavePointTip(list) {
+    if (list != null && list.length > 0) {
+      return t('flink.app.view.savepointSwitch');
+    }
+    return t('flink.app.view.savepointInput');
+  }
+
   const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
     name: 'startApplicationModal',
     labelWidth: 120,
@@ -77,7 +84,8 @@
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointInput')),
+        afterItem: () =>
+          h('span', { class: 'conf-switch' }, handleSavePointTip(receiveData.historySavePoint)),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed,
         required: true,
@@ -227,7 +235,7 @@
           v-else
           @dblclick="handleSavepoint(model, field, false)"
           type="text"
-          placeholder="Please enter savepoint manually"
+          :placeholder="$t('flink.app.view.savepointInput')"
           v-model:value="model[field]"
         />
       </template>

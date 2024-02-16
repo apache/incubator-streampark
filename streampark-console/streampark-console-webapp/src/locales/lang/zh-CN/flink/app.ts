@@ -160,8 +160,9 @@ export default {
     changed: '应用程序已更改。',
     fromSavepoint: 'Savepoint 恢复',
     savepointTip: '作业从 savepoint 或 checkpoint 恢复状态',
-    savepointInput: '指定 savepoint/checkpoint 路径 (双击切换"手动输入"或"下拉框选择")',
-    ignoreRestored: '跳过恢复失败',
+    savepointInput: '指定 savepoint/checkpoint 路径',
+    savepointSwitch: '指定 savepoint/checkpoint 路径 (双击切换"下拉框选择"或"手动输入")',
+    ignoreRestored: '忽略失败',
     ignoreRestoredTip: '当状态恢复失败时跳过错误，作业继续运行, 同参数：-allowNonRestoredState(-n)',
   },
   pod: {

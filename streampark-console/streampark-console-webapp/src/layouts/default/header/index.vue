@@ -39,6 +39,8 @@
       </a-button>
       <Divider type="vertical" />
 
+      <Icon icon="ant-design:qrcode-outlined" :class="`${prefixCls}-action__item`" />
+
       <!-- Github info -->
       <Github :class="`${prefixCls}-action__item github-item`" />
       <!-- Theme Switch -->
@@ -98,10 +100,12 @@
   import { useLocale } from '/@/locales/useLocale';
   import { version } from '../../../../package.json';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon/src/Icon.vue';
 
   export default defineComponent({
     name: 'LayoutHeader',
     components: {
+      Icon,
       Header: Layout.Header,
       AppLogo,
       LayoutTrigger,
