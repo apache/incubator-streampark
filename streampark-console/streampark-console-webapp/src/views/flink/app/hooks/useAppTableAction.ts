@@ -264,8 +264,8 @@ export const useAppTableAction = (
 
   const formConfig = computed((): Partial<FormProps> => {
     const tableFormConfig: FormProps = {
-      baseColProps: { span: 5, style: { paddingRight: '20px' } },
-      actionColOptions: { span: 4 },
+      baseColProps: { span: 4, style: { paddingRight: '30px' } },
+      actionColOptions: { style: { paddingRight: '0px' } },
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
@@ -329,6 +329,7 @@ export const useAppTableAction = (
           text: t('common.add'),
           color: 'primary',
           preIcon: 'ant-design:plus-outlined',
+          style: { float: 'right' },
         },
       });
     }

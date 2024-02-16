@@ -29,7 +29,12 @@
         select * from t_team
         <where>
             <if test="team.teamName != null and team.teamName != ''">
-                and team_name like concat('%','${team.teamName}','%')
+                <if test="_databaseId == 'mysql'">
+                    and team_name like concat('%', #{team.teamName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and team_name like '%' || #{team.teamName} || '%'
+                </if>
             </if>
             <if test="team.createTimeFrom != null and team.createTimeFrom !=''">
                 and create_time &gt; #{team.createTimeFrom}

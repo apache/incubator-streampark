@@ -38,10 +38,20 @@
         on v.creator_id = u.user_id
         and v.team_id = #{variable.teamId}
         <if test="variable.description != null and variable.description != ''">
-            and v.description like concat('%','${variable.description}','%')
+            <if test="_databaseId == 'mysql'">
+                and v.description like concat('%', #{variable.description},'%')
+            </if>
+            <if test="_databaseId == 'pgsql'">
+                and v.description like '%' || #{variable.description} || '%'
+            </if>
         </if>
         <if test="variable.variableCode != null and variable.variableCode != ''">
-            and v.variable_code like concat('%','${variable.variableCode}','%')
+            <if test="_databaseId == 'mysql'">
+                and v.variable_code like concat('%', #{variable.variableCode},'%')
+            </if>
+            <if test="_databaseId == 'pgsql'">
+                and v.variable_code like '%' || #{variable.variableCode} || '%'
+            </if>
         </if>
     </select>
 
@@ -61,7 +71,12 @@
         <where>
             team_id = #{teamId}
             <if test="keyword != null and keyword != ''">
-                and variable_code like concat('%', '${keyword}', '%') or description like concat('%', '${keyword}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and variable_code like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and variable_code like '%' || #{keyword} || '%' or description like '%' || #{keyword} || '%'
+                </if>
             </if>
         </where>
     </select>

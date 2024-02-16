@@ -20,6 +20,8 @@ package org.apache.streampark.console.base.config;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
+import org.apache.ibatis.mapping.DatabaseIdProvider;
+import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.apache.ibatis.type.JdbcType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -33,6 +35,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Properties;
 
 /** for MyBatis Configure management. */
 @Configuration
@@ -88,5 +92,17 @@ public class MybatisConfig {
       globalConfig.setBanner(false);
       properties.setGlobalConfig(globalConfig);
     };
+  }
+
+  @Bean
+  public DatabaseIdProvider databaseIdProvider() {
+    VendorDatabaseIdProvider databaseIdProvider = new VendorDatabaseIdProvider();
+    Properties properties = new Properties();
+    properties.put("MySQL", "mysql");
+    // h2 is also used as the processing strategy for MySQL
+    properties.setProperty("H2", "mysql");
+    properties.setProperty("PostgreSQL", "pgsql");
+    databaseIdProvider.setProperties(properties);
+    return databaseIdProvider;
   }
 }
