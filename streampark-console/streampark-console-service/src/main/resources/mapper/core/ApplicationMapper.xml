@@ -163,10 +163,20 @@
                 and t.execution_mode = #{application.executionMode}
             </if>
             <if test="application.jobName != null and application.jobName != ''">
-                and t.job_name like concat('%','${application.jobName}','%')
+                <if test="_databaseId == 'mysql'">
+                    and t.job_name like concat('%', #{application.jobName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.job_name like '%' || #{application.jobName} || '%'
+                </if>
             </if>
             <if test="application.projectName != null and application.projectName != ''">
-                and p.name like concat('%','${application.projectName}','%')
+                <if test="_databaseId == 'mysql'">
+                    and p.name like concat('%', #{application.projectName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and p.name like '%' || #{application.projectName} || '%'
+                </if>
             </if>
             <if test="application.appId != null and application.appId != ''">
                 and t.app_id = #{application.appId}
@@ -185,7 +195,12 @@
                 </foreach>
             </if>
             <if test="application.tags != null and application.tags != ''">
-                and t.tags like concat('%','${application.tags}','%')
+                <if test="_databaseId == 'mysql'">
+                    and t.tags like concat('%', #{application.tags},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.tags like '%' || #{application.tags} || '%'
+                </if>
             </if>
         </where>
     </select>

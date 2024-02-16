@@ -33,7 +33,12 @@
                 team_id = #{yarnQueue.teamId}
             </if>
             <if test="yarnQueue.queueLabel != null and yarnQueue.queueLabel != ''">
-                and queue_label like concat('%','${yarnQueue.queueLabel}','%')
+                <if test="_databaseId == 'mysql'">
+                    and queue_label like concat('%', #{yarnQueue.queueLabel},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and queue_label like '%' || #{yarnQueue.queueLabel} || '%'
+                </if>
             </if>
             <if test="yarnQueue.createTimeFrom != null and yarnQueue.createTimeFrom !=''">
                 and create_time &gt; #{yarnQueue.createTimeFrom}

@@ -51,7 +51,12 @@
         <where>
             tur.team_id = #{member.teamId}
             <if test="member.userName != null and member.userName != ''">
-                and u.username like concat('%','${member.userName}','%')
+                <if test="_databaseId == 'mysql'">
+                    and u.username like concat('%', #{member.userName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and u.username like '%' || #{member.userName} || '%'
+                </if>
             </if>
             <if test="member.roleName != null and member.roleName != ''">
                 and r.role_name = #{member.roleName}
