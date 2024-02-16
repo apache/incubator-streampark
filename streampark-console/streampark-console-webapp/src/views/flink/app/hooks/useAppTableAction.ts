@@ -264,7 +264,7 @@ export const useAppTableAction = (
 
   const formConfig = computed((): Partial<FormProps> => {
     const tableFormConfig: FormProps = {
-      baseColProps: { span: 4, style: { paddingRight: '20px' } },
+      baseColProps: { span: 4, style: { paddingRight: '30px' } },
       actionColOptions: { style: { paddingRight: '0px' } },
       showSubmitButton: false,
       showResetButton: false,
