@@ -17,11 +17,11 @@
 
 package org.apache.streampark.console.base.config;
 
-import org.apache.ibatis.mapping.DatabaseIdProvider;
-import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLPrepareInterceptor;
 import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInterceptor;
 
+import org.apache.ibatis.mapping.DatabaseIdProvider;
+import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.apache.ibatis.type.JdbcType;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -94,15 +94,15 @@ public class MybatisConfig {
     };
   }
 
-    @Bean
-    public DatabaseIdProvider databaseIdProvider() {
-        VendorDatabaseIdProvider databaseIdProvider = new VendorDatabaseIdProvider();
-        Properties properties = new Properties();
-        properties.put("MySQL","mysql");
-        // h2 is also used as the processing strategy for MySQL
-        properties.setProperty("H2", "mysql");
-        properties.setProperty("PostgreSQL", "pgsql");
-        databaseIdProvider.setProperties(properties);
-        return databaseIdProvider;
-    }
+  @Bean
+  public DatabaseIdProvider databaseIdProvider() {
+    VendorDatabaseIdProvider databaseIdProvider = new VendorDatabaseIdProvider();
+    Properties properties = new Properties();
+    properties.put("MySQL", "mysql");
+    // h2 is also used as the processing strategy for MySQL
+    properties.setProperty("H2", "mysql");
+    properties.setProperty("PostgreSQL", "pgsql");
+    databaseIdProvider.setProperties(properties);
+    return databaseIdProvider;
+  }
 }
