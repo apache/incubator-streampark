@@ -324,7 +324,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     appParam.setOptionState(OptionStateEnum.NONE.getValue());
     appParam.setCreateTime(new Date());
-    appParam.setModifyTime(new Date());
+    appParam.setModifyTime(appParam.getCreateTime());
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
     boolean success = validateQueueIfNeeded(appParam);
