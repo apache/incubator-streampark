@@ -21,3 +21,4 @@ alter table "public"."t_flink_project"
 update "public"."t_menu" set menu_name='Apache Flink',order_num=1 where menu_id = 120000;
 update "public"."t_menu" set order_num=3 where menu_id = 110000;
 update "public"."t_menu" set order_num=2 where menu_id = 130000;
+delete from "public"."t_menu" where menu_id=110300;
