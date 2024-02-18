@@ -68,7 +68,14 @@ class UtilsTest extends AnyFunSuite {
   }
 
   test("checkHttpURL should return false for non-HTTP URL") {
-    val url = "http://localhost"
-    assert(!Utils.checkHttpURL(url))
+    var httpUrl = "http://www.example.com"
+    assert(Utils.checkHttpURL(httpUrl))
+    var httpsUrl = "https://www.example.com"
+    assert(Utils.checkHttpURL(httpsUrl))
+
+    httpUrl = "http://local";
+    assert(!Utils.checkHttpURL(httpUrl))
+    httpsUrl = "https://local"
+    assert(!Utils.checkHttpURL(httpsUrl))
   }
 }
