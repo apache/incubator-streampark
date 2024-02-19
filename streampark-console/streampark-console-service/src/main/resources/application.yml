@@ -63,6 +63,8 @@ spring:
     time-zone: GMT+8
     deserialization:
       fail-on-unknown-properties: false
+  messages:
+    basename: i18n.message
   main:
     allow-circular-references: true
     banner-mode: off
