@@ -98,6 +98,9 @@ You can submit any ideas as [pull requests](https://github.com/apache/incubator-
 
 We welcome your suggestions, comments (including criticisms), comments and contributions. See [How to Contribute](https://streampark.apache.org/community/submit_guide/submit_code) and [Code Submission Guide](https://streampark.apache.org/community/submit_guide/code_style_and_quality_guide)
 
+### 📤 Subscribe Mailing Lists
+Mail List is the most recognized form of communication in Apache community. See how to [Join the Mailing Lists](https://streampark.apache.org/community/contribution_guide/mailing_lists)
+
 Thank you to all the people who already contributed to StreamPark!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
