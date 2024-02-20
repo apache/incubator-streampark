@@ -41,19 +41,29 @@ class ImplicitsUtilsTest extends AnyFunSuite {
   }
 
   test("StringImplicits.cast should convert string to the specified type") {
+    val byteString = "1"
     val intString = "123"
     val doubleString = "3.14"
+    val floatString = "3.14f"
     val booleanString = "true"
+    val shortString = "12345"
+    val longString = "100000000"
 
+    assert(booleanString.cast[Boolean](classOf[Boolean]))
+    assert(byteString.cast[Byte](classOf[Byte]) == 1)
     assert(intString.cast[Int](classOf[Int]) == 123)
     assert(doubleString.cast[Double](classOf[Double]) == 3.14)
-    assert(booleanString.cast[Boolean](classOf[Boolean]))
+    assert(floatString.cast[Float](classOf[Float]) == 3.14f)
+    assert(shortString.cast[Short](classOf[Short]) == 12345)
+    assert(longString.cast[Long](classOf[Long]) == 100000000)
   }
 
   test("StringImplicits.cast should throw IllegalArgumentException for unsupported type") {
     val unsupportedString = "test"
+    val unsupportedBigdeciaml = "10e5"
     assertThrows[IllegalArgumentException] {
       unsupportedString.cast[Unit](classOf[Unit])
+      unsupportedBigdeciaml.cast[BigDecimal](classOf[BigDecimal])
     }
   }
 }
