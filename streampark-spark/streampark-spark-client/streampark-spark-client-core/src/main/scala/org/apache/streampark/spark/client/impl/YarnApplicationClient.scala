@@ -22,6 +22,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
 
+import org.apache.commons.collections.MapUtils
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
 import java.util.concurrent.{CountDownLatch, Executors, ExecutorService}
@@ -62,6 +63,13 @@ object YarnApplicationClient extends SparkClientTrait {
         "spark.yarn.jars",
         submitRequest.asInstanceOf[SubmitRequest].hdfsWorkspace.sparkLib + "/*.jar")
       .setVerbose(true)
+
+    if (
+      MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter.containsKey(
+        "sql")
+    ) {
+      launcher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
+    }
 
     logger.info("The spark task start")
 

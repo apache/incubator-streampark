@@ -43,6 +43,8 @@ public class CommonServiceImpl implements CommonService {
 
   private String sqlClientJar = null;
 
+  private String sparkSqlClientJar = null;
+
   @Autowired private UserService userService;
 
   @Override
@@ -86,7 +88,7 @@ public class CommonServiceImpl implements CommonService {
 
   @Override
   public String getSqlClientJar(SparkEnv sparkEnv) {
-    if (sqlClientJar == null) {
+    if (sparkSqlClientJar == null) {
       File localClient = WebUtils.getAppClientDir();
       ApiAlertException.throwIfFalse(
           localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
@@ -106,8 +108,8 @@ public class CommonServiceImpl implements CommonService {
           jars.size() > 1,
           "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
 
-      sqlClientJar = jars.get(0);
+      sparkSqlClientJar = jars.get(0);
     }
-    return sqlClientJar;
+    return sparkSqlClientJar;
   }
 }

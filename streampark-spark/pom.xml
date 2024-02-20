@@ -28,9 +28,10 @@
     <packaging>pom</packaging>
 
     <modules>
-<!--        <module>streampark-spark-core</module>-->
-<!--        <module>streampark-spark-connector</module>-->
+        <module>streampark-spark-core</module>
+        <module>streampark-spark-connector</module>
         <module>streampark-spark-client</module>
+        <module>streampark-spark-sqlclient</module>
     </modules>
 
     <dependencies>
@@ -63,6 +64,27 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming-kafka-0-10_2.12</artifactId>
             <version>${spark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo-shaded</artifactId>
+            <version>4.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-ast_2.12</artifactId>
+            <version>3.7.0-M5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-core_2.12</artifactId>
+            <version>3.7.0-M5</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
