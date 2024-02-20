@@ -129,13 +129,17 @@ object YarnUtils extends Logger {
     if (!getLatest && rmHttpURL != null) {
       return rmHttpURL
     }
-
     synchronized {
       val conf = HadoopUtils.hadoopConf
-      val useHttps = YarnConfiguration.useHttps(conf)
-      val (webConfKey, defaultPort, protocol) = useHttps match {
-        case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
-        case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
+      val (webConfKey, defaultPort, protocol) = {
+        if (YarnConfiguration.useHttps(conf)) {
+          (
+            YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS,
+            YarnConfiguration.DEFAULT_RM_WEBAPP_HTTPS_PORT,
+            "https://")
+        } else {
+          (YarnConfiguration.RM_WEBAPP_ADDRESS, YarnConfiguration.DEFAULT_RM_WEBAPP_PORT, "http://")
+        }
       }
 
       def findActiveRMId(yarnConf: YarnConfiguration): String = {
@@ -191,7 +195,7 @@ object YarnUtils extends Logger {
 
       rmHttpURL = protocol + Option(conf.get("yarn.web-proxy.address", null)).getOrElse {
         val addrKey = if (!HAUtil.isHAEnabled(conf)) webConfKey else getAddressConfKey
-        val socketAddr = conf.getSocketAddr(addrKey, s"0.0.0.0:$defaultPort", defaultPort.toInt)
+        val socketAddr = conf.getSocketAddr(addrKey, s"0.0.0.0:$defaultPort", defaultPort)
         val address = NetUtils.getConnectAddress(socketAddr)
         val resolved = address.getAddress
 
@@ -205,7 +209,6 @@ object YarnUtils extends Logger {
             }
           }
         }
-
         s"$hostName:${address.getPort}"
       }
       logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
