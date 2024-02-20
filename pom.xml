@@ -146,6 +146,7 @@
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
         <mockito.version>3.4.6</mockito.version>
+        <mockito-scala.version>1.17.14</mockito-scala.version>
         <assertj.version>3.23.1</assertj.version>
 
         <PermGen>64m</PermGen>
