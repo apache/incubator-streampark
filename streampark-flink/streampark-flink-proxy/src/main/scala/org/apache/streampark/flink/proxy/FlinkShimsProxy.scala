@@ -165,10 +165,7 @@ object FlinkShimsProxy extends Logger {
         val libURL = getFlinkHomeLib(
           flinkVersion.flinkHome,
           "lib",
-          file => {
-            val name = file.getName.toLowerCase
-            name.endsWith(".jar") && !name.startsWith("log4j")
-          }
+          !_.getName.toLowerCase.startsWith("log4j")
         )
 
         val shimsUrls = ListBuffer[URL](libURL: _*)
@@ -197,7 +194,11 @@ object FlinkShimsProxy extends Logger {
       filterFun: File => Boolean): List[URL] = {
     val file = new File(flinkHome, childDir)
     require(file.isDirectory, s"FLINK_HOME $file does not exist")
-    file.listFiles.filter(filterFun).map(_.toURI.toURL).toList
+    file.listFiles
+      .filter(filterFun)
+      .filter(_.getName.toLowerCase.endsWith(".jar"))
+      .map(_.toURI.toURL)
+      .toList
   }
 
   @throws[Exception]
