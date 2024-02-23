@@ -162,7 +162,15 @@ object FlinkShimsProxy extends Logger {
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${flinkVersion.fullVersion}", {
         // 1) flink/lib
-        val libURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", !_.getName.startsWith("log4j"))
+        val libURL = getFlinkHomeLib(
+          flinkVersion.flinkHome,
+          "lib",
+          file => {
+            val name = file.getName.toLowerCase
+            name.endsWith(".jar") && !name.startsWith("log4j")
+          }
+        )
+
         val shimsUrls = ListBuffer[URL](libURL: _*)
 
         // 2) add all shims jar
