@@ -18,40 +18,41 @@
 package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.console.base.filter.LanguageHeaderFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Locale;
 
-/**
- * Messages are returned in the language set by the user
- */
+/** Messages are returned in the language set by the user */
 @Component
 public class I18nMessageUtils {
-    @Autowired
-    private MessageSource messageSource;
-    
-    /**
-     * build message for different language
-     * @param resourceKey the key of i18n resources
-     * @param locale preferred language
-     * @return message
-     */
-    @NotNull
-    public String buildMessage(@NotNull String resourceKey, @NotNull Locale locale) {
-        return messageSource.getMessage(resourceKey,null, locale);
-    }
-    
-    /**
-     * build message for different language
-     * @param i18nResourceKey the key of i18n resources
-     * @return message
-     */
-    @NotNull
-    public String message(@NotNull String i18nResourceKey) {
-        Locale locale = new Locale(LanguageHeaderFilter.getLanguage());
-        return buildMessage(i18nResourceKey, locale);
-    }
+  @Autowired private MessageSource messageSource;
+
+  /**
+   * build message for different language
+   *
+   * @param resourceKey the key of i18n resources
+   * @param locale preferred language
+   * @return message
+   */
+  @NotNull
+  public String buildMessage(@NotNull String resourceKey, @NotNull Locale locale) {
+    return messageSource.getMessage(resourceKey, null, locale);
+  }
+
+  /**
+   * build message for different language
+   *
+   * @param i18nResourceKey the key of i18n resources
+   * @return message
+   */
+  @NotNull
+  public String message(@NotNull String i18nResourceKey) {
+    Locale locale = new Locale(LanguageHeaderFilter.getLanguage());
+    return buildMessage(i18nResourceKey, locale);
+  }
 }

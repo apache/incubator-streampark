@@ -20,6 +20,7 @@ package org.apache.streampark.console.base.util;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.enums.I18nResourceEnum;
 import org.apache.streampark.console.base.filter.LanguageHeaderFilter;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,57 +31,67 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
-class I18nMessageUtilsTest extends SpringUnitTestBase {
-    private LanguageHeaderFilter filter;
-    @Autowired
-    private I18nMessageUtils i18nMessageUtils;
-    
-    @BeforeEach
-    public void setUp() {
-        filter = new LanguageHeaderFilter();
+public class I18nMessageUtilsTest extends SpringUnitTestBase {
+  private LanguageHeaderFilter filter;
+  @Autowired private I18nMessageUtils i18nMessageUtils;
+
+  @BeforeEach
+  public void setUp() {
+    filter = new LanguageHeaderFilter();
+  }
+
+  @Test
+  void englishMessageTest() {
+    initLanguageHeaderFilter("en");
+    String english =
+        i18nMessageUtils.message(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName());
+    assertEquals("Failed send DingTalk alert", english);
+  }
+
+  @Test
+  void chineseMessageTest() {
+    initLanguageHeaderFilter("zh");
+    String chinese =
+        i18nMessageUtils.message(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName());
+    assertEquals("发送钉钉告警失败", chinese);
+  }
+
+  private void initLanguageHeaderFilter(String language) {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    request.addHeader("Language", language);
+
+    try {
+      Method doFilterInternalMethod =
+          LanguageHeaderFilter.class.getDeclaredMethod(
+              "doFilterInternal",
+              HttpServletRequest.class,
+              HttpServletResponse.class,
+              FilterChain.class);
+      doFilterInternalMethod.setAccessible(true);
+      doFilterInternalMethod.invoke(filter, request, response, new MockFilterChain());
+      assertEquals(language, LanguageHeaderFilter.getLanguage());
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    
-    @Test
-    void englishMessageTest() {
-        initLanguageHeaderFilter("en");
-        String english = i18nMessageUtils.message(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName());
-        assertEquals("Failed send DingTalk alert", english);
-    }
-    
-    @Test
-    void chineseMessageTest() {
-        initLanguageHeaderFilter("zh");
-        String chinese = i18nMessageUtils.message(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName());
-        assertEquals("发送钉钉告警失败", chinese);
-    }
-    
-    private void initLanguageHeaderFilter(String language) {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        request.addHeader("Language",language);
-        
-        try {
-            Method doFilterInternalMethod = LanguageHeaderFilter.class.getDeclaredMethod("doFilterInternal",
-                    HttpServletRequest.class, HttpServletResponse.class, FilterChain.class);
-            doFilterInternalMethod.setAccessible(true);
-            doFilterInternalMethod.invoke(filter, request, response, new MockFilterChain());
-            assertEquals(language, LanguageHeaderFilter.getLanguage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Test
-    void buildMessageTest() {
-        String english = i18nMessageUtils.buildMessage(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName(), Locale.ENGLISH);
-        assertEquals("Failed send DingTalk alert", english);
-        
-        String chinese = i18nMessageUtils.buildMessage(I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName(), Locale.CHINESE);
-        assertEquals("发送钉钉告警失败", chinese);
-    }
+  }
+
+  @Test
+  void buildMessageTest() {
+    String english =
+        i18nMessageUtils.buildMessage(
+            I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName(), Locale.ENGLISH);
+    assertEquals("Failed send DingTalk alert", english);
+
+    String chinese =
+        i18nMessageUtils.buildMessage(
+            I18nResourceEnum.FAILED_SEND_DINGTALK_ALERT.getName(), Locale.CHINESE);
+    assertEquals("发送钉钉告警失败", chinese);
+  }
 }

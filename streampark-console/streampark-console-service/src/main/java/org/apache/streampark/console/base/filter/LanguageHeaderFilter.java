@@ -24,32 +24,34 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Locale;
 
-/**
- * Parse the request, get the language type set by the user.
- */
+/** Parse the request, get the language type set by the user. */
 public class LanguageHeaderFilter extends OncePerRequestFilter {
-    private static final ThreadLocal<String> languageCache = new ThreadLocal<>();
-    @Override
-    protected void doFilterInternal(@NotNull final HttpServletRequest request,
-                                    @NotNull final HttpServletResponse response,
-                                    @NotNull final FilterChain filterChain) throws ServletException, IOException {
-        
-        String language = request.getHeader("Language");
-        
-        if (null != language) {
-            languageCache.set(language);
-        } else {
-            languageCache.set(Locale.getDefault().getLanguage());
-        }
-        
-        filterChain.doFilter(request, response);
+  private static final ThreadLocal<String> languageCache = new ThreadLocal<>();
+
+  @Override
+  protected void doFilterInternal(
+      @NotNull final HttpServletRequest request,
+      @NotNull final HttpServletResponse response,
+      @NotNull final FilterChain filterChain)
+      throws ServletException, IOException {
+
+    String language = request.getHeader("Language");
+
+    if (null != language) {
+      languageCache.set(language);
+    } else {
+      languageCache.set(Locale.getDefault().getLanguage());
     }
-    
-    @NotNull
-    public static String getLanguage() {
-        return languageCache.get();
-    }
+
+    filterChain.doFilter(request, response);
+  }
+
+  @NotNull
+  public static String getLanguage() {
+    return languageCache.get();
+  }
 }
