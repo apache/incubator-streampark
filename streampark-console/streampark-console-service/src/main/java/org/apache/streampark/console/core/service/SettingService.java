@@ -23,6 +23,7 @@ import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,6 +65,14 @@ public interface SettingService extends IService<Setting> {
    * @return true if the update is successful, false otherwise
    */
   boolean update(Setting setting);
+
+  /**
+   * * Updates the specified Settings.
+   *
+   * @param settings list of setting object to update
+   * @return true if the update is successful, false otherwise
+   */
+  boolean updateSettings(List<Setting> settings);
 
   /**
    * Retrieves the Maven configuration settings.
