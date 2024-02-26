@@ -79,8 +79,10 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
       throw new ApiAlertException("Sorry, the variable code already exists.");
     }
     variable.setCreatorId(serviceHelper.getUserId());
-    variable.setCreateTime(new Date());
-    variable.setModifyTime(new Date());
+
+    Date date = new Date();
+    variable.setCreateTime(date);
+    variable.setModifyTime(date);
     this.save(variable);
   }
 

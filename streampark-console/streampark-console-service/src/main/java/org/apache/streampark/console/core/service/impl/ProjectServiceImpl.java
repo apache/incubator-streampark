@@ -100,8 +100,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     long count = count(queryWrapper);
     RestResponse response = RestResponse.success();
     if (count == 0) {
-      project.setCreateTime(new Date());
-      project.setModifyTime(new Date());
+      Date date = new Date();
+      project.setCreateTime(date);
+      project.setModifyTime(date);
       boolean status = save(project);
       if (status) {
         return response.message("Add project successfully").data(true);

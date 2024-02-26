@@ -122,8 +122,9 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public boolean createYarnQueue(YarnQueue yarnQueue) {
     ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
     ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, checkResponse.getMsg());
-    yarnQueue.setCreateTime(new Date());
-    yarnQueue.setModifyTime(new Date());
+    Date date = new Date();
+    yarnQueue.setCreateTime(date);
+    yarnQueue.setModifyTime(date);
     return save(yarnQueue);
   }
 

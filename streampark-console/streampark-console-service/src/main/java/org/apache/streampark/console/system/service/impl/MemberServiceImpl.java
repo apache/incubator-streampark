@@ -144,8 +144,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     member.setId(null);
     member.setUserId(user.getUserId());
-    member.setCreateTime(new Date());
-    member.setModifyTime(new Date());
+
+    Date date = new Date();
+    member.setCreateTime(date);
+    member.setModifyTime(date);
     this.save(member);
   }
 

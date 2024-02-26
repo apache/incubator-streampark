@@ -93,8 +93,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void createUser(User user) {
-    user.setCreateTime(new Date());
-    user.setModifyTime(new Date());
+    Date date = new Date();
+    user.setCreateTime(date);
+    user.setModifyTime(date);
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, user.getPassword());
     user.setSalt(salt);
