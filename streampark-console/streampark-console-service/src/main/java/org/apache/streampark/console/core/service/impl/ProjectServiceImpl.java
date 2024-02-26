@@ -101,6 +101,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     RestResponse response = RestResponse.success();
     if (count == 0) {
       project.setCreateTime(new Date());
+      project.setModifyTime(new Date());
       boolean status = save(project);
       if (status) {
         return response.message("Add project successfully").data(true);
@@ -132,6 +133,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
+    project.setModifyTime(new Date());
     if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {

@@ -86,7 +86,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             team.getTeamName()));
     team.setId(null);
     team.setCreateTime(new Date());
-    team.setModifyTime(team.getCreateTime());
+    team.setModifyTime(new Date());
     this.save(team);
   }
 

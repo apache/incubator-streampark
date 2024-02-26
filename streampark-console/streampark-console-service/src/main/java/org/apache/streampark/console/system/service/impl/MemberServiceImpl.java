@@ -145,7 +145,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     member.setId(null);
     member.setUserId(user.getUserId());
     member.setCreateTime(new Date());
-    member.setModifyTime(team.getCreateTime());
+    member.setModifyTime(new Date());
     this.save(member);
   }
 
@@ -177,6 +177,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 new ApiAlertException(
                     String.format("The roleId [%s] not found", member.getRoleId())));
     oldMember.setRoleId(member.getRoleId());
+    oldMember.setModifyTime(new Date());
     updateById(oldMember);
   }
 }

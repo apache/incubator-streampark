@@ -72,6 +72,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
   @Override
   public void createRole(Role role) {
     role.setCreateTime(new Date());
+    role.setModifyTime(new Date());
     this.save(role);
 
     String[] menuIds = role.getMenuId().split(StringPool.COMMA);

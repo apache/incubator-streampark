@@ -56,7 +56,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   @Autowired private UserService userService;
 
   @Override
-  public RestResponse generateToken(Long userId, String expireTime, String description) {
+  public RestResponse create(Long userId, String expireTime, String description) {
     User user = userService.getById(userId);
     if (Objects.isNull(user)) {
       return RestResponse.success().put("code", 0).message("user not available");
@@ -75,6 +75,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     accessToken.setDescription(description);
     accessToken.setExpireTime(DateUtils.stringToDate(jwtToken.getExpireAt()));
     accessToken.setCreateTime(new Date());
+    accessToken.setModifyTime(new Date());
     accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
     this.save(accessToken);
@@ -122,6 +123,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     AccessToken updateObj = new AccessToken();
     updateObj.setStatus(status);
     updateObj.setId(tokenId);
+    updateObj.setModifyTime(new Date());
     return RestResponse.success(this.updateById(updateObj));
   }
 

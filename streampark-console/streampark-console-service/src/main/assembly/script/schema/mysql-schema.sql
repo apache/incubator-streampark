@@ -197,7 +197,7 @@ create table `t_flink_project` (
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `build_state` tinyint default -1,
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`id`) using btree,
   index `inx_team` (`team_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -252,7 +252,7 @@ create table `t_menu` (
   `display` tinyint collate utf8mb4_general_ci not null default 1 comment 'whether the menu is displayed',
   `order_num` int default null comment 'sort',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`menu_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -284,7 +284,7 @@ create table `t_team` (
   `team_name` varchar(64) collate utf8mb4_general_ci not null comment 'team name',
   `description` varchar(255) collate utf8mb4_general_ci default null,
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`id`) using btree,
   unique key `team_name_idx` (`team_name`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
@@ -302,7 +302,7 @@ create table `t_variable` (
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`id`) using btree,
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -315,7 +315,7 @@ create table `t_role` (
   `role_id` bigint not null auto_increment comment 'user id',
   `role_name` varchar(64) collate utf8mb4_general_ci not null comment 'role name',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
   primary key (`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -365,7 +365,7 @@ create table `t_user` (
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1) collate utf8mb4_general_ci not null comment 'status 0:locked 1:active',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   `last_login_time` datetime default null comment 'last login time',
   `sex` char(1) collate utf8mb4_general_ci default null comment 'gender 0:male 1:female 2:confidential',
   `avatar` varchar(128) collate utf8mb4_general_ci default null comment 'avatar',
@@ -385,7 +385,7 @@ create table `t_member` (
   `user_id` bigint not null comment 'user id',
   `role_id` bigint not null comment 'role id',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`id`) using btree,
   unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -405,7 +405,7 @@ create table `t_app_build_pipe`(
   `steps_status_ts` text,
   `error` text,
   `build_result` text,
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`app_id`) using btree
 ) engine = innodb auto_increment=100000 default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -453,7 +453,7 @@ create table `t_access_token` (
   `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description',
   `status` tinyint default null comment '1:enable,0:disable',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
@@ -474,7 +474,7 @@ create table `t_alert_config` (
   `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
   `lark_params` text collate utf8mb4_general_ci comment 'lark params',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   index `inx_alert_user` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -488,8 +488,8 @@ CREATE TABLE `t_external_link` (
   `badge_name` varchar(64) collate utf8mb4_general_ci default null,
   `badge_color` varchar(64) collate utf8mb4_general_ci default null,
   `link_url` varchar(255) collate utf8mb4_general_ci default null,
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
-  `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
+  `create_time` datetime not null default current_timestamp COMMENT 'create time',
+  `modify_time` datetime not null default current_timestamp COMMENT 'modify time'
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -502,7 +502,7 @@ create table `t_yarn_queue` (
   `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue label expression',
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description of the queue label',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
    unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 

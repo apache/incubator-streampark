@@ -33,7 +33,7 @@ create table `t_alert_config` (
   `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
   `lark_params` text collate utf8mb4_general_ci comment 'lark params',
   `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime not null default current_timestamp comment 'modify time',
   index `inx_user_id` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 

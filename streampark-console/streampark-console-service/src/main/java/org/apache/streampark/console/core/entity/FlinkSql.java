@@ -55,6 +55,7 @@ public class FlinkSql {
   private Integer candidate;
 
   private Date createTime;
+
   private transient boolean effective = false;
   /** sql diff */
   private transient boolean sqlDifference = false;

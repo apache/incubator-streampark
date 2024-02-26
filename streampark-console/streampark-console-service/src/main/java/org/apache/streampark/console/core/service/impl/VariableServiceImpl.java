@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -78,6 +79,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
       throw new ApiAlertException("Sorry, the variable code already exists.");
     }
     variable.setCreatorId(serviceHelper.getUserId());
+    variable.setCreateTime(new Date());
+    variable.setModifyTime(new Date());
     this.save(variable);
   }
 
@@ -130,6 +133,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     if (!findVariable.getVariableCode().equals(variable.getVariableCode())) {
       throw new ApiAlertException("Sorry, the variable code cannot be updated.");
     }
+
+    variable.setModifyTime(new Date());
     this.baseMapper.updateById(variable);
     // endregion
 

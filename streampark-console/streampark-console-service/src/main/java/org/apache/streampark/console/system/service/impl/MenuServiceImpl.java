@@ -129,6 +129,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   @Transactional(rollbackFor = Exception.class)
   public void createMenu(Menu menu) {
     menu.setCreateTime(new Date());
+    menu.setModifyTime(new Date());
     setMenu(menu);
     this.save(menu);
   }

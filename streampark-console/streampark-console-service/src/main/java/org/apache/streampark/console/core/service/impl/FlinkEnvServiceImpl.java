@@ -43,6 +43,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     implements FlinkEnvService {
 
   @Autowired private FlinkClusterService flinkClusterService;
+
   @Autowired private ApplicationService applicationService;
 
   /**
