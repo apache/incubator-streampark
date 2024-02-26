@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -76,6 +77,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     } catch (Exception e) {
       return false;
     }
+  }
+
+  public boolean updateSettings(List<Setting> settings) {
+    for (Setting each : settings) {
+      boolean result = update(each);
+      if (!result) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override
