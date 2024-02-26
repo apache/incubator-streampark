@@ -255,7 +255,15 @@ DEFAULT_OPTS="""
   -XX:NewSize=100m
   -XX:+UseConcMarkSweepGC
   -XX:CMSInitiatingOccupancyFraction=70
+  -XX:+PrintGC 
+  -XX:+PrintGCDateStamps 
+  -XX:+PrintGCDetails 
+  -XX:GCLogFileSize=50M 
+  -XX:NumberOfGCLogFiles=10 
+  -XX:+UseGCLogFileRotation
   -Xloggc:${APP_HOME}/logs/gc.log
+  -XX:+HeapDumpOnOutOfMemoryError
+  -XX:HeapDumpPath=${APP_HOME}/logs
   """
 
 DEBUG_OPTS=""
