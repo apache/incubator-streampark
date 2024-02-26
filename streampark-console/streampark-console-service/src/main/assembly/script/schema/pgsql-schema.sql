@@ -95,8 +95,8 @@ create table "public"."t_access_token" (
   "expire_time" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
   "status" int2,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 );
 comment on column "public"."t_access_token"."id" is 'key';
 comment on column "public"."t_access_token"."token" is 'token';
@@ -125,8 +125,8 @@ create table "public"."t_alert_config" (
   "we_com_params" varchar(255) collate "pg_catalog"."default",
   "http_callback_params" text collate "pg_catalog"."default",
   "lark_params" text collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_alert_config"."alert_name" is 'alert name';
@@ -159,7 +159,7 @@ create table "public"."t_app_backup" (
   "version" int4,
   "path" varchar(128) collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 alter table "public"."t_app_backup" add constraint "t_app_backup_pkey" primary key ("id");
@@ -178,7 +178,7 @@ create table "public"."t_app_build_pipe" (
   "steps_status_ts" text collate "pg_catalog"."default",
   "error" text collate "pg_catalog"."default",
   "build_result" text collate "pg_catalog"."default",
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "modify_time" timestamp(6)
 )
 ;
 alter table "public"."t_app_build_pipe" add constraint "t_app_build_pipe_pkey" primary key ("app_id");
@@ -234,8 +234,8 @@ create table "public"."t_flink_app" (
   "available_slot" int4,
   "option_state" int2,
   "tracking" int2,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6),
   "option_time" timestamp(6),
   "release" int2 default 1,
   "build" boolean default true,
@@ -290,7 +290,7 @@ create table "public"."t_flink_cluster" (
   "resolve_order" int4,
   "exception" text collate "pg_catalog"."default",
   "cluster_state" int2 default 0,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 comment on column "public"."t_flink_cluster"."address" is 'url address of jobmanager';
@@ -329,7 +329,7 @@ create table "public"."t_flink_config" (
   "version" int4 not null,
   "latest" boolean not null default false,
   "content" text collate "pg_catalog"."default" not null,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 alter table "public"."t_flink_config" add constraint "t_flink_config_pkey" primary key ("id");
@@ -346,7 +346,7 @@ create table "public"."t_flink_effective" (
   "app_id" int8 not null,
   "target_type" int2 not null,
   "target_id" int8 not null,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 comment on column "public"."t_flink_effective"."target_type" is '1) config 2) flink sql';
@@ -373,7 +373,7 @@ create table "public"."t_flink_env" (
   "flink_conf" text collate "pg_catalog"."default" not null,
   "is_default" boolean not null default false,
   "description" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 comment on column "public"."t_flink_env"."id" is 'id';
@@ -433,8 +433,8 @@ create table "public"."t_flink_project" (
   "last_build" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default",
   "build_state" int2 default -1,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");
@@ -457,7 +457,7 @@ create table "public"."t_flink_savepoint" (
   "path" varchar(255) collate "pg_catalog"."default",
   "latest" boolean not null default true,
   "trigger_time" timestamp(6),
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 alter table "public"."t_flink_savepoint" add constraint "t_flink_savepoint_pkey" primary key ("id");
@@ -476,7 +476,7 @@ create table "public"."t_flink_sql" (
   "dependency" text collate "pg_catalog"."default",
   "version" int4,
   "candidate" int2 default 1 not null,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key ("id");
@@ -499,8 +499,8 @@ create table "public"."t_menu" (
   "type" int2,
   "display" boolean not null default true,
   "order_num" float8,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_menu"."menu_id" is 'menu button id';
@@ -532,7 +532,7 @@ create table "public"."t_message" (
   "title" varchar(255) collate "pg_catalog"."default",
   "context" text collate "pg_catalog"."default",
   "is_read" boolean default false,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6)
 )
 ;
 alter table "public"."t_message" add constraint "t_message_pkey" primary key ("id");
@@ -552,8 +552,8 @@ create table "public"."t_team" (
   "id" int8 not null default nextval('streampark_t_team_id_seq'::regclass),
   "team_name" varchar(64) collate "pg_catalog"."default" not null,
   "description" varchar(255) collate "pg_catalog"."default" default null,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_team"."id" is 'team id';
@@ -578,8 +578,8 @@ create table "public"."t_variable" (
   "creator_id" int8  not null,
   "team_id" int8  not null,
   "desensitization" boolean not null default false,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_variable"."id" is 'variable id';
@@ -608,8 +608,8 @@ create sequence "public"."streampark_t_role_id_seq"
 create table "public"."t_role" (
   "role_id" int8 not null default nextval('streampark_t_role_id_seq'::regclass),
   "role_name" varchar(64) collate "pg_catalog"."default" not null,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6),
   "description" varchar(255) collate "pg_catalog"."default"
 )
 ;
@@ -672,8 +672,8 @@ create table "public"."t_user" (
   "login_type" int2 default 0,
   "last_team_id" int8,
   "status" int2,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6),
   "last_login_time" timestamp(6),
   "sex" char(1) collate "pg_catalog"."default",
   "avatar" varchar(128) collate "pg_catalog"."default",
@@ -713,8 +713,8 @@ create table "public"."t_member" (
   "team_id" int8,
   "user_id" int8,
   "role_id" int8,
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_member"."team_id" is 'team id';
@@ -740,8 +740,8 @@ create table "public"."t_external_link" (
   "badge_name" varchar(64) collate "pg_catalog"."default",
   "badge_color" varchar(64) collate "pg_catalog"."default",
   "link_url" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone))
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6))
 ;
 alter table "public"."t_external_link" add constraint "t_external_link_pkey" primary key ("id");
 
@@ -757,8 +757,8 @@ create table "public"."t_yarn_queue" (
   "team_id" int8 not null,
   "queue_label" varchar(128) not null collate "pg_catalog"."default",
   "description" varchar(255) collate "pg_catalog"."default",
-  "create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-  "modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+  "create_time" timestamp(6),
+  "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_yarn_queue"."id" is 'queue id';
