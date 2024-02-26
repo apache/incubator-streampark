@@ -27,8 +27,8 @@ CREATE TABLE `t_external_link` (
   `badge_name` varchar(64) collate utf8mb4_general_ci default null,
   `badge_color` varchar(64) collate utf8mb4_general_ci default null,
   `link_url` varchar(255) collate utf8mb4_general_ci default null,
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
-  `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'modify time'
+  `create_time` datetime default null COMMENT 'create time',
+  `modify_time` datetime default null COMMENT 'modify time'
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 drop table if exists `t_yarn_queue`;
@@ -37,8 +37,8 @@ create table `t_yarn_queue` (
   `team_id` bigint not null comment 'team id',
   `queue_label` varchar(128) collate utf8mb4_general_ci not null comment 'queue and label expression',
   `description` varchar(255) collate utf8mb4_general_ci default null comment 'description of the queue label',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   unique key `unq_team_id_queue_label` (`team_id`, `queue_label`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -120,6 +120,7 @@ alter table `t_flink_cluster`
 
 alter table `t_access_token`
     modify column `description` varchar(255) character set utf8mb4 collate utf8mb4_general_ci default null comment 'description';
+
 
 -- menu script
 delete from `t_menu`;

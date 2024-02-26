@@ -109,7 +109,9 @@ public class AuthenticatorImpl implements Authenticator {
 
   private User newUserCreate(LoginTypeEnum loginTypeEnum, String username) throws Exception {
     User newUser = new User();
-    newUser.setCreateTime(new Date());
+    Date date = new Date();
+    newUser.setCreateTime(date);
+    newUser.setModifyTime(date);
     newUser.setUsername(username);
     newUser.setNickName(username);
     newUser.setLoginType(loginTypeEnum);

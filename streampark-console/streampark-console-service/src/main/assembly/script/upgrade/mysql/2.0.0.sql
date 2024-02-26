@@ -23,7 +23,7 @@ set foreign_key_checks = 0;
 drop table if exists `t_alert_config`;
 create table `t_alert_config` (
   `id` bigint   not null auto_increment primary key,
-  `user_id` bigint   default null,
+  `user_id` bigint  default null,
   `alert_name` varchar(128) collate utf8mb4_general_ci default null comment 'alert group name',
   `alert_type` int default 0 comment 'alert type',
   `email_params` varchar(255) collate utf8mb4_general_ci comment 'email params',
@@ -32,8 +32,8 @@ create table `t_alert_config` (
   `we_com_params` varchar(255) collate utf8mb4_general_ci comment 'wechat params',
   `http_callback_params` text collate utf8mb4_general_ci comment 'http callback params',
   `lark_params` text collate utf8mb4_general_ci comment 'lark params',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   index `inx_user_id` (`user_id`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
 
@@ -67,7 +67,7 @@ alter table `t_flink_app`
     add column `option_time` datetime default null after `create_time`,
     add column `ingress_template` text collate utf8mb4_general_ci comment 'ingress模版文件',
     add column `default_mode_ingress` text collate utf8mb4_general_ci comment '配置ingress的域名',
-    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add column `modify_time` datetime default null after `create_time`,
     add column `tags` varchar(500) default null;
 
 alter table `t_flink_log` add column `job_manager_url` varchar(255) default null after `yarn_app_id`;
@@ -78,7 +78,7 @@ alter table `t_flink_project`
     add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
     add column `git_credential` tinyint not null default 1 after `id`,
     add column `prvkey_path` varchar(255) collate utf8mb4_general_ci default null after `password`,
-    add column `modify_time` datetime not null default current_timestamp on update current_timestamp after `create_time`,
+    add column `modify_time` datetime default null after `create_time`,
     add index `inx_team` (`team_id`) using btree;
 
 update `t_flink_project` set git_credential=1 where url like 'http%';
@@ -89,7 +89,7 @@ alter table `t_flink_cluster`
     change column `dynamic_options` `dynamic_properties` text comment 'allows specifying multiple generic configuration options';
 
 -- change `update_time` to `modify_time`
-alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime not null default current_timestamp on update current_timestamp;
+alter table `t_app_build_pipe` change column `update_time` `modify_time` datetime default null on update current_timestamp;
 
 
 -- change `readed` to `is_read`
@@ -119,10 +119,10 @@ alter table `t_user` modify `create_time` datetime not null default current_time
 alter table `t_flink_cluster` modify `create_time` datetime not null default current_timestamp;
 alter table `t_access_token` modify `create_time` datetime not null default current_timestamp;
 
-alter table `t_access_token` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
-alter table `t_menu` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
-alter table `t_role` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
-alter table `t_user` modify `modify_time` datetime not null default current_timestamp on update current_timestamp;
+alter table `t_access_token` modify `modify_time` datetime default null on update current_timestamp;
+alter table `t_menu` modify `modify_time` datetime default null on update current_timestamp;
+alter table `t_role` modify `modify_time` datetime default null on update current_timestamp;
+alter table `t_user` modify `modify_time` datetime default null on update current_timestamp;
 
 -- add new modules to the menu
 delete from `t_menu`;
@@ -262,8 +262,8 @@ create table `t_team` (
   `id` bigint not null auto_increment comment 'team id',
   `team_name` varchar(50) collate utf8mb4_general_ci not null comment 'team name',
   `description` varchar(255) collate utf8mb4_general_ci default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`id`) using btree,
   unique key `team_name_idx` (`team_name`) using btree
 ) engine = innodb default charset = utf8mb4 collate = utf8mb4_general_ci;
@@ -297,8 +297,8 @@ alter table `t_member`
 add column `team_id` bigint not null comment 'team id' default 100000 after `id`,
 modify column `user_id` bigint not null comment 'user id',
 modify column `role_id` bigint not null comment 'role id',
-add column  `create_time` datetime not null default current_timestamp comment 'create time',
-add column  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+add column  `create_time` datetime default null comment 'create time',
+add column  `modify_time` datetime default null comment 'modify time',
 drop index `UN_INX`,
 add unique key `un_user_team_role_inx` (`user_id`,`team_id`,`role_id`) using btree;
 
@@ -316,9 +316,9 @@ change column `DESCRIPTION` `description` varchar(255) collate utf8mb4_general_c
 change column `TYPE` `type` tinyint not null comment '1: input 2: boolean 3: number',
 add primary key (`setting_key`);
 
-insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker Register Image namespace', 'Docker命名空间', 1);
-insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
-insert into `t_setting` values (16, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
+insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);
+insert into `t_setting` values (15, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml full path', 1);
+insert into `t_setting` values (16, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
 
 update t_setting set setting_key = replace(setting_key, 'streamx', 'streampark') where setting_key like 'streamx%';
 
@@ -339,8 +339,8 @@ create table `t_variable` (
   `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
   `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
   `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`id`) using btree,
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
