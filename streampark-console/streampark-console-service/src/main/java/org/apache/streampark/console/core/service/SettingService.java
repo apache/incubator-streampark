@@ -33,7 +33,6 @@ public interface SettingService extends IService<Setting> {
   String KEY_MAVEN_REPOSITORY = "streampark.maven.central.repository";
   String KEY_MAVEN_AUTH_USER = "streampark.maven.auth.user";
   String KEY_MAVEN_AUTH_PASSWORD = "streampark.maven.auth.password";
-  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
   String KEY_ALERT_EMAIL_HOST = "alert.email.host";
   String KEY_ALERT_EMAIL_PORT = "alert.email.port";
@@ -53,8 +52,6 @@ public interface SettingService extends IService<Setting> {
   Setting get(String key);
 
   boolean update(Setting setting);
-
-  String getStreamParkAddress();
 
   String getMavenSettings();
 
