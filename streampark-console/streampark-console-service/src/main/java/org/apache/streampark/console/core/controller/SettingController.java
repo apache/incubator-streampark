@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.bean.SettingAlertEmailConfigParams;
 import org.apache.streampark.console.core.bean.SettingDockerConfigParams;
@@ -85,6 +86,10 @@ public class SettingController {
   @PostMapping("update/docker")
   @RequiresPermissions("setting:update")
   public RestResponse updateDocker(@RequestBody SettingDockerConfigParams params) {
+    if (!SettingDockerConfigParams.verifyParams(params)) {
+      return RestResponse.fail(ResponseCode.CODE_FAIL, "The parameter is incorrect, please check!");
+    }
+
     List<Setting> settings =
         Arrays.asList(
             params.getAddress(), params.getNamespace(),
@@ -97,6 +102,10 @@ public class SettingController {
   @PostMapping("update/alert/email")
   @RequiresPermissions("setting:update")
   public RestResponse updateAlertEmail(@RequestBody SettingAlertEmailConfigParams params) {
+    if (!SettingAlertEmailConfigParams.verifyParams(params)) {
+      return RestResponse.fail(ResponseCode.CODE_FAIL, "The parameter is incorrect, please check!");
+    }
+
     List<Setting> settings =
         Arrays.asList(
             params.getHost(),
