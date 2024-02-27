@@ -33,17 +33,18 @@ public class SettingAlertEmailConfigParams {
   private Setting password;
   private Setting ssl;
   /* 只允许英文字母、数字、下划线、英文句号、以及中划线组成 */
-  private final String EMAIL_ADDRESS_REGEXP = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+  private static final String EMAIL_ADDRESS_REGEXP =
+      "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
   /* The port value must be between 0-65535 */
-  private final String PORT_REGEXP =
+  private static final String PORT_REGEXP =
       "^([1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$";
-  private final String FROM_REGEXP = "";
+  private static final String FROM_REGEXP = "";
   /*字母开头，允许5-16字节，允许字母数字下划线*/
-  private final String USER_NAME_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+  private static final String USER_NAME_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
   /*字母开头，允许5-16字节，允许字母数字下划线*/
-  private final String PASS_WORD_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+  private static final String PASS_WORD_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
   /* Whether SSL is enabled or not can only be true false */
-  private final String SSL_REGEXP = "^(true|false)$";
+  private static final String SSL_REGEXP = "^(true|false)$";
 
   public static boolean verifyParams(SettingAlertEmailConfigParams params) {
     return params.verifyHost()

@@ -32,19 +32,19 @@ public class SettingDockerConfigParams {
   private Setting namespace;
 
   /*字母开头，允许5-16字节，允许字母数字下划线*/
-  private final String USER_NAME_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+  private static final String USER_NAME_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
   /*字母开头，允许5-16字节，允许字母数字下划线*/
-  private final String PASSWORD_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+  private static final String PASSWORD_REGEXP = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
   /*ipv4 match rule  */
-  private final String IPV4_ADDRESS_REGEX =
+  private static final String IPV4_ADDRESS_REGEX =
       "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
   /*ipv6 match rule */
-  private final String IPV6_ADDRESS_REGEX = "^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)$";
+  private static final String IPV6_ADDRESS_REGEX = "^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)$";
   /* domain match rule */
-  private final String DOMAIN_NAME_REGEX =
+  private static final String DOMAIN_NAME_REGEX =
       "^((http:\\/\\/)|(https:\\/\\/))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(\\/)";
   /* Docker namespace rules based on the format of the domain name */
-  String NAMESPACE_REGEX = "^(?!-)[a-zA-Z0-9-]{1,253}(?<!-)$";
+  private static final String NAMESPACE_REGEX = "^(?!-)[a-zA-Z0-9-]{1,253}(?<!-)$";
 
   public static boolean verifyParams(SettingDockerConfigParams params) {
     return params.verifyUserName()
