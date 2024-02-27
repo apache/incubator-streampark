@@ -95,6 +95,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
   }
 
+  public boolean updateSettings(List<Setting> settings) {
+    for (Setting each : settings) {
+      boolean result = update(each);
+      if (!result) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Override
   public SenderEmail getSenderEmail() {
     try {
