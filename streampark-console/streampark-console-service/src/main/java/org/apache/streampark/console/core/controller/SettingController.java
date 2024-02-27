@@ -18,7 +18,10 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.bean.SettingAlertEmailConfigParams;
+import org.apache.streampark.console.core.bean.SettingDockerConfigParams;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
@@ -31,9 +34,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Tag(name = "SETTING_TAG")
@@ -76,7 +81,43 @@ public class SettingController {
     boolean updated = settingService.update(setting);
     return RestResponse.success(updated);
   }
-
+  
+  @Operation(summary = "Update docker setting")
+  @PostMapping("update/docker")
+  @RequiresPermissions("setting:update")
+  public RestResponse updateDocker(@RequestBody SettingDockerConfigParams params) {
+    if (!SettingDockerConfigParams.verifyParams(params)) {
+      return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
+    }
+    
+    List<Setting> settings =
+        Arrays.asList(
+            params.getAddress(), params.getNamespace(),
+            params.getUsername(), params.getPassword());
+    boolean updated = settingService.updateSettings(settings);
+    return RestResponse.success(updated);
+  }
+  
+  @Operation(summary = "Update alert email")
+  @PostMapping("update/alert/email")
+  @RequiresPermissions("setting:update")
+  public RestResponse updateAlertEmail(@RequestBody SettingAlertEmailConfigParams params) {
+    if (!SettingAlertEmailConfigParams.verifyParams(params)) {
+      return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
+    }
+    
+    List<Setting> settings =
+        Arrays.asList(
+            params.getHost(),
+            params.getPort(),
+            params.getFrom(),
+            params.getUsername(),
+            params.getPassword(),
+            params.getSsl());
+    boolean updated = settingService.updateSettings(settings);
+    return RestResponse.success(updated);
+  }
+  
   @Operation(summary = "Check hadoop status")
   @PostMapping("checkHadoop")
   public RestResponse checkHadoop() {
