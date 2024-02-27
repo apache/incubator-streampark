@@ -62,9 +62,9 @@ public class Variable implements Serializable {
 
   private Boolean desensitization;
 
-  private transient Date createTime;
+  private Date createTime;
 
-  private transient Date modifyTime;
+  private Date modifyTime;
 
   public void dataMasking() {
     if (desensitization) {

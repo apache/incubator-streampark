@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -121,6 +122,9 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public boolean createYarnQueue(YarnQueue yarnQueue) {
     ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
     ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, checkResponse.getMsg());
+    Date date = new Date();
+    yarnQueue.setCreateTime(date);
+    yarnQueue.setModifyTime(date);
     return save(yarnQueue);
   }
 
@@ -150,8 +154,10 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
     checkNotReferencedByFlinkClusters(queueFromDB.getQueueLabel(), "updating");
 
+    queueFromDB.setModifyTime(new Date());
     queueFromDB.setDescription(yarnQueue.getDescription());
     queueFromDB.setQueueLabel(yarnQueue.getQueueLabel());
+
     updateById(queueFromDB);
   }
 

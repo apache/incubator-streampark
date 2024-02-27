@@ -81,7 +81,7 @@ public class AccessTokenController {
       String expireTime,
       @RequestParam(required = false) String description)
       throws InternalException {
-    return accessTokenService.generateToken(userId, expireTime, description);
+    return accessTokenService.create(userId, expireTime, description);
   }
 
   @Operation(summary = "Verify current user token")

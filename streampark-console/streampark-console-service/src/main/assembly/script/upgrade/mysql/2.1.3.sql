@@ -32,7 +32,7 @@ alter table `t_flink_app`
     modify column `k8s_jm_pod_template` longtext,
     modify column `k8s_tm_pod_template` longtext,
     modify column `options` longtext comment 'json form of parameter collection ',
-    modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+    modify column `modify_time` datetime default null comment 'modify time';
 
 alter table `t_flink_cluster`
     modify column `options` longtext comment 'json form of parameter collection ',

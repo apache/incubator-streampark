@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 
 /** base tester. */
 @Transactional
@@ -107,6 +108,10 @@ public abstract class SpringTestBase {
     YarnQueue yarnQueue = new YarnQueue();
     yarnQueue.setTeamId(teamId);
     yarnQueue.setQueueLabel(queueLabel);
+
+    Date date = new Date();
+    yarnQueue.setCreateTime(date);
+    yarnQueue.setModifyTime(date);
     return yarnQueue;
   }
 }

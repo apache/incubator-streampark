@@ -103,7 +103,7 @@ public class FlinkCluster implements Serializable {
 
   private Integer clusterState;
 
-  private Date createTime = new Date();
+  private Date createTime;
 
   @JsonIgnore
   public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {

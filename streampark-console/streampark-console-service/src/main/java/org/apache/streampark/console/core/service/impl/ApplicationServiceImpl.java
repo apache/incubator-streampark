@@ -786,7 +786,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     appParam.setState(FlinkAppState.ADDED.getValue());
     appParam.setRelease(ReleaseState.NEED_RELEASE.get());
     appParam.setOptionState(OptionState.NONE.getValue());
-    appParam.setCreateTime(new Date());
+
+    // createTime & modifyTime
+    Date date = new Date();
+    appParam.setCreateTime(date);
+    appParam.setModifyTime(date);
+
     appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
     boolean success = validateQueueIfNeeded(appParam);
@@ -880,8 +885,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     newApp.setState(FlinkAppState.ADDED.getValue());
     newApp.setRelease(ReleaseState.NEED_RELEASE.get());
     newApp.setOptionState(OptionState.NONE.getValue());
-    newApp.setCreateTime(new Date());
     newApp.setHotParams(oldApp.getHotParams());
+
+    // createTime & modifyTime
+    Date date = new Date();
+    newApp.setCreateTime(date);
+    newApp.setModifyTime(date);
 
     newApp.setJar(oldApp.getJar());
     newApp.setJarCheckSum(oldApp.getJarCheckSum());

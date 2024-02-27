@@ -93,7 +93,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void createUser(User user) {
-    user.setCreateTime(new Date());
+    Date date = new Date();
+    user.setCreateTime(date);
+    user.setModifyTime(date);
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, user.getPassword());
     user.setSalt(salt);
@@ -131,6 +133,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
+    user.setModifyTime(new Date());
     this.baseMapper.updateById(user);
   }
 

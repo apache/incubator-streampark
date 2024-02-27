@@ -340,8 +340,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 savePoint.setAppId(application.getId());
                 savePoint.setLatest(true);
                 savePoint.setType(CheckPointType.SAVEPOINT.get());
-                savePoint.setCreateTime(new Date());
-                savePoint.setTriggerTime(new Date());
+
+                Date date = new Date();
+                savePoint.setCreateTime(date);
+                savePoint.setTriggerTime(date);
                 savePoint.setPath(savePointDir);
                 this.save(savePoint);
 
