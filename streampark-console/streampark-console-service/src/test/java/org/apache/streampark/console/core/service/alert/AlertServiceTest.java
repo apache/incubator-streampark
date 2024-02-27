@@ -91,9 +91,9 @@ class AlertServiceTest {
     senderEmail.setFrom("****@domain.com");
     senderEmail.setUserName("******");
     senderEmail.setPassword("******");
-    senderEmail.setSmtpPort(465);
+    senderEmail.setPort(465);
     senderEmail.setSsl(true);
-    senderEmail.setSmtpHost("smtp.exmail.qq.com");
+    senderEmail.setHost("smtp.exmail.qq.com");
   }
 
   void before2() {
@@ -232,15 +232,15 @@ class AlertServiceTest {
   private void sendEmail(String subject, String html, String... mails) throws EmailException {
     HtmlEmail htmlEmail = new HtmlEmail();
     htmlEmail.setCharset("UTF-8");
-    htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+    htmlEmail.setHostName(this.senderEmail.getHost());
     htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
     htmlEmail.setFrom(this.senderEmail.getFrom());
 
     if (this.senderEmail.isSsl()) {
       htmlEmail.setSSLOnConnect(true);
-      htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+      htmlEmail.setSslSmtpPort(this.senderEmail.getPort().toString());
     } else {
-      htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
+      htmlEmail.setSmtpPort(this.senderEmail.getPort());
     }
     htmlEmail.setSubject(subject);
     htmlEmail.setHtmlMsg(html);

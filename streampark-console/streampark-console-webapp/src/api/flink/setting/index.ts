@@ -60,19 +60,18 @@ export function fetchCheckHadoop(): Promise<boolean> {
   });
 }
 
-//TODO: Getting docker configuration through the backend interface
 /**
  * get docker setting info
  */
 export function fetchDockerConfig() {
-  return defHttp.post({ url: '/flink/setting/all' });
+  return defHttp.post({ url: '/flink/setting/docker' });
 }
 
 /**
  * get alert setting info
  */
-export function fetchAlertConfig() {
-  return defHttp.post({ url: '/flink/setting/all' });
+export function fetchEmailConfig() {
+  return defHttp.post({ url: '/flink/setting/email' });
 }
 
 /**
@@ -90,7 +89,7 @@ export function fetchDockerUpdate(data: Recordable): Promise<boolean> {
  * Update alert setting
  * @returns {Promise<Boolean>}
  */
-export function fetchAlertUpdate(data: Recordable): Promise<boolean> {
+export function fetchEmailUpdate(data: Recordable): Promise<boolean> {
   return defHttp.post({
     url: SETTING_APi.UPDATE_ALERT,
     data,

@@ -19,12 +19,14 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.console.core.entity.Setting;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Data
+@Getter
+@Setter
 public class SettingDockerConfigParams {
   private Setting username;
   private Setting password;
@@ -42,7 +44,7 @@ public class SettingDockerConfigParams {
   private static final String IPV6_ADDRESS_REGEX = "^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)$";
   /* domain match rule */
   private static final String DOMAIN_NAME_REGEX =
-      "^((http:\\/\\/)|(https:\\/\\/))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(\\/)";
+      "^((http://)|(https://))?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}(\\/)";
   /* Docker namespace rules based on the format of the domain name */
   private static final String NAMESPACE_REGEX = "^(?!-)[a-zA-Z0-9-]{1,253}(?<!-)$";
 

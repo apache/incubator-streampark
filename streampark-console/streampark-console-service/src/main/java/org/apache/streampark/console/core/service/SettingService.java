@@ -17,12 +17,12 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,31 +54,11 @@ public interface SettingService extends IService<Setting> {
 
   boolean update(Setting setting);
 
-  /**
-   * * Updates the specified Settings.
-   *
-   * @param settings list of setting object to update
-   * @return true if the update is successful, false otherwise
-   */
-  boolean updateSettings(List<Setting> settings);
+  boolean updateDocker(DockerConfig dockerConfig);
 
-  String getMavenSettings();
-
-  String getMavenRepository();
-
-  String getMavenAuthUser();
-
-  String getMavenAuthPassword();
+  boolean updateEmail(SenderEmail senderEmail);
 
   SenderEmail getSenderEmail();
-
-  String getDockerRegisterAddress();
-
-  String getDockerRegisterUser();
-
-  String getDockerRegisterPassword();
-
-  String getDockerRegisterNamespace();
 
   String getIngressModeDefault();
 }

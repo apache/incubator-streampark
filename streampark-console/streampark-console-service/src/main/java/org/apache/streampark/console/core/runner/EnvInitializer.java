@@ -27,10 +27,9 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.SettingService;
-
-import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,25 +110,8 @@ public class EnvInitializer implements ApplicationRunner {
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
-    String mvnSettings = settingService.getMavenSettings();
-    if (StringUtils.isNotEmpty(mvnSettings)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
-    }
-
-    String mvnRepository = settingService.getMavenRepository();
-    if (StringUtils.isNotEmpty(mvnRepository)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
-    }
-
-    String mvnAuthUser = settingService.getMavenAuthUser();
-    if (StringUtils.isNotEmpty(mvnAuthUser)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
-    }
-
-    String mvnAuthPassword = settingService.getMavenAuthPassword();
-    if (StringUtils.isNotEmpty(mvnAuthPassword)) {
-      InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
-    }
+    MavenConfig mavenConfig = MavenConfig.fromSetting();
+    mavenConfig.updateConfig();
 
     InternalConfigHolder.log();
   }
