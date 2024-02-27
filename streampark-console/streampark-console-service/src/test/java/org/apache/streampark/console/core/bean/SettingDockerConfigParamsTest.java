@@ -27,116 +27,116 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class SettingDockerConfigParamsTest {
-	private SettingDockerConfigParams dockerConfigParams;
-	private Setting setting;
-	private Method method;
-	
-	@BeforeEach
-	void setUp() {
-		dockerConfigParams = new SettingDockerConfigParams();
-		setting = new Setting();
-	}
-	
-	@Test
-	void verifyUserNameTest()
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		dockerConfigParams.setUsername(setting);
-		initVerifyMethod("verifyUserName");
-		
-		setting.setSettingValue("Aa111111");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("Aa111111@");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("Aa@aa_");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("test");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue(null);
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-	}
-	
-	@Test
-	void verifyPassWordTest()
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		dockerConfigParams.setPassword(setting);
-		initVerifyMethod("verifyPassWord");
-		
-		setting.setSettingValue("AaaAaa");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("AaAa");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("123456789");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue(null);
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-	}
-	
-	@Test
-	void verifyAddressTest()
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		dockerConfigParams.setAddress(setting);
-		initVerifyMethod("verifyAddress");
-		
-		setting.setSettingValue("https://www.google.com/");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("http://www.google.com/");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("www.google.com");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("127.0.0.1");
-		Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("htp://www.google.com");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("ww.google.com");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("localhost");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue("0.0.0");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue(null);
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-	}
-	
-	@Test
-	void verifyNameSpaceTest()
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		dockerConfigParams.setAddress(setting);
-		initVerifyMethod("verifyNameSpace");
-		
-		setting.setSettingValue("dom.mod");
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-		
-		setting.setSettingValue(null);
-		Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
-	}
-	
-	void initVerifyMethod(final String methodName) throws NoSuchMethodException {
-		Class<SettingDockerConfigParams> clazz = SettingDockerConfigParams.class;
-		method = clazz.getDeclaredMethod(methodName);
-		method.setAccessible(true);
-	}
+  private SettingDockerConfigParams dockerConfigParams;
+  private Setting setting;
+  private Method method;
+
+  @BeforeEach
+  void setUp() {
+    dockerConfigParams = new SettingDockerConfigParams();
+    setting = new Setting();
+  }
+
+  @Test
+  void verifyUserNameTest()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    dockerConfigParams.setUsername(setting);
+    initVerifyMethod("verifyUserName");
+
+    setting.setSettingValue("Aa111111");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("Aa111111@");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("Aa@aa_");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("test");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue(null);
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+  }
+
+  @Test
+  void verifyPassWordTest()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    dockerConfigParams.setPassword(setting);
+    initVerifyMethod("verifyPassWord");
+
+    setting.setSettingValue("AaaAaa");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("AaAa");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("123456789");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue(null);
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+  }
+
+  @Test
+  void verifyAddressTest()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    dockerConfigParams.setAddress(setting);
+    initVerifyMethod("verifyAddress");
+
+    setting.setSettingValue("https://www.google.com/");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("http://www.google.com/");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("www.google.com");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("127.0.0.1");
+    Assertions.assertTrue((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("htp://www.google.com");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("ww.google.com");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("localhost");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue("0.0.0");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue(null);
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+  }
+
+  @Test
+  void verifyNameSpaceTest()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    dockerConfigParams.setAddress(setting);
+    initVerifyMethod("verifyNameSpace");
+
+    setting.setSettingValue("dom.mod");
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+
+    setting.setSettingValue(null);
+    Assertions.assertFalse((boolean) method.invoke(dockerConfigParams));
+  }
+
+  void initVerifyMethod(final String methodName) throws NoSuchMethodException {
+    Class<SettingDockerConfigParams> clazz = SettingDockerConfigParams.class;
+    method = clazz.getDeclaredMethod(methodName);
+    method.setAccessible(true);
+  }
 }

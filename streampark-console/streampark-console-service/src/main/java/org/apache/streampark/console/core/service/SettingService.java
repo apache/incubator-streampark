@@ -54,7 +54,7 @@ public interface SettingService extends IService<Setting> {
   Setting get(String key);
 
   boolean update(Setting setting);
-  
+
   /**
    * * Updates the specified Settings.
    *
@@ -62,8 +62,7 @@ public interface SettingService extends IService<Setting> {
    * @return true if the update is successful, false otherwise
    */
   boolean updateSettings(List<Setting> settings);
-  
-  
+
   String getStreamParkAddress();
 
   String getMavenSettings();

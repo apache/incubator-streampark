@@ -81,7 +81,7 @@ public class SettingController {
     boolean updated = settingService.update(setting);
     return RestResponse.success(updated);
   }
-  
+
   @Operation(summary = "Update docker setting")
   @PostMapping("update/docker")
   @RequiresPermissions("setting:update")
@@ -89,7 +89,7 @@ public class SettingController {
     if (!SettingDockerConfigParams.verifyParams(params)) {
       return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
     }
-    
+
     List<Setting> settings =
         Arrays.asList(
             params.getAddress(), params.getNamespace(),
@@ -97,7 +97,7 @@ public class SettingController {
     boolean updated = settingService.updateSettings(settings);
     return RestResponse.success(updated);
   }
-  
+
   @Operation(summary = "Update alert email")
   @PostMapping("update/alert/email")
   @RequiresPermissions("setting:update")
@@ -105,7 +105,7 @@ public class SettingController {
     if (!SettingAlertEmailConfigParams.verifyParams(params)) {
       return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
     }
-    
+
     List<Setting> settings =
         Arrays.asList(
             params.getHost(),
@@ -117,7 +117,7 @@ public class SettingController {
     boolean updated = settingService.updateSettings(settings);
     return RestResponse.success(updated);
   }
-  
+
   @Operation(summary = "Check hadoop status")
   @PostMapping("checkHadoop")
   public RestResponse checkHadoop() {

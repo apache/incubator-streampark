@@ -94,7 +94,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       return false;
     }
   }
-  
+
   public boolean updateSettings(List<Setting> settings) {
     for (Setting each : settings) {
       boolean result = update(each);
@@ -104,7 +104,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
     return true;
   }
-  
+
   @Override
   public SenderEmail getSenderEmail() {
     try {
