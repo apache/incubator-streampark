@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { useModal } from '/@/components/Modal';
   export default defineComponent({
     name: 'MavenSetting',
   });
@@ -27,6 +28,7 @@
   import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import SettingForm from './SettingForm.vue';
 
   const AvatarMap = {
     'streampark.maven.settings': 'settings2',
@@ -55,15 +57,20 @@
   });
 
   const { createMessage } = useMessage();
+  const [registerModal, { openModal }] = useModal();
   function handleSwitch(record: SystemSetting) {
     emits('updateValue', record);
   }
   /* edit input */
   function handleEdit(record: SystemSetting) {
     if (record.settingKey.startsWith('docker.register')) {
-      alert('docker...');
+      openModal(true, {
+        type: 'docker',
+      });
     } else if (record.settingKey.startsWith('alert.email')) {
-      alert('email...');
+      openModal(true, {
+        type: 'alert',
+      });
     } else {
       if (!record.editable) {
         record.submitting = true;
@@ -86,8 +93,8 @@
 
 <template>
   <List>
-    <template v-for="item in data" :key="item.settingKey">
-      <ListItem v-if="AvatarMap[item.settingKey]">
+    <template v-for="item in data">
+      <ListItem v-if="AvatarMap[item.settingKey]" :key="item.settingKey">
         <ListItemMeta :title="item.settingName" :description="item.description" style="width: 50%">
           <template #avatar>
             <div class="avatar">
@@ -139,4 +146,5 @@
       </ListItem>
     </template>
   </List>
+  <SettingForm @register="registerModal" @success="emits('reload')" />
 </template>
