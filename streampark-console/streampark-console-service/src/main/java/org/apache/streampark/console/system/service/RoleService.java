@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface RoleService extends IService<Role> {
 
-  IPage<Role> findRoles(Role role, RestRequest request);
+  IPage<Role> page(Role role, RestRequest request);
 
   Role findByName(String roleName);
 

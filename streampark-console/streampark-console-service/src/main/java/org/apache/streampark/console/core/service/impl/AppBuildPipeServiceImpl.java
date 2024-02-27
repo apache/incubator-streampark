@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.FileUtils;
@@ -31,6 +30,7 @@ import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
@@ -45,12 +45,13 @@ import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -88,6 +89,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,7 +120,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private SettingService settingService;
 
@@ -126,21 +128,13 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationService applicationService;
 
+  @Autowired private FlinkClusterService flinkClusterService;
+
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   @Autowired private ApplicationConfigService applicationConfigService;
-
-  private final ExecutorService executorService =
-      new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
-          60L,
-          TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
 
   private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
@@ -150,6 +144,22 @@ public class AppBuildPipeServiceImpl
 
   private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
       Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+
+  private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+
+  private final ExecutorService buildPipelineExecutor =
+      new ThreadPoolExecutor(
+          1,
+          CPU_NUM,
+          60L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-flink-buildPipeline"));
+
+  @PreDestroy
+  public void shutdown() {
+    buildPipelineExecutor.shutdown();
+  }
 
   @Override
   public boolean buildApplication(@Nonnull Application app, ApplicationLog applicationLog) {
@@ -180,8 +190,8 @@ public class AppBuildPipeServiceImpl
             app.setRelease(ReleaseState.RELEASING.get());
             applicationService.updateRelease(app);
 
-            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
-              flinkRESTAPIWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.initialize();
             }
 
             // 1) checkEnv
@@ -240,7 +250,7 @@ public class AppBuildPipeServiceImpl
             } else {
               Message message =
                   new Message(
-                      commonService.getUserId(),
+                      serviceHelper.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       Utils.stringifyException(snapshot.error().exception()),
@@ -254,8 +264,8 @@ public class AppBuildPipeServiceImpl
             }
             applicationService.updateRelease(app);
             applicationLogService.save(applicationLog);
-            if (flinkRESTAPIWatcher.isWatchingApp(app.getId())) {
-              flinkRESTAPIWatcher.init();
+            if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
+              flinkAppHttpWatcher.initialize();
             }
           }
         });
@@ -288,8 +298,7 @@ public class AppBuildPipeServiceImpl
     DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
     DOCKER_PUSH_PG_SNAPSHOTS.invalidate(app.getId());
-    // async release pipeline
-    executorService.submit((Runnable) pipeline::launch);
+    buildPipelineExecutor.submit(pipeline::launch);
     return saved;
   }
 
@@ -328,6 +337,13 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
+        String k8sNamespace = app.getK8sNamespace();
+        String clusterId = app.getClusterId();
+        if (app.getFlinkClusterId() != null) {
+          FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+          k8sNamespace = flinkCluster.getK8sNamespace();
+          clusterId = flinkCluster.getClusterId();
+        }
         FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
             new FlinkK8sSessionBuildRequest(
                 app.getJobName(),
@@ -338,8 +354,8 @@ public class AppBuildPipeServiceImpl
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 app.getMavenArtifact(),
-                app.getClusterId(),
-                app.getK8sNamespace());
+                clusterId,
+                k8sNamespace);
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
@@ -353,7 +369,7 @@ public class AppBuildPipeServiceImpl
                 app.getDevelopmentMode(),
                 flinkEnv.getFlinkVersion(),
                 app.getMavenArtifact(),
-                app.getClusterId(),
+                app.getJobName(),
                 app.getK8sNamespace(),
                 app.getFlinkImage(),
                 app.getK8sPodTemplates(),
@@ -378,7 +394,7 @@ public class AppBuildPipeServiceImpl
 
     FsOperator localFS = FsOperator.lfs();
     // 1. copy jar to local upload dir
-    if (app.isFlinkSqlJob() || app.isApacheFlinkCustomCodeJob()) {
+    if (app.isFlinkSqlJob() || app.isCustomCodeJob()) {
       if (!app.getMavenDependency().getJar().isEmpty()) {
         for (String jar : app.getMavenDependency().getJar()) {
           File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -393,14 +409,14 @@ public class AppBuildPipeServiceImpl
       }
     }
 
-    if (app.isApacheFlinkCustomCodeJob()) {
+    if (app.isCustomCodeJob()) {
       // customCode upload jar to appHome...
       FsOperator fsOperator = app.getFsOperator();
       ResourceFrom resourceFrom = ResourceFrom.of(app.getResourceFrom());
 
       File userJar;
       if (resourceFrom == ResourceFrom.CICD) {
-        userJar = getAppDistJar(app);
+        userJar = getCustomCodeAppDistJar(app);
       } else if (resourceFrom == ResourceFrom.UPLOAD) {
         userJar = new File(WebUtils.getAppTempDir(), app.getJar());
       } else {
@@ -484,15 +500,17 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  private File getAppDistJar(Application app) {
-    if (app.getApplicationType() == ApplicationType.STREAMPARK_FLINK) {
-      return new File(app.getDistHome(), app.getModule().concat(".jar"));
+  private File getCustomCodeAppDistJar(Application app) {
+    switch (app.getApplicationType()) {
+      case APACHE_FLINK:
+        return new File(app.getDistHome(), app.getJar());
+      case STREAMPARK_FLINK:
+        String userJar = String.format("%s/lib/%s.jar", app.getDistHome(), app.getModule());
+        return new File(userJar);
+      default:
+        throw new IllegalArgumentException(
+            "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
     }
-    if (app.getApplicationType() == ApplicationType.APACHE_FLINK) {
-      return new File(app.getDistHome(), app.getJar());
-    }
-    throw new IllegalArgumentException(
-        "[StreamPark] unsupported ApplicationType of custom code: " + app.getApplicationType());
   }
 
   /** copy from {@link ApplicationServiceImpl#start(Application, boolean)} */
@@ -511,7 +529,7 @@ public class AppBuildPipeServiceImpl
                     + app.getApplicationType());
         }
       case FLINK_SQL:
-        String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+        String sqlDistJar = serviceHelper.getSqlClientJar(flinkEnv);
         return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
       default:
         throw new UnsupportedOperationException(

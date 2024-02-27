@@ -34,12 +34,11 @@ import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
-import org.apache.streampark.console.core.enums.GitCredential;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
-import org.apache.streampark.console.core.task.FlinkRESTAPIWatcher;
+import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
 import org.apache.flink.configuration.MemorySize;
@@ -81,17 +80,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Autowired private ApplicationService applicationService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private final ExecutorService executorService =
+  private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+
+  private final ExecutorService projectBuildExecutor =
       new ThreadPoolExecutor(
-          Runtime.getRuntime().availableProcessors() * 5,
-          Runtime.getRuntime().availableProcessors() * 10,
+          CPU_NUM,
+          CPU_NUM,
           60L,
           TimeUnit.SECONDS,
-          new LinkedBlockingQueue<>(1024),
-          ThreadUtils.threadFactory("streampark-build-executor"),
-          new ThreadPoolExecutor.AbortPolicy());
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-project-build"));
 
   @Override
   public RestResponse create(Project project) {
@@ -100,7 +100,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     long count = count(queryWrapper);
     RestResponse response = RestResponse.success();
     if (count == 0) {
-      project.setCreateTime(new Date());
+      Date date = new Date();
+      project.setCreateTime(date);
+      project.setModifyTime(date);
       boolean status = save(project);
       if (status) {
         return response.message("Add project successfully").data(true);
@@ -126,14 +128,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setName(projectParam.getName());
     project.setUrl(projectParam.getUrl());
     project.setBranches(projectParam.getBranches());
-    project.setGitCredential(projectParam.getGitCredential());
     project.setPrvkeyPath(projectParam.getPrvkeyPath());
     project.setUserName(projectParam.getUserName());
     project.setPassword(projectParam.getPassword());
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
-    if (GitCredential.isSSH(project.getGitCredential())) {
+    project.setModifyTime(new Date());
+    if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {
       project.setPrvkeyPath(null);
@@ -178,7 +180,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public IPage<Project> page(Project project, RestRequest request) {
-    Page<Project> page = new MybatisPager<Project>().getDefaultPage(request);
+    Page<Project> page = MybatisPager.getPage(request);
     return this.baseMapper.page(page, project);
   }
 
@@ -206,7 +208,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
               if (buildState == BuildState.SUCCESSFUL) {
                 baseMapper.updateBuildTime(id);
               }
-              flinkRESTAPIWatcher.init();
+              flinkAppHttpWatcher.initialize();
             },
             fileLogger -> {
               List<Application> applications =
@@ -221,10 +223,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     app.setBuild(true);
                     this.applicationService.updateRelease(app);
                   });
-              flinkRESTAPIWatcher.init();
+              flinkAppHttpWatcher.initialize();
             });
     CompletableFuture<Void> buildTask =
-        CompletableFuture.runAsync(projectBuildTask, executorService);
+        CompletableFuture.runAsync(projectBuildTask, projectBuildExecutor);
     // TODO May need to define parameters to set the build timeout in the future.
     CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
   }
@@ -271,10 +273,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public String getAppConfPath(Long id, String module) {
     Project project = getById(id);
     File appHome = project.getDistHome();
+    File[] files = appHome.listFiles();
+    if (!appHome.exists() || files == null) {
+      return null;
+    }
     Optional<File> fileOptional =
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-            .filter((x) -> x.getName().equals(module))
-            .findFirst();
+        Arrays.stream(files).filter((x) -> x.getName().equals(module)).findFirst();
     return fileOptional.map(File::getAbsolutePath).orElse(null);
   }
 

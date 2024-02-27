@@ -14,56 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { dateToDuration } from '/@/utils/dateUtil';
-import { BasicColumn } from '/@/components/Table';
-import {
-  AppStateEnum,
-  ExecModeEnum,
-  FailoverStrategyEnum,
-  ReleaseStateEnum,
-} from '/@/enums/flinkEnum';
-import { useI18n } from '/@/hooks/web/useI18n';
-const { t } = useI18n();
-
-/* app */
-export const getAppColumns = (): BasicColumn[] => [
-  {
-    title: t('flink.app.appName'),
-    dataIndex: 'jobName',
-    align: 'left',
-    fixed: 'left',
-    width: 250,
-  },
-  { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion', width: 110 },
-  { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
-  {
-    title: t('flink.app.runStatus'),
-    dataIndex: 'state',
-    width: 120,
-    filters: [
-      { text: t('flink.app.runStatusOptions.added'), value: String(AppStateEnum.ADDED) },
-      { text: t('flink.app.runStatusOptions.starting'), value: String(AppStateEnum.STARTING) },
-      { text: t('flink.app.runStatusOptions.running'), value: String(AppStateEnum.RUNNING) },
-      { text: t('flink.app.runStatusOptions.failed'), value: String(AppStateEnum.FAILED) },
-      { text: t('flink.app.runStatusOptions.canceled'), value: String(AppStateEnum.CANCELED) },
-      { text: t('flink.app.runStatusOptions.finished'), value: String(AppStateEnum.FINISHED) },
-      { text: t('flink.app.runStatusOptions.suspended'), value: String(AppStateEnum.SUSPENDED) },
-      { text: t('flink.app.runStatusOptions.lost'), value: String(AppStateEnum.LOST) },
-      { text: t('flink.app.runStatusOptions.silent'), value: String(AppStateEnum.SILENT) },
-      { text: t('flink.app.runStatusOptions.terminated'), value: String(AppStateEnum.TERMINATED) },
-    ],
-  },
-  { title: t('flink.app.releaseBuild'), dataIndex: 'release', width: 220 },
-  {
-    title: t('flink.app.duration'),
-    dataIndex: 'duration',
-    sorter: true,
-    width: 150,
-    customRender: ({ value }) => dateToDuration(value),
-  },
-  { title: t('flink.app.modifiedTime'), dataIndex: 'modifyTime', sorter: true, width: 165 },
-  { title: t('flink.app.owner'), dataIndex: 'nickName', width: 100 },
-];
+import { ExecModeEnum, FailoverStrategyEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
 
 /* Get diff editor configuration */
 export const getMonacoOptions = (readOnly: boolean) => {

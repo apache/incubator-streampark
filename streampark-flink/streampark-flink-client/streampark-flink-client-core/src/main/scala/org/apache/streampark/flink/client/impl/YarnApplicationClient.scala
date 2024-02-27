@@ -30,7 +30,7 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
-import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
@@ -46,6 +46,7 @@ object YarnApplicationClient extends YarnClientTrait {
   private[this] lazy val workspace = Workspace.remote
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       submitRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser
@@ -85,10 +86,6 @@ object YarnApplicationClient extends YarnClientTrait {
         PipelineOptions.JARS,
         Collections.singletonList(
           submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath))
-      // yarn application name
-      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
-      // yarn application Type
-      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
     logInfo(s"""
                |------------------------------------------------------------------
@@ -136,6 +133,12 @@ object YarnApplicationClient extends YarnClientTrait {
         }
       }
     })
+  }
+
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+    super.doCancel(cancelRequest, flinkConf)
   }
 
 }

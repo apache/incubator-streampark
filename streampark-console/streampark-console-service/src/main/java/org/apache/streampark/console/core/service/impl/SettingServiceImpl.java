@@ -158,13 +158,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   }
 
   @Override
-  public String getStreamParkAddress() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
   public String getMavenSettings() {
     return SETTINGS.getOrDefault(SettingService.KEY_MAVEN_SETTINGS, emptySetting).getSettingValue();
   }

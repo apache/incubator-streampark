@@ -127,7 +127,7 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     val dockerConf = request.dockerConfig
     val baseImageTag = request.flinkBaseImage.trim
     val pushImageTag = {
-      val expectedImageTag = s"streamparkflinkjob-${request.k8sNamespace}-${request.clusterId}"
+      val expectedImageTag = s"streampark-${request.k8sNamespace}-${request.clusterId}"
       compileTag(expectedImageTag, dockerConf.registerAddress, dockerConf.imageNamespace)
     }
 
@@ -203,16 +203,15 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     }.getOrElse(throw getError.exception)
 
     // Step-8:  init build workspace of ingress
-    val ingressOutputPath = request.ingressTemplate match {
-      case ingress if StringUtils.isBlank(ingress) =>
-        skipStep(8)
-        ""
+    request.ingressTemplate match {
+      case ingress if StringUtils.isBlank(ingress) => skipStep(8)
       case _ =>
         execStep(8) {
-          val ingressOutputPath =
-            IngressController.prepareIngressTemplateFiles(buildWorkspace, request.ingressTemplate)
-          logInfo(s"export flink ingress: $ingressOutputPath")
-          ingressOutputPath
+          val path = IngressController.prepareIngressTemplateFiles(
+            buildWorkspace,
+            request.ingressTemplate
+          )
+          logInfo(s"export flink ingress: $path")
         }.getOrElse(throw getError.exception)
     }
 

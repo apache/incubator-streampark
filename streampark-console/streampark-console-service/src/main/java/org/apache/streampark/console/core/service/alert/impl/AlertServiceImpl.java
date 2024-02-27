@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
+import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.util.SpringContextUtils;
@@ -39,22 +40,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class AlertServiceImpl implements AlertService {
   @Autowired private AlertConfigService alertConfigService;
 
+  private final ExecutorService notifyExecutor =
+      new ThreadPoolExecutor(
+          1,
+          2,
+          20L,
+          TimeUnit.SECONDS,
+          new LinkedBlockingQueue<>(),
+          ThreadUtils.threadFactory("streampark-notify"));
+
   @Override
   public void alert(Application application, CheckPointStatus checkPointStatus) {
     AlertTemplate alertTemplate = AlertTemplate.of(application, checkPointStatus);
-    alert(application, alertTemplate);
+    notifyExecutor.submit(() -> alert(application, alertTemplate));
   }
 
   @Override
   public void alert(Application application, FlinkAppState appState) {
     AlertTemplate alertTemplate = AlertTemplate.of(application, appState);
-    alert(application, alertTemplate);
+    notifyExecutor.submit(() -> alert(application, alertTemplate));
   }
 
   private void alert(Application application, AlertTemplate alertTemplate) {
@@ -73,6 +87,7 @@ public class AlertServiceImpl implements AlertService {
   @Override
   public boolean alert(AlertConfigWithParams params, AlertTemplate alertTemplate)
       throws AlertException {
+
     List<AlertType> alertTypes = AlertType.decode(params.getAlertType());
     if (CollectionUtils.isEmpty(alertTypes)) {
       return true;

@@ -54,6 +54,8 @@ object ConfigConst {
   /** kerberos */
   val KEY_KERBEROS = "kerberos"
 
+  val KEY_KERBEROS_SERVICE_ACCOUNT = "kubernetes.service-account"
+
   val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
 
   /** hadoop.security.authentication */
@@ -201,7 +203,7 @@ object ConfigConst {
     println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
     println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
     println("                                       /_/                        \n\n")
-    println("    Version:  2.1.2                                          ")
+    println("    Version:  2.1.3                                          ")
     println("    WebSite:  https://streampark.apache.org                           ")
     println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
     println(s"    Info   :  $info                                 ")

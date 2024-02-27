@@ -22,7 +22,8 @@ import org.apache.streampark.console.core.enums.CheckPointType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,7 +31,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 public class CheckPoints implements Serializable {
 
   private List<CheckPoint> history;
@@ -45,7 +47,8 @@ public class CheckPoints implements Serializable {
     return latest.getLatestCheckpoint();
   }
 
-  @Data
+  @Getter
+  @Setter
   public static class CheckPoint implements Serializable {
     private Long id;
     private String status;
@@ -91,7 +94,8 @@ public class CheckPoints implements Serializable {
     }
   }
 
-  @Data
+  @Getter
+  @Setter
   public static class Latest implements Serializable {
     private CheckPoint completed;
     private CheckPoint savepoint;

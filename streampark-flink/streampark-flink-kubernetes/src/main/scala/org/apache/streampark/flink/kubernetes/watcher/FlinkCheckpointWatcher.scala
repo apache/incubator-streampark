@@ -116,8 +116,8 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
         Checkpoint.as(
           Request
             .get(s"$flinkJmRestUrl/jobs/${trackId.jobId}/checkpoints")
-            .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-            .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
             .execute
             .returnContent
             .asString(StandardCharsets.UTF_8)) match {
@@ -161,10 +161,10 @@ object Checkpoint {
           case _ =>
             val cp = Checkpoint(
               id = (completed \ "id").extractOpt[Long].getOrElse(0L),
-              status = (completed \ "status").extractOpt[String].getOrElse(null),
-              externalPath = (completed \ "external_path").extractOpt[String].getOrElse(null),
+              status = (completed \ "status").extractOpt[String].orNull,
+              externalPath = (completed \ "external_path").extractOpt[String].orNull,
               isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
-              checkpointType = (completed \ "checkpoint_type").extractOpt[String].getOrElse(null),
+              checkpointType = (completed \ "checkpoint_type").extractOpt[String].orNull,
               triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
             )
             Some(cp)

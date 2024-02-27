@@ -24,7 +24,7 @@ public class RestResponse extends HashMap<String, Object> {
   public static final String STATUS_SUCCESS = "success";
   public static final String STATUS_FAIL = "error";
 
-  private static final long serialVersionUID = -8713837118340960775L;
+  private static final long serialVersionUID = 1L;
 
   public static RestResponse success(Object data) {
     RestResponse resp = new RestResponse();

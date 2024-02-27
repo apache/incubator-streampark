@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.Utils
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.networking.v1beta1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.ClusterClient
 
 import scala.collection.JavaConverters._
@@ -30,7 +31,7 @@ import scala.util.Try
 
 class IngressStrategyV1beta1 extends IngressStrategy {
 
-  override def ingressUrlAddress(
+  override def getIngressUrl(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
@@ -47,6 +48,17 @@ class IngressStrategyV1beta1 extends IngressStrategy {
           case e =>
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
         }.get
+    }
+  }
+
+  override def buildIngressAnnotations(
+      clusterId: String,
+      namespace: String): Map[String, String] = {
+    val map = super.buildIngressAnnotations(clusterId, namespace)
+    if (StringUtils.isNotBlank(ingressClass)) {
+      Map("kubernetes.io/ingress.class" -> ingressClass) ++ map
+    } else {
+      map
     }
   }
 

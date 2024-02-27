@@ -23,6 +23,8 @@ import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.AppExistsState;
 
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +88,8 @@ public interface ApplicationService extends IService<Application> {
 
   boolean checkAlter(Application application);
 
+  Map<String, String> getRumtimeConfig(Long id);
+
   void updateRelease(Application application);
 
   List<Application> getByProjectId(Long id);
@@ -120,4 +124,8 @@ public interface ApplicationService extends IService<Application> {
   List<String> historyUploadJars();
 
   String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception;
+
+  AppExistsState checkStart(Application app);
+
+  List<ApplicationReport> getYARNApplication(String appName);
 }

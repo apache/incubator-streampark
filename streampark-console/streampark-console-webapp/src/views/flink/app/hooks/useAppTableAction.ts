@@ -65,12 +65,6 @@ export const useAppTableAction = (
   function getActionList(record: AppListRecord, currentPageNo: number): ActionItem[] {
     return [
       {
-        tooltip: { title: t('flink.app.operation.edit') },
-        auth: 'app:update',
-        icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record, currentPageNo),
-      },
-      {
         tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
@@ -105,6 +99,12 @@ export const useAppTableAction = (
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.edit') },
+        auth: 'app:update',
+        icon: 'clarity:note-edit-line',
+        onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },
@@ -264,14 +264,24 @@ export const useAppTableAction = (
 
   const formConfig = computed((): Partial<FormProps> => {
     const tableFormConfig: FormProps = {
-      baseColProps: { span: 5, style: { paddingRight: '20px' } },
-      actionColOptions: { span: 4 },
+      baseColProps: { span: 4, style: { paddingRight: '30px' } },
+      actionColOptions: { style: { paddingRight: '0px' } },
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
         router.push({ path: '/flink/app/add' });
       },
       schemas: [
+        {
+          label: t('flink.app.searchName'),
+          field: 'jobName',
+          component: 'Input',
+          componentProps: {
+            placeholder: t('flink.app.searchName'),
+            onChange: handlePageDataReload.bind(null, false),
+            onSearch: handlePageDataReload.bind(null, false),
+          },
+        },
         {
           label: t('flink.app.tags'),
           field: 'tags',
@@ -310,16 +320,6 @@ export const useAppTableAction = (
             onChange: handlePageDataReload.bind(null, false),
           },
         },
-        {
-          label: t('flink.app.searchName'),
-          field: 'jobName',
-          component: 'Input',
-          componentProps: {
-            placeholder: t('flink.app.searchName'),
-            onChange: handlePageDataReload.bind(null, false),
-            onSearch: handlePageDataReload.bind(null, false),
-          },
-        },
       ],
     };
     if (hasPermission('app:create')) {
@@ -329,6 +329,7 @@ export const useAppTableAction = (
           text: t('common.add'),
           color: 'primary',
           preIcon: 'ant-design:plus-outlined',
+          style: { float: 'right' },
         },
       });
     }

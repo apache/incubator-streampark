@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenState;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
@@ -52,7 +52,7 @@ public class AccessTokenController {
 
   @Autowired private AccessTokenService accessTokenService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   /** generate token string */
   @Operation(summary = "Create token")
@@ -81,13 +81,13 @@ public class AccessTokenController {
       String expireTime,
       @RequestParam(required = false) String description)
       throws InternalException {
-    return accessTokenService.generateToken(userId, expireTime, description);
+    return accessTokenService.create(userId, expireTime, description);
   }
 
   @Operation(summary = "Verify current user token")
   @PostMapping(value = "check")
   public RestResponse verifyToken() {
-    Long userId = commonService.getUserId();
+    Long userId = serviceHelper.getUserId();
     RestResponse restResponse = RestResponse.success();
     if (userId != null) {
       AccessToken accessToken = accessTokenService.getByUserId(userId);
@@ -117,7 +117,7 @@ public class AccessTokenController {
   @RequiresPermissions("token:view")
   public RestResponse tokensList(
       RestRequest restRequest, @Parameter(hidden = true) AccessToken accessToken) {
-    IPage<AccessToken> accessTokens = accessTokenService.findAccessTokens(accessToken, restRequest);
+    IPage<AccessToken> accessTokens = accessTokenService.page(accessToken, restRequest);
     return RestResponse.success(accessTokens);
   }
 
@@ -170,7 +170,7 @@ public class AccessTokenController {
     curlBuilder
         .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
         .addHeader(
-            "Authorization", accessTokenService.getByUserId(commonService.getUserId()).getToken());
+            "Authorization", accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
 
     if ("/flink/app/start".equalsIgnoreCase(path)) {
       resultCURL =

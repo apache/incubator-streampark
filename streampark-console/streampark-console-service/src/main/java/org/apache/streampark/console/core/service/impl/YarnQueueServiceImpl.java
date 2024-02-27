@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,12 +73,10 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Override
-  public IPage<YarnQueue> findYarnQueues(YarnQueue yarnQueue, RestRequest request) {
+  public IPage<YarnQueue> page(YarnQueue yarnQueue, RestRequest request) {
     Utils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
     Utils.notNull(yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
-    Page<YarnQueue> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<YarnQueue> page = MybatisPager.getPage(request);
     return this.baseMapper.findQueues(page, yarnQueue);
   }
 
@@ -122,6 +122,9 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   public boolean createYarnQueue(YarnQueue yarnQueue) {
     ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
     ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, checkResponse.getMsg());
+    Date date = new Date();
+    yarnQueue.setCreateTime(date);
+    yarnQueue.setModifyTime(date);
     return save(yarnQueue);
   }
 
@@ -151,8 +154,10 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
     checkNotReferencedByFlinkClusters(queueFromDB.getQueueLabel(), "updating");
 
+    queueFromDB.setModifyTime(new Date());
     queueFromDB.setDescription(yarnQueue.getDescription());
     queueFromDB.setQueueLabel(yarnQueue.getQueueLabel());
+
     updateById(queueFromDB);
   }
 
@@ -236,7 +241,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             .stream()
             .filter(
                 application -> {
-                  application.setYarnQueueByHotParams();
+                  application.setByHotParams();
                   return StringUtils.equals(application.getYarnQueue(), queueLabel);
                 })
             .collect(Collectors.toList());

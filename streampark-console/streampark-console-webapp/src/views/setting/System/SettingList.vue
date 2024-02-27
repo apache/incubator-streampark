@@ -16,6 +16,7 @@
 -->
 <script lang="ts">
   import { defineComponent } from 'vue';
+  import { useModal } from '/@/components/Modal';
   export default defineComponent({
     name: 'MavenSetting',
   });
@@ -27,23 +28,16 @@
   import { fetchSystemSettingUpdate } from '/@/api/flink/setting';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import SettingForm from './SettingForm.vue';
 
   const AvatarMap = {
-    'streampark.maven.settings': 'settings',
+    'streampark.maven.settings': 'settings2',
     'streampark.maven.central.repository': 'maven',
     'streampark.maven.auth.user': 'user',
     'streampark.maven.auth.password': 'mvnpass',
     'docker.register.address': 'docker',
-    'docker.register.namespace': 'namespace',
-    'docker.register.user': 'auth',
-    'docker.register.password': 'password',
-    'alert.email.host': 'host',
-    'alert.email.port': 'port',
     'alert.email.from': 'mail',
-    'alert.email.userName': 'user',
-    'alert.email.password': 'keys',
-    'alert.email.ssl': 'ssl',
-    'ingress.mode.default': 'settings',
+    'ingress.mode.default': 'nginx',
   };
 
   const ListItem = List.Item;
@@ -63,15 +57,26 @@
   });
 
   const { createMessage } = useMessage();
+  const [registerModal, { openModal }] = useModal();
   function handleSwitch(record: SystemSetting) {
     emits('updateValue', record);
   }
   /* edit input */
   function handleEdit(record: SystemSetting) {
-    if (!record.editable) {
-      record.submitting = true;
+    if (record.settingKey.startsWith('docker.register')) {
+      openModal(true, {
+        type: 'docker',
+      });
+    } else if (record.settingKey.startsWith('alert.email')) {
+      openModal(true, {
+        type: 'alert',
+      });
+    } else {
+      if (!record.editable) {
+        record.submitting = true;
+      }
+      record.editable = !record.editable;
     }
-    record.editable = !record.editable;
   }
   /* edit commit */
   async function handleSubmit(record: SystemSetting) {
@@ -88,8 +93,8 @@
 
 <template>
   <List>
-    <template v-for="item in data" :key="item.settingKey">
-      <ListItem>
+    <template v-for="item in data">
+      <ListItem v-if="AvatarMap[item.settingKey]" :key="item.settingKey">
         <ListItemMeta :title="item.settingName" :description="item.description" style="width: 50%">
           <template #avatar>
             <div class="avatar">
@@ -127,14 +132,19 @@
         <template #actions>
           <div v-if="item.type === 1" v-auth="'setting:update'">
             <a v-if="!item.submitting" @click="handleEdit(item)">
-              {{ t('common.edit') }}
+              <a-button type="primary" shape="circle">
+                <SvgIcon name="edit" />
+              </a-button>
             </a>
             <a v-else @click="handleSubmit(item)">
-              {{ t('common.submitText') }}
+              <a-button type="primary" shape="circle">
+                <SvgIcon name="save" />
+              </a-button>
             </a>
           </div>
         </template>
       </ListItem>
     </template>
   </List>
+  <SettingForm @register="registerModal" @success="emits('reload')" />
 </template>

@@ -25,7 +25,7 @@ insert into "public"."t_team" values (100000, 'default', null, now(), now());
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into "public"."t_flink_app" values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, true, null, null, null, null, null, null, false, null, null, null, 'streampark,test');
+insert into "public"."t_flink_app" values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, true, null, null, null, null, null, null, false, null, null, null, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -35,7 +35,7 @@ insert into "public"."t_flink_effective" values (100000, 100000, 2, 100000, now(
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into "public"."t_flink_project" values (100000, 100000, 'streampark-quickstart', '1', 'https://github.com/apache/incubator-streampark-quickstart', 'release-2.0.0', null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
+insert into "public"."t_flink_project" values (100000, 100000, 'streampark-quickstart', 'https://github.com/apache/incubator-streampark-quickstart', 'release-2.0.0', null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
 
 
 -- ----------------------------
@@ -46,12 +46,11 @@ insert into "public"."t_flink_sql" values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
-insert into "public"."t_menu" values (110000, 0, 'menu.system', '/system', 'PageView', null, 'desktop', '0', '1', 1, now(), now());
-insert into "public"."t_menu" values (120000, 0, 'StreamPark', '/flink', 'PageView', null, 'build', '0', '1', 2, now(), now());
-insert into "public"."t_menu" values (130000, 0, 'menu.setting', '/setting', 'PageView', null, 'setting', '0', '1', 5, now(), now());
+insert into "public"."t_menu" values (110000, 0, 'menu.system', '/system', 'PageView', null, null, '0', '1', 3, now(), now());
+insert into "public"."t_menu" values (120000, 0, 'Apache Flink', '/flink', 'PageView', null, null, '0', '1', 1, now(), now());
+insert into "public"."t_menu" values (130000, 0, 'menu.setting', '/setting', 'PageView', null, null, '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (110100, 110000, 'menu.userManagement', '/system/user', 'system/user/User', null, 'user', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (110200, 110000, 'menu.roleManagement', '/system/role', 'system/role/Role', null, 'smile', '0', '1', 2, now(), now());
-insert into "public"."t_menu" values (110300, 110000, 'menu.menuManagement', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, now(), now());
 insert into "public"."t_menu" values (110400, 110000, 'menu.tokenManagement', '/system/token', 'system/token/Token', null, 'lock', '0', '1', 1, now(), now());
 insert into "public"."t_menu" values (110500, 110000, 'menu.teamManagement', '/system/team', 'system/team/Team', null, 'team', '0', '1', 2, now(), now());
 insert into "public"."t_menu" values (110600, 110000, 'menu.memberManagement', '/system/member', 'system/member/Member', null, 'usergroup-add', '0', '1', 2, now(), now());
@@ -228,21 +227,21 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
-insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
-insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
-insert into "public"."t_setting" values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
-insert into "public"."t_setting" values (5, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-insert into "public"."t_setting" values (6, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-insert into "public"."t_setting" values (7, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
-insert into "public"."t_setting" values (8, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-insert into "public"."t_setting" values (9, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-insert into "public"."t_setting" values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-insert into "public"."t_setting" values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
-insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
-insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
-insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
-insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
+insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml full path', 1);
+insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);
+insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven private server authentication username', 1);
+insert into "public"."t_setting" values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven private server authentication password', 1);
+insert into "public"."t_setting" values (5, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
+insert into "public"."t_setting" values (6, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
+insert into "public"."t_setting" values (7, 'alert.email.from', null, 'Alert Sender Email', 'Email to send alerts', 1);
+insert into "public"."t_setting" values (8, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
+insert into "public"."t_setting" values (9, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
+insert into "public"."t_setting" values (10, 'alert.email.ssl', 'false', 'Alert Email SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
+insert into "public"."t_setting" values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
+insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
+insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
+insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);
+insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
 
 -- ----------------------------
 -- Records of t_user

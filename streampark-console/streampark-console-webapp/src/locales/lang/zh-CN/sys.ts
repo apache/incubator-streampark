@@ -17,7 +17,7 @@
 export default {
   api: {
     operationFailed: '操作失败',
-    errorTip: '错误提示',
+    errorTip: '出错啦！',
     errorMessage: '操作失败,系统异常!',
     timeoutMessage: '登录超时,请重新登录!',
     apiTimeoutMessage: '接口请求超时,请刷新页面重试!',
@@ -51,15 +51,11 @@ export default {
     tableColumnFile: '文件',
     tableColumnMsg: '错误信息',
     tableColumnStackMsg: 'stack信息',
-
     tableActionDesc: '详情',
-
     modalTitle: '错误详情',
-
     fireVueError: '点击触发vue错误',
     fireResourceError: '点击触发资源加载错误',
     fireAjaxError: '点击触发ajax错误',
-
     enableMessage: '只在`/src/settings/projectSetting.ts` 内的useErrorHandle=true时生效.',
   },
   exception: {

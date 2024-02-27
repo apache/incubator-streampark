@@ -619,8 +619,8 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.hamcrest/hamcrest-core/1.3 BSD-3-Clause
     https://mvnrepository.com/artifact/org.ow2.asm/asm/5.0.4 BSD-3-Clause
     https://mvnrepository.com/artifact/org.owasp.encoder/encoder/1.2.3 BSD-3-Clause
-    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/5.13.1.202206130422-r BSD-3-Clause
-    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.jsch/5.13.1.202206130422-r BSD-3-Clause
+    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/5.13.3.202401111512-r BSD-3-Clause
+    https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.jsch/5.13.3.202401111512-r BSD-3-Clause
     https://mvnrepository.com/artifact/org.ow2.asm/asm/8.0 BSD-3-Clause
     https://mvnrepository.com/artifact/org.ow2.asm/asm-analysis/8.0 BSD-3-Clause
     https://mvnrepository.com/artifact/org.ow2.asm/asm-commons/8.0 BSD-3-Clause

@@ -211,3 +211,11 @@ export enum FailoverStrategyEnum {
   ALERT = 1,
   RESTART = 2,
 }
+
+export enum AppExistsEnum {
+  NO = 0,
+  IN_DB = 1,
+  IN_YARN = 2,
+  IN_KUBERNETES = 3,
+  INVALID = 4,
+}

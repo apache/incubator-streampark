@@ -29,7 +29,12 @@
         select * from t_role
         <where>
             <if test="role.roleName != null and role.roleName != ''">
-                and role_name like concat('%',#{role.roleName},'%')
+                <if test="_databaseId == 'mysql'">
+                    and role_name like concat('%', #{role.roleName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and role_name like '%' || #{role.roleName} || '%'
+                </if>
             </if>
             <if test="role.createTimeFrom != null and role.createTimeFrom !=''">
                 and  create_time &gt; #{role.createTimeFrom}
@@ -38,9 +43,6 @@
                 and  create_time &lt; #{role.createTimeTo}
             </if>
         </where>
-        <if test="role.sortField != null and role.sortField != ''">
-            order by ${role.sortField} ${role.sortOrder}
-        </if>
     </select>
 
 </mapper>

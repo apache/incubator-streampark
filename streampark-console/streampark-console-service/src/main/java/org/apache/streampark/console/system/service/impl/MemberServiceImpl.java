@@ -20,6 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -74,11 +75,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public IPage<Member> findUsers(Member member, RestRequest request) {
+  public IPage<Member> page(Member member, RestRequest request) {
     ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
-    Page<Member> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+    Page<Member> page = MybatisPager.getPage(request);
     return baseMapper.findUsers(page, member);
   }
 
@@ -145,8 +144,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     member.setId(null);
     member.setUserId(user.getUserId());
-    member.setCreateTime(new Date());
-    member.setModifyTime(team.getCreateTime());
+
+    Date date = new Date();
+    member.setCreateTime(date);
+    member.setModifyTime(date);
     this.save(member);
   }
 
@@ -178,6 +179,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 new ApiAlertException(
                     String.format("The roleId [%s] not found", member.getRoleId())));
     oldMember.setRoleId(member.getRoleId());
+    oldMember.setModifyTime(new Date());
     updateById(oldMember);
   }
 }

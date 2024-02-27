@@ -1,4 +1,4 @@
-/* 
+/*
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -12,68 +12,70 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License. 
+  limitations under the License.
 */
 
-import { defineComponent, toRefs, unref } from 'vue';
+import { computed, defineComponent, toRefs, unref } from 'vue';
 import { Tag, Tooltip } from 'ant-design-vue';
 import './State.less';
 import { AppStateEnum, ReleaseStateEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 
 /*  state map*/
-const stateMap = {
-  [AppStateEnum.ADDED]: { color: '#2f54eb', title: 'ADDED' },
+export const stateMap = {
+  [AppStateEnum.ADDED]: { color: '#2f54eb', title: t('flink.app.runState.added') },
   [AppStateEnum.INITIALIZING]: {
     color: '#738df8',
-    title: 'INITIALIZING',
+    title: t('flink.app.runState.initializing'),
     class: 'status-processing-initializing',
   },
-  [AppStateEnum.CREATED]: { color: '#2f54eb', title: 'CREATED' },
+  [AppStateEnum.CREATED]: { color: '#2f54eb', title: t('flink.app.runState.created') },
   [AppStateEnum.STARTING]: {
     color: '#1AB58E',
-    title: 'STARTING',
+    title: t('flink.app.runState.starting'),
     class: 'status-processing-starting',
   },
   [AppStateEnum.RESTARTING]: {
     color: '#13c2c2',
-    title: 'RESTARTING',
+    title: t('flink.app.runState.restarting'),
     class: 'status-processing-restarting',
   },
   [AppStateEnum.RUNNING]: {
     color: '#52c41a',
-    title: 'RUNNING',
+    title: t('flink.app.runState.running'),
     class: 'status-processing-running',
   },
   [AppStateEnum.FAILING]: {
     color: '#fa541c',
-    title: 'FAILING',
+    title: t('flink.app.runState.failing'),
     class: 'status-processing-failing',
   },
-  [AppStateEnum.FAILED]: { color: '#f5222d', title: 'FAILED' },
-  [AppStateEnum.CANCELLING]: { color: '#faad14', title: 'CANCELLING' },
-  [AppStateEnum.CANCELED]: { color: '#fa8c16', title: 'CANCELED' },
-  [AppStateEnum.FINISHED]: { color: '#1890ff', title: 'FINISHED' },
-  [AppStateEnum.SUSPENDED]: { color: '#722ed1', title: 'SUSPENDED' },
+  [AppStateEnum.FAILED]: { color: '#f5222d', title: t('flink.app.runState.failed') },
+  [AppStateEnum.CANCELLING]: { color: '#faad14', title: t('flink.app.runState.cancelling') },
+  [AppStateEnum.CANCELED]: { color: '#fa8c16', title: t('flink.app.runState.canceled') },
+  [AppStateEnum.FINISHED]: { color: '#1890ff', title: t('flink.app.runState.finished') },
+  [AppStateEnum.SUSPENDED]: { color: '#722ed1', title: t('flink.app.runState.suspended') },
   [AppStateEnum.RECONCILING]: {
     color: '#eb2f96',
-    title: 'RECONCILING',
+    title: t('flink.app.runState.reconciling'),
     class: 'status-processing-reconciling',
   },
-  [AppStateEnum.LOST]: { color: '#000000', title: 'LOST' },
+  [AppStateEnum.LOST]: { color: '#333333', title: t('flink.app.runState.lost') },
   [AppStateEnum.MAPPING]: {
     color: '#13c2c2',
-    title: 'MAPPING',
+    title: t('flink.app.runState.mapping'),
     class: 'status-processing-restarting',
   },
   [AppStateEnum.SILENT]: {
     color: '#738df8',
-    title: 'SILENT',
+    title: t('flink.app.runState.silent'),
     class: 'status-processing-initializing',
   },
-  [AppStateEnum.TERMINATED]: { color: '#8E50FF', title: 'TERMINATED' },
+  [AppStateEnum.TERMINATED]: { color: '#8E50FF', title: t('flink.app.runState.terminated') },
 };
 /*  option state map*/
-const optionStateMap = {
+export const optionStateMap = {
   [OptionStateEnum.RELEASING]: {
     color: '#1ABBDC',
     title: 'RELEASING',
@@ -97,21 +99,24 @@ const optionStateMap = {
 };
 
 /* release state map*/
-const releaseStateMap = {
-  [ReleaseStateEnum.DONE]: { color: '#52c41a', title: 'DONE' },
-  [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: 'WAITING' },
+export const releaseStateMap = {
+  [ReleaseStateEnum.FAILED]: { color: '#f5222d', title: t('flink.app.releaseState.failed') },
+  [ReleaseStateEnum.DONE]: { color: '#52c41a', title: t('flink.app.releaseState.success') },
+  [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: t('flink.app.releaseState.waiting') },
   [ReleaseStateEnum.RELEASING]: {
     color: '#52c41a',
-    title: 'RELEASING',
+    title: t('flink.app.releaseState.releasing'),
     class: 'status-processing-deploying',
   },
-  [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: 'PENDING' },
-  [ReleaseStateEnum.NEED_ROLLBACK]: { color: '#fa8c16', title: 'WAITING' },
+  [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: t('flink.app.releaseState.pending') },
+  [ReleaseStateEnum.NEED_ROLLBACK]: {
+    color: '#fa8c16',
+    title: t('flink.app.releaseState.waiting'),
+  },
 };
-releaseStateMap[-1] = { color: '#f5222d', title: 'FAILED' };
 
 /* build state map*/
-const buildStatusMap = {
+export const buildStatusMap = {
   0: { color: '#99A3A4', title: 'UNKNOWN' },
   1: { color: '#F5B041', title: 'PENDING' },
   2: {
@@ -122,6 +127,7 @@ const buildStatusMap = {
   3: { color: '#2ECC71', title: 'SUCCESS' },
   4: { color: '#E74C3C', title: 'FAILURE' },
 };
+
 const overviewMap = {
   running: { color: '#52c41a', title: 'RUNNING' },
   canceled: { color: '#fa8c16', title: 'CANCELED' },
@@ -143,16 +149,43 @@ export default defineComponent({
       type: Object as PropType<Recordable>,
       default: () => ({}),
     },
+    maxTitle: String,
   },
   setup(props) {
     const { data, option } = toRefs(props);
+
+    const tagWidth = computed(() => {
+      if (props.maxTitle === undefined) return 0;
+      // create a dom to calculate the width of the tag
+      const dom = document.createElement('span');
+      dom.style.display = 'inline-block';
+      dom.style.fontSize = '10px';
+      dom.style.padding = '0 2px';
+      dom.style.borderRadius = '2px';
+      dom.textContent = props.maxTitle;
+      document.body.appendChild(dom);
+      const width = dom.clientWidth + 2;
+      document.body.removeChild(dom);
+      return width;
+    });
+
     const renderTag = (map: Recordable, key: number) => {
       if (!Reflect.has(map, key)) {
         return;
       }
-      return <Tag {...map[key]}>{map[key].title}</Tag>;
+      return (
+        <Tag {...map[key]} style={getStyle.value}>
+          {map[key].title}
+        </Tag>
+      );
     };
 
+    const getStyle = computed(() => {
+      if (tagWidth.value > 0) {
+        return { width: `${tagWidth.value}px`, textAlign: 'center' };
+      }
+      return {};
+    });
     const renderState = () => {
       if (unref(data).optionState === OptionStateEnum.NONE) {
         return <div class="bold-tag">{renderTag(stateMap, unref(data).state)}</div>;

@@ -63,7 +63,7 @@ public class ApplicationBackUpServiceImpl
 
   @Override
   public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
-    Page<ApplicationBackUp> page = new MybatisPager<ApplicationBackUp>().getDefaultPage(request);
+    Page<ApplicationBackUp> page = MybatisPager.getPage(request);
     LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
         new LambdaQueryWrapper<ApplicationBackUp>()
             .eq(ApplicationBackUp::getAppId, backUp.getAppId());

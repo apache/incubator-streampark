@@ -19,6 +19,7 @@ package org.apache.streampark.flink.kubernetes.watcher
 
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrackId}
 
@@ -81,25 +82,27 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[FlinkMetricCV]]] =
-      trackIds.map(
-        id => {
-          val future = Future(collectMetrics(id))
-          future.onComplete(_.getOrElse(None) match {
-            case Some(metric) =>
-              val clusterKey = id.toClusterKey
-              // update current flink cluster metrics on cache
-              watchController.flinkMetrics.put(clusterKey, metric)
-              val isMetricChanged = {
-                val preMetric = watchController.flinkMetrics.get(clusterKey)
-                preMetric == null || !preMetric.equalsPayload(metric)
-              }
-              if (isMetricChanged) {
-                eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
-              }
-            case _ =>
+      trackIds
+        .filter(_.executeMode == FlinkK8sExecuteMode.SESSION)
+        .map(
+          id => {
+            val future = Future(collectMetrics(id))
+            future.onComplete(_.getOrElse(None) match {
+              case Some(metric) =>
+                val clusterKey = id.toClusterKey
+                // update current flink cluster metrics on cache
+                watchController.flinkMetrics.put(clusterKey, metric)
+                val isMetricChanged = {
+                  val preMetric = watchController.flinkMetrics.get(clusterKey)
+                  preMetric == null || !preMetric.equalsPayload(metric)
+                }
+                if (isMetricChanged) {
+                  eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
+                }
+              case _ =>
+            })
+            future
           })
-          future
-        })
     // blocking until all future are completed or timeout is reached
     Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
       _ =>
@@ -117,7 +120,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
    * This method can be called directly from outside, without affecting the current cachePool
    * result.
    */
-  def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
+  private def collectMetrics(id: TrackId): Option[FlinkMetricCV] = {
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
     val flinkJmRestUrl =
@@ -128,8 +131,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       .as(
         Request
           .get(s"$flinkJmRestUrl/overview")
-          .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-          .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+          .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+          .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
           .execute
           .returnContent
           .asString(StandardCharsets.UTF_8))
@@ -141,8 +144,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
         .as(
           Request
             .get(s"$flinkJmRestUrl/jobmanager/config")
-            .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
-            .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
             .execute
             .returnContent
             .asString(StandardCharsets.UTF_8))

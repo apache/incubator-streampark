@@ -97,3 +97,6 @@
     </BasicForm>
   </PageWrapper>
 </template>
+<style lang="less">
+  @import url('./Cluster.less');
+</style>

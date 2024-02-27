@@ -22,7 +22,8 @@ import org.apache.streampark.common.conf.ConfigConst;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -31,11 +32,12 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @TableName("t_variable")
 public class Variable implements Serializable {
 
-  private static final long serialVersionUID = -7720746591258904369L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;
@@ -60,13 +62,9 @@ public class Variable implements Serializable {
 
   private Boolean desensitization;
 
-  private transient Date createTime;
+  private Date createTime;
 
-  private transient Date modifyTime;
-
-  private transient String sortField;
-
-  private transient String sortOrder;
+  private Date modifyTime;
 
   public void dataMasking() {
     if (desensitization) {

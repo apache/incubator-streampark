@@ -19,10 +19,11 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -60,13 +61,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
   @Autowired private VariableService variableService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Override
-  public IPage<Team> findTeams(Team team, RestRequest request) {
-    Page<Team> page = new Page<>();
-    page.setCurrent(request.getPageNum());
-    page.setSize(request.getPageSize());
+  public IPage<Team> page(Team team, RestRequest request) {
+    Page<Team> page = MybatisPager.getPage(request);
     return this.baseMapper.findTeam(page, team);
   }
 
@@ -86,14 +85,16 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             "Team name [%s] exists already. Create team failed. Please rename and try again.",
             team.getTeamName()));
     team.setId(null);
-    team.setCreateTime(new Date());
-    team.setModifyTime(team.getCreateTime());
+
+    Date date = new Date();
+    team.setCreateTime(date);
+    team.setModifyTime(date);
     this.save(team);
   }
 
   @Override
   public void deleteTeam(Long teamId) {
-    log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
+    log.info("{} Proceed delete team[Id={}]", serviceHelper.getLoginUser().getUsername(), teamId);
     Team team = this.getById(teamId);
     // TODO The AssertUtils.checkApiAlert can simplify the exception.
     if (team == null) {

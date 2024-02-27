@@ -24,13 +24,14 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.CheckPointStatus;
 import org.apache.streampark.console.core.enums.FlinkAppState;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.TimeZone;
 
-@Data
+@Getter
+@Setter
 public class AlertTemplate implements Serializable {
   private String title;
   private String subject;
@@ -49,12 +50,7 @@ public class AlertTemplate implements Serializable {
   private boolean atAll = false;
 
   private static AlertTemplate of(Application application) {
-    long duration;
-    if (application.getEndTime() == null) {
-      duration = System.currentTimeMillis() - application.getStartTime().getTime();
-    } else {
-      duration = application.getEndTime().getTime() - application.getStartTime().getTime();
-    }
+
     AlertTemplate template = new AlertTemplate();
     template.setJobName(application.getJobName());
 
@@ -66,15 +62,35 @@ public class AlertTemplate implements Serializable {
       template.setLink(null);
     }
 
-    template.setStartTime(
-        DateUtils.format(
-            application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-    template.setEndTime(
-        DateUtils.format(
-            application.getEndTime() == null ? new Date() : application.getEndTime(),
-            DateUtils.fullFormat(),
-            TimeZone.getDefault()));
-    template.setDuration(DateUtils.toDuration(duration));
+    // duration
+    if (application.getStartTime() != null) {
+      // 1) startTime
+      template.setStartTime(
+          DateUtils.format(
+              application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+
+      if (application.getEndTime() != null) {
+        long duration = application.getEndTime().getTime() - application.getStartTime().getTime();
+        if (duration > 0) {
+          template.setEndTime(
+              DateUtils.format(
+                  application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+          template.setDuration(DateUtils.toStringDuration(duration));
+        } else {
+          template.setStartTime("-");
+          template.setEndTime("-");
+          template.setDuration("-");
+        }
+      } else {
+        template.setEndTime("-");
+        template.setDuration("-");
+      }
+    } else {
+      template.setStartTime("-");
+      template.setEndTime("-");
+      template.setDuration("-");
+    }
+
     boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
     template.setRestart(needRestart);
     if (needRestart) {
@@ -97,7 +113,7 @@ public class AlertTemplate implements Serializable {
     AlertTemplate template = of(application);
     template.setType(2);
     template.setCpFailureRateInterval(
-        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+        DateUtils.toStringDuration(application.getCpFailureRateInterval() * 1000 * 60));
     template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
     template.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
     template.setSubject(

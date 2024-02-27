@@ -19,14 +19,16 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@Setter
 public class MavenPom {
   private String groupId;
   private String artifactId;

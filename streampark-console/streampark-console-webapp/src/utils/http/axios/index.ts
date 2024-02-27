@@ -15,6 +15,7 @@ import { useErrorLogStoreWithOut } from '/@/store/modules/errorLog';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { joinTimestamp, formatRequestDate } from './helper';
 import { useUserStoreWithOut } from '/@/store/modules/user';
+import { useLocaleStoreWithOut } from '/@/store/modules/locale';
 import { AxiosRetry } from '/@/utils/http/axios/axiosRetry';
 import { errorHandler } from './errorHandle';
 
@@ -93,6 +94,8 @@ const transform: AxiosTransform = {
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);
     const teamId = getUserTeamId();
+    const localStore = useLocaleStoreWithOut();
+    config.headers = Object.assign(config.headers || {}, { 'language': localStore.getLocale });
     if (config.method?.toUpperCase() === RequestEnum.GET) {
       if (!isString(params)) {
         // Add a timestamp parameter to the get request to avoid taking data from the cache.

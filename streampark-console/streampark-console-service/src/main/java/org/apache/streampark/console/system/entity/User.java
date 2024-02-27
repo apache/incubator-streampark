@@ -24,7 +24,8 @@ import org.apache.streampark.console.core.enums.UserType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -33,11 +34,12 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @TableName("t_user")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = -4852732617765810959L;
+  private static final long serialVersionUID = 1L;
   /** user status */
   public static final String STATUS_VALID = "1";
 
@@ -83,10 +85,6 @@ public class User implements Serializable {
   private String description;
 
   private transient String oldPassword;
-
-  private transient String sortField;
-
-  private transient String sortOrder;
 
   private transient String createTimeFrom;
   private transient String createTimeTo;

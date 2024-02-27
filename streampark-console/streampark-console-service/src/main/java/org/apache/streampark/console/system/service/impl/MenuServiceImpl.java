@@ -128,7 +128,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void createMenu(Menu menu) {
-    menu.setCreateTime(new Date());
+    Date date = new Date();
+    menu.setCreateTime(date);
+    menu.setModifyTime(date);
     setMenu(menu);
     this.save(menu);
   }

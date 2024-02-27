@@ -29,7 +29,7 @@ import scala.util.Try
 
 class IngressStrategyV1 extends IngressStrategy {
 
-  override def ingressUrlAddress(
+  override def getIngressUrl(
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
@@ -47,7 +47,6 @@ class IngressStrategyV1 extends IngressStrategy {
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
         }.get
     }
-
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
@@ -62,6 +61,7 @@ class IngressStrategyV1 extends IngressStrategy {
           .addToOwnerReferences(ownerReference) // Add OwnerReference
           .endMetadata()
           .withNewSpec()
+          .withIngressClassName(ingressClass)
           .addNewRule()
           .withHost(domainName)
           .withNewHttp()

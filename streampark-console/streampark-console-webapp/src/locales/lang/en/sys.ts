@@ -17,15 +17,13 @@
 export default {
   api: {
     operationFailed: 'Operation failed',
-    errorTip: 'Error Tip',
+    errorTip: 'Ooop',
     errorMessage: 'The operation failed, the system is abnormal!',
     timeoutMessage: 'Login timed out, please log in again!',
     apiTimeoutMessage: 'The interface request timed out, please refresh the page and try again!',
     apiRequestFailed: 'The interface request failed, please try again later!',
-    networkException: 'network anomaly',
-    networkExceptionMsg:
-      'Please check if your network connection is normal! The network is abnormal',
-
+    networkException: 'network error',
+    networkExceptionMsg: 'Network error, please check your network connection! 🌐⚠️',
     errMsg401: 'The user does not have permission (token, user name, password error)!',
     errMsg403: 'The user is authorized, but access is forbidden!',
     errMsg404: 'Network request error, the resource was not found!',

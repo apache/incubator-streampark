@@ -51,8 +51,9 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    externalLink.setCreateTime(new Date());
-    externalLink.setModifyTime(new Date());
+    Date date = new Date();
+    externalLink.setCreateTime(date);
+    externalLink.setModifyTime(date);
     externalLink.setId(null);
     this.save(externalLink);
   }
@@ -76,7 +77,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     Application app = applicationService.getById(appId);
     Utils.notNull(app, "Application doesn't exist");
     List<ExternalLink> externalLink = this.list();
-    if (externalLink != null && externalLink.size() > 0) {
+    if (externalLink != null && !externalLink.isEmpty()) {
       // Render the placeholder
       externalLink.forEach(link -> this.renderLinkUrl(link, app));
     }

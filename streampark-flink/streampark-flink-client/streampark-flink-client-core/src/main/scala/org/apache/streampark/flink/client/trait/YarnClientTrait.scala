@@ -38,6 +38,13 @@ import scala.util.Try
 /** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
 
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    flinkConfig
+      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
+      .safeSet(YarnConfigOptions.APPLICATION_TAGS, "streampark")
+  }
+
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](
       request: R,
       flinkConf: Configuration,
@@ -70,8 +77,8 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       request,
       flinkConf,
-      (jid, client) => {
-        SavepointResponse(super.triggerSavepoint(request, jid, client))
+      (jobID, client) => {
+        SavepointResponse(super.triggerSavepoint(request, jobID, client))
       })
   }
 
@@ -79,9 +86,11 @@ trait YarnClientTrait extends FlinkClientTrait {
     executeClientAction(
       cancelRequest,
       flinkConf,
-      (jid, client) => {
-        CancelResponse(super.cancelJob(cancelRequest, jid, client))
-      })
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        CancelResponse(resp)
+      }
+    )
   }
 
   private lazy val deployInternalMethod: Method = {

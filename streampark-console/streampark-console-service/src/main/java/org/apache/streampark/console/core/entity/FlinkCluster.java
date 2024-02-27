@@ -42,7 +42,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
@@ -53,7 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
+@Setter
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
 
@@ -101,7 +103,7 @@ public class FlinkCluster implements Serializable {
 
   private Integer clusterState;
 
-  private Date createTime = new Date();
+  private Date createTime;
 
   @JsonIgnore
   public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {

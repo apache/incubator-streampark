@@ -15,6 +15,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.ApplicationMapper">
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Application">
@@ -72,6 +73,7 @@
         <result column="k8s_pod_template" jdbcType="LONGVARCHAR" property="k8sPodTemplate"/>
         <result column="k8s_jm_pod_template" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
         <result column="k8s_tm_pod_template" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
+        <result column="ingress_template" jdbcType="LONGVARCHAR" property="ingressTemplate"/>
         <result column="k8s_hadoop_integration" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
         <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
         <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
@@ -161,10 +163,20 @@
                 and t.execution_mode = #{application.executionMode}
             </if>
             <if test="application.jobName != null and application.jobName != ''">
-                and t.job_name like concat('%',#{application.jobName},'%')
+                <if test="_databaseId == 'mysql'">
+                    and t.job_name like concat('%', #{application.jobName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.job_name like '%' || #{application.jobName} || '%'
+                </if>
             </if>
             <if test="application.projectName != null and application.projectName != ''">
-                and p.name like concat('%',#{application.projectName},'%')
+                <if test="_databaseId == 'mysql'">
+                    and p.name like concat('%', #{application.projectName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and p.name like '%' || #{application.projectName} || '%'
+                </if>
             </if>
             <if test="application.appId != null and application.appId != ''">
                 and t.app_id = #{application.appId}
@@ -183,7 +195,12 @@
                 </foreach>
             </if>
             <if test="application.tags != null and application.tags != ''">
-                and t.tags like concat('%',#{application.tags},'%')
+                <if test="_databaseId == 'mysql'">
+                    and t.tags like concat('%', #{application.tags},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.tags like '%' || #{application.tags} || '%'
+                </if>
             </if>
         </where>
     </select>

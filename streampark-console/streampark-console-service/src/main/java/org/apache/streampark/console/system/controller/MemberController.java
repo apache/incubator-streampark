@@ -57,7 +57,7 @@ public class MemberController {
   @Operation(summary = "List members")
   @PostMapping("list")
   public RestResponse memberList(RestRequest restRequest, Member member) {
-    IPage<Member> userList = memberService.findUsers(member, restRequest);
+    IPage<Member> userList = memberService.page(member, restRequest);
     return RestResponse.success(userList);
   }
 

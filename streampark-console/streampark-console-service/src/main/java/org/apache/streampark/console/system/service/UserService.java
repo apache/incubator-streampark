@@ -47,7 +47,7 @@ public interface UserService extends IService<User> {
    * @param restRequest queryRequest
    * @return IPage
    */
-  IPage<User> findUserDetail(User user, RestRequest restRequest);
+  IPage<User> page(User user, RestRequest restRequest);
 
   /**
    * update login time

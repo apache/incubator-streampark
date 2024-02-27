@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.router.VueRouter;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.service.MenuService;
 
@@ -49,14 +49,14 @@ public class MenuController {
 
   @Autowired private MenuService menuService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Operation(summary = "List menu-routes")
   @PostMapping("router")
   public RestResponse getUserRouters(Long teamId) {
     // TODO The teamId is required, get routers should be called after choose teamId.
     ArrayList<VueRouter<Menu>> routers =
-        this.menuService.getUserRouters(commonService.getUserId(), teamId);
+        this.menuService.getUserRouters(serviceHelper.getUserId(), teamId);
     return RestResponse.success(routers);
   }
 

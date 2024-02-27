@@ -36,19 +36,6 @@ import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-/**
- * @param clusterId
- *   flink cluster id in k8s cluster.
- * @param kubernetesNamespace
- *   k8s namespace.
- * @param flinkRestExposedType
- *   flink rest-service exposed type on k8s cluster.
- */
-case class KubernetesSubmitParam(
-    clusterId: String,
-    kubernetesNamespace: String,
-    @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
-
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
     executionMode: ExecutionMode,
@@ -63,10 +50,12 @@ case class SubmitRequest(
     savePoint: String,
     args: String,
     @Nullable buildResult: BuildResult,
-    @Nullable k8sSubmitParam: KubernetesSubmitParam,
-    @Nullable extraParameter: JavaMap[String, Any]) {
+    @Nullable extraParameter: JavaMap[String, Any],
+    @Nullable clusterId: String,
+    @Nullable kubernetesNamespace: String,
+    @Nullable flinkRestExposedType: FlinkK8sRestExposedType) {
 
-  lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
+  private lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_PROPERTY_PREFIX)
 
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
@@ -80,7 +69,7 @@ case class SubmitRequest(
 
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
-  lazy val allowNonRestoredState = Try(
+  lazy val allowNonRestoredState: Boolean = Try(
     properties.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean)
     .getOrElse(false)
 
@@ -178,14 +167,14 @@ case class SubmitRequest(
         if (buildResult == null) {
           throw new Exception(
             s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
-              s",clusterId=${k8sSubmitParam.clusterId}," +
-              s",namespace=${k8sSubmitParam.kubernetesNamespace}")
+              s",clusterId=$clusterId," +
+              s",namespace=$kubernetesNamespace")
         }
         if (!buildResult.pass) {
           throw new Exception(
             s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
-              s",clusterId=${k8sSubmitParam.clusterId}," +
-              s",namespace=${k8sSubmitParam.kubernetesNamespace}")
+              s",clusterId=$clusterId," +
+              s",namespace=$kubernetesNamespace")
         }
       case _ =>
         if (this.buildResult == null) {

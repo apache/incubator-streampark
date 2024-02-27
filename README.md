@@ -59,6 +59,12 @@
 
 ![](https://streampark.apache.org/image/sqlide.png)
 
+## 🚀 QuickStart
+- [Start with Docker](docker/README.md)
+- [Start with Kubernetes](helm/README.md)
+
+Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+
 ## 🔨 How to Build
 
 ```shell
@@ -70,10 +76,6 @@ cd incubator-streampark
 ## 🧑‍💻 Downloads
 
 Download address for run-directly software package : [https://streampark.apache.org/download](https://streampark.apache.org/download)
-
-## 🚀 Quick Start
-
-Click [Document](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 💋 Our users
 

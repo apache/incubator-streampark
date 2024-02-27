@@ -25,13 +25,13 @@ import javax.annotation.Nullable
 import java.util.{Map => JavaMap}
 
 case class CancelRequest(
-    flinkVersion: FlinkVersion,
-    executionMode: ExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
+    override val flinkVersion: FlinkVersion,
+    override val executionMode: ExecutionMode,
+    @Nullable override val properties: JavaMap[String, Any],
+    override val clusterId: String,
+    override val jobId: String,
     override val withSavepoint: Boolean,
     withDrain: Boolean,
-    savepointPath: String,
+    override val savepointPath: String,
     override val kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE)
   extends SavepointRequestTrait

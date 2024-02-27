@@ -52,10 +52,10 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
   @Override
   public IPage<AlertConfigWithParams> page(AlertConfigWithParams params, RestRequest request) {
     // build query conditions
-    LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper();
+    LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper<>();
     wrapper.eq(params.getUserId() != null, AlertConfig::getUserId, params.getUserId());
 
-    Page<AlertConfig> page = new MybatisPager<AlertConfig>().getDefaultPage(request);
+    Page<AlertConfig> page = MybatisPager.getPage(request);
     IPage<AlertConfig> resultPage = getBaseMapper().selectPage(page, wrapper);
 
     Page<AlertConfigWithParams> result = new Page<>();

@@ -20,15 +20,17 @@ package org.apache.streampark.console.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 @TableName("t_role_menu")
-@Data
+@Getter
+@Setter
 public class RoleMenu implements Serializable {
 
-  private static final long serialVersionUID = -7573904024872252113L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;

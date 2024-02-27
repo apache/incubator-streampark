@@ -20,6 +20,7 @@ import org.apache.streampark.common.enums.StorageType
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
 import org.apache.streampark.common.util.Utils.StringCasts
 
+import java.io.File
 import java.net.URI
 
 object Workspace {
@@ -36,7 +37,15 @@ object Workspace {
   lazy val APP_LOCAL_DIST = s"$localWorkspace/dist"
 
   /** dirPath of the maven local repository with built-in compilation process */
-  lazy val MAVEN_LOCAL_PATH = s"$localWorkspace/mvnrepo"
+  lazy val MAVEN_LOCAL_PATH: String = {
+    val userName = SystemPropertyUtils.get("user.home")
+    val repository = new File(s"$userName/.m2/repository")
+    if (repository.exists()) {
+      repository.getAbsolutePath
+    } else {
+      s"$localWorkspace/mvnrepo"
+    }
+  }
 
   /** local sourceCode path.(for git...) */
   lazy val PROJECT_LOCAL_PATH = s"$localWorkspace/project"

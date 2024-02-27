@@ -32,13 +32,13 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
 
   Boolean create(FlinkCluster flinkCluster);
 
-  void delete(FlinkCluster flinkCluster);
+  void delete(Long id);
 
   void update(FlinkCluster flinkCluster);
 
-  void start(FlinkCluster flinkCluster);
+  void start(Long id);
 
-  void shutdown(FlinkCluster flinkCluster);
+  void shutdown(Long id);
 
   Boolean existsByClusterId(String clusterId, Long id);
 
@@ -47,4 +47,6 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
   Boolean existsByFlinkEnvId(Long id);
 
   List<FlinkCluster> getByExecutionModes(Collection<ExecutionMode> executionModes);
+
+  List<FlinkCluster> listCluster();
 }

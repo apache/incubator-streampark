@@ -80,13 +80,13 @@ class YarnQueueServiceTest extends SpringTestBase {
     // Test for 1st page, size = 2, order by create time desc
     YarnQueue queryParams = new YarnQueue();
     queryParams.setTeamId(targetTeamId);
-    queryParams.setSortField("create_time");
-    queryParams.setSortOrder("desc");
     queryParams.setTeamId(targetTeamId);
     RestRequest request = new RestRequest();
     request.setPageSize(2);
     request.setPageNum(1);
-    IPage<YarnQueue> yarnQueues = yarnQueueService.findYarnQueues(queryParams, request);
+    request.setSortField("create_time");
+    request.setSortOrder("desc");
+    IPage<YarnQueue> yarnQueues = yarnQueueService.page(queryParams, request);
     assertThat(
             yarnQueues.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
@@ -96,7 +96,7 @@ class YarnQueueServiceTest extends SpringTestBase {
     // Test for 1st page, size = 2, order by create time with queue_label
     queryParams.setQueueLabel("q3");
     IPage<YarnQueue> yarnQueuesWithQueueLabelLikeQuery =
-        yarnQueueService.findYarnQueues(queryParams, request);
+        yarnQueueService.page(queryParams, request);
     assertThat(
             yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)

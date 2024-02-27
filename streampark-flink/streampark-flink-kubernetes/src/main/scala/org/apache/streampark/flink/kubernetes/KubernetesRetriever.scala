@@ -30,10 +30,9 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.hc.core5.util.Timeout
 
 import javax.annotation.Nullable
-
-import java.time.Duration
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -41,11 +40,12 @@ import scala.util.{Failure, Success, Try}
 object KubernetesRetriever extends Logger {
 
   // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
-  val FLINK_CLIENT_TIMEOUT_SEC = 30L
+  val FLINK_CLIENT_TIMEOUT_SEC: Timeout =
+    Timeout.ofMilliseconds(ClientOptions.CLIENT_TIMEOUT.defaultValue().toMillis)
+
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
-  val FLINK_REST_AWAIT_TIMEOUT_SEC = 10L
-  // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
-  val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
+  val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout =
+    Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
 
   /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
@@ -61,7 +61,7 @@ object KubernetesRetriever extends Logger {
   private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
 
   /** get new flink cluster client of kubernetes mode */
-  def newFinkClusterClient(
+  private def newFinkClusterClient(
       clusterId: String,
       @Nullable namespace: String,
       executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
@@ -69,9 +69,11 @@ object KubernetesRetriever extends Logger {
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
     flinkConfig.setString(KubernetesConfigOptions.CLUSTER_ID, clusterId)
-    flinkConfig.set(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(FLINK_CLIENT_TIMEOUT_SEC))
-    flinkConfig.setLong(RestOptions.AWAIT_LEADER_TIMEOUT, FLINK_REST_AWAIT_TIMEOUT_SEC * 1000)
-    flinkConfig.setInteger(RestOptions.RETRY_MAX_ATTEMPTS, FLINK_REST_RETRY_MAX_ATTEMPTS)
+    flinkConfig.set(ClientOptions.CLIENT_TIMEOUT, ClientOptions.CLIENT_TIMEOUT.defaultValue())
+    flinkConfig.set(
+      RestOptions.AWAIT_LEADER_TIMEOUT,
+      RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
+    flinkConfig.set(RestOptions.RETRY_MAX_ATTEMPTS, RestOptions.RETRY_MAX_ATTEMPTS.defaultValue())
     if (Try(namespace.isEmpty).getOrElse(true)) {
       flinkConfig.setString(
         KubernetesConfigOptions.NAMESPACE,
@@ -101,12 +103,12 @@ object KubernetesRetriever extends Logger {
   /**
    * check whether deployment exists on kubernetes cluster
    *
-   * @param name
-   *   deployment name
    * @param namespace
    *   deployment namespace
+   * @param deploymentName
+   *   deployment name
    */
-  def isDeploymentExists(name: String, namespace: String): Boolean = {
+  def isDeploymentExists(namespace: String, deploymentName: String): Boolean = {
     using(KubernetesRetriever.newK8sClient()) {
       client =>
         client
@@ -117,8 +119,19 @@ object KubernetesRetriever extends Logger {
           .list()
           .getItems
           .asScala
-          .exists(e => e.getMetadata.getName == name)
-    }(_ => false)
+          .exists(_.getMetadata.getName == deploymentName)
+    } {
+      e =>
+        logError(
+          s"""
+             |[StreamPark] check deploymentExists error,
+             |namespace: $namespace,
+             |deploymentName: $deploymentName,
+             |error: $e
+             |""".stripMargin
+        )
+        false
+    }
   }
 
   /** retrieve flink jobManager rest url */
@@ -129,10 +142,15 @@ object KubernetesRetriever extends Logger {
         .getOrElse(return None)) {
       client =>
         val url =
-          IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+          IngressController.getIngressUrl(clusterKey.namespace, clusterKey.clusterId, client)
         logger.info(s"retrieve flink jobManager rest url: $url")
         client.close()
         Some(url)
     }
   }
+
+  def getSessionClusterIngressURL(namespace: String, clusterId: String): String = {
+    retrieveFlinkRestUrl(ClusterKey(FlinkK8sExecuteMode.SESSION, namespace, clusterId)).orNull
+  }
+
 }

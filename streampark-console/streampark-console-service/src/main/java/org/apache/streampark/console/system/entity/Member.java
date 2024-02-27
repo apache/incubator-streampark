@@ -20,16 +20,18 @@ package org.apache.streampark.console.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @TableName("t_member")
-@Data
+@Getter
+@Setter
 public class Member implements Serializable {
 
-  private static final long serialVersionUID = -3166012934498268403L;
+  private static final long serialVersionUID = 1L;
 
   @TableId(type = IdType.AUTO)
   private Long id;
@@ -47,10 +49,6 @@ public class Member implements Serializable {
   private transient String userName;
 
   private transient String roleName;
-
-  private transient String sortField;
-
-  private transient String sortOrder;
 
   private transient String createTimeFrom;
 

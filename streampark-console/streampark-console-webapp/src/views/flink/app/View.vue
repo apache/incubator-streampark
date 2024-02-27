@@ -25,13 +25,13 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Divider, Tag } from 'ant-design-vue';
+  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, TableAction } from '/@/components/Table';
   import { AppListRecord } from '/@/api/flink/app/app.type';
-  import { getAppColumns, releaseTitleMap } from './data';
+  import { releaseTitleMap } from './data';
   import { handleView } from './utils';
   import { useDrawer } from '/@/components/Drawer';
   import { useModal } from '/@/components/Modal';
@@ -41,9 +41,15 @@
   import LogModal from './components/AppView/LogModal.vue';
   import BuildDrawer from './components/AppView/BuildDrawer.vue';
   import AppDashboard from './components/AppView/AppDashboard.vue';
-  import State from './components/State';
+  import State, {
+    buildStatusMap,
+    optionStateMap,
+    releaseStateMap,
+    stateMap,
+  } from './components/State';
   import { useSavepoint } from './hooks/useSavepoint';
-
+  import { useAppTableColumns } from './hooks/useAppTableColumns';
+  import AppTableResize from './components/AppResize.vue';
   const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
@@ -52,10 +58,18 @@
     savepointing: new Map(),
   };
 
+  const titleLenRef = ref({
+    maxState: '',
+    maxRelease: '',
+    maxBuild: '',
+  });
+
   const appDashboardRef = ref<any>();
+  const noData = ref<boolean>();
 
   const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
+  const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
   const { openSavepoint } = useSavepoint(handleOptionApp);
   const [registerStartModal, { openModal: openStartModal }] = useModal();
   const [registerStopModal, { openModal: openStopModal }] = useModal();
@@ -78,6 +92,7 @@
     },
     afterFetch: (dataSource) => {
       const timestamp = new Date().getTime();
+      noData.value = dataSource.length == 0;
       dataSource.forEach((x) => {
         x.expanded = [
           {
@@ -112,12 +127,52 @@
           }
         }
       });
+      const stateLenMap = dataSource.reduce(
+        (
+          prev: {
+            maxState: string;
+            maxRelease: string;
+            maxBuild: string;
+          },
+          cur: any,
+        ) => {
+          const { state, optionState, release, buildStatus } = cur;
+          // state title len
+          if (optionState === OptionStateEnum.NONE) {
+            const stateStr = stateMap[state]?.title;
+            if (stateStr && stateStr.length > prev.maxState.length) {
+              prev.maxState = stateStr;
+            }
+          } else {
+            const stateStr = optionStateMap[optionState]?.title;
+            if (stateStr && stateStr.length > prev.maxState.length) {
+              prev.maxState = stateStr;
+            }
+          }
+          //release title len
+          const releaseStr = releaseStateMap[release]?.title;
+          if (releaseStr && releaseStr.length > prev.maxRelease.length) {
+            prev.maxRelease = releaseStr;
+          }
+          //build title len
+          const buildStr = buildStatusMap[buildStatus]?.title;
+          if (buildStr && buildStr.length > prev.maxBuild.length) {
+            prev.maxBuild = buildStr;
+          }
+          return prev;
+        },
+        {
+          maxState: '',
+          maxRelease: '',
+          maxBuild: '',
+        },
+      );
+      Object.assign(titleLenRef.value, stateLenMap);
       return dataSource;
     },
     fetchSetting: { listField: 'records' },
     immediate: true,
     canResize: false,
-    columns: getAppColumns(),
     showIndexColumn: false,
     showTableSetting: true,
     useSearchForm: true,
@@ -139,11 +194,6 @@
     optionApps,
   );
 
-  // build Detail
-  function openBuildProgressDetailDrawer(app: AppListRecord) {
-    openBuildDrawer(true, { appId: app.id });
-  }
-
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
@@ -152,7 +202,7 @@
       app['optionState'] === OptionStateEnum.SAVEPOINTING
     ) {
       // yarn-per-job|yarn-session|yarn-application
-      handleView(app, unref(yarn));
+      await handleView(app, unref(yarn));
     }
   }
 
@@ -196,7 +246,13 @@
 <template>
   <PageWrapper contentFullHeight>
     <AppDashboard ref="appDashboardRef" />
-    <BasicTable @register="registerTable" class="app_list !px-0 pt-20px" :formConfig="formConfig">
+    <BasicTable
+      @register="registerTable"
+      :columns="getAppColumns"
+      @resize-column="onTableColumnResize"
+      class="app_list !px-0 pt-20px"
+      :formConfig="formConfig"
+    >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
@@ -211,7 +267,26 @@
             }"
             @click="handleJobView(record)"
           >
-            <Tooltip :title="record.description"> {{ record.jobName }} </Tooltip>
+            <Popover :title="t('common.detailText')">
+              <template #content>
+                <div class="flex">
+                  <span class="pr-6px font-bold">{{ t('flink.app.appName') }}:</span>
+                  <div class="max-w-300px break-words">{{ record.jobName }}</div>
+                </div>
+                <div class="pt-2px">
+                  <span class="pr-6px font-bold">{{ t('flink.app.jobType') }}:</span>
+                  <Tag color="blue">
+                    <span v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
+                    <span v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
+                  </Tag>
+                </div>
+                <div class="pt-2px flex">
+                  <span class="pr-6px font-bold">{{ t('common.description') }}:</span>
+                  <div class="max-w-300px break-words">{{ record.description }}</div>
+                </div>
+              </template>
+              {{ record.jobName }}
+            </Popover>
           </span>
 
           <template v-if="record['jobType'] === JobTypeEnum.JAR">
@@ -244,20 +319,27 @@
           <State option="task" :data="record" />
         </template>
         <template v-if="column.dataIndex === 'state'">
-          <State option="state" :data="record" />
+          <State option="state" :data="record" :maxTitle="titleLenRef.maxState" />
         </template>
         <template v-if="column.dataIndex === 'release'">
-          <State option="release" :title="releaseTitleMap[record.release] || ''" :data="record" />
-          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus" />
           <State
-            option="build"
-            :click="openBuildProgressDetailDrawer.bind(null, record)"
+            option="release"
+            :maxTitle="titleLenRef.maxRelease"
+            :title="releaseTitleMap[record.release] || ''"
             :data="record"
           />
         </template>
         <template v-if="column.dataIndex === 'operation'">
           <TableAction v-bind="getTableActions(record, currentTablePage)" />
         </template>
+      </template>
+      <template #insertTable="{ tableContainer }">
+        <AppTableResize
+          v-if="!noData"
+          :table-container="tableContainer"
+          :resize-min="200"
+          v-model:left="tableColumnWidth.jobName"
+        />
       </template>
     </BasicTable>
     <StartApplicationModal @register="registerStartModal" @update-option="handleOptionApp" />

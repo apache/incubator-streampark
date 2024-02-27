@@ -17,4 +17,4 @@
 
 package org.apache.streampark.flink.client.bean
 
-case class ShutDownResponse()
+case class ShutDownResponse(error: Throwable = null)

@@ -28,7 +28,8 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,7 +70,7 @@ public class CheckpointProcessor {
 
   @Autowired private SavePointService savePointService;
 
-  @Autowired private FlinkRESTAPIWatcher flinkRESTAPIWatcher;
+  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
   public void process(Application application, @Nonnull CheckPoints checkPoints) {
     checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
@@ -82,15 +83,15 @@ public class CheckpointProcessor {
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
     if (CheckPointStatus.COMPLETED.equals(status)) {
-      if (shouldStoreAsSavepoint(checkPointKey, checkPoint)) {
+      if (checkSaveAsSavepoint(checkPointKey, checkPoint)) {
         savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
         saveSavepoint(checkPoint, application.getId());
-        flinkRESTAPIWatcher.cleanSavepoint(application);
+        flinkAppHttpWatcher.cleanSavepoint(application);
         return;
       }
 
       Long latestChkId = getLatestCheckpointedId(appId, checkPointKey.getCheckPointId());
-      if (shouldStoreAsCheckpoint(checkPoint, latestChkId)) {
+      if (checkSaveAsCheckpoint(checkPoint, latestChkId)) {
         checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
         saveSavepoint(checkPoint, application.getId());
       }
@@ -130,12 +131,11 @@ public class CheckpointProcessor {
     }
   }
 
-  private static boolean shouldStoreAsCheckpoint(
-      @Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
+  private boolean checkSaveAsCheckpoint(@Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
     return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
   }
 
-  private boolean shouldStoreAsSavepoint(
+  private boolean checkSaveAsSavepoint(
       CheckPointKey checkPointKey, @Nonnull CheckPoints.CheckPoint checkPoint) {
     if (!checkPoint.getIsSavepoint()) {
       return false;
@@ -199,7 +199,8 @@ public class CheckpointProcessor {
   }
 
   /** Util class for checkpoint key. */
-  @Data
+  @Getter
+  @Setter
   public static class CheckPointKey {
     private Long appId;
     private String jobId;

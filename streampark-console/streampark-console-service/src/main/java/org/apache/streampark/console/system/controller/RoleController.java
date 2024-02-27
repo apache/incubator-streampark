@@ -58,7 +58,7 @@ public class RoleController {
   @PostMapping("list")
   @RequiresPermissions("role:view")
   public RestResponse roleList(RestRequest restRequest, Role role) {
-    IPage<Role> roleList = roleService.findRoles(role, restRequest);
+    IPage<Role> roleList = roleService.page(role, restRequest);
     return RestResponse.success(roleList);
   }
 

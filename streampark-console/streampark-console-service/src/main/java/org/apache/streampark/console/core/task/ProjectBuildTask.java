@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
-import org.apache.streampark.console.core.enums.GitCredential;
 
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
@@ -106,9 +105,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       return true;
     } catch (Exception e) {
       if (e instanceof InvalidRemoteException) {
-        GitCredential gitCredential = GitCredential.of(project.getGitCredential());
-        if (gitCredential == GitCredential.HTTPS) {
-          project.setGitCredential(GitCredential.SSH.getValue());
+        if (project.isHttpRepositoryUrl()) {
           String url =
               project
                   .getUrl()

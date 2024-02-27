@@ -17,4 +17,18 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-case class K8sEventKey(namespace: String, clusterId: String)
+import org.apache.streampark.common.util.Utils
+
+case class K8sEventKey(namespace: String, clusterId: String) {
+
+  override def hashCode(): Int = Utils.hashCode(namespace, clusterId)
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: K8sEventKey =>
+        this.namespace == that.namespace &&
+        this.clusterId == that.clusterId
+      case _ => false
+    }
+  }
+
+}

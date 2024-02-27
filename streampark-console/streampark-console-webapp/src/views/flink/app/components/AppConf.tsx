@@ -1,4 +1,4 @@
-/* 
+/*
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -12,7 +12,7 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License. 
+  limitations under the License.
 */
 
 import { defineComponent, toRefs, unref } from 'vue';
@@ -27,6 +27,8 @@ import { fetchAppConf, fetchName } from '/@/api/flink/app/app';
 import { SettingTwoTone } from '@ant-design/icons-vue';
 import { fetchListConf } from '/@/api/flink/project';
 import { UseStrategyEnum } from '/@/enums/flinkEnum';
+import { useI18n } from '/@/hooks/web/useI18n';
+const { t } = useI18n();
 
 export default defineComponent({
   name: 'AppConf',
@@ -79,8 +81,12 @@ export default defineComponent({
               value={unref(model).strategy}
               onChange={(value: any) => handleChangeStrategy(value)}
             >
-              <Select.Option value={UseStrategyEnum.USE_EXIST}>use existing</Select.Option>
-              <Select.Option value={UseStrategyEnum.RESELECT}>reselect</Select.Option>
+              <Select.Option value={UseStrategyEnum.USE_EXIST}>
+                {t('flink.app.useExisting')}
+              </Select.Option>
+              <Select.Option value={UseStrategyEnum.RESELECT}>
+                {t('flink.app.reselect')}
+              </Select.Option>
             </Select>
             {unref(model).strategy == UseStrategyEnum.USE_EXIST && (
               <Form.Item style="width: calc(75% - 75px);margin-left:10px;">

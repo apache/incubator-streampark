@@ -241,23 +241,25 @@ if [ "$USE_NOHUP" = "true" ]; then
   NOHUP="nohup"
 fi
 
-
 PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
 
 APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
 
-DEFAULT_OPTS="""
-  -ea
-  -server
-  -Xms1024m
-  -Xmx1024m
-  -Xmn256m
-  -XX:NewSize=100m
-  -XX:+UseConcMarkSweepGC
-  -XX:CMSInitiatingOccupancyFraction=70
-  -Xloggc:${APP_HOME}/logs/gc.log
-  """
+JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
+JVM_ARGS="-server"
+if [ -f $JVM_OPTS_FILE ]; then
+  while read line
+  do
+      if [[ "$line" == -* ]]; then
+        JVM_ARGS="${JVM_ARGS} $line"
+      fi
+  done < $JVM_OPTS_FILE
+fi
+
+JVM_OPTS=${JVM_OPTS:-"${JVM_ARGS}"}
+JVM_OPTS="$JVM_OPTS -XX:HeapDumpPath=${APP_HOME}/logs/dump.hprof"
+JVM_OPTS="$JVM_OPTS -Xloggc:${APP_HOME}/logs/gc.log"
 DEBUG_OPTS=""
 
 # ----- Execute The Requested Command -----------------------------------------
@@ -270,7 +272,7 @@ print_logo() {
   printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
   printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
   printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
-  printf '      %s   Version:  2.1.2 %s\n'                                                         $BLUE   $RESET
+  printf '      %s   Version:  2.1.3 %s\n'                                                         $BLUE   $RESET
   printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                  $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
@@ -417,13 +419,12 @@ start() {
 
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  # shellcheck disable=SC2155
+  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
-  local JAVA_OPTS="""
-  $vmOption
-  $DEFAULT_OPTS
-  $DEBUG_OPTS
-  """
+  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+
+  echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
   eval $NOHUP $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
@@ -498,13 +499,14 @@ start_docker() {
 
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
-  local vmOption=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
+  # shellcheck disable=SC2155
+  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
 
-  local JAVA_OPTS="""
-    $vmOption
-    $DEFAULT_OPTS
-    $DEBUG_OPTS
-    """
+  JVM_OPTS="${JVM_OPTS} -XX:-UseContainerSupport"
+
+  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+
+  echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
   $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
