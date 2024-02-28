@@ -57,11 +57,11 @@ class SettingServiceTest extends SpringTestBase {
   void testUpdateAlertEmailConfigTest() {
     SenderEmail senderEmail = new SenderEmail();
     senderEmail.setHost("test-host-setting-value");
-    senderEmail.setPort(456);
     senderEmail.setUserName("test-username-setting-value");
     senderEmail.setPassword("test-password-setting-value");
     senderEmail.setFrom("test-from-setting-value");
     senderEmail.setSsl(true);
+    senderEmail.setPort(456);
 
     settingService.updateEmail(senderEmail);
 
@@ -69,16 +69,16 @@ class SettingServiceTest extends SpringTestBase {
         "test-host-setting-value",
         settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
     Assertions.assertEquals(
-        "test-port-setting-value",
-        settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
-    Assertions.assertEquals(
-        456, settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
+        "test-from-setting-value",
+        settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
     Assertions.assertEquals(
         "test-username-setting-value",
         settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
     Assertions.assertEquals(
         "test-password-setting-value",
         settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+    Assertions.assertEquals(
+        456, settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
     Assertions.assertEquals(
         true, settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
   }
