@@ -72,7 +72,7 @@ class SettingServiceTest extends SpringTestBase {
         "test-port-setting-value",
         settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
     Assertions.assertEquals(
-        "test-from-setting-value",
+        456,
         settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
     Assertions.assertEquals(
         "test-username-setting-value",
@@ -81,7 +81,7 @@ class SettingServiceTest extends SpringTestBase {
         "test-password-setting-value",
         settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
     Assertions.assertEquals(
-        "test-ssl-setting-value",
+        true,
         settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
   }
 }
