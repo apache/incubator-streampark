@@ -19,10 +19,14 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum SETTING_APi {
   GET = '/flink/setting/get',
+  GET_DOCKER = '/flink/setting/docker',
+  GET_EMAIL = '/flink/setting/email',
   ALL = '/flink/setting/all',
-  CHECK_HADOOP = '/flink/setting/checkHadoop',
   UPDATE = '/flink/setting/update',
+  CHECK_HADOOP = '/flink/setting/check/hadoop',
+  CHECK_DOCKER = '/flink/setting/check/docker',
   UPDATE_DOCKER = '/flink/setting/update/docker',
+  CHECK_EMAIL = '/flink/setting/check/email',
   UPDATE_ALERT = '/flink/setting/update/email',
 }
 /**
@@ -64,14 +68,34 @@ export function fetchCheckHadoop(): Promise<boolean> {
  * get docker setting info
  */
 export function fetchDockerConfig() {
-  return defHttp.post({ url: '/flink/setting/docker' });
+  return defHttp.post({ url: SETTING_APi.GET_DOCKER });
+}
+
+/**
+ * verify docker setting info
+ */
+export function fetchVerifyDocker(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.CHECK_DOCKER,
+    data,
+  });
+}
+
+/**
+ * verify docker setting info
+ */
+export function fetchVerifyEmail(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.CHECK_EMAIL,
+    data,
+  });
 }
 
 /**
  * get alert setting info
  */
 export function fetchEmailConfig() {
-  return defHttp.post({ url: '/flink/setting/email' });
+  return defHttp.post({ url: SETTING_APi.GET_EMAIL });
 }
 
 /**

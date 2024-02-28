@@ -42,7 +42,7 @@ export const settingFormSchema: SettingForm = {
       helpMessage: t('setting.system.docker.namespace.desc'),
       component: 'Input',
       componentProps: {
-        placeholder: t('setting.system.docker.address.label'),
+        placeholder: t('setting.system.docker.namespace.label'),
       },
       required: true,
     },
@@ -52,7 +52,7 @@ export const settingFormSchema: SettingForm = {
       helpMessage: t('setting.system.docker.userName.desc'),
       component: 'Input',
       componentProps: {
-        placeholder: t('setting.system.docker.address.label'),
+        placeholder: t('setting.system.docker.userName.label'),
       },
       required: true,
     },

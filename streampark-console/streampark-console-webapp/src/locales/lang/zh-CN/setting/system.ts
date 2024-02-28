@@ -38,45 +38,45 @@ export default {
   },
   docker: {
     address: {
-      label: 'Docker注册地址',
-      desc: 'Docker容器服务地址',
+      label: 'Docker 地址',
+      desc: 'Docker 容器的服务地址',
     },
     namespace: {
-      label: 'Docker命名空间',
-      desc: 'Docker构建环境和目标镜像注册使用的命名空间',
+      label: 'Docker 命名空间',
+      desc: 'Docker 构建环境和目标镜像注册使用的命名空间',
     },
     userName: {
-      label: 'Docker注册用户',
-      desc: 'Docker容器服务认证用户名',
+      label: 'Docker 用户名',
+      desc: 'Docker 容器服务认证用户名',
     },
     password: {
-      label: 'Docker注册密码',
-      desc: 'Docker容器服务认证密码',
+      label: 'Docker 密码',
+      desc: 'Docker 容器服务认证密码',
     },
   },
   email: {
     host: {
-      label: '告警邮件Smtp主机',
-      desc: '告警邮箱Smtp主机',
+      label: '邮件Smtp主机',
+      desc: '告警邮箱 Smtp主机',
     },
     port: {
-      label: '告警邮件Smtp端口',
-      desc: '告警邮箱Smtp端口',
+      label: '邮箱Smtp端口',
+      desc: '告警邮箱 Smtp端口',
     },
     userName: {
-      label: '告警邮件用户名',
-      desc: '用于发送告警邮件的用户名认证',
+      label: '邮箱用户名',
+      desc: '用于发送告警邮件的认证用户名',
     },
     password: {
-      label: '告警邮件密码',
-      desc: '用于发送告警邮件的密码认证',
+      label: '邮箱密码',
+      desc: '用于发送告警邮件的认证密码',
     },
     from: {
-      label: '告警邮件发送者',
-      desc: '发送告警的邮箱',
+      label: '邮箱地址',
+      desc: '用于发送告警的邮箱',
     },
     ssl: {
-      label: '告警邮件SSL',
+      label: '开启 SSL',
       desc: '是否在发送告警邮箱中启用 SSL',
     },
   },
