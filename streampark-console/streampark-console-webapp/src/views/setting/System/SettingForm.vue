@@ -105,7 +105,13 @@
 </script>
 
 <template>
-  <BasicModal @register="registerModal" :width="750" @ok="handleOk" :after-close="afterClose">
+  <BasicModal
+    @register="registerModal"
+    :width="750"
+    @ok="handleOk"
+    :after-close="afterClose"
+    centered
+  >
     <template #title>
       <SettingTwoTone class="ml-10px" theme="twoTone" two-tone-color="#4a9ff5" />
       {{ title }}
