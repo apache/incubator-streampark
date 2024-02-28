@@ -19,7 +19,6 @@
   import { SettingTwoTone } from '@ant-design/icons-vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { SystemSetting } from '/@/api/flink/setting/types/setting.type';
   import {
     fetchEmailConfig,
     fetchEmailUpdate,
@@ -29,13 +28,14 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { isNullOrUnDef } from '/@/utils/is';
+  import { settingFormSchema } from './config';
 
   const emit = defineEmits(['success', 'register']);
   const { createMessage } = useMessage();
   const { t } = useI18n();
   defineOptions({ name: 'DockerSetting' });
 
-  const settings = ref<SystemSetting[]>();
+  const settingConfig = ref<Recordable>({});
   const type = ref('docker');
   const title = computed(() => {
     if (type.value == 'docker') return t('setting.system.systemSettingItems.dockerSetting.name');
@@ -46,21 +46,17 @@
     try {
       changeLoading(true);
       await resetFields();
-      let res: any;
       type.value = data.type;
 
       if (data.type === 'docker') {
-        res = await fetchDockerConfig();
+        settingConfig.value = await fetchDockerConfig();
       } else if (data.type === 'email') {
-        res = await fetchEmailConfig();
+        settingConfig.value = await fetchEmailConfig();
       }
-      settings.value = res
-        ?.filter((i) => i.settingKey.startsWith(data.type))
-        ?.sort((a, b) => a.orderNum - b.orderNum);
 
       await setFieldsValue(
-        data.settings.reduce((pre, cur) => {
-          if (!isNullOrUnDef(cur.settingValue)) pre[cur.settingKey] = cur.settingValue;
+        Object.keys(settingConfig.value).reduce((pre, cur) => {
+          if (!isNullOrUnDef(settingConfig.value[cur])) pre[cur] = settingConfig.value[cur];
           return pre;
         }, {}),
       );
@@ -80,43 +76,16 @@
     showActionButtonGroup: false,
   });
   const formSchemas = computed((): FormSchema[] => {
-    return (
-      settings.value?.map((item) => {
-        const component =
-          item.type === 1
-            ? item.settingKey.endsWith('password')
-              ? 'InputPassword'
-              : 'Input'
-            : 'Switch';
-
-        const getField = () => {
-          if (type.value == 'docker') {
-            return item.settingKey.replaceAll('docker.register.', '');
-          }
-          if (type.value == 'email') {
-            return item.settingKey.replaceAll('alert.email.', '');
-          }
-          return item.settingKey;
-        };
-        return {
-          field: getField(),
-          label: item.settingName,
-          helpMessage: item.description,
-          component,
-          componentProps:
-            component == 'Switch'
-              ? {
-                  checkedChildren: 'ON',
-                  unCheckedChildren: 'OFF',
-                }
-              : {
-                  autocomplete: 'new-password',
-                },
-          //TODO Required or not according to the back-end interface
-          required: item.type == 1,
-        };
-      }) ?? []
-    );
+    if (Reflect.has(settingFormSchema, type.value)) {
+      return settingFormSchema[type.value];
+    }
+    return Object.keys(settingConfig.value).map((key) => {
+      return {
+        field: key,
+        label: key,
+        component: 'Input',
+      };
+    });
   });
   async function handleOk() {
     try {
@@ -131,12 +100,18 @@
     }
   }
   async function afterClose() {
-    settings.value = [];
+    settingConfig.value = [];
   }
 </script>
 
 <template>
-  <BasicModal @register="registerModal" :width="750" @ok="handleOk" :after-close="afterClose">
+  <BasicModal
+    @register="registerModal"
+    :width="750"
+    @ok="handleOk"
+    :after-close="afterClose"
+    centered
+  >
     <template #title>
       <SettingTwoTone class="ml-10px" theme="twoTone" two-tone-color="#4a9ff5" />
       {{ title }}

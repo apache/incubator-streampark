@@ -23,7 +23,7 @@ enum SETTING_APi {
   CHECK_HADOOP = '/flink/setting/checkHadoop',
   UPDATE = '/flink/setting/update',
   UPDATE_DOCKER = '/flink/setting/update/docker',
-  UPDATE_ALERT = '/flink/setting/update/alert/email',
+  UPDATE_ALERT = '/flink/setting/update/email',
 }
 /**
  * Get system settings
