@@ -121,7 +121,12 @@
           return;
         }
       }
-      createMessage.success(t('setting.system.update.success'));
+      Swal.fire({
+        icon: 'success',
+        title: t('setting.system.update.success'),
+        showConfirmButton: false,
+        timer: 2000,
+      });
       closeModal();
       emit('success');
     } catch (error) {
