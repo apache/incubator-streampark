@@ -115,11 +115,15 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
       SenderEmail senderEmail = new SenderEmail();
       senderEmail.setHost(host);
-      senderEmail.setPort(Integer.parseInt(port));
+      if (StringUtils.isNotBlank(port)) {
+        senderEmail.setPort(Integer.parseInt(port));
+      }
       senderEmail.setFrom(from);
       senderEmail.setUserName(userName);
       senderEmail.setPassword(password);
-      senderEmail.setSsl(Boolean.parseBoolean(ssl));
+      if (StringUtils.isNotBlank(ssl)) {
+        senderEmail.setSsl(Boolean.parseBoolean(ssl));
+      }
       return senderEmail;
     } catch (Exception e) {
       log.warn("Fault Alert Email is not set.");

@@ -75,7 +75,7 @@ public class SettingController {
 
   @Operation(summary = "get Docker config")
   @PostMapping("docker")
-  @RequiresPermissions("get")
+  @RequiresPermissions("setting:view")
   public RestResponse docker() {
     DockerConfig dockerConfig = DockerConfig.fromSetting();
     return RestResponse.success(dockerConfig);
@@ -83,7 +83,7 @@ public class SettingController {
 
   @Operation(summary = "check docker setting")
   @PostMapping("check/docker")
-  @RequiresPermissions("get")
+  @RequiresPermissions("setting:view")
   public RestResponse checkDocker(DockerConfig dockerConfig) {
     ResponseResult result = settingService.checkDocker(dockerConfig);
     return RestResponse.success(result);
@@ -99,7 +99,7 @@ public class SettingController {
 
   @Operation(summary = "get sender email")
   @PostMapping("email")
-  @RequiresPermissions("get")
+  @RequiresPermissions("setting:view")
   public RestResponse email() {
     SenderEmail senderEmail = settingService.getSenderEmail();
     return RestResponse.success(senderEmail);
@@ -107,7 +107,7 @@ public class SettingController {
 
   @Operation(summary = "check email")
   @PostMapping("check/email")
-  @RequiresPermissions("get")
+  @RequiresPermissions("setting:view")
   public RestResponse checkEmail(SenderEmail senderEmail) {
     ResponseResult result = settingService.checkEmail(senderEmail);
     return RestResponse.success(result);
