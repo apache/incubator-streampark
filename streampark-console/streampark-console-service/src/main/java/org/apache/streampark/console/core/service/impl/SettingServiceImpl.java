@@ -17,8 +17,9 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.MavenConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
@@ -71,21 +72,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
           new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
       this.update(entity, queryWrapper);
 
-      String settingKey = setting.getSettingKey();
-      if (CommonConfig.MAVEN_SETTINGS_PATH().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), value);
-      }
-
-      if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
-      }
-
-      if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
-      }
-      if (CommonConfig.MAVEN_AUTH_PASSWORD().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
-      }
+      MavenConfig.fromSetting(setting).updateConfig();
 
       Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
       optional.ifPresent(x -> x.setSettingValue(value));
@@ -95,10 +82,21 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
   }
 
-  public boolean updateSettings(List<Setting> settings) {
+  public boolean updateDocker(DockerConfig dockerConfig) {
+    List<Setting> settings = DockerConfig.toSettings(dockerConfig);
     for (Setting each : settings) {
-      boolean result = update(each);
-      if (!result) {
+      if (!update(each)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public boolean updateEmail(SenderEmail senderEmail) {
+    List<Setting> settings = SenderEmail.toSettings(senderEmail);
+    for (Setting each : settings) {
+      if (!update(each)) {
         return false;
       }
     }
@@ -116,12 +114,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       String ssl = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue();
 
       SenderEmail senderEmail = new SenderEmail();
-      senderEmail.setSmtpHost(host);
-      senderEmail.setSmtpPort(Integer.parseInt(port));
+      senderEmail.setHost(host);
+      if (StringUtils.isNotBlank(port)) {
+        senderEmail.setPort(Integer.parseInt(port));
+      }
       senderEmail.setFrom(from);
       senderEmail.setUserName(userName);
       senderEmail.setPassword(password);
-      senderEmail.setSsl(Boolean.parseBoolean(ssl));
+      if (StringUtils.isNotBlank(ssl)) {
+        senderEmail.setSsl(Boolean.parseBoolean(ssl));
+      }
       return senderEmail;
     } catch (Exception e) {
       log.warn("Fault Alert Email is not set.");
@@ -130,63 +132,27 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   }
 
   @Override
-  public String getDockerRegisterAddress() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterUser() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterPassword() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getDockerRegisterNamespace() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getMavenSettings() {
-    return SETTINGS.getOrDefault(SettingService.KEY_MAVEN_SETTINGS, emptySetting).getSettingValue();
-  }
-
-  @Override
-  public String getMavenRepository() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getMavenAuthUser() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getMavenAuthPassword() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
   public String getIngressModeDefault() {
     return SETTINGS
         .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
         .getSettingValue();
+  }
+
+  @Override
+  public ResponseResult checkDocker(DockerConfig dockerConfig) {
+    // TODO check
+    ResponseResult result = new ResponseResult();
+    result.setStatus(200);
+    result.setMsg("success");
+    return result;
+  }
+
+  @Override
+  public ResponseResult checkEmail(SenderEmail senderEmail) {
+    // TODO check
+    ResponseResult result = new ResponseResult();
+    result.setStatus(200);
+    result.setMsg("success");
+    return result;
   }
 }

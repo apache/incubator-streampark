@@ -19,12 +19,14 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.console.core.entity.Setting;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Data
+@Getter
+@Setter
 public class SettingAlertEmailConfigParams {
   private Setting host;
   private Setting port;

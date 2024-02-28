@@ -21,8 +21,8 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { SystemSetting } from '/@/api/flink/setting/types/setting.type';
   import {
-    fetchAlertConfig,
-    fetchAlertUpdate,
+    fetchEmailConfig,
+    fetchEmailUpdate,
     fetchDockerConfig,
     fetchDockerUpdate,
   } from '/@/api/flink/setting';
@@ -39,7 +39,7 @@
   const type = ref('docker');
   const title = computed(() => {
     if (type.value == 'docker') return t('setting.system.systemSettingItems.dockerSetting.name');
-    if (type.value == 'alert') return t('setting.system.systemSettingItems.emailSetting.name');
+    if (type.value == 'email') return t('setting.system.systemSettingItems.emailSetting.name');
     return '';
   });
   const [registerModal, { closeModal, changeLoading }] = useModalInner(async (data) => {
@@ -49,17 +49,16 @@
       let res: any;
       type.value = data.type;
 
-      //TODO Separate requests for interfaces based on type
       if (data.type === 'docker') {
         res = await fetchDockerConfig();
-      } else if (data.type === 'docker') {
-        res = await fetchAlertConfig();
+      } else if (data.type === 'email') {
+        res = await fetchEmailConfig();
       }
       settings.value = res
         ?.filter((i) => i.settingKey.startsWith(data.type))
         ?.sort((a, b) => a.orderNum - b.orderNum);
 
-      setFieldsValue(
+      await setFieldsValue(
         data.settings.reduce((pre, cur) => {
           if (!isNullOrUnDef(cur.settingValue)) pre[cur.settingKey] = cur.settingValue;
           return pre;
@@ -90,12 +89,11 @@
               : 'Input'
             : 'Switch';
 
-        //TODO Build the form schema data based on the data returned by the interface.
         const getField = () => {
           if (type.value == 'docker') {
             return item.settingKey.replaceAll('docker.register.', '');
           }
-          if (type.value == 'alert') {
+          if (type.value == 'email') {
             return item.settingKey.replaceAll('alert.email.', '');
           }
           return item.settingKey;
@@ -124,7 +122,7 @@
     try {
       const formData = await validate();
       if (type.value === 'docker') await fetchDockerUpdate(formData);
-      if (type.value === 'alert') await fetchAlertUpdate(formData);
+      if (type.value === 'email') await fetchEmailUpdate(formData);
       createMessage.success(t('setting.system.update.success'));
       closeModal();
       emit('success');

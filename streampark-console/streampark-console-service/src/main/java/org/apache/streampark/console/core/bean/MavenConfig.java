@@ -24,7 +24,8 @@ import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
@@ -32,7 +33,8 @@ import java.util.Map;
  * This class represents the Maven configuration for the application. It provides methods to
  * retrieve the various Maven configuration options.
  */
-@Data
+@Getter
+@Setter
 public class MavenConfig {
 
   /** File path for Maven settings. */
@@ -48,28 +50,47 @@ public class MavenConfig {
   private String mvnAuthPassword;
 
   /** */
+  public static MavenConfig fromSetting(Setting settings) {
+    MavenConfig mavenConfig = new MavenConfig();
+    String value = settings.getSettingValue();
+    switch (settings.getSettingKey()) {
+      case SettingService.KEY_MAVEN_SETTINGS:
+        mavenConfig.setMvnSettings(value);
+        break;
+      case SettingService.KEY_MAVEN_REPOSITORY:
+        mavenConfig.setMvnRepository(value);
+        break;
+      case SettingService.KEY_MAVEN_AUTH_USER:
+        mavenConfig.setMvnAuthUser(value);
+        break;
+      case SettingService.KEY_MAVEN_AUTH_PASSWORD:
+        mavenConfig.setMvnAuthPassword(value);
+        break;
+      default:
+        break;
+    }
+    return mavenConfig;
+  }
+
   public static MavenConfig fromSetting() {
     MavenConfig mavenConfig = new MavenConfig();
+
     Map<String, Setting> settings = SettingService.SETTINGS;
-    if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH().key())) {
-      mavenConfig.setMvnSettings(
-          settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());
-    }
+    Setting emptySetting = new Setting();
 
-    if (settings.containsKey(CommonConfig.MAVEN_REMOTE_URL().key())) {
-      mavenConfig.setMvnRepository(
-          settings.get(CommonConfig.MAVEN_REMOTE_URL().key()).getSettingValue());
-    }
+    mavenConfig.setMvnSettings(
+        settings.getOrDefault(SettingService.KEY_MAVEN_SETTINGS, emptySetting).getSettingValue());
 
-    if (settings.containsKey(CommonConfig.MAVEN_AUTH_USER().key())) {
-      mavenConfig.setMvnAuthUser(
-          settings.get(CommonConfig.MAVEN_AUTH_USER().key()).getSettingValue());
-    }
+    mavenConfig.setMvnRepository(
+        settings.getOrDefault(SettingService.KEY_MAVEN_REPOSITORY, emptySetting).getSettingValue());
 
-    if (settings.containsKey(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
-      mavenConfig.setMvnAuthPassword(
-          settings.get(CommonConfig.MAVEN_AUTH_PASSWORD().key()).getSettingValue());
-    }
+    mavenConfig.setMvnAuthUser(
+        settings.getOrDefault(SettingService.KEY_MAVEN_AUTH_USER, emptySetting).getSettingValue());
+
+    mavenConfig.setMvnAuthPassword(
+        settings
+            .getOrDefault(SettingService.KEY_MAVEN_AUTH_PASSWORD, emptySetting)
+            .getSettingValue());
 
     return mavenConfig;
   }
@@ -80,7 +101,6 @@ public class MavenConfig {
    * values, they will be updated in the internal configuration.
    */
   public void updateConfig() {
-
     if (StringUtils.isNotBlank(mvnSettings)) {
       InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
     }

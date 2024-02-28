@@ -80,15 +80,15 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
       HtmlEmail htmlEmail = new HtmlEmail();
       htmlEmail.setCharset("UTF-8");
-      htmlEmail.setHostName(senderEmail.getSmtpHost());
+      htmlEmail.setHostName(senderEmail.getHost());
       htmlEmail.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
       htmlEmail.setFrom(senderEmail.getFrom());
       if (senderEmail.isSsl()) {
         htmlEmail.setSSLCheckServerIdentity(true);
         htmlEmail.setSSLOnConnect(true);
-        htmlEmail.setSslSmtpPort(senderEmail.getSmtpPort().toString());
+        htmlEmail.setSslSmtpPort(senderEmail.getPort().toString());
       } else {
-        htmlEmail.setSmtpPort(senderEmail.getSmtpPort());
+        htmlEmail.setSmtpPort(senderEmail.getPort());
       }
       htmlEmail.setSubject(mail.getSubject());
       htmlEmail.setHtmlMsg(html);

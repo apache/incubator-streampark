@@ -18,10 +18,10 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.bean.SettingAlertEmailConfigParams;
-import org.apache.streampark.console.core.bean.SettingDockerConfigParams;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
+import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
@@ -34,11 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Tag(name = "SETTING_TAG")
@@ -75,39 +73,51 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
+  @Operation(summary = "get Docker config")
+  @PostMapping("docker")
+  @RequiresPermissions("setting:view")
+  public RestResponse docker() {
+    DockerConfig dockerConfig = DockerConfig.fromSetting();
+    return RestResponse.success(dockerConfig);
+  }
+
+  @Operation(summary = "check docker setting")
+  @PostMapping("check/docker")
+  @RequiresPermissions("setting:view")
+  public RestResponse checkDocker(DockerConfig dockerConfig) {
+    ResponseResult result = settingService.checkDocker(dockerConfig);
+    return RestResponse.success(result);
+  }
+
   @Operation(summary = "Update docker setting")
   @PostMapping("update/docker")
   @RequiresPermissions("setting:update")
-  public RestResponse updateDocker(@RequestBody SettingDockerConfigParams params) {
-    if (!SettingDockerConfigParams.verifyParams(params)) {
-      return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
-    }
-
-    List<Setting> settings =
-        Arrays.asList(
-            params.getAddress(), params.getNamespace(),
-            params.getUsername(), params.getPassword());
-    boolean updated = settingService.updateSettings(settings);
+  public RestResponse updateDocker(DockerConfig dockerConfig) {
+    boolean updated = settingService.updateDocker(dockerConfig);
     return RestResponse.success(updated);
   }
 
-  @Operation(summary = "Update alert email")
-  @PostMapping("update/alert/email")
-  @RequiresPermissions("setting:update")
-  public RestResponse updateAlertEmail(@RequestBody SettingAlertEmailConfigParams params) {
-    if (!SettingAlertEmailConfigParams.verifyParams(params)) {
-      return RestResponse.fail("The parameter is incorrect, please check!", ResponseCode.CODE_FAIL);
-    }
+  @Operation(summary = "get sender email")
+  @PostMapping("email")
+  @RequiresPermissions("setting:view")
+  public RestResponse email() {
+    SenderEmail senderEmail = settingService.getSenderEmail();
+    return RestResponse.success(senderEmail);
+  }
 
-    List<Setting> settings =
-        Arrays.asList(
-            params.getHost(),
-            params.getPort(),
-            params.getFrom(),
-            params.getUsername(),
-            params.getPassword(),
-            params.getSsl());
-    boolean updated = settingService.updateSettings(settings);
+  @Operation(summary = "check email")
+  @PostMapping("check/email")
+  @RequiresPermissions("setting:view")
+  public RestResponse checkEmail(SenderEmail senderEmail) {
+    ResponseResult result = settingService.checkEmail(senderEmail);
+    return RestResponse.success(result);
+  }
+
+  @Operation(summary = "Update sender email")
+  @PostMapping("update/email")
+  @RequiresPermissions("setting:update")
+  public RestResponse updateEmail(SenderEmail senderEmail) {
+    boolean updated = settingService.updateEmail(senderEmail);
     return RestResponse.success(updated);
   }
 

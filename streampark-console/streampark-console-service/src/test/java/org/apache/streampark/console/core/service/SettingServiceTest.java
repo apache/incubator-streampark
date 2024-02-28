@@ -18,113 +18,68 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringTestBase;
-import org.apache.streampark.console.core.bean.SettingAlertEmailConfigParams;
-import org.apache.streampark.console.core.bean.SettingDockerConfigParams;
-import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.SenderEmail;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.List;
-
 class SettingServiceTest extends SpringTestBase {
-  private final SettingDockerConfigParams dockerConfigParams = new SettingDockerConfigParams();
-  private final SettingAlertEmailConfigParams alertEmailConfigParams =
-      new SettingAlertEmailConfigParams();
 
   @Autowired SettingService settingService;
 
-  /*docker config*/
-  void initDockerConfigParams(SettingDockerConfigParams params) {
-    Setting address = settingService.get("docker.register.address");
-    address.setSettingValue("test-address-setting-value");
-    Setting username = settingService.get("docker.register.user");
-    username.setSettingValue("test-username-setting-value");
-    Setting password = settingService.get("docker.register.password");
-    password.setSettingValue("test-password-setting-value");
-    Setting namespace = settingService.get("docker.register.namespace");
-    namespace.setSettingValue("test-namespace-setting-value");
-    params.setAddress(address);
-    params.setUsername(username);
-    params.setPassword(password);
-    params.setNamespace(namespace);
-  }
-
   @Test
   void testUpdateDockerConfigTest() {
-    initDockerConfigParams(dockerConfigParams);
-    List<Setting> settings =
-        Arrays.asList(
-            dockerConfigParams.getAddress(),
-            dockerConfigParams.getNamespace(),
-            dockerConfigParams.getUsername(),
-            dockerConfigParams.getPassword());
-    settingService.updateSettings(settings);
+    DockerConfig dockerConfig = new DockerConfig();
+    dockerConfig.setUserName("test-username-setting-value");
+    dockerConfig.setPassword("test-password-setting-value");
+    dockerConfig.setNamespace("test-namespace-setting-value");
+    dockerConfig.setAddress("test-address-setting-value");
+
+    settingService.updateDocker(dockerConfig);
 
     Assertions.assertEquals(
         "test-address-setting-value",
-        settingService.get("docker.register.address").getSettingValue());
+        settingService.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getSettingValue());
     Assertions.assertEquals(
         "test-username-setting-value",
-        settingService.get("docker.register.user").getSettingValue());
+        settingService.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
     Assertions.assertEquals(
         "test-password-setting-value",
-        settingService.get("docker.register.password").getSettingValue());
+        settingService.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getSettingValue());
     Assertions.assertEquals(
         "test-namespace-setting-value",
-        settingService.get("docker.register.namespace").getSettingValue());
-  }
-
-  /*alert email config*/
-  void initAlertEmailConfigParams(SettingAlertEmailConfigParams params) {
-    Setting host = settingService.get("alert.email.host");
-    host.setSettingValue("test-host-setting-value");
-    Setting port = settingService.get("alert.email.port");
-    port.setSettingValue("test-port-setting-value");
-    Setting from = settingService.get("alert.email.from");
-    from.setSettingValue("test-from-setting-value");
-    Setting username = settingService.get("alert.email.userName");
-    username.setSettingValue("test-username-setting-value");
-    Setting password = settingService.get("alert.email.password");
-    password.setSettingValue("test-password-setting-value");
-    Setting ssl = settingService.get("alert.email.ssl");
-    ssl.setSettingValue("test-ssl-setting-value");
-    params.setHost(host);
-    params.setPort(port);
-    params.setFrom(from);
-    params.setUsername(username);
-    params.setPassword(password);
-    params.setSsl(ssl);
+        settingService.get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE).getSettingValue());
   }
 
   @Test
   void testUpdateAlertEmailConfigTest() {
-    initAlertEmailConfigParams(alertEmailConfigParams);
-    List<Setting> settings =
-        Arrays.asList(
-            alertEmailConfigParams.getHost(),
-            alertEmailConfigParams.getPort(),
-            alertEmailConfigParams.getFrom(),
-            alertEmailConfigParams.getUsername(),
-            alertEmailConfigParams.getPassword(),
-            alertEmailConfigParams.getSsl());
-    settingService.updateSettings(settings);
+    SenderEmail senderEmail = new SenderEmail();
+    senderEmail.setHost("test-host-setting-value");
+    senderEmail.setUserName("test-username-setting-value");
+    senderEmail.setPassword("test-password-setting-value");
+    senderEmail.setFrom("test-from-setting-value");
+    senderEmail.setSsl(true);
+    senderEmail.setPort(456);
+
+    settingService.updateEmail(senderEmail);
 
     Assertions.assertEquals(
-        "test-host-setting-value", settingService.get("alert.email.host").getSettingValue());
+        "test-host-setting-value",
+        settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
     Assertions.assertEquals(
-        "test-port-setting-value", settingService.get("alert.email.port").getSettingValue());
-    Assertions.assertEquals(
-        "test-from-setting-value", settingService.get("alert.email.from").getSettingValue());
+        "test-from-setting-value",
+        settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
     Assertions.assertEquals(
         "test-username-setting-value",
-        settingService.get("alert.email.userName").getSettingValue());
+        settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
     Assertions.assertEquals(
         "test-password-setting-value",
-        settingService.get("alert.email.password").getSettingValue());
+        settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
     Assertions.assertEquals(
-        "test-ssl-setting-value", settingService.get("alert.email.ssl").getSettingValue());
+        "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
+    Assertions.assertEquals(
+        "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
   }
 }

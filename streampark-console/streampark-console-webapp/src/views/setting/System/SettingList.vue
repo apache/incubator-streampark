@@ -69,7 +69,7 @@
       });
     } else if (record.settingKey.startsWith('alert.email')) {
       openModal(true, {
-        type: 'alert',
+        type: 'email',
       });
     } else {
       if (!record.editable) {

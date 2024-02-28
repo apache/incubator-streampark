@@ -17,10 +17,15 @@
 
 package org.apache.streampark.console.core.bean;
 
+import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The DockerConfig class represents the configuration for an email system. It holds the SMTP host,
@@ -29,35 +34,39 @@ import lombok.extern.slf4j.Slf4j;
  * <p>This class also provides a static factory method to create an DockerConfig object from a map
  * of settings.
  */
-@Data
+@Getter
+@Setter
 @Slf4j
 public class DockerConfig {
 
   private String address;
-  private String user;
+  private String userName;
   private String password;
   private String namespace;
 
   public static DockerConfig fromSetting() {
     try {
       DockerConfig dockerConfig = new DockerConfig();
+      Setting emptySetting = new Setting();
 
       dockerConfig.setAddress(
           SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
+              .getOrDefault(SettingService.KEY_DOCKER_REGISTER_ADDRESS, emptySetting)
               .getSettingValue());
 
-      dockerConfig.setUser(
-          SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+      dockerConfig.setUserName(
+          SettingService.SETTINGS
+              .getOrDefault(SettingService.KEY_DOCKER_REGISTER_USER, emptySetting)
+              .getSettingValue());
 
       dockerConfig.setPassword(
           SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
+              .getOrDefault(SettingService.KEY_DOCKER_REGISTER_PASSWORD, emptySetting)
               .getSettingValue());
 
       dockerConfig.setNamespace(
           SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
+              .getOrDefault(SettingService.KEY_DOCKER_REGISTER_NAMESPACE, emptySetting)
               .getSettingValue());
 
       return dockerConfig;
@@ -65,5 +74,24 @@ public class DockerConfig {
       log.warn("Failed to create DockerConfig from settings", e);
     }
     return null;
+  }
+
+  public static List<Setting> toSettings(DockerConfig dockerConfig) {
+    Setting address = new Setting();
+    address.setSettingKey(SettingService.KEY_DOCKER_REGISTER_ADDRESS);
+    address.setSettingValue(dockerConfig.getAddress());
+
+    Setting user = new Setting();
+    user.setSettingKey(SettingService.KEY_DOCKER_REGISTER_USER);
+    user.setSettingValue(dockerConfig.getUserName());
+
+    Setting password = new Setting();
+    password.setSettingKey(SettingService.KEY_DOCKER_REGISTER_PASSWORD);
+    password.setSettingValue(dockerConfig.getPassword());
+
+    Setting namespace = new Setting();
+    namespace.setSettingKey(SettingService.KEY_DOCKER_REGISTER_NAMESPACE);
+    namespace.setSettingValue(dockerConfig.getNamespace());
+    return Arrays.asList(address, user, password, namespace);
   }
 }
