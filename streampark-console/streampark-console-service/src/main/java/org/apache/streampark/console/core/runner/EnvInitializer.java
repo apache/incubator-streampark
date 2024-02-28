@@ -110,8 +110,7 @@ public class EnvInitializer implements ApplicationRunner {
               InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
             });
 
-    MavenConfig mavenConfig = MavenConfig.fromSetting();
-    mavenConfig.updateConfig();
+    MavenConfig.fromSetting().updateConfig();
 
     InternalConfigHolder.log();
   }

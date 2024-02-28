@@ -50,6 +50,28 @@ public class MavenConfig {
   private String mvnAuthPassword;
 
   /** */
+  public static MavenConfig fromSetting(Setting settings) {
+    MavenConfig mavenConfig = new MavenConfig();
+    String value = settings.getSettingValue();
+    switch (settings.getSettingKey()) {
+      case SettingService.KEY_MAVEN_SETTINGS:
+        mavenConfig.setMvnSettings(value);
+        break;
+      case SettingService.KEY_MAVEN_REPOSITORY:
+        mavenConfig.setMvnRepository(value);
+        break;
+      case SettingService.KEY_MAVEN_AUTH_USER:
+        mavenConfig.setMvnAuthUser(value);
+        break;
+      case SettingService.KEY_MAVEN_AUTH_PASSWORD:
+        mavenConfig.setMvnAuthPassword(value);
+        break;
+      default:
+        break;
+    }
+    return mavenConfig;
+  }
+
   public static MavenConfig fromSetting() {
     MavenConfig mavenConfig = new MavenConfig();
 

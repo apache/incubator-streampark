@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 
@@ -61,4 +62,8 @@ public interface SettingService extends IService<Setting> {
   SenderEmail getSenderEmail();
 
   String getIngressModeDefault();
+
+  ResponseResult checkDocker(DockerConfig dockerConfig);
+
+  ResponseResult checkEmail(SenderEmail senderEmail);
 }

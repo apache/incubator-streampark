@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.MavenConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
@@ -72,21 +72,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
           new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
       this.update(entity, queryWrapper);
 
-      String settingKey = setting.getSettingKey();
-      if (CommonConfig.MAVEN_SETTINGS_PATH().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), value);
-      }
-
-      if (CommonConfig.MAVEN_REMOTE_URL().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), value);
-      }
-
-      if (CommonConfig.MAVEN_AUTH_USER().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), value);
-      }
-      if (CommonConfig.MAVEN_AUTH_PASSWORD().key().equals(settingKey)) {
-        InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), value);
-      }
+      MavenConfig.fromSetting(setting).updateConfig();
 
       Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
       optional.ifPresent(x -> x.setSettingValue(value));
@@ -146,5 +132,23 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     return SETTINGS
         .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
         .getSettingValue();
+  }
+
+  @Override
+  public ResponseResult checkDocker(DockerConfig dockerConfig) {
+    // TODO check
+    ResponseResult result = new ResponseResult();
+    result.setStatus(200);
+    result.setMsg("success");
+    return result;
+  }
+
+  @Override
+  public ResponseResult checkEmail(SenderEmail senderEmail) {
+    // TODO check
+    ResponseResult result = new ResponseResult();
+    result.setStatus(200);
+    result.setMsg("success");
+    return result;
   }
 }

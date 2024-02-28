@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
@@ -80,6 +81,14 @@ public class SettingController {
     return RestResponse.success(dockerConfig);
   }
 
+  @Operation(summary = "check docker setting")
+  @PostMapping("check/docker")
+  @RequiresPermissions("get")
+  public RestResponse checkDocker(DockerConfig dockerConfig) {
+    ResponseResult result = settingService.checkDocker(dockerConfig);
+    return RestResponse.success(result);
+  }
+
   @Operation(summary = "Update docker setting")
   @PostMapping("update/docker")
   @RequiresPermissions("setting:update")
@@ -96,10 +105,18 @@ public class SettingController {
     return RestResponse.success(senderEmail);
   }
 
+  @Operation(summary = "check email")
+  @PostMapping("check/email")
+  @RequiresPermissions("get")
+  public RestResponse checkEmail(SenderEmail senderEmail) {
+    ResponseResult result = settingService.checkEmail(senderEmail);
+    return RestResponse.success(result);
+  }
+
   @Operation(summary = "Update sender email")
   @PostMapping("update/email")
   @RequiresPermissions("setting:update")
-  public RestResponse updateAlertEmail(SenderEmail senderEmail) {
+  public RestResponse updateEmail(SenderEmail senderEmail) {
     boolean updated = settingService.updateEmail(senderEmail);
     return RestResponse.success(updated);
   }
