@@ -851,9 +851,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     newApp.setJobName(jobName);
     newApp.setClusterId(
-        ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum())
-            ? oldApp.getClusterId()
-            : jobName);
+        ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum()) ? oldApp.getClusterId() : null);
     newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
     newApp.setVersionId(oldApp.getVersionId());
 
