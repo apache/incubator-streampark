@@ -95,7 +95,7 @@ const transform: AxiosTransform = {
     formatDate && data && !isString(data) && formatRequestDate(data);
     const teamId = getUserTeamId();
     const localStore = useLocaleStoreWithOut();
-    config.headers = Object.assign(config.headers || {}, { 'language': localStore.getLocale });
+    config.headers = Object.assign(config.headers || {}, { language: localStore.getLocale });
     if (config.method?.toUpperCase() === RequestEnum.GET) {
       if (!isString(params)) {
         // Add a timestamp parameter to the get request to avoid taking data from the cache.

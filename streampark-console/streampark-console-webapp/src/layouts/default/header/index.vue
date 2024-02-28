@@ -39,13 +39,9 @@
       </a-button>
       <Divider type="vertical" />
 
-      <Popover
-        placement="bottom"
-        trigger="hover"
-        arrow-point-at-center
-      >
+      <Popover placement="bottom" trigger="hover" arrow-point-at-center>
         <template #content>
-          <img src="/@/assets/images/join_wechat.png" alt="qrcode"  class="h-150px w-150px"/>
+          <img src="/@/assets/images/join_wechat.png" alt="qrcode" class="h-150px w-150px" />
         </template>
         <Icon icon="ant-design:qrcode-outlined" :class="`${prefixCls}-action__item`" />
       </Popover>
@@ -130,7 +126,7 @@
       LockScreen,
       Divider,
       AppDarkModeToggle,
-      Popover
+      Popover,
     },
     props: {
       fixed: propTypes.bool,

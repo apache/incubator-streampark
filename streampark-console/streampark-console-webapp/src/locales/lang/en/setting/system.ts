@@ -38,7 +38,7 @@ export default {
   },
   docker: {
     address: {
-      label: 'Docker Register Address',
+      label: 'Docker Address',
       desc: 'Docker container service address',
     },
     namespace: {
@@ -46,37 +46,37 @@ export default {
       desc: 'Namespace for docker image used in docker building env and target image register',
     },
     userName: {
-      label: 'Docker Register User',
+      label: 'Docker Username',
       desc: 'Docker container service authentication username',
     },
     password: {
-      label: 'Docker Register Password',
+      label: 'Docker Password',
       desc: 'Docker container service authentication password',
     },
   },
   email: {
     host: {
-      label: 'Alert Email Smtp Host',
+      label: 'Smtp Host',
       desc: 'Alert Mailbox Smtp Host',
     },
     port: {
-      label: 'Alert Email Smtp Port',
+      label: 'Smtp Port',
       desc: 'Smtp Port of the alarm mailbox',
     },
     from: {
-      label: 'Alert Email From',
+      label: 'Email Address',
       desc: 'Email to send alerts',
     },
     userName: {
-      label: 'Alert Email User',
+      label: 'Email Username',
       desc: 'Authentication username used to send alert emails',
     },
     password: {
-      label: 'Alert Email Password',
+      label: 'Email Password',
       desc: 'Authentication password used to send alarm email',
     },
     ssl: {
-      label: 'Alert Email SSL',
+      label: 'SSL enable',
       desc: 'Whether to enable SSL in the mailbox that sends the alert',
     },
   },

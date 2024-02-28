@@ -122,7 +122,7 @@ public class SettingController {
   }
 
   @Operation(summary = "Check hadoop status")
-  @PostMapping("checkHadoop")
+  @PostMapping("check/hadoop")
   public RestResponse checkHadoop() {
     try {
       HadoopUtils.hdfs().getStatus();
