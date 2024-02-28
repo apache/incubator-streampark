@@ -82,4 +82,17 @@ class SettingServiceTest extends SpringTestBase {
     Assertions.assertEquals(
         "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
   }
+
+  @Test
+  void checkEmailTest() {
+    SenderEmail senderEmail = new SenderEmail();
+    senderEmail.setHost("smtp.163.com");
+    senderEmail.setUserName("XXX@163.com");
+    senderEmail.setPassword("XXX");
+    senderEmail.setFrom("XXX@163.com");
+    senderEmail.setSsl(false);
+    senderEmail.setPort(25);
+
+    settingService.checkEmail(senderEmail);
+  }
 }
