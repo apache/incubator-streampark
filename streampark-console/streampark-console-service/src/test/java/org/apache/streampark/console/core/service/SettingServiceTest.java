@@ -22,11 +22,13 @@ import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@Disabled("'ese test cases can't be runnable due to external service is not available.")
 class SettingServiceTest extends SpringTestBase {
 
   @Autowired SettingService settingService;
