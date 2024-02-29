@@ -85,8 +85,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             "Team name [%s] exists already. Create team failed. Please rename and try again.",
             team.getTeamName()));
     team.setId(null);
-    team.setCreateTime(new Date());
-    team.setModifyTime(team.getCreateTime());
+    Date date = new Date();
+    team.setCreateTime(date);
+    team.setModifyTime(date);
     this.save(team);
   }
 

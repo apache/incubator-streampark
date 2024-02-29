@@ -62,13 +62,6 @@ public class SettingController {
     return RestResponse.success(setting);
   }
 
-  @Operation(summary = "Get streampark address")
-  @PostMapping("weburl")
-  public RestResponse webUrl() {
-    String url = settingService.getStreamParkAddress();
-    return RestResponse.success(url == null ? null : url.trim());
-  }
-
   @Operation(summary = "Update setting")
   @PostMapping("update")
   @RequiresPermissions("setting:update")

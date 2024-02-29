@@ -111,7 +111,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
   @Override
   public void createUser(User user) {
-    user.setCreateTime(new Date());
+    Date date = new Date();
+    user.setCreateTime(date);
+    user.setModifyTime(date);
     if (StringUtils.isNoneBlank(user.getPassword())) {
       String salt = ShaHashUtils.getRandomSalt();
       String password = ShaHashUtils.encrypt(salt, user.getPassword());

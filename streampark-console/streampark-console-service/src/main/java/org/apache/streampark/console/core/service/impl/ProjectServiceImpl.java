@@ -95,7 +95,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
 
-    project.setCreateTime(new Date());
+    Date date = new Date();
+    project.setCreateTime(date);
+    project.setModifyTime(date);
     boolean status = save(project);
 
     if (status) {

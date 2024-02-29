@@ -34,8 +34,8 @@ create table `t_resource` (
 `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
 `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
 `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
-`create_time` datetime not null default current_timestamp comment 'create time',
-`modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+`create_time` datetime default null comment 'create time',
+`modify_time` datetime default null comment 'modify time',
 primary key (`id`) using btree,
 unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -87,8 +87,8 @@ create table `t_flink_gateway` (
 `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
 `gateway_type` int not null comment 'The type of the gateway',
 `address` varchar(150) default null comment 'url address of gateway endpoint',
-`create_time` datetime not null default current_timestamp comment 'create time',
-`modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+`create_time` datetime default null comment 'create time',
+`modify_time` datetime default null comment 'modify time',
 primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 

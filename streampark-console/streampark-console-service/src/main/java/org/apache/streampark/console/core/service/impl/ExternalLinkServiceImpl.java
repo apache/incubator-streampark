@@ -53,8 +53,9 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    externalLink.setCreateTime(new Date());
-    externalLink.setModifyTime(new Date());
+    Date date = new Date();
+    externalLink.setCreateTime(date);
+    externalLink.setModifyTime(date);
     externalLink.setId(null);
     this.save(externalLink);
   }
