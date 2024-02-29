@@ -103,8 +103,8 @@ export default {
     forgetPassword: 'Forget Password?',
     otherSignIn: 'Sign in with',
 
-    ldapTip: 'Sign in with LDAP',
-    passwordTip: 'Sign in with password',
+    ldapTip: 'Sign in by LDAP',
+    passwordTip: 'Sign in by password',
 
     // notify
     loginSuccessTitle: 'Login successful',
