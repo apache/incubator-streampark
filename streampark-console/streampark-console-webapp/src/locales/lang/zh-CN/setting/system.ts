@@ -56,16 +56,16 @@ export default {
   },
   email: {
     host: {
-      label: '邮件Smtp主机',
-      desc: '告警邮箱 Smtp主机',
+      label: '发送邮件服务器',
+      desc: '发送告警邮件的服务器 Smtp 主机',
     },
     port: {
-      label: '邮箱Smtp端口',
+      label: '发送邮件Smtp端口',
       desc: '告警邮箱 Smtp端口',
     },
     userName: {
       label: '邮箱用户名',
-      desc: '用于发送告警邮件的认证用户名',
+      desc: '发送告警邮件的用户名,一般是你的邮箱地址',
     },
     password: {
       label: '邮箱密码',

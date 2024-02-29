@@ -61,19 +61,19 @@ export default {
     },
     port: {
       label: 'Smtp Port',
-      desc: 'Smtp Port of the alarm mailbox',
+      desc: 'Smtp Port of the mailbox',
     },
     from: {
       label: 'Email Address',
-      desc: 'Email to send alerts',
+      desc: 'Your email address used to send alert email',
     },
     userName: {
       label: 'Email Username',
-      desc: 'Authentication username used to send alert emails',
+      desc: 'Authentication username used to send email，generally: your email address',
     },
     password: {
       label: 'Email Password',
-      desc: 'Authentication password used to send alarm email',
+      desc: 'Authentication password used to send alert email',
     },
     ssl: {
       label: 'SSL enable',
