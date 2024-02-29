@@ -26,6 +26,12 @@ import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -40,6 +46,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -145,11 +152,45 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
   @Override
   public ResponseResult checkDocker(DockerConfig dockerConfig) {
-    // TODO check
     ResponseResult result = new ResponseResult();
-    result.setStatus(200);
-    result.setMsg("success");
+
+    CloseableHttpClient httpclient = HttpClients.createDefault();
+
+    // Transfer a JSON object with the login information to the server
+    HttpPost loginRequest = getHttpPost(dockerConfig);
+
+    try {
+      CloseableHttpResponse loginResponse = httpclient.execute(loginRequest);
+
+      int statusCode = loginResponse.getStatusLine().getStatusCode();
+
+      if (statusCode == 200) {
+        result.setStatus(200);
+        result.setMsg("successful");
+      } else {
+        result.setStatus(statusCode);
+        result.setMsg("login to server failed please check");
+      }
+    } catch (IOException e) {
+      result.setStatus(500);
+      result.setMsg("request failed, please check: " + e.getMessage());
+    }
+
     return result;
+  }
+
+  private static HttpPost getHttpPost(final DockerConfig dockerConfig) {
+    HttpPost loginRequest = new HttpPost(dockerConfig.getAddress());
+    loginRequest.setHeader("Content-Type", "application/json");
+    String userLoginParam =
+        "{\"username\": \""
+            + dockerConfig.getUserName()
+            + "\", \"password\": \""
+            + dockerConfig.getPassword()
+            + "\"}";
+    StringEntity jsonBody = new StringEntity(userLoginParam, ContentType.APPLICATION_JSON);
+    loginRequest.setEntity(jsonBody);
+    return loginRequest;
   }
 
   @Override

@@ -98,4 +98,14 @@ class SettingServiceTest extends SpringTestBase {
     ResponseResult result = settingService.checkEmail(senderEmail);
     Assertions.assertEquals(result.getStatus(), 200);
   }
+
+  @Test
+  void checkDockerTest() {
+    DockerConfig dockerConfig = new DockerConfig();
+    dockerConfig.setAddress("https://hub.docker.com/v2/users/login");
+    dockerConfig.setUserName("username");
+    dockerConfig.setPassword("password");
+    dockerConfig.setNamespace("");
+    settingService.checkDocker(dockerConfig);
+  }
 }
