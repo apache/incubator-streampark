@@ -36,8 +36,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 @Slf4j
 @Service
@@ -149,10 +154,25 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
   @Override
   public ResponseResult checkEmail(SenderEmail senderEmail) {
-    // TODO check
     ResponseResult result = new ResponseResult();
-    result.setStatus(200);
-    result.setMsg("success");
+    Properties props = new Properties();
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    props.put("mail.smtp.host", senderEmail.getHost());
+    props.put("mail.smtp.port", senderEmail.getPort());
+
+    Session session = Session.getInstance(props);
+    try {
+      Transport transport = session.getTransport("smtp");
+      transport.connect(
+          senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
+      transport.close();
+      result.setStatus(200);
+    } catch (MessagingException e) {
+      result.setStatus(500);
+      result.setMsg("connect to target mail server failed: " + e.getMessage());
+    }
+
     return result;
   }
 }
