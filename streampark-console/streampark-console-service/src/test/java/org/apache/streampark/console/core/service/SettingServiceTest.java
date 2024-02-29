@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class SettingServiceTest extends SpringTestBase {
 
   @Autowired SettingService settingService;
@@ -93,6 +95,8 @@ class SettingServiceTest extends SpringTestBase {
     senderEmail.setSsl(false);
     senderEmail.setPort(25);
 
-    settingService.checkEmail(senderEmail);
+    assertDoesNotThrow(
+        () -> settingService.checkEmail(senderEmail),
+        "connect to target mail server failed, please check!");
   }
 }

@@ -24,6 +24,8 @@ import org.apache.streampark.console.core.entity.Setting;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.mail.MessagingException;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,5 +67,5 @@ public interface SettingService extends IService<Setting> {
 
   ResponseResult checkDocker(DockerConfig dockerConfig);
 
-  ResponseResult checkEmail(SenderEmail senderEmail);
+  ResponseResult checkEmail(SenderEmail senderEmail) throws MessagingException;
 }

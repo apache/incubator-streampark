@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -27,7 +26,6 @@ import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.SimpleEmail;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -38,8 +36,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 @Slf4j
 @Service
@@ -150,26 +153,24 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   }
 
   @Override
-  public ResponseResult checkEmail(SenderEmail senderEmail) {
+  public ResponseResult checkEmail(SenderEmail senderEmail) throws MessagingException {
+    Properties props = new Properties();
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    props.put("mail.smtp.host", senderEmail.getHost());
+    props.put("mail.smtp.port", senderEmail.getPort());
+
+    Session session = Session.getInstance(props);
+
     try {
-      SimpleEmail email = new SimpleEmail();
-      email.setCharset("UTF-8");
-      email.setHostName(senderEmail.getHost());
-      email.setAuthentication(senderEmail.getUserName(), senderEmail.getPassword());
-      email.setFrom(senderEmail.getFrom());
-      if (senderEmail.isSsl()) {
-        email.setSSLCheckServerIdentity(true);
-        email.setSSLOnConnect(true);
-        email.setSslSmtpPort(senderEmail.getPort().toString());
-      } else {
-        email.setSmtpPort(senderEmail.getPort());
-      }
-      email.setSubject("update alert email setting successful.");
-      email.addTo(senderEmail.getFrom());
-      email.send();
-    } catch (Exception e) {
-      throw new AlertException("Failed send email alert", e);
+      Transport transport = session.getTransport("smtp");
+      transport.connect(
+          senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
+      transport.close();
+    } catch (MessagingException e) {
+      throw new MessagingException("connect to target mail server failed, please check!");
     }
+
     ResponseResult result = new ResponseResult();
     result.setStatus(200);
     result.setMsg("success");
