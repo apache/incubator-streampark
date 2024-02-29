@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
 import org.junit.jupiter.api.Assertions;
@@ -83,5 +84,18 @@ class SettingServiceTest extends SpringTestBase {
         "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
     Assertions.assertEquals(
         "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
+  }
+
+  @Test
+  void checkEmailTest() {
+    SenderEmail senderEmail = new SenderEmail();
+    senderEmail.setHost("smtp.qq.com");
+    senderEmail.setUserName("******@qq.com");
+    senderEmail.setPassword("******");
+    senderEmail.setFrom("******@qq.com");
+    senderEmail.setSsl(true);
+    senderEmail.setPort(465);
+    ResponseResult result = settingService.checkEmail(senderEmail);
+    Assertions.assertEquals(result.getStatus(), 200);
   }
 }
