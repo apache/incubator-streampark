@@ -153,7 +153,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
   }
 
   @Override
-  public ResponseResult checkEmail(SenderEmail senderEmail) throws MessagingException {
+  public ResponseResult checkEmail(SenderEmail senderEmail) {
+    ResponseResult result = new ResponseResult();
     Properties props = new Properties();
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.starttls.enable", "true");
@@ -161,19 +162,17 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     props.put("mail.smtp.port", senderEmail.getPort());
 
     Session session = Session.getInstance(props);
-
     try {
       Transport transport = session.getTransport("smtp");
       transport.connect(
           senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
       transport.close();
+      result.setStatus(200);
     } catch (MessagingException e) {
-      throw new MessagingException("connect to target mail server failed, please check!");
+      result.setStatus(500);
+      result.setMsg("connect to target mail server failed: " + e.getMessage());
     }
 
-    ResponseResult result = new ResponseResult();
-    result.setStatus(200);
-    result.setMsg("success");
     return result;
   }
 }

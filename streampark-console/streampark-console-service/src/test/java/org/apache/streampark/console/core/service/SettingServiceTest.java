@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 @Disabled("'ese test cases can't be runnable due to external service is not available.")
 class SettingServiceTest extends SpringTestBase {
 
@@ -85,20 +83,5 @@ class SettingServiceTest extends SpringTestBase {
         "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
     Assertions.assertEquals(
         "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
-  }
-
-  @Test
-  void checkEmailTest() {
-    SenderEmail senderEmail = new SenderEmail();
-    senderEmail.setHost("smtp.163.com");
-    senderEmail.setUserName("XXX@163.com");
-    senderEmail.setPassword("XXX");
-    senderEmail.setFrom("XXX@163.com");
-    senderEmail.setSsl(false);
-    senderEmail.setPort(25);
-
-    assertDoesNotThrow(
-        () -> settingService.checkEmail(senderEmail),
-        "connect to target mail server failed, please check!");
   }
 }

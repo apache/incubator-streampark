@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.mail.MessagingException;
-
 import java.util.List;
 
 @Tag(name = "SETTING_TAG")
@@ -110,7 +108,7 @@ public class SettingController {
   @Operation(summary = "check email")
   @PostMapping("check/email")
   @RequiresPermissions("setting:view")
-  public RestResponse checkEmail(SenderEmail senderEmail) throws MessagingException {
+  public RestResponse checkEmail(SenderEmail senderEmail) {
     ResponseResult result = settingService.checkEmail(senderEmail);
     return RestResponse.success(result);
   }
