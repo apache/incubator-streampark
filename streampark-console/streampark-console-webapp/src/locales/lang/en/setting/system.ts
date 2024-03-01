@@ -34,7 +34,8 @@ export default {
     },
   },
   update: {
-    success: 'setting updated successfully',
+    success: 'Setting updated successfully',
+    dockerNotStart: 'Please make sure your Docker service has been started. 🙂',
   },
   docker: {
     address: {
