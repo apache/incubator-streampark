@@ -29,6 +29,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.AuthResponse;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -145,10 +153,41 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
   @Override
   public ResponseResult checkDocker(DockerConfig dockerConfig) {
-    // TODO check
+    DockerClientConfig config =
+        DefaultDockerClientConfig.createDefaultConfigBuilder()
+            .withRegistryUrl(dockerConfig.getAddress())
+            .build();
+
+    DockerHttpClient httpClient =
+        new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
+
     ResponseResult result = new ResponseResult();
-    result.setStatus(200);
-    result.setMsg("success");
+
+    try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
+      AuthConfig authConfig =
+          new AuthConfig()
+              .withUsername(dockerConfig.getUserName())
+              .withPassword(dockerConfig.getPassword())
+              .withRegistryAddress(dockerConfig.getAddress());
+      AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+      if (response.getStatus().equals("Login Succeeded")) {
+        result.setStatus(200);
+      } else {
+        result.setStatus(500);
+        result.setMsg("docker login failed, status: " + response.getStatus());
+      }
+    } catch (Exception e) {
+      if (e.getMessage().contains("LastErrorException")) {
+        result.setStatus(400);
+      } else if (e.getMessage().contains("Status 401")) {
+        result.setStatus(500);
+        result.setMsg(
+            "Failed to validate Docker registry, unauthorized: incorrect username or password ");
+      } else {
+        result.setStatus(500);
+        result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
+      }
+    }
     return result;
   }
 

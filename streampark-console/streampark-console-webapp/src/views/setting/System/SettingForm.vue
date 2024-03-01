@@ -95,7 +95,7 @@
       const formData = await validate();
       if (type.value === 'docker') {
         const resp = await fetchVerifyDocker(formData);
-        if (resp.status === 200) {
+        if (resp.status === 200 || resp.status === 400) {
           await fetchDockerUpdate(formData);
         } else {
           Swal.fire({

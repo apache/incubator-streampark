@@ -41,6 +41,8 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
 
+        <docker.client.version>3.2.13</docker.client.version>
+
         <knife4j-openapi3.version>4.0.0</knife4j-openapi3.version>
         <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
         <commons-compress.version>1.21</commons-compress.version>
@@ -151,6 +153,26 @@
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+
+        <!-- docker client-->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-core</artifactId>
+            <version>${docker.client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
+            <version>${docker.client.version}</version>
         </dependency>
 
         <dependency>
