@@ -91,7 +91,37 @@ public interface ResourceService extends IService<Resource> {
    */
   void changeOwnership(Long userId, Long targetUserId);
 
+  /**
+   * upload jar file
+   *
+   * @param file
+   * @return
+   * @throws IOException
+   */
   String upload(MultipartFile file) throws IOException;
 
+  /**
+   * check resource content is valid
+   *
+   * @param resource
+   * @return
+   * @throws Exception
+   */
   RestResponse checkResource(Resource resource) throws Exception;
+
+  /**
+   * find resource by resource content
+   *
+   * @param resource
+   * @return
+   */
+  List<Resource> findResource(Resource resource);
+
+  /**
+   * transfer resource to team resource
+   *
+   * @param teamId team id
+   * @param resourcePath resource path
+   */
+  void transferTeamResource(Long teamId, String resourcePath);
 }
