@@ -30,6 +30,8 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import SettingForm from './SettingForm.vue';
 
+  const { t } = useI18n();
+
   const AvatarMap = {
     'streampark.maven.settings': 'settings2',
     'streampark.maven.central.repository': 'maven',
@@ -40,10 +42,29 @@
     'ingress.mode.default': 'nginx',
   };
 
+  const settingTitles = {
+    'streampark.maven.settings': t('setting.system.title.mavenSettings'),
+    'streampark.maven.central.repository': t('setting.system.title.mavenRepository'),
+    'streampark.maven.auth.user': t('setting.system.title.mavenUser'),
+    'streampark.maven.auth.password': t('setting.system.title.mavenPassword'),
+    'docker.register.address': t('setting.system.title.docker'),
+    'alert.email.from': t('setting.system.title.email'),
+    'ingress.mode.default': t('setting.system.title.ingress'),
+  };
+
+  const settingDesc = {
+    'streampark.maven.settings': t('setting.system.desc.mavenSettings'),
+    'streampark.maven.central.repository': t('setting.system.desc.mavenRepository'),
+    'streampark.maven.auth.user': t('setting.system.desc.mavenUser'),
+    'streampark.maven.auth.password': t('setting.system.desc.mavenPassword'),
+    'docker.register.address': t('setting.system.desc.docker'),
+    'alert.email.from': t('setting.system.desc.email'),
+    'ingress.mode.default': t('setting.system.desc.ingress'),
+  };
+
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
 
-  const { t } = useI18n();
   const emits = defineEmits(['updateValue', 'reload']);
   defineProps({
     data: {
@@ -95,7 +116,13 @@
   <List>
     <template v-for="item in data">
       <ListItem v-if="AvatarMap[item.settingKey]" :key="item.settingKey">
-        <ListItemMeta :title="item.settingName" :description="item.description" style="width: 50%">
+        <ListItemMeta style="width: 50%">
+          <template #title>
+            {{ settingTitles[item.settingKey] }}
+          </template>
+          <template #description>
+            {{ settingDesc[item.settingKey] }}
+          </template>
           <template #avatar>
             <div class="avatar">
               <SvgIcon :name="AvatarMap[item.settingKey]" />

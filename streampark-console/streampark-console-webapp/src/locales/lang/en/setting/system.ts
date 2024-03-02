@@ -37,6 +37,24 @@ export default {
     success: 'Setting updated successfully',
     dockerNotStart: 'Please make sure your Docker service has been started. 🙂',
   },
+  title: {
+    mavenSettings: 'Maven Settings File Path',
+    mavenRepository: 'Maven Central Repository',
+    mavenUser: 'Maven Central Repository Auth User',
+    mavenPassword: 'Maven Central Repository Auth Password',
+    docker: 'Docker Setting',
+    email: 'Alert Mailbox Setting',
+    ingress: 'Ingress domain address Setting',
+  },
+  desc: {
+    mavenSettings: 'Specify the full path to the local maven settings.xml',
+    mavenRepository: 'Maven central repository, Specify a repository address for maven.',
+    mavenUser: 'Maven central repository authentication username',
+    mavenPassword: 'Maven central repository authentication password',
+    docker: 'Docker container service settings',
+    email: 'Alert Mailbox settings used to sent alert email',
+    ingress: 'Automatically generate an nginx-based ingress by passing in a domain name',
+  },
   docker: {
     address: {
       label: 'Docker Address',

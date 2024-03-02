@@ -107,6 +107,7 @@
     </appender>
 
     <root level="INFO">
+        <appender-ref ref="STDOUT"/>
         <appender-ref ref="INFO"/>
         <appender-ref ref="WARN"/>
         <appender-ref ref="ERROR"/>
