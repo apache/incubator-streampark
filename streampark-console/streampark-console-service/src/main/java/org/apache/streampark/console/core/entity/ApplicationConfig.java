@@ -31,6 +31,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Base64;
 import java.util.Collections;
@@ -77,25 +78,7 @@ public class ApplicationConfig {
   }
 
   public Map<String, String> readConfig() {
-    ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
-    Map<String, String> configs = null;
-    if (fileType != null) {
-      switch (fileType) {
-        case YAML:
-          configs = PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
-          break;
-        case PROPERTIES:
-          configs =
-              PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
-          break;
-        case HOCON:
-          configs = PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
-          break;
-        default:
-          configs = Collections.emptyMap();
-          break;
-      }
-    }
+    Map<String, String> configs = renderConfigs();
 
     if (MapUtils.isNotEmpty(configs)) {
       return configs.entrySet().stream()
@@ -119,5 +102,23 @@ public class ApplicationConfig {
                   Map.Entry::getValue));
     }
     return Collections.emptyMap();
+  }
+
+  @Nullable
+  private Map<String, String> renderConfigs() {
+    ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
+    if (fileType == null) {
+      return null;
+    }
+    switch (fileType) {
+      case YAML:
+        return PropertiesUtils.fromYamlTextAsJava(DeflaterUtils.unzipString(this.content));
+      case PROPERTIES:
+        return PropertiesUtils.fromPropertiesTextAsJava(DeflaterUtils.unzipString(this.content));
+      case HOCON:
+        return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
+      default:
+        return Collections.emptyMap();
+    }
   }
 }

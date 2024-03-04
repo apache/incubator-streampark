@@ -117,17 +117,8 @@ public class EnvInitializer implements ApplicationRunner {
   }
 
   public synchronized void storageInitialize(StorageType storageType) {
-    String appHome = WebUtils.getAppHome();
 
-    if (StringUtils.isBlank(appHome)) {
-      throw new ExceptionInInitializerError(
-          String.format(
-              "[StreamPark] Workspace path check failed,"
-                  + " The system initialization check failed. If started local for development and debugging,"
-                  + " please ensure the -D%s parameter is clearly specified,"
-                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-              ConfigKeys.KEY_APP_HOME()));
-    }
+    checkAppHome();
 
     if (initialized.contains(storageType)) {
       return;
@@ -137,6 +128,35 @@ public class EnvInitializer implements ApplicationRunner {
     Workspace workspace = Workspace.of(storageType);
 
     // 1. prepare workspace dir
+    prepareWorkspace(storageType, fsOperator, workspace);
+    // 2. upload jar.
+    // 2.1) upload client jar
+    uploadClientJar(workspace, fsOperator);
+    // 2.2) upload plugin jar.
+    uploadPluginJar(workspace, fsOperator);
+    // 2.3) upload shims jar
+    uploadShimsJar(workspace, fsOperator);
+    // 2.4) create maven local repository dir
+    createMvnLocalRepoDir();
+
+    initialized.add(storageType);
+  }
+
+  private static void checkAppHome() {
+    final String appHome = WebUtils.getAppHome();
+    if (StringUtils.isBlank(appHome)) {
+      throw new ExceptionInInitializerError(
+          String.format(
+              "[StreamPark] Workspace path check failed,"
+                  + " The system initialization check failed. If started local for development and debugging,"
+                  + " please ensure the -D%s parameter is clearly specified,"
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+              ConfigKeys.KEY_APP_HOME()));
+    }
+  }
+
+  private void prepareWorkspace(
+      StorageType storageType, FsOperator fsOperator, Workspace workspace) {
     if (LFS == storageType) {
       fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
@@ -148,9 +168,16 @@ public class EnvInitializer implements ApplicationRunner {
             workspace.APP_PYTHON(),
             workspace.APP_JARS())
         .forEach(fsOperator::mkdirsIfNotExists);
+  }
 
-    // 2. upload jar.
-    // 2.1) upload client jar
+  private static void createMvnLocalRepoDir() {
+    String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
+    if (FsOperator.lfs().exists(localMavenRepo)) {
+      FsOperator.lfs().mkdirs(localMavenRepo);
+    }
+  }
+
+  private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
     File client = WebUtils.getAppClientDir();
     Utils.required(
         client.exists() && client.listFiles().length > 0,
@@ -163,18 +190,9 @@ public class EnvInitializer implements ApplicationRunner {
       log.info("load client:{} to {}", file.getName(), appClient);
       fsOperator.upload(file.getAbsolutePath(), appClient);
     }
+  }
 
-    // 2.2) upload plugin jar.
-    String appPlugins = workspace.APP_PLUGINS();
-    fsOperator.mkCleanDirs(appPlugins);
-
-    File plugins = WebUtils.getAppPluginsDir();
-    for (File file : plugins.listFiles(fileFilter)) {
-      log.info("load plugin:{} to {}", file.getName(), appPlugins);
-      fsOperator.upload(file.getAbsolutePath(), appPlugins);
-    }
-
-    // 2.3) upload shims jar
+  private void uploadShimsJar(Workspace workspace, FsOperator fsOperator) {
     File[] shims =
         WebUtils.getAppLibDir()
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
@@ -193,14 +211,17 @@ public class EnvInitializer implements ApplicationRunner {
         fsOperator.upload(file.getAbsolutePath(), shimsPath);
       }
     }
+  }
 
-    // 2.4) create maven local repository dir
-    String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
-    if (FsOperator.lfs().exists(localMavenRepo)) {
-      FsOperator.lfs().mkdirs(localMavenRepo);
+  private void uploadPluginJar(Workspace workspace, FsOperator fsOperator) {
+    String appPlugins = workspace.APP_PLUGINS();
+    fsOperator.mkCleanDirs(appPlugins);
+
+    File plugins = WebUtils.getAppPluginsDir();
+    for (File file : plugins.listFiles(fileFilter)) {
+      log.info("load plugin:{} to {}", file.getName(), appPlugins);
+      fsOperator.upload(file.getAbsolutePath(), appPlugins);
     }
-
-    initialized.add(storageType);
   }
 
   public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {

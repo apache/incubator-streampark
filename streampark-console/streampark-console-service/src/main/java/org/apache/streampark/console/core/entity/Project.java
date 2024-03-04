@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.shaded.guava30.com.google.common.base.Preconditions;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -38,6 +39,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.lib.Constants;
+
+import javax.annotation.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,9 +192,7 @@ public class Project implements Serializable {
     String mvn = windows ? "mvn.cmd" : "mvn";
 
     String mavenHome = System.getenv("M2_HOME");
-    if (mavenHome == null) {
-      mavenHome = System.getenv("MAVEN_HOME");
-    }
+    mavenHome = mavenHome == null ? System.getenv("MAVEN_HOME") : mavenHome;
 
     boolean useWrapper = true;
     if (mavenHome != null) {
@@ -207,43 +208,46 @@ public class Project implements Serializable {
     }
 
     if (useWrapper) {
-      if (windows) {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
-      } else {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw");
-      }
+      mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
     }
 
-    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
+    return renderCmd(mvn);
+  }
 
+  @Nonnull
+  private String renderCmd(String mvn) {
+    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
+    renderCmdByBuildArgs(cmdBuffer);
+    renderCmdBySetting(cmdBuffer);
+    return cmdBuffer.toString();
+  }
+
+  private void renderCmdByBuildArgs(StringBuilder cmdBuffer) {
     if (StringUtils.isNotBlank(this.buildArgs)) {
       String args = getIllegalArgs(this.buildArgs);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
-      }
+      Preconditions.checkArgument(
+          args == null,
+          "Illegal argument: \"%s\" in maven build parameters: %s",
+          args,
+          this.buildArgs);
       cmdBuffer.append(this.buildArgs.trim());
     }
+  }
 
+  private void renderCmdBySetting(StringBuilder cmdBuffer) {
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotBlank(setting)) {
-      String args = getIllegalArgs(setting);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
-      }
-      File file = new File(setting);
-      if (file.exists() && file.isFile()) {
-        cmdBuffer.append(" --settings ").append(setting);
-      } else {
-        throw new IllegalArgumentException(
-            String.format(
-                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-                setting));
-      }
+    if (StringUtils.isBlank(setting)) {
+      return;
     }
-    return cmdBuffer.toString();
+    String args = getIllegalArgs(setting);
+    Preconditions.checkArgument(
+        args == null, "Illegal argument \"%s\" in maven-setting file path: %s", args, setting);
+    File file = new File(setting);
+    Preconditions.checkArgument(
+        !file.exists() || !file.isFile(),
+        "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+        setting);
+    cmdBuffer.append(" --settings ").append(setting);
   }
 
   private String getIllegalArgs(String param) {
@@ -269,11 +273,10 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (StringUtils.isNotBlank(this.getPom())) {
-      buildHome =
-          new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+    if (StringUtils.isBlank(this.getPom())) {
+      return buildHome;
     }
-    return buildHome;
+    return new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
   }
 
   @JsonIgnore

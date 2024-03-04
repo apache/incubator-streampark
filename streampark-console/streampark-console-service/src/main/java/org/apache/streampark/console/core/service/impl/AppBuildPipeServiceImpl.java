@@ -168,16 +168,12 @@ public class AppBuildPipeServiceImpl
    * @return Whether the pipeline was successfully started
    */
   @Override
-  public boolean buildApplication(@NotNull Long appId, boolean forceBuild) {
+  public boolean buildApplication(@Nonnull Long appId, boolean forceBuild) {
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
     Application app = applicationManageService.getById(appId);
-    ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(RELEASE.getValue());
-    applicationLog.setAppId(app.getId());
-    applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    ApplicationLog applicationLog = getApplicationLog(app);
 
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
@@ -361,25 +357,7 @@ public class AppBuildPipeServiceImpl
         });
     // save docker resolve progress detail to cache, only for flink-k8s application mode.
     if (PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.pipeType()) {
-      pipeline
-          .as(FlinkK8sApplicationBuildPipeline.class)
-          .registerDockerProgressWatcher(
-              new DockerProgressWatcher() {
-                @Override
-                public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
-                  DOCKER_PULL_PG_SNAPSHOTS.put(app.getId(), snapshot);
-                }
-
-                @Override
-                public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
-                  DOCKER_BUILD_PG_SNAPSHOTS.put(app.getId(), snapshot);
-                }
-
-                @Override
-                public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
-                  DOCKER_PUSH_PG_SNAPSHOTS.put(app.getId(), snapshot);
-                }
-              });
+      registerDockerProgressWatcher(pipeline, app);
     }
     // save pipeline instance snapshot to db before release it.
     AppBuildPipeline buildPipeline =
@@ -391,6 +369,38 @@ public class AppBuildPipeServiceImpl
     // async release pipeline
     executorService.submit((Runnable) pipeline::launch);
     return saved;
+  }
+
+  private void registerDockerProgressWatcher(BuildPipeline pipeline, Application app) {
+    pipeline
+        .as(FlinkK8sApplicationBuildPipeline.class)
+        .registerDockerProgressWatcher(
+            new DockerProgressWatcher() {
+              @Override
+              public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
+                DOCKER_PULL_PG_SNAPSHOTS.put(app.getId(), snapshot);
+              }
+
+              @Override
+              public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
+                DOCKER_BUILD_PG_SNAPSHOTS.put(app.getId(), snapshot);
+              }
+
+              @Override
+              public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
+                DOCKER_PUSH_PG_SNAPSHOTS.put(app.getId(), snapshot);
+              }
+            });
+  }
+
+  @Nonnull
+  private ApplicationLog getApplicationLog(Application app) {
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(RELEASE.getValue());
+    applicationLog.setAppId(app.getId());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setUserId(commonService.getUserId());
+    return applicationLog;
   }
 
   /**
@@ -443,69 +453,26 @@ public class AppBuildPipeServiceImpl
           localWorkspace = app.getLocalAppHome();
         }
         FlinkYarnApplicationBuildRequest yarnAppRequest =
-            new FlinkYarnApplicationBuildRequest(
-                app.getJobName(),
-                mainClass,
-                localWorkspace,
-                yarnProvidedPath,
-                app.getDevelopmentMode(),
-                getMergedDependencyInfo(app));
+            buildFlinkYarnApplicationBuildRequest(app, mainClass, localWorkspace, yarnProvidedPath);
         log.info("Submit params to building pipeline : {}", yarnAppRequest);
         return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
       case YARN_PER_JOB:
       case YARN_SESSION:
       case REMOTE:
         FlinkRemotePerJobBuildRequest buildRequest =
-            new FlinkRemotePerJobBuildRequest(
-                app.getJobName(),
-                app.getLocalAppHome(),
-                mainClass,
-                flinkUserJar,
-                app.isCustomCodeJob(),
-                app.getFlinkExecutionMode(),
-                app.getDevelopmentMode(),
-                flinkEnv.getFlinkVersion(),
-                getMergedDependencyInfo(app));
+            buildFlinkRemotePerJobBuildRequest(app, mainClass, flinkUserJar, flinkEnv);
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
         FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
-            new FlinkK8sSessionBuildRequest(
-                app.getJobName(),
-                app.getLocalAppHome(),
-                mainClass,
-                flinkUserJar,
-                app.getFlinkExecutionMode(),
-                app.getDevelopmentMode(),
-                flinkEnv.getFlinkVersion(),
-                getMergedDependencyInfo(app),
-                app.getClusterId(),
-                app.getK8sNamespace());
+            buildFlinkK8sSessionBuildRequest(app, mainClass, flinkUserJar, flinkEnv);
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
         DockerConfig dockerConfig = settingService.getDockerConfig();
         FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
-            new FlinkK8sApplicationBuildRequest(
-                app.getJobName(),
-                app.getLocalAppHome(),
-                mainClass,
-                flinkUserJar,
-                app.getFlinkExecutionMode(),
-                app.getDevelopmentMode(),
-                flinkEnv.getFlinkVersion(),
-                getMergedDependencyInfo(app),
-                app.getClusterId(),
-                app.getK8sNamespace(),
-                app.getFlinkImage(),
-                app.getK8sPodTemplates(),
-                app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
-                DockerConf.of(
-                    dockerConfig.getAddress(),
-                    dockerConfig.getNamespace(),
-                    dockerConfig.getUser(),
-                    dockerConfig.getPassword()),
-                app.getIngressTemplate());
+            buildFlinkK8sApplicationBuildRequest(
+                app, mainClass, flinkUserJar, flinkEnv, dockerConfig);
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
         if (K8sFlinkConfig.isV2Enabled()) {
           return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
@@ -515,6 +482,84 @@ public class AppBuildPipeServiceImpl
         throw new UnsupportedOperationException(
             "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
     }
+  }
+
+  @NotNull
+  private FlinkYarnApplicationBuildRequest buildFlinkYarnApplicationBuildRequest(
+      @NotNull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
+    FlinkYarnApplicationBuildRequest yarnAppRequest =
+        new FlinkYarnApplicationBuildRequest(
+            app.getJobName(),
+            mainClass,
+            localWorkspace,
+            yarnProvidedPath,
+            app.getDevelopmentMode(),
+            getMergedDependencyInfo(app));
+    return yarnAppRequest;
+  }
+
+  @Nonnull
+  private FlinkK8sApplicationBuildRequest buildFlinkK8sApplicationBuildRequest(
+      @Nonnull Application app,
+      String mainClass,
+      String flinkUserJar,
+      FlinkEnv flinkEnv,
+      DockerConfig dockerConfig) {
+    FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
+        new FlinkK8sApplicationBuildRequest(
+            app.getJobName(),
+            app.getLocalAppHome(),
+            mainClass,
+            flinkUserJar,
+            app.getFlinkExecutionMode(),
+            app.getDevelopmentMode(),
+            flinkEnv.getFlinkVersion(),
+            getMergedDependencyInfo(app),
+            app.getClusterId(),
+            app.getK8sNamespace(),
+            app.getFlinkImage(),
+            app.getK8sPodTemplates(),
+            app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
+            DockerConf.of(
+                dockerConfig.getAddress(),
+                dockerConfig.getNamespace(),
+                dockerConfig.getUser(),
+                dockerConfig.getPassword()),
+            app.getIngressTemplate());
+    return k8sApplicationBuildRequest;
+  }
+
+  @Nonnull
+  private FlinkK8sSessionBuildRequest buildFlinkK8sSessionBuildRequest(
+      @Nonnull Application app, String mainClass, String flinkUserJar, FlinkEnv flinkEnv) {
+    FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
+        new FlinkK8sSessionBuildRequest(
+            app.getJobName(),
+            app.getLocalAppHome(),
+            mainClass,
+            flinkUserJar,
+            app.getFlinkExecutionMode(),
+            app.getDevelopmentMode(),
+            flinkEnv.getFlinkVersion(),
+            getMergedDependencyInfo(app),
+            app.getClusterId(),
+            app.getK8sNamespace());
+    return k8sSessionBuildRequest;
+  }
+
+  @Nonnull
+  private FlinkRemotePerJobBuildRequest buildFlinkRemotePerJobBuildRequest(
+      @Nonnull Application app, String mainClass, String flinkUserJar, FlinkEnv flinkEnv) {
+    return new FlinkRemotePerJobBuildRequest(
+        app.getJobName(),
+        app.getLocalAppHome(),
+        mainClass,
+        flinkUserJar,
+        app.isCustomCodeJob(),
+        app.getFlinkExecutionMode(),
+        app.getDevelopmentMode(),
+        flinkEnv.getFlinkVersion(),
+        getMergedDependencyInfo(app));
   }
 
   /** copy from {@link ApplicationActionService#start(Application, boolean)} */

@@ -28,6 +28,8 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
+import org.apache.flink.shaded.guava30.com.google.common.base.Preconditions;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Data;
@@ -97,41 +99,51 @@ public class FlinkCheckpointProcessor {
         saveSavepoint(checkPoint, application.getId());
       }
     } else if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
-      Counter counter = checkPointFailedCache.get(appId);
-      if (counter == null) {
-        checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
-      } else {
-        long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
-        if (minute <= application.getCpFailureRateInterval()
-            && counter.getCount() >= application.getCpMaxFailureInterval()) {
-          checkPointFailedCache.remove(appId);
-          FailoverStrategyEnum failoverStrategyEnum =
-              FailoverStrategyEnum.of(application.getCpFailureAction());
-          if (failoverStrategyEnum == null) {
-            throw new IllegalArgumentException(
-                "Unexpected cpFailureAction: " + application.getCpFailureAction());
-          }
-          switch (failoverStrategyEnum) {
-            case ALERT:
-              alertService.alert(
-                  application.getAlertId(),
-                  AlertTemplate.of(application, CheckPointStatusEnum.FAILED));
-              break;
-            case RESTART:
-              try {
-                applicationActionService.restart(application);
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-              break;
-            default:
-              // do nothing
-              break;
-          }
-        } else {
-          counter.increment();
+      processFailedCheckpoint(application, checkPoint, appId);
+    }
+  }
+
+  private void processFailedCheckpoint(
+      Application application, @Nonnull CheckPoints.CheckPoint checkPoint, Long appId) {
+    Counter counter = checkPointFailedCache.get(appId);
+    if (counter == null) {
+      checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
+      return;
+    }
+
+    long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
+    if (minute > application.getCpFailureRateInterval()
+        || counter.getCount() < application.getCpMaxFailureInterval()) {
+      counter.increment();
+      return;
+    }
+    checkPointFailedCache.remove(appId);
+    FailoverStrategyEnum failoverStrategyEnum =
+        FailoverStrategyEnum.of(application.getCpFailureAction());
+    Preconditions.checkArgument(
+        failoverStrategyEnum != null,
+        "Unexpected cpFailureAction: %s",
+        application.getCpFailureAction());
+    processFailoverStrategy(application, failoverStrategyEnum);
+  }
+
+  private void processFailoverStrategy(
+      Application application, FailoverStrategyEnum failoverStrategyEnum) {
+    switch (failoverStrategyEnum) {
+      case ALERT:
+        alertService.alert(
+            application.getAlertId(), AlertTemplate.of(application, CheckPointStatusEnum.FAILED));
+        break;
+      case RESTART:
+        try {
+          applicationActionService.restart(application);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
-      }
+        break;
+      default:
+        // do nothing
+        break;
     }
   }
 
