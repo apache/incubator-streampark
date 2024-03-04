@@ -19,6 +19,9 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
+import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
@@ -67,6 +70,54 @@ public class SettingController {
   @RequiresPermissions("setting:update")
   public RestResponse update(Setting setting) {
     boolean updated = settingService.update(setting);
+    return RestResponse.success(updated);
+  }
+
+  @Operation(summary = "get Docker config")
+  @PostMapping("docker")
+  @RequiresPermissions("setting:view")
+  public RestResponse docker() {
+    DockerConfig dockerConfig = DockerConfig.fromSetting();
+    return RestResponse.success(dockerConfig);
+  }
+
+  @Operation(summary = "check docker setting")
+  @PostMapping("check/docker")
+  @RequiresPermissions("setting:view")
+  public RestResponse checkDocker(DockerConfig dockerConfig) {
+    ResponseResult result = settingService.checkDocker(dockerConfig);
+    return RestResponse.success(result);
+  }
+
+  @Operation(summary = "Update docker setting")
+  @PostMapping("update/docker")
+  @RequiresPermissions("setting:update")
+  public RestResponse updateDocker(DockerConfig dockerConfig) {
+    boolean updated = settingService.updateDocker(dockerConfig);
+    return RestResponse.success(updated);
+  }
+
+  @Operation(summary = "get sender email")
+  @PostMapping("email")
+  @RequiresPermissions("setting:view")
+  public RestResponse email() {
+    SenderEmail senderEmail = settingService.getSenderEmail();
+    return RestResponse.success(senderEmail);
+  }
+
+  @Operation(summary = "check email")
+  @PostMapping("check/email")
+  @RequiresPermissions("setting:view")
+  public RestResponse checkEmail(SenderEmail senderEmail) {
+    ResponseResult result = settingService.checkEmail(senderEmail);
+    return RestResponse.success(result);
+  }
+
+  @Operation(summary = "Update sender email")
+  @PostMapping("update/email")
+  @RequiresPermissions("setting:update")
+  public RestResponse updateEmail(SenderEmail senderEmail) {
+    boolean updated = settingService.updateEmail(senderEmail);
     return RestResponse.success(updated);
   }
 
