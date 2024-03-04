@@ -209,7 +209,7 @@ export default {
     enableDrain: '在触发 savepoint 和停止作业之前发送 MAX_WATERMARK',
     invalidSavePoint: 'savepoint 路径无效: ',
     canceling: '当前作业正在停止中',
-    starting: '当前作业正在q启动中',
+    starting: '当前作业正在启动中',
   },
   dashboard: {
     availableTaskSlots: '可用的任务槽数',
