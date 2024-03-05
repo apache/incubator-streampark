@@ -126,18 +126,24 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String args;
   /** application module */
   private String module;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String options;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String hotParams;
 
   private Integer resolveOrder;
+
   private Integer executionMode;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String dynamicProperties;
+
   private Integer appType;
 
   /** determine if tracking status */
@@ -165,12 +171,15 @@ public class Application implements Serializable {
   private Long duration;
 
   /** checkpoint max failure interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpMaxFailureInterval;
 
   /** checkpoint failure rate interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureRateInterval;
 
   /** Actions triggered after X minutes failed Y times: 1: send alert 2: restart */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureAction;
 
   /** overview */
@@ -187,8 +196,6 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long flinkClusterId;
 
-  private String description;
-
   private Date createTime;
 
   private Date optionTime;
@@ -204,6 +211,7 @@ public class Application implements Serializable {
   private String k8sTmPodTemplate;
 
   private String ingressTemplate;
+
   private String defaultModeIngress;
 
   /** 1: cicd (build from csv) 2: upload (upload local jar job) */
@@ -212,7 +220,11 @@ public class Application implements Serializable {
   /** flink-hadoop integration on flink-k8s mode */
   private Boolean k8sHadoopIntegration;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String tags;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
+  private String description;
 
   /** running job */
   private transient JobsOverview.Task overview;
