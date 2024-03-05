@@ -126,6 +126,7 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer alertId;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String args;
   /** application module */
   private String module;
@@ -137,6 +138,8 @@ public class Application implements Serializable {
 
   private Integer resolveOrder;
   private Integer executionMode;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String dynamicProperties;
   private Integer appType;
 
@@ -165,12 +168,15 @@ public class Application implements Serializable {
   private Long duration;
 
   /** checkpoint max failure interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpMaxFailureInterval;
 
   /** checkpoint failure rate interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureRateInterval;
 
   /** Actions triggered after X minutes failed Y times: 1: send alert 2: restart */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureAction;
 
   /** overview */
