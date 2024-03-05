@@ -78,6 +78,7 @@ public class FlinkCluster implements Serializable {
 
   private String serviceAccount;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String description;
 
   private Long userId;
@@ -86,10 +87,12 @@ public class FlinkCluster implements Serializable {
 
   private String options;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String yarnQueue;
 
   private Boolean k8sHadoopIntegration;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String dynamicProperties;
 
   private Integer k8sRestExposedType;
