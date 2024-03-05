@@ -93,7 +93,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
             yarnQueues.getRecords().stream()
                 .map(YarnQueue::getQueueLabel)
                 .collect(Collectors.toList()))
-        .containsExactlyInAnyOrder(q3AtL3, q3AtL1);
+        .containsExactlyInAnyOrder(q3AtL3, q2AtL1);
 
     // Test for 1st page, size = 2, order by create time with queue_label
     queryParams.setQueueLabel("q3");
