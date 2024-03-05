@@ -60,6 +60,20 @@ public class SsoShiroPlugin {
     shiroService.addRealm(new Pac4jRealm());
 
     // Construct the shiro filter for SSO
+    constructShiroFilterForSSO();
+
+    // Construct the filterChainDefinitionMap for SSO
+    LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
+    filterChainDefinitionMap.put("/sso/signin", "ssoSecurityFilter");
+    filterChainDefinitionMap.put("/sso/token", "ssoSecurityFilter");
+    filterChainDefinitionMap.put("/pac4jLogout", "ssoLogoutFilter");
+    // Get callback endpoint from callbackUrl
+    String callbackEndpoint = URI.create(ssoConfig.getClients().getCallbackUrl()).getPath();
+    filterChainDefinitionMap.put(callbackEndpoint, "ssoCallbackFilter");
+    shiroService.addFilterChains(filterChainDefinitionMap);
+  }
+
+  private void constructShiroFilterForSSO() {
     SecurityFilter securityFilter = new SecurityFilter();
     CallbackFilter callbackFilter = new CallbackFilter();
     LogoutFilter logoutFilter = new LogoutFilter();
@@ -72,15 +86,5 @@ public class SsoShiroPlugin {
     filters.put("ssoCallbackFilter", callbackFilter);
     filters.put("ssoLogoutFilter", logoutFilter);
     shiroService.addFilters(filters);
-
-    // Construct the filterChainDefinitionMap for SSO
-    LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-    filterChainDefinitionMap.put("/sso/signin", "ssoSecurityFilter");
-    filterChainDefinitionMap.put("/sso/token", "ssoSecurityFilter");
-    filterChainDefinitionMap.put("/pac4jLogout", "ssoLogoutFilter");
-    // Get callback endpoint from callbackUrl
-    String callbackEndpoint = URI.create(ssoConfig.getClients().getCallbackUrl()).getPath();
-    filterChainDefinitionMap.put(callbackEndpoint, "ssoCallbackFilter");
-    shiroService.addFilterChains(filterChainDefinitionMap);
   }
 }

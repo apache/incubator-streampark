@@ -37,6 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nonnull;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -73,17 +74,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
       String markdown = FreemarkerUtils.format(template, alertTemplate);
       Map<String, Object> cardMap =
           mapper.readValue(markdown, new TypeReference<Map<String, Object>>() {});
-
-      Map<String, Object> body = new HashMap<>();
-      // get sign
-      if (alertLarkParams.getSecretEnable()) {
-        long timestamp = System.currentTimeMillis() / 1000;
-        String sign = getSign(alertLarkParams.getSecretToken(), timestamp);
-        body.put("timestamp", timestamp);
-        body.put("sign", sign);
-      }
-      body.put("msg_type", "interactive");
-      body.put("card", cardMap);
+      Map<String, Object> body = renderBody(alertLarkParams, cardMap);
       sendMessage(alertLarkParams, body);
       return true;
     } catch (AlertException alertException) {
@@ -91,6 +82,22 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
     } catch (Exception e) {
       throw new AlertException("Failed send lark alert", e);
     }
+  }
+
+  @Nonnull
+  private Map<String, Object> renderBody(
+      AlertLarkParams alertLarkParams, Map<String, Object> cardMap) {
+    Map<String, Object> body = new HashMap<>();
+    // get sign
+    if (alertLarkParams.getSecretEnable()) {
+      long timestamp = System.currentTimeMillis() / 1000;
+      String sign = getSign(alertLarkParams.getSecretToken(), timestamp);
+      body.put("timestamp", timestamp);
+      body.put("sign", sign);
+    }
+    body.put("msg_type", "interactive");
+    body.put("card", cardMap);
+    return body;
   }
 
   private void sendMessage(AlertLarkParams params, Map<String, Object> body) throws AlertException {

@@ -116,15 +116,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     ApiAlertException.throwIfFalse(
         !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
         "The project is being built, update project failed.");
-    project.setName(projectParam.getName());
-    project.setUrl(projectParam.getUrl());
-    project.setBranches(projectParam.getBranches());
-    project.setPrvkeyPath(projectParam.getPrvkeyPath());
-    project.setUserName(projectParam.getUserName());
-    project.setPassword(projectParam.getPassword());
-    project.setPom(projectParam.getPom());
-    project.setDescription(projectParam.getDescription());
-    project.setBuildArgs(projectParam.getBuildArgs());
+    updateInternal(projectParam, project);
     if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {
@@ -146,6 +138,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
     baseMapper.updateById(project);
     return true;
+  }
+
+  private static void updateInternal(Project projectParam, Project project) {
+    project.setName(projectParam.getName());
+    project.setUrl(projectParam.getUrl());
+    project.setBranches(projectParam.getBranches());
+    project.setPrvkeyPath(projectParam.getPrvkeyPath());
+    project.setUserName(projectParam.getUserName());
+    project.setPassword(projectParam.getPassword());
+    project.setPom(projectParam.getPom());
+    project.setDescription(projectParam.getDescription());
+    project.setBuildArgs(projectParam.getBuildArgs());
   }
 
   @Override

@@ -46,9 +46,21 @@ public class ApiAlertException extends AbstractApiException {
     super(message, cause, ResponseCode.CODE_FAIL_ALERT);
   }
 
-  public static void throwIfNull(Object object, String errorMessage) {
+  public static void throwIfNull(Object object, String errorMsgFmt, Object... args) {
     if (Objects.isNull(object)) {
-      throw new ApiAlertException(errorMessage);
+      if (args == null || args.length < 1) {
+        throw new ApiAlertException(errorMsgFmt);
+      }
+      throw new ApiAlertException(String.format(errorMsgFmt, args));
+    }
+  }
+
+  public static void throwIfNotNull(Object object, String errorMsgFmt, Object... args) {
+    if (!Objects.isNull(object)) {
+      if (args == null || args.length < 1) {
+        throw new ApiAlertException(errorMsgFmt);
+      }
+      throw new ApiAlertException(String.format(errorMsgFmt, args));
     }
   }
 
@@ -58,9 +70,12 @@ public class ApiAlertException extends AbstractApiException {
     }
   }
 
-  public static void throwIfTrue(boolean expression, String errorMessage) {
+  public static void throwIfTrue(boolean expression, String errorMsgFmt, Object... args) {
     if (expression) {
-      throw new ApiAlertException(errorMessage);
+      if (args == null || args.length < 1) {
+        throw new ApiAlertException(errorMsgFmt);
+      }
+      throw new ApiAlertException(String.format(errorMsgFmt, args));
     }
   }
 }

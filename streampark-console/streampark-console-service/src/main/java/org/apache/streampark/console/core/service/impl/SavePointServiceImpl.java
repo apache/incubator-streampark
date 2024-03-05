@@ -58,6 +58,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -161,15 +162,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public void trigger(Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
     log.info("Start to trigger savepoint for app {}", appId);
     Application application = applicationManageService.getById(appId);
-
-    ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
-    applicationLog.setAppId(application.getId());
-    applicationLog.setJobManagerUrl(application.getJobManagerUrl());
-    applicationLog.setOptionTime(new Date());
-    applicationLog.setYarnAppId(application.getClusterId());
-    applicationLog.setUserId(commonService.getUserId());
-
+    ApplicationLog applicationLog = getApplicationLog(application);
     FlinkAppHttpWatcher.addSavepoint(application.getId());
 
     application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
@@ -187,6 +180,18 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         CompletableFuture.supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
 
     handleSavepointResponseFuture(application, applicationLog, savepointFuture);
+  }
+
+  @NotNull
+  private ApplicationLog getApplicationLog(Application application) {
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
+    applicationLog.setAppId(application.getId());
+    applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setYarnAppId(application.getClusterId());
+    applicationLog.setUserId(commonService.getUserId());
+    return applicationLog;
   }
 
   @Override

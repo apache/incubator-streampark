@@ -99,6 +99,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -390,7 +391,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
-
       ApiAlertException.throwIfTrue(
           !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
           "[StreamPark] The same task name is already running in the yarn queue");
@@ -400,7 +400,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     Utils.requireNotNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-
     ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
 
     // if manually started, clear the restart flag
@@ -413,17 +412,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
-
     // 2) update app state to starting...
     starting(application);
-
-    String jobId = new JobID().toHexString();
-    ApplicationLog applicationLog = new ApplicationLog();
-    applicationLog.setOptionName(OperationEnum.START.getValue());
-    applicationLog.setAppId(application.getId());
-    applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
-
+    ApplicationLog applicationLog = constructAppLog(application);
     // set the latest to Effective, (it will only become the current effective at this time)
     applicationManageService.toEffective(application);
 
@@ -468,7 +459,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             flinkEnv.getFlinkConf(),
             FlinkDevelopmentMode.of(application.getJobType()),
             application.getId(),
-            jobId,
+            new JobID().toHexString(),
             application.getJobName(),
             appConf,
             application.getApplicationType(),
@@ -491,83 +482,112 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         (response, throwable) -> {
           // 1) remove Future
           startFutureMap.remove(application.getId());
-
           // 2) exception
           if (throwable != null) {
-            String exception = ExceptionUtils.stringifyException(throwable);
-            applicationLog.setException(exception);
-            applicationLog.setSuccess(false);
-            applicationLogService.save(applicationLog);
-            if (throwable instanceof CancellationException) {
-              doStopped(application.getId());
-            } else {
-              Application app = getById(appParam.getId());
-              app.setState(FlinkAppStateEnum.FAILED.getValue());
-              app.setOptionState(OptionStateEnum.NONE.getValue());
-              updateById(app);
-              if (isKubernetesApp(app)) {
-                k8SFlinkTrackMonitor.unWatching(toTrackId(app));
-              } else {
-                FlinkAppHttpWatcher.unWatching(appParam.getId());
-              }
-            }
+            processForException(appParam, throwable, applicationLog, application);
             return;
           }
-
           // 3) success
-          applicationLog.setSuccess(true);
-          if (response.flinkConfig() != null) {
-            String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
-            if (jmMemory != null) {
-              application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
-            }
-            String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
-            if (tmMemory != null) {
-              application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
-            }
-          }
-          application.setAppId(response.clusterId());
-          if (StringUtils.isNoneEmpty(response.jobId())) {
-            application.setJobId(response.jobId());
-          }
-
-          if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
-            application.setJobManagerUrl(response.jobManagerUrl());
-            applicationLog.setJobManagerUrl(response.jobManagerUrl());
-          }
-          applicationLog.setYarnAppId(response.clusterId());
-          application.setStartTime(new Date());
-          application.setEndTime(null);
-
-          // if start completed, will be added task to tracking queue
-          if (isKubernetesApp(application)) {
-            application.setRelease(ReleaseStateEnum.DONE.get());
-            k8SFlinkTrackMonitor.doWatching(toTrackId(application));
-            if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-              String domainName = settingService.getIngressModeDefault();
-              if (StringUtils.isNotBlank(domainName)) {
-                try {
-                  IngressController.configureIngress(
-                      domainName, application.getClusterId(), application.getK8sNamespace());
-                } catch (KubernetesClientException e) {
-                  log.info("Failed to create ingress, stack info:{}", e.getMessage());
-                  applicationLog.setException(e.getMessage());
-                  applicationLog.setSuccess(false);
-                  applicationLogService.save(applicationLog);
-                  application.setState(FlinkAppStateEnum.FAILED.getValue());
-                  application.setOptionState(OptionStateEnum.NONE.getValue());
-                }
-              }
-            }
-          } else {
-            FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
-            FlinkAppHttpWatcher.doWatching(application);
-          }
-          // update app
-          updateById(application);
-          // save log
-          applicationLogService.save(applicationLog);
+          processForSuccess(appParam, response, applicationLog, application);
         });
+  }
+
+  @NotNull
+  private ApplicationLog constructAppLog(Application application) {
+    ApplicationLog applicationLog = new ApplicationLog();
+    applicationLog.setOptionName(OperationEnum.START.getValue());
+    applicationLog.setAppId(application.getId());
+    applicationLog.setOptionTime(new Date());
+    applicationLog.setUserId(commonService.getUserId());
+    return applicationLog;
+  }
+
+  private void processForSuccess(
+      Application appParam,
+      SubmitResponse response,
+      ApplicationLog applicationLog,
+      Application application) {
+    applicationLog.setSuccess(true);
+    if (response.flinkConfig() != null) {
+      String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
+      if (jmMemory != null) {
+        application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
+      }
+      String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
+      if (tmMemory != null) {
+        application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
+      }
+    }
+    application.setAppId(response.clusterId());
+    if (StringUtils.isNoneEmpty(response.jobId())) {
+      application.setJobId(response.jobId());
+    }
+
+    if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
+      application.setJobManagerUrl(response.jobManagerUrl());
+      applicationLog.setJobManagerUrl(response.jobManagerUrl());
+    }
+    applicationLog.setYarnAppId(response.clusterId());
+    application.setStartTime(new Date());
+    application.setEndTime(null);
+
+    // if start completed, will be added task to tracking queue
+    if (isKubernetesApp(application)) {
+      processForK8sApp(application, applicationLog);
+    } else {
+      FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
+      FlinkAppHttpWatcher.doWatching(application);
+    }
+    // update app
+    updateById(application);
+    // save log
+    applicationLogService.save(applicationLog);
+  }
+
+  private void processForK8sApp(Application application, ApplicationLog applicationLog) {
+    application.setRelease(ReleaseStateEnum.DONE.get());
+    k8SFlinkTrackMonitor.doWatching(toTrackId(application));
+    if (!FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
+      return;
+    }
+    String domainName = settingService.getIngressModeDefault();
+    if (StringUtils.isNotBlank(domainName)) {
+      try {
+        IngressController.configureIngress(
+            domainName, application.getClusterId(), application.getK8sNamespace());
+      } catch (KubernetesClientException e) {
+        log.info("Failed to create ingress, stack info:{}", e.getMessage());
+        applicationLog.setException(e.getMessage());
+        applicationLog.setSuccess(false);
+        applicationLogService.save(applicationLog);
+        application.setState(FlinkAppStateEnum.FAILED.getValue());
+        application.setOptionState(OptionStateEnum.NONE.getValue());
+      }
+    }
+  }
+
+  private void processForException(
+      Application appParam,
+      Throwable throwable,
+      ApplicationLog applicationLog,
+      Application application) {
+    String exception = ExceptionUtils.stringifyException(throwable);
+    applicationLog.setException(exception);
+    applicationLog.setSuccess(false);
+    applicationLogService.save(applicationLog);
+    if (throwable instanceof CancellationException) {
+      doStopped(application.getId());
+    } else {
+      Application app = getById(appParam.getId());
+      app.setState(FlinkAppStateEnum.FAILED.getValue());
+      app.setOptionState(OptionStateEnum.NONE.getValue());
+      updateById(app);
+      if (isKubernetesApp(app)) {
+        k8SFlinkTrackMonitor.unWatching(toTrackId(app));
+      } else {
+        FlinkAppHttpWatcher.unWatching(appParam.getId());
+      }
+    }
   }
 
   /**
