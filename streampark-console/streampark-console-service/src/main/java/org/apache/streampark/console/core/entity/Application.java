@@ -141,6 +141,7 @@ public class Application implements Serializable {
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String dynamicProperties;
+
   private Integer appType;
 
   /** determine if tracking status */
