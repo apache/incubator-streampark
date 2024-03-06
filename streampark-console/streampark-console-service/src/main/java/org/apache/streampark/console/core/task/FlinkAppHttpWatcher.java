@@ -449,6 +449,7 @@ public class FlinkAppHttpWatcher {
     } else {
       WATCHING_APPS.put(appId, application);
     }
+
     StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
     StateChangeEvent nowEvent = StateChangeEvent.of(application);
     if (!nowEvent.equals(event)) {
@@ -617,8 +618,12 @@ public class FlinkAppHttpWatcher {
   }
 
   public void cleanSavepoint(Application application) {
-    SAVEPOINT_CACHE.invalidate(application.getId());
     application.setOptionState(OptionState.NONE.getValue());
+    StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
+    if (event != null && event.getOptionState() == OptionState.SAVEPOINTING) {
+      doPersistMetrics(application, false);
+    }
+    SAVEPOINT_CACHE.invalidate(application.getId());
   }
 
   /** set current option state */
@@ -648,6 +653,13 @@ public class FlinkAppHttpWatcher {
     }
     log.info("[StreamPark][FlinkAppHttpWatcher] add app to savepoint,appId:{}", appId);
     SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
+
+    // update to PREVIOUS_STATUS
+    StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
+    if (event != null) {
+      event.setOptionState(OptionState.SAVEPOINTING);
+      PREVIOUS_STATUS.put(appId, event);
+    }
   }
 
   public static void unWatching(Long appId) {
