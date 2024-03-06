@@ -90,7 +90,7 @@ export const useSavepoint = (updateOption: Fn) => {
                 savePoint: unref(customSavepoint),
               });
               if (data.data === false) {
-                createErrorSwal('custom savepoint path is invalid, ' + data.message);
+                await createErrorSwal('custom savepoint path is invalid, ' + data.message);
                 reject('custom savepoint path is invalid');
               } else {
                 await handleSavepointAction(savepointReq);
@@ -104,8 +104,11 @@ export const useSavepoint = (updateOption: Fn) => {
               }
             } else {
               const { data } = await fetchCheckSavepointPath({ id: appId.value });
-              if (data.data) await handleSavepointAction(savepointReq);
-              else createErrorSwal(data.message);
+              if (data.data) {
+                await handleSavepointAction(savepointReq);
+              } else {
+                await createErrorSwal(data.message);
+              }
               reject();
             }
           } catch (error) {

@@ -334,6 +334,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             savepointResponse -> {
               if (savepointResponse != null && savepointResponse.savePointDir() != null) {
                 applicationLog.setSuccess(true);
+                flinkAppHttpWatcher.cleanSavepoint(application);
                 String savePointDir = savepointResponse.savePointDir();
                 log.info("Request savepoint successful, savepointDir: {}", savePointDir);
               }

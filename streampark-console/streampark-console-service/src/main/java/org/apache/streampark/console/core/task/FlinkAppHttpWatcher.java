@@ -403,15 +403,16 @@ public class FlinkAppHttpWatcher {
      NEED_RESTART_AFTER_ROLLBACK (Need to restart after rollback)
      NEED_RESTART_AFTER_DEPLOY (Need to rollback after deploy)
     */
+    Long appId = application.getId();
     if (OptionState.STARTING.equals(optionState)) {
-      Application latestApp = WATCHING_APPS.get(application.getId());
+      Application latestApp = WATCHING_APPS.get(appId);
       ReleaseState releaseState = latestApp.getReleaseState();
       switch (releaseState) {
         case NEED_RESTART:
         case NEED_ROLLBACK:
           LambdaUpdateWrapper<Application> updateWrapper =
               new LambdaUpdateWrapper<Application>()
-                  .eq(Application::getId, application.getId())
+                  .eq(Application::getId, appId)
                   .set(Application::getRelease, ReleaseState.DONE.get());
           applicationService.update(updateWrapper);
           break;
@@ -422,17 +423,18 @@ public class FlinkAppHttpWatcher {
 
     // The current state is running, and there is a current task in the savePointCache,
     // indicating that the task is doing savepoint
-    if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
+    if (SAVEPOINT_CACHE.getIfPresent(appId) != null) {
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
     } else {
       application.setOptionState(OptionState.NONE.getValue());
     }
     application.setState(currentState.getValue());
     doPersistMetrics(application, false);
-    cleanOptioning(optionState, application.getId());
+    cleanOptioning(optionState, appId);
   }
 
   private void doPersistMetrics(Application application, boolean stopWatch) {
+    Long appId = application.getId();
     if (FlinkAppState.isEndState(application.getState())) {
       application.setOverview(null);
       application.setTotalTM(null);
@@ -441,16 +443,16 @@ public class FlinkAppHttpWatcher {
       application.setAvailableSlot(null);
       application.setJmMemory(null);
       application.setTmMemory(null);
-      unWatching(application.getId());
+      unWatching(appId);
     } else if (stopWatch) {
-      unWatching(application.getId());
+      unWatching(appId);
     } else {
-      WATCHING_APPS.put(application.getId(), application);
+      WATCHING_APPS.put(appId, application);
     }
-    StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
+    StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
     StateChangeEvent nowEvent = StateChangeEvent.of(application);
     if (!nowEvent.equals(event)) {
-      PREVIOUS_STATUS.put(application.getId(), nowEvent);
+      PREVIOUS_STATUS.put(appId, nowEvent);
       applicationService.persistMetrics(application);
     }
   }
@@ -831,10 +833,12 @@ public class FlinkAppHttpWatcher {
         return false;
       }
       StateChangeEvent that = (StateChangeEvent) object;
+      if (optionState != that.optionState) {
+        return false;
+      }
       return Objects.equals(id, that.id)
           && Objects.equals(jobId, that.jobId)
           && appState == that.appState
-          && optionState == that.optionState
           && Objects.equals(jobManagerUrl, that.jobManagerUrl);
     }
 

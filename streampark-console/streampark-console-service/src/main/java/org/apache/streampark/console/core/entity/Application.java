@@ -120,6 +120,7 @@ public class Application implements Serializable {
   /** has restart count */
   private Integer restartCount;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer optionState;
 
   /** alert id */
