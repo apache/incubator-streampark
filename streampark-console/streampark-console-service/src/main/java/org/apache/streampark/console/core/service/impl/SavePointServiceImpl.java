@@ -99,7 +99,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private final ExecutorService flinkTriggerExecutor =
       new ThreadPoolExecutor(
-          1,
+          CPU_NUM,
           CPU_NUM,
           60L,
           TimeUnit.SECONDS,
@@ -335,18 +335,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               if (savepointResponse != null && savepointResponse.savePointDir() != null) {
                 applicationLog.setSuccess(true);
                 String savePointDir = savepointResponse.savePointDir();
-
-                SavePoint savePoint = new SavePoint();
-                savePoint.setAppId(application.getId());
-                savePoint.setLatest(true);
-                savePoint.setType(CheckPointType.SAVEPOINT.get());
-
-                Date date = new Date();
-                savePoint.setCreateTime(date);
-                savePoint.setTriggerTime(date);
-                savePoint.setPath(savePointDir);
-                this.save(savePoint);
-
                 log.info("Request savepoint successful, savepointDir: {}", savePointDir);
               }
             },
@@ -364,6 +352,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
               application.setOptionState(OptionState.NONE.getValue());
               application.setOptionTime(new Date());
               applicationService.update(application);
+              flinkAppHttpWatcher.cleanSavepoint(application);
               flinkAppHttpWatcher.initialize();
             });
   }
