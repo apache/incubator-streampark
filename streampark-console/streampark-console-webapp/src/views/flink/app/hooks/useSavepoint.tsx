@@ -106,6 +106,7 @@ export const useSavepoint = (updateOption: Fn) => {
               const { data } = await fetchCheckSavepointPath({ id: appId.value });
               if (data.data) {
                 await handleSavepointAction(savepointReq);
+                resolve(true);
               } else {
                 await createErrorSwal(data.message);
               }

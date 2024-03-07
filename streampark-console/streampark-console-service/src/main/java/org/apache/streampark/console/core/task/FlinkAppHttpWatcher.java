@@ -845,12 +845,10 @@ public class FlinkAppHttpWatcher {
         return false;
       }
       StateChangeEvent that = (StateChangeEvent) object;
-      if (optionState != that.optionState) {
-        return false;
-      }
       return Objects.equals(id, that.id)
           && Objects.equals(jobId, that.jobId)
-          && appState == that.appState
+          && Objects.equals(appState, that.appState)
+          && Objects.equals(optionState, that.optionState)
           && Objects.equals(jobManagerUrl, that.jobManagerUrl);
     }
 

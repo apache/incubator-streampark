@@ -265,13 +265,15 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         if (!config.isEmpty()) {
           savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
         }
-      } else {
-        // 3.2) At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound
-        // flink
-        FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-        savepointPath =
-            flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
       }
+    }
+
+    // 3.2) read the savepoint in flink-conf.yml in the bound
+    if (StringUtils.isBlank(savepointPath)) {
+      // flink
+      FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
+      savepointPath =
+          flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
     }
 
     return savepointPath;
