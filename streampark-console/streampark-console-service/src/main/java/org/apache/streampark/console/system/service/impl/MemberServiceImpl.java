@@ -122,17 +122,21 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public void createMember(Member member) {
     User user = userService.getByUsername(member.getUserName());
-    PremisesUtils.throwIfNull(user, "The username [%s] not found", member.getUserName(), ApiAlertException.class);
-    
+    ApiAlertException.throwIfNull(
+        user, "The username [%s] not found", member.getUserName(), ApiAlertException.class);
+
     PremisesUtils.throwIfNull(
-        roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId(), ApiAlertException.class);
+        roleService.getById(member.getRoleId()),
+        "The roleId [%s] not found" + member.getRoleId(),
+        ApiAlertException.class);
     Team team = teamService.getById(member.getTeamId());
-    PremisesUtils.throwIfNull(team, "The teamId [%s] not found", member.getTeamId(), ApiAlertException.class);
-    PremisesUtils.throwIfNotNull(
+    PremisesUtils.throwIfNull(
+        team, "The teamId [%s] not found" + member.getTeamId(), ApiAlertException.class);
+    ApiAlertException.throwIfNotNull(
         findByUserId(member.getTeamId(), user.getUserId()),
         "The user [%s] has been added the team [%s], please don't add it again.",
-        member.getUserName(), team.getTeamName(),
-       ApiAlertException.class);
+        member.getUserName(),
+        team.getTeamName());
 
     member.setId(null);
     member.setUserId(user.getUserId());

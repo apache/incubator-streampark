@@ -158,7 +158,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   private static void processConnectorResource(Resource resource) throws JsonProcessingException {
     String connector = resource.getConnector();
-    PremisesUtils.throwIfNull(connector, "the flink connector is null.");
+    PremisesUtils.throwIfNull(connector, "the flink connector is null.", ApiAlertException.class);
     FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
     resource.setResourceName(connectorResource.getFactoryIdentifier());
     Optional.ofNullable(connectorResource.getRequiredOptions())

@@ -75,7 +75,9 @@ public class LdapService {
    */
   public boolean ldapLogin(String userId, String userPwd) {
     PremisesUtils.throwIfFalse(
-        enable, "ldap is not enabled, Please check the configuration: ldap.enable", ApiAlertException.class);
+        enable,
+        "ldap is not enabled, Please check the configuration: ldap.enable",
+        ApiAlertException.class);
     renderLdapEnv();
     try {
       NamingEnumeration<SearchResult> results = getSearchResults(userId);

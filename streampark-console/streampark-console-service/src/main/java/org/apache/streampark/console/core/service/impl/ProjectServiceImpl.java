@@ -118,7 +118,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         ApiAlertException.class);
     PremisesUtils.throwIfFalse(
         !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
-        "The project is being built, update project failed.", ApiAlertException.class);
+        "The project is being built, update project failed.",
+        ApiAlertException.class);
     updateInternal(projectParam, project);
     if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
