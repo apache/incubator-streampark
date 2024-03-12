@@ -35,11 +35,13 @@ spec:
     - description: Last observed state of the job.
       jsonPath: .status.jobStatus.state
       name: Job Status
+      priority: 0
       type: string
     - description: "Lifecycle state of the Flink resource (including being rolled\
         \ back, failed etc.)."
       jsonPath: .status.lifecycleState
       name: Lifecycle State
+      priority: 0
       type: string
     name: v1beta1
     schema:
@@ -61,6 +63,7 @@ spec:
                 - v1_16
                 - v1_17
                 - v1_18
+                - v1_19
                 type: string
               ingress:
                 properties:
@@ -767,6 +770,15 @@ spec:
                                 timeoutSeconds:
                                   type: integer
                               type: object
+                            resizePolicy:
+                              items:
+                                properties:
+                                  resourceName:
+                                    type: string
+                                  restartPolicy:
+                                    type: string
+                                type: object
+                              type: array
                             resources:
                               properties:
                                 claims:
@@ -1289,6 +1301,15 @@ spec:
                                 timeoutSeconds:
                                   type: integer
                               type: object
+                            resizePolicy:
+                              items:
+                                properties:
+                                  resourceName:
+                                    type: string
+                                  restartPolicy:
+                                    type: string
+                                type: object
+                              type: array
                             resources:
                               properties:
                                 claims:
@@ -1817,6 +1838,15 @@ spec:
                                 timeoutSeconds:
                                   type: integer
                               type: object
+                            resizePolicy:
+                              items:
+                                properties:
+                                  resourceName:
+                                    type: string
+                                  restartPolicy:
+                                    type: string
+                                type: object
+                              type: array
                             resources:
                               properties:
                                 claims:
@@ -2853,6 +2883,13 @@ spec:
                       containerStatuses:
                         items:
                           properties:
+                            allocatedResources:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                x-kubernetes-int-or-string: true
+                              type: object
                             containerID:
                               type: string
                             image:
@@ -2895,6 +2932,30 @@ spec:
                               type: string
                             ready:
                               type: boolean
+                            resources:
+                              properties:
+                                claims:
+                                  items:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                  type: array
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                              type: object
                             restartCount:
                               type: integer
                             started:
@@ -2936,6 +2997,13 @@ spec:
                       ephemeralContainerStatuses:
                         items:
                           properties:
+                            allocatedResources:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                x-kubernetes-int-or-string: true
+                              type: object
                             containerID:
                               type: string
                             image:
@@ -2978,6 +3046,30 @@ spec:
                               type: string
                             ready:
                               type: boolean
+                            resources:
+                              properties:
+                                claims:
+                                  items:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                  type: array
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                              type: object
                             restartCount:
                               type: integer
                             started:
@@ -3021,6 +3113,13 @@ spec:
                       initContainerStatuses:
                         items:
                           properties:
+                            allocatedResources:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                x-kubernetes-int-or-string: true
+                              type: object
                             containerID:
                               type: string
                             image:
@@ -3063,6 +3162,30 @@ spec:
                               type: string
                             ready:
                               type: boolean
+                            resources:
+                              properties:
+                                claims:
+                                  items:
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                  type: array
+                                limits:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                                requests:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
+                              type: object
                             restartCount:
                               type: integer
                             started:
@@ -3119,6 +3242,8 @@ spec:
                       qosClass:
                         type: string
                       reason:
+                        type: string
+                      resize:
                         type: string
                       startTime:
                         type: string
@@ -3831,6 +3956,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -4353,6 +4487,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -4881,6 +5024,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -5917,6 +6069,13 @@ spec:
                           containerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -5959,6 +6118,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -6000,6 +6183,13 @@ spec:
                           ephemeralContainerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -6042,6 +6232,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -6085,6 +6299,13 @@ spec:
                           initContainerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -6127,6 +6348,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -6183,6 +6428,8 @@ spec:
                           qosClass:
                             type: string
                           reason:
+                            type: string
+                          resize:
                             type: string
                           startTime:
                             type: string
@@ -6896,6 +7143,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -7418,6 +7674,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -7946,6 +8211,15 @@ spec:
                                     timeoutSeconds:
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  items:
+                                    properties:
+                                      resourceName:
+                                        type: string
+                                      restartPolicy:
+                                        type: string
+                                    type: object
+                                  type: array
                                 resources:
                                   properties:
                                     claims:
@@ -8982,6 +9256,13 @@ spec:
                           containerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -9024,6 +9305,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -9065,6 +9370,13 @@ spec:
                           ephemeralContainerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -9107,6 +9419,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -9150,6 +9486,13 @@ spec:
                           initContainerStatuses:
                             items:
                               properties:
+                                allocatedResources:
+                                  additionalProperties:
+                                    anyOf:
+                                    - type: integer
+                                    - type: string
+                                    x-kubernetes-int-or-string: true
+                                  type: object
                                 containerID:
                                   type: string
                                 image:
@@ -9192,6 +9535,30 @@ spec:
                                   type: string
                                 ready:
                                   type: boolean
+                                resources:
+                                  properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        type: object
+                                      type: array
+                                    limits:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                    requests:
+                                      additionalProperties:
+                                        anyOf:
+                                        - type: integer
+                                        - type: string
+                                        x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
                                 restartCount:
                                   type: integer
                                 started:
@@ -9249,6 +9616,8 @@ spec:
                             type: string
                           reason:
                             type: string
+                          resize:
+                            type: string
                           startTime:
                             type: string
                         type: object
@@ -9284,6 +9653,8 @@ spec:
                     type: integer
                   initialSavepointPath:
                     type: string
+                  checkpointTriggerNonce:
+                    type: integer
                   upgradeMode:
                     enum:
                     - savepoint
@@ -9415,6 +9786,48 @@ spec:
                           type: object
                         type: array
                       lastPeriodicSavepointTimestamp:
+                        type: integer
+                    type: object
+                  checkpointInfo:
+                    properties:
+                      lastCheckpoint:
+                        properties:
+                          timeStamp:
+                            type: integer
+                          triggerType:
+                            enum:
+                            - MANUAL
+                            - PERIODIC
+                            - UPGRADE
+                            - UNKNOWN
+                            type: string
+                          formatType:
+                            enum:
+                            - FULL
+                            - INCREMENTAL
+                            - UNKNOWN
+                            type: string
+                          triggerNonce:
+                            type: integer
+                        type: object
+                      triggerId:
+                        type: string
+                      triggerTimestamp:
+                        type: integer
+                      triggerType:
+                        enum:
+                        - MANUAL
+                        - PERIODIC
+                        - UPGRADE
+                        - UNKNOWN
+                        type: string
+                      formatType:
+                        enum:
+                        - FULL
+                        - INCREMENTAL
+                        - UNKNOWN
+                        type: string
+                      lastPeriodicCheckpointTimestamp:
                         type: integer
                     type: object
                 type: object
