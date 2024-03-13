@@ -523,7 +523,7 @@ public class AppBuildPipeServiceImpl
             DockerConf.of(
                 dockerConfig.getAddress(),
                 dockerConfig.getNamespace(),
-                dockerConfig.getUser(),
+                dockerConfig.getUsername(),
                 dockerConfig.getPassword()),
             app.getIngressTemplate());
     return k8sApplicationBuildRequest;

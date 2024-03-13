@@ -17,14 +17,18 @@
 
 package org.apache.streampark.console.core.bean;
 
+import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * The DockerConfig class represents the configuration for an email system. It holds the SMTP host,
- * port, from address, username, password, and whether SSL is enabled.
+ * The DockerConfig class represents the configuration for docker system. It holds Registered
+ * address, username, password, and namespace.
  *
  * <p>This class also provides a static factory method to create an DockerConfig object from a map
  * of settings.
@@ -34,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DockerConfig {
 
   private String address;
-  private String user;
+  private String username;
   private String password;
   private String namespace;
 
@@ -47,7 +51,7 @@ public class DockerConfig {
               .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
               .getSettingValue());
 
-      dockerConfig.setUser(
+      dockerConfig.setUsername(
           SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
 
       dockerConfig.setPassword(
@@ -65,5 +69,24 @@ public class DockerConfig {
       log.warn("Failed to create DockerConfig from settings", e);
     }
     return null;
+  }
+
+  public static List<Setting> toSettings(DockerConfig dockerConfig) {
+    Setting address = new Setting();
+    address.setSettingKey(SettingService.KEY_DOCKER_REGISTER_ADDRESS);
+    address.setSettingValue(dockerConfig.getAddress());
+
+    Setting username = new Setting();
+    username.setSettingKey(SettingService.KEY_DOCKER_REGISTER_USER);
+    username.setSettingValue(dockerConfig.getUsername());
+
+    Setting password = new Setting();
+    password.setSettingKey(SettingService.KEY_DOCKER_REGISTER_PASSWORD);
+    password.setSettingValue(dockerConfig.getPassword());
+
+    Setting namespace = new Setting();
+    namespace.setSettingKey(SettingService.KEY_DOCKER_REGISTER_NAMESPACE);
+    namespace.setSettingValue(dockerConfig.getNamespace());
+    return Arrays.asList(address, username, password, namespace);
   }
 }

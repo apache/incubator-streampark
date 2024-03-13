@@ -240,22 +240,21 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml 完整路径', 1);
-insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven 私服地址', 1);
-insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven 私服认证用户名', 1);
-insert into "public"."t_setting" values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven 私服认证密码', 1);
-insert into "public"."t_setting" values (5, 'alert.email.host', null, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
-insert into "public"."t_setting" values (6, 'alert.email.port', null, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
-insert into "public"."t_setting" values (7, 'alert.email.from', null, 'Alert  Email From', '发送告警的邮箱', 1);
-insert into "public"."t_setting" values (8, 'alert.email.userName', null, 'Alert  Email User', '用来发送告警邮箱的认证用户名', 1);
-insert into "public"."t_setting" values (9, 'alert.email.password', null, 'Alert Email Password', '用来发送告警邮箱的认证密码', 1);
-insert into "public"."t_setting" values (10, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
-insert into "public"."t_setting" values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker容器服务地址', 1);
-insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Docker Register User', 'Docker容器服务认证用户名', 1);
-insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker容器服务认证密码', 1);
-insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Namespace for docker image used in docker building env and target image register', 'Docker命名空间', 1);
-insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Automatically generate an nginx-based ingress by passing in a domain name', 'Ingress域名地址', 1);
-
+insert into "public"."t_setting" values (1, 'streampark.maven.settings', null, 'Maven Settings File Path', 'Maven Settings.xml full path', 1);
+insert into "public"."t_setting" values (2, 'streampark.maven.central.repository', null, 'Maven Central Repository', 'Maven private server address', 1);
+insert into "public"."t_setting" values (3, 'streampark.maven.auth.user', null, 'Maven Central Repository Auth User', 'Maven private server authentication username', 1);
+insert into "public"."t_setting" values (4, 'streampark.maven.auth.password', null, 'Maven Central Repository Auth Password', 'Maven private server authentication password', 1);
+insert into "public"."t_setting" values (5, 'alert.email.host', null, 'Alert Email Smtp Host', 'Alert Mailbox Smtp Host', 1);
+insert into "public"."t_setting" values (6, 'alert.email.port', null, 'Alert Email Smtp Port', 'Smtp Port of the alarm mailbox', 1);
+insert into "public"."t_setting" values (7, 'alert.email.from', null, 'Alert Sender Email', 'Email to send alerts', 1);
+insert into "public"."t_setting" values (8, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
+insert into "public"."t_setting" values (9, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
+insert into "public"."t_setting" values (10, 'alert.email.ssl', 'false', 'Alert Email SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
+insert into "public"."t_setting" values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
+insert into "public"."t_setting" values (12, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
+insert into "public"."t_setting" values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
+insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);
+insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
