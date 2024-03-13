@@ -26,7 +26,6 @@
     fetchVerifyDocker,
     fetchVerifyEmail,
   } from '/@/api/setting';
-  import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { isNullOrUnDef } from '/@/utils/is';
   import { settingFormSchema } from './config';
@@ -34,7 +33,6 @@
   import Swal from 'sweetalert2';
 
   const emit = defineEmits(['success', 'register']);
-  const { createMessage } = useMessage();
   const { t } = useI18n();
   defineOptions({ name: 'DockerSetting' });
 

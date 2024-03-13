@@ -25,7 +25,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Divider, Tag, Popover } from 'ant-design-vue';
+  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
