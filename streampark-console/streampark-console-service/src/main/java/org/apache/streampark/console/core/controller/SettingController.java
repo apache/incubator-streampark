@@ -43,7 +43,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/setting")
+@RequestMapping("setting")
 public class SettingController {
 
   @Autowired private SettingService settingService;
@@ -122,7 +122,7 @@ public class SettingController {
   }
 
   @Operation(summary = "Check hadoop status")
-  @PostMapping("checkHadoop")
+  @PostMapping("check/hadoop")
   public RestResponse checkHadoop() {
     try {
       HadoopUtils.hdfs().getStatus();
