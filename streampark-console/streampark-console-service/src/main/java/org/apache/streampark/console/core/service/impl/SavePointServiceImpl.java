@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -146,7 +147,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     // task, see if Application conf is configured when the task is defined, if checkpoints are
     // configured
     // and enabled, read `state.savepoints.dir`
-    savepointPath = getSavepointFromAppCfgIfStreamParkOrSQLJob(application);
+    savepointPath = getSavepointFromConfig(application);
     if (StringUtils.isNotBlank(savepointPath)) {
       return savepointPath;
     }
@@ -340,7 +341,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
    */
   @VisibleForTesting
   @Nullable
-  public String getSavepointFromAppCfgIfStreamParkOrSQLJob(Application application) {
+  public String getSavepointFromConfig(Application application) {
     if (!application.isStreamParkJob() && !application.isFlinkSqlJob()) {
       return null;
     }
