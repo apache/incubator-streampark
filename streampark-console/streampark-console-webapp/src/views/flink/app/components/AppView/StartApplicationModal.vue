@@ -24,7 +24,7 @@
   });
 </script>
 <script setup lang="ts" name="StartApplicationModal">
-  import { h } from 'vue';
+  import { h, ref } from 'vue';
   import { Select, Input, Tag } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon, Icon } from '/@/components/Icon';
@@ -32,16 +32,15 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
   import { fetchCheckStart, fetchForcedStop, fetchStart } from '/@/api/flink/app';
-
-  import { AppExistsEnum, RestoreModeEnum } from '/@/enums/flinkEnum';
-  import { fetchFlinkEnv } from '/@/api/flink/flinkEnv';
-  import { renderFlinkAppRestoreMode } from '/@/views/flink/app/hooks/useFlinkRender';
+  import { AppExistsEnum } from '/@/enums/flinkEnum';
 
   const SelectOption = Select.Option;
 
   const { t } = useI18n();
   const { Swal } = useMessage();
   const router = useRouter();
+  const selectInput = ref<boolean>(false);
+  const selectValue = ref<string>(null);
 
   const emits = defineEmits(['register', 'updateOption']);
   const receiveData = reactive<Recordable>({});
@@ -56,61 +55,50 @@
     }
   });
 
+  function handleSavePointTip(list) {
+    if (list != null && list.length > 0) {
+      return t('flink.app.view.savepointSwitch');
+    }
+    return t('flink.app.view.savepointInput');
+  }
+
   const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
     name: 'startApplicationModal',
     labelWidth: 120,
     schemas: [
       {
         field: 'startSavePointed',
-        label: 'from savepoint',
+        label: t('flink.app.view.fromSavepoint'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'tip-info' },
-            'restore the application from savepoint or latest checkpoint',
-          ),
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointTip')),
       },
       {
         field: 'startSavePoint',
-        label: 'savepoint',
+        label: 'Savepoint',
         component:
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
             ? 'Select'
             : 'Input',
         afterItem: () =>
-          h(
-            'span',
-            { class: 'tip-info' },
-            'restore the application from savepoint or latest checkpoint',
-          ),
+          h('span', { class: 'conf-switch' }, handleSavePointTip(receiveData.historySavePoint)),
         slot: 'savepoint',
         ifShow: ({ values }) => values.startSavePointed,
         required: true,
       },
       {
-        field: 'restoreMode',
-        label: 'restore mode',
-        component: 'Select',
-        defaultValue: RestoreModeEnum.NO_CLAIM,
-        render: (renderCallbackParams) => renderFlinkAppRestoreMode(renderCallbackParams),
-        ifShow: ({ values }) => values.startSavePointed && checkFlinkVersion(),
-      },
-      {
         field: 'allowNonRestoredState',
-        label: 'ignore restored',
+        label: t('flink.app.view.ignoreRestored'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: () =>
-          h('span', { class: 'tip-info' }, 'ignore savepoint then cannot be restored'),
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.ignoreRestoredTip')),
         defaultValue: false,
         ifShow: ({ values }) => values.startSavePointed,
       },
@@ -135,16 +123,20 @@
     await handleDoSubmit();
   }
 
+  async function handleReset() {
+    selectInput.value = false;
+    selectValue.value = null;
+  }
+
   /* submit */
   async function handleDoSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
-      const restoreMode = savePointed ? formValue['restoreMode'] : null;
+      handleReset();
       const { data } = await fetchStart({
         id: receiveData.application.id,
-        restoreMode,
         savePointed,
         savePoint: savePointPath,
         allowNonRestored: formValue.allowNonRestoredState || false,
@@ -152,7 +144,7 @@
       if (data.data) {
         Swal.fire({
           icon: 'success',
-          title: 'The current job is starting',
+          title: t('flink.app.operation.starting'),
           showConfirmButton: false,
           timer: 2000,
         });
@@ -190,10 +182,14 @@
     }
   }
 
-  async function checkFlinkVersion() {
-    const versionId = receiveData.application.versionId;
-    const flinkVersion = await fetchFlinkEnv(versionId);
-    return parseInt(flinkVersion.versionOfMiddle) >= 15;
+  function handleSavepoint(model, field, input) {
+    selectInput.value = input;
+    if (input) {
+      selectValue.value = model[field];
+      model[field] = null;
+    } else {
+      model[field] = selectValue.value;
+    }
   }
 </script>
 <template>
@@ -201,6 +197,7 @@
     @register="registerModal"
     :minHeight="100"
     @ok="handleSubmit"
+    @cancel="handleReset"
     :okText="t('common.apply')"
     :cancelText="t('common.cancelText')"
   >
@@ -211,8 +208,12 @@
 
     <BasicForm @register="registerForm" class="!pt-40px">
       <template #savepoint="{ model, field }">
-        <template v-if="receiveData.historySavePoint && receiveData.historySavePoint.length > 0">
-          <Select allow-clear v-model:value="model[field]">
+        <template
+          v-if="
+            !selectInput && receiveData.historySavePoint && receiveData.historySavePoint.length > 0
+          "
+        >
+          <Select v-model:value="model[field]" @dblclick="handleSavepoint(model, field, true)">
             <SelectOption v-for="(k, i) in receiveData.historySavePoint" :key="i" :value="k.path">
               <span style="color: darkgrey">
                 <Icon icon="ant-design:clock-circle-outlined" />
@@ -232,8 +233,9 @@
         </template>
         <Input
           v-else
+          @dblclick="handleSavepoint(model, field, false)"
           type="text"
-          placeholder="Please enter savepoint manually"
+          :placeholder="$t('flink.app.view.savepointInput')"
           v-model:value="model[field]"
         />
       </template>
