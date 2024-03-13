@@ -336,13 +336,6 @@
             :title="releaseTitleMap[record.release] || ''"
             :data="record"
           />
-          <Divider type="vertical" style="margin: 0 4px" v-if="record.buildStatus" />
-          <State
-            option="build"
-            :maxTitle="titleLenRef.maxBuild"
-            :click="openBuildProgressDetailDrawer.bind(null, record)"
-            :data="record"
-          />
         </template>
         <template v-if="column.dataIndex === 'operation'">
           <TableAction v-bind="getTableActions(record, currentTablePage)" />
