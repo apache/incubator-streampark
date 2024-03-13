@@ -135,8 +135,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     effective.setAppId(appId);
     effective.setTargetType(EffectiveTypeEnum.CONFIG.getType());
     effectiveService.save(effective);
-    assertThat(savePointServiceImpl.getSavepointFromConfig(app))
-        .isEqualTo("hdfs:///test");
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isEqualTo("hdfs:///test");
   }
 
   @Test

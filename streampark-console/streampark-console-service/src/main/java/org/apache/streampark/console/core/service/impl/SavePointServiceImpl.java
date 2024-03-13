@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
