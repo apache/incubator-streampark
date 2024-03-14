@@ -284,7 +284,8 @@ insert into `t_setting` values (6, 'alert.email.port', null, 'Alert Email Smtp P
 insert into `t_setting` values (7, 'alert.email.from', null, 'Alert Sender Email', 'Email to send alerts', 1);
 insert into `t_setting` values (8, 'alert.email.userName', null, 'Alert  Email User', 'Authentication username used to send alert emails', 1);
 insert into `t_setting` values (9, 'alert.email.password', null, 'Alert Email Password', 'Authentication password used to send alarm email', 1);
-insert into `t_setting` values (10, 'alert.email.ssl', 'false', 'Alert Email SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);insert into `t_setting` values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
+insert into `t_setting` values (10, 'alert.email.ssl', 'false', 'Alert Email SSL', 'Whether to enable SSL in the mailbox that sends the alert', 2);
+insert into `t_setting` values (11, 'docker.register.address', null, 'Docker Register Address', 'Docker container service address', 1);
 insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Register User', 'Docker container service authentication username', 1);
 insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
 insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);

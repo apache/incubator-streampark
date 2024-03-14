@@ -95,17 +95,17 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
     // Test for non-(StreamPark job Or FlinkSQL job)
     app.setAppType(ApplicationType.APACHE_FLINK.getType());
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
     app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) without application config.
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
     app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
     app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
 
     // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
     ApplicationConfig appCfg = new ApplicationConfig();
@@ -114,7 +114,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     appCfg.setContent("state.savepoints.dir=hdfs:///test");
     appCfg.setFormat(ConfigFileTypeEnum.PROPERTIES.getValue());
     configService.save(appCfg);
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
 
     // Test for (StreamPark job or FlinkSQL job) with application config and enabled checkpoint and
     // configured value.
@@ -122,7 +122,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     // Test for non-value for CHECKPOINTING_INTERVAL
     appCfg.setContent("");
     configService.updateById(appCfg);
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app)).isNull();
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
 
     // Test for configured CHECKPOINTING_INTERVAL
     appCfg.setContent(
@@ -135,8 +135,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     effective.setAppId(appId);
     effective.setTargetType(EffectiveTypeEnum.CONFIG.getType());
     effectiveService.save(effective);
-    assertThat(savePointServiceImpl.getSavepointFromAppCfgIfStreamParkOrSQLJob(app))
-        .isEqualTo("hdfs:///test");
+    assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isEqualTo("hdfs:///test");
   }
 
   @Test

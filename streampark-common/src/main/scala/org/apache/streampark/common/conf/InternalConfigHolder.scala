@@ -43,6 +43,9 @@ object InternalConfigHolder extends Logger {
   /** configuration key options storage (key -> ConfigOption) */
   private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
+  /** Initialize the ConfigHub. */
+  Seq(CommonConfig, K8sFlinkConfig)
+
   /** Register the ConfigOption */
   private[conf] def register(@Nonnull conf: InternalOption): Unit = {
     confOptions.put(conf.key, conf)

@@ -18,11 +18,16 @@ import { SystemSetting } from './types/setting.type';
 import { defHttp } from '/@/utils/http/axios';
 
 enum SETTING_APi {
-  GET = '/flink/setting/get',
-  ALL = '/flink/setting/all',
-  CHECK_HADOOP = '/flink/setting/checkHadoop',
-  SYNC = '/flink/setting/sync',
-  UPDATE = '/flink/setting/update',
+  GET = '/setting/get',
+  GET_DOCKER = '/setting/docker',
+  GET_EMAIL = '/setting/email',
+  ALL = '/setting/all',
+  UPDATE = '/setting/update',
+  CHECK_HADOOP = '/setting/check/hadoop',
+  CHECK_DOCKER = '/setting/check/docker',
+  UPDATE_DOCKER = '/setting/update/docker',
+  CHECK_EMAIL = '/setting/check/email',
+  UPDATE_ALERT = '/setting/update/email',
 }
 /**
  * Get system settings
@@ -56,5 +61,61 @@ export function fetchSystemSettingUpdate(data: {
 export function fetchCheckHadoop(): Promise<boolean> {
   return defHttp.post({
     url: SETTING_APi.CHECK_HADOOP,
+  });
+}
+
+/**
+ * get docker setting info
+ */
+export function fetchDockerConfig() {
+  return defHttp.post({ url: SETTING_APi.GET_DOCKER });
+}
+
+/**
+ * verify docker setting info
+ */
+export function fetchVerifyDocker(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.CHECK_DOCKER,
+    data,
+  });
+}
+
+/**
+ * verify docker setting info
+ */
+export function fetchVerifyEmail(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.CHECK_EMAIL,
+    data,
+  });
+}
+
+/**
+ * get alert setting info
+ */
+export function fetchEmailConfig() {
+  return defHttp.post({ url: SETTING_APi.GET_EMAIL });
+}
+
+/**
+ * Update docker setting
+ * @returns {Promise<Boolean>}
+ */
+export function fetchDockerUpdate(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.UPDATE_DOCKER,
+    data,
+  });
+}
+
+/**
+ * Update alert setting
+ * @returns {Promise<Boolean>}
+ */
+export function fetchEmailUpdate(data: Recordable): Promise<boolean> {
+  return defHttp.post({
+    url: SETTING_APi.UPDATE_ALERT,
+    data,
   });
 }

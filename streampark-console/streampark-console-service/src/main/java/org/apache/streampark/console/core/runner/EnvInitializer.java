@@ -77,6 +77,9 @@ public class EnvInitializer implements ApplicationRunner {
   @SneakyThrows
   @Override
   public void run(ApplicationArguments args) throws Exception {
+
+    checkAppHome();
+
     // init InternalConfig
     initConfig();
 
@@ -101,6 +104,7 @@ public class EnvInitializer implements ApplicationRunner {
               Utils.requireNotNull(config);
               InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
             });
+
     InternalConfigHolder.log();
 
     settingService.getMavenConfig().updateConfig();
@@ -117,8 +121,6 @@ public class EnvInitializer implements ApplicationRunner {
   }
 
   public synchronized void storageInitialize(StorageType storageType) {
-
-    checkAppHome();
 
     if (initialized.contains(storageType)) {
       return;
