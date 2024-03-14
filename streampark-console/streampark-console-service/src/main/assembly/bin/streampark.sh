@@ -42,13 +42,6 @@ if [[ "`tty`" != "not a tty" ]]; then
     have_tty=1
 fi
 
-# Bugzilla 37848: When no TTY is available, don't output to console
-have_tty=0
-# shellcheck disable=SC2006
-if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
-fi
-
  # Only use colors if connected to a terminal
 if [[ ${have_tty} -eq 1 ]]; then
   PRIMARY=$(printf '\033[38;5;082m')
