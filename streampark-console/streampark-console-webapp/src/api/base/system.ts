@@ -28,7 +28,6 @@ enum Api {
   MenuList = '/menu/list',
   RoleMenu = '/role/menu',
   RolePageList = '/role/list',
-  UserList = '/user/list',
 }
 
 export const getMenuList = (params?: MenuParams): Promise<MenuListModel> => {
@@ -47,6 +46,3 @@ export const getRoleMenu = (params?: MenuParams) =>
  */
 export const getRoleListByPage = (params?: RolePageParams) =>
   defHttp.post<RolePageListGetResultModel>({ url: Api.RolePageList, params });
-
-export const getUserListByPage = (params?: BasicPageParams) =>
-  defHttp.post<UserListGetResultModel>({ url: Api.UserList, params });

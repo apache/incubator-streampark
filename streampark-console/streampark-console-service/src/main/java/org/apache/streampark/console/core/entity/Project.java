@@ -256,7 +256,7 @@ public class Project implements Serializable {
       return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
     String[] argsList = param.split("\\s+");
     while (iterator.hasNext()) {
       String chr = iterator.next();
