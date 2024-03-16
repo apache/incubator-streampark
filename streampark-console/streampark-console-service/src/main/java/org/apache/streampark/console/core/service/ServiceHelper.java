@@ -28,6 +28,7 @@ import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class ServiceHelper {
   public User getLoginUser() {
     String token = (String) SecurityUtils.getSubject().getPrincipal();
     Long userId = JWTUtil.getUserId(token);
+    if (userId == null) {
+      throw new AuthenticationException("Unauthorized");
+    }
     return userService.getById(userId);
   }
 

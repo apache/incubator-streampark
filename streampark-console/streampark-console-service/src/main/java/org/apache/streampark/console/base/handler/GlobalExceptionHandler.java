@@ -22,8 +22,8 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.UnauthenticatedException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -48,24 +48,18 @@ import java.util.Set;
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(value = Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public RestResponse handleException(Exception e) {
-    log.info("Internal server error：", e);
-    return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
-  }
-
-  @ExceptionHandler(value = AuthorizationException.class)
+  @ExceptionHandler(value = UnauthenticatedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public RestResponse handleException(AuthorizationException e) {
-    return RestResponse.fail("Unauthenticated", ResponseCode.CODE_UNAUTHORIZED);
+  public RestResponse handelUnauthenticatedException(UnauthenticatedException e) {
+    log.info("Unauthenticated: {}", e.getMessage());
+    return RestResponse.fail("Unauthenticated.", ResponseCode.CODE_UNAUTHORIZED);
   }
 
-  @ExceptionHandler(value = UnauthorizedException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public RestResponse handleUnauthorizedException(Exception e) {
-    log.info("Permission denied，{}", e.getMessage());
-    return RestResponse.fail("Unauthenticated", ResponseCode.CODE_FORBIDDEN);
+  @ExceptionHandler(value = AuthenticationException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public RestResponse handelUnauthenticatedException(AuthenticationException e) {
+    log.info("Permission denied: {}", e.getMessage());
+    return RestResponse.fail("Permission denied.", ResponseCode.CODE_UNAUTHORIZED);
   }
 
   @ExceptionHandler(value = AbstractApiException.class)
@@ -73,6 +67,13 @@ public class GlobalExceptionHandler {
   public RestResponse handleException(AbstractApiException e) {
     log.info("api exception：{}", e.getMessage());
     return RestResponse.fail(e.getMessage(), e.getResponseCode());
+  }
+
+  @ExceptionHandler(value = Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @Order(value = Ordered.HIGHEST_PRECEDENCE)
+  public RestResponse handleException(Exception e) {
+    return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
   }
 
   /**

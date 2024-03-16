@@ -185,7 +185,6 @@
           localStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);
           if (nickName) successText += `: ${nickName}`;
         }
-
         const loginSuccess = await userStore.afterLoginAction(true);
         if (loginSuccess) {
           createMessage.success(`${t('sys.login.loginSuccessTitle')} ${successText}`);

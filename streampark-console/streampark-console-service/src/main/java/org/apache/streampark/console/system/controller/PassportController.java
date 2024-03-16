@@ -54,8 +54,6 @@ import java.util.Map;
 @RequestMapping("passport")
 public class PassportController {
 
-  private static final String TOKEN = "Authorization";
-
   @Autowired private UserService userService;
 
   @Autowired private ShiroProperties properties;
