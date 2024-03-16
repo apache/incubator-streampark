@@ -115,6 +115,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     appCfg.setFormat(ConfigFileTypeEnum.PROPERTIES.getValue());
     configService.save(appCfg);
     assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
+    appCfg = configService.getById(appCfgId);
 
     // Test for (StreamPark job or FlinkSQL job) with application config and enabled checkpoint and
     // configured value.
