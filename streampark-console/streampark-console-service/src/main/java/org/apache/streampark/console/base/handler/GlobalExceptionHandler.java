@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -31,7 +32,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,15 +52,14 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(Exception e) {
     log.info("Internal server error：", e);
+    log.info(e.getCause().getClass().getName());
     return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
   }
 
-  @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
-    log.info("not supported request method，exception：{}", e.getMessage());
-    return RestResponse.fail(
-        "not supported request method，exception：" + e.getMessage(), ResponseCode.CODE_FAIL);
+  @ExceptionHandler(value = AuthorizationException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public RestResponse handleException(AuthorizationException e) {
+    return RestResponse.fail("Unauthenticated", ResponseCode.CODE_UNAUTHORIZED);
   }
 
   @ExceptionHandler(value = AbstractApiException.class)

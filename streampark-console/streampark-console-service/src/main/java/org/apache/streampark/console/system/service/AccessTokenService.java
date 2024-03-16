@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface AccessTokenService extends IService<AccessToken> {
 
-  RestResponse create(Long userId, String expireTime, String description) throws InternalException;
+  RestResponse create(Long userId, String description) throws InternalException;
 
   boolean deleteToken(Long id);
 

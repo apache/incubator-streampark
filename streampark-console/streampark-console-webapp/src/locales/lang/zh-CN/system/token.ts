@@ -24,7 +24,6 @@ export default {
     title: '令牌列表',
     userName: '用户名',
     token: '令牌',
-    expireTime: '过期时间',
     status: '状态',
   },
   operation: {

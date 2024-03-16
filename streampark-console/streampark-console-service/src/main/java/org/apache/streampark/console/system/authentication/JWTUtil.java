@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.SpringContextUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -26,7 +27,6 @@ import org.apache.shiro.authc.AuthenticationException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,6 @@ public class JWTUtil {
     } catch (TokenExpiredException e) {
       throw new AuthenticationException(e.getMessage());
     } catch (Exception e) {
-      log.error("token is invalid:{} , e:{}", e.getMessage(), e.getClass());
       return false;
     }
   }
@@ -66,18 +65,29 @@ public class JWTUtil {
     try {
       DecodedJWT jwt = JWT.decode(token);
       return jwt.getClaim("userName").asString();
-    } catch (JWTDecodeException e) {
-      log.error("error：{}", e.getMessage());
+    } catch (Exception e) {
       return null;
     }
   }
 
   public static Long getUserId(String token) {
+    if (token == null) {
+      throw new AuthenticationException("Unauthorized");
+    }
     try {
       DecodedJWT jwt = JWT.decode(token);
       return jwt.getClaim("userId").asLong();
-    } catch (JWTDecodeException e) {
-      log.error("error：{}", e.getMessage());
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public static AuthenticationType getAuthType(String token) {
+    try {
+      DecodedJWT jwt = JWT.decode(token);
+      int type = jwt.getClaim("type").asInt();
+      return AuthenticationType.of(type);
+    } catch (Exception e) {
       return null;
     }
   }
@@ -89,8 +99,8 @@ public class JWTUtil {
    * @param userName
    * @return
    */
-  public static String sign(Long userId, String userName) {
-    return sign(userId, userName, getExpireTime());
+  public static String sign(Long userId, String userName, AuthenticationType authType) {
+    return sign(userId, userName, authType, getExpireTime());
   }
 
   /**
@@ -101,18 +111,15 @@ public class JWTUtil {
    * @param expireTime
    * @return
    */
-  public static String sign(Long userId, String userName, Long expireTime) {
-    try {
-      Date date = new Date(expireTime);
-      return JWT.create()
-          .withClaim("userId", userId)
-          .withClaim("userName", userName)
-          .withExpiresAt(date)
-          .sign(algorithm);
-    } catch (Exception e) {
-      log.error("error：{}", e);
-      return null;
-    }
+  public static String sign(
+      Long userId, String userName, AuthenticationType authType, Long expireTime) {
+    Date date = new Date(expireTime);
+    return JWT.create()
+        .withClaim("userId", userId)
+        .withClaim("userName", userName)
+        .withClaim("type", authType.get())
+        .withExpiresAt(date)
+        .sign(algorithm);
   }
 
   /** get token expire timestamp */

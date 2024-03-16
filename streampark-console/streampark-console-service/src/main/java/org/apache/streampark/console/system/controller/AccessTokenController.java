@@ -64,12 +64,6 @@ public class AccessTokenController {
         example = "100000",
         schema = @Schema(implementation = Long.class)),
     @Parameter(
-        name = "expireTime",
-        description = "token expire time, yyyy-MM-dd HH:mm:ss",
-        required = true,
-        example = "9999-01-01 00:00:00",
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
         name = "description",
         description = "token description",
         schema = @Schema(implementation = String.class))
@@ -78,10 +72,9 @@ public class AccessTokenController {
   @RequiresPermissions("token:add")
   public RestResponse createToken(
       @NotBlank(message = "{required}") Long userId,
-      String expireTime,
       @RequestParam(required = false) String description)
       throws InternalException {
-    return accessTokenService.create(userId, expireTime, description);
+    return accessTokenService.create(userId, description);
   }
 
   @Operation(summary = "Verify current user token")

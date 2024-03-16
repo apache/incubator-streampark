@@ -23,7 +23,6 @@
         t1.user_id,
         t2.username,
         t1.token,
-        t1.expire_time,
         t1.create_time,
         t1.modify_time,
         t1.description,

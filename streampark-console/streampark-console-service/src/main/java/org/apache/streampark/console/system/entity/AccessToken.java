@@ -53,9 +53,6 @@ public class AccessToken implements Serializable {
   @NotNull(message = "{required}")
   private Integer status;
 
-  @NotNull(message = "{required}")
-  private Date expireTime;
-
   private String description;
 
   private Date createTime;

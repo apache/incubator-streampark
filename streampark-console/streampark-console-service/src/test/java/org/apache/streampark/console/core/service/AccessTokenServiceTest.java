@@ -42,8 +42,7 @@ public class AccessTokenServiceTest extends SpringTestBase {
   @Test
   void testCrudToken() throws Exception {
     Long mockUserId = 100000L;
-    String expireTime = "9999-01-01 00:00:00";
-    RestResponse restResponse = accessTokenService.create(mockUserId, expireTime, "");
+    RestResponse restResponse = accessTokenService.create(mockUserId, "");
     Assertions.assertNotNull(restResponse);
     Assertions.assertInstanceOf(AccessToken.class, restResponse.get("data"));
 

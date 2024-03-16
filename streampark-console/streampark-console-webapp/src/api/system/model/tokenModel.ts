@@ -20,7 +20,6 @@ export interface TokenListRecord {
   userId: string;
   token: string;
   status: number;
-  expireTime: string;
   description: string;
   createTime: string;
   modifyTime: string;
@@ -32,6 +31,5 @@ export interface TokenListRecord {
 export interface TokenCreateParam {
   userId: number;
   description: string;
-  expireTime: string;
   teamId: string;
 }

@@ -22,6 +22,7 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
@@ -40,6 +41,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
@@ -51,6 +54,8 @@ import java.util.Map;
 @RequestMapping("passport")
 public class PassportController {
 
+  private static final String TOKEN = "Authorization";
+
   @Autowired private UserService userService;
 
   @Autowired private ShiroProperties properties;
@@ -60,6 +65,8 @@ public class PassportController {
   @Operation(summary = "Signin")
   @PostMapping("signin")
   public RestResponse signin(
+      HttpServletRequest request,
+      HttpServletResponse response,
       @NotBlank(message = "{required}") String username,
       @NotBlank(message = "{required}") String password,
       @NotBlank(message = "{required}") String loginType)
@@ -88,21 +95,30 @@ public class PassportController {
     }
 
     this.userService.updateLoginTime(username);
-    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), username));
+    String sign = JWTUtil.sign(user.getUserId(), username, AuthenticationType.SIGN);
+
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
-    String expireTimeStr = DateUtils.formatFullTime(expireTime);
-    JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+    String ttl = DateUtils.formatFullTime(expireTime);
+
+    // shiro login
+    JWTToken loginToken = new JWTToken(sign, ttl, AuthenticationType.SIGN.get());
+    SecurityUtils.getSubject().login(loginToken);
+
+    // generate UserInfo
+    String token = WebUtils.encryptToken(sign);
+    JWTToken jwtToken = new JWTToken(token, ttl, AuthenticationType.SIGN.get());
     String userId = RandomStringUtils.randomAlphanumeric(20);
     user.setId(userId);
     Map<String, Object> userInfo =
         userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+
     return new RestResponse().data(userInfo);
   }
 
   @Operation(summary = "Signout")
   @PostMapping("signout")
   public RestResponse signout() {
-    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+    SecurityUtils.getSubject().logout();
     return new RestResponse();
   }
 }

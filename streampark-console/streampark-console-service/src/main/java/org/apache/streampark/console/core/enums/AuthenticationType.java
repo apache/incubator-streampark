@@ -14,36 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.streampark.console.core.enums;
 
-package org.apache.streampark.console.base.exception;
+import java.util.Arrays;
 
-/**
- *
- *
- * <pre>
- * An exception message that needs to be notified to front-end.
- * </pre>
- */
-public abstract class AbstractApiException extends RuntimeException {
+public enum AuthenticationType {
+  SIGN(1),
 
-  private final Long responseCode;
+  OPENAPI(2);
 
-  protected AbstractApiException(String message, Long responseCode) {
-    super(message);
-    this.responseCode = responseCode;
+  private final Integer value;
+
+  AuthenticationType(int value) {
+    this.value = value;
   }
 
-  protected AbstractApiException(Throwable cause, Long responseCode) {
-    super(cause);
-    this.responseCode = responseCode;
+  public int get() {
+    return this.value;
   }
 
-  protected AbstractApiException(String message, Throwable cause, Long responseCode) {
-    super(message, cause);
-    this.responseCode = responseCode;
-  }
-
-  public Long getResponseCode() {
-    return responseCode;
+  public static AuthenticationType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
   }
 }

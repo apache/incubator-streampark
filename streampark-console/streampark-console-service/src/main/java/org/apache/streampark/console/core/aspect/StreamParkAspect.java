@@ -49,8 +49,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
 @Aspect
@@ -74,10 +72,10 @@ public class StreamParkAspect {
     log.debug("restResponse aspect, method:{}", methodSignature.getName());
     Boolean isApi =
         (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
-    if (Objects.nonNull(isApi) && isApi) {
+    if (isApi != null && isApi) {
       ApiAccess apiAccess = methodSignature.getMethod().getAnnotation(ApiAccess.class);
-      if (Objects.isNull(apiAccess) || !apiAccess.value()) {
-        throw new ApiAlertException("api accessToken authentication failed!");
+      if (apiAccess == null) {
+        throw new ApiAlertException("current api unsupported!");
       }
     }
     return (RestResponse) joinPoint.proceed();
