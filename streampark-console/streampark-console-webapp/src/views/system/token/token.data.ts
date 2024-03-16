@@ -20,7 +20,6 @@ import { Switch } from 'ant-design-vue';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { fetTokenStatusToggle } from '/@/api/system/token';
 import { getNoTokenUserList } from '/@/api/system/user';
-import dayjs from 'dayjs';
 import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
