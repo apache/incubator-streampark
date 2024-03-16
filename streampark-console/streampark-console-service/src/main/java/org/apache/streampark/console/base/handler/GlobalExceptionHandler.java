@@ -52,7 +52,6 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(Exception e) {
     log.info("Internal server error：", e);
-    log.info(e.getCause().getClass().getName());
     return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
   }
 
@@ -60,6 +59,13 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public RestResponse handleException(AuthorizationException e) {
     return RestResponse.fail("Unauthenticated", ResponseCode.CODE_UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(value = UnauthorizedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public RestResponse handleUnauthorizedException(Exception e) {
+    log.info("Permission denied，{}", e.getMessage());
+    return RestResponse.fail("Unauthenticated", ResponseCode.CODE_FORBIDDEN);
   }
 
   @ExceptionHandler(value = AbstractApiException.class)
@@ -106,11 +112,5 @@ public class GlobalExceptionHandler {
     }
     message = new StringBuilder(message.substring(0, message.length() - 1));
     return RestResponse.fail(message.toString(), ResponseCode.CODE_FAIL);
-  }
-
-  @ExceptionHandler(value = UnauthorizedException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public void handleUnauthorizedException(Exception e) {
-    log.info("Permission denied，{}", e.getMessage());
   }
 }
