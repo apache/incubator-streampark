@@ -47,7 +47,7 @@ export default {
     branchesPlaceholder: 'Select a branch',
     pom: 'POM',
     pomPlaceholder:
-      'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xmlh',
+      'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml',
     buildArgs: 'Build Argument',
     buildArgsPlaceholder: 'Build Argument, e.g: -Pprod',
     description: 'description',
