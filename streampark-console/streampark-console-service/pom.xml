@@ -50,7 +50,7 @@
         <jsch.version>0.2.11</jsch.version>
         <shiro.version>1.10.0</shiro.version>
         <p6spy.version>3.9.1</p6spy.version>
-        <freemarker.version>2.3.30</freemarker.version>
+        <freemarker.version>2.3.32</freemarker.version>
         <commons-email.version>1.5</commons-email.version>
         <jwt.version>4.0.0</jwt.version>
         <lombok.version>1.18.24</lombok.version>

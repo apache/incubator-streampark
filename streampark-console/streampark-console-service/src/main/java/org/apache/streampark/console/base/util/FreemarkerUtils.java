@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.util;
 
 import freemarker.cache.StringTemplateLoader;
+import freemarker.core.TemplateClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -36,6 +37,7 @@ public class FreemarkerUtils {
     SpringTemplateLoader templateLoader =
         new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
     CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
+    CONFIGURATION.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
     CONFIGURATION.setTemplateLoader(templateLoader);
     CONFIGURATION.setDefaultEncoding("UTF-8");
   }
@@ -51,6 +53,7 @@ public class FreemarkerUtils {
 
   public static Template loadTemplateString(String template) throws Exception {
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
+    configuration.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
     StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
     stringTemplateLoader.putTemplate("template", template);
     configuration.setTemplateLoader(stringTemplateLoader);
