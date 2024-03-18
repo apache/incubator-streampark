@@ -30,6 +30,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.GZipUtils;
+import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
@@ -93,7 +94,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     long count = count(queryWrapper);
     RestResponse response = RestResponse.success();
 
-    ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
+    PremisesUtils.throwIfTrue(
+        count > 0, "project name already exists, add project failed", ApiAlertException.class);
 
     Date date = new Date();
     project.setCreateTime(date);
@@ -110,12 +112,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public boolean update(Project projectParam) {
     Project project = getById(projectParam.getId());
     Utils.requireNotNull(project);
-    ApiAlertException.throwIfFalse(
+    PremisesUtils.throwIfFalse(
         project.getTeamId().equals(projectParam.getTeamId()),
-        "TeamId can't be changed, update project failed.");
-    ApiAlertException.throwIfFalse(
+        "TeamId can't be changed, update project failed.",
+        ApiAlertException.class);
+    PremisesUtils.throwIfFalse(
         !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
-        "The project is being built, update project failed.");
+        "The project is being built, update project failed.",
+        ApiAlertException.class);
     updateInternal(projectParam, project);
     if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
@@ -243,8 +247,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public List<String> listJars(Project project) {
     List<String> jarList = new ArrayList<>(0);
-    ApiAlertException.throwIfNull(
-        project.getModule(), "Project module can't be null, please check.");
+    PremisesUtils.throwIfNull(
+        project.getModule(),
+        "Project module can't be null, please check.",
+        ApiAlertException.class);
     File apps = new File(project.getDistHome(), project.getModule());
     for (File file : Objects.requireNonNull(apps.listFiles())) {
       if (file.getName().endsWith(Constant.JAR_SUFFIX)) {

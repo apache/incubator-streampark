@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.core.entity.FlinkGateWay;
 import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.mapper.FlinkGateWayMapper;
@@ -45,8 +46,10 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
 
   private void preHandleGatewayInfo(FlinkGateWay flinkGateWay) {
     // validate gateway name
-    ApiAlertException.throwIfTrue(
-        existsByGatewayName(flinkGateWay.getGatewayName()), "gateway name already exists");
+    PremisesUtils.throwIfTrue(
+        existsByGatewayName(flinkGateWay.getGatewayName()),
+        "gateway name already exists",
+        ApiAlertException.class);
 
     // validate gateway address and set gateway type
     flinkGateWay.setGatewayType(getGatewayVersion(flinkGateWay.getAddress()));

@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.base.util.PremisesUtils;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,7 +77,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public IPage<Member> getPage(Member member, RestRequest request) {
-    ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
+    PremisesUtils.throwIfNull(
+        member.getTeamId(), "The team id is required.", ApiAlertException.class);
     Page<Member> page = MybatisPager.getPage(request);
     return baseMapper.selectPage(page, member);
   }
@@ -100,7 +103,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   private Member findByUserId(Long teamId, Long userId) {
-    ApiAlertException.throwIfNull(teamId, "The team id is required.");
+    PremisesUtils.throwIfNull(teamId, "The team id is required.", ApiAlertException.class);
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)
@@ -119,12 +122,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Override
   public void createMember(Member member) {
     User user = userService.getByUsername(member.getUserName());
-    ApiAlertException.throwIfNull(user, "The username [%s] not found", member.getUserName());
-
     ApiAlertException.throwIfNull(
-        roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+        user, "The username [%s] not found", member.getUserName(), ApiAlertException.class);
+
+    PremisesUtils.throwIfNull(
+        roleService.getById(member.getRoleId()),
+        "The roleId [%s] not found" + member.getRoleId(),
+        ApiAlertException.class);
     Team team = teamService.getById(member.getTeamId());
-    ApiAlertException.throwIfNull(team, "The teamId [%s] not found", member.getTeamId());
+    PremisesUtils.throwIfNull(
+        team, "The teamId [%s] not found" + member.getTeamId(), ApiAlertException.class);
     ApiAlertException.throwIfNotNull(
         findByUserId(member.getTeamId(), user.getUserId()),
         "The user [%s] has been added the team [%s], please don't add it again.",
@@ -142,8 +149,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public void remove(Long id) {
-    Member member = this.getById(id);
-    ApiAlertException.throwIfNull(member, "The member [id=%s] not found", id);
+    Member member =
+        Optional.ofNullable(this.getById(id))
+            .orElseThrow(
+                () -> new ApiAlertException(String.format("The member [id=%s] not found", id)));
     this.removeById(member);
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }
