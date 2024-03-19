@@ -203,7 +203,7 @@ object ConfigConst {
     println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
     println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
     println("                                       /_/                        \n\n")
-    println("    Version:  2.1.3                                          ")
+    println("    Version:  2.1.4                                          ")
     println("    WebSite:  https://streampark.apache.org                           ")
     println("    GitHub :  https://github.com/apache/incubator-streampark                    ")
     println(s"    Info   :  $info                                 ")

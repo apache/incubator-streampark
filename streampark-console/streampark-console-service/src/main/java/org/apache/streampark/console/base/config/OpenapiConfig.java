@@ -52,7 +52,7 @@ public class OpenapiConfig implements WebMvcConfigurer {
                         .name("Apache StreamPark")
                         .url("https://streampark.apache.org/")
                         .email("dev@streampark.apache.org"))
-                .version("2.1.3")
+                .version("2.1.4")
                 .license(new License().name("Apache-2.0 license")))
         .components(
             new Components()
