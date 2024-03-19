@@ -93,7 +93,7 @@ public class PassportController {
     }
 
     this.userService.updateLoginTime(username);
-    String sign = JWTUtil.sign(user.getUserId(), username, AuthenticationType.SIGN);
+    String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
 
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
     String ttl = DateUtils.formatFullTime(expireTime);

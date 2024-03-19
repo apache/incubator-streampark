@@ -39,6 +39,7 @@ class JWTTest extends SpringTestBase {
         JWTUtil.sign(
             10000L,
             userName,
+            "streampark",
             AuthenticationType.SIGN,
             DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 

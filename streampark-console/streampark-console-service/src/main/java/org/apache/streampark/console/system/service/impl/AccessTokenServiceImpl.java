@@ -60,7 +60,8 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     }
     String token =
         WebUtils.encryptToken(
-            JWTUtil.sign(user.getUserId(), user.getUsername(), AuthenticationType.OPENAPI));
+            JWTUtil.sign(
+                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
     JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME, 1);
 
     AccessToken accessToken = new AccessToken();
