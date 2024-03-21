@@ -61,13 +61,12 @@ public class FreemarkerUtils {
   }
 
   public static String format(Template template, Object dataModel) throws TemplateException {
-    String result = null;
     try (StringWriter writer = new StringWriter()) {
       template.process(dataModel, writer);
-      result = writer.toString();
+      return writer.toString();
     } catch (IOException e) {
       log.error(e.getMessage());
     }
-    return result;
+    return null;
   }
 }
