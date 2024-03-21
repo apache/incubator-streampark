@@ -218,15 +218,21 @@ public class Project implements Serializable {
     }
 
     StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
-
     if (StringUtils.isNotBlank(this.buildArgs)) {
+      this.buildArgs = this.buildArgs.trim();
+      if (this.buildArgs.contains("\n")) {
+        throw new IllegalArgumentException(
+            String.format(
+                "Illegal argument: newline character in maven build parameters: \"%s\"",
+                this.buildArgs));
+      }
       String args = getIllegalArgs(this.buildArgs);
       if (args != null) {
         throw new IllegalArgumentException(
             String.format(
                 "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
       }
-      cmdBuffer.append(this.buildArgs.trim());
+      cmdBuffer.append(this.buildArgs);
     }
 
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
