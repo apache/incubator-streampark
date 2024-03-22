@@ -1948,6 +1948,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           .filter(report -> report.getName().equals(appName))
           .collect(Collectors.toList());
     } catch (Exception e) {
+      log.error(Utils.stringifyException(e));
       throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
     }
   }
