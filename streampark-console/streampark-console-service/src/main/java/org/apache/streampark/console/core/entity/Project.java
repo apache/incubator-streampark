@@ -188,6 +188,40 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
+    StringBuilder mvnArgBuffer = new StringBuilder("clean package -DskipTests ");
+    if (StringUtils.isNotBlank(this.buildArgs)) {
+      mvnArgBuffer.append(this.buildArgs.trim());
+    }
+
+    // --settings
+    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+    if (StringUtils.isNotBlank(setting)) {
+      File file = new File(setting);
+      if (file.exists() && file.isFile()) {
+        mvnArgBuffer.append(" --settings ").append(setting.trim());
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                setting));
+      }
+    }
+
+    // check maven args
+    String mvnArgs = mvnArgBuffer.toString();
+    if (mvnArgs.contains("\n")) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Illegal argument: newline character in maven build parameters: \"%s\"", mvnArgs));
+    }
+
+    String args = getIllegalArgs(mvnArgs);
+    if (args != null) {
+      throw new IllegalArgumentException(
+          String.format("Illegal argument: \"%s\" in maven build parameters: %s", args, mvnArgs));
+    }
+
+    // find mvn
     boolean windows = Utils.isWindows();
     String mvn = windows ? "mvn.cmd" : "mvn";
 
@@ -211,48 +245,12 @@ public class Project implements Serializable {
 
     if (useWrapper) {
       if (windows) {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
+        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd ");
       } else {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw");
+        mvn = WebUtils.getAppHome().concat("/bin/mvnw ");
       }
     }
-
-    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
-    if (StringUtils.isNotBlank(this.buildArgs)) {
-      this.buildArgs = this.buildArgs.trim();
-      if (this.buildArgs.contains("\n")) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Illegal argument: newline character in maven build parameters: \"%s\"",
-                this.buildArgs));
-      }
-      String args = getIllegalArgs(this.buildArgs);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
-      }
-      cmdBuffer.append(this.buildArgs);
-    }
-
-    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotBlank(setting)) {
-      String args = getIllegalArgs(setting);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
-      }
-      File file = new File(setting);
-      if (file.exists() && file.isFile()) {
-        cmdBuffer.append(" --settings ").append(setting);
-      } else {
-        throw new IllegalArgumentException(
-            String.format(
-                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-                setting));
-      }
-    }
-    return cmdBuffer.toString();
+    return mvn.concat(mvnArgs);
   }
 
   private String getIllegalArgs(String param) {
