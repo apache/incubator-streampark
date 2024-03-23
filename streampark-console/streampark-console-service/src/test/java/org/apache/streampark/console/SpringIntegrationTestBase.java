@@ -19,10 +19,10 @@ package org.apache.streampark.console;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.flink.util.Preconditions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -104,13 +104,12 @@ public abstract class SpringIntegrationTestBase {
   }
 
   private static File tryFindStreamParkPackagedDirFile() {
-    String userDir = Preconditions.checkNotNull(SystemPropertyUtils.get("user.dir"));
+    String userDir = AssertUtils.notNull(SystemPropertyUtils.get("user.dir"));
     File pkgTargetDirFile = new File(userDir, "target");
-    Preconditions.checkState(
+    AssertUtils.state(
         pkgTargetDirFile.exists(),
-        "The target directory of %s doesn't exist. %s",
-        userDir,
-        RUN_PKG_SCRIPT_HINT);
+        String.format(
+            "The target directory of %s doesn't exist. %s", userDir, RUN_PKG_SCRIPT_HINT));
     Optional<File> availablePkgParentFileOpt =
         Arrays.stream(requireNonNull(pkgTargetDirFile.listFiles(PKG_NAME_FILTER))).findFirst();
     final File availablePkgParentFile =

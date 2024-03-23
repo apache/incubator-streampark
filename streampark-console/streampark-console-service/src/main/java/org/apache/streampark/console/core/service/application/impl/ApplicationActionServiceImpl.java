@@ -27,11 +27,11 @@ import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.FlinkRestoreMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -381,7 +381,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   public void start(Application appParam, boolean auto) throws Exception {
     // 1) check application
     final Application application = getById(appParam.getId());
-    Utils.requireNotNull(application);
+    AssertUtils.notNull(application);
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
@@ -397,7 +397,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-    Utils.requireNotNull(buildPipeline);
+    AssertUtils.notNull(buildPipeline);
 
     FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
@@ -635,7 +635,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     switch (application.getDevelopmentMode()) {
       case FLINK_SQL:
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-        Utils.requireNotNull(flinkSql);
+        AssertUtils.notNull(flinkSql);
         // 1) dist_userJar
         String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
         // 2) appConfig
