@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
-import org.apache.flink.shaded.guava30.com.google.common.base.Preconditions;
+import org.apache.flink.util.Preconditions;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
