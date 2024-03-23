@@ -184,11 +184,9 @@ object AssertUtils {
    *   if the collection contains a {@code null} element
    */
   def noNullElements(@Nullable collection: util.Collection[_], message: String): Unit = {
-    if (collection != null) {
-      for (element <- collection) {
-        if (element == null) {
-          throw new IllegalArgumentException(message)
-        }
+    if (collection != null) for (element <- collection) {
+      if (element == null) {
+        throw new IllegalArgumentException(message)
       }
     }
   }
@@ -224,7 +222,9 @@ object AssertUtils {
    *   StringUtils#hasLength
    */
   def hasLength(@Nullable text: String, message: String): Unit = {
-    if (!getHasLength(text)) throw new IllegalArgumentException(message)
+    if (!getHasLength(text)) {
+      throw new IllegalArgumentException(message)
+    }
   }
 
   /**
@@ -260,10 +260,12 @@ object AssertUtils {
    *   StringUtils#hasText
    */
   def hasText(@Nullable text: String, message: String): Unit = {
-    if (!getHasText(text)) throw new IllegalArgumentException(message)
+    if (!getHasText(text)) {
+      throw new IllegalArgumentException(message)
+    }
   }
 
-  private[this] def getHasLength(@Nullable str: String): Boolean = str != null && !str.isEmpty
+  private[this] def getHasLength(@Nullable str: String): Boolean = str != null && str.nonEmpty
 
   private[this] def getHasText(@Nullable str: String): Boolean = {
     str != null && str.nonEmpty && containsText(str)
