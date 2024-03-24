@@ -130,7 +130,7 @@ object KubernetesRetriever extends Logger {
              |error: $e
              |""".stripMargin
         )
-        false
+        true
     }
   }
 

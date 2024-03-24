@@ -1948,8 +1948,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           .filter(report -> report.getName().equals(appName))
           .collect(Collectors.toList());
     } catch (Exception e) {
-      log.error(Utils.stringifyException(e));
-      throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
+      log.error("Failed to connect hadoop YARN, detail: {}", Utils.stringifyException(e));
+      throw new RuntimeException("Failed to connect hadoop YARN. Ensure that hadoop yarn is running.");
     }
   }
 
