@@ -876,15 +876,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.getJobName() != null) {
       app.setJobName(application.getJobName());
     }
-    if (application.getAppId() != null) {
-      app.setAppId(application.getAppId());
-    }
-    if (application.getJobId() != null) {
-      app.setJobId(application.getJobId());
-    }
-    if (application.getJobManagerUrl() != null) {
-      app.setJobManagerUrl(application.getJobManagerUrl());
-    }
+    app.setAppId(application.getAppId());
+    app.setJobId(application.getJobId());
+    app.setJobManagerUrl(application.getJobManagerUrl());
     if (application.getVersionId() != null) {
       app.setVersionId(application.getVersionId());
     }
@@ -921,18 +915,14 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.getBuild() != null) {
       app.setBuild(application.getBuild());
     }
-    if (application.getRestartSize() != null) {
-      app.setRestartSize(application.getRestartSize());
-    }
+    app.setRestartSize(application.getRestartSize());
     if (application.getRestartCount() != null) {
       app.setRestartCount(application.getRestartCount());
     }
     if (application.getOptionState() != null) {
       app.setOptionState(application.getOptionState());
     }
-    if (application.getAlertId() != null) {
-      app.setAlertId(application.getAlertId());
-    }
+    app.setAlertId(application.getAlertId());
     if (application.getArgs() != null) {
       app.setArgs(application.getArgs());
     }
@@ -942,9 +932,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.getOptions() != null) {
       app.setOptions(application.getOptions());
     }
-    if (application.getHotParams() != null) {
-      app.setHotParams(application.getHotParams());
-    }
+    app.setHotParams(application.getHotParams());
     if (application.getResolveOrder() != null) {
       app.setResolveOrder(application.getResolveOrder());
     }
@@ -972,9 +960,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.getStartTime() != null) {
       app.setStartTime(application.getStartTime());
     }
-    if (application.getEndTime() != null) {
-      app.setEndTime(application.getEndTime());
-    }
+    app.setEndTime(application.getEndTime());
     if (application.getDuration() != null) {
       app.setDuration(application.getDuration());
     }
@@ -1008,9 +994,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     if (application.getTotalTask() != null) {
       app.setTotalTask(application.getTotalTask());
     }
-    if (application.getFlinkClusterId() != null) {
-      app.setFlinkClusterId(application.getFlinkClusterId());
-    }
+    app.setFlinkClusterId(application.getFlinkClusterId());
     if (application.getDescription() != null) {
       app.setDescription(application.getDescription());
     }

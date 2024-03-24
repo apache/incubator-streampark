@@ -54,6 +54,7 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
@@ -138,6 +139,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private ApplicationActionService applicationActionService;
 
   @PostConstruct
   public void resetOptionState() {
@@ -609,7 +612,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       application.setJar(appParam.getJar());
       application.setMainClass(appParam.getMainClass());
     }
-    this.updateById(application);
+    applicationActionService.updateById(application);
     return true;
   }
 
@@ -682,7 +685,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         }
       }
     }
-    this.updateById(application);
+    applicationActionService.updateById(application);
     this.configService.update(appParam, application.isRunning());
   }
 
