@@ -125,7 +125,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     ApiAlertException.throwIfFalse(
         findVariable.getVariableCode().equals(variable.getVariableCode()),
         "Sorry, the variable code cannot be updated.");
-    this.baseMapper.updateById(variable);
+    updateById(variable);
     // endregion
 
     // set Application's field release to NEED_RESTART
@@ -259,5 +259,29 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public boolean existsByTeamId(Long teamId) {
     return this.baseMapper.existsByTeamId(teamId);
+  }
+
+  @Override
+  public boolean updateById(Variable entity) {
+    Variable variable = this.baseMapper.selectById(entity.getId());
+    if (entity.getVariableCode() != null) {
+      variable.setVariableCode(entity.getVariableCode());
+    }
+    if (entity.getVariableValue() != null) {
+      variable.setVariableValue(entity.getVariableValue());
+    }
+    if (entity.getDescription() != null) {
+      variable.setDescription(entity.getDescription());
+    }
+    if (entity.getCreatorId() != null) {
+      variable.setCreatorId(entity.getCreatorId());
+    }
+    if (entity.getTeamId() != null) {
+      variable.setTeamId(entity.getTeamId());
+    }
+    if (entity.getDesensitization() != null) {
+      variable.setDesensitization(entity.getDesensitization());
+    }
+    return super.updateById(variable);
   }
 }
