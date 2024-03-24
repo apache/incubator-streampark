@@ -37,7 +37,7 @@ class ExternalLinkServiceTest extends SpringUnitTestBase {
   }
 
   @Test
-  void testUpdateLinkService() {
+  void testUpdateLinkServiceById() {
     ExternalLink link = new ExternalLink();
     link.setBadgeLabel("badgeLabel");
     link.setBadgeColor("badgeColor");
@@ -48,7 +48,7 @@ class ExternalLinkServiceTest extends SpringUnitTestBase {
     link.setBadgeColor("updatedBadgeColor");
     link.setBadgeName("updatedBadgeName");
     link.setLinkUrl(null);
-    externalLinkService.update(link);
+    externalLinkService.updateById(link);
     link = externalLinkService.getById(link.getId());
 
     assertThat(link.getBadgeLabel()).isEqualTo("updatedBadgeLabel");

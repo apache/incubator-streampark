@@ -65,6 +65,11 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
+    baseMapper.updateById(externalLink);
+  }
+
+  @Override
+  public boolean updateById(ExternalLink externalLink) {
     ExternalLink link = baseMapper.selectById(externalLink.getId());
     if (externalLink.getBadgeLabel() != null) {
       link.setBadgeLabel(externalLink.getBadgeLabel());
@@ -79,7 +84,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
       link.setLinkUrl(externalLink.getLinkUrl());
     }
     link.setModifyTime(new Date());
-    baseMapper.updateById(link);
+    return super.updateById(link);
   }
 
   @Override

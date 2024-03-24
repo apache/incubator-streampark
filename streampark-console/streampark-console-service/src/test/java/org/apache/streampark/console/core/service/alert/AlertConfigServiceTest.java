@@ -37,7 +37,7 @@ class AlertConfigServiceTest extends SpringUnitTestBase {
   }
 
   @Test
-  void testUpdateLinkServiceById() {
+  void testUpdateAlertConfigServiceById() {
     AlertConfig config = new AlertConfig();
     config.setUserId(1L);
     config.setAlertName("alertName");
