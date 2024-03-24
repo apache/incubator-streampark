@@ -74,6 +74,39 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
   }
 
   @Override
+  public boolean updateById(AlertConfig entity) {
+    AlertConfig alertConfig = baseMapper.selectById(entity.getId());
+    if (alertConfig == null) {
+      return false;
+    }
+    if (entity.getUserId() != null) {
+      alertConfig.setUserId(entity.getUserId());
+    }
+    if (entity.getAlertName() != null) {
+      alertConfig.setAlertName(entity.getAlertName());
+    }
+    if (entity.getAlertType() != null) {
+      alertConfig.setAlertType(entity.getAlertType());
+    }
+    if (entity.getEmailParams() != null) {
+      alertConfig.setEmailParams(entity.getEmailParams());
+    }
+    if (entity.getDingTalkParams() != null) {
+      alertConfig.setDingTalkParams(entity.getDingTalkParams());
+    }
+    if (entity.getWeComParams() != null) {
+      alertConfig.setWeComParams(entity.getWeComParams());
+    }
+    if (entity.getHttpCallbackParams() != null) {
+      alertConfig.setHttpCallbackParams(entity.getHttpCallbackParams());
+    }
+    if (entity.getLarkParams() != null) {
+      alertConfig.setLarkParams(entity.getLarkParams());
+    }
+    return super.updateById(alertConfig);
+  }
+
+  @Override
   public boolean removeById(Long id) throws AlertException {
     long count =
         applicationInfoService.count(
