@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** org.apache.streampark.console.core.service.ExternalLinkServiceTest. */
+/** org.apache.streampark.console.core.service.alert.AlertConfigServiceTest. */
 class AlertConfigServiceTest extends SpringUnitTestBase {
   @Autowired private AlertConfigService alertConfigService;
 
