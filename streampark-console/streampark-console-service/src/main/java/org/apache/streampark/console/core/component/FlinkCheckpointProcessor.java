@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.component;
 
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
@@ -27,8 +28,6 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
-
-import org.apache.flink.shaded.guava30.com.google.common.base.Preconditions;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -120,10 +119,9 @@ public class FlinkCheckpointProcessor {
     checkPointFailedCache.remove(appId);
     FailoverStrategyEnum failoverStrategyEnum =
         FailoverStrategyEnum.of(application.getCpFailureAction());
-    Preconditions.checkArgument(
+    AssertUtils.required(
         failoverStrategyEnum != null,
-        "Unexpected cpFailureAction: %s",
-        application.getCpFailureAction());
+        "Unexpected cpFailureAction: " + application.getCpFailureAction());
     processFailoverStrategy(application, failoverStrategyEnum);
   }
 

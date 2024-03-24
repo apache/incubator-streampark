@@ -61,7 +61,7 @@ object DockerRetriever {
   /** set docker-host for kata */
   def setDockerHost(): Unit = {
     val dockerhost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
-    if (Utils.requireNotEmpty(dockerhost)) {
+    if (Utils.isNotEmpty(dockerhost)) {
       val dockerHostUri: URI = new URI(dockerhost)
       dockerHttpClientBuilder.dockerHost(dockerHostUri)
     }

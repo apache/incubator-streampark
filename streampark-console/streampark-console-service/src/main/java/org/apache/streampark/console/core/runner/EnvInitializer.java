@@ -24,8 +24,8 @@ import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -101,7 +101,7 @@ public class EnvInitializer implements ApplicationRunner {
         .forEach(
             key -> {
               InternalOption config = InternalConfigHolder.getConfig(key);
-              Utils.requireNotNull(config);
+              AssertUtils.notNull(config);
               InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
             });
 
@@ -181,7 +181,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
     File client = WebUtils.getAppClientDir();
-    Utils.required(
+    AssertUtils.required(
         client.exists() && client.listFiles().length > 0,
         client.getAbsolutePath().concat(" is not exists or empty directory "));
 
@@ -198,7 +198,7 @@ public class EnvInitializer implements ApplicationRunner {
     File[] shims =
         WebUtils.getAppLibDir()
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
-    Utils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
+    AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
     String appShims = workspace.APP_SHIMS();
     fsOperator.delete(appShims);

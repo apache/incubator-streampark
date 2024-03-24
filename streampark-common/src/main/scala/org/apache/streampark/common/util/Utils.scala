@@ -33,17 +33,7 @@ object Utils extends Logger {
 
   private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
-  def requireNotNull(obj: Any, message: String): Unit = {
-    if (obj == null) {
-      throw new NullPointerException(message)
-    }
-  }
-
-  def requireNotNull(obj: Any): Unit = {
-    requireNotNull(obj, "this argument must not be null")
-  }
-
-  def requireNotEmpty(elem: Any): Boolean = {
+  def isNotEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
       case x if x.isInstanceOf[Array[_]] => elem.asInstanceOf[Array[_]].nonEmpty
@@ -56,19 +46,7 @@ object Utils extends Logger {
     }
   }
 
-  def isEmpty(elem: Any): Boolean = !requireNotEmpty(elem)
-
-  def required(expression: Boolean): Unit = {
-    if (!expression) {
-      throw new IllegalArgumentException
-    }
-  }
-
-  def required(expression: Boolean, errorMessage: Any): Unit = {
-    if (!expression) {
-      throw new IllegalArgumentException(s"Requirement failed: ${errorMessage.toString}")
-    }
-  }
+  def isEmpty(elem: Any): Boolean = !isNotEmpty(elem)
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
