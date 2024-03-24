@@ -187,10 +187,10 @@ class ApplicationActionServiceTest extends SpringUnitTestBase {
     assertThat(app.getK8sHadoopIntegration()).isEqualTo(false);
     assertThat(app.getRelease()).isEqualTo(0);
     assertThat(app.getBuild()).isEqualTo(false);
-    assertThat(app.getRestartSize()).isEqualTo(0);
+    assertThat(app.getRestartSize()).isNull();
     assertThat(app.getRestartCount()).isEqualTo(0);
     assertThat(app.getOptionState()).isEqualTo(0);
-    assertThat(app.getAlertId()).isEqualTo(0L);
+    assertThat(app.getAlertId()).isNull();
     assertThat(app.getArgs()).isEqualTo("updatedArgs");
     assertThat(app.getModule()).isEqualTo("updatedModule");
     assertThat(app.getOptions()).isEqualTo("updatedOptions");
@@ -204,7 +204,7 @@ class ApplicationActionServiceTest extends SpringUnitTestBase {
     assertThat(app.getJarCheckSum()).isEqualTo(0L);
     assertThat(app.getMainClass()).isEqualTo("updatedMainClass");
     assertThat(app.getStartTime()).isEqualTo(startTime);
-    assertThat(app.getEndTime()).isEqualTo(endTime);
+    assertThat(app.getEndTime()).isNull();
     assertThat(app.getDuration()).isEqualTo(0L);
     assertThat(app.getCpMaxFailureInterval()).isEqualTo(0);
     assertThat(app.getCpFailureRateInterval()).isEqualTo(0);
@@ -216,7 +216,7 @@ class ApplicationActionServiceTest extends SpringUnitTestBase {
     assertThat(app.getJmMemory()).isEqualTo(0);
     assertThat(app.getTmMemory()).isEqualTo(0);
     assertThat(app.getTotalTask()).isEqualTo(0);
-    assertThat(app.getFlinkClusterId()).isEqualTo(0L);
+    assertThat(app.getFlinkClusterId()).isNull();
     assertThat(app.getDescription()).isEqualTo("updatedDescription");
     assertThat(app.getOptionTime()).isEqualTo(optionTime);
     assertThat(app.getResourceFrom()).isEqualTo(0);
