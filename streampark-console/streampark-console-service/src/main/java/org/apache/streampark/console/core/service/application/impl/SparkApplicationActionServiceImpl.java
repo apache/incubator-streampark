@@ -26,11 +26,11 @@ import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -303,7 +303,7 @@ public class SparkApplicationActionServiceImpl
   public void start(SparkApplication appParam, boolean auto) throws Exception {
     // 1) check application
     final SparkApplication application = getById(appParam.getId());
-    Utils.requireNotNull(application);
+    AssertUtils.notNull(application);
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
@@ -319,7 +319,7 @@ public class SparkApplicationActionServiceImpl
     }
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-    Utils.requireNotNull(buildPipeline);
+    AssertUtils.notNull(buildPipeline);
 
     SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
 
@@ -499,7 +499,7 @@ public class SparkApplicationActionServiceImpl
     switch (application.getDevelopmentMode()) {
       case FLINK_SQL:
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-        Utils.requireNotNull(flinkSql);
+        AssertUtils.notNull(flinkSql);
         // 1) dist_userJar
         String sqlDistJar = commonService.getSqlClientJar(sparkEnv);
         // 2) appConfig
