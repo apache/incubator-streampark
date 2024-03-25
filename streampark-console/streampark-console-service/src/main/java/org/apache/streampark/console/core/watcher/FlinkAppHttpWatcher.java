@@ -238,10 +238,47 @@ public class FlinkAppHttpWatcher {
    */
   private void getStateFromFlink(Application application) throws Exception {
     JobsOverview jobsOverview = httpJobsOverview(application);
+    Optional<JobsOverview.Job> jobOptional = getJobsOverviewJob(application, jobsOverview);
+    if (jobOptional.isPresent()) {
+
+      processJobState(application, jobOptional);
+    }
+  }
+
+  private void processJobState(Application application, Optional<JobsOverview.Job> jobOptional)
+      throws Exception {
+    JobsOverview.Job jobOverview = jobOptional.get();
+    FlinkAppStateEnum currentState = FlinkAppStateEnum.of(jobOverview.getState());
+
+    if (FlinkAppStateEnum.OTHER != currentState) {
+      try {
+        // 1) set info from JobOverview
+        handleJobOverview(application, jobOverview);
+      } catch (Exception e) {
+        log.error("get flink jobOverview error: {}", e.getMessage(), e);
+      }
+      try {
+        // 2) CheckPoints
+        handleCheckPoints(application);
+      } catch (Exception e) {
+        log.error("get flink jobOverview error: {}", e.getMessage(), e);
+      }
+      // 3) savePoint obsolete check and NEED_START check
+      OptionStateEnum optionStateEnum = OPTIONING.get(application.getId());
+      if (FlinkAppStateEnum.RUNNING == currentState) {
+        handleRunningState(application, optionStateEnum, currentState);
+      } else {
+        handleNotRunState(application, optionStateEnum, currentState);
+      }
+    }
+  }
+
+  @Nonnull
+  private Optional<JobsOverview.Job> getJobsOverviewJob(
+      Application application, JobsOverview jobsOverview) {
     Optional<JobsOverview.Job> optional;
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
-    if (FlinkExecutionMode.YARN_APPLICATION == execMode
-        || FlinkExecutionMode.YARN_PER_JOB == execMode) {
+    if (FlinkExecutionMode.isYarnPerJobOrAppMode(execMode)) {
       optional =
           !jobsOverview.getJobs().isEmpty()
               ? jobsOverview.getJobs().stream()
@@ -254,33 +291,7 @@ public class FlinkAppHttpWatcher {
               .filter(x -> x.getId().equals(application.getJobId()))
               .findFirst();
     }
-    if (optional.isPresent()) {
-
-      JobsOverview.Job jobOverview = optional.get();
-      FlinkAppStateEnum currentState = FlinkAppStateEnum.of(jobOverview.getState());
-
-      if (FlinkAppStateEnum.OTHER != currentState) {
-        try {
-          // 1) set info from JobOverview
-          handleJobOverview(application, jobOverview);
-        } catch (Exception e) {
-          log.error("get flink jobOverview error: {}", e.getMessage(), e);
-        }
-        try {
-          // 2) CheckPoints
-          handleCheckPoints(application);
-        } catch (Exception e) {
-          log.error("get flink jobOverview error: {}", e.getMessage(), e);
-        }
-        // 3) savePoint obsolete check and NEED_START check
-        OptionStateEnum optionStateEnum = OPTIONING.get(application.getId());
-        if (FlinkAppStateEnum.RUNNING == currentState) {
-          handleRunningState(application, optionStateEnum, currentState);
-        } else {
-          handleNotRunState(application, optionStateEnum, currentState);
-        }
-      }
-    }
+    return optional;
   }
 
   /**

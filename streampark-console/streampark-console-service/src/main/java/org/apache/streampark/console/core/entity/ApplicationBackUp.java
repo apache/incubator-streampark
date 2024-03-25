@@ -55,6 +55,10 @@ public class ApplicationBackUp {
     this.configId = application.getConfigId();
     this.description = application.getBackUpDescription();
     this.createTime = new Date();
+    renderPath(application);
+  }
+
+  private void renderPath(Application application) {
     switch (application.getFlinkExecutionMode()) {
       case KUBERNETES_NATIVE_APPLICATION:
       case KUBERNETES_NATIVE_SESSION:
