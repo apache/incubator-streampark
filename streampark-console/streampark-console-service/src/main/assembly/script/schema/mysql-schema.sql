@@ -570,7 +570,7 @@ create table `t_spark_env` (
                                `spark_conf` text collate utf8mb4_general_ci not null comment 'spark-conf',
                                `is_default` tinyint not null default 0 comment 'whether default version or not',
                                `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
-                               `create_time` datetime not null default current_timestamp comment 'create time',
+                               `create_time` datetime default null comment 'create time',
                                primary key (`id`) using btree,
                                unique key `un_env_name` (`spark_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
@@ -625,8 +625,8 @@ create table `t_spark_app` (
                                `available_slot` int default null,
                                `option_state` tinyint default null,
                                `tracking` tinyint default null,
-                               `create_time` datetime not null default current_timestamp comment 'create time',
-                               `modify_time` datetime not null default current_timestamp comment 'modify time',
+                               `create_time` datetime default null comment 'create time',
+                               `modify_time` datetime default null comment 'modify time',
                                `option_time` datetime default null,
                                `release` tinyint default 1,
                                `build` tinyint default 1,
