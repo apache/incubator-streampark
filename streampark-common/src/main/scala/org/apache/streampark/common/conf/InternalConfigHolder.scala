@@ -44,9 +44,7 @@ object InternalConfigHolder extends Logger {
   private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
   /** Initialize the ConfigHub. */
-  {
-    Seq(CommonConfig, K8sFlinkConfig)
-  }
+  Seq(CommonConfig, K8sFlinkConfig)
 
   /** Register the ConfigOption */
   private[conf] def register(@Nonnull conf: InternalOption): Unit = {

@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nonnull;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -73,35 +74,57 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
       if (StringUtils.hasLength(contacts)) {
         Collections.addAll(contactList, contacts.split(","));
       }
-      String title = alertTemplate.getTitle();
-      if (!contactList.isEmpty()) {
-        StringJoiner joiner = new StringJoiner(",@", title + " @", "");
-        contactList.forEach(joiner::add);
-        title = joiner.toString();
-      }
-      Map<String, Object> contactMap = new HashMap<>();
-      contactMap.put("atMobiles", contactList);
-      contactMap.put("isAtAll", BooleanUtils.toBoolean(dingTalkParams.getIsAtAll()));
-
+      String title = renderTitle(alertTemplate, contactList);
+      Map<String, Object> contactMap = renderContact(contactList, dingTalkParams);
       // format markdown
       String markdown = FreemarkerUtils.format(template, alertTemplate);
+      Map<String, String> contentMap = renderContent(title, markdown);
+      Map<String, Object> bodyMap = renderBody(contentMap, contactMap);
 
-      Map<String, String> content = new HashMap<>();
-      content.put("title", title);
-      content.put("text", markdown);
-
-      Map<String, Object> body = new HashMap<>();
-      body.put("msgtype", "markdown");
-      body.put("markdown", content);
-      body.put("at", contactMap);
-
-      sendMessage(dingTalkParams, body);
+      sendMessage(dingTalkParams, bodyMap);
       return true;
     } catch (AlertException alertException) {
       throw alertException;
     } catch (Exception e) {
       throw new AlertException("Failed send DingTalk alert", e);
     }
+  }
+
+  @Nonnull
+  private Map<String, Object> renderBody(
+      Map<String, String> content, Map<String, Object> contactMap) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("msgtype", "markdown");
+    body.put("markdown", content);
+    body.put("at", contactMap);
+    return body;
+  }
+
+  @Nonnull
+  private Map<String, String> renderContent(String title, String markdown) {
+    Map<String, String> content = new HashMap<>();
+    content.put("title", title);
+    content.put("text", markdown);
+    return content;
+  }
+
+  @Nonnull
+  private Map<String, Object> renderContact(
+      List<String> contactList, AlertDingTalkParams dingTalkParams) {
+    Map<String, Object> contactMap = new HashMap<>();
+    contactMap.put("atMobiles", contactList);
+    contactMap.put("isAtAll", BooleanUtils.toBoolean(dingTalkParams.getIsAtAll()));
+    return contactMap;
+  }
+
+  private String renderTitle(AlertTemplate alertTemplate, List<String> contactList) {
+    String title = alertTemplate.getTitle();
+    if (!contactList.isEmpty()) {
+      StringJoiner joiner = new StringJoiner(",@", title + " @", "");
+      contactList.forEach(joiner::add);
+      title = joiner.toString();
+    }
+    return title;
   }
 
   private void sendMessage(AlertDingTalkParams params, Map<String, Object> body)

@@ -26,11 +26,11 @@ public class DorisSinkBufferEntry implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  public ArrayList<byte[]> getBuffer() {
+  public List<byte[]> getBuffer() {
     return buffer;
   }
 
-  private ArrayList<byte[]> buffer = new ArrayList<>();
+  private List<byte[]> buffer = new ArrayList<>();
   private int batchCount = 0;
   private long batchSize = 0;
   private String label;

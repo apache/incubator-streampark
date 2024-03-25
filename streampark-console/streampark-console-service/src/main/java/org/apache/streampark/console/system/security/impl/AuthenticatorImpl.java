@@ -64,7 +64,8 @@ public class AuthenticatorImpl implements Authenticator {
 
     ApiAlertException.throwIfTrue(
         user.getLoginType() != LoginTypeEnum.PASSWORD,
-        String.format("user [%s] can not login with PASSWORD", username));
+        "user [%s] can not login with PASSWORD",
+        username);
 
     String salt = user.getSalt();
     password = ShaHashUtils.encrypt(salt, password);
@@ -86,7 +87,9 @@ public class AuthenticatorImpl implements Authenticator {
     if (user != null) {
       ApiAlertException.throwIfTrue(
           user.getLoginType() != LoginTypeEnum.LDAP,
-          String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
+          "user [%s] can only sign in with %s",
+          username,
+          user.getLoginType());
 
       return user;
     }
@@ -100,7 +103,9 @@ public class AuthenticatorImpl implements Authenticator {
     if (user != null) {
       ApiAlertException.throwIfTrue(
           user.getLoginType() != LoginTypeEnum.SSO,
-          String.format("user [%s] can only sign in with %s", username, user.getLoginType()));
+          "user [%s] can only sign in with %s",
+          username,
+          user.getLoginType());
       return user;
     }
 
@@ -109,7 +114,9 @@ public class AuthenticatorImpl implements Authenticator {
 
   private User newUserCreate(LoginTypeEnum loginTypeEnum, String username) throws Exception {
     User newUser = new User();
-    newUser.setCreateTime(new Date());
+    Date date = new Date();
+    newUser.setCreateTime(date);
+    newUser.setModifyTime(date);
     newUser.setUsername(username);
     newUser.setNickName(username);
     newUser.setLoginType(loginTypeEnum);

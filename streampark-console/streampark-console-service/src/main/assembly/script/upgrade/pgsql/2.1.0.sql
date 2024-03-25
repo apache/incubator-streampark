@@ -25,8 +25,8 @@ create table "public"."t_external_link" (
 "badge_name" varchar(100) collate "pg_catalog"."default",
 "badge_color" varchar(100) collate "pg_catalog"."default",
 "link_url" varchar(1000) collate "pg_catalog"."default",
-"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+"create_time" timestamp(6),
+"modify_time" timestamp(6)
 );
 
 alter table "public"."t_external_link" add constraint "t_external_link_pkey" primary key ("id");
@@ -40,8 +40,8 @@ create table "public"."t_yarn_queue" (
 "team_id" int8 not null,
 "queue_label" varchar(128) not null collate "pg_catalog"."default",
 "description" varchar(256) collate "pg_catalog"."default",
-"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+"create_time" timestamp(6),
+"modify_time" timestamp(6)
 );
 comment on column "public"."t_yarn_queue"."id" is 'queue id';
 comment on column "public"."t_yarn_queue"."team_id" is 'team id';

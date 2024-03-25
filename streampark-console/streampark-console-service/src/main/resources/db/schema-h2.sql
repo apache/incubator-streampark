@@ -26,8 +26,8 @@ create table if not exists `t_app_backup` (
   `version` int default null,
   `path` varchar(128)  default null,
   `description` varchar(255) default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`id`)
 );
 
@@ -79,8 +79,8 @@ create table if not exists `t_flink_app` (
   `available_slot` int default null,
   `option_state` tinyint default null,
   `tracking` tinyint default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   `option_time` datetime default null,
   `release` tinyint default 1,
   `build` tinyint default 1,
@@ -110,7 +110,7 @@ create table if not exists `t_flink_config` (
   `version` int not null,
   `latest` tinyint not null default 0,
   `content` text  not null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`)
 );
 
@@ -122,7 +122,7 @@ create table if not exists `t_flink_effective` (
   `app_id` bigint not null,
   `target_type` tinyint not null comment '1) config 2) flink sql',
   `target_id` bigint not null comment 'configId or sqlId',
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`),
   unique (`app_id`,`target_type`)
 );
@@ -139,7 +139,7 @@ create table if not exists `t_flink_env` (
   `flink_conf` text  not null comment 'flink-conf',
   `is_default` tinyint not null default 0 comment 'whether default version or not',
   `description` varchar(255)  default null comment 'description',
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`),
   unique (`flink_name`)
 );
@@ -180,8 +180,8 @@ create table if not exists `t_flink_project` (
   `last_build` datetime default null,
   `description` varchar(255)  default null,
   `build_state` tinyint default -1,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`id`)
 );
 
@@ -197,7 +197,7 @@ create table if not exists `t_flink_savepoint` (
   `path` varchar(255)  default null,
   `latest` tinyint not null default 1,
   `trigger_time` datetime default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`)
 );
 
@@ -212,7 +212,7 @@ create table if not exists `t_flink_sql` (
   `dependency` text ,
   `version` int default null,
   `candidate` tinyint not null default 1,
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`)
 );
 
@@ -232,8 +232,8 @@ create table if not exists `t_resource` (
   `connector_required_options` text default null,
   `connector_optional_options` text default null,
   `team_id` bigint not null comment 'team id',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`id`)
 );
 
@@ -251,8 +251,8 @@ create table if not exists `t_menu` (
   `type` char(2)  default null comment 'type 0:menu 1:button',
   `display` tinyint not null default 0 comment 'whether the menu is displayed',
   `order_num` int default null comment 'sort',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`menu_id`)
 );
 
@@ -267,7 +267,7 @@ create table if not exists `t_message` (
   `title` varchar(255)  default null,
   `context` text ,
   `is_read` tinyint default 0,
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   primary key(`id`)
 );
 
@@ -278,8 +278,8 @@ create table if not exists `t_team` (
   `id` bigint generated by default as identity not null comment 'team id',
   `team_name` varchar(64) not null comment 'team name',
   `description` varchar(255) default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`id`),
   unique (`team_name`)
 );
@@ -295,8 +295,8 @@ create table if not exists `t_variable` (
   `creator_id` bigint not null comment 'user id of creator',
   `team_id` bigint not null comment 'team id',
   `desensitization` tinyint not null default 0 comment '0 is no desensitization, 1 is desensitization, if set to desensitization, it will be replaced by * when displayed',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key (`id`),
   unique (`team_id`, `variable_code`)
 );
@@ -307,8 +307,8 @@ create table if not exists `t_variable` (
 create table if not exists `t_role` (
   `role_id` bigint generated by default as identity not null comment 'user id',
   `role_name` varchar(64)  not null comment 'user name',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   `description` varchar(255)  default null comment 'description',
   primary key(`role_id`)
 );
@@ -350,8 +350,8 @@ create table if not exists `t_user` (
   `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso',
   `last_team_id` bigint default null comment 'last team id',
   `status` char(1)  not null comment 'status 0:locked 1:active',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   `last_login_time` datetime default null comment 'last login time',
   `sex` char(1)  default null comment 'gender 0:male 1:female 2:confidential',
   `avatar` varchar(128)  default null comment 'avatar',
@@ -368,8 +368,8 @@ create table if not exists `t_member` (
   `team_id` bigint not null comment 'team id',
   `user_id` bigint not null comment 'user id',
   `role_id` bigint not null comment 'role id',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`id`),
   unique (`team_id`, `user_id`,`role_id`)
 );
@@ -387,7 +387,7 @@ create table if not exists `t_app_build_pipe` (
   `steps_status_ts` text,
   `error` text,
   `build_result` text,
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`app_id`)
 );
 
@@ -416,7 +416,7 @@ create table if not exists `t_flink_cluster` (
   `resolve_order` tinyint default null,
   `exception` text comment 'exception information',
   `cluster_state` tinyint default 0 comment 'cluster status (0: created but not started, 1: started, 2: stopped)',
-  `create_time` datetime not null default current_timestamp comment 'create time',
+  `create_time` datetime default null comment 'create time',
   `start_time` datetime default null comment 'start time',
   `end_time` datetime default null comment 'end time',
   `alert_id` bigint default null comment 'alert id',
@@ -438,8 +438,8 @@ create table if not exists `t_alert_config` (
   `we_com_params` varchar(255)  comment 'wechat params',
   `http_callback_params` text  comment 'http callback params',
   `lark_params` text  comment 'lark params',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'change time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime not null default current_timestamp comment 'change time',
   primary key(`id`)
 );
 
@@ -454,8 +454,8 @@ create table if not exists `t_access_token` (
   `expire_time` datetime default null comment 'expiration',
   `description` varchar(255) default null comment 'description',
   `status` tinyint default null comment '1:enable,0:disable',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`id`)
 );
 
@@ -469,8 +469,8 @@ create table if not exists `t_external_link` (
   `badge_name` varchar(64)  default null,
   `badge_color` varchar(64)  default null,
   `link_url` varchar(255)  default null,
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   primary key(`id`)
 );
 
@@ -484,8 +484,8 @@ create table if not exists `t_yarn_queue` (
   `team_id` bigint not null comment 'team id',
   `queue_label` varchar(128) not null comment 'queue label expression',
   `description` varchar(255) default null comment 'description of the queue label',
-  `create_time` datetime not null default current_timestamp comment 'create time',
-  `modify_time` datetime not null default current_timestamp on update current_timestamp comment 'modify time',
+  `create_time` datetime default null comment 'create time',
+  `modify_time` datetime default null comment 'modify time',
   unique key (`team_id`,`queue_label`),
   primary key (`id`)
 );

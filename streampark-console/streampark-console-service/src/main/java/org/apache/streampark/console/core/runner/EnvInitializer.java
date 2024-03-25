@@ -24,8 +24,8 @@ import org.apache.streampark.common.conf.InternalOption;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,48 +77,41 @@ public class EnvInitializer implements ApplicationRunner {
   @SneakyThrows
   @Override
   public void run(ApplicationArguments args) throws Exception {
-    Optional<String> profile =
-        Arrays.stream(context.getEnvironment().getActiveProfiles()).findFirst();
-    if ("test".equals(profile.orElse(null))) {
-      return;
-    }
 
-    String appHome = WebUtils.getAppHome();
-    if (StringUtils.isBlank(appHome)) {
-      throw new ExceptionInInitializerError(
-          String.format(
-              "[StreamPark] System initialization check failed,"
-                  + " The system initialization check failed. If started local for development and debugging,"
-                  + " please ensure the -D%s parameter is clearly specified,"
-                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-              ConfigKeys.KEY_APP_HOME()));
-    }
+    checkAppHome();
 
     // init InternalConfig
-    initInternalConfig(context.getEnvironment());
-    // overwrite system variable HADOOP_USER_NAME
-    String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
-    overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
-    // initialize local file system resources
-    storageInitialize(LFS);
-    // Launch the embedded http file server.
-    ZIOExt.unsafeRun(EmbeddedFileServer.launch());
+    initConfig();
+
+    boolean isTest = Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("test");
+    if (!isTest) {
+      // initialize local file system resources
+      storageInitialize(LFS);
+      // Launch the embedded http file server.
+      ZIOExt.unsafeRun(EmbeddedFileServer.launch());
+    }
   }
 
-  private void initInternalConfig(Environment springEnv) {
+  private void initConfig() {
+
+    Environment env = context.getEnvironment();
     // override config from spring application.yaml
     InternalConfigHolder.keys().stream()
-        .filter(springEnv::containsProperty)
+        .filter(env::containsProperty)
         .forEach(
             key -> {
               InternalOption config = InternalConfigHolder.getConfig(key);
-              Utils.requireNotNull(config);
-              InternalConfigHolder.set(config, springEnv.getProperty(key, config.classType()));
+              AssertUtils.notNull(config);
+              InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
             });
+
+    InternalConfigHolder.log();
 
     settingService.getMavenConfig().updateConfig();
 
-    InternalConfigHolder.log();
+    // overwrite system variable HADOOP_USER_NAME
+    String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
+    overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
   }
 
   private void overrideSystemProp(String key, String defaultValue) {
@@ -138,6 +130,35 @@ public class EnvInitializer implements ApplicationRunner {
     Workspace workspace = Workspace.of(storageType);
 
     // 1. prepare workspace dir
+    prepareWorkspace(storageType, fsOperator, workspace);
+    // 2. upload jar.
+    // 2.1) upload client jar
+    uploadClientJar(workspace, fsOperator);
+    // 2.2) upload plugin jar.
+    uploadPluginJar(workspace, fsOperator);
+    // 2.3) upload shims jar
+    uploadShimsJar(workspace, fsOperator);
+    // 2.4) create maven local repository dir
+    createMvnLocalRepoDir();
+
+    initialized.add(storageType);
+  }
+
+  private static void checkAppHome() {
+    final String appHome = WebUtils.getAppHome();
+    if (StringUtils.isBlank(appHome)) {
+      throw new ExceptionInInitializerError(
+          String.format(
+              "[StreamPark] Workspace path check failed,"
+                  + " The system initialization check failed. If started local for development and debugging,"
+                  + " please ensure the -D%s parameter is clearly specified,"
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+              ConfigKeys.KEY_APP_HOME()));
+    }
+  }
+
+  private void prepareWorkspace(
+      StorageType storageType, FsOperator fsOperator, Workspace workspace) {
     if (LFS == storageType) {
       fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
     }
@@ -149,11 +170,18 @@ public class EnvInitializer implements ApplicationRunner {
             workspace.APP_PYTHON(),
             workspace.APP_JARS())
         .forEach(fsOperator::mkdirsIfNotExists);
+  }
 
-    // 2. upload jar.
-    // 2.1) upload client jar
+  private static void createMvnLocalRepoDir() {
+    String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
+    if (FsOperator.lfs().exists(localMavenRepo)) {
+      FsOperator.lfs().mkdirs(localMavenRepo);
+    }
+  }
+
+  private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
     File client = WebUtils.getAppClientDir();
-    Utils.required(
+    AssertUtils.required(
         client.exists() && client.listFiles().length > 0,
         client.getAbsolutePath().concat(" is not exists or empty directory "));
 
@@ -164,22 +192,13 @@ public class EnvInitializer implements ApplicationRunner {
       log.info("load client:{} to {}", file.getName(), appClient);
       fsOperator.upload(file.getAbsolutePath(), appClient);
     }
+  }
 
-    // 2.2) upload plugin jar.
-    String appPlugins = workspace.APP_PLUGINS();
-    fsOperator.mkCleanDirs(appPlugins);
-
-    File plugins = WebUtils.getAppPluginsDir();
-    for (File file : plugins.listFiles(fileFilter)) {
-      log.info("load plugin:{} to {}", file.getName(), appPlugins);
-      fsOperator.upload(file.getAbsolutePath(), appPlugins);
-    }
-
-    // 2.3) upload shims jar
+  private void uploadShimsJar(Workspace workspace, FsOperator fsOperator) {
     File[] shims =
         WebUtils.getAppLibDir()
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
-    Utils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
+    AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
     String appShims = workspace.APP_SHIMS();
     fsOperator.delete(appShims);
@@ -194,14 +213,17 @@ public class EnvInitializer implements ApplicationRunner {
         fsOperator.upload(file.getAbsolutePath(), shimsPath);
       }
     }
+  }
 
-    // 2.4) create maven local repository dir
-    String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
-    if (FsOperator.lfs().exists(localMavenRepo)) {
-      FsOperator.lfs().mkdirs(localMavenRepo);
+  private void uploadPluginJar(Workspace workspace, FsOperator fsOperator) {
+    String appPlugins = workspace.APP_PLUGINS();
+    fsOperator.mkCleanDirs(appPlugins);
+
+    File plugins = WebUtils.getAppPluginsDir();
+    for (File file : plugins.listFiles(fileFilter)) {
+      log.info("load plugin:{} to {}", file.getName(), appPlugins);
+      fsOperator.upload(file.getAbsolutePath(), appPlugins);
     }
-
-    initialized.add(storageType);
   }
 
   public void checkFlinkEnv(StorageType storageType, FlinkEnv flinkEnv) throws IOException {

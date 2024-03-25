@@ -85,8 +85,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             "Team name [%s] exists already. Create team failed. Please rename and try again.",
             team.getTeamName()));
     team.setId(null);
-    team.setCreateTime(new Date());
-    team.setModifyTime(team.getCreateTime());
+    Date date = new Date();
+    team.setCreateTime(date);
+    team.setModifyTime(date);
     this.save(team);
   }
 
@@ -95,22 +96,22 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     log.info("{} Proceed delete team[Id={}]", commonService.getCurrentUser().getUsername(), teamId);
     Team team = this.getById(teamId);
 
-    ApiAlertException.throwIfNull(team, String.format("The team[Id=%s] doesn't exist.", teamId));
+    ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);
 
     ApiAlertException.throwIfTrue(
         applicationInfoService.existsByTeamId(teamId),
-        String.format(
-            "Please delete the applications under the team[name=%s] first!", team.getTeamName()));
+        "Please delete the applications under the team[name=%s] first!",
+        team.getTeamName());
 
     ApiAlertException.throwIfTrue(
         projectService.existsByTeamId(teamId),
-        String.format(
-            "Please delete the projects under the team[name=%s] first!", team.getTeamName()));
+        "Please delete the projects under the team[name=%s] first!",
+        team.getTeamName());
 
     ApiAlertException.throwIfTrue(
         variableService.existsByTeamId(teamId),
-        String.format(
-            "Please delete the variables under the team[name=%s] first!", team.getTeamName()));
+        "Please delete the variables under the team[name=%s] first!",
+        team.getTeamName());
 
     memberService.removeByTeamId(teamId);
     userService.clearLastTeam(teamId);

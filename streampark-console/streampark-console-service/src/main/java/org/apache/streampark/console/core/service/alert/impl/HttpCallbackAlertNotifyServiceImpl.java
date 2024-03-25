@@ -41,6 +41,8 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Nonnull;
+
 import java.util.Map;
 
 @Slf4j
@@ -77,24 +79,7 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
   private void sendMessage(AlertHttpCallbackParams params, Map<String, Object> body)
       throws AlertException {
     String url = params.getUrl();
-    HttpHeaders headers = new HttpHeaders();
-    String contentType = params.getContentType();
-    MediaType mediaType = MediaType.APPLICATION_JSON;
-    if (StringUtils.hasLength(contentType)) {
-      switch (contentType.toLowerCase()) {
-        case MediaType.APPLICATION_FORM_URLENCODED_VALUE:
-          mediaType = MediaType.APPLICATION_FORM_URLENCODED;
-          break;
-        case MediaType.MULTIPART_FORM_DATA_VALUE:
-          mediaType = MediaType.MULTIPART_FORM_DATA;
-          break;
-        case MediaType.APPLICATION_JSON_VALUE:
-        default:
-          break;
-      }
-    }
-    headers.setContentType(mediaType);
-
+    HttpHeaders headers = getHttpHeaders(params);
     ResponseEntity<Object> response;
     try {
       HttpMethod httpMethod = HttpMethod.POST;
@@ -118,5 +103,27 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
     if (response == null) {
       throw new AlertException(String.format("Failed to request httpCallback alert,%nurl:%s", url));
     }
+  }
+
+  @Nonnull
+  private HttpHeaders getHttpHeaders(AlertHttpCallbackParams params) {
+    HttpHeaders headers = new HttpHeaders();
+    String contentType = params.getContentType();
+    MediaType mediaType = MediaType.APPLICATION_JSON;
+    if (StringUtils.hasLength(contentType)) {
+      switch (contentType.toLowerCase()) {
+        case MediaType.APPLICATION_FORM_URLENCODED_VALUE:
+          mediaType = MediaType.APPLICATION_FORM_URLENCODED;
+          break;
+        case MediaType.MULTIPART_FORM_DATA_VALUE:
+          mediaType = MediaType.MULTIPART_FORM_DATA;
+          break;
+        case MediaType.APPLICATION_JSON_VALUE:
+        default:
+          break;
+      }
+    }
+    headers.setContentType(mediaType);
+    return headers;
   }
 }

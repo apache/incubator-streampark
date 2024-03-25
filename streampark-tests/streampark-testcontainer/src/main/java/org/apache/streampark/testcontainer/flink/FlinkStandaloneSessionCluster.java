@@ -17,7 +17,7 @@
 
 package org.apache.streampark.testcontainer.flink;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,9 +98,9 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
   @Override
   public void start() {
-    Utils.requireNotNull(jobManagerContainer);
+    AssertUtils.notNull(jobManagerContainer);
     jobManagerContainer.start();
-    Utils.requireNotNull(taskManagerContainers);
+    AssertUtils.notNull(taskManagerContainers);
     for (FlinkContainer taskManagerContainer : taskManagerContainers) {
       taskManagerContainer.start();
     }
@@ -108,11 +108,11 @@ public class FlinkStandaloneSessionCluster implements Startable {
 
   @Override
   public void stop() {
-    Utils.requireNotNull(taskManagerContainers);
+    AssertUtils.notNull(taskManagerContainers);
     for (FlinkContainer taskManagerContainer : taskManagerContainers) {
       taskManagerContainer.stop();
     }
-    Utils.requireNotNull(jobManagerContainer);
+    AssertUtils.notNull(jobManagerContainer);
     jobManagerContainer.stop();
   }
 
@@ -151,13 +151,13 @@ public class FlinkStandaloneSessionCluster implements Startable {
     }
 
     public Builder taskManagerNum(int taskManagerNum) {
-      Utils.required(taskManagerNum >= 0, "taskManagerNum must be greater than -1.");
+      AssertUtils.required(taskManagerNum >= 0, "taskManagerNum must be greater than -1.");
       this.taskManagerNum = taskManagerNum;
       return this;
     }
 
     public Builder slotsNumPerTm(int slotsNumPerTm) {
-      Utils.required(slotsNumPerTm > 0, "slotsNumPerTm must be greater than 0.");
+      AssertUtils.required(slotsNumPerTm > 0, "slotsNumPerTm must be greater than 0.");
       this.slotsNumPerTm = slotsNumPerTm;
       return this;
     }

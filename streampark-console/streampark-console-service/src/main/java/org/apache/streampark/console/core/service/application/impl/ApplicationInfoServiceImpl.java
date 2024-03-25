@@ -64,6 +64,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -147,26 +149,15 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       }
       JobsOverview.Task task = app.getOverview();
       if (task != null) {
-        overview.setTotal(overview.getTotal() + task.getTotal());
-        overview.setCreated(overview.getCreated() + task.getCreated());
-        overview.setScheduled(overview.getScheduled() + task.getScheduled());
-        overview.setDeploying(overview.getDeploying() + task.getDeploying());
-        overview.setRunning(overview.getRunning() + task.getRunning());
-        overview.setFinished(overview.getFinished() + task.getFinished());
-        overview.setCanceling(overview.getCanceling() + task.getCanceling());
-        overview.setCanceled(overview.getCanceled() + task.getCanceled());
-        overview.setFailed(overview.getFailed() + task.getFailed());
-        overview.setReconciling(overview.getReconciling() + task.getReconciling());
+        renderJobsOverviewTaskByTask(overview, task);
       }
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric;
-    if (K8sFlinkConfig.isV2Enabled()) {
-      k8sMetric = flinkK8sObserver.getAggClusterMetricCV(teamId);
-    } else {
-      k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
-    }
+    FlinkMetricCV k8sMetric =
+        K8sFlinkConfig.isV2Enabled()
+            ? flinkK8sObserver.getAggClusterMetricCV(teamId)
+            : k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
     if (k8sMetric != null) {
       totalJmMemory += k8sMetric.totalJmMemory();
       totalTmMemory += k8sMetric.totalTmMemory();
@@ -174,14 +165,45 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
       totalSlot += k8sMetric.totalSlot();
       availableSlot += k8sMetric.availableSlot();
       runningJob += k8sMetric.runningJob();
-      overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-      overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-      overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-      overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-      overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+      renderJobsOverviewTaskByK8sMetric(overview, k8sMetric);
     }
 
     // result json
+    return constructDashboardMap(
+        overview, totalJmMemory, totalTmMemory, totalTm, availableSlot, totalSlot, runningJob);
+  }
+
+  private void renderJobsOverviewTaskByTask(JobsOverview.Task overview, JobsOverview.Task task) {
+    overview.setTotal(overview.getTotal() + task.getTotal());
+    overview.setCreated(overview.getCreated() + task.getCreated());
+    overview.setScheduled(overview.getScheduled() + task.getScheduled());
+    overview.setDeploying(overview.getDeploying() + task.getDeploying());
+    overview.setRunning(overview.getRunning() + task.getRunning());
+    overview.setFinished(overview.getFinished() + task.getFinished());
+    overview.setCanceling(overview.getCanceling() + task.getCanceling());
+    overview.setCanceled(overview.getCanceled() + task.getCanceled());
+    overview.setFailed(overview.getFailed() + task.getFailed());
+    overview.setReconciling(overview.getReconciling() + task.getReconciling());
+  }
+
+  private void renderJobsOverviewTaskByK8sMetric(
+      JobsOverview.Task overview, FlinkMetricCV k8sMetric) {
+    overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
+    overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
+    overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
+    overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
+    overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
+  }
+
+  @Nonnull
+  private Map<String, Serializable> constructDashboardMap(
+      JobsOverview.Task overview,
+      Integer totalJmMemory,
+      Integer totalTmMemory,
+      Integer totalTm,
+      Integer availableSlot,
+      Integer totalSlot,
+      Integer runningJob) {
     Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
     dashboardDataMap.put("task", overview);
     dashboardDataMap.put("jmMemory", totalJmMemory);

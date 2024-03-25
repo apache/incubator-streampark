@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
@@ -53,8 +53,9 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    externalLink.setCreateTime(new Date());
-    externalLink.setModifyTime(new Date());
+    Date date = new Date();
+    externalLink.setCreateTime(date);
+    externalLink.setModifyTime(date);
     externalLink.setId(null);
     this.save(externalLink);
   }
@@ -76,7 +77,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   @Override
   public List<ExternalLink> render(Long appId) {
     Application app = applicationManageService.getById(appId);
-    Utils.requireNotNull(app, "Application doesn't exist");
+    AssertUtils.notNull(app, "Application doesn't exist");
     List<ExternalLink> externalLink = this.list();
     if (externalLink != null && externalLink.size() > 0) {
       // Render the placeholder
@@ -111,10 +112,10 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (result == null) {
       return true;
     }
-    Utils.required(
+    AssertUtils.required(
         !result.getBadgeName().equals(params.getBadgeName()),
         String.format("The name: %s is already existing.", result.getBadgeName()));
-    Utils.required(
+    AssertUtils.required(
         !result.getLinkUrl().equals(params.getLinkUrl()),
         String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
     return false;
