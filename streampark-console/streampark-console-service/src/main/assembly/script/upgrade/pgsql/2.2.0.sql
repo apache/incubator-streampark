@@ -34,8 +34,8 @@ create table "public"."t_resource" (
 "connector_required_options" text default null,
 "connector_optional_options" text default null,
 "team_id" int8  not null,
-"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+"create_time" timestamp(6),
+"modify_time" timestamp(6)
 );
 
 comment on column "public"."t_resource"."id" is 'Resource id';
@@ -99,8 +99,8 @@ create table "public"."t_flink_gateway" (
 "description" text collate "pg_catalog"."default" default null,
 "gateway_type" int4,
 "address" varchar(150) collate "pg_catalog"."default",
-"create_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone),
-"modify_time" timestamp(6) not null default timezone('UTC-8'::text, (now())::timestamp(0) without time zone)
+"create_time" timestamp(6),
+"modify_time" timestamp(6)
 );
 comment on column "public"."t_flink_gateway"."id" is 'The id of the gateway';
 comment on column "public"."t_flink_gateway"."gateway_name" is 'The name of the gateway';

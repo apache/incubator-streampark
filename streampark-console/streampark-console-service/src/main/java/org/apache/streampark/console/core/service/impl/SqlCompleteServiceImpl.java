@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.core.service.SqlCompleteService;
 
 import com.google.common.collect.Sets;
@@ -56,7 +56,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
 
   @Override
   public List<String> getComplete(String sql) {
-    if (sql.length() > 0 && BLACK_SET.contains(sql.charAt(sql.length() - 1))) {
+    if (!sql.isEmpty() && BLACK_SET.contains(sql.charAt(sql.length() - 1))) {
       return new ArrayList<>();
     }
     String[] temp = sql.split("\\s");
@@ -184,7 +184,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         nowStep = nowStep.get(nowChar).getNext();
         loc += 1;
       }
-      Utils.requireNotNull(preNode);
+      AssertUtils.notNull(preNode);
       preNode.setStop();
       preNode.setCount(count);
     }

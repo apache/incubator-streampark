@@ -19,7 +19,7 @@ export default {
     menu: '系统管理',
     user: '用户管理',
     role: '角色管理',
-    token: 'Token 管理',
+    token: '秘钥管理',
     team: '团队管理',
     member: '成员管理',
   },

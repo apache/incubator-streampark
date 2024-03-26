@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -188,13 +189,38 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
+    // 1) check build args
+    String buildArg = getMvnBuildArgs();
+    StringBuilder argBuilder = new StringBuilder();
+    if (StringUtils.isNotBlank(buildArg)) {
+      argBuilder.append(buildArg);
+    }
+
+    // 2) mvn setting file
+    String mvnSetting = getMvnSetting();
+    if (StringUtils.isNotBlank(mvnSetting)) {
+      argBuilder.append(" --settings ").append(mvnSetting);
+    }
+
+    // 3) check args
+    String cmd = argBuilder.toString();
+    String illegalArg = getIllegalArgs(cmd);
+    if (illegalArg != null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid maven argument, illegal args: %s, in your maven args: %s", illegalArg, cmd));
+    }
+
+    String mvn = getMvn();
+    return mvn.concat(" ").concat(cmd);
+  }
+
+  private String getMvn() {
     boolean windows = Utils.isWindows();
     String mvn = windows ? "mvn.cmd" : "mvn";
 
     String mavenHome = System.getenv("M2_HOME");
-    if (mavenHome == null) {
-      mavenHome = System.getenv("MAVEN_HOME");
-    }
+    mavenHome = mavenHome == null ? System.getenv("MAVEN_HOME") : mavenHome;
 
     boolean useWrapper = true;
     if (mavenHome != null) {
@@ -202,7 +228,7 @@ public class Project implements Serializable {
       try {
         Process process = Runtime.getRuntime().exec(mvn + " --version");
         process.waitFor();
-        Utils.required(process.exitValue() == 0);
+        AssertUtils.required(process.exitValue() == 0);
         useWrapper = false;
       } catch (Exception ignored) {
         log.warn("try using user-installed maven failed, now use maven-wrapper.");
@@ -210,43 +236,34 @@ public class Project implements Serializable {
     }
 
     if (useWrapper) {
-      if (windows) {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
-      } else {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw");
-      }
+      mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
     }
+    return mvn;
+  }
 
-    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
-
+  private String getMvnBuildArgs() {
     if (StringUtils.isNotBlank(this.buildArgs)) {
       String args = getIllegalArgs(this.buildArgs);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format(
-                "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
-      }
-      cmdBuffer.append(this.buildArgs.trim());
+      AssertUtils.required(
+          args == null,
+          String.format(
+              "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
+      return this.buildArgs.trim();
     }
+    return null;
+  }
 
+  private String getMvnSetting() {
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isNotBlank(setting)) {
-      String args = getIllegalArgs(setting);
-      if (args != null) {
-        throw new IllegalArgumentException(
-            String.format("Illegal argument \"%s\" in maven-setting file path: %s", args, setting));
-      }
-      File file = new File(setting);
-      if (file.exists() && file.isFile()) {
-        cmdBuffer.append(" --settings ").append(setting);
-      } else {
-        throw new IllegalArgumentException(
-            String.format(
-                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-                setting));
-      }
+    if (StringUtils.isBlank(setting)) {
+      return null;
     }
-    return cmdBuffer.toString();
+    File file = new File(setting);
+    AssertUtils.required(
+        !file.exists() || !file.isFile(),
+        String.format(
+            "Invalid maven-setting file path \"%s\", the path not exist or is not file", setting));
+    return setting;
   }
 
   private String getIllegalArgs(String param) {
@@ -256,7 +273,7 @@ public class Project implements Serializable {
       return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
     String[] argsList = param.split("\\s+");
     while (iterator.hasNext()) {
       String chr = iterator.next();
@@ -272,11 +289,10 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getMavenWorkHome() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (StringUtils.isNotBlank(this.getPom())) {
-      buildHome =
-          new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+    if (StringUtils.isBlank(this.getPom())) {
+      return buildHome;
     }
-    return buildHome;
+    return new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
   }
 
   @JsonIgnore

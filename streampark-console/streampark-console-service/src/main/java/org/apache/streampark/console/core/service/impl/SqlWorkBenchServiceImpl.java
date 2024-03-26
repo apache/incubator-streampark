@@ -98,13 +98,24 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     String host = remoteURI.getHost();
     String port = String.valueOf(remoteURI.getPort());
     String clusterId = flinkCluster.getClusterId();
-
     FlinkExecutionMode executionModeEnum = FlinkExecutionMode.of(flinkCluster.getExecutionMode());
-    if (executionModeEnum == null) {
-      throw new IllegalArgumentException("executionMode is null");
-    }
 
     streamParkConf.put("execution.target", executionModeEnum.getName());
+    renderConfByFlinkExecutionMode(
+        executionModeEnum, streamParkConf, host, port, clusterId, flinkCluster);
+
+    return sqlGateWayService.openSession(
+        new SessionEnvironment(
+            flinkGatewayId + flinkClusterId + UUID.randomUUID().toString(), null, streamParkConf));
+  }
+
+  private void renderConfByFlinkExecutionMode(
+      FlinkExecutionMode executionModeEnum,
+      Map<String, String> streamParkConf,
+      String host,
+      String port,
+      String clusterId,
+      FlinkCluster flinkCluster) {
     switch (Objects.requireNonNull(executionModeEnum)) {
       case REMOTE:
         streamParkConf.put("rest.address", host);
@@ -135,10 +146,6 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
       default:
         throw new IllegalArgumentException("Unsupported execution mode: " + executionModeEnum);
     }
-
-    return sqlGateWayService.openSession(
-        new SessionEnvironment(
-            flinkGatewayId + flinkClusterId + UUID.randomUUID().toString(), null, streamParkConf));
   }
 
   @Override

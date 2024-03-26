@@ -129,39 +129,18 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     Dependency dependency = Dependency.toDependency(resourceStr);
     List<String> jars = dependency.getJar();
     List<MavenPom> poms = dependency.getPom();
-
-    ApiAlertException.throwIfTrue(
-        jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
-
-    ApiAlertException.throwIfTrue(
-        resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
-        "Please upload jar for Flink_App resource");
-
-    ApiAlertException.throwIfTrue(
-        jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+    check(resource, jars, poms);
 
     if (resource.getResourceType() == ResourceTypeEnum.CONNECTOR) {
-      String connector = resource.getConnector();
-      ApiAlertException.throwIfTrue(connector == null, "the flink connector is null.");
-      FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
-      resource.setResourceName(connectorResource.getFactoryIdentifier());
-      Optional.ofNullable(connectorResource.getRequiredOptions())
-          .ifPresent(
-              v ->
-                  resource.setConnectorRequiredOptions(
-                      ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
-      Optional.ofNullable(connectorResource.getOptionalOptions())
-          .ifPresent(
-              v ->
-                  resource.setConnectorOptionalOptions(
-                      ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
+      processConnectorResource(resource);
     } else {
       ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
     }
 
-    ApiAlertException.throwIfTrue(
-        this.findByResourceName(resource.getTeamId(), resource.getResourceName()) != null,
-        String.format("the resource %s already exists, please check.", resource.getResourceName()));
+    ApiAlertException.throwIfNotNull(
+        this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
+        "the resource %s already exists, please check.",
+        resource.getResourceName());
 
     if (!jars.isEmpty()) {
       String resourcePath = jars.get(0);
@@ -173,6 +152,33 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     resource.setCreatorId(commonService.getUserId());
     this.save(resource);
+  }
+
+  private static void processConnectorResource(Resource resource) throws JsonProcessingException {
+    String connector = resource.getConnector();
+    ApiAlertException.throwIfNull(connector, "the flink connector is null.");
+    FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
+    resource.setResourceName(connectorResource.getFactoryIdentifier());
+    Optional.ofNullable(connectorResource.getRequiredOptions())
+        .ifPresent(
+            v ->
+                resource.setConnectorRequiredOptions(
+                    ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
+    Optional.ofNullable(connectorResource.getOptionalOptions())
+        .ifPresent(
+            v ->
+                resource.setConnectorOptionalOptions(
+                    ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
+  }
+
+  private void check(Resource resource, List<String> jars, List<MavenPom> poms) {
+    ApiAlertException.throwIfTrue(
+        jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+    ApiAlertException.throwIfTrue(
+        resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
+        "Please upload jar for Flink_App resource");
+    ApiAlertException.throwIfTrue(
+        jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
   }
 
   @Override
