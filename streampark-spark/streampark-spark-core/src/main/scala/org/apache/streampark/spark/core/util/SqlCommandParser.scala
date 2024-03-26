@@ -197,7 +197,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    * <pre> DROP statements are used to remove a catalog with the given catalog name or to remove a
    * registered table/view/function from the current or specified Catalog.
    *
-   * Flink SQL supports the following DROP statements for now: * DROP CATALOG * DROP TABLE * DROP
+   * Spark SQL supports the following DROP statements for now: * DROP CATALOG * DROP TABLE * DROP
    * DATABASE * DROP VIEW * DROP FUNCTION </pre>
    */
 
@@ -270,16 +270,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   // ---- EXPLAIN Statement--------------------------------------------------------------------------------------------------------------------------------
 
-  /**
-   * For flink-1.13.x: EXPLAIN PLAN FOR `<query_statement_or_insert_statement>` <br> For
-   * flink-1.14.x: EXPLAIN ESTIMATED_COST, CHANGELOG_MODE, JSON_EXECUTION_PLAN
-   * `<query_statement_or_insert_statement>`<br> For flink-1.15.x: <br> <pre> EXPLAIN
-   * [([ExplainDetail[, ExplainDetail]*]) | PLAN FOR]
-   * <query_statement_or_insert_statement_or_statement_set>
-   *
-   * statement_set: EXECUTE STATEMENT SET BEGIN insert_statement; ... insert_statement; END; </pre>
-   * Recommended not to use the form of flink-1.15.x
-   */
   case object EXPLAIN extends SqlCommand("explain", "(EXPLAIN\\s+.+)")
 
   // ---- USE Statements--------------------------------------------------------------------------------------------------------------------------------
@@ -309,20 +299,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object SHOW_CURRENT_DATABASE
     extends SqlCommand("show current database", "(SHOW\\s+CURRENT\\s+DATABASE\\s*)")
 
-  /**
-   * SHOW TABLES,support from flink-1.13.x<br> SHOW TABLES [ ( FROM | IN )
-   * [catalog_name.]database_name ] [ [NOT] LIKE `<sql_like_pattern`> ], support from flink-1.15.x
-   */
   case object SHOW_TABLES extends SqlCommand("show tables", "(SHOW\\s+TABLES.*)")
 
-  /** SHOW CREATE TABLE, flink-1.14.x support. */
   case object SHOW_CREATE_TABLE
     extends SqlCommand("show create table", "(SHOW\\s+CREATE\\s+TABLE\\s+.+)")
 
-  /**
-   * SHOW COLUMNS ( FROM | IN ) [`[`catalog_name.]database.]`<table_name>` [ [NOT] LIKE
-   * `<sql_like_pattern>`],flink-1.15.x support.
-   */
   case object SHOW_COLUMNS extends SqlCommand("show columns", "(SHOW\\s+COLUMNS\\s+.+)")
 
   /** SHOW VIEWS */
@@ -373,12 +354,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   // ----INSERT SET Statements--------------------------------------------------------------------------------------------------------------------------------
   /*
    * <pre>
-   * SQL Client execute each INSERT INTO statement as a single Flink job. However,
+   * SQL Client execute each INSERT INTO statement as a single Spark job. However,
    * this is sometimes not optimal because some part of the pipeline can be reused.
    * SQL Client supports STATEMENT SET syntax to execute a set of SQL statements.
    * This is an equivalent feature with StatementSet in Table API.
    * The STATEMENT SET syntax encloses one or more INSERT INTO statements.
-   * All statements in a STATEMENT SET block are holistically optimized and executed as a single Flink job.
+   * All statements in a STATEMENT SET block are holistically optimized and executed as a single Spark job.
    * Joint optimization and execution allows for reusing common intermediate results and can therefore significantly
    * improve the efficiency of executing multiple queries.
    * </pre>
@@ -393,10 +374,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object END_STATEMENT_SET
     extends SqlCommand("end statement set", "END", Converters.NO_OPERANDS)
 
-  // Since: 2.1.2 for flink 1.18
   case object DELETE extends SqlCommand("delete", "(DELETE\\s+FROM\\s+.+)")
 
-  // Since: 2.1.2 for flink 1.18
   case object UPDATE extends SqlCommand("update", "(UPDATE\\s+.+)")
 
   private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
