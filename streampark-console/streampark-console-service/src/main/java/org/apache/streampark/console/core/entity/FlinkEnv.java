@@ -76,7 +76,7 @@ public class FlinkEnv implements Serializable {
     public void doSetFlinkConf() throws ApiDetailException {
         try {
             File yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-            if (!yaml.exists()) yaml = new File(this.flinkHome.concat("/conf/conf.yaml"));
+            if (!yaml.exists()) yaml = new File(this.flinkHome.concat("/conf/config.yaml"));
             String flinkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);
             this.flinkConf = DeflaterUtils.zipString(flinkConf);
         } catch (Exception e) {
