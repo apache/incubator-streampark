@@ -105,7 +105,7 @@ public class ProjectController {
   @Operation(summary = "List git project branches")
   @PostMapping("branches")
   public RestResponse branches(Project project) {
-    List<String> branches = project.getAllBranches();
+    List<String> branches = projectService.getAllBranches(project);
     return RestResponse.success().data(branches);
   }
 
@@ -120,7 +120,7 @@ public class ProjectController {
   @Operation(summary = "Authenticate git project")
   @PostMapping("gitcheck")
   public RestResponse gitCheck(Project project) {
-    GitAuthorizedErrorEnum error = project.gitCheck();
+    GitAuthorizedErrorEnum error = projectService.gitCheck(project);
     return RestResponse.success().data(error.getType());
   }
 

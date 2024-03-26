@@ -84,9 +84,18 @@ public class GitUtils {
   private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
     if (project.isHttpRepositoryUrl()) {
       if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
-        UsernamePasswordCredentialsProvider credentialsProvider =
-            new UsernamePasswordCredentialsProvider(project.getUserName(), project.getPassword());
-        transportCommand.setCredentialsProvider(credentialsProvider);
+        try {
+          String decrypt =
+              StringUtils.isNotBlank(project.getSalt())
+                  ? EncryptUtils.decrypt(project.getPassword(), project.getSalt())
+                  : project.getPassword();
+          UsernamePasswordCredentialsProvider credentialsProvider =
+              new UsernamePasswordCredentialsProvider(project.getUserName(), decrypt);
+          transportCommand.setCredentialsProvider(credentialsProvider);
+        } catch (Exception e) {
+          throw new IllegalStateException(
+              "[StreamPark] git setCredentials: project password decrypt failed", e);
+        }
       }
     } else if (project.isSshRepositoryUrl()) {
       transportCommand.setTransportConfigCallback(

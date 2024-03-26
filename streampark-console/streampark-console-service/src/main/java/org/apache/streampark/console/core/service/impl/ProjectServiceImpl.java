@@ -28,11 +28,16 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
+import org.apache.streampark.console.base.util.GitUtils;
+import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
+import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -40,6 +45,7 @@ import org.apache.streampark.console.core.service.application.ApplicationManageS
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.MemorySize;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -94,7 +100,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     RestResponse response = RestResponse.success();
 
     ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
-
+    if (StringUtils.isNotBlank(project.getPassword())) {
+      String salt = ShaHashUtils.getRandomSalt();
+      try {
+        String encrypt = EncryptUtils.encrypt(project.getPassword(), salt);
+        project.setSalt(salt);
+        project.setPassword(encrypt);
+      } catch (Exception e) {
+        log.error("Project password decrypt failed", e);
+        throw new ApiAlertException("Project github/gitlab password decrypt failed");
+      }
+    }
     project.setCreateTime(new Date());
     boolean status = save(project);
 
@@ -119,7 +135,30 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setBranches(projectParam.getBranches());
     project.setPrvkeyPath(projectParam.getPrvkeyPath());
     project.setUserName(projectParam.getUserName());
-    project.setPassword(projectParam.getPassword());
+    if (StringUtils.isNotBlank(projectParam.getPassword())) {
+      if (StringUtils.isBlank(project.getPassword())) {
+        String salt = ShaHashUtils.getRandomSalt();
+        try {
+          String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), salt);
+          project.setSalt(salt);
+          project.setPassword(encrypt);
+        } catch (Exception e) {
+          log.error("project password encrypt failed");
+          throw new ApiAlertException(e);
+        }
+      } else {
+        // Check whether the encrypted password is the same as the current password
+        if (!Objects.equals(project.getPassword(), projectParam.getPassword())) {
+          try {
+            String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), project.getSalt());
+            project.setPassword(encrypt);
+          } catch (Exception e) {
+            log.error("project password encrypt failed");
+            throw new ApiAlertException(e);
+          }
+        }
+      }
+    }
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
@@ -371,5 +410,37 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   private String getBuildLogPath(Long projectId) {
     return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
+  }
+
+  @Override
+  public List<String> getAllBranches(Project project) {
+    try {
+      return GitUtils.getBranchList(remakeProject(project));
+    } catch (Exception e) {
+      throw new ApiDetailException(e);
+    }
+  }
+
+  @Override
+  public GitAuthorizedErrorEnum gitCheck(Project project) {
+    try {
+      GitUtils.getBranchList(remakeProject(project));
+      return GitAuthorizedErrorEnum.SUCCESS;
+    } catch (Exception e) {
+      String err = e.getMessage();
+      if (err.contains("not authorized")) {
+        return GitAuthorizedErrorEnum.ERROR;
+      } else if (err.contains("Authentication is required")) {
+        return GitAuthorizedErrorEnum.REQUIRED;
+      }
+      return GitAuthorizedErrorEnum.UNKNOW;
+    }
+  }
+
+  private Project remakeProject(Project project) {
+    if (Objects.nonNull(project.getId())) {
+      return this.baseMapper.selectById(project.getId());
+    }
+    return project;
   }
 }

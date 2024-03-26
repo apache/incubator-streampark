@@ -191,6 +191,7 @@ create table `t_flink_project` (
   `user_name` varchar(64) collate utf8mb4_general_ci default null,
   `password` varchar(64) collate utf8mb4_general_ci default null,
   `prvkey_path` varchar(128) collate utf8mb4_general_ci default null,
+  `salt` varchar(26) collate utf8mb4_general_ci default null,
   `pom` varchar(255) collate utf8mb4_general_ci default null,
   `build_args` varchar(255) default null,
   `type` tinyint default null,
