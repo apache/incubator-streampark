@@ -1949,7 +1949,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           .collect(Collectors.toList());
     } catch (Exception e) {
       log.error("Failed to connect hadoop YARN, detail: {}", Utils.stringifyException(e));
-      throw new RuntimeException("Failed to connect hadoop YARN. Ensure that hadoop yarn is running.");
+      throw new RuntimeException(
+          "Failed to connect hadoop YARN. Ensure that hadoop yarn is running.");
     }
   }
 
