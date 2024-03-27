@@ -154,6 +154,7 @@ public interface ProjectService extends IService<Project> {
    * @return branch information under the project
    */
   List<String> getAllBranches(Project project);
+
   /**
    * Check git
    *
