@@ -77,6 +77,9 @@ public class Project implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String prvkeyPath;
 
+  /** No salt value is returned */
+  @JsonIgnore private String salt;
+
   /** 1:git 2:svn */
   private Integer repository;
 

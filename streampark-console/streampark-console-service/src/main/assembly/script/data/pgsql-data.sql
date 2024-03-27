@@ -35,7 +35,7 @@ insert into "public"."t_flink_effective" values (100000, 100000, 2, 100000, now(
 -- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-insert into "public"."t_flink_project" values (100000, 100000, 'streampark-quickstart', 'https://github.com/apache/incubator-streampark-quickstart', 'release-2.0.0', null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
+insert into "public"."t_flink_project" values (100000, 100000, 'streampark-quickstart', 'https://github.com/apache/incubator-streampark-quickstart', 'release-2.0.0', null, null, null, null, null, null, 1, 1, null, 'streampark-quickstart', -1, now(), now());
 
 
 -- ----------------------------
@@ -87,10 +87,10 @@ insert into "public"."t_menu" values (110602, 110600, 'update', null, null, 'mem
 insert into "public"."t_menu" values (110603, 110600, 'delete', null, null, 'member:delete', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110604, 110600, 'role view', null, null, 'role:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110605, 110600, 'view', null, null, 'member:view', null, '1', '1', null, now(), now());
-insert into "public"."t_menu" values (120101, 120100, 'add', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', null, now(), now());
+insert into "public"."t_menu" values (120101, 120100, 'add', '/flink/project/add', 'resource/project/Add', 'project:create', '', '0', '0', null, now(), now());
 insert into "public"."t_menu" values (120102, 120100, 'build', null, null, 'project:build', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (120103, 120100, 'delete', null, null, 'project:delete', null, '1', '1', null, now(), now());
-insert into "public"."t_menu" values (120104, 120100, 'edit', '/flink/project/edit', 'flink/project/Edit', 'project:update', null, '0', '0', null, now(), now());
+insert into "public"."t_menu" values (120104, 120100, 'edit', '/flink/project/edit', 'resource/project/Edit', 'project:update', null, '0', '0', null, now(), now());
 insert into "public"."t_menu" values (120105, 120100, 'view', null, null, 'project:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (120201, 120200, 'add', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', null, now(), now());
 insert into "public"."t_menu" values (120202, 120200, 'detail app', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', null, now(), now());
