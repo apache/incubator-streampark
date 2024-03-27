@@ -71,8 +71,11 @@ public class FlinkK8sChangeEventListener {
     TrackId trackId = event.trackId();
     // get pre application record
     Application app = applicationService.getById(trackId.appId());
-    if (app == null || FlinkAppState.isEndState(app.getState())) {
+    if (app == null) {
       return;
+    }
+    if (FlinkAppState.isEndState(app.getState())) {
+      log.info("job [{}] is EndState, but also update it.", app.getJobName());
     }
 
     // update application record
