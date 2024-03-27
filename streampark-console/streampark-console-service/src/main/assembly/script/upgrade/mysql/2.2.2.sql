@@ -244,3 +244,7 @@ alter table `t_flink_app`
 
 alter table `t_flink_log`
     add column `user_id` bigint default null comment 'operator user id';
+
+alter table `t_flink_project`
+    add column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'password salt',
+    modify column `password` varchar(512) collate utf8mb4_general_ci default null comment 'password';

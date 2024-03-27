@@ -22,3 +22,11 @@ alter table "public"."t_flink_log"
     add column "user_id" int8 collate "pg_catalog"."default";
 
 comment on column "public"."t_flink_log"."user_id" is 'operator user id';
+
+alter table "public"."t_flink_project"
+    add column `salt` varchar(26) collate "pg_catalog"."default";
+
+comment on column "public"."t_flink_project"."salt" is 'password salt';
+
+alter table "public"."t_flink_project"
+    alter column `password` type varchar(512) collate "pg_catalog"."default";

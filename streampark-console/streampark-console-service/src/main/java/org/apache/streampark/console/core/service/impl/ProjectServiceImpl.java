@@ -132,39 +132,27 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     ApiAlertException.throwIfFalse(
         !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
         "The project is being built, update project failed.");
-    project.setName(projectParam.getName());
-    project.setUrl(projectParam.getUrl());
-    project.setBranches(projectParam.getBranches());
-    project.setPrvkeyPath(projectParam.getPrvkeyPath());
-    project.setUserName(projectParam.getUserName());
-    if (StringUtils.isNotBlank(projectParam.getPassword())) {
-      if (StringUtils.isBlank(project.getPassword())) {
-        String salt = ShaHashUtils.getRandomSalt();
-        try {
-          String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), salt);
-          project.setSalt(salt);
-          project.setPassword(encrypt);
-        } catch (Exception e) {
-          log.error("project password encrypt failed");
-          throw new ApiAlertException(e);
-        }
+    updateInternal(projectParam, project);
+    if (project.isHttpRepositoryUrl()) {
+      if (StringUtils.isBlank(projectParam.getUserName())) {
+        project.setUserName(null);
+        project.setPassword(null);
+        project.setSalt(null);
       } else {
-        // Check whether the encrypted password is the same as the current password
-        if (!Objects.equals(project.getPassword(), projectParam.getPassword())) {
+        project.setUserName(projectParam.getUserName());
+        if (!Objects.equals(projectParam.getPassword(), project.getPassword())) {
           try {
-            String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), project.getSalt());
+            String salt = ShaHashUtils.getRandomSalt();
+            String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), salt);
             project.setPassword(encrypt);
+            project.setSalt(salt);
           } catch (Exception e) {
-            log.error("project password encrypt failed");
+            log.error("The project github/gitlab password encrypt failed");
             throw new ApiAlertException(e);
           }
         }
       }
     }
-    project.setPom(projectParam.getPom());
-    project.setDescription(projectParam.getDescription());
-    project.setBuildArgs(projectParam.getBuildArgs());
-    updateInternal(projectParam, project);
     if (project.isSshRepositoryUrl()) {
       project.setUserName(null);
     } else {
