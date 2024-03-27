@@ -102,7 +102,11 @@ trait FlinkClientTrait extends Logger {
         }
       case _ =>
         if (submitRequest.userJarFile != null) {
-          val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
+          var jarPath = submitRequest.userJarFile.getAbsolutePath
+          if (Utils.isWindows) {
+            jarPath = StringUtils.replace(jarPath, "\\", "/")
+          }
+          val uri = PackagedProgramUtils.resolveURI(jarPath)
           val programOptions = ProgramOptions.create(commandLine)
           val executionParameters = ExecutionConfigAccessor.fromProgramOptions(
             programOptions,
