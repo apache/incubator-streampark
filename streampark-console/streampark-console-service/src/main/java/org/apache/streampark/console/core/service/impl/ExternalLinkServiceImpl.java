@@ -65,8 +65,26 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    externalLink.setModifyTime(new Date());
     baseMapper.updateById(externalLink);
+  }
+
+  @Override
+  public boolean updateById(ExternalLink externalLink) {
+    ExternalLink link = baseMapper.selectById(externalLink.getId());
+    if (externalLink.getBadgeLabel() != null) {
+      link.setBadgeLabel(externalLink.getBadgeLabel());
+    }
+    if (externalLink.getBadgeColor() != null) {
+      link.setBadgeColor(externalLink.getBadgeColor());
+    }
+    if (externalLink.getBadgeName() != null) {
+      link.setBadgeName(externalLink.getBadgeName());
+    }
+    if (externalLink.getLinkUrl() != null) {
+      link.setLinkUrl(externalLink.getLinkUrl());
+    }
+    link.setModifyTime(new Date());
+    return super.updateById(link);
   }
 
   @Override
