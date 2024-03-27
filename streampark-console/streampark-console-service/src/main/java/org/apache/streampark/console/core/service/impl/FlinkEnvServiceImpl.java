@@ -88,8 +88,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     long count = this.baseMapper.selectCount(null);
     version.setIsDefault(count == 0);
     version.setCreateTime(new Date());
-    version.doSetFlinkConf();
     version.doSetVersion();
+    version.doSetFlinkConf();
     return save(version);
   }
 
