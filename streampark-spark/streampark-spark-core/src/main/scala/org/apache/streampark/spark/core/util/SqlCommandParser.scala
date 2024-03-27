@@ -351,29 +351,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   /** RESET */
   case object RESET_ALL extends SqlCommand("reset all", "RESET", _ => Some(Array[String]("ALL")))
 
-  // ----INSERT SET Statements--------------------------------------------------------------------------------------------------------------------------------
-  /*
-   * <pre>
-   * SQL Client execute each INSERT INTO statement as a single Spark job. However,
-   * this is sometimes not optimal because some part of the pipeline can be reused.
-   * SQL Client supports STATEMENT SET syntax to execute a set of SQL statements.
-   * This is an equivalent feature with StatementSet in Table API.
-   * The STATEMENT SET syntax encloses one or more INSERT INTO statements.
-   * All statements in a STATEMENT SET block are holistically optimized and executed as a single Spark job.
-   * Joint optimization and execution allows for reusing common intermediate results and can therefore significantly
-   * improve the efficiency of executing multiple queries.
-   * </pre>
-   */
-  /** This is SQL Client's syntax, don't use in our platform. */
-  @Deprecated
-  case object BEGIN_STATEMENT_SET
-    extends SqlCommand("begin statement set", "BEGIN\\s+STATEMENT\\s+SET", Converters.NO_OPERANDS)
-
-  /** This is SQL Client's syntax, don't use in our platform. */
-  @Deprecated
-  case object END_STATEMENT_SET
-    extends SqlCommand("end statement set", "END", Converters.NO_OPERANDS)
-
   case object DELETE extends SqlCommand("delete", "(DELETE\\s+FROM\\s+.+)")
 
   case object UPDATE extends SqlCommand("update", "(UPDATE\\s+.+)")
