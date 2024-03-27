@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -178,6 +179,13 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
   @Override
   public void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel) {
     if (FlinkExecutionMode.isYarnMode(executionModeEnum)) {
+      ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
+    }
+  }
+
+  @Override
+  public void checkQueueLabel(SparkExecutionMode executionModeEnum, String queueLabel) {
+    if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
       ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
     }
   }

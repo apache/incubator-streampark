@@ -29,6 +29,7 @@ import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.zio.ZIOExt;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.flink.kubernetes.v2.fs.EmbeddedFileServer;
 
@@ -248,6 +249,31 @@ public class EnvInitializer implements ApplicationRunner {
     if (!fsOperator.exists(flinkHome)) {
       log.info("{} is not exists,upload beginning....", flinkHome);
       fsOperator.upload(flinkLocalHome, flinkHome, false, true);
+    }
+  }
+
+  public void checkSparkEnv(StorageType storageType, SparkEnv sparkEnv) throws IOException {
+    String sparkLocalHome = sparkEnv.getSparkHome();
+    if (StringUtils.isBlank(sparkLocalHome)) {
+      throw new ExceptionInInitializerError(
+          "[StreamPark] SPARK_HOME is undefined,Make sure that Spark is installed.");
+    }
+    Workspace workspace = Workspace.of(storageType);
+    String appSpark = workspace.APP_SPARK();
+    FsOperator fsOperator = FsOperator.of(storageType);
+    if (!fsOperator.exists(appSpark)) {
+      log.info("checkSparkEnv, now mkdir [{}] starting ...", appSpark);
+      fsOperator.mkdirs(appSpark);
+    }
+    File sparkLocalDir = new File(sparkLocalHome);
+    if (Files.isSymbolicLink(sparkLocalDir.toPath())) {
+      sparkLocalDir = sparkLocalDir.getCanonicalFile();
+    }
+    String sparkName = sparkLocalDir.getName();
+    String sparkHome = appSpark.concat("/").concat(sparkName);
+    if (!fsOperator.exists(sparkHome)) {
+      log.info("{} is not exists,upload beginning....", sparkHome);
+      fsOperator.upload(sparkLocalHome, sparkHome, false, true);
     }
   }
 }

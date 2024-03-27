@@ -122,3 +122,12 @@ case class FlinkYarnApplicationBuildRequest(
     developmentMode: FlinkDevelopmentMode,
     dependencyInfo: DependencyInfo)
   extends BuildParam
+
+case class SparkYarnApplicationBuildRequest(
+    appName: String,
+    mainClass: String,
+    localWorkspace: String,
+    yarnProvidedPath: String,
+    developmentMode: FlinkDevelopmentMode,
+    dependencyInfo: DependencyInfo)
+  extends BuildParam

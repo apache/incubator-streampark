@@ -77,6 +77,14 @@ public class ApplicationConfig {
     application.setFormat(this.format);
   }
 
+  public void setToApplication(SparkApplication application) {
+    String unzipString = DeflaterUtils.unzipString(content);
+    String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+    application.setConfig(encode);
+    application.setConfigId(this.id);
+    application.setFormat(this.format);
+  }
+
   public Map<String, String> readConfig() {
     Map<String, String> configs = renderConfigs();
 
