@@ -21,6 +21,8 @@ on:
   push:
     branches:
       - dev
+      - release-*
+      - dev-*
     paths-ignore:
       - '**.md'
       - 'deploy/**'
