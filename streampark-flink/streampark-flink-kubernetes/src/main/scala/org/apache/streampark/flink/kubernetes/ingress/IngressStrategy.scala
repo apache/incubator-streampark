@@ -28,9 +28,12 @@ import java.io.File
 
 trait IngressStrategy {
 
+  val REST_SERVICE_IDENTIFICATION = "rest"
+
   lazy val ingressClass: String = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
 
-  def getIngressUrl(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String
+  def getIngressUrl(nameSpace: String, clusterId: String)(
+      clusterClient: => ClusterClient[_]): String
 
   def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit
 

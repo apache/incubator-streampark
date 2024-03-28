@@ -31,10 +31,8 @@ import scala.util.Try
 
 class IngressStrategyV1beta1 extends IngressStrategy {
 
-  override def getIngressUrl(
-      nameSpace: String,
-      clusterId: String,
-      clusterClient: ClusterClient[_]): String = {
+  override def getIngressUrl(nameSpace: String, clusterId: String)(
+      clusterClient: => ClusterClient[_]): String = {
 
     Utils.using(new DefaultKubernetesClient) {
       client =>
@@ -43,7 +41,9 @@ class IngressStrategyV1beta1 extends IngressStrategy {
             .map(ingress => ingress.getSpec.getRules.get(0))
             .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
             .map { case (host, path) => s"http://$host$path" }
-            .getOrElse(clusterClient.getWebInterfaceURL)
+            .getOrElse {
+              Utils.using(clusterClient)(client => client.getWebInterfaceURL)
+            }
         }.recover {
           case e =>
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
