@@ -136,17 +136,14 @@ object KubernetesRetriever extends Logger {
 
   /** retrieve flink jobManager rest url */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    Utils.using(
-      KubernetesRetriever
-        .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
-        .getOrElse(return None)) {
-      client =>
-        val url =
-          IngressController.getIngressUrl(clusterKey.namespace, clusterKey.clusterId, client)
-        logger.info(s"retrieve flink jobManager rest url: $url")
-        client.close()
-        Some(url)
-    }
+    val url =
+      IngressController.getIngressUrl(clusterKey.namespace, clusterKey.clusterId) {
+        KubernetesRetriever
+          .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
+          .getOrElse(return None)
+      }
+    logger.info(s"retrieve flink jobManager rest url: $url")
+    Some(url)
   }
 
   def getSessionClusterIngressURL(namespace: String, clusterId: String): String = {

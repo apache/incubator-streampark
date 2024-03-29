@@ -29,10 +29,8 @@ import scala.util.Try
 
 class IngressStrategyV1 extends IngressStrategy {
 
-  override def getIngressUrl(
-      nameSpace: String,
-      clusterId: String,
-      clusterClient: ClusterClient[_]): String = {
+  override def getIngressUrl(nameSpace: String, clusterId: String)(
+      clusterClient: => ClusterClient[_]): String = {
 
     Utils.using(new DefaultKubernetesClient) {
       client =>
@@ -41,7 +39,9 @@ class IngressStrategyV1 extends IngressStrategy {
             .map(ingress => ingress.getSpec.getRules.get(0))
             .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
             .map { case (host, path) => s"http://$host$path" }
-            .getOrElse(clusterClient.getWebInterfaceURL)
+            .getOrElse {
+              Utils.using(clusterClient)(client => client.getWebInterfaceURL)
+            }
         }.recover {
           case e =>
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
@@ -49,10 +49,28 @@ class IngressStrategyV1 extends IngressStrategy {
     }
   }
 
+  private[this] def touchIngressBackendRestPort(
+      client: DefaultKubernetesClient,
+      clusterId: String,
+      nameSpace: String): Int = {
+    var ports = client.services
+      .inNamespace(nameSpace)
+      .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
+      .get()
+      .getSpec
+      .getPorts
+      .asScala
+    ports =
+      ports.filter(servicePort => servicePort.getName.equalsIgnoreCase(REST_SERVICE_IDENTIFICATION))
+    ports.map(servicePort => servicePort.getTargetPort.getIntVal).head
+  }
+
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
     Utils.using(new DefaultKubernetesClient) {
       client =>
         val ownerReference = getOwnerReference(nameSpace, clusterId, client)
+        val ingressBackendRestServicePort =
+          touchIngressBackendRestPort(client, clusterId, nameSpace)
         val ingress = new IngressBuilder()
           .withNewMetadata()
           .withName(clusterId)
@@ -70,9 +88,9 @@ class IngressStrategyV1 extends IngressStrategy {
           .withPathType("ImplementationSpecific")
           .withNewBackend()
           .withNewService()
-          .withName(s"$clusterId-rest")
+          .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
           .withNewPort()
-          .withName("rest")
+          .withNumber(ingressBackendRestServicePort)
           .endPort()
           .endService()
           .endBackend()
@@ -82,9 +100,9 @@ class IngressStrategyV1 extends IngressStrategy {
           .withPathType("ImplementationSpecific")
           .withNewBackend()
           .withNewService()
-          .withName(s"$clusterId-rest")
+          .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
           .withNewPort()
-          .withName("rest")
+          .withNumber(ingressBackendRestServicePort)
           .endPort()
           .endService()
           .endBackend()
