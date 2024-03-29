@@ -20,23 +20,14 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Variable;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /** org.apache.streampark.console.core.service.VariableServiceTest */
 class VariableServiceTest extends SpringUnitTestBase {
 
   @Autowired private VariableService variableService;
-
-  @AfterEach
-  void cleanTestRecordsInDatabase() {
-    variableService.remove(new QueryWrapper<>());
-  }
 
   /** Test whether the variable will be replaced normally */
   @Test
@@ -79,32 +70,5 @@ class VariableServiceTest extends SpringUnitTestBase {
     String paramWithPlaceholders = "--kafka.brokers ${" + variableCode + "}";
     String realParam = variableService.replaceVariable(teamId, paramWithPlaceholders);
     Assertions.assertNotEquals("--kafka.brokers " + variableVariable, realParam);
-  }
-
-  @Test
-  void testUpdateVariableServiceById() {
-    Variable variable = new Variable();
-    variable.setVariableCode("variableCode");
-    variable.setVariableValue("variableValue");
-    variable.setDescription("description");
-    variable.setCreatorId(0L);
-    variable.setTeamId(0L);
-    variable.setDesensitization(false);
-    variableService.save(variable);
-    variable.setVariableCode("updatedVariableCode");
-    variable.setVariableValue("updatedVariableValue");
-    variable.setDescription("updatedDescription");
-    variable.setCreatorId(null);
-    variable.setTeamId(null);
-    variable.setDesensitization(null);
-    variableService.updateById(variable);
-    variable = variableService.getById(variable.getId());
-
-    assertThat(variable.getVariableCode()).isEqualTo("updatedVariableCode");
-    assertThat(variable.getVariableValue()).isEqualTo("updatedVariableValue");
-    assertThat(variable.getDescription()).isEqualTo("updatedDescription");
-    assertThat(variable.getCreatorId()).isEqualTo(0L);
-    assertThat(variable.getTeamId()).isEqualTo(0L);
-    assertThat(variable.getDesensitization()).isEqualTo(false);
   }
 }

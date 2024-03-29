@@ -273,15 +273,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     if (entity.getDescription() != null) {
       variable.setDescription(entity.getDescription());
     }
-    if (entity.getCreatorId() != null) {
-      variable.setCreatorId(entity.getCreatorId());
-    }
-    if (entity.getTeamId() != null) {
-      variable.setTeamId(entity.getTeamId());
-    }
-    if (entity.getDesensitization() != null) {
-      variable.setDesensitization(entity.getDesensitization());
-    }
+    variable.setCreatorId(entity.getCreatorId());
+    variable.setTeamId(entity.getTeamId());
+    variable.setDesensitization(entity.getDesensitization());
     return super.updateById(variable);
   }
 }
