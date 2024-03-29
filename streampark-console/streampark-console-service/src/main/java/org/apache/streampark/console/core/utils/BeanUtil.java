@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.utils;
 
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.func.Func1;
 
 /** Util class for bean */
 public class BeanUtil {
@@ -28,8 +29,12 @@ public class BeanUtil {
    * @param source the source object for copy
    * @param target the target object for copy
    */
-  public static void copyIgnoreNull(Object source, Object target) {
+  @SafeVarargs
+  public static <P, R> void copyIgnoreNull(
+      Object source, Object target, Func1<P, R>... ignoreProperties) {
     cn.hutool.core.bean.BeanUtil.copyProperties(
-        source, target, CopyOptions.create().ignoreNullValue());
+        source,
+        target,
+        CopyOptions.create().ignoreNullValue().setIgnoreProperties(ignoreProperties));
   }
 }

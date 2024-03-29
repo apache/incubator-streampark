@@ -853,7 +853,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   public boolean updateById(Application application) {
     Application app = getById(application.getId());
-    BeanUtil.copyIgnoreNull(application, app);
+    BeanUtil.copyIgnoreNull(application, app, Application::getId, Application::getCreateTime);
     app.setAppId(application.getAppId());
     app.setJobId(application.getJobId());
     app.setJobManagerUrl(application.getJobManagerUrl());
