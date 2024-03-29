@@ -44,6 +44,7 @@
         <knife4j-openapi3.version>4.0.0</knife4j-openapi3.version>
         <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
         <commons-compress.version>1.21</commons-compress.version>
+        <hutool.version>5.8.26</hutool.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <shiro.version>1.10.0</shiro.version>
         <jsch.version>0.2.11</jsch.version>
@@ -256,6 +257,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!-- hutool -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
 
         <!-- h2 -->

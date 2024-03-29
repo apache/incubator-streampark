@@ -65,6 +65,7 @@ import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
@@ -852,164 +853,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   @Override
   public boolean updateById(Application application) {
     Application app = getById(application.getId());
-    if (application.getDefaultModeIngress() != null) {
-      app.setDefaultModeIngress(application.getDefaultModeIngress());
-    }
-    if (application.getK8sNamespace() != null) {
-      app.setK8sNamespace(application.getK8sNamespace());
-    }
-    if (application.getState() != null) {
-      app.setState(application.getState());
-    }
-    if (application.getTeamId() != null) {
-      app.setTeamId(application.getTeamId());
-    }
-    if (application.getJobType() != null) {
-      app.setJobType(application.getJobType());
-    }
-    if (application.getProjectId() != null) {
-      app.setProjectId(application.getProjectId());
-    }
-    if (application.getUserId() != null) {
-      app.setUserId(application.getUserId());
-    }
-    if (application.getJobName() != null) {
-      app.setJobName(application.getJobName());
-    }
+    BeanUtil.copyIgnoreNull(application, app);
     app.setAppId(application.getAppId());
     app.setJobId(application.getJobId());
     app.setJobManagerUrl(application.getJobManagerUrl());
-    if (application.getVersionId() != null) {
-      app.setVersionId(application.getVersionId());
-    }
-    if (application.getClusterId() != null) {
-      app.setClusterId(application.getClusterId());
-    }
-    if (application.getFlinkImage() != null) {
-      app.setFlinkImage(application.getFlinkImage());
-    }
-    if (application.getK8sName() != null) {
-      app.setK8sName(application.getK8sName());
-    }
-    if (application.getK8sRestExposedType() != null) {
-      app.setK8sRestExposedType(application.getK8sRestExposedType());
-    }
-    if (application.getK8sPodTemplate() != null) {
-      app.setK8sPodTemplate(application.getK8sPodTemplate());
-    }
-    if (application.getK8sJmPodTemplate() != null) {
-      app.setK8sJmPodTemplate(application.getK8sJmPodTemplate());
-    }
-    if (application.getK8sTmPodTemplate() != null) {
-      app.setK8sTmPodTemplate(application.getK8sTmPodTemplate());
-    }
-    if (application.getIngressTemplate() != null) {
-      app.setIngressTemplate(application.getIngressTemplate());
-    }
-    if (application.getK8sHadoopIntegration() != null) {
-      app.setK8sHadoopIntegration(application.getK8sHadoopIntegration());
-    }
-    if (application.getRelease() != null) {
-      app.setRelease(application.getRelease());
-    }
-    if (application.getBuild() != null) {
-      app.setBuild(application.getBuild());
-    }
     app.setRestartSize(application.getRestartSize());
-    if (application.getRestartCount() != null) {
-      app.setRestartCount(application.getRestartCount());
-    }
-    if (application.getOptionState() != null) {
-      app.setOptionState(application.getOptionState());
-    }
     app.setAlertId(application.getAlertId());
-    if (application.getArgs() != null) {
-      app.setArgs(application.getArgs());
-    }
-    if (application.getModule() != null) {
-      app.setModule(application.getModule());
-    }
-    if (application.getOptions() != null) {
-      app.setOptions(application.getOptions());
-    }
-    app.setHotParams(application.getHotParams());
-    if (application.getResolveOrder() != null) {
-      app.setResolveOrder(application.getResolveOrder());
-    }
-    if (application.getExecutionMode() != null) {
-      app.setExecutionMode(application.getExecutionMode());
-    }
-    if (application.getDynamicProperties() != null) {
-      app.setDynamicProperties(application.getDynamicProperties());
-    }
-    if (application.getAppType() != null) {
-      app.setAppType(application.getAppType());
-    }
-    if (application.getTracking() != null) {
-      app.setTracking(application.getTracking());
-    }
-    if (application.getJar() != null) {
-      app.setJar(application.getJar());
-    }
-    if (application.getJarCheckSum() != null) {
-      app.setJarCheckSum(application.getJarCheckSum());
-    }
-    if (application.getMainClass() != null) {
-      app.setMainClass(application.getMainClass());
-    }
-    if (application.getStartTime() != null) {
-      app.setStartTime(application.getStartTime());
-    }
     app.setEndTime(application.getEndTime());
-    if (application.getDuration() != null) {
-      app.setDuration(application.getDuration());
-    }
-    if (application.getCpMaxFailureInterval() != null) {
-      app.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
-    }
-    if (application.getCpFailureRateInterval() != null) {
-      app.setCpFailureRateInterval(application.getCpFailureRateInterval());
-    }
-    if (application.getCpFailureAction() != null) {
-      app.setCpFailureAction(application.getCpFailureAction());
-    }
-    if (application.getTotalTM() != null) {
-      app.setTotalTM(application.getTotalTM());
-    }
-    if (application.getHadoopUser() != null) {
-      app.setHadoopUser(application.getHadoopUser());
-    }
-    if (application.getTotalSlot() != null) {
-      app.setTotalSlot(application.getTotalSlot());
-    }
-    if (application.getAvailableSlot() != null) {
-      app.setAvailableSlot(application.getAvailableSlot());
-    }
-    if (application.getJmMemory() != null) {
-      app.setJmMemory(application.getJmMemory());
-    }
-    if (application.getTmMemory() != null) {
-      app.setTmMemory(application.getTmMemory());
-    }
-    if (application.getTotalTask() != null) {
-      app.setTotalTask(application.getTotalTask());
-    }
+    app.setHotParams(application.getHotParams());
     app.setFlinkClusterId(application.getFlinkClusterId());
-    if (application.getDescription() != null) {
-      app.setDescription(application.getDescription());
-    }
-    if (application.getOptionTime() != null) {
-      app.setOptionTime(application.getOptionTime());
-    }
-    if (application.getResourceFrom() != null) {
-      app.setResourceFrom(application.getResourceFrom());
-    }
-    if (application.getTags() != null) {
-      app.setTags(application.getTags());
-    }
-    if (application.getProbing() != null) {
-      app.setProbing(application.getProbing());
-    }
     return super.updateById(app);
   }
 }

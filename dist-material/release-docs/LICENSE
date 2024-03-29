@@ -733,6 +733,13 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/com.github.scribejava/scribejava-apis/7.1.1 MIT
     https://mvnrepository.com/artifact/com.github.scribejava/scribejava-core/7.1.1 MIT
 
+========================================================================
+MulanPSL-2.0 licenses
+========================================================================
+The following components are provided under the MulanPSL-2.0 License. See project link for details.
+The text of each license is also included in licenses/LICENSE-[project].txt.
+
+    https://mvnrepository.com/artifact/cn.hutool/hutool-core/5.8.26 MulanPSL-2.0
 
 ========================================================================
 Public Domain licenses
