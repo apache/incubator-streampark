@@ -48,5 +48,8 @@ public final class Constant {
   public static final String STREAMPARK_FLINKSQL_CLIENT_CLASS =
       "org.apache.streampark.flink.cli.SqlClient";
 
+  public static final String STREAMPARK_SPARKSQL_CLIENT_CLASS =
+      "org.apache.streampark.spark.cli.SqlClient";
+
   public static final String PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3";
 }

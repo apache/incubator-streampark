@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.core
 
-import org.apache.streampark.common.conf.ConfigConst._
+import org.apache.streampark.common.conf.ConfigKeys._
 
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.{Seconds, StreamingContext}

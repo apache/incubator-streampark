@@ -189,8 +189,9 @@ create table `t_flink_project` (
   `url` varchar(255) collate utf8mb4_general_ci default null,
   `branches` varchar(64) collate utf8mb4_general_ci default null,
   `user_name` varchar(64) collate utf8mb4_general_ci default null,
-  `password` varchar(64) collate utf8mb4_general_ci default null,
+  `password` varchar(512) collate utf8mb4_general_ci default null,
   `prvkey_path` varchar(128) collate utf8mb4_general_ci default null,
+  `salt` varchar(26) collate utf8mb4_general_ci default null,
   `pom` varchar(255) collate utf8mb4_general_ci default null,
   `build_args` varchar(255) default null,
   `type` tinyint default null,
@@ -555,5 +556,98 @@ create table if not exists `t_resource` (
 `create_time` datetime default null comment 'create time',
 `modify_time` datetime not null default current_timestamp comment 'modify time'
 );
+
+
+-- ----------------------------
+-- table structure for t_spark_env
+-- ----------------------------
+drop table if exists `t_spark_env`;
+create table `t_spark_env` (
+                               `id` bigint not null auto_increment comment 'id',
+                               `spark_name` varchar(128) collate utf8mb4_general_ci not null comment 'spark instance name',
+                               `spark_home` varchar(255) collate utf8mb4_general_ci not null comment 'spark home path',
+                               `version` varchar(64) collate utf8mb4_general_ci not null comment 'spark version',
+                               `scala_version` varchar(64) collate utf8mb4_general_ci not null comment 'scala version of spark',
+                               `spark_conf` text collate utf8mb4_general_ci not null comment 'spark-conf',
+                               `is_default` tinyint not null default 0 comment 'whether default version or not',
+                               `description` varchar(255) collate utf8mb4_general_ci default null comment 'description',
+                               `create_time` datetime default null comment 'create time',
+                               primary key (`id`) using btree,
+                               unique key `un_env_name` (`spark_name`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- Table structure for t_spark_app
+-- ----------------------------
+drop table if exists `t_spark_app`;
+create table `t_spark_app` (
+                               `id` bigint not null auto_increment,
+                               `team_id` bigint not null,
+                               `job_type` tinyint default null,
+                               `execution_mode` tinyint default null,
+                               `resource_from` tinyint default null,
+                               `project_id` bigint default null,
+                               `job_name` varchar(255) collate utf8mb4_general_ci default null,
+                               `module` varchar(255) collate utf8mb4_general_ci default null,
+                               `jar` varchar(255) collate utf8mb4_general_ci default null,
+                               `jar_check_sum` bigint default null,
+                               `main_class` varchar(255) collate utf8mb4_general_ci default null,
+                               `args` text collate utf8mb4_general_ci,
+                               `options` text collate utf8mb4_general_ci,
+                               `hot_params` text collate utf8mb4_general_ci,
+                               `user_id` bigint default null,
+                               `app_id` varchar(64) collate utf8mb4_general_ci default null,
+                               `app_type` tinyint default null,
+                               `duration` bigint default null,
+                               `job_id` varchar(64) collate utf8mb4_general_ci default null,
+                               `job_manager_url` varchar(255) collate utf8mb4_general_ci default null,
+                               `version_id` bigint default null,
+                               `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
+                               `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
+                               `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
+                               `spark_image` varchar(128) collate utf8mb4_general_ci default null,
+                               `state` int default null,
+                               `restart_size` int default null,
+                               `restart_count` int default null,
+                               `cp_threshold` int default null,
+                               `cp_max_failure_interval` int default null,
+                               `cp_failure_rate_interval` int default null,
+                               `cp_failure_action` tinyint default null,
+                               `dynamic_properties` text collate utf8mb4_general_ci,
+                               `description` varchar(255) collate utf8mb4_general_ci default null,
+                               `resolve_order` tinyint default null,
+                               `k8s_rest_exposed_type` tinyint default null,
+                               `jm_memory` int default null,
+                               `tm_memory` int default null,
+                               `total_task` int default null,
+                               `total_tm` int default null,
+                               `total_slot` int default null,
+                               `available_slot` int default null,
+                               `option_state` tinyint default null,
+                               `tracking` tinyint default null,
+                               `create_time` datetime default null comment 'create time',
+                               `modify_time` datetime default null comment 'modify time',
+                               `option_time` datetime default null,
+                               `release` tinyint default 1,
+                               `build` tinyint default 1,
+                               `start_time` datetime default null,
+                               `end_time` datetime default null,
+                               `alert_id` bigint default null,
+                               `k8s_pod_template` text collate utf8mb4_general_ci,
+                               `k8s_jm_pod_template` text collate utf8mb4_general_ci,
+                               `k8s_tm_pod_template` text collate utf8mb4_general_ci,
+                               `k8s_hadoop_integration` tinyint default 0,
+                               `spark_cluster_id` bigint default null,
+                               `ingress_template` text collate utf8mb4_general_ci,
+                               `default_mode_ingress` text collate utf8mb4_general_ci,
+                               `tags` varchar(500) default null,
+                               `probing` tinyint default 0,
+                               `hadoop_user` varchar(64) collate utf8mb4_general_ci default null,
+                               primary key (`id`) using btree,
+                               key `inx_job_type` (`job_type`) using btree,
+                               key `inx_track` (`tracking`) using btree,
+                               index `inx_team` (`team_id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 set foreign_key_checks = 1;

@@ -79,7 +79,17 @@ public enum PipelineTypeEnum {
           .put(1, "Create building workspace")
           .put(2, "Build shaded flink app jar")
           .build(),
-      K8sAppModeBuildResponse.class);
+      K8sAppModeBuildResponse.class),
+
+  SPARK_YARN_APPLICATION(
+      6,
+      "spark yarn application mode task building pipeline",
+      ImmutableMap.<Integer, String>builder()
+          .put(1, "Prepare hadoop yarn environment and building workspace")
+          .put(2, "Resolve maven dependencies")
+          .put(3, "upload jar to yarn.provided.lib.dirs")
+          .build(),
+      SimpleBuildResponse.class);
 
   private final Integer code;
   /** short description of pipeline type. */

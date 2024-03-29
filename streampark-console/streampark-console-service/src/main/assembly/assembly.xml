@@ -31,6 +31,7 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>org.apache.streampark:streampark-flink-sqlclient_${scala.binary.version}</exclude>
+                <exclude>org.apache.streampark:streampark-spark-sqlclient_${scala.binary.version}</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
         </dependencySet>
@@ -38,6 +39,7 @@
             <outputDirectory>client</outputDirectory>
             <includes>
                 <include>org.apache.streampark:streampark-flink-sqlclient_${scala.binary.version}</include>
+                <include>org.apache.streampark:streampark-spark-sqlclient_${scala.binary.version}</include>
             </includes>
         </dependencySet>
     </dependencySets>

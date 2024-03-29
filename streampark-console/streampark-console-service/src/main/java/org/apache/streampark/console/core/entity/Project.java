@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.GitUtils;
@@ -28,7 +29,6 @@ import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.shaded.guava30.com.google.common.base.Preconditions;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -37,8 +37,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.lib.Constants;
-
-import javax.annotation.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +71,9 @@ public class Project implements Serializable {
   private String password;
 
   private String prvkeyPath;
+
+  /** No salt value is returned */
+  @JsonIgnore private String salt;
 
   /** 1:git 2:svn */
   private Integer repository;
@@ -183,6 +184,33 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
+    // 1) check build args
+    String buildArg = getMvnBuildArgs();
+    StringBuilder argBuilder = new StringBuilder();
+    if (StringUtils.isNotBlank(buildArg)) {
+      argBuilder.append(buildArg);
+    }
+
+    // 2) mvn setting file
+    String mvnSetting = getMvnSetting();
+    if (StringUtils.isNotBlank(mvnSetting)) {
+      argBuilder.append(" --settings ").append(mvnSetting);
+    }
+
+    // 3) check args
+    String cmd = argBuilder.toString();
+    String illegalArg = getIllegalArgs(cmd);
+    if (illegalArg != null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid maven argument, illegal args: %s, in your maven args: %s", illegalArg, cmd));
+    }
+
+    String mvn = getMvn();
+    return mvn.concat(" ").concat(cmd);
+  }
+
+  private String getMvn() {
     boolean windows = Utils.isWindows();
     String mvn = windows ? "mvn.cmd" : "mvn";
 
@@ -195,7 +223,7 @@ public class Project implements Serializable {
       try {
         Process process = Runtime.getRuntime().exec(mvn + " --version");
         process.waitFor();
-        Utils.required(process.exitValue() == 0);
+        AssertUtils.required(process.exitValue() == 0);
         useWrapper = false;
       } catch (Exception ignored) {
         log.warn("try using user-installed maven failed, now use maven-wrapper.");
@@ -205,44 +233,32 @@ public class Project implements Serializable {
     if (useWrapper) {
       mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
     }
-
-    return renderCmd(mvn);
+    return mvn;
   }
 
-  @Nonnull
-  private String renderCmd(String mvn) {
-    StringBuilder cmdBuffer = new StringBuilder(mvn).append(" clean package -DskipTests ");
-    renderCmdByBuildArgs(cmdBuffer);
-    renderCmdBySetting(cmdBuffer);
-    return cmdBuffer.toString();
-  }
-
-  private void renderCmdByBuildArgs(StringBuilder cmdBuffer) {
+  private String getMvnBuildArgs() {
     if (StringUtils.isNotBlank(this.buildArgs)) {
       String args = getIllegalArgs(this.buildArgs);
-      Preconditions.checkArgument(
+      AssertUtils.required(
           args == null,
-          "Illegal argument: \"%s\" in maven build parameters: %s",
-          args,
-          this.buildArgs);
-      cmdBuffer.append(this.buildArgs.trim());
+          String.format(
+              "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
+      return this.buildArgs.trim();
     }
+    return null;
   }
 
-  private void renderCmdBySetting(StringBuilder cmdBuffer) {
+  private String getMvnSetting() {
     String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
     if (StringUtils.isBlank(setting)) {
-      return;
+      return null;
     }
-    String args = getIllegalArgs(setting);
-    Preconditions.checkArgument(
-        args == null, "Illegal argument \"%s\" in maven-setting file path: %s", args, setting);
     File file = new File(setting);
-    Preconditions.checkArgument(
+    AssertUtils.required(
         !file.exists() || !file.isFile(),
-        "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-        setting);
-    cmdBuffer.append(" --settings ").append(setting);
+        String.format(
+            "Invalid maven-setting file path \"%s\", the path not exist or is not file", setting));
+    return setting;
   }
 
   private String getIllegalArgs(String param) {
@@ -252,7 +268,7 @@ public class Project implements Serializable {
       return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
     }
 
-    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">").iterator();
+    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
     String[] argsList = param.split("\\s+");
     while (iterator.hasNext()) {
       String chr = iterator.next();

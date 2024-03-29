@@ -68,7 +68,7 @@ export const renderEngineType = ({ model }) => {
   const renderOptions = () => {
     const options = [
       { label: 'Apache Flink', value: EngineTypeEnum.FLINK, disabled: false, src: flinkAppSvg },
-      { label: 'Apache Spark', value: EngineTypeEnum.SPARK, disabled: true, src: sparkSvg },
+      { label: 'Apache Spark', value: EngineTypeEnum.SPARK, disabled: false, src: sparkSvg },
     ];
     return options.map(({ label, value, disabled, src }) => {
       return (
