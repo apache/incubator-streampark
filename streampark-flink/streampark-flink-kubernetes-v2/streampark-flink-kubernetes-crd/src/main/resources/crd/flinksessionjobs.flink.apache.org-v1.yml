@@ -35,11 +35,13 @@ spec:
     - description: Last observed state of the job.
       jsonPath: .status.jobStatus.state
       name: Job Status
+      priority: 0
       type: string
     - description: "Lifecycle state of the Flink resource (including being rolled\
         \ back, failed etc.)."
       jsonPath: .status.lifecycleState
       name: Lifecycle State
+      priority: 0
       type: string
     name: v1beta1
     schema:
@@ -70,6 +72,8 @@ spec:
                     type: integer
                   initialSavepointPath:
                     type: string
+                  checkpointTriggerNonce:
+                    type: integer
                   upgradeMode:
                     enum:
                     - savepoint
@@ -78,6 +82,8 @@ spec:
                     type: string
                   allowNonRestoredState:
                     type: boolean
+                  savepointRedeployNonce:
+                    type: integer
                 type: object
               restartNonce:
                 type: integer
@@ -184,9 +190,53 @@ spec:
                       lastPeriodicSavepointTimestamp:
                         type: integer
                     type: object
+                  checkpointInfo:
+                    properties:
+                      lastCheckpoint:
+                        properties:
+                          timeStamp:
+                            type: integer
+                          triggerType:
+                            enum:
+                            - MANUAL
+                            - PERIODIC
+                            - UPGRADE
+                            - UNKNOWN
+                            type: string
+                          formatType:
+                            enum:
+                            - FULL
+                            - INCREMENTAL
+                            - UNKNOWN
+                            type: string
+                          triggerNonce:
+                            type: integer
+                        type: object
+                      triggerId:
+                        type: string
+                      triggerTimestamp:
+                        type: integer
+                      triggerType:
+                        enum:
+                        - MANUAL
+                        - PERIODIC
+                        - UPGRADE
+                        - UNKNOWN
+                        type: string
+                      formatType:
+                        enum:
+                        - FULL
+                        - INCREMENTAL
+                        - UNKNOWN
+                        type: string
+                      lastPeriodicCheckpointTimestamp:
+                        type: integer
+                    type: object
                 type: object
               error:
                 type: string
+              observedGeneration:
+                type: integer
               lifecycleState:
                 enum:
                 - CREATED
