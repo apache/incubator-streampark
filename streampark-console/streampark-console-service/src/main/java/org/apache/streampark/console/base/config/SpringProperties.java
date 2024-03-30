@@ -58,7 +58,19 @@ public class SpringProperties {
     }
     switch (dialect.toLowerCase()) {
       case "mysql":
-        springConfig.put("spring.datasource.driver-class-name", "com.mysql.cj.jdbc.Driver");
+        try {
+          Class.forName("com.mysql.cj.jdbc.Driver");
+          springConfig.put("spring.datasource.driver-class-name", "com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+          try {
+            Class.forName("com.mysql.jdbc.Driver");
+            springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
+          } catch (ClassNotFoundException e1) {
+            throw new ExceptionInInitializerError(
+                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, please check the MySQL driver exists in the $streampark/lib,\n"
+                    + "Notice: The Mysql jdbc driver is incompatible with the Apache 2.0 license, You need to download the mysql jdbc driver jar and put it in $streampark/lib.");
+          }
+        }
         break;
       case "pgsql":
         springConfig.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
