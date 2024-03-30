@@ -107,9 +107,8 @@ public class SpringProperties {
       File file = new File(appHome + "/conf/config.yaml");
       if (file.exists() && file.isFile()) {
         Properties properties = new Properties();
-        Map<String, String> configMapping =
-            PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
-        properties.putAll(configMapping);
+        Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
+        properties.putAll(config);
         return properties;
       }
       throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
@@ -117,8 +116,8 @@ public class SpringProperties {
       InputStream inputStream =
           SpringProperties.class.getClassLoader().getResourceAsStream("config.yaml");
       Properties properties = new Properties();
-      Map<String, String> configMapping = PropertiesUtils.fromYamlFileAsJava(inputStream);
-      properties.putAll(configMapping);
+      Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(inputStream);
+      properties.putAll(config);
       return properties;
     }
   }
