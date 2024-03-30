@@ -25,14 +25,12 @@ import java.io._
 class FileUtilsTest extends AnyFunSuite {
 
   test("isJarFileType should return true for a valid jar file") {
-    // "PK\03\04"
     val jarFileContent = Array[Byte](0x50, 0x4b, 0x03, 0x04)
     val jarInputStream = new ByteArrayInputStream(jarFileContent)
     assert(FileUtils.isJarFileType(jarInputStream))
   }
 
   test("isJarFileType should return false for a non-jar file") {
-    // TEST
     val textFileContent = Array[Byte](0x54, 0x45, 0x53, 0x54)
     val textInputStream = new ByteArrayInputStream(textFileContent)
     assert(!FileUtils.isJarFileType(textInputStream))
