@@ -96,6 +96,7 @@
             <fileMode>0755</fileMode>
             <includes>
                 <include>config.yaml</include>
+                <include>logback.xml</include>
             </includes>
         </fileSet>
         <fileSet>

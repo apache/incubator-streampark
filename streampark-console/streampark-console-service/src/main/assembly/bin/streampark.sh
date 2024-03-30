@@ -412,6 +412,7 @@ start() {
   eval $NOHUP $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
@@ -484,6 +485,7 @@ start_docker() {
   $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
+    -Dlogging.config="${APP_CONF}/logback.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN
 
