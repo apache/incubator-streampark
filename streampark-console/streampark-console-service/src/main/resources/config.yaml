@@ -24,18 +24,21 @@ server.port: 10000
 server.session.ttl: 2h # unit[s|m|h|d], e.g: 24h, 2d....
 
 # see: https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java
+server.undertow.direct-buffers: true
 server.undertow.buffer-size: 1024
-server.undertow.direct-buffers: 1024
 server.undertow.threads.io: 16
 server.undertow.threads.worker: 256
 
 # system database, default h2, mysql|pgsql|h2
-datasource.dialect: mysql # h2, pgsql
+datasource.dialect: h2 # h2, pgsql
 #-------if datasource.dialect is mysql or pgsql, it is necessary to set-------
-datasource.username: root
-datasource.password: streampark
+datasource.username:
+datasource.password:
+# mysql jdbc url example:
+# datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+# postgresql jdbc url example:
 # datasource.url: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
-datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+datasource.url:
 #---------------------------------------------------------------------------------
 
 # Directory for storing locally built project

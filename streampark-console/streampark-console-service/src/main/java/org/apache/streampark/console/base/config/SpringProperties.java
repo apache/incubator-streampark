@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.console.base.config;
 
-import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,15 +27,16 @@ import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 public class SpringProperties {
 
-  public static Map<String, Object> getProperties() {
+  public static Properties get() {
     // 1) get spring config
-    Map<String, Object> springConfig = getSpringConfig();
+    Properties springConfig = getSpringConfig();
 
     // 2) get user config
-    Map<String, String> userConfig = getUserConfig();
+    Properties userConfig = getUserConfig();
 
     // 3) merge config
     mergeConfig(userConfig, springConfig);
@@ -43,13 +44,14 @@ public class SpringProperties {
     // 4) datasource
     dataSourceConfig(userConfig, springConfig);
 
+    // 5) system.setProperties
+    springConfig.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
+
     return springConfig;
   }
 
-  private static void dataSourceConfig(
-      Map<String, String> userConfig, Map<String, Object> springConfig) {
-
-    String dialect = userConfig.remove("datasource.dialect");
+  private static void dataSourceConfig(Properties userConfig, Properties springConfig) {
+    String dialect = userConfig.getProperty("datasource.dialect", "").toString();
     if (StringUtils.isBlank(dialect)) {
       throw new ExceptionInInitializerError(
           "datasource.dialect is required, please check config.yaml");
@@ -79,8 +81,7 @@ public class SpringProperties {
     }
   }
 
-  private static void mergeConfig(
-      Map<String, String> userConfig, Map<String, Object> springConfig) {
+  private static void mergeConfig(Properties userConfig, Properties springConfig) {
 
     Map<String, String> configMapping = Maps.newHashMap();
     configMapping.put("datasource.username", "spring.datasource.username");
@@ -89,7 +90,7 @@ public class SpringProperties {
 
     userConfig.forEach(
         (k, v) -> {
-          if (StringUtils.isNotBlank(v)) {
+          if (StringUtils.isNoneBlank(k.toString(), v.toString())) {
             String key = configMapping.get(k);
             if (key != null) {
               springConfig.put(key, v);
@@ -100,23 +101,30 @@ public class SpringProperties {
         });
   }
 
-  private static Map<String, String> getUserConfig() {
-    String appHome = SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME(), null);
+  private static Properties getUserConfig() {
+    String appHome = WebUtils.getAppHome();
     if (appHome != null) {
       File file = new File(appHome + "/conf/config.yaml");
       if (file.exists() && file.isFile()) {
-        return PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
+        Properties properties = new Properties();
+        Map<String, String> configMapping =
+            PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
+        properties.putAll(configMapping);
+        return properties;
       }
+      throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
     } else {
       InputStream inputStream =
           SpringProperties.class.getClassLoader().getResourceAsStream("config.yaml");
-      return PropertiesUtils.fromYamlFileAsJava(inputStream);
+      Properties properties = new Properties();
+      Map<String, String> configMapping = PropertiesUtils.fromYamlFileAsJava(inputStream);
+      properties.putAll(configMapping);
+      return properties;
     }
-    throw new ExceptionInInitializerError("config.yaml not found");
   }
 
-  private static Map<String, Object> getSpringConfig() {
-    Map<String, Object> config = Maps.newHashMap();
+  private static Properties getSpringConfig() {
+    Properties config = new Properties();
     // env
     config.put("spring.devtools.restart.enabled", "false");
     config.put("spring.aop.proxy-target-class", "true");

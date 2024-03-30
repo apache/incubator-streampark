@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class JWTUtil {
 
-  private static Long TTL_SECOND;
+  private static Long ttlOfSecond;
 
   /**
    * verify token
@@ -114,7 +114,7 @@ public class JWTUtil {
   }
 
   public static Long getTTLOfSecond() {
-    if (TTL_SECOND == null) {
+    if (ttlOfSecond == null) {
       String ttl = System.getProperty("server.session.ttl", "24h").trim();
       String regexp = "^\\d+(s|m|h|d)$";
       Pattern pattern = Pattern.compile(regexp);
@@ -127,15 +127,15 @@ public class JWTUtil {
       Long second = Long.parseLong(time);
       switch (unit) {
         case "m":
-          return TTL_SECOND = second * 60;
+          return ttlOfSecond = second * 60;
         case "h":
-          return TTL_SECOND = second * 60 * 60;
+          return ttlOfSecond = second * 60 * 60;
         case "d":
-          return TTL_SECOND = second * 24 * 60 * 60;
+          return ttlOfSecond = second * 24 * 60 * 60;
         default:
-          return TTL_SECOND = second;
+          return ttlOfSecond = second;
       }
     }
-    return TTL_SECOND;
+    return ttlOfSecond;
   }
 }

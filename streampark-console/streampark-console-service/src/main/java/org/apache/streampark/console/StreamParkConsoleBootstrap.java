@@ -25,8 +25,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.util.Map;
-
 /**
  *
  *
@@ -52,9 +50,9 @@ import java.util.Map;
 public class StreamParkConsoleBootstrap extends SpringBootServletInitializer {
 
   public static void main(String[] args) throws Exception {
-    Map<String, Object> properties = SpringProperties.getProperties();
-    properties.forEach((k, v) -> System.setProperty(k, v.toString()));
-    SpringApplicationBuilder builder = new SpringApplicationBuilder().properties(properties);
-    builder.sources(StreamParkConsoleBootstrap.class).run(args);
+    new SpringApplicationBuilder()
+        .properties(SpringProperties.get())
+        .sources(StreamParkConsoleBootstrap.class)
+        .run(args);
   }
 }

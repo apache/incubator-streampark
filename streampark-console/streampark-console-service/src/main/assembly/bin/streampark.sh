@@ -137,6 +137,12 @@ APP_OUT="$APP_LOG"/streampark.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
+CONFIG="${APP_CONF}/config.yaml"
+if [[ ! -f "$CONFIG" ]] ; then
+  echo_r "ERROR: $CONFIG invalid or not found! please check.";
+  exit 1;
+fi
+
 # Ensure that any user defined CLASSPATH variables are not used on startup,
 # but allow them to be specified in setenv.sh, in rare case when it is needed.
 CLASSPATH=
@@ -278,21 +284,18 @@ print_logo() {
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
-parse_yaml() {
-   local prefix=$2
-   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-   sed -ne "s|^\($s\):|\1|" \
-        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
-   awk -F$fs '{
-      indent = length($1)/2;
-      vname[indent] = $2;
-      for (i in vname) {if (i > indent) {delete vname[i]}}
-      if (length($3) > 0) {
-         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
-      }
-   }'
+read_config() {
+  local prop_key=$1
+  local value
+  while IFS=':' read -r k v; do
+    k="${k/[[:space:]]/}"
+    v="${v/[[:space:]]/}"
+    if [[ ! $k = \#* ]] && [[ $k = $prop_key ]]; then
+      value=$v
+      break
+    fi
+  done < "$CONFIG"
+  echo "$value"
 }
 
 # shellcheck disable=SC2120
@@ -313,32 +316,25 @@ get_pid() {
     fi
   fi
 
-  # shellcheck disable=SC2006
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
+  local serverPort=$(read_config "server.port")
+  if [ x"${serverPort}" == x"" ]; then
+    echo_r "server.port is required, please check $CONFIG"
     exit 1;
-  fi
-
-  # shellcheck disable=SC2046
-  eval $(parse_yaml "${PROPER}" "conf_")
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2155
-  # shellcheck disable=SC2116
-  local serverPort=$(echo "$conf_server_port")
-  # shellcheck disable=SC2006
-  # shellcheck disable=SC2155
-  local used=`lsof -i:"$serverPort" | wc -l`
-  if [ "$used" -gt 0 ]; then
-    # shellcheck disable=SC2006
-    local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
-    if [ ! -z $PID ]; then
-      echo $PID
-    else
-      echo 0
-    fi
   else
-    echo 0
+     # shellcheck disable=SC2006
+      # shellcheck disable=SC2155
+      local used=`lsof -i:"$serverPort" | wc -l`
+      if [ "$used" -gt 0 ]; then
+        # shellcheck disable=SC2006
+        local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
+        if [ ! -z $PID ]; then
+          echo $PID
+        else
+          echo 0
+        fi
+      else
+        echo 0
+      fi
   fi
 }
 
@@ -365,22 +361,9 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
-    exit 1;
-  else
-    echo_g "Usage: config file: $PROPER ";
-  fi
-
-  # shellcheck disable=SC2046
-  eval $(parse_yaml "${PROPER}" "conf_")
-  # shellcheck disable=SC2001
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2155
-  local workspace=$(echo "$conf_streampark_workspace_local" | sed 's/#.*$//g')
+  local workspace=$(read_config "streampark.workspace.local")
   if [[ ! -d $workspace ]]; then
-    echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in application.yml"
+    echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please check $CONFIG"
     echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
     exit 1;
   fi
@@ -429,8 +412,6 @@ start() {
   eval $NOHUP $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
-    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
-    -Dspring.config.location="${PROPER}" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
@@ -460,14 +441,6 @@ start_docker() {
       echo_w "Using JRE_HOME:   $JRE_HOME"
     fi
     echo_w "Using APP_PID:   $APP_PID"
-  fi
-
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
-    exit 1;
-  else
-    echo_g "Usage: config file: $PROPER ";
   fi
 
   if [ "${HADOOP_HOME}"x == ""x ]; then
