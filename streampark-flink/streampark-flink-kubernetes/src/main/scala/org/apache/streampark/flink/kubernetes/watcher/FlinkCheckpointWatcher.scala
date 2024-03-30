@@ -23,7 +23,6 @@ import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEven
 import org.apache.streampark.flink.kubernetes.model.{CheckpointCV, ClusterKey, TrackId}
 
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JNull}
 import org.json4s.JsonAST.JNothing
 import org.json4s.jackson.JsonMethods.parse
