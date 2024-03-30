@@ -19,16 +19,24 @@
 logging.level.root: info
 # server port
 server.port: 10000
+# The user's login session has a validity period. If it exceeds this time, the user will be automatically logout
+# unit: s|m|h|d, s: second, m:minute, h:hour, d: day
+server.session.ttl: 2h # unit[s|m|h|d], e.g: 24h, 2d....
+
 # see: https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java
-server.undertow.io-threads: 16
+server.undertow.buffer-size: 1024
+server.undertow.direct-buffers: 1024
+server.undertow.threads.io: 16
+server.undertow.threads.worker: 256
 
 # system database, default h2, mysql|pgsql|h2
-datasource.dialect: h2 # h2, pgsql
-# if datasource.dialect is mysql or pgsql, it is necessary to set...
+datasource.dialect: mysql # h2, pgsql
+#-------if datasource.dialect is mysql or pgsql, it is necessary to set-------
 datasource.username: root
 datasource.password: streampark
 # datasource.url: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
 datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+#---------------------------------------------------------------------------------
 
 # Directory for storing locally built project
 streampark.workspace.local: /tmp/streampark
@@ -39,17 +47,17 @@ streampark.workspace.remote: hdfs:///streampark/
 streampark.proxy.yarn-url:
 # lark proxy address, default https://open.feishu.cn
 streampark.proxy.lark-url:
-# flink on k8s ingress setting, If an ingress controller is specified in the configuration, the ingress class
-#  kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
-#  multiple ingress controllers in a production environment.
-streampark.k8s.ingress.class: nginx
 # flink on yarn or spark on yarn, monitoring job status from yarn, it is necessary to set hadoop.http.authentication.type
 streampark.yarn.http-auth: simple  # default simple, or kerberos
 # flink on yarn or spark on yarn, it is necessary to set
 streampark.hadoop-user-name: hdfs
+# flink on k8s ingress setting, If an ingress controller is specified in the configuration, the ingress class
+#  kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
+#  multiple ingress controllers in a production environment.
+streampark.flink-k8s.ingress.class: nginx
 
 # sign streampark with ldap.
-ldap.enable: false  # Is ldap enabled? If so, please modify the urls
+ldap.enable: false  # ldap enabled
 ldap.urls: ldap://99.99.99.99:389 #AD server IP, default port 389
 ldap.base-dn: dc=streampark,dc=com  # Login Account
 ldap.username: cn=Manager,dc=streampark,dc=com
