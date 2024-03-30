@@ -16,6 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
+import org.apache.streampark.common.conf.ConfigConst.{KEY_SECURITY_KERBEROS_DEBUG, KEY_SECURITY_KERBEROS_ENABLE, KEY_SECURITY_KERBEROS_KEYTAB, KEY_SECURITY_KERBEROS_KRB5_CONF, KEY_SECURITY_KERBEROS_PRINCIPAL}
 import org.apache.streampark.common.fs.LfsOperator
 
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
@@ -32,10 +34,43 @@ import scala.util.{Failure, Success, Try}
 /** Hadoop client configuration tools mainly for flink use. */
 object HadoopConfigUtils {
 
-  val HADOOP_CLIENT_CONF_FILES: Array[String] =
+  private[this] lazy val kerberosConf: Map[String, String] = {
+    val map = System.getProperties.filter(_._1.startsWith("security.kerberos")).toMap
+    map match {
+      case m if m.nonEmpty => m
+      case _ =>
+        val appHome = SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null)
+        val file = new File(s"$appHome/conf/kerberos.yml")
+        if (file.exists() && file.isFile) {
+          PropertiesUtils.fromYamlFile(file.getAbsolutePath)
+        } else {
+          Map.empty[String, String]
+        }
+    }
+  }
+
+  lazy val hadoopUserName: String =
+    InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
+
+  lazy val kerberosDebug =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
+
+  lazy val kerberosEnable =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false").toBoolean
+
+  lazy val kerberosPrincipal =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
+
+  val kerberosKeytab =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
+
+  val kerberosKrb5 =
+    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KRB5_CONF, "")
+
+  private val HADOOP_CLIENT_CONF_FILES: Array[String] =
     Array("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
 
-  val HIVE_CLIENT_CONF_FILES: Array[String] =
+  private val HIVE_CLIENT_CONF_FILES: Array[String] =
     Array("core-site.xml", "hdfs-site.xml", "hive-site.xml")
 
   /** Get Hadoop configuration directory path from system. */

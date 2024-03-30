@@ -265,7 +265,8 @@ object YarnUtils extends Logger {
         })
     } else {
       val url =
-        if (!hasYarnHttpSimpleAuth) reqUrl else s"$reqUrl?user.name=${HadoopUtils.hadoopUserName}"
+        if (!hasYarnHttpSimpleAuth) reqUrl
+        else s"$reqUrl?user.name=${HadoopConfigUtils.hadoopUserName}"
       HttpClientUtils.httpGetRequest(url, config)
     }
   }

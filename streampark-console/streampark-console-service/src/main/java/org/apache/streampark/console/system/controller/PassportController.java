@@ -20,7 +20,6 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -55,8 +54,6 @@ import java.util.Map;
 public class PassportController {
 
   @Autowired private UserService userService;
-
-  @Autowired private ShiroProperties properties;
 
   @Autowired private Authenticator authenticator;
 
@@ -95,7 +92,7 @@ public class PassportController {
     this.userService.updateLoginTime(username);
     String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
 
-    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getJwtTimeOut());
+    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
     String ttl = DateUtils.formatFullTime(expireTime);
 
     // shiro login

@@ -23,9 +23,10 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class IngressStrategyV1 extends IngressStrategy {
 
@@ -35,17 +36,25 @@ class IngressStrategyV1 extends IngressStrategy {
     Utils.using(new DefaultKubernetesClient) {
       client =>
         Try {
-          Option(client.network.v1.ingresses.inNamespace(nameSpace).withName(clusterId).get)
-            .map(ingress => ingress.getSpec.getRules.get(0))
-            .map(rule => rule.getHost -> rule.getHttp.getPaths.get(0).getPath)
-            .map { case (host, path) => s"http://$host$path" }
-            .getOrElse {
-              Utils.using(clusterClient)(client => client.getWebInterfaceURL)
-            }
-        }.recover {
-          case e =>
+          val ingress =
+            Try(client.network.v1.ingresses().inNamespace(nameSpace).withName(clusterId).get())
+              .getOrElse(null)
+          if (ingress == null) {
+            Utils.using(clusterClient)(client => client.getWebInterfaceURL)
+          } else {
+            Option(ingress)
+              .map(ingress => ingress.getSpec.getRules.head)
+              .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
+              .map { case (host, path) => s"http://$host$path" }
+              .getOrElse {
+                Utils.using(clusterClient)(client => client.getWebInterfaceURL)
+              }
+          }
+        } match {
+          case Success(value) => value
+          case Failure(e) =>
             throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
-        }.get
+        }
     }
   }
 

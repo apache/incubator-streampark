@@ -1,0 +1,68 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# logging level
+logging.level.root: info
+# server port
+server.port: 10000
+# see: https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java
+server.undertow.io-threads: 16
+
+# system database, default h2, mysql|pgsql|h2
+datasource.dialect: h2 # h2, pgsql
+# if datasource.dialect is mysql or pgsql, it is necessary to set...
+datasource.username: root
+datasource.password: streampark
+# datasource.url: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+
+# Directory for storing locally built project
+streampark.workspace.local: /tmp/streampark
+# The root hdfs path of the jars, Same as yarn.provided.lib.dirs for flink on yarn-application
+# and Same as --jars for spark on yarn
+streampark.workspace.remote: hdfs:///streampark/
+# hadoop yarn proxy path, e.g: knox process address https://streampark.com:8443/proxy/yarn
+streampark.proxy.yarn-url:
+# lark proxy address, default https://open.feishu.cn
+streampark.proxy.lark-url:
+# flink on k8s ingress setting, If an ingress controller is specified in the configuration, the ingress class
+#  kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
+#  multiple ingress controllers in a production environment.
+streampark.k8s.ingress.class: nginx
+# flink on yarn or spark on yarn, monitoring job status from yarn, it is necessary to set hadoop.http.authentication.type
+streampark.yarn.http-auth: simple  # default simple, or kerberos
+# flink on yarn or spark on yarn, it is necessary to set
+streampark.hadoop-user-name: hdfs
+
+# sign streampark with ldap.
+ldap.enable: false  # Is ldap enabled? If so, please modify the urls
+ldap.urls: ldap://99.99.99.99:389 #AD server IP, default port 389
+ldap.base-dn: dc=streampark,dc=com  # Login Account
+ldap.username: cn=Manager,dc=streampark,dc=com
+ldap.password: streampark
+ldap.user.identity-attribute: uid
+ldap.user.email-attribute: mail
+
+# flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication,
+# it is necessary to set up Kerberos authentication related parameters.
+security.kerberos.login.enable: false
+security.kerberos.login.debug: false
+# kerberos principal path
+security.kerberos.login.principal:
+security.kerberos.login.krb5:
+security.kerberos.login.keytab:
+security.kerberos.ttl: 2h # unit [s|m|h|d]

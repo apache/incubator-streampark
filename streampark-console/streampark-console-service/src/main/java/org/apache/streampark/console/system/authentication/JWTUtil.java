@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.console.base.properties.ShiroProperties;
-import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 
 import com.auth0.jwt.JWT;
@@ -28,12 +26,12 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class JWTUtil {
 
-  private static final long JWT_TIME_OUT =
-      SpringContextUtils.getBean(ShiroProperties.class).getJwtTimeOut() * 1000;
+  private static Long TTL_SECOND;
 
   /**
    * verify token
@@ -90,7 +88,9 @@ public class JWTUtil {
    */
   public static String sign(
       Long userId, String userName, String secret, AuthenticationType authType) {
-    return sign(userId, userName, secret, authType, getExpireTime());
+    Long second = getTTLOfSecond() * 1000;
+    Long ttl = System.currentTimeMillis() + second;
+    return sign(userId, userName, secret, authType, ttl);
   }
 
   /**
@@ -113,8 +113,29 @@ public class JWTUtil {
         .sign(algorithm);
   }
 
-  /** get token expire timestamp */
-  private static Long getExpireTime() {
-    return System.currentTimeMillis() + JWT_TIME_OUT;
+  public static Long getTTLOfSecond() {
+    if (TTL_SECOND == null) {
+      String ttl = System.getProperty("server.session.ttl", "24h").trim();
+      String regexp = "^\\d+(s|m|h|d)$";
+      Pattern pattern = Pattern.compile(regexp);
+      if (!pattern.matcher(ttl).matches()) {
+        throw new IllegalArgumentException(
+            "server.session.ttl is invalid, Time units must be [s|m|h|d], e.g: 24h, 2d... please check config.yaml ");
+      }
+      String unit = ttl.substring(ttl.length() - 1);
+      String time = ttl.substring(0, ttl.length() - 1);
+      Long second = Long.parseLong(time);
+      switch (unit) {
+        case "m":
+          return TTL_SECOND = second * 60;
+        case "h":
+          return TTL_SECOND = second * 60 * 60;
+        case "d":
+          return TTL_SECOND = second * 24 * 60 * 60;
+        default:
+          return TTL_SECOND = second;
+      }
+    }
+    return TTL_SECOND;
   }
 }

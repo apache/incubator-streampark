@@ -17,10 +17,15 @@
 
 package org.apache.streampark.console;
 
+import org.apache.streampark.console.base.config.SpringProperties;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.Map;
 
 /**
  *
@@ -44,9 +49,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
-public class StreamParkConsoleBootstrap {
+public class StreamParkConsoleBootstrap extends SpringBootServletInitializer {
 
-  public static void main(String[] args) {
-    SpringApplication.run(StreamParkConsoleBootstrap.class, args);
+  public static void main(String[] args) throws Exception {
+    Map<String, Object> properties = SpringProperties.getProperties();
+    properties.forEach((k, v) -> System.setProperty(k, v.toString()));
+    SpringApplicationBuilder builder = new SpringApplicationBuilder().properties(properties);
+    builder.sources(StreamParkConsoleBootstrap.class).run(args);
   }
 }
