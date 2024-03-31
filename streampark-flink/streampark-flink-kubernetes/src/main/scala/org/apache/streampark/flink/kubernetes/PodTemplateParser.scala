@@ -70,7 +70,8 @@ object PodTemplateParser {
           }))
     }
 
-    val enableSpecState = root.containsKey("spec") && Try(!root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)
+    val enableSpecState = root.containsKey("spec") && Try(
+      !root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)
     if (enableSpecState) {
       res.put("spec", root.get("spec"))
     }

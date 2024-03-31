@@ -228,7 +228,8 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
       registerAddress: String,
       imageNamespace: String): String = {
     var tagName = if (tag.contains("/")) tag else s"$imageNamespace/$tag"
-    val addRegisterAddressState = StringUtils.isNotBlank(registerAddress) && !tagName.startsWith(registerAddress)
+    val addRegisterAddressState =
+      StringUtils.isNotBlank(registerAddress) && !tagName.startsWith(registerAddress)
     if (addRegisterAddressState) {
       tagName = s"$registerAddress/$tagName"
     }

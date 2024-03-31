@@ -254,10 +254,11 @@ object MavenTool extends Logger {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {
-      val isFilteredState = name.startsWith("META-INF/") && name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")
+      val isFilteredState = name.startsWith("META-INF/") && name.endsWith(".SF") || name.endsWith(
+        ".DSA") || name.endsWith(".RSA")
       if (isFilteredState) {
-          logInfo(s"shade ignore file: $name")
-          return true
+        logInfo(s"shade ignore file: $name")
+        return true
       }
       false
     }

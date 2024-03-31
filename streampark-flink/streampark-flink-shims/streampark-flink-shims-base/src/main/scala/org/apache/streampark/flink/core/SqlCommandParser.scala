@@ -643,7 +643,10 @@ object SqlSplitter {
     for (singleCommentPrefix <- singleLineCommentPrefixList) {
       singleCommentPrefix.length match {
         case 1 if curChar == singleCommentPrefix.charAt(0) => flag = true
-        case 2 if curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(1) => flag = true
+        case 2
+            if curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(
+              1) =>
+          flag = true
         case _ =>
       }
     }

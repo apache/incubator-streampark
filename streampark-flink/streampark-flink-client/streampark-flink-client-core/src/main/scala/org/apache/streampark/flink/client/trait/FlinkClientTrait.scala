@@ -472,8 +472,9 @@ trait FlinkClientTrait extends Logger {
     }
 
     // execution.runtime-mode
-    val addRuntimeModeState = submitRequest.properties.nonEmpty && submitRequest.properties.containsKey(
-      ExecutionOptions.RUNTIME_MODE.key())
+    val addRuntimeModeState =
+      submitRequest.properties.nonEmpty && submitRequest.properties.containsKey(
+        ExecutionOptions.RUNTIME_MODE.key())
     if (addRuntimeModeState) {
       programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
       programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
