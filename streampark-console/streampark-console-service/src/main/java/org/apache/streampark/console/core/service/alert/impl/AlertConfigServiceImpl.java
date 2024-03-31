@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -79,30 +80,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     if (alertConfig == null) {
       return false;
     }
-    if (entity.getUserId() != null) {
-      alertConfig.setUserId(entity.getUserId());
-    }
-    if (entity.getAlertName() != null) {
-      alertConfig.setAlertName(entity.getAlertName());
-    }
-    if (entity.getAlertType() != null) {
-      alertConfig.setAlertType(entity.getAlertType());
-    }
-    if (entity.getEmailParams() != null) {
-      alertConfig.setEmailParams(entity.getEmailParams());
-    }
-    if (entity.getDingTalkParams() != null) {
-      alertConfig.setDingTalkParams(entity.getDingTalkParams());
-    }
-    if (entity.getWeComParams() != null) {
-      alertConfig.setWeComParams(entity.getWeComParams());
-    }
-    if (entity.getHttpCallbackParams() != null) {
-      alertConfig.setHttpCallbackParams(entity.getHttpCallbackParams());
-    }
-    if (entity.getLarkParams() != null) {
-      alertConfig.setLarkParams(entity.getLarkParams());
-    }
+    BeanUtil.copyIgnoreNull(entity, alertConfig, AlertConfig::getId, AlertConfig::getCreateTime);
     return super.updateById(alertConfig);
   }
 
