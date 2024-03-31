@@ -90,7 +90,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
     SavePointServiceImpl savePointServiceImpl = (SavePointServiceImpl) savePointService;
     Application app = new Application();
     Long appId = 1L;
-    Long appCfgId = 1L;
+    Long appConfigId = 1L;
     app.setId(appId);
 
     // Test for non-(StreamPark job Or FlinkSQL job)
@@ -109,13 +109,13 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
     // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
     ApplicationConfig appCfg = new ApplicationConfig();
-    appCfg.setId(appCfgId);
+    appCfg.setId(appConfigId);
     appCfg.setAppId(appId);
     appCfg.setContent("state.savepoints.dir=hdfs:///test");
     appCfg.setFormat(ConfigFileTypeEnum.PROPERTIES.getValue());
     configService.save(appCfg);
     assertThat(savePointServiceImpl.getSavepointFromConfig(app)).isNull();
-    appCfg = configService.getById(appCfgId);
+    appCfg = configService.getById(appConfigId);
 
     // Test for (StreamPark job or FlinkSQL job) with application config and enabled checkpoint and
     // configured value.
