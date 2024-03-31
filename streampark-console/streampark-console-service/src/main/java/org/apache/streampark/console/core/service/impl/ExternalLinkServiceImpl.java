@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -71,18 +72,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
   @Override
   public boolean updateById(ExternalLink externalLink) {
     ExternalLink link = baseMapper.selectById(externalLink.getId());
-    if (externalLink.getBadgeLabel() != null) {
-      link.setBadgeLabel(externalLink.getBadgeLabel());
-    }
-    if (externalLink.getBadgeColor() != null) {
-      link.setBadgeColor(externalLink.getBadgeColor());
-    }
-    if (externalLink.getBadgeName() != null) {
-      link.setBadgeName(externalLink.getBadgeName());
-    }
-    if (externalLink.getLinkUrl() != null) {
-      link.setLinkUrl(externalLink.getLinkUrl());
-    }
+    BeanUtil.copyIgnoreNull(externalLink, link, ExternalLink::getId, ExternalLink::getCreateTime);
     link.setModifyTime(new Date());
     return super.updateById(link);
   }
