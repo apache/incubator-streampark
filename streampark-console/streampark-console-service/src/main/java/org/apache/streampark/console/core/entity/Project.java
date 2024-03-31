@@ -254,10 +254,10 @@ public class Project implements Serializable {
   }
 
   private String getIllegalArgs(String param) {
-    Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
+    Pattern pattern = Pattern.compile("(`(.?|\\s)*`)|(\\$\\((.?|\\s)*\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
+      return matcher.group(1) == null ? matcher.group(3) : matcher.group(1);
     }
 
     Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
