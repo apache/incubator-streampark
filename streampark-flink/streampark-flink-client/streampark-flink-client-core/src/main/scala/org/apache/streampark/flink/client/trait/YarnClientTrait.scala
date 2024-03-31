@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.util.{ExceptionUtils, Utils}
+import org.apache.streampark.common.util.{AssertUtils, ExceptionUtils, Utils}
 import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.flink.client.bean._
 
@@ -47,10 +47,10 @@ trait YarnClientTrait extends FlinkClientTrait {
     flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, savepointRequestTrait.clusterId)
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConf)
-    if (applicationId == null) {
-      throw new FlinkException(
-        "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-    }
+    AssertUtils.required(
+      applicationId != null,
+      "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+
     val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
     clusterDescriptor
       .retrieve(applicationId)
