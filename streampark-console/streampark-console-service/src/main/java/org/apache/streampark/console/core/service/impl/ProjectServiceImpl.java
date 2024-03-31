@@ -296,7 +296,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
     }
     LambdaQueryWrapper<Project> queryWrapper =
-        new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
+        new LambdaQueryWrapper<Project>()
+            .eq(Project::getName, project.getName())
+            .eq(Project::getTeamId, project.getTeamId());
     return this.baseMapper.selectCount(queryWrapper) > 0;
   }
 
