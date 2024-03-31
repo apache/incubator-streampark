@@ -44,7 +44,6 @@ import zio.{Console, ZIO}
 class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
 
   "Deploy a simple Flink application job to Kubernetes" in unsafeRun {
-
     val spec = FlinkDeploymentDef(
       name = "simple-appjob",
       namespace = "fdev",
@@ -116,13 +115,31 @@ class UsingOperator extends AnyWordSpecLike with BeforeAndAfterAll {
     } yield ()
   }
 
-  "Deploy a simple Flink application job with flinkConfiguration to Kubernetes and subscribe job status and endpoint" in unsafeRun {
+  "Deploy a simple Flink session mode job to Kubernetes and subscribe job status and endpoint" in unsafeRun {
+    val spec = FlinkSessionJobDef(
+      namespace = "fdev",
+      name = "simple-sessionjob",
+      deploymentName = "simple-session",
+      job = JobDef(
+        jarURI = s"$assetPath/StateMachineExample.jar",
+        parallelism = 1
+      )
+    )
+    for {
+      _ <- FlinkK8sOperator.deploySessionJob(114515, spec)
+      // subscribe job status
+      _ <- FlinkK8sObserver.evaluatedJobSnaps.flatSubscribeValues().debugPretty.runDrain.fork
+      _ <- FlinkK8sObserver.restSvcEndpointSnaps.flatSubscribeValues().debugPretty.runDrain.fork
+      _ <- ZIO.never
+    } yield ()
+  }
+
+  "Deploy a simple Flink application job to Kubernetes and subscribe job status and endpoint" in unsafeRun {
     val spec = FlinkDeploymentDef(
       name = "simple-appjob",
       namespace = "fdev",
       image = "flink:1.16",
       flinkVersion = FlinkVersion.V1_16,
-      flinkConfiguration = Map("taskmanager.numberOfTaskSlots" -> "2"),
       jobManager = JobManagerDef(cpu = 1, memory = "1024m", "2G"),
       taskManager = TaskManagerDef(cpu = 1, memory = "1024m", "2G"),
       job = JobDef(
