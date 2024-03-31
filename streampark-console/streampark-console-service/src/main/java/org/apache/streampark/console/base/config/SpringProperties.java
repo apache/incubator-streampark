@@ -67,8 +67,8 @@ public class SpringProperties {
             springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
           } catch (ClassNotFoundException e1) {
             throw new ExceptionInInitializerError(
-                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, please check the MySQL driver exists in the $streampark/lib,\n"
-                    + "Notice: The Mysql jdbc driver is incompatible with the Apache 2.0 license, You need to download the mysql jdbc driver jar and put it in $streampark/lib.");
+                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
+                    + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
           }
         }
         break;
@@ -102,13 +102,11 @@ public class SpringProperties {
 
     userConfig.forEach(
         (k, v) -> {
-          if (StringUtils.isNoneBlank(k.toString(), v.toString())) {
-            String key = configMapping.get(k);
-            if (key != null) {
-              springConfig.put(key, v);
-            } else {
-              springConfig.put(k, v);
-            }
+          String key = configMapping.get(k);
+          if (key != null) {
+            springConfig.put(key, v);
+          } else {
+            springConfig.put(k, v);
           }
         });
   }
@@ -136,13 +134,13 @@ public class SpringProperties {
 
   private static Properties getSpringConfig() {
     Properties config = new Properties();
-    // env
+    // basic
+    config.put("spring.application.name", "Apache StreamPark");
+    config.put("spring.main.banner-mode", "false");
     config.put("spring.devtools.restart.enabled", "false");
     config.put("spring.aop.proxy-target-class", "true");
     config.put("spring.messages.encoding", "utf-8");
     config.put("spring.main.allow-circular-references", "true");
-    config.put("spring.main.banner-mode", "false");
-    config.put("spring.application.name", "StreamPark");
     config.put("spring.mvc.converters.preferred-json-mapper", "jackson");
 
     // jackson

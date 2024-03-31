@@ -31,6 +31,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
+import scala.util.Try
 
 object PropertiesUtils extends Logger {
 
@@ -70,13 +71,12 @@ object PropertiesUtils extends Logger {
             })
           .toMap
       case text =>
-        val value = text match {
-          case null => ""
-          case other => other.toString
-        }
-        prefix match {
-          case "" => proper += k -> value
-          case other => proper += s"$other.$k" -> value
+        if (text != null) {
+          val value = text.toString.trim
+          prefix match {
+            case "" => proper += k -> value
+            case other => proper += s"$other.$k" -> value
+          }
         }
         proper.toMap
     }
