@@ -66,12 +66,15 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    baseMapper.updateById(externalLink);
+    updateById(externalLink);
   }
 
   @Override
   public boolean updateById(ExternalLink externalLink) {
     ExternalLink link = baseMapper.selectById(externalLink.getId());
+    if (link == null) {
+      return false;
+    }
     BeanUtil.copyIgnoreNull(externalLink, link, ExternalLink::getId, ExternalLink::getCreateTime);
     link.setModifyTime(new Date());
     return super.updateById(link);

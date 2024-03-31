@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -160,5 +161,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
     oldMember.setRoleId(member.getRoleId());
     updateById(oldMember);
+  }
+
+  @Override
+  public boolean updateById(Member entity) {
+    Member member = baseMapper.selectById(entity.getId());
+    if (member == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, member, Member::getId, Member::getCreateTime);
+    return super.updateById(member);
   }
 }

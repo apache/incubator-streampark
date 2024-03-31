@@ -265,6 +265,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public boolean updateById(Variable entity) {
     Variable variable = this.baseMapper.selectById(entity.getId());
+    if (variable == null) {
+      return false;
+    }
     BeanUtil.copyIgnoreNull(entity, variable, Variable::getId, Variable::getCreateTime);
     variable.setCreatorId(entity.getCreatorId());
     variable.setTeamId(entity.getTeamId());

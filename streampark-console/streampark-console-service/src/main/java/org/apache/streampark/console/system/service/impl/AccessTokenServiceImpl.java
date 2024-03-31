@@ -23,6 +23,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -123,5 +124,15 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   @Override
   public AccessToken getByUserId(Long userId) {
     return baseMapper.selectByUserId(userId);
+  }
+
+  @Override
+  public boolean updateById(AccessToken entity) {
+    AccessToken accessToken = baseMapper.selectById(entity.getId());
+    if (accessToken == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, accessToken, AccessToken::getId, AccessToken::getCreateTime);
+    return super.updateById(accessToken);
   }
 }

@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -152,6 +153,16 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   public void validity(Long id) {
     FlinkEnv flinkEnv = getById(id);
     checkOrElseAlert(flinkEnv);
+  }
+
+  @Override
+  public boolean updateById(FlinkEnv entity) {
+    FlinkEnv flinkEnv = baseMapper.selectById(entity.getId());
+    if (flinkEnv == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, flinkEnv, FlinkEnv::getId, FlinkEnv::getCreateTime);
+    return super.updateById(flinkEnv);
   }
 
   private void checkOrElseAlert(FlinkEnv flinkEnv) {
