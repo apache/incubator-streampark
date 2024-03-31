@@ -235,11 +235,10 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
       val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
 
-      if (
-        shutDownRequest.clusterId != null && kubeClientWrapper
-          .getService(shutDownRequest.clusterId)
-          .isPresent
-      ) {
+      val stopAndCleanupState = shutDownRequest.clusterId != null && kubeClientWrapper
+        .getService(shutDownRequest.clusterId)
+        .isPresent
+      if (stopAndCleanupState) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
         ShutDownResponse(shutDownRequest.clusterId)
       } else {
