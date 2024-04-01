@@ -29,12 +29,6 @@ import java.util.Set;
 /** Flink sql gateway's Factory for {@link SqlGatewayService}. */
 public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
-  public static final ConfigOption<String> BASE_URI =
-      ConfigOption.key("base-uri")
-          .stringType()
-          .noDefaultValue()
-          .withDescription("The base uri of the flink cluster.");
-
   @Override
   public String factoryIdentifier() {
     return "flink-v1";
@@ -60,4 +54,10 @@ public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
     String baseUri = context.getGateWayServiceOptions().get(BASE_URI.getKey());
     return new FlinkSqlGatewayImpl(baseUri);
   }
+
+  public static final ConfigOption<String> BASE_URI =
+      ConfigOption.key("base-uri")
+          .stringType()
+          .noDefaultValue()
+          .withDescription("The base uri of the flink cluster.");
 }

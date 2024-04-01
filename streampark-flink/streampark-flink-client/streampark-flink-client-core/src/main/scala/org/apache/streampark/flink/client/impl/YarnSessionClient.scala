@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.{AssertUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
@@ -69,10 +69,10 @@ object YarnSessionClient extends YarnClientTrait {
       logDebug(s"kerberos Security is Enabled...")
       val useTicketCache =
         flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(
-          s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-      }
+      AssertUtils.required(
+        HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
+        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!"
+      )
     }
 
     val shipFiles = new util.ArrayList[String]()
