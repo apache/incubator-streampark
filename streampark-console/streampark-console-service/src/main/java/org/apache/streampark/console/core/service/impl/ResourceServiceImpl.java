@@ -41,6 +41,7 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
@@ -209,7 +210,17 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     findResource.setDescription(resource.getDescription());
-    baseMapper.updateById(findResource);
+    updateById(findResource);
+  }
+
+  @Override
+  public boolean updateById(Resource entity) {
+    Resource resource = baseMapper.selectById(entity.getId());
+    if (resource == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, resource, Resource::getId, Resource::getCreateTime);
+    return super.updateById(resource);
   }
 
   @Override

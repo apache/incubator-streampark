@@ -15,36 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.entity;
+package org.apache.streampark.console.core.utils;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.func.Func1;
 
-import java.io.Serializable;
+/** Util class for bean */
+public class BeanUtil {
 
-@Data
-@TableName("t_setting")
-@Slf4j
-public class Setting implements Serializable {
-
-  private Integer orderNum;
-
-  private String settingName;
-
-  @TableId(type = IdType.INPUT)
-  private String settingKey;
-
-  private String settingValue;
-
-  private Integer type;
-
-  private String description;
-  private transient boolean editable = false;
-  private transient boolean submitting = false;
-
-  private transient String flinkHome;
-  private transient String flinkConf;
+  /**
+   * bean copy ignore null field
+   *
+   * @param source the source object for copy
+   * @param target the target object for copy
+   */
+  @SafeVarargs
+  public static <P, R> void copyIgnoreNull(
+      Object source, Object target, Func1<P, R>... ignoreProperties) {
+    cn.hutool.core.bean.BeanUtil.copyProperties(
+        source,
+        target,
+        CopyOptions.create().ignoreNullValue().setIgnoreProperties(ignoreProperties));
+  }
 }

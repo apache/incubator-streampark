@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.mapper.RoleMapper;
@@ -102,7 +103,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
   @Override
   public void updateRole(Role role) {
     role.setModifyTime(new Date());
-    baseMapper.updateById(role);
+    updateById(role);
     LambdaQueryWrapper<RoleMenu> queryWrapper =
         new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId());
     roleMenuMapper.delete(queryWrapper);
@@ -125,5 +126,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
               rm.setRoleId(role.getRoleId());
               this.roleMenuMapper.insert(rm);
             });
+  }
+
+  @Override
+  public boolean updateById(Role entity) {
+    Role role = baseMapper.selectById(entity.getRoleId());
+    if (role == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, role, Role::getRoleId, Role::getCreateTime);
+    return super.updateById(role);
   }
 }

@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.TeamMapper;
@@ -132,6 +133,16 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     oldTeam.setDescription(team.getDescription());
     oldTeam.setModifyTime(new Date());
     updateById(oldTeam);
+  }
+
+  @Override
+  public boolean updateById(Team entity) {
+    Team team = baseMapper.selectById(entity.getId());
+    if (team == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, team, Team::getId, Team::getCreateTime);
+    return super.updateById(team);
   }
 
   @Override

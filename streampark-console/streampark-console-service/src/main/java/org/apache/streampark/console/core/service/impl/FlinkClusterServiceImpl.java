@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -224,6 +225,21 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkK8sObserver.watchFlinkCluster(flinkCluster);
     }
     updateById(flinkCluster);
+  }
+
+  @Override
+  public boolean updateById(FlinkCluster entity) {
+    FlinkCluster flinkCluster = baseMapper.selectById(entity.getId());
+    if (flinkCluster == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, flinkCluster, FlinkCluster::getId, FlinkCluster::getCreateTime);
+    flinkCluster.setAddress(entity.getAddress());
+    flinkCluster.setJobManagerUrl(entity.getJobManagerUrl());
+    flinkCluster.setException(entity.getException());
+    flinkCluster.setEndTime(entity.getEndTime());
+    flinkCluster.setAlertId(entity.getAlertId());
+    return super.updateById(flinkCluster);
   }
 
   private void updateFlinkClusterForNonRemoteModes(

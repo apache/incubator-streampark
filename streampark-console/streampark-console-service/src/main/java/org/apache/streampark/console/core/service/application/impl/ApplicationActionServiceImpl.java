@@ -65,6 +65,7 @@ import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
@@ -251,7 +252,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     application.setOptionTime(new Date());
-    this.baseMapper.updateById(application);
+    updateById(application);
 
     Long userId = commonService.getUserId();
     if (!application.getUserId().equals(userId)) {
@@ -847,5 +848,20 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfFalse(
         flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
         "[StreamPark] The flink cluster not running, please start it");
+  }
+
+  @Override
+  public boolean updateById(Application application) {
+    Application app = getById(application.getId());
+    BeanUtil.copyIgnoreNull(application, app, Application::getId, Application::getCreateTime);
+    app.setAppId(application.getAppId());
+    app.setJobId(application.getJobId());
+    app.setJobManagerUrl(application.getJobManagerUrl());
+    app.setRestartSize(application.getRestartSize());
+    app.setAlertId(application.getAlertId());
+    app.setEndTime(application.getEndTime());
+    app.setHotParams(application.getHotParams());
+    app.setFlinkClusterId(application.getFlinkClusterId());
+    return super.updateById(app);
   }
 }

@@ -171,3 +171,5 @@ dependency:
       license: Eclipse Public License 2.0
     - name: org.slf4j:slf4j-api
       license: MIT License
+    - name: cn.hutool:hutool-core
+      license: MulanPSL-2.0

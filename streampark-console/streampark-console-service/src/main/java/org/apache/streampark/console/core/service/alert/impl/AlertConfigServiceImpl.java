@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.BeanUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -71,6 +72,16 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
   public boolean exist(AlertConfig alertConfig) {
     AlertConfig confByName = this.baseMapper.selectAlertConfByName(alertConfig);
     return confByName != null;
+  }
+
+  @Override
+  public boolean updateById(AlertConfig entity) {
+    AlertConfig alertConfig = baseMapper.selectById(entity.getId());
+    if (alertConfig == null) {
+      return false;
+    }
+    BeanUtil.copyIgnoreNull(entity, alertConfig, AlertConfig::getId, AlertConfig::getCreateTime);
+    return super.updateById(alertConfig);
   }
 
   @Override
