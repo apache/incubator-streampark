@@ -115,9 +115,9 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
             case Some(jobState) =>
               val trackId = id.copy(jobId = jobState.jobId)
               val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
-              if (
+              val updateState =
                 latest == null || latest.jobState != jobState.jobState || latest.jobId != jobState.jobId
-              ) {
+              if (updateState) {
                 // put job status to cache
                 watchController.jobStatuses.put(trackId, jobState)
                 // set jobId to trackIds
@@ -327,9 +327,9 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       pollEmitTime = pollEmitTime,
       pollAckTime = System.currentTimeMillis)
 
-    if (
+    val updateJobState =
       jobState == FlinkJobStateEnum.SILENT && latest != null && latest.jobState == FlinkJobStateEnum.SILENT
-    ) {
+    if (updateJobState) {
       Some(jobStatusCV.copy(pollEmitTime = latest.pollEmitTime, pollAckTime = latest.pollAckTime))
     } else {
       Some(jobStatusCV)

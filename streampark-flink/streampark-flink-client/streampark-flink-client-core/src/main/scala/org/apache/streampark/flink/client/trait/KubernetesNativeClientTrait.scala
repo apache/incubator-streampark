@@ -47,20 +47,20 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
         covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType.get))
 
-    if (submitRequest.buildResult != null) {
-      if (submitRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
-        val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
-        buildResult.podTemplatePaths.foreach(
-          p => {
-            if (PodTemplateTool.KUBERNETES_POD_TEMPLATE.key.equals(p._1)) {
-              flinkConfig.safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
-            } else if (PodTemplateTool.KUBERNETES_JM_POD_TEMPLATE.key.equals(p._1)) {
-              flinkConfig.safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
-            } else if (PodTemplateTool.KUBERNETES_TM_POD_TEMPLATE.key.equals(p._1)) {
-              flinkConfig.safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
-            }
-          })
-      }
+    val addBuildParamState =
+      submitRequest.buildResult != null && submitRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION
+    if (addBuildParamState) {
+      val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
+      buildResult.podTemplatePaths.foreach(
+        p => {
+          if (PodTemplateTool.KUBERNETES_POD_TEMPLATE.key.equals(p._1)) {
+            flinkConfig.safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
+          } else if (PodTemplateTool.KUBERNETES_JM_POD_TEMPLATE.key.equals(p._1)) {
+            flinkConfig.safeSet(KubernetesConfigOptions.JOB_MANAGER_POD_TEMPLATE, p._2)
+          } else if (PodTemplateTool.KUBERNETES_TM_POD_TEMPLATE.key.equals(p._1)) {
+            flinkConfig.safeSet(KubernetesConfigOptions.TASK_MANAGER_POD_TEMPLATE, p._2)
+          }
+        })
     }
 
     // add flink conf configuration, mainly to set the log4j configuration

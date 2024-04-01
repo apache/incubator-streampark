@@ -259,12 +259,11 @@ object YarnSessionClient extends YarnClientTrait {
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       val yarnClusterDescriptor = getSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
-      if (
-        FinalApplicationStatus.UNDEFINED.equals(
-          clusterDescriptor.getYarnClient
-            .getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId))
-            .getFinalApplicationStatus)
-      ) {
+      val shutDownState = FinalApplicationStatus.UNDEFINED.equals(
+        clusterDescriptor.getYarnClient
+          .getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId))
+          .getFinalApplicationStatus)
+      if (shutDownState) {
         val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
         client = clientProvider.getClusterClient
         client.shutDownCluster()
