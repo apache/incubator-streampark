@@ -72,6 +72,7 @@ public class SpringProperties {
           }
         }
         break;
+      case "postgresql":
       case "pgsql":
         springConfig.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
         break;
