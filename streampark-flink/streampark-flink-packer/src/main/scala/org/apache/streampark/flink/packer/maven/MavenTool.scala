@@ -65,11 +65,11 @@ object MavenTool extends Logger {
         "central",
         Constant.DEFAULT,
         InternalConfigHolder.get(MAVEN_REMOTE_URL))
-    val remoteRepository =
-      if (
+    val remoteRepository = {
+      val buildState =
         InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(
           MAVEN_AUTH_PASSWORD) == null
-      ) {
+      if (buildState) {
         builder.build()
       } else {
         val authentication = new AuthenticationBuilder()
@@ -78,6 +78,7 @@ object MavenTool extends Logger {
           .build()
         builder.setAuthentication(authentication).build()
       }
+    }
     List(remoteRepository)
   }
 
@@ -253,11 +254,11 @@ object MavenTool extends Logger {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {
-      if (name.startsWith("META-INF/")) {
-        if (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")) {
-          logInfo(s"shade ignore file: $name")
-          return true
-        }
+      val isFilteredState = name.startsWith("META-INF/") && name.endsWith(".SF") || name.endsWith(
+        ".DSA") || name.endsWith(".RSA")
+      if (isFilteredState) {
+        logInfo(s"shade ignore file: $name")
+        return true
       }
       false
     }
