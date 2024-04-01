@@ -107,27 +107,38 @@ public class Project implements Serializable {
 
   private transient String dateTo;
 
-  /** project source */
-  private transient String appSource;
-
   /** get project source */
   @JsonIgnore
   public File getAppSource() {
-    if (StringUtils.isBlank(appSource)) {
-      appSource = Workspace.PROJECT_LOCAL_PATH();
-    }
-    File sourcePath = new File(appSource);
+    File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
     if (!sourcePath.exists()) {
       sourcePath.mkdirs();
+    } else if (sourcePath.isFile()) {
+      throw new IllegalArgumentException(
+          "[StreamPark] project source base path: "
+              + sourcePath.getAbsolutePath()
+              + " must be directory");
     }
-    if (sourcePath.isFile()) {
-      throw new IllegalArgumentException("[StreamPark] sourcePath must be directory");
+
+    String sourceDir = getSourceDirName();
+    File srcFile =
+        new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
+    String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
+    if (srcFile.exists()) {
+      File newFile = new File(newPath);
+      if (!newFile.exists()) {
+        newFile.mkdirs();
+      }
+      // old project path move to new path
+      srcFile.getParentFile().renameTo(newFile);
     }
-    String branches = StringUtils.isBlank(this.getBranches()) ? "main" : this.getBranches();
+    return new File(newPath, sourceDir);
+  }
+
+  private String getSourceDirName() {
+    String branches = this.getBranches() == null ? "main" : this.getBranches();
     String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
-    String fullName = rootName.concat("-").concat(branches);
-    String path = String.format("%s/%s/%s", sourcePath.getAbsolutePath(), getName(), fullName);
-    return new File(path);
+    return rootName.concat("-").concat(branches);
   }
 
   @JsonIgnore
