@@ -31,6 +31,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
+import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
@@ -95,22 +96,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public RestResponse create(Project project) {
-    LambdaQueryWrapper<Project> queryWrapper =
-        new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
-    long count = count(queryWrapper);
     RestResponse response = RestResponse.success();
-    if (count == 0) {
-      Date date = new Date();
-      project.setCreateTime(date);
-      project.setModifyTime(date);
-      boolean status = save(project);
-      if (status) {
-        return response.message("Add project successfully").data(true);
-      } else {
-        return response.message("Add project failed").data(false);
-      }
+    project.setId(null);
+    ApiAlertException.throwIfTrue(
+        checkExists(project), "project name already exists, add project failed");
+    Date date = new Date();
+    project.setCreateTime(date);
+    project.setModifyTime(date);
+    boolean status = save(project);
+    if (status) {
+      return response.message("Add project successfully").data(true);
     } else {
-      throw new ApiAlertException("project name already exists,add project failed");
+      return response.message("Add project failed").data(false);
     }
   }
 
@@ -121,7 +118,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     Utils.notNull(project);
     ApiAlertException.throwIfFalse(
         project.getTeamId().equals(projectParam.getTeamId()),
-        "TeamId can't be changed, update project failed.");
+        "Team can't be changed, update project failed.");
     ApiAlertException.throwIfFalse(
         !project.getBuildState().equals(BuildState.BUILDING.get()),
         "The project is being built, update project failed.");
@@ -291,7 +288,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   public boolean checkExists(Project project) {
     if (project.getId() != null) {
       Project proj = getById(project.getId());
-      if (proj.getName().equals(project.getName())) {
+      if (proj != null && ObjectUtils.safeEquals(project.getName(), proj.getName())) {
         return false;
       }
     }
