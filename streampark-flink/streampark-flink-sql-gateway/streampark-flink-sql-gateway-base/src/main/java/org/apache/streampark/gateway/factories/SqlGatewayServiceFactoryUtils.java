@@ -18,7 +18,6 @@
 package org.apache.streampark.gateway.factories;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.gateway.ConfigOption;
 import org.apache.streampark.gateway.exception.ValidationException;
 import org.apache.streampark.gateway.service.SqlGatewayService;
@@ -60,11 +59,12 @@ public class SqlGatewayServiceFactoryUtils {
 
     List<String> identifiers = Arrays.asList(identifiersStr.split(Constant.SEMICOLON));
 
-    AssertUtils.required(
-        !identifiers.isEmpty(),
-        String.format(
-            "Service options do not contain an option key '%s' for discovering an service.",
-            SQL_GATEWAY_SERVICE_TYPE.getKey()));
+    if (identifiers.isEmpty()) {
+      throw new ValidationException(
+          String.format(
+              "Service options do not contain an option key '%s' for discovering an service.",
+              SQL_GATEWAY_SERVICE_TYPE.getKey()));
+    }
     validateSpecifiedServicesAreUnique(identifiers);
 
     List<SqlGatewayService> services = new ArrayList<>();
@@ -111,13 +111,14 @@ public class SqlGatewayServiceFactoryUtils {
               .sorted()
               .collect(Collectors.toList());
 
-      AssertUtils.required(
-          missingRequiredOptions.isEmpty(),
-          String.format(
-              "One or more required options are missing.\n\n"
-                  + "Missing required options are:\n\n"
-                  + "%s",
-              String.join("\n", missingRequiredOptions)));
+      if (!missingRequiredOptions.isEmpty()) {
+        throw new ValidationException(
+            String.format(
+                "One or more required options are missing.\n\n"
+                    + "Missing required options are:\n\n"
+                    + "%s",
+                String.join("\n", missingRequiredOptions)));
+      }
     }
   }
 
@@ -140,12 +141,13 @@ public class SqlGatewayServiceFactoryUtils {
     Set<String> uniqueIdentifiers = new HashSet<>();
 
     for (String identifier : identifiers) {
-      AssertUtils.required(
-          !uniqueIdentifiers.contains(identifier),
-          String.format(
-              "Get the duplicate service identifier '%s' for the option '%s'. "
-                  + "Please keep the specified service identifier unique.",
-              identifier, SQL_GATEWAY_SERVICE_TYPE.getKey()));
+      if (uniqueIdentifiers.contains(identifier)) {
+        throw new ValidationException(
+            String.format(
+                "Get the duplicate service identifier '%s' for the option '%s'. "
+                    + "Please keep the specified service identifier unique.",
+                identifier, SQL_GATEWAY_SERVICE_TYPE.getKey()));
+      }
       uniqueIdentifiers.add(identifier);
     }
   }
