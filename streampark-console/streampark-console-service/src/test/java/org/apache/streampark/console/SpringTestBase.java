@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,10 +48,12 @@ import java.util.Date;
 @AutoConfigureTestEntityManager
 @AutoConfigureWebTestClient(timeout = "60000")
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
+@ActiveProfiles("test")
 @SpringBootTest(
     classes = StreamParkConsoleBootstrap.class,
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     properties = {
+      "server.port=10000",
       "spring.application.name=Apache StreamPark",
       "spring.main.banner-mode=false",
       "spring.aop.proxy-target-class=true",
@@ -60,6 +63,7 @@ import java.util.Date;
       "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
       "spring.jackson.time-zone=GMT+8",
       "spring.jackson.deserialization.fail-on-unknown-properties=false",
+      "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
       "datasource.dialect=h2",
       "spring.datasource.driver-class-name=org.h2.Driver",
       "spring.datasource.username=sa",
