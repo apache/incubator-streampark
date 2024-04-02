@@ -199,7 +199,7 @@ public class Project implements Serializable {
 
   @JsonIgnore
   public String getMavenArgs() {
-    StringBuilder mvnArgBuffer = new StringBuilder("clean package -DskipTests ");
+    StringBuilder mvnArgBuffer = new StringBuilder(" clean package -DskipTests ");
     if (StringUtils.isNotBlank(this.buildArgs)) {
       mvnArgBuffer.append(this.buildArgs.trim());
     }
@@ -256,9 +256,9 @@ public class Project implements Serializable {
 
     if (useWrapper) {
       if (windows) {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd ");
+        mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
       } else {
-        mvn = WebUtils.getAppHome().concat("/bin/mvnw ");
+        mvn = WebUtils.getAppHome().concat("/bin/mvnw");
       }
     }
     return mvn.concat(mvnArgs);
