@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.conf.{CommonConfig, ConfigConst, InternalConfigHolder}
+import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.streampark.common.conf.ConfigConst._
 
 import org.apache.commons.collections.CollectionUtils
@@ -58,47 +58,15 @@ object HadoopUtils extends Logger {
 
   private[this] var tgt: KerberosTicket = _
 
-  lazy val hadoopUserName: String =
-    InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME)
-
-  private[this] lazy val kerberosConf: Map[String, String] =
-    SystemPropertyUtils.get(ConfigConst.KEY_APP_HOME, null) match {
-      case null =>
-        getClass.getResourceAsStream("/kerberos.yml") match {
-          case x if x != null => PropertiesUtils.fromYamlFile(x)
-          case _ => null
-        }
-      case f =>
-        val file = new File(s"$f/conf/kerberos.yml")
-        if (file.exists() && file.isFile) {
-          PropertiesUtils.fromYamlFile(file.getAbsolutePath)
-        } else null
-    }
-
-  private[this] lazy val kerberosDebug =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_DEBUG, "false")
-
-  private[this] lazy val kerberosEnable =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false").toBoolean
-
-  private[this] lazy val kerberosPrincipal =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
-
-  private[this] lazy val kerberosKeytab =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
-
-  private[this] lazy val kerberosKrb5 =
-    kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KRB5_CONF, "")
-
   private[this] lazy val configurationCache: util.Map[String, Configuration] =
     new ConcurrentHashMap[String, Configuration]()
 
   def getUgi(): UserGroupInformation = {
     if (ugi == null) {
-      ugi = if (kerberosEnable) {
+      ugi = if (HadoopConfigUtils.kerberosEnable) {
         getKerberosUGI()
       } else {
-        UserGroupInformation.createRemoteUser(hadoopUserName)
+        UserGroupInformation.createRemoteUser(HadoopConfigUtils.hadoopUserName)
       }
     }
     ugi
@@ -199,24 +167,27 @@ object HadoopUtils extends Logger {
     logInfo("kerberos login starting....")
 
     require(
-      kerberosPrincipal.nonEmpty && kerberosKeytab.nonEmpty,
-      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty")
+      HadoopConfigUtils.kerberosPrincipal.nonEmpty && HadoopConfigUtils.kerberosKeytab.nonEmpty,
+      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty"
+    )
 
     System.setProperty("javax.security.auth.useSubjectCredsOnly", "false")
 
-    if (kerberosKrb5.nonEmpty) {
-      System.setProperty("java.security.krb5.conf", kerberosKrb5)
-      System.setProperty("java.security.krb5.conf.path", kerberosKrb5)
+    if (HadoopConfigUtils.kerberosKrb5.nonEmpty) {
+      System.setProperty("java.security.krb5.conf", HadoopConfigUtils.kerberosKrb5)
+      System.setProperty("java.security.krb5.conf.path", HadoopConfigUtils.kerberosKrb5)
     }
 
-    System.setProperty("sun.security.spnego.debug", kerberosDebug)
-    System.setProperty("sun.security.krb5.debug", kerberosDebug)
+    System.setProperty("sun.security.spnego.debug", HadoopConfigUtils.kerberosDebug)
+    System.setProperty("sun.security.krb5.debug", HadoopConfigUtils.kerberosDebug)
     hadoopConf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
 
     Try {
       UserGroupInformation.setConfiguration(hadoopConf)
       val ugi =
-        UserGroupInformation.loginUserFromKeytabAndReturnUGI(kerberosPrincipal, kerberosKeytab)
+        UserGroupInformation.loginUserFromKeytabAndReturnUGI(
+          HadoopConfigUtils.kerberosPrincipal,
+          HadoopConfigUtils.kerberosKeytab)
       UserGroupInformation.setLoginUser(ugi)
       logInfo("kerberos authentication successful")
       ugi
@@ -236,9 +207,7 @@ object HadoopUtils extends Logger {
         })
       } match {
         case Success(fs) =>
-          val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
-          val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
-          if (kerberosEnable) {
+          if (HadoopConfigUtils.kerberosEnable) {
             // reLogin...
             val timer = new Timer()
             timer.schedule(

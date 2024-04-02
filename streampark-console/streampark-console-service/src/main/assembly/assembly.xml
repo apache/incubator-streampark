@@ -95,9 +95,8 @@
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <includes>
-                <include>*.yml</include>
-                <include>*.properties</include>
-                <include>logback*.xml</include>
+                <include>config.yaml</include>
+                <include>logback.xml</include>
             </includes>
         </fileSet>
         <fileSet>
