@@ -29,7 +29,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -103,10 +102,10 @@ public class CheckPoints implements Serializable {
     @JsonIgnore
     public List<CheckPoint> getLatestCheckpoint() {
       List<CheckPoint> checkPoints = new ArrayList<>();
-      if (Objects.nonNull(completed)) {
+      if (completed != null) {
         checkPoints.add(completed);
       }
-      if (Objects.nonNull(savepoint)) {
+      if (savepoint != null) {
         checkPoints.add(savepoint);
       }
       return checkPoints;
