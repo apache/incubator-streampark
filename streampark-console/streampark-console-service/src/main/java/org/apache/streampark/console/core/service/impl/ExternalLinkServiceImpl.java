@@ -24,7 +24,6 @@ import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.BeanUtil;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -66,18 +65,8 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     if (!this.check(externalLink)) {
       return;
     }
-    updateById(externalLink);
-  }
-
-  @Override
-  public boolean updateById(ExternalLink externalLink) {
-    ExternalLink link = baseMapper.selectById(externalLink.getId());
-    if (link == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(externalLink, link, ExternalLink::getId, ExternalLink::getCreateTime);
-    link.setModifyTime(new Date());
-    return super.updateById(link);
+    externalLink.setModifyTime(new Date());
+    baseMapper.updateById(externalLink);
   }
 
   @Override

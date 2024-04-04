@@ -30,7 +30,6 @@ import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.BeanUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +125,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     ApiAlertException.throwIfFalse(
         findVariable.getVariableCode().equals(variable.getVariableCode()),
         "Sorry, the variable code cannot be updated.");
-    updateById(variable);
+    this.baseMapper.updateById(variable);
     // endregion
 
     // set Application's field release to NEED_RESTART
@@ -260,18 +259,5 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public boolean existsByTeamId(Long teamId) {
     return this.baseMapper.existsByTeamId(teamId);
-  }
-
-  @Override
-  public boolean updateById(Variable entity) {
-    Variable variable = this.baseMapper.selectById(entity.getId());
-    if (variable == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(entity, variable, Variable::getId, Variable::getCreateTime);
-    variable.setCreatorId(entity.getCreatorId());
-    variable.setTeamId(entity.getTeamId());
-    variable.setDesensitization(entity.getDesensitization());
-    return super.updateById(variable);
   }
 }

@@ -40,6 +40,7 @@ import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -79,11 +80,14 @@ public class Application implements Serializable {
   /** The name of the frontend and program displayed in yarn */
   private String jobName;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String appId;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String jobId;
 
   /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String jobManagerUrl;
 
   /** flink version */
@@ -124,6 +128,7 @@ public class Application implements Serializable {
   private Boolean build;
 
   /** max restart retries after job failed */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer restartSize;
 
   /** has restart count */
@@ -132,6 +137,7 @@ public class Application implements Serializable {
   private Integer optionState;
 
   /** alert id */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long alertId;
 
   private String args;
@@ -140,6 +146,7 @@ public class Application implements Serializable {
 
   private String options;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String hotParams;
 
   private Integer resolveOrder;
@@ -162,6 +169,7 @@ public class Application implements Serializable {
 
   private Date startTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
   private Long duration;
@@ -189,6 +197,7 @@ public class Application implements Serializable {
   private Integer totalTask;
 
   /** the cluster id bound to the task in remote mode */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long flinkClusterId;
 
   private String description;

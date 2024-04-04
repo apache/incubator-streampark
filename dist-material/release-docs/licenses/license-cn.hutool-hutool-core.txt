@@ -1,1 +1,0 @@
-License: {Name: MulanPSL-2.0, URL: http://license.coscl.org.cn/MulanPSL2, Distribution: repo, Comments: , }

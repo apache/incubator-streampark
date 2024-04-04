@@ -31,7 +31,6 @@ import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Team;
@@ -137,16 +136,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     return RestResponse.success();
   }
 
-  @Override
-  public boolean updateById(User entity) {
-    User user = getById(entity.getUserId());
-    if (user == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(entity, user, User::getUserId, User::getCreateTime);
-    return super.updateById(user);
-  }
-
   private boolean needTransferResource(User existsUser, User user) {
     if (User.STATUS_LOCK.equals(existsUser.getStatus())
         || User.STATUS_VALID.equals(user.getStatus())) {
@@ -173,7 +162,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
     user.setSalt(salt);
     user.setPassword(password);
-    updateById(user);
+    this.baseMapper.updateById(user);
   }
 
   @Override
@@ -210,7 +199,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     User user = getById(userId);
     AssertUtils.notNull(user);
     user.setLastTeamId(teamId);
-    updateById(user);
+    this.baseMapper.updateById(user);
   }
 
   @Override
@@ -240,7 +229,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
       if (teams.size() == 1) {
         Team team = teams.get(0);
         user.setLastTeamId(team.getId());
-        updateById(user);
+        this.baseMapper.updateById(user);
       }
     }
   }

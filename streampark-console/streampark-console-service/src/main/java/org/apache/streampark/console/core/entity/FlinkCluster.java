@@ -31,7 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.hc.client5.http.config.RequestConfig;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
@@ -57,8 +59,10 @@ public class FlinkCluster implements Serializable {
   @TableId(type = IdType.AUTO)
   private Long id;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String address;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String jobManagerUrl;
 
   private String clusterId;
@@ -94,6 +98,7 @@ public class FlinkCluster implements Serializable {
 
   private Integer resolveOrder;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String exception;
 
   private Integer clusterState;
@@ -102,8 +107,10 @@ public class FlinkCluster implements Serializable {
 
   private Date startTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long alertId;
 
   private transient Integer allJobs = 0;
