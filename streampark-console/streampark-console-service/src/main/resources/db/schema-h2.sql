@@ -173,6 +173,7 @@ create table if not exists `t_flink_project` (
   `branches` varchar(64)  default null,
   `user_name` varchar(64)  default null,
   `password` varchar(64)  default null,
+  `salt` varchar(26) default null,
   `prvkey_path` varchar(128)  default null,
   `pom` varchar(255)  default null,
   `build_args` varchar(255) default null,

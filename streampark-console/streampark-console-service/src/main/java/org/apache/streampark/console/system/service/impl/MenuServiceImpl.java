@@ -26,7 +26,6 @@ import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.MenuMapper;
 import org.apache.streampark.console.system.service.MenuService;
-import org.apache.streampark.console.system.service.RoleMenuService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -56,8 +55,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
   public static final String TOTAL = "total";
 
   @Autowired private UserService userService;
-
-  @Autowired private RoleMenuService roleMenuService;
 
   @Override
   public List<String> listPermissions(Long userId, Long teamId) {
