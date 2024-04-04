@@ -40,7 +40,6 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -93,8 +92,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Autowired private FlinkEnvService flinkEnvService;
 
   @Autowired private ApplicationManageService applicationManageService;
-
-  @Autowired private ApplicationActionService applicationActionService;
 
   @Autowired private ApplicationConfigService configService;
 
@@ -170,7 +167,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
     application.setOptionTime(new Date());
-    this.applicationActionService.updateById(application);
+    this.applicationManageService.updateById(application);
     flinkAppHttpWatcher.init();
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());

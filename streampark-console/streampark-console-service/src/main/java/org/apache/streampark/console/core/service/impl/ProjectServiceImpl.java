@@ -43,7 +43,6 @@ import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
-import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
 import org.apache.commons.lang3.StringUtils;
@@ -173,21 +172,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             });
       }
     }
-    updateById(project);
+    baseMapper.updateById(project);
     return true;
-  }
-
-  @Override
-  public boolean updateById(Project entity) {
-    Project project = baseMapper.selectById(entity.getId());
-    if (project == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(entity, project, Project::getId, Project::getCreateTime);
-    project.setUserName(entity.getUserName());
-    project.setPassword(entity.getPassword());
-    project.setPrvkeyPath(entity.getPrvkeyPath());
-    return super.updateById(project);
   }
 
   private static void updateInternal(Project projectParam, Project project) {

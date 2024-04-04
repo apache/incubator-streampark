@@ -59,7 +59,6 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.BeanUtil;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -647,16 +646,6 @@ public class AppBuildPipeServiceImpl
       return save(pipe);
     }
     return updateById(pipe);
-  }
-
-  @Override
-  public boolean updateById(AppBuildPipeline entity) {
-    AppBuildPipeline appBuildPipeline = baseMapper.selectById(entity.getAppId());
-    if (appBuildPipeline == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(entity, appBuildPipeline, AppBuildPipeline::getAppId);
-    return super.updateById(appBuildPipeline);
   }
 
   /**

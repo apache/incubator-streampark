@@ -30,7 +30,9 @@ import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -66,10 +68,13 @@ public class Project implements Serializable {
 
   private Date lastBuild;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String userName;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String password;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String prvkeyPath;
 
   /** No salt value is returned */

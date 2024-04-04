@@ -41,6 +41,7 @@ public class YarnQueue implements Serializable {
   /** yarn queue and label in format {queue} or {queue@label1} or {queue@label1,label2}. */
   private String queueLabel;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String description;
 
   private Date createTime;

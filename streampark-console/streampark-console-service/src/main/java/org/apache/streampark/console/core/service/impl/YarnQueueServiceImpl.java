@@ -31,7 +31,6 @@ import org.apache.streampark.console.core.mapper.YarnQueueMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.BeanUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -156,17 +155,6 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     queueFromDB.setDescription(yarnQueue.getDescription());
     queueFromDB.setQueueLabel(yarnQueue.getQueueLabel());
     updateById(queueFromDB);
-  }
-
-  @Override
-  public boolean updateById(YarnQueue entity) {
-    YarnQueue yarnQueue = baseMapper.selectById(entity.getId());
-    if (yarnQueue == null) {
-      return false;
-    }
-    BeanUtil.copyIgnoreNull(entity, yarnQueue, YarnQueue::getId, YarnQueue::getCreateTime);
-    yarnQueue.setDescription(entity.getDescription());
-    return super.updateById(yarnQueue);
   }
 
   @Override

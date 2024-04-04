@@ -22,7 +22,6 @@ import org.apache.streampark.console.base.mybatis.interceptor.PostgreSQLQueryInt
 
 import org.apache.ibatis.type.JdbcType;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
@@ -86,7 +85,6 @@ public class MybatisConfig {
       GlobalConfig globalConfig = GlobalConfigUtils.getGlobalConfig(mybatisConfiguration);
       GlobalConfig.DbConfig dbConfig = globalConfig.getDbConfig();
       dbConfig.setIdType(IdType.AUTO);
-      dbConfig.setUpdateStrategy(FieldStrategy.IGNORED);
       // close mybatis-plus banner
       globalConfig.setBanner(false);
       properties.setGlobalConfig(globalConfig);
