@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +78,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     this.save(role);
 
     String[] menuIds = role.getMenuId().split(StringPool.COMMA);
-    setRoleMenus(role, menuIds);
+    updateRoleMenus(role, menuIds);
   }
 
   @Override
@@ -113,17 +113,17 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
       menuId = menuId + StringPool.COMMA + Constant.APP_MENU_ID;
     }
     String[] menuIds = menuId.split(StringPool.COMMA);
-    setRoleMenus(role, menuIds);
+    updateRoleMenus(role, menuIds);
   }
 
-  private void setRoleMenus(Role role, String[] menuIds) {
-    Arrays.stream(menuIds)
-        .forEach(
-            menuId -> {
-              RoleMenu rm = new RoleMenu();
-              rm.setMenuId(Long.valueOf(menuId));
-              rm.setRoleId(role.getRoleId());
-              this.roleMenuMapper.insert(rm);
-            });
+  private void updateRoleMenus(Role role, String[] menuIds) {
+    List<RoleMenu> roleMenus = new ArrayList<>();
+    for (String menuId : menuIds) {
+      RoleMenu rm = new RoleMenu();
+      rm.setMenuId(Long.valueOf(menuId));
+      rm.setRoleId(role.getRoleId());
+      roleMenus.add(rm);
+    }
+    roleMenuService.saveBatch(roleMenus);
   }
 }

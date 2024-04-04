@@ -151,7 +151,10 @@ public class Application implements Serializable {
 
   private Integer resolveOrder;
   private Integer executionMode;
+
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String dynamicProperties;
+
   private Integer appType;
 
   /** determine if tracking status */
@@ -172,15 +175,19 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Date endTime;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long duration;
 
   /** checkpoint max failure interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpMaxFailureInterval;
 
   /** checkpoint failure rate interval */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureRateInterval;
 
   /** Actions triggered after X minutes failed Y times: 1: send alert 2: restart */
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Integer cpFailureAction;
 
   /** overview */
@@ -200,6 +207,7 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private Long flinkClusterId;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String description;
 
   private Date createTime;
@@ -211,6 +219,7 @@ public class Application implements Serializable {
   /** 1: cicd (build from csv) 2: upload (upload local jar job) */
   private Integer resourceFrom;
 
+  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String tags;
 
   private Boolean probing = false;

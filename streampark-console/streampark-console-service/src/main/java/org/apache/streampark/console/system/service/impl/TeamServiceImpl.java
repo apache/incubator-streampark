@@ -121,7 +121,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
   @Override
   public void updateTeam(Team team) {
     Team oldTeam =
-        Optional.ofNullable(this.getById(team))
+        Optional.ofNullable(this.getById(team.getId()))
             .orElseThrow(
                 () ->
                     new IllegalArgumentException(

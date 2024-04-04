@@ -116,10 +116,8 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             ? AccessToken.STATUS_DISABLE
             : AccessToken.STATUS_ENABLE;
 
-    AccessToken updateObj = new AccessToken();
-    updateObj.setStatus(status);
-    updateObj.setId(tokenId);
-    return RestResponse.success(this.updateById(updateObj));
+    tokenInfo.setStatus(status);
+    return RestResponse.success(this.updateById(tokenInfo));
   }
 
   @Override

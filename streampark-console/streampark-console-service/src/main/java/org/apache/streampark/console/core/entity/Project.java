@@ -223,7 +223,7 @@ public class Project implements Serializable {
     }
 
     String mvn = getMvn();
-    return mvn.concat(" ").concat(cmd);
+    return mvn.concat(" clean package -DskipTests ").concat(cmd);
   }
 
   private String getMvn() {
@@ -278,10 +278,10 @@ public class Project implements Serializable {
   }
 
   private String getIllegalArgs(String param) {
-    Pattern pattern = Pattern.compile("(`.*?`)|(\\$\\((.*?)\\))");
+    Pattern pattern = Pattern.compile("(`(.?|\\s)*`)|(\\$\\((.?|\\s)*\\))");
     Matcher matcher = pattern.matcher(param);
     if (matcher.find()) {
-      return matcher.group(1) == null ? matcher.group(2) : matcher.group(1);
+      return matcher.group(1) == null ? matcher.group(3) : matcher.group(1);
     }
 
     Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
