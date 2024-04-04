@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -55,7 +54,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   @Override
   public RestResponse create(Long userId, String description) {
     User user = userService.getById(userId);
-    if (Objects.isNull(user)) {
+    if (user == null) {
       return RestResponse.success().put("code", 0).message("user not available");
     }
     String token =
@@ -101,7 +100,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   @Override
   public RestResponse toggleToken(Long tokenId) {
     AccessToken tokenInfo = baseMapper.getById(tokenId);
-    if (Objects.isNull(tokenInfo)) {
+    if (tokenInfo == null) {
       return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_FAIL_ALERT);
     }
 

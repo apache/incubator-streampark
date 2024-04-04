@@ -41,7 +41,7 @@ public class CheckPoints implements Serializable {
 
   @JsonIgnore
   public List<CheckPoint> getLatestCheckpoint() {
-    if (Objects.isNull(latest)) {
+    if (latest == null) {
       return Collections.emptyList();
     }
     return latest.getLatestCheckpoint();

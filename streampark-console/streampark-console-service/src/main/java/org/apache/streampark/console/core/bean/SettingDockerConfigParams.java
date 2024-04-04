@@ -22,7 +22,6 @@ import org.apache.streampark.console.core.entity.Setting;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Getter
@@ -56,21 +55,21 @@ public class SettingDockerConfigParams {
   }
 
   private boolean verifyUserName() {
-    if (Objects.isNull(getUsername()) || Objects.isNull(getUsername().getSettingValue())) {
+    if (getUsername() == null || getUsername().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(USER_NAME_REGEXP, getUsername().getSettingValue());
   }
 
   private boolean verifyPassWord() {
-    if (Objects.isNull(getPassword()) || Objects.isNull(getPassword().getSettingValue())) {
+    if (getPassword() == null || getPassword().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(PASSWORD_REGEXP, getPassword().getSettingValue());
   }
 
   private boolean verifyAddress() {
-    if (Objects.isNull(getAddress()) || Objects.isNull(getAddress().getSettingValue())) {
+    if (getAddress() == null || getAddress().getSettingValue() == null) {
       return false;
     }
 
@@ -80,7 +79,7 @@ public class SettingDockerConfigParams {
   }
 
   private boolean verifyNameSpace() {
-    if (Objects.isNull(getNamespace()) || Objects.isNull(getNamespace().getSettingValue())) {
+    if (getNamespace() == null || getNamespace().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(NAMESPACE_REGEX, getNamespace().getSettingValue());

@@ -50,7 +50,7 @@ object ReflectUtils extends Logger {
   }
 
   def getFieldValue(obj: Any, field: Field): Any = {
-    if (Objects.isNull(obj) || Objects.isNull(field)) null
+    if (obj == null || field == null) null
     else {
       field.setAccessible(true)
       field.get(obj) match {
@@ -62,7 +62,7 @@ object ReflectUtils extends Logger {
 
   def setFieldValue(obj: Any, fieldName: String, value: Any): Unit = {
     val field = getAccessibleField(obj, fieldName)
-    if (Objects.isNull(field))
+    if (field == null)
       throw new IllegalArgumentException(
         "Could not find field [" + fieldName + "] on target [" + obj + "]")
     try

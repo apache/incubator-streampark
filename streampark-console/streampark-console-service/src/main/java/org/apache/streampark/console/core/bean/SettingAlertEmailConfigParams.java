@@ -22,7 +22,6 @@ import org.apache.streampark.console.core.entity.Setting;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Getter
@@ -58,42 +57,42 @@ public class SettingAlertEmailConfigParams {
   }
 
   private boolean verifyHost() {
-    if (Objects.isNull(getHost()) || Objects.isNull(getHost().getSettingValue())) {
+    if (getHost() == null || getHost().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(EMAIL_ADDRESS_REGEXP, getHost().getSettingValue());
   }
 
   private boolean verifyPort() {
-    if (Objects.isNull(getPort()) || Objects.isNull(getPort().getSettingValue())) {
+    if (getPort() == null || getPort().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(PORT_REGEXP, getPort().getSettingValue());
   }
 
   private boolean verifyFrom() {
-    if (Objects.isNull(getFrom()) || Objects.isNull(getFrom().getSettingValue())) {
+    if (getFrom() == null || getFrom().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(FROM_REGEXP, getFrom().getSettingValue());
   }
 
   private boolean verifyUserName() {
-    if (Objects.isNull(getUsername()) || Objects.isNull(getUsername().getSettingValue())) {
+    if (getUsername() == null || getUsername().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(USER_NAME_REGEXP, getUsername().getSettingValue());
   }
 
   private boolean verifyPassWord() {
-    if (Objects.isNull(getPassword()) || Objects.isNull(getPassword().getSettingValue())) {
+    if (getPassword() == null || getPassword().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(PASS_WORD_REGEXP, getPassword().getSettingValue());
   }
 
   private boolean verifySSL() {
-    if (Objects.isNull(getSsl()) || Objects.isNull(getSsl().getSettingValue())) {
+    if (getSsl() == null || getSsl().getSettingValue() == null) {
       return false;
     }
     return Pattern.matches(SSL_REGEXP, getSsl().getSettingValue());

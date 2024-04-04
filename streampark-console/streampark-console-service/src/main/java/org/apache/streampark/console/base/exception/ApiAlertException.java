@@ -19,8 +19,6 @@ package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
 
-import java.util.Objects;
-
 /**
  *
  *
@@ -47,7 +45,7 @@ public class ApiAlertException extends AbstractApiException {
   }
 
   public static void throwIfNull(Object object, String errorMessage) {
-    if (Objects.isNull(object)) {
+    if (object == null) {
       throw new ApiAlertException(errorMessage);
     }
   }
