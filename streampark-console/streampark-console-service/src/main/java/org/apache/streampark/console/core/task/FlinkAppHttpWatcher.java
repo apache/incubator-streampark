@@ -515,6 +515,7 @@ public class FlinkAppHttpWatcher {
       default:
         application.setState(currentState.getValue());
         doPersistMetrics(application, false);
+        break;
     }
   }
 

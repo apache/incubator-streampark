@@ -84,7 +84,7 @@ object ReflectUtils extends Logger {
         makeAccessible(field)
         return field
       } catch {
-        case e: NoSuchFieldException =>
+        case _: NoSuchFieldException =>
       }
       superClass = superClass.getSuperclass
     }

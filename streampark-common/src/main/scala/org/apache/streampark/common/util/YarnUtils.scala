@@ -41,19 +41,20 @@ object YarnUtils extends Logger {
 
   private[this] var rmHttpURL: String = _
 
-  lazy val PROXY_YARN_URL = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_PROXY_YARN_URL)
+  private lazy val PROXY_YARN_URL =
+    InternalConfigHolder.get[String](CommonConfig.STREAMPARK_PROXY_YARN_URL)
 
   /**
    * hadoop.http.authentication.type<br> get yarn http authentication mode.<br> ex: simple, kerberos
    *
    * @return
    */
-  lazy val hasYarnHttpKerberosAuth: Boolean = {
+  private lazy val hasYarnHttpKerberosAuth: Boolean = {
     val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
     "kerberos".equalsIgnoreCase(yarnHttpAuth)
   }
 
-  lazy val hasYarnHttpSimpleAuth: Boolean = {
+  private lazy val hasYarnHttpSimpleAuth: Boolean = {
     val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
     "simple".equalsIgnoreCase(yarnHttpAuth)
   }
@@ -216,9 +217,6 @@ object YarnUtils extends Logger {
     rmHttpURL
   }
 
-  def getYarnAppTrackingUrl(applicationId: ApplicationId): String =
-    HadoopUtils.yarnClient.getApplicationReport(applicationId).getTrackingUrl
-
   /**
    * @param url
    *   url
@@ -242,9 +240,7 @@ object YarnUtils extends Logger {
         Try(request(s"${getRMWebAppURL()}/$url", timeout)) match {
           case Success(v) => v
           case Failure(_) =>
-            Utils.retry[String](5) {
-              request(s"${getRMWebAppURL(true)}/$url", timeout)
-            } match {
+            Utils.retry[String](5)(request(s"${getRMWebAppURL(true)}/$url", timeout)) match {
               case Success(v) => v
               case Failure(e) =>
                 throw new IOException(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
