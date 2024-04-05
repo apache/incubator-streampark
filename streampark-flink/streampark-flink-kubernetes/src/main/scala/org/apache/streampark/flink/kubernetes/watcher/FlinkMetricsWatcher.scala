@@ -19,22 +19,20 @@ package org.apache.streampark.flink.kubernetes.watcher
 
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, KubernetesRetriever, MetricWatcherConfig}
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, TrackId}
 
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.core5.util.Timeout
 import org.json4s.{DefaultFormats, JArray}
 import org.json4s.jackson.JsonMethods.parse
 
 import javax.annotation.concurrent.ThreadSafe
 
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import java.util.concurrent.{ScheduledFuture, TimeUnit}
 
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -46,30 +44,31 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
   extends Logger
   with FlinkWatcher {
 
-  private val trackTaskExecPool = Executors.newWorkStealingPool()
-  implicit private val trackTaskExecutor: ExecutionContextExecutorService =
-    ExecutionContext.fromExecutorService(trackTaskExecPool)
-
-  private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
 
   /** start watcher process */
   override def doStart(): Unit = {
-    timerSchedule =
-      timerExec.scheduleAtFixedRate(() => doWatch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
+    timerSchedule = watchExecutor.scheduleAtFixedRate(
+      () => doWatch(),
+      0,
+      conf.requestIntervalSec,
+      TimeUnit.SECONDS)
     logInfo("[flink-k8s] FlinkMetricWatcher started.")
   }
 
   /** stop watcher process */
   override def doStop(): Unit = {
-    timerSchedule.cancel(true)
+    if (!timerSchedule.isCancelled) {
+      timerSchedule.cancel(true)
+    }
     logInfo("[flink-k8s] FlinkMetricWatcher stopped.")
   }
 
   /** closes resource, relinquishing any underlying resources. */
   override def doClose(): Unit = {
-    timerExec.shutdownNow()
-    trackTaskExecutor.shutdownNow()
+    if (!timerSchedule.isCancelled) {
+      timerSchedule.cancel(true)
+    }
     logInfo("[flink-k8s] FlinkMetricWatcher closed.")
   }
 
@@ -82,27 +81,25 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[FlinkMetricCV]]] =
-      trackIds
-        .filter(_.executeMode == FlinkK8sExecuteMode.SESSION)
-        .map(
-          id => {
-            val future = Future(collectMetrics(id))
-            future.onComplete(_.getOrElse(None) match {
-              case Some(metric) =>
-                val clusterKey = id.toClusterKey
-                // update current flink cluster metrics on cache
-                watchController.flinkMetrics.put(clusterKey, metric)
-                val isMetricChanged = {
-                  val preMetric = watchController.flinkMetrics.get(clusterKey)
-                  preMetric == null || !preMetric.equalsPayload(metric)
-                }
-                if (isMetricChanged) {
-                  eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
-                }
-              case _ =>
-            })
-            future
+      trackIds.map(
+        id => {
+          val future = Future(collectMetrics(id))
+          future.onComplete(_.getOrElse(None) match {
+            case Some(metric) =>
+              val clusterKey = id.toClusterKey
+              // update current flink cluster metrics on cache
+              watchController.flinkMetrics.put(clusterKey, metric)
+              val isMetricChanged = {
+                val preMetric = watchController.flinkMetrics.get(clusterKey)
+                preMetric == null || !preMetric.equalsPayload(metric)
+              }
+              if (isMetricChanged) {
+                eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
+              }
+            case _ =>
           })
+          future
+        })
     // blocking until all future are completed or timeout is reached
     Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
       _ =>

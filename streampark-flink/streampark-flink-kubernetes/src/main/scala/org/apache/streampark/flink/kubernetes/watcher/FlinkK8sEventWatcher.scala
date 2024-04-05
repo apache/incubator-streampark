@@ -27,7 +27,7 @@ import org.apache.flink.kubernetes.kubeclient.resources.{CompatibleKubernetesWat
 
 import javax.annotation.concurrent.ThreadSafe
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 /**
  * K8s Event Watcher for Flink Native-K8s Mode. Currently only flink-native-application mode events

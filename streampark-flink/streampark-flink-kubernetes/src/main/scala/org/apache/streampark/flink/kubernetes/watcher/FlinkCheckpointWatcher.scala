@@ -30,7 +30,7 @@ import org.json4s.jackson.JsonMethods.parse
 import javax.annotation.concurrent.ThreadSafe
 
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import java.util.concurrent.{ScheduledFuture, TimeUnit}
 
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
@@ -44,30 +44,34 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
   extends Logger
   with FlinkWatcher {
 
-  private val trackTaskExecPool = Executors.newWorkStealingPool()
   implicit private val trackTaskExecutor: ExecutionContextExecutorService =
-    ExecutionContext.fromExecutorService(trackTaskExecPool)
+    ExecutionContext.fromExecutorService(watchExecutor)
 
-  private val timerExec = Executors.newSingleThreadScheduledExecutor()
   private var timerSchedule: ScheduledFuture[_] = _
 
   /** start watcher process */
   override def doStart(): Unit = {
-    timerSchedule =
-      timerExec.scheduleAtFixedRate(() => doWatch(), 0, conf.requestIntervalSec, TimeUnit.SECONDS)
+    timerSchedule = watchExecutor.scheduleAtFixedRate(
+      () => doWatch(),
+      0,
+      conf.requestIntervalSec,
+      TimeUnit.SECONDS)
     logInfo("[flink-k8s] FlinkCheckpointWatcher started.")
   }
 
   /** stop watcher process */
   override def doStop(): Unit = {
-    timerSchedule.cancel(true)
+    if (!timerSchedule.isCancelled) {
+      timerSchedule.cancel(true)
+    }
     logInfo("[flink-k8s] FlinkCheckpointWatcher stopped.")
   }
 
   /** closes resource, relinquishing any underlying resources. */
   override def doClose(): Unit = {
-    timerExec.shutdownNow()
-    trackTaskExecutor.shutdownNow()
+    if (!timerSchedule.isCancelled) {
+      timerSchedule.cancel(true)
+    }
     logInfo("[flink-k8s] FlinkCheckpointWatcher closed.")
   }
 
