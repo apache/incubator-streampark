@@ -32,7 +32,7 @@ import javax.annotation.concurrent.ThreadSafe
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{ScheduledFuture, TimeUnit}
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -43,6 +43,9 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
     implicit val eventBus: ChangeEventBus)
   extends Logger
   with FlinkWatcher {
+
+  implicit private val trackTaskExecutor: ExecutionContextExecutorService =
+    ExecutionContext.fromExecutorService(watchExecutor)
 
   private var timerSchedule: ScheduledFuture[_] = _
 
