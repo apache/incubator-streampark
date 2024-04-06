@@ -22,8 +22,6 @@ import org.apache.streampark.common.util.PropertiesUtils
 
 import org.apache.commons.cli.{DefaultParser, Options}
 
-import java.net.URLClassLoader
-
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
