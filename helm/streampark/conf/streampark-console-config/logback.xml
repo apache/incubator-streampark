@@ -17,33 +17,38 @@
   -->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
     <contextName>StreamPark</contextName>
-    <property name="log.path" value="${app.home}/logs"/>
-    <property name="log.maxHistory" value="15"/>
-    <property name="log.colorPattern"
+    <property name="LOG_HOME" value="${app.home}/logs"/>
+    <property name="LOG_MAX_HISTORY" value="15"/>
               value="%d{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger):%L] %msg%n"/>
-    <property name="log.pattern"
+    <property name="LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36}:%L - %msg%n"/>
+    <property name="COLOR_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger):%L] %msg%n"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>${log.colorPattern}</pattern>
+            <pattern>${COLOR_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
     <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
+            <onMatch>DENY</onMatch>
+            <onMismatch>ACCEPT</onMismatch>
         </filter>
-        <encoder>
-            <charset>UTF-8</charset>
-            <pattern>${log.pattern}</pattern>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/info.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <MaxHistory>${log.maxHistory}</MaxHistory>
+        <file>${LOG_HOME}/info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/info.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
     </appender>
 
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -52,12 +57,16 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <file>${LOG_HOME}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/error.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
-            <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
 
@@ -67,12 +76,16 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/warn.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <file>${LOG_HOME}/warn.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/warn.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
-            <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
 
@@ -82,12 +95,16 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <file>${LOG_HOME}/debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/debug.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
-            <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
 
@@ -97,14 +114,25 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/trace.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <file>${LOG_HOME}/trace.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/trace.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
-            <pattern>${log.pattern}</pattern>
         </encoder>
     </appender>
+
+    <!-- log level -->
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="com.apache.ibatis" level="TRACE"/>
+    <logger name="java.sql.Connection" level="DEBUG"/>
+    <logger name="java.sql.Statement" level="DEBUG"/>
+    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
