@@ -20,9 +20,10 @@ services:
     image: apache/streampark:latest
     command: ${RUN_COMMAND}
     ports:
-      - 10000:10000
+      - ${SERVER_PORT}:${SERVER_PORT}
     env_file: .env
     volumes:
+      - ./config.yaml:/streampark/conf/config.yaml
       - flink:/streampark/flink/${FLINK}
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts:ro
