@@ -18,11 +18,14 @@
 package org.apache.streampark.console.base.config;
 
 import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -31,23 +34,30 @@ import java.util.Properties;
 
 public class SpringProperties {
 
+  private static final Logger log = LoggerFactory.getLogger(SpringProperties.class);
+
   public static Properties get() {
-    // 1) get spring config
-    Properties springConfig = getSpringConfig();
-
-    // 2) get user config
-    Properties userConfig = getUserConfig();
-
-    // 3) merge config
-    mergeConfig(userConfig, springConfig);
-
-    // 4) datasource
-    dataSourceConfig(userConfig, springConfig);
-
-    // 5) system.setProperties
-    springConfig.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
-
-    return springConfig;
+    File oldConfig = getOldConfig();
+    if (oldConfig != null) {
+      log.warn(
+          "in the \"conf\" directory, found the \"application.yml\" file. The \"application.yml\" file is deprecated. "
+              + "For compatibility, this \"application.yml\" file will be used preferentially. The latest configuration file is \"config.yaml\". "
+              + "It is recommended to use \"config.yaml\". Note: \"application.yml\" will be completely deprecated in version 2.2.0. ");
+      SystemPropertyUtils.set("spring.config.location", oldConfig.getAbsolutePath());
+      return new Properties();
+    } else {
+      // 1) get spring config
+      Properties springConfig = getSpringConfig();
+      // 2) get user config
+      Properties userConfig = getUserConfig();
+      // 3) merge config
+      mergeConfig(userConfig, springConfig);
+      // 4) datasource
+      dataSourceConfig(userConfig, springConfig);
+      // 5) system.setProperties
+      springConfig.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
+      return springConfig;
+    }
   }
 
   private static void dataSourceConfig(Properties userConfig, Properties springConfig) {
@@ -112,12 +122,21 @@ public class SpringProperties {
         });
   }
 
+  private static boolean useOldConfig() {
+    String appHome = WebUtils.getAppHome();
+    if (appHome == null) {
+      return false;
+    }
+    File file = new File(appHome + "/conf/application.yml");
+    return file.exists();
+  }
+
   private static Properties getUserConfig() {
     String appHome = WebUtils.getAppHome();
+    Properties properties = new Properties();
     if (appHome != null) {
       File file = new File(appHome + "/conf/config.yaml");
       if (file.exists() && file.isFile()) {
-        Properties properties = new Properties();
         Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
         properties.putAll(config);
         return properties;
@@ -126,7 +145,6 @@ public class SpringProperties {
     } else {
       InputStream inputStream =
           SpringProperties.class.getClassLoader().getResourceAsStream("config.yaml");
-      Properties properties = new Properties();
       Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(inputStream);
       properties.putAll(config);
       return properties;
@@ -165,5 +183,17 @@ public class SpringProperties {
     config.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher");
 
     return config;
+  }
+
+  private static File getOldConfig() {
+    String appHome = WebUtils.getAppHome();
+    if (appHome == null) {
+      return null;
+    }
+    File file = new File(appHome + "/conf/application.yml");
+    if (file.exists()) {
+      return file;
+    }
+    return null;
   }
 }

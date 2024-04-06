@@ -56,7 +56,9 @@ public class MybatisConfig {
    * @return {@linkplain PostgreSQLQueryInterceptor}
    */
   @Bean
-  @ConditionalOnProperty(name = "datasource.dialect", havingValue = "pgsql")
+  @ConditionalOnProperty(
+      name = {"datasource.dialect", "spring.profiles.active"},
+      havingValue = "pgsql")
   public PostgreSQLQueryInterceptor postgreSQLQueryInterceptor() {
     return new PostgreSQLQueryInterceptor();
   }
@@ -67,7 +69,9 @@ public class MybatisConfig {
    * @return {@linkplain PostgreSQLPrepareInterceptor}
    */
   @Bean
-  @ConditionalOnProperty(name = "datasource.dialect", havingValue = "pgsql")
+  @ConditionalOnProperty(
+      name = {"datasource.dialect", "spring.profiles.active"},
+      havingValue = "pgsql")
   public PostgreSQLPrepareInterceptor postgreSQLPrepareInterceptor() {
     return new PostgreSQLPrepareInterceptor();
   }

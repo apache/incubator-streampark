@@ -137,12 +137,6 @@ APP_OUT="$APP_LOG"/streampark.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
-CONFIG="${APP_CONF}/config.yaml"
-if [[ ! -f "$CONFIG" ]] ; then
-  echo_r "ERROR: $CONFIG invalid or not found! please check.";
-  exit 1;
-fi
-
 # Ensure that any user defined CLASSPATH variables are not used on startup,
 # but allow them to be specified in setenv.sh, in rare case when it is needed.
 CLASSPATH=
@@ -247,13 +241,13 @@ if [ "$USE_NOHUP" = "true" ]; then
   NOHUP="nohup"
 fi
 
-PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
+BASH_UTIL="org.apache.streampark.console.base.util.BashJavaUtils"
 
 APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
 
 JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
-JVM_ARGS="-server"
+JVM_ARGS=""
 if [ -f $JVM_OPTS_FILE ]; then
   while read line
   do
@@ -284,18 +278,20 @@ print_logo() {
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
-read_config() {
-  local prop_key=$1
-  local value
-  while IFS=':' read -r k v; do
-    k="${k/[[:space:]]/}"
-    v="${v/[[:space:]]/}"
-    if [[ ! $k = \#* ]] && [[ $k = $prop_key ]]; then
-      value=$v
-      break
+init_env() {
+  # shellcheck disable=SC2006
+  CONFIG="${APP_CONF}/application.yml"
+  if [[ -f "$CONFIG" ]] ; then
+    echo_y """[WARN] in the \"conf\" directory, found the \"application.yml\" file. The \"application.yml\" file is deprecated.
+       For compatibility, this application.yml will be used preferentially. The latest configuration file is \"config.yaml\". It is recommended to use \"config.yaml\".
+       Note: \"application.yml\" will be completely deprecated in version 2.2.0. """
+  else
+    CONFIG="${APP_CONF}/config.yaml"
+    if [[ ! -f "$CONFIG" ]] ; then
+      echo_r "can not found config.yaml in \"conf\" directory, please check."
+      exit 1;
     fi
-  done < "$CONFIG"
-  echo "$value"
+  fi
 }
 
 # shellcheck disable=SC2120
@@ -316,7 +312,8 @@ get_pid() {
     fi
   fi
 
-  local serverPort=$(read_config "server.port")
+  # shellcheck disable=SC2006
+  local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --yaml "server.port" "$CONFIG"`
   if [ x"${serverPort}" == x"" ]; then
     echo_r "server.port is required, please check $CONFIG"
     exit 1;
@@ -361,12 +358,14 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  local workspace=$(read_config "streampark.workspace.local")
-  if [[ ! -d $workspace ]]; then
-    echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please check $CONFIG"
-    echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
-    exit 1;
-  fi
+   # shellcheck disable=SC2006
+   local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --yaml "streampark.workspace.local" "$CONFIG"`
+   if [[ ! -d $workspace ]]; then
+     echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in $CONFIG"
+     echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
+     exit 1;
+   fi
+
   if [[ ! -w $workspace ]] || [[ ! -r $workspace ]]; then
       echo_r "ERROR: streampark.workspace.local: \"$workspace\" Permission denied! "
       exit 1;
@@ -403,9 +402,7 @@ start() {
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
-
-  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
@@ -471,14 +468,9 @@ start_docker() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  # shellcheck disable=SC2034
-  # shellcheck disable=SC2006
-  # shellcheck disable=SC2155
-  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
-
   JVM_OPTS="${JVM_OPTS} -XX:-UseContainerSupport"
 
-  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
@@ -573,6 +565,7 @@ restart() {
 
 main() {
   print_logo
+  init_env
   case "$1" in
     "debug")
         DEBUG_PORT=$2
