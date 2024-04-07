@@ -22,9 +22,7 @@ on:
     - cron: '0 10 * * *'
   push:
     branches:
-      - release-*
-    tags:
-      - v*
+      - dev-2.1.4
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
