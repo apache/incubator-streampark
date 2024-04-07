@@ -20,7 +20,7 @@ logging:
     root: info
 
 server:
-  port: ${SERVER_PORT}
+  port: 10000
   session:
     # The user's login session has a validity period. If it exceeds this time, the user will be automatically logout
     # unit: s|m|h|d, s: second, m:minute, h:hour, d: day

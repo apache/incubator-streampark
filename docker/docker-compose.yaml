@@ -18,13 +18,13 @@ version: '3.8'
 services:
   streampark-console:
     image: apache/streampark:latest
-    command: ${RUN_COMMAND}
+    command: '/bin/sh -c "wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.31/mysql-connector-j-8.0.31.jar && bash bin/streampark.sh start_docker "'
     ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
+      - "10000:10000"
     env_file: .env
     volumes:
       - ./config.yaml:/streampark/conf/config.yaml
-      - flink:/streampark/flink/${FLINK}
+      - flink:/streampark/flink/flink1.14.5
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts:ro
       - ~/.kube:/root/.kube:ro
@@ -34,7 +34,7 @@ services:
       - streampark
 
   flink-jobmanager:
-    image: ${FLINK_IMAGE}
+    image: flink:1.14.5-scala_2.12
     ports:
       - "8081:8081"
     command: jobmanager
@@ -47,7 +47,7 @@ services:
       - streampark
 
   flink-taskmanager:
-    image: ${FLINK_IMAGE}
+    image: flink:1.14.5-scala_2.12
     depends_on:
       - flink-jobmanager
     command: taskmanager
