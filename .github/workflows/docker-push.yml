@@ -63,6 +63,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set environment variables
+        run: |
+          if [[ ${{ github.event_name }} == "release" ]]; then
+            TAG=${{ github.event.release.tag_name }}
+            echo "TAG=${TAG#v}" >> $GITHUB_ENV
+          else
+            echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+          fi
+          
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -79,5 +88,5 @@ jobs:
           context: .
           file: docker/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ env.TAG }}
           labels: ${{ steps.meta.outputs.labels }}
