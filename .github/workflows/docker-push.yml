@@ -57,7 +57,7 @@ jobs:
         run: |
           ./mvnw clean install -DskipTests -Pscala-2.12,shaded,dist,webapp
 
-      - name: Log in to the Container registry
+      - name: Login to the Container registry
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
