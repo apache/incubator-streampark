@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build project release package
+      - name: Build project with maven
         run: |
           ./mvnw clean install -DskipTests -Pscala-2.12,shaded,dist,webapp
 
@@ -75,10 +75,9 @@ jobs:
         with:
           images: apache/streampark
           tags: |
-            type=raw,value=latest,enable=false
             type=semver,pattern={{version}}
 
-      - name: Build and push streampark
+      - name: Build and push image
         uses: docker/build-push-action@v3
         with:
           context: .
