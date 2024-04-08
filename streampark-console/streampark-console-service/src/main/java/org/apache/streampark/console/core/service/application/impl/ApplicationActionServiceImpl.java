@@ -66,6 +66,7 @@ import org.apache.streampark.console.core.service.application.ApplicationActionS
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
+import org.apache.streampark.console.core.utils.SystemSecurityManager;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -472,6 +473,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             buildResult,
             kubernetesSubmitParam,
             extraParameter);
+    // Because we as a deployment platform don't know what types of applications users will submit
+    // when they request them, blocking unsafe operations from the submit entry
+    System.setSecurityManager(new SystemSecurityManager());
 
     CompletableFuture<SubmitResponse> future =
         CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
