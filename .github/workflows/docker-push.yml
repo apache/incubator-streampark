@@ -23,6 +23,8 @@ on:
   push:
     branches:
       - dev-2.1.4
+    tags:
+      - v*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
