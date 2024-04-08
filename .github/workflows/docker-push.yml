@@ -21,8 +21,6 @@ on:
   schedule:
     - cron: '0 10 * * *'
   push:
-    branches:
-      - release-*
     tags:
       - v*
 
@@ -77,8 +75,7 @@ jobs:
         with:
           images: apache/streampark
           tags: |
-            type=ref,event=tag
-            type=semver,pattern={{version}},enable=true
+            type=match,pattern=v(.*),group=1
 
       - name: Build and push streampark
         uses: docker/build-push-action@v3
