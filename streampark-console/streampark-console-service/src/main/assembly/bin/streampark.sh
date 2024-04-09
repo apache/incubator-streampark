@@ -210,7 +210,7 @@ fi
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
-if [ ! -z "$CLASSPATH" ]; then
+if [[ ! -z "$CLASSPATH" ]]; then
   CLASSPATH="$CLASSPATH":
 fi
 CLASSPATH="$CLASSPATH"
@@ -229,7 +229,7 @@ if ${cygwin}; then
   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
 fi
 
-if [ -z "$USE_NOHUP" ]; then
+if [[ -z "$USE_NOHUP" ]]; then
   if $hpux; then
     USE_NOHUP="true"
   else
@@ -237,7 +237,7 @@ if [ -z "$USE_NOHUP" ]; then
   fi
 fi
 unset NOHUP
-if [ "$USE_NOHUP" = "true" ]; then
+if [[ "$USE_NOHUP" = "true" ]]; then
   NOHUP="nohup"
 fi
 
@@ -248,7 +248,7 @@ APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
 JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
 JVM_ARGS=""
-if [ -f $JVM_OPTS_FILE ]; then
+if [[ -f $JVM_OPTS_FILE ]]; then
   while read line
   do
       if [[ "$line" == -* ]]; then
@@ -296,14 +296,14 @@ init_env() {
 
 # shellcheck disable=SC2120
 get_pid() {
-  if [ -f "$APP_PID" ]; then
-    if [ -s "$APP_PID" ]; then
+  if [[ -f "$APP_PID" ]]; then
+    if [[ -s "$APP_PID" ]]; then
       # shellcheck disable=SC2155
       # shellcheck disable=SC2006
       local PID=`cat "$APP_PID"`
       kill -0 $PID >/dev/null 2>&1
       # shellcheck disable=SC2181
-      if [ $? -eq 0 ]; then
+      if [[ $? -eq 0 ]]; then
         echo $PID
         exit 0
       fi
@@ -314,17 +314,17 @@ get_pid() {
 
   # shellcheck disable=SC2006
   local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --yaml "server.port" "$CONFIG"`
-  if [ x"${serverPort}" == x"" ]; then
+  if [[ x"${serverPort}" == x"" ]]; then
     echo_r "server.port is required, please check $CONFIG"
     exit 1;
   else
      # shellcheck disable=SC2006
       # shellcheck disable=SC2155
       local used=`lsof -i:"$serverPort" | wc -l`
-      if [ "$used" -gt 0 ]; then
+      if [[ "$used" -gt 0 ]]; then
         # shellcheck disable=SC2006
         local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
-        if [ ! -z $PID ]; then
+        if [[ ! -z $PID ]]; then
           echo $PID
         else
           echo 0
@@ -340,7 +340,7 @@ start() {
   # shellcheck disable=SC2006
   local PID=$(get_pid)
 
-  if [ $PID -gt 0 ]; then
+  if [[ $PID -gt 0 ]]; then
     # shellcheck disable=SC2006
     echo_r "StreamPark is already running pid: $PID , start aborted!"
     exit 1
@@ -371,7 +371,7 @@ start() {
       exit 1;
   fi
 
-  if [ "${HADOOP_HOME}"x == ""x ]; then
+  if [[ "${HADOOP_HOME}"x == ""x ]]; then
     echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
@@ -441,7 +441,7 @@ start_docker() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  if [ "${HADOOP_HOME}"x == ""x ]; then
+  if [[ "${HADOOP_HOME}"x == ""x ]]; then
     echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
@@ -484,7 +484,8 @@ start_docker() {
 }
 
 debug() {
-  if [ ! -n "$DEBUG_PORT" ]; then
+  # shellcheck disable=SC2236
+  if [[ ! -n "$DEBUG_PORT" ]]; then
     echo_r "If start with debug mode,Please fill in the debug port like: bash streampark.sh debug 10002 "
   else
     DEBUG_OPTS="""
@@ -512,17 +513,17 @@ stop() {
   # shellcheck disable=SC2006
   echo_g "StreamPark stopping with the PID: $PID"
 
-  kill -9 $PID
+  kill -9 "$PID"
 
   while [ $SLEEP -ge 0 ]; do
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
-    kill -0 $PID >/dev/null 2>&1
+    kill -0 "$PID" >/dev/null 2>&1
     # shellcheck disable=SC2181
-    if [ $? -gt 0 ]; then
+    if [[ $? -gt 0 ]]; then
       rm -f "$APP_PID" >/dev/null 2>&1
-      if [ $? != 0 ]; then
-        if [ -w "$APP_PID" ]; then
+      if [[ $? != 0 ]]; then
+        if [[ -w "$APP_PID" ]]; then
           cat /dev/null > "$APP_PID"
         else
           echo_r "The PID file could not be removed."
@@ -532,7 +533,7 @@ stop() {
       break
     fi
 
-    if [ $SLEEP -gt 0 ]; then
+    if [[ $SLEEP -gt 0 ]]; then
        sleep 1
     fi
     # shellcheck disable=SC2006
@@ -540,7 +541,7 @@ stop() {
     SLEEP=`expr $SLEEP - 1 `
   done
 
-  if [ "$SLEEP" -lt 0 ]; then
+  if [[ "$SLEEP" -lt 0 ]]; then
      echo_r "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
   fi
 }
@@ -549,7 +550,7 @@ status() {
   # shellcheck disable=SC2155
   # shellcheck disable=SC2006
   local PID=$(get_pid)
-  if [ $PID -eq 0 ]; then
+  if [[ $PID -eq 0 ]]; then
     echo_r "StreamPark is not running"
   else
     echo_g "StreamPark is running pid is: $PID"
