@@ -50,7 +50,7 @@ object FlinkClient extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     val securityManager = System.getSecurityManager
     try {
-      System.setSecurityManager(new SystemSecurityManager())
+      System.setSecurityManager(new ExitSecurityManager())
       proxy[SubmitResponse](submitRequest, submitRequest.flinkVersion, SUBMIT_REQUEST)
     } finally {
       System.setSecurityManager(securityManager)
@@ -97,7 +97,7 @@ object FlinkClient extends Logger {
 }
 
 /** Used to mask JVM requests for external operations */
-class SystemSecurityManager extends SecurityManager {
+class ExitSecurityManager extends SecurityManager {
   override def checkExit(status: Int): Unit = {
     throw new SecurityException(
       s"System.exit($status) was called in your flink job, The job has been stopped, please check your program...")
