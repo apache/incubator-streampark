@@ -24,7 +24,7 @@ export default {
   fail: '失败',
   table: {
     title: '成员列表',
-    userName: '用户名',
+    userName: '用户',
     roleName: '角色',
     createTime: '创建时间',
     modifyTime: '修改时间',

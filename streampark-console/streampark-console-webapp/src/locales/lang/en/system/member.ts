@@ -24,7 +24,7 @@ export default {
   fail: 'failed',
   table: {
     title: 'Member List',
-    userName: 'User Name',
+    userName: 'User',
     roleName: 'Role',
     createTime: 'Create Time',
     modifyTime: 'Modify Time',

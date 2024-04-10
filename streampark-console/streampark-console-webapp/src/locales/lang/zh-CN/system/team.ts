@@ -25,7 +25,7 @@ export default {
   fail: '失败',
   table: {
     title: 'Team列表',
-    teamName: 'Team名称',
+    teamName: 'Team',
     description: '描述',
     descriptionMessage: '超过了100个字符的最大长度限制',
     teamNamePlaceholder: '请输入team名称',

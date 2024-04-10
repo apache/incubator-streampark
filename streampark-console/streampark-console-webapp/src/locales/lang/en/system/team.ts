@@ -25,7 +25,7 @@ export default {
   fail: 'failed',
   table: {
     title: 'Team List',
-    teamName: 'Team Name',
+    teamName: 'Team',
     teamNamePlaceholder: 'please enter Team Name',
     description: 'Description',
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
