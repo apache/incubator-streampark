@@ -30,7 +30,6 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -66,9 +65,7 @@ public class UserController {
 
   @Operation(summary = "List users")
   @PostMapping("list")
-  @RequiresPermissions(
-      value = {"user:view", "app:view"},
-      logical = Logical.OR)
+  @RequiresPermissions("user:view")
   public RestResponse userList(RestRequest restRequest, User user) {
     IPage<User> userList = userService.page(user, restRequest);
     return RestResponse.success(userList);
@@ -101,6 +98,7 @@ public class UserController {
 
   @Operation(summary = "List without token users")
   @PostMapping("getNoTokenUser")
+  @RequiresPermissions("token:add")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
     return RestResponse.success(userList);

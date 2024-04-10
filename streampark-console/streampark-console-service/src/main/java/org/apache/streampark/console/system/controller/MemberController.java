@@ -56,6 +56,7 @@ public class MemberController {
 
   @Operation(summary = "List members")
   @PostMapping("list")
+  @RequiresPermissions("member:view")
   public RestResponse memberList(RestRequest restRequest, Member member) {
     IPage<Member> userList = memberService.page(member, restRequest);
     return RestResponse.success(userList);
@@ -63,6 +64,7 @@ public class MemberController {
 
   @Operation(summary = "List candidate users")
   @PostMapping("candidateUsers")
+  @RequiresPermissions("member:add")
   public RestResponse candidateUsers(Long teamId) {
     List<User> userList = memberService.findCandidateUsers(teamId);
     return RestResponse.success(userList);
