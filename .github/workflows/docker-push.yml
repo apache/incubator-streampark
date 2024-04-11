@@ -75,7 +75,7 @@ jobs:
         with:
           images: apache/streampark
           tags: |
-            type=match,pattern=release-/v(.*),group=1
+            type=match,pattern=release/v(.*),group=1
 
       - name: Build and push image
         uses: docker/build-push-action@v3
