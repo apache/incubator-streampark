@@ -17,24 +17,8 @@
 
 package org.apache.streampark.console.core.enums;
 
-import java.util.Arrays;
-
 public enum PermissionType {
-  USER(1),
-  TEAM(2),
-  APP(3);
-
-  private final int value;
-
-  public int get() {
-    return this.value;
-  }
-
-  PermissionType(int value) {
-    this.value = value;
-  }
-
-  public static PermissionType of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+  USER,
+  TEAM,
+  APP;
 }

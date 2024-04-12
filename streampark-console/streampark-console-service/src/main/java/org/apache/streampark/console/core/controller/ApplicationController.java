@@ -79,6 +79,7 @@ public class ApplicationController {
   @Operation(summary = "Get application")
   @ApiAccess
   @PostMapping("get")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   @RequiresPermissions("app:detail")
   public RestResponse get(Application app) {
     Application application = applicationService.getApp(app);
@@ -137,14 +138,16 @@ public class ApplicationController {
 
   @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
-  public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> map = applicationService.dashboard(teamId);
+  @PermissionAction(id = "#app.teamId", type = PermissionType.TEAM)
+  public RestResponse dashboard(Application app) {
+    Map<String, Serializable> map = applicationService.dashboard(app.getTeamId());
     return RestResponse.success(map);
   }
 
   @Operation(summary = "List applications")
   @ApiAccess
   @PostMapping("list")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   @RequiresPermissions("app:view")
   public RestResponse list(Application app, RestRequest request) {
     IPage<Application> applicationList = applicationService.page(app, request);
@@ -154,6 +157,7 @@ public class ApplicationController {
   @Operation(summary = "Mapping application")
   @AppUpdated
   @PostMapping("mapping")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   @RequiresPermissions("app:mapping")
   public RestResponse mapping(Application app) {
     boolean flag = applicationService.mapping(app);
@@ -291,6 +295,7 @@ public class ApplicationController {
 
   @Operation(summary = "Get application on yarn name")
   @PostMapping("name")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   public RestResponse yarnName(Application app) {
     String yarnName = applicationService.getYarnName(app);
     return RestResponse.success(yarnName);
@@ -298,6 +303,7 @@ public class ApplicationController {
 
   @Operation(summary = "Check the application exist status")
   @PostMapping("checkName")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   public RestResponse checkName(Application app) {
     AppExistsState exists = applicationService.checkExists(app);
     return RestResponse.success(exists.get());
@@ -305,6 +311,7 @@ public class ApplicationController {
 
   @Operation(summary = "Get application conf")
   @PostMapping("readConf")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   public RestResponse readConf(Application app) throws IOException {
     String config = applicationService.readConf(app);
     return RestResponse.success(config);
@@ -312,13 +319,15 @@ public class ApplicationController {
 
   @Operation(summary = "Get application main-class")
   @PostMapping("main")
-  public RestResponse getMain(Application application) {
-    String mainClass = applicationService.getMain(application);
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
+  public RestResponse getMain(Application app) {
+    String mainClass = applicationService.getMain(app);
     return RestResponse.success(mainClass);
   }
 
   @Operation(summary = "List application backups")
   @PostMapping("backups")
+  @PermissionAction(id = "#backUp.appId", type = PermissionType.APP)
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
     IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
     return RestResponse.success(backups);
@@ -326,17 +335,18 @@ public class ApplicationController {
 
   @Operation(summary = "List application operation logs")
   @PostMapping("optionlog")
+  @PermissionAction(id = "#backUp.appId", type = PermissionType.APP)
   public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
     IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
     return RestResponse.success(applicationList);
   }
 
   @Operation(summary = "Delete application operation log")
-  @PermissionAction(id = "#applicationLog.appId", type = PermissionType.APP)
+  @PermissionAction(id = "#log.appId", type = PermissionType.APP)
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
-  public RestResponse deleteOperationLog(ApplicationLog applicationLog) {
-    Boolean deleted = applicationLogService.delete(applicationLog);
+  public RestResponse deleteOperationLog(ApplicationLog log) {
+    Boolean deleted = applicationLogService.delete(log);
     return RestResponse.success(deleted);
   }
 
@@ -402,6 +412,7 @@ public class ApplicationController {
 
   @Operation(summary = "Check the application savepoint path")
   @PostMapping("checkSavepointPath")
+  @PermissionAction(id = "#app.id", type = PermissionType.APP)
   public RestResponse checkSavepointPath(Application app) throws Exception {
     String error = applicationService.checkSavepointPath(app);
     if (error == null) {
@@ -432,6 +443,7 @@ public class ApplicationController {
         example = "100",
         schema = @Schema(implementation = int.class)),
   })
+  @PermissionAction(id = "#id", type = PermissionType.APP)
   @PostMapping(value = "k8sStartLog")
   public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
     String resp = applicationService.k8sStartLog(id, offset, limit);
