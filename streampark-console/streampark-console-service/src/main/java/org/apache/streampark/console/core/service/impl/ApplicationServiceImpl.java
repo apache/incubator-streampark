@@ -1221,8 +1221,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public String readConf(Application appParam) throws IOException {
-    File file = new File(appParam.getConfig());
+  public String readConf(String config) throws IOException {
+    File file = new File(config);
     String conf = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     return Base64.getEncoder().encodeToString(conf.getBytes());
   }

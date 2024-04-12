@@ -42,7 +42,6 @@ enum APP_API {
   CREATE = '/flink/app/create',
   CHECK_START = '/flink/app/check_start',
   START = '/flink/app/start',
-  CLEAN = '/flink/app/clean',
   BACKUPS = '/flink/app/backups',
   ROLLBACK = '/flink/app/rollback',
   REVOKE = '/flink/app/revoke',

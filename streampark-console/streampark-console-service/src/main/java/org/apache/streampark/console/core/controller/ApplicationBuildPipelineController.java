@@ -21,13 +21,12 @@ import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -92,7 +91,7 @@ public class ApplicationBuildPipelineController {
         schema = @Schema(defaultValue = "false", implementation = boolean.class))
   })
   @ApiAccess
-  @PermissionAction(id = "#appId", type = PermissionType.APP)
+  @PermissionScope(app = "#appId")
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
@@ -153,6 +152,7 @@ public class ApplicationBuildPipelineController {
   @Operation(summary = "Get application release pipeline")
   @ApiAccess
   @PostMapping("/detail")
+  @PermissionScope(app = "#appId")
   @RequiresPermissions("app:view")
   public RestResponse getBuildProgressDetail(Long appId) {
     Map<String, Object> details = new HashMap<>(0);

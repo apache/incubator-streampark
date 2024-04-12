@@ -20,9 +20,8 @@ package org.apache.streampark.console.core.aspect;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.ApiAccess;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ServiceHelper;
@@ -93,14 +92,14 @@ public class StreamParkAspect {
     return target;
   }
 
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionAction)")
+  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
   public void permissionAction() {}
 
   @Around("permissionAction()")
   public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    PermissionAction permissionAction =
-        methodSignature.getMethod().getAnnotation(PermissionAction.class);
+    PermissionScope permissionScope =
+        methodSignature.getMethod().getAnnotation(PermissionScope.class);
 
     User currentUser = serviceHelper.getLoginUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
@@ -108,42 +107,44 @@ public class StreamParkAspect {
     boolean isAdmin = currentUser.getUserType() == UserType.ADMIN;
 
     if (!isAdmin) {
-      PermissionType permissionType = permissionAction.type();
-      Long paramId = getParamId(joinPoint, methodSignature, permissionAction.id());
+      // 1) check userId
+      Long userId = getId(joinPoint, methodSignature, permissionScope.user());
+      ApiAlertException.throwIfTrue(
+          userId != null && !currentUser.getUserId().equals(userId),
+          "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
-      switch (permissionType) {
-        case USER:
-          ApiAlertException.throwIfTrue(
-              !currentUser.getUserId().equals(paramId),
-              "Permission denied, only user himself can access this permission");
-          break;
-        case TEAM:
-          Member member = memberService.findByUserName(paramId, currentUser.getUsername());
+      // 2) check team
+      Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
+      if (teamId != null) {
+        Member member = memberService.findByUserName(teamId, currentUser.getUsername());
+        ApiAlertException.throwIfTrue(
+            member == null,
+            "Permission denied, only members of this team can access this permission");
+      }
+
+      // 3) check app
+      Long appId = getId(joinPoint, methodSignature, permissionScope.app());
+      if (appId != null) {
+        Application app = applicationService.getById(appId);
+        ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+        if (!currentUser.getUserId().equals(app.getUserId())) {
+          Member member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
           ApiAlertException.throwIfTrue(
               member == null,
-              "Permission denied, only user belongs to this team can access this permission");
-          break;
-        case APP:
-          Application app = applicationService.getById(paramId);
-          ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-          member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
-          ApiAlertException.throwIfTrue(
-              member == null,
-              "Permission denied, only user belongs to this team can access this permission");
-          break;
-        default:
-          throw new IllegalArgumentException(
-              String.format("Permission type %s is not supported.", permissionType));
+              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+        }
       }
     }
 
     return (RestResponse) joinPoint.proceed();
   }
 
-  private Long getParamId(
-      ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String spELString) {
+  private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {
+    if (StringUtils.isEmpty(expr)) {
+      return null;
+    }
     SpelExpressionParser parser = new SpelExpressionParser();
-    Expression expression = parser.parseExpression(spELString);
+    Expression expression = parser.parseExpression(expr);
     EvaluationContext context = new StandardEvaluationContext();
     Object[] args = joinPoint.getArgs();
     DefaultParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
@@ -156,7 +157,6 @@ public class StreamParkAspect {
     if (value == null || StringUtils.isBlank(value.toString())) {
       return null;
     }
-
     try {
       return Long.parseLong(value.toString());
     } catch (NumberFormatException e) {

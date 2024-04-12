@@ -65,7 +65,7 @@ public interface ApplicationService extends IService<Application> {
 
   void clean(Application app);
 
-  String readConf(Application app) throws IOException;
+  String readConf(String config) throws IOException;
 
   Application getApp(Application app);
 

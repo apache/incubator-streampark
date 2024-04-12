@@ -21,9 +21,8 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.LoginType;
-import org.apache.streampark.console.core.enums.PermissionType;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -82,6 +81,7 @@ public class UserController {
 
   @Operation(summary = "Update user")
   @PutMapping("update")
+  @PermissionScope(user = "#user.id")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
     this.userService.updateUser(user);
@@ -90,6 +90,7 @@ public class UserController {
 
   @Operation(summary = "Delete user")
   @DeleteMapping("delete")
+  @PermissionScope(user = "#userId")
   @RequiresPermissions("user:delete")
   public RestResponse deleteUser(Long userId) throws Exception {
     this.userService.deleteUser(userId);
@@ -97,7 +98,7 @@ public class UserController {
   }
 
   @Operation(summary = "List without token users")
-  @PostMapping("getNoTokenUser")
+  @PermissionScope(user = "#userId")
   @RequiresPermissions("token:add")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
@@ -112,7 +113,7 @@ public class UserController {
   }
 
   @Operation(summary = "Update password")
-  @PermissionAction(id = "#user.userId", type = PermissionType.USER)
+  @PermissionScope(user = "#user.id")
   @PutMapping("password")
   public RestResponse updatePassword(User user) throws Exception {
     userService.updatePassword(user);

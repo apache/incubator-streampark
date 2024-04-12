@@ -140,7 +140,6 @@ export const useUserStore = defineStore({
           await fetchInitUserTeam(data as { teamId: string; userId: string });
         } else {
           const resp = await fetchSetUserTeam(data);
-
           const { permissions, roles = [], user } = resp;
           this.setUserInfo(user);
           this.setRoleList(roles as RoleEnum[]);
