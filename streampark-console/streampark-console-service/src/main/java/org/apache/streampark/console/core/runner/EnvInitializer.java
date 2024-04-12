@@ -186,17 +186,7 @@ public class EnvInitializer implements ApplicationRunner {
       fsOperator.upload(file.getAbsolutePath(), appClient);
     }
 
-    // 2.2) upload plugin jar.
-    String appPlugins = workspace.APP_PLUGINS();
-    fsOperator.mkCleanDirs(appPlugins);
-
-    File plugins = WebUtils.getAppPluginsDir();
-    for (File file : plugins.listFiles(fileFilter)) {
-      log.info("load plugin:{} to {}", file.getName(), appPlugins);
-      fsOperator.upload(file.getAbsolutePath(), appPlugins);
-    }
-
-    // 2.3) upload shims jar
+    // 2.2) upload shims jar
     File[] shims =
         WebUtils.getAppLibDir()
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
@@ -217,8 +207,7 @@ public class EnvInitializer implements ApplicationRunner {
       }
     }
 
-    // 2.4) create maven local repository dir
-
+    // 2.3) create maven local repository dir
     String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
     if (FsOperator.lfs().exists(localMavenRepo)) {
       FsOperator.lfs().mkdirs(localMavenRepo);
