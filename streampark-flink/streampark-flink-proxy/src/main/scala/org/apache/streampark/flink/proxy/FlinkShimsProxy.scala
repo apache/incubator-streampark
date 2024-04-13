@@ -76,7 +76,7 @@ object FlinkShimsProxy extends Logger {
   }
 
   // need to load all flink-table dependencies compatible with different versions
-  def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
+  private def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     logInfo(s"add verify sql lib,flink version: $flinkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${flinkVersion.fullVersion}", {
@@ -105,7 +105,7 @@ object FlinkShimsProxy extends Logger {
     )
   }
 
-  def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
+  private def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
     val appHome = System.getProperty(ConfigConst.KEY_APP_HOME)
     require(
       appHome != null,

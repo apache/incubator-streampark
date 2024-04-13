@@ -93,5 +93,5 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-              - key: logback.xml
-                path: logback.xml
+              - key: logback-spring.xml
+                path: logback-spring.xml

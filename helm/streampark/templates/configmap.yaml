@@ -30,11 +30,11 @@ data:
 {{- if index (.Values.streamParkDefaultConfiguration) "config.yaml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "config.yaml" | nindent 4 -}}
 {{- end }}
-  logback.xml: |+
+  logback-spring.xml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/logback.xml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/streampark-console-config/logback-spring.xml"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "logback.xml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "logback.xml" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
 {{- end }}
 {{- end }}

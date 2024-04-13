@@ -34,23 +34,22 @@ server:
 
 # system database, default h2, mysql|pgsql|h2
 datasource:
-  dialect: h2  #h2, pgsql
+  dialect: h2  #h2, mysql, pgsql
   # if datasource.dialect is mysql or pgsql, you need to configure the following connection information
-  # mysql/postgresql connect access user
+  # mysql/postgresql connect user
   username:
-  # mysql/postgresql connect access password
+  # mysql/postgresql connect password
   password:
-  # mysql/postgresql connection address
-  # mysql jdbc url example: datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
-  # postgresql jdbc url example: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+  # mysql/postgresql connect jdbcURL
+  # mysql example: datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+  # postgresql example: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
   url:
 
 streampark:
   workspace:
-    # Local workspace, storage of clone projects and compiled projects,Do not set under $APP_HOME. Set it to a directory outside of $APP_HOME.
+    # Local workspace, storage directory of clone projects and compiled projects,Do not set under $APP_HOME. Set it to a directory outside of $APP_HOME.
     local: /tmp/streampark
-    # The root hdfs path of the jars, Same as yarn.provided.lib.dirs for flink on yarn-application
-    # and Same as --jars for spark on yarn
+    # The root hdfs path of the jars, Same as yarn.provided.lib.dirs for flink on yarn-application and Same as --jars for spark on yarn
     remote: hdfs:///streampark/
   proxy:
     # lark proxy address, default https://open.feishu.cn
@@ -62,13 +61,8 @@ streampark:
     http-auth: 'simple'  # default simple, or kerberos
   # flink on yarn or spark on yarn, HADOOP_USER_NAME
   hadoop-user-name: hdfs
-  # flink on k8s ingress setting, If an ingress controller is specified in the configuration, the ingress class
-  #  kubernetes.io/ingress.class must be specified when creating the ingress, since there are often
-  #  multiple ingress controllers in a production environment.
-  flink-k8s.ingress.class: nginx
 
-# flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication,
-# it is necessary to set up Kerberos authentication related parameters.
+# flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
 security:
   kerberos:
     login:

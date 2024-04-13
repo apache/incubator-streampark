@@ -131,7 +131,7 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
   private class ContextInitializer(loggerContext: LoggerContext)
     extends LogBackContextInitializer(loggerContext) {
 
-    val shadedPackage = "org.apache.streampark.shaded"
+    private val shadedPackage = "org.apache.streampark.shaded"
 
     override def configureByResource(url: URL): Unit = {
       Utils.notNull(url, "URL argument cannot be null")

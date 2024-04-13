@@ -55,7 +55,7 @@ public class SpringProperties {
       // 4) datasource
       dataSourceConfig(userConfig, springConfig);
       // 5) system.setProperties
-      springConfig.forEach((k, v) -> System.setProperty(k.toString(), v.toString()));
+      springConfig.forEach((k, v) -> SystemPropertyUtils.set(k.toString(), v.toString()));
       return springConfig;
     }
   }
