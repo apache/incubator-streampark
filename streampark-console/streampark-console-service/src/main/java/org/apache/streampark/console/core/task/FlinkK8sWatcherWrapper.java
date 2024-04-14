@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
-import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
@@ -105,14 +104,7 @@ public class FlinkK8sWatcherWrapper {
     }
     // filter out the application that should be tracking
     return k8sApplication.stream()
-        .filter(
-            app -> {
-              boolean isEndState =
-                  FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum()));
-              boolean deploymentExists =
-                  KubernetesRetriever.isDeploymentExists(app.getK8sNamespace(), app.getClusterId());
-              return !isEndState || deploymentExists;
-            })
+        .filter(app -> FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
         .map(this::toTrackId)
         .collect(Collectors.toList());
   }
@@ -126,13 +118,9 @@ public class FlinkK8sWatcherWrapper {
           app.getJobId(),
           app.getTeamId().toString());
     } else if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
-      String namespace = app.getK8sNamespace();
-      String clusterId = app.getClusterId();
-      if (app.getFlinkClusterId() != null) {
-        FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
-        namespace = flinkCluster.getK8sNamespace();
-        clusterId = flinkCluster.getClusterId();
-      }
+      FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+      String namespace = flinkCluster.getK8sNamespace();
+      String clusterId = flinkCluster.getClusterId();
       return TrackId.onSession(
           namespace, clusterId, app.getId(), app.getJobId(), app.getTeamId().toString());
     } else {

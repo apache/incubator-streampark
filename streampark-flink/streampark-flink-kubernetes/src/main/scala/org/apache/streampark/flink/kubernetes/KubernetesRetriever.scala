@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.{DateUtils, Logger, Utils}
 import org.apache.streampark.common.util.Utils.using
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
@@ -46,6 +46,8 @@ object KubernetesRetriever extends Logger {
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
   val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout =
     Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
+
+  private val DEPLOYMENT_LOST_TIME = collection.mutable.Map[String, Long]()
 
   /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
@@ -122,15 +124,35 @@ object KubernetesRetriever extends Logger {
           .exists(_.getMetadata.getName == deploymentName)
     } {
       e =>
-        logError(
+        logWarn(
           s"""
-             |[StreamPark] check deploymentExists error,
+             |[StreamPark] check deploymentExists WARN,
              |namespace: $namespace,
              |deploymentName: $deploymentName,
              |error: $e
              |""".stripMargin
         )
-        true
+        val key = s"${namespace}_$deploymentName"
+        DEPLOYMENT_LOST_TIME.get(key) match {
+          case Some(time) =>
+            val timeOut = 1000 * 60 * 3L
+            if (System.currentTimeMillis() - time >= timeOut) {
+              logError(
+                s"""
+                   |[StreamPark] check deploymentExists Failed,
+                   |namespace: $namespace,
+                   |deploymentName: $deploymentName,
+                   |detail: deployment: $deploymentName Not Found more than 3 minutes, $e
+                   |""".stripMargin
+              )
+              DEPLOYMENT_LOST_TIME -= key
+              return false
+            }
+            return true
+          case _ =>
+            DEPLOYMENT_LOST_TIME += key -> System.currentTimeMillis()
+            true
+        }
     }
   }
 

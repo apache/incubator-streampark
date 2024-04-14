@@ -517,6 +517,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
     this.baseMapper.page(page, appParam);
+
     List<Application> records = page.getRecords();
     long now = System.currentTimeMillis();
 
@@ -524,55 +525,43 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     Map<Long, PipelineStatus> pipeStates = appBuildPipeService.listPipelineStatus(appIds);
 
     // add building pipeline status info and app control info
-    records =
-        records.stream()
-            .peek(
-                record -> {
-                  // 1) running Duration
-                  if (record.getTracking() == 1) {
-                    FlinkAppState state = record.getFlinkAppStateEnum();
-                    if (state == FlinkAppState.RUNNING
-                        || state == FlinkAppState.CANCELLING
-                        || state == FlinkAppState.MAPPING) {
-                      record.setDuration(now - record.getStartTime().getTime());
-                    }
-                  }
-                  // 2) k8s restURL
-                  if (record.isKubernetesModeJob()) {
-                    // set duration
-                    String restUrl =
-                        flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
-                    record.setFlinkRestUrl(restUrl);
-                  }
-                })
-            .peek(
-                record -> {
-                  // 3) buildStatus
-                  if (pipeStates.containsKey(record.getId())) {
-                    record.setBuildStatus(pipeStates.get(record.getId()).getCode());
-                  }
-                })
-            .peek(
-                record -> {
-                  // 4) appControl
-                  AppControl appControl =
-                      new AppControl()
-                          .setAllowBuild(
-                              record.getBuildStatus() == null
-                                  || !PipelineStatus.running
-                                      .getCode()
-                                      .equals(record.getBuildStatus()))
-                          .setAllowStart(
-                              !record.shouldBeTrack()
-                                  && PipelineStatus.success
-                                      .getCode()
-                                      .equals(record.getBuildStatus()))
-                          .setAllowStop(record.isRunning());
-                  record.setAppControl(appControl);
-                })
-            .collect(Collectors.toList());
+    records.forEach(
+        record -> {
+          // 1) running Duration
+          if (record.getTracking() == 1) {
+            FlinkAppState state = record.getFlinkAppStateEnum();
+            if (state == FlinkAppState.RUNNING
+                || state == FlinkAppState.CANCELLING
+                || state == FlinkAppState.MAPPING) {
+              record.setDuration(now - record.getStartTime().getTime());
+            }
+            // 2) k8s restURL
+            if (record.isKubernetesModeJob()) {
+              // set duration
+              String restUrl =
+                  flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
+              record.setFlinkRestUrl(restUrl);
+            }
+          }
 
-    page.setRecords(records);
+          // 3) buildStatus
+          if (pipeStates.containsKey(record.getId())) {
+            record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+          }
+
+          // 4) appControl
+          AppControl appControl =
+              new AppControl()
+                  .setAllowBuild(
+                      record.getBuildStatus() == null
+                          || !PipelineStatus.running.getCode().equals(record.getBuildStatus()))
+                  .setAllowStart(
+                      !record.shouldBeTrack()
+                          && PipelineStatus.success.getCode().equals(record.getBuildStatus()))
+                  .setAllowStop(record.isRunning());
+          record.setAppControl(appControl);
+        });
+
     return page;
   }
 
@@ -1307,8 +1296,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     applicationLog.setYarnAppId(application.getClusterId());
 
     if (appParam.getSavePointed()) {
-      FlinkAppHttpWatcher.addSavepoint(application.getId());
-      application.setOptionState(OptionState.SAVEPOINTING.getValue());
+      if (!application.isKubernetesModeJob()) {
+        FlinkAppHttpWatcher.addSavepoint(application.getId());
+        application.setOptionState(OptionState.SAVEPOINTING.getValue());
+      }
     } else {
       application.setOptionState(OptionState.CANCELLING.getValue());
     }
@@ -1620,17 +1611,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String k8sClusterId;
     FlinkK8sRestExposedType exposedType = null;
     if (application.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
-      // For compatibility with historical versions
-      if (application.getFlinkClusterId() == null) {
-        k8sClusterId = application.getClusterId();
-        k8sNamespace = application.getK8sNamespace();
-        exposedType = application.getK8sRestExposedTypeEnum();
-      } else {
-        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        k8sClusterId = cluster.getClusterId();
-        k8sNamespace = cluster.getK8sNamespace();
-        exposedType = cluster.getK8sRestExposedTypeEnum();
-      }
+      FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
+      k8sClusterId = cluster.getClusterId();
+      k8sNamespace = cluster.getK8sNamespace();
+      exposedType = cluster.getK8sRestExposedTypeEnum();
     } else if (application.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
       k8sClusterId = application.getJobName();
       k8sNamespace = application.getK8sNamespace();
@@ -1969,19 +1953,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         k8sNamespace = application.getK8sNamespace();
         break;
       case KUBERNETES_NATIVE_SESSION:
-        if (application.getFlinkClusterId() == null) {
-          clusterId = application.getClusterId();
-          k8sNamespace = application.getK8sNamespace();
-        } else {
-          cluster = flinkClusterService.getById(application.getFlinkClusterId());
-          ApiAlertException.throwIfNull(
-              cluster,
-              String.format(
-                  "The Kubernetes session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                  application.getFlinkClusterId()));
-          clusterId = cluster.getClusterId();
-          k8sNamespace = cluster.getK8sNamespace();
-        }
+        cluster = flinkClusterService.getById(application.getFlinkClusterId());
+        ApiAlertException.throwIfNull(
+            cluster,
+            String.format(
+                "The Kubernetes session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                application.getFlinkClusterId()));
+        clusterId = cluster.getClusterId();
+        k8sNamespace = cluster.getK8sNamespace();
         break;
       default:
         break;

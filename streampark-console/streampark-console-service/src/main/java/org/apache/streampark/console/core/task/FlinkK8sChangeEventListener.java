@@ -34,6 +34,8 @@ import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 import org.apache.streampark.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import scala.Enumeration;
 
@@ -58,6 +61,9 @@ public class FlinkK8sChangeEventListener {
   @Lazy @Autowired private AlertService alertService;
 
   @Lazy @Autowired private CheckpointProcessor checkpointProcessor;
+
+  private static final Cache<Long, Byte> SAVEPOINT_CACHE =
+      Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
   /**
    * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update

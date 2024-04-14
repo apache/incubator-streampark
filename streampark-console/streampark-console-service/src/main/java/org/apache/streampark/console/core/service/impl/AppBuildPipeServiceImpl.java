@@ -338,13 +338,9 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", buildRequest);
         return FlinkRemoteBuildPipeline.of(buildRequest);
       case KUBERNETES_NATIVE_SESSION:
-        String k8sNamespace = app.getK8sNamespace();
-        String clusterId = app.getClusterId();
-        if (app.getFlinkClusterId() != null) {
-          FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
-          k8sNamespace = flinkCluster.getK8sNamespace();
-          clusterId = flinkCluster.getClusterId();
-        }
+        FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+        String k8sNamespace = flinkCluster.getK8sNamespace();
+        String clusterId = flinkCluster.getClusterId();
         FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
             new FlinkK8sSessionBuildRequest(
                 app.getJobName(),

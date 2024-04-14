@@ -291,12 +291,15 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
 
-    FlinkAppHttpWatcher.addSavepoint(application.getId());
-
-    application.setOptionState(OptionState.SAVEPOINTING.getValue());
-    application.setOptionTime(new Date());
-    this.applicationService.updateById(application);
-    flinkAppHttpWatcher.initialize();
+    if (!application.isKubernetesModeJob()) {
+      FlinkAppHttpWatcher.addSavepoint(application.getId());
+      application.setOptionState(OptionState.SAVEPOINTING.getValue());
+      application.setOptionTime(new Date());
+      this.applicationService.updateById(application);
+      flinkAppHttpWatcher.initialize();
+    } else {
+      this.applicationService.updateById(application);
+    }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
 
