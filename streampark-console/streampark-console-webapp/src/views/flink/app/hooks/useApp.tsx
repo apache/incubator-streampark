@@ -336,7 +336,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
                 name="clusterId"
                 rules={[{ required: true, message: 'YARN ApplicationId is required' }]}
               >
-                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.clusterId} />
+                <Input
+                  type="text"
+                  placeholder="ApplicationId"
+                  v-model:value={formValue.clusterId}
+                />
               </Form.Item>
             )}
             <Form.Item

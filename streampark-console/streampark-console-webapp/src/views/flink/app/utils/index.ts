@@ -105,7 +105,7 @@ export function descriptionFilter(option) {
 
 export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   const executionMode = app['executionMode'];
-  if (executionMode == ExecModeEnum.REMOTE) {
+  if (executionMode == ExecModeEnum.STANDALONE) {
     const res = await fetchRemoteURL(app.flinkClusterId);
     window.open(res + '/#/job/' + app.jobId + '/overview');
   } else if (
@@ -269,7 +269,7 @@ function getFlinkClusterId(values: Recordable) {
   if (values.executionMode == ExecModeEnum.YARN_SESSION) {
     return values.yarnSessionClusterId;
   }
-  if (values.executionMode == ExecModeEnum.REMOTE) {
+  if (values.executionMode == ExecModeEnum.STANDALONE) {
     return values.remoteClusterId;
   }
   if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {

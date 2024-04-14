@@ -78,22 +78,22 @@ export const stateMap = {
 export const optionStateMap = {
   [OptionStateEnum.RELEASING]: {
     color: '#1ABBDC',
-    title: 'RELEASING',
+    title: t('flink.app.releaseState.releasing'),
     class: 'status-processing-deploying',
   },
   [OptionStateEnum.CANCELLING]: {
     color: '#faad14',
-    title: 'CANCELLING',
+    title: t('flink.app.runState.cancelling'),
     class: 'status-processing-cancelling',
   },
   [OptionStateEnum.STARTING]: {
     color: '#1AB58E',
-    title: 'STARTING',
+    title: t('flink.app.runState.starting'),
     class: 'status-processing-starting',
   },
   [OptionStateEnum.SAVEPOINTING]: {
     color: '#faad14',
-    title: 'SAVEPOINT',
+    title: t('flink.app.runState.savepoint'),
     class: 'status-processing-cancelling',
   },
 };

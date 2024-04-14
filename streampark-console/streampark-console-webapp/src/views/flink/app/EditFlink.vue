@@ -118,7 +118,7 @@
         Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
       } else if (app.executionMode == ExecModeEnum.YARN_SESSION) {
         Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
-      } else if (app.executionMode == ExecModeEnum.REMOTE) {
+      } else if (app.executionMode == ExecModeEnum.STANDALONE) {
       }
 
       if (!executionMode) {

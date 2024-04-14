@@ -76,6 +76,7 @@ export default {
     starting: 'STARTING',
     restarting: 'RESTARTING',
     running: 'RUNNING',
+    savepoint: 'SAVEPOINT',
     failing: 'FAILING',
     failed: 'FAILED',
     lost: 'LOST',

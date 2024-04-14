@@ -61,12 +61,12 @@ export const k8sRestExposedType = [
 ];
 
 export const executionModes = [
-  { label: 'remote', value: ExecModeEnum.REMOTE, disabled: false },
+  { label: 'standalone', value: ExecModeEnum.STANDALONE, disabled: false },
   { label: 'yarn application', value: ExecModeEnum.YARN_APPLICATION, disabled: false },
   { label: 'yarn session', value: ExecModeEnum.YARN_SESSION, disabled: false },
-  { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION, disabled: false },
+  { label: 'k8s session', value: ExecModeEnum.KUBERNETES_SESSION, disabled: false },
   {
-    label: 'kubernetes application',
+    label: 'k8s application',
     value: ExecModeEnum.KUBERNETES_APPLICATION,
     disabled: false,
   },

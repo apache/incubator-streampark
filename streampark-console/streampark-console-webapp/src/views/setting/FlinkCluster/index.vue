@@ -25,7 +25,7 @@
 <script lang="ts" setup name="FlinkClusterSetting">
   import { onMounted, ref } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Popconfirm, Tooltip, Card } from 'ant-design-vue';
+  import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import {
     PauseCircleOutlined,
@@ -156,16 +156,28 @@
           <div class="list-content" style="width: 20%">
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
-              <p style="margin-top: 10px">
-                {{ item.executionModeEnum.toLowerCase() }}
+              <p style="margin-top: 10px" v-if="item.executionMode === ExecModeEnum.STANDALONE">
+                <Tag color="#2db7f5">standalone</Tag>
+              </p>
+              <p
+                style="margin-top: 10px"
+                v-else-if="item.executionMode === ExecModeEnum.YARN_SESSION"
+              >
+                <Tag color="#87d068">yarn session</Tag>
+              </p>
+              <p
+                style="margin-top: 10px"
+                v-else-if="item.executionMode === ExecModeEnum.KUBERNETES_SESSION"
+              >
+                <Tag color="#108ee9">k8s session</Tag>
               </p>
             </div>
           </div>
           <div
             class="list-content"
-            style="width: 30%"
+            style="width: 35%"
             v-if="
-              item.executionMode === ExecModeEnum.REMOTE ||
+              item.executionMode === ExecModeEnum.STANDALONE ||
               item.executionMode === ExecModeEnum.YARN_SESSION
             "
           >
@@ -194,7 +206,7 @@
             <template v-if="handleIsStart(item)">
               <Tooltip :title="t('setting.flinkCluster.stop')">
                 <a-button
-                  :disabled="item.executionMode === ExecModeEnum.REMOTE"
+                  :disabled="item.executionMode === ExecModeEnum.STANDALONE"
                   v-auth="'cluster:create'"
                   @click="handleShutdownCluster(item)"
                   shape="circle"
@@ -209,7 +221,7 @@
             <template v-else>
               <Tooltip :title="t('setting.flinkCluster.start')">
                 <a-button
-                  :disabled="item.executionMode === ExecModeEnum.REMOTE"
+                  :disabled="item.executionMode === ExecModeEnum.STANDALONE"
                   v-auth="'cluster:create'"
                   @click="handleDeployCluster(item)"
                   shape="circle"

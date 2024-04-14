@@ -13,7 +13,7 @@ export enum BuildStateEnum {
 /* ExecutionMode  */
 export enum ExecModeEnum {
   /** remote (standalone) */
-  REMOTE = 1,
+  STANDALONE = 1,
   /** yarn per-job (deprecated, please use yarn-application mode) */
   YARN_PER_JOB = 2,
   /** yarn session */
