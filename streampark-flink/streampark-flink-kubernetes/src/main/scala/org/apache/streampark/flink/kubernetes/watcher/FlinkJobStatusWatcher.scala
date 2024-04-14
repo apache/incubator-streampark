@@ -116,27 +116,24 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       val sessionIds = trackIds.filter(_.executeMode == FlinkK8sExecuteMode.SESSION)
       val sessionCluster = sessionIds.groupBy(_.toClusterKey.toString).flatMap(_._2).toSet
       val sessionFuture = sessionCluster.map {
-        id =>
-          val future = Future(touchSessionAllJob(id))
+        trackId =>
+          val future = Future(touchSessionAllJob(trackId))
           future.onComplete(_.toOption match {
             case Some(map) =>
-              sessionIds.foreach(
-                id => {
-                  map.find(_._1.jobId == id.jobId) match {
-                    case Some(job) =>
-                      updateState(job._1.copy(appId = id.appId), job._2)
+              map.find(_._1.jobId == trackId.jobId) match {
+                case Some(job) =>
+                  updateState(job._1.copy(appId = trackId.appId), job._2)
+                case _ =>
+                  touchSessionJob(trackId) match {
+                    case Some(state) =>
+                      if (state.jobState == FlinkJobState.LOST) {
+                        // can't find that job in the k8s cluster.
+                        watchController.unWatching(trackId)
+                      }
+                      eventBus.postSync(FlinkJobStatusChangeEvent(trackId, state))
                     case _ =>
-                      // can't find that job in the k8s cluster.
-                      watchController.unWatching(id)
-                      val lostState = JobStatusCV(
-                        jobState = FlinkJobState.LOST,
-                        jobId = id.jobId,
-                        pollEmitTime = System.currentTimeMillis,
-                        pollAckTime = System.currentTimeMillis
-                      )
-                      eventBus.postSync(FlinkJobStatusChangeEvent(id, lostState))
                   }
-                })
+              }
             case _ =>
           })
           future
@@ -221,6 +218,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       watchController.jobStatuses.put(trackId, jobState)
       // set jobId to trackIds
       watchController.trackIds.update(trackId)
+
       eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
     }
 

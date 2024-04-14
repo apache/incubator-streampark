@@ -204,7 +204,7 @@
       return;
     }
     const value = await handleGetApplication();
-    setFieldsValue(value);
+    await setFieldsValue(value);
     if (app.resourceFrom == ResourceFromEnum.CICD) {
       jars.value = await fetchListJars({
         id: app.projectId,

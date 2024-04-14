@@ -111,7 +111,7 @@ public interface ApplicationService extends IService<Application> {
 
   List<String> getRecentK8sNamespace();
 
-  List<String> getRecentK8sClusterId(Integer executionMode);
+  List<String> getRecentK8sClusterId();
 
   List<String> getRecentFlinkBaseImage();
 

@@ -603,8 +603,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public List<String> getRecentK8sClusterId(Integer executionMode) {
-    return baseMapper.getRecentK8sClusterId(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+  public List<String> getRecentK8sClusterId() {
+    return baseMapper.getRecentK8sClusterId(DEFAULT_HISTORY_RECORD_LIMIT);
   }
 
   @Override
@@ -834,56 +834,58 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         !existsByJobName,
         "[StreamPark] Application names can't be repeated, copy application failed.");
 
-    Application oldApp = getById(appParam.getId());
+    Application persist = getById(appParam.getId());
     Application newApp = new Application();
     String jobName = appParam.getJobName();
 
     newApp.setJobName(jobName);
     newApp.setClusterId(
-        ExecutionMode.isSessionMode(oldApp.getExecutionModeEnum()) ? oldApp.getClusterId() : null);
-    newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
-    newApp.setVersionId(oldApp.getVersionId());
+        ExecutionMode.isSessionMode(persist.getExecutionModeEnum())
+            ? persist.getClusterId()
+            : null);
+    newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : persist.getArgs());
+    newApp.setVersionId(persist.getVersionId());
 
-    newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
-    newApp.setRestartSize(oldApp.getRestartSize());
-    newApp.setJobType(oldApp.getJobType());
-    newApp.setOptions(oldApp.getOptions());
-    newApp.setDynamicProperties(oldApp.getDynamicProperties());
-    newApp.setResolveOrder(oldApp.getResolveOrder());
-    newApp.setExecutionMode(oldApp.getExecutionMode());
-    newApp.setFlinkImage(oldApp.getFlinkImage());
-    newApp.setK8sNamespace(oldApp.getK8sNamespace());
-    newApp.setK8sRestExposedType(oldApp.getK8sRestExposedType());
-    newApp.setK8sPodTemplate(oldApp.getK8sPodTemplate());
-    newApp.setK8sJmPodTemplate(oldApp.getK8sJmPodTemplate());
-    newApp.setK8sTmPodTemplate(oldApp.getK8sTmPodTemplate());
-    newApp.setK8sHadoopIntegration(oldApp.getK8sHadoopIntegration());
-    newApp.setDescription(oldApp.getDescription());
-    newApp.setAlertId(oldApp.getAlertId());
-    newApp.setCpFailureAction(oldApp.getCpFailureAction());
-    newApp.setCpFailureRateInterval(oldApp.getCpFailureRateInterval());
-    newApp.setCpMaxFailureInterval(oldApp.getCpMaxFailureInterval());
-    newApp.setMainClass(oldApp.getMainClass());
-    newApp.setAppType(oldApp.getAppType());
-    newApp.setResourceFrom(oldApp.getResourceFrom());
-    newApp.setProjectId(oldApp.getProjectId());
-    newApp.setModule(oldApp.getModule());
+    newApp.setFlinkClusterId(persist.getFlinkClusterId());
+    newApp.setRestartSize(persist.getRestartSize());
+    newApp.setJobType(persist.getJobType());
+    newApp.setOptions(persist.getOptions());
+    newApp.setDynamicProperties(persist.getDynamicProperties());
+    newApp.setResolveOrder(persist.getResolveOrder());
+    newApp.setExecutionMode(persist.getExecutionMode());
+    newApp.setFlinkImage(persist.getFlinkImage());
+    newApp.setK8sNamespace(persist.getK8sNamespace());
+    newApp.setK8sRestExposedType(persist.getK8sRestExposedType());
+    newApp.setK8sPodTemplate(persist.getK8sPodTemplate());
+    newApp.setK8sJmPodTemplate(persist.getK8sJmPodTemplate());
+    newApp.setK8sTmPodTemplate(persist.getK8sTmPodTemplate());
+    newApp.setK8sHadoopIntegration(persist.getK8sHadoopIntegration());
+    newApp.setDescription(persist.getDescription());
+    newApp.setAlertId(persist.getAlertId());
+    newApp.setCpFailureAction(persist.getCpFailureAction());
+    newApp.setCpFailureRateInterval(persist.getCpFailureRateInterval());
+    newApp.setCpMaxFailureInterval(persist.getCpMaxFailureInterval());
+    newApp.setMainClass(persist.getMainClass());
+    newApp.setAppType(persist.getAppType());
+    newApp.setResourceFrom(persist.getResourceFrom());
+    newApp.setProjectId(persist.getProjectId());
+    newApp.setModule(persist.getModule());
     newApp.setUserId(serviceHelper.getUserId());
     newApp.setState(FlinkAppState.ADDED.getValue());
     newApp.setRelease(ReleaseState.NEED_RELEASE.get());
     newApp.setOptionState(OptionState.NONE.getValue());
-    newApp.setHotParams(oldApp.getHotParams());
+    newApp.setHotParams(persist.getHotParams());
 
     // createTime & modifyTime
     Date date = new Date();
     newApp.setCreateTime(date);
     newApp.setModifyTime(date);
 
-    newApp.setJar(oldApp.getJar());
-    newApp.setJarCheckSum(oldApp.getJarCheckSum());
-    newApp.setTags(oldApp.getTags());
-    newApp.setTeamId(oldApp.getTeamId());
-    newApp.setDependency(oldApp.getDependency());
+    newApp.setJar(persist.getJar());
+    newApp.setJarCheckSum(persist.getJarCheckSum());
+    newApp.setTags(persist.getTags());
+    newApp.setTeamId(persist.getTeamId());
+    newApp.setDependency(persist.getDependency());
 
     boolean saved = save(newApp);
     if (saved) {
@@ -908,7 +910,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       return newApp.getId();
     } else {
       throw new ApiAlertException(
-          "create application from copy failed, copy source app: " + oldApp.getJobName());
+          "create application from copy failed, copy source app: " + persist.getJobName());
     }
   }
 
@@ -990,7 +992,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setDynamicProperties(appParam.getDynamicProperties());
     application.setResolveOrder(appParam.getResolveOrder());
     application.setExecutionMode(appParam.getExecutionMode());
-    application.setClusterId(appParam.getClusterId());
+    application.setFlinkClusterId(appParam.getFlinkClusterId());
     application.setFlinkImage(appParam.getFlinkImage());
     application.updateHotParams(appParam);
     application.setK8sRestExposedType(appParam.getK8sRestExposedType());
@@ -1285,6 +1287,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Override
   public void cancel(Application appParam) throws Exception {
     FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionState.CANCELLING);
+
     Application application = getById(appParam.getId());
     application.setState(FlinkAppState.CANCELLING.getValue());
 
@@ -1293,7 +1296,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     applicationLog.setAppId(application.getId());
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setYarnAppId(application.getClusterId());
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      applicationLog.setYarnAppId(application.getClusterId());
+    }
 
     if (appParam.getSavePointed()) {
       if (!application.isKubernetesModeJob()) {
@@ -1692,7 +1697,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           }
 
           if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-            application.setAppId(response.clusterId());
+            application.setClusterId(response.clusterId());
             applicationLog.setYarnAppId(response.clusterId());
           }
 
@@ -1946,7 +1951,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       case YARN_APPLICATION:
       case YARN_PER_JOB:
       case YARN_SESSION:
-        clusterId = application.getAppId();
+        clusterId = application.getClusterId();
         break;
       case KUBERNETES_NATIVE_APPLICATION:
         clusterId = application.getJobName();

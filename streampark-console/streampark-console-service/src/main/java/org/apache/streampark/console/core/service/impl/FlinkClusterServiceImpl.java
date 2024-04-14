@@ -174,7 +174,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       log.info("deploy cluster request: {}", deployRequest);
       Future<DeployResponse> future =
           bootstrapExecutor.submit(() -> FlinkClient.deploy(deployRequest));
-      DeployResponse deployResponse = future.get(5, TimeUnit.SECONDS);
+      DeployResponse deployResponse = future.get();
       if (deployResponse.error() != null) {
         throw new ApiDetailException(
             "deploy cluster "
@@ -313,7 +313,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     try {
       Future<ShutDownResponse> future =
           bootstrapExecutor.submit(() -> FlinkClient.shutdown(deployRequest));
-      ShutDownResponse shutDownResponse = future.get(60, TimeUnit.SECONDS);
+      ShutDownResponse shutDownResponse = future.get();
       if (shutDownResponse.error() != null) {
         throw new ApiDetailException(
             "shutdown cluster failed, error: \n"

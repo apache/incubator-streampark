@@ -58,7 +58,6 @@ create table `t_flink_app` (
   `options` longtext collate utf8mb4_general_ci,
   `hot_params` text collate utf8mb4_general_ci,
   `user_id` bigint default null,
-  `app_id` varchar(64) collate utf8mb4_general_ci default null,
   `app_type` tinyint default null,
   `duration` bigint default null,
   `job_id` varchar(64) collate utf8mb4_general_ci default null,

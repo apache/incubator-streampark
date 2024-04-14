@@ -51,7 +51,6 @@ create table if not exists `t_flink_app` (
   `options` longtext,
   `hot_params` text ,
   `user_id` bigint default null,
-  `app_id` varchar(64) default null,
   `app_type` tinyint default null,
   `duration` bigint default null,
   `job_id` varchar(64) default null,

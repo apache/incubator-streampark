@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.service.ApplicationService;
 
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "FLINK_APPLICATION_HISTORY_TAG")
@@ -61,20 +59,10 @@ public class ApplicationHistoryController {
   }
 
   @Operation(summary = "List the session cluster history records")
-  @PostMapping("sessionClusterIds")
+  @PostMapping("k8sClusterId")
   @RequiresPermissions("app:create")
-  public RestResponse listSessionClusterId(int executionMode) {
-    List<String> clusterIds;
-    switch (ExecutionMode.of(executionMode)) {
-      case KUBERNETES_NATIVE_SESSION:
-      case YARN_SESSION:
-      case REMOTE:
-        clusterIds = applicationService.getRecentK8sClusterId(executionMode);
-        break;
-      default:
-        clusterIds = new ArrayList<>(0);
-        break;
-    }
+  public RestResponse recentK8sClusterId() {
+    List<String> clusterIds = applicationService.getRecentK8sClusterId();
     return RestResponse.success(clusterIds);
   }
 

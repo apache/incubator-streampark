@@ -289,16 +289,15 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     applicationLog.setAppId(application.getId());
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setYarnAppId(application.getClusterId());
-
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      applicationLog.setYarnAppId(application.getClusterId());
+    }
     if (!application.isKubernetesModeJob()) {
       FlinkAppHttpWatcher.addSavepoint(application.getId());
       application.setOptionState(OptionState.SAVEPOINTING.getValue());
       application.setOptionTime(new Date());
       this.applicationService.updateById(application);
       flinkAppHttpWatcher.initialize();
-    } else {
-      this.applicationService.updateById(application);
     }
 
     FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
@@ -354,11 +353,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         .whenComplete(
             (t, e) -> {
               applicationLogService.save(applicationLog);
-              application.setOptionState(OptionState.NONE.getValue());
-              application.setOptionTime(new Date());
-              applicationService.update(application);
-              flinkAppHttpWatcher.cleanSavepoint(application);
-              flinkAppHttpWatcher.initialize();
+              if (!application.isKubernetesModeJob()) {
+                application.setOptionState(OptionState.NONE.getValue());
+                application.setOptionTime(new Date());
+                applicationService.update(application);
+                flinkAppHttpWatcher.cleanSavepoint(application);
+                flinkAppHttpWatcher.initialize();
+              }
             });
   }
 
@@ -396,7 +397,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private String getClusterId(Application application, FlinkCluster cluster) {
     if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-      return application.getClusterId();
+      return ExecutionMode.isKubernetesSessionMode(application.getExecutionMode())
+          ? cluster.getClusterId()
+          : application.getClusterId();
     } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       if (ExecutionMode.YARN_SESSION.equals(application.getExecutionModeEnum())) {
         Utils.notNull(
@@ -406,7 +409,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 application.getFlinkClusterId()));
         return cluster.getClusterId();
       } else {
-        return application.getAppId();
+        return application.getClusterId();
       }
     }
     return null;

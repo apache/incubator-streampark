@@ -18,5 +18,11 @@
 UPDATE t_flink_app
 SET flink_cluster_id = t_flink_cluster.id
     FROM t_flink_cluster
-where t_flink_app.cluster_id = t_flink_cluster.cluster_id
-  and t_flink_app.execution_mode = 5;
+WHERE t_flink_app.cluster_id = t_flink_cluster.cluster_id
+  AND t_flink_app.execution_mode = 5;
+
+UPDATE t_flink_app
+SET cluster_id = app_id
+WHERE execution_mode IN (2,3,5);
+
+ALTER TABLE t_flink_app DROP COLUMN app_id;

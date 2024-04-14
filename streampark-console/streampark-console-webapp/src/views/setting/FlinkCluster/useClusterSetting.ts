@@ -33,7 +33,7 @@ import optionData from '../../flink/app/data/option';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
-  fetchSessionClusterIds,
+  fetchK8sSessionClusterId,
 } from '/@/api/flink/app/flinkHistory';
 import { handleFormValue } from '../../flink/app/utils';
 import { useMessage } from '/@/hooks/web/useMessage';
@@ -371,9 +371,7 @@ export const useClusterSetting = () => {
     fetchK8sNamespaces().then((res) => {
       historyRecord.k8sNamespace = res;
     });
-    fetchSessionClusterIds({
-      executionMode: ExecModeEnum.KUBERNETES_SESSION,
-    }).then((res) => {
+    fetchK8sSessionClusterId().then((res) => {
       historyRecord.k8sSessionClusterId = res;
     });
     fetchFlinkBaseImages().then((res) => {

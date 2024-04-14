@@ -88,7 +88,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     HashMap<String, String> map = new HashMap();
     map.put(PlaceholderType.JOB_ID.get(), app.getJobId());
     map.put(PlaceholderType.JOB_NAME.get(), app.getJobName());
-    map.put(PlaceholderType.YARN_ID.get(), app.getAppId());
+    map.put(PlaceholderType.YARN_ID.get(), app.getClusterId());
     PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("{", "}");
     link.setRenderedLinkUrl(
         propertyPlaceholderHelper.replacePlaceholders(link.getLinkUrl().trim(), map::get));

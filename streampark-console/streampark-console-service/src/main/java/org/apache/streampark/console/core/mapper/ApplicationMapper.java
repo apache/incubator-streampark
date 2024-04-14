@@ -41,8 +41,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   List<String> getRecentK8sNamespace(@Param("limitSize") Integer limit);
 
-  List<String> getRecentK8sClusterId(
-      @Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
+  List<String> getRecentK8sClusterId(@Param("limitSize") Integer limit);
 
   List<String> getRecentFlinkBaseImage(@Param("limitSize") Integer limit);
 

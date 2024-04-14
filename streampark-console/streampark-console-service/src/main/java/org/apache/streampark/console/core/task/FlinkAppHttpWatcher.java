@@ -701,12 +701,12 @@ public class FlinkAppHttpWatcher {
   }
 
   private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {
-    String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+    String reqURL = "ws/v1/cluster/apps/".concat(application.getClusterId());
     return yarnRestRequest(reqURL, YarnAppInfo.class);
   }
 
   private Overview httpOverview(Application application) throws IOException {
-    String appId = application.getAppId();
+    String appId = application.getClusterId();
     if (appId != null) {
       if (application.getExecutionModeEnum().equals(ExecutionMode.YARN_APPLICATION)
           || application.getExecutionModeEnum().equals(ExecutionMode.YARN_PER_JOB)) {
@@ -731,7 +731,7 @@ public class FlinkAppHttpWatcher {
       String reqURL;
       if (StringUtils.isEmpty(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId());
+        reqURL = String.format(format, application.getClusterId());
       } else {
         String format = "%s/" + flinkUrl;
         reqURL = String.format(format, application.getJobManagerUrl());
@@ -765,7 +765,7 @@ public class FlinkAppHttpWatcher {
       String reqURL;
       if (StringUtils.isEmpty(application.getJobManagerUrl())) {
         String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId(), application.getJobId());
+        reqURL = String.format(format, application.getClusterId(), application.getJobId());
       } else {
         String format = "%s/" + flinkUrl;
         reqURL = String.format(format, application.getJobManagerUrl(), application.getJobId());

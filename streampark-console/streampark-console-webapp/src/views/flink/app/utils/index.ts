@@ -115,9 +115,9 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   ) {
     if (!yarn) {
       const res = await fetchYarn();
-      window.open(res + '/proxy/' + app['appId'] + '/');
+      window.open(res + '/proxy/' + app['clusterId'] + '/');
     } else {
-      window.open(yarn + '/proxy/' + app['appId'] + '/');
+      window.open(yarn + '/proxy/' + app['clusterId'] + '/');
     }
   } else {
     if (app.flinkRestUrl) {

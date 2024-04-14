@@ -28,7 +28,6 @@
         <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
         <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
         <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
-        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="flink_cluster_id" jdbcType="BIGINT" property="flinkClusterId"/>
@@ -178,13 +177,9 @@
                     and p.name like '%' || #{application.projectName} || '%'
                 </if>
             </if>
-            <if test="application.appId != null and application.appId != ''">
-                and t.app_id = #{application.appId}
-            </if>
             <if test="application.state != null and application.state != ''">
                 and t.state = #{application.state}
             </if>
-
             <if test="application.userId != null and application.userId != ''">
                 and t.user_id = #{application.userId}
             </if>
@@ -286,11 +281,11 @@
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">
         update t_flink_app
         <set>
+            <if test="application.clusterId != null">
+                cluster_id=#{application.clusterId},
+            </if>
             <if test="application.jobId != null">
                 job_id=#{application.jobId},
-            </if>
-            <if test="application.appId != null">
-                app_id=#{application.appId},
             </if>
             end_time=null,
             state=14,
@@ -314,11 +309,11 @@
     <select id="getRecentK8sClusterId" resultType="java.lang.String" parameterType="java.util.Map">
         select cluster_id
         from (
-            select cluster_id, max(create_time) as ct
-            from t_flink_app
-            where cluster_id is not null
-            and execution_mode = #{executionMode}
-            group by cluster_id
+            select c.cluster_id, max(a.create_time) as ct
+            from t_flink_app a inner join t_flink_cluster c
+            on a.flink_cluster_id = c.id
+            where a.execution_mode = 5
+            group by c.cluster_id
             order by ct desc
         ) as ci
         limit #{limitSize}

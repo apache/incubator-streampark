@@ -42,7 +42,7 @@ import { fetchVariableAll } from '/@/api/flink/variable';
 import {
   fetchFlinkBaseImages,
   fetchK8sNamespaces,
-  fetchSessionClusterIds,
+  fetchK8sSessionClusterId,
 } from '/@/api/flink/app/flinkHistory';
 import { fetchSelect } from '/@/api/flink/project';
 import { fetchAlertSetting } from '/@/api/flink/setting/alert';
@@ -584,13 +584,13 @@ export const useCreateAndEditSchema = (
     });
 
     //get flinkCluster
-    fetchFlinkCluster().then((res) => {
-      flinkClusters.value = res;
+    fetchFlinkCluster().then((resp) => {
+      flinkClusters.value = resp;
     });
-    fetchK8sNamespaces().then((res) => {
-      historyRecord.k8sNamespace = res;
+    fetchK8sNamespaces().then((resp) => {
+      historyRecord.k8sNamespace = resp;
     });
-    fetchSessionClusterIds({ executionMode: ExecModeEnum.KUBERNETES_SESSION }).then((res) => {
+    fetchK8sSessionClusterId().then((res) => {
       historyRecord.k8sSessionClusterId = res;
     });
     fetchFlinkBaseImages().then((res) => {

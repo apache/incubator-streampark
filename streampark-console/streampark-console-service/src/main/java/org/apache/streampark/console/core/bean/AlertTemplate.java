@@ -56,7 +56,8 @@ public class AlertTemplate implements Serializable {
 
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       String format = "%s/proxy/%s/";
-      String url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getAppId());
+      String url =
+          String.format(format, YarnUtils.getRMWebAppURL(false), application.getClusterId());
       template.setLink(url);
     } else {
       template.setLink(null);

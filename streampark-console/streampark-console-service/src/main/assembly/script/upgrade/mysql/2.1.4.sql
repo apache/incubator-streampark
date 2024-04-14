@@ -17,12 +17,18 @@
 
 use streampark;
 
-set names utf8mb4;
-set foreign_key_checks = 0;
+SET NAMES utf8mb4;
+SET foreign_key_checks = 0;
 
-update `t_flink_app` a inner join `t_flink_cluster` c
-on a.`cluster_id` = c.`cluster_id`
-    and a.`execution_mode` = 5
-    set a.`flink_cluster_id` = c.`id`;
+UPDATE `t_flink_app` a INNER JOIN `t_flink_cluster` c
+ON a.`cluster_id` = c.`cluster_id`
+AND a.`execution_mode` = 5
+SET a.`flink_cluster_id` = c.`id`;
 
-set foreign_key_checks = 1;
+UPDATE `t_flink_app`
+SET `cluster_id` = `app_id`
+WHERE `execution_mode` IN (2,3,5);
+
+ALTER TABLE `t_flink_app` DROP COLUMN `app_id`;
+
+SET foreign_key_checks = 1;

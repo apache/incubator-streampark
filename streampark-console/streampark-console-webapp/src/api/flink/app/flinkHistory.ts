@@ -19,7 +19,7 @@ import { defHttp } from '/@/utils/http/axios';
 enum HISTORY_API {
   UPLOAD_JARS = '/flink/history/uploadJars',
   K8S_NAMESPACES = '/flink/history/k8sNamespaces',
-  SESSION_CLUSTER_IDS = '/flink/history/sessionClusterIds',
+  K8S_SESSION_CLUSTER_ID = '/flink/history/k8sClusterId',
   FLINK_BASE_IMAGES = '/flink/history/flinkBaseImages',
   FLINK_POD_TEMPLATES = '/flink/history/flinkPodTemplates',
   FLINK_JM_POD_TEMPLATES = '/flink/history/flinkJmPodTemplates',
@@ -42,8 +42,8 @@ export function fetchUploadJars(): Promise<string[]> {
   return defHttp.post({ url: HISTORY_API.UPLOAD_JARS });
 }
 
-export function fetchSessionClusterIds(data) {
-  return defHttp.post({ url: HISTORY_API.SESSION_CLUSTER_IDS, data });
+export function fetchK8sSessionClusterId() {
+  return defHttp.post({ url: HISTORY_API.K8S_SESSION_CLUSTER_ID });
 }
 
 export function fetchFlinkBaseImages() {

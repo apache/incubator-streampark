@@ -206,7 +206,6 @@ create table "public"."t_flink_app" (
   "options" text collate "pg_catalog"."default",
   "hot_params" text collate "pg_catalog"."default",
   "user_id" int8,
-  "app_id" varchar(64) collate "pg_catalog"."default",
   "app_type" int2,
   "duration" int8,
   "job_id" varchar(64) collate "pg_catalog"."default",
