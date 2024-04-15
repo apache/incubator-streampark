@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -48,6 +49,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+@Hidden
 @Tag(name = "ALERT_TAG")
 @Slf4j
 @Validated

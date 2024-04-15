@@ -37,6 +37,7 @@ import org.apache.streampark.flink.packer.pipeline.PipelineType;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -54,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "FLINK_APPLICATION_BUILD_PIPELINE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -149,6 +149,8 @@ public class ApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
+  @Hidden
+  @Tag(name = "FLINK_APPLICATION_BUILD_PIPELINE_TAG")
   @Operation(summary = "Get application release pipeline")
   @ApiAccess
   @PostMapping("/detail")

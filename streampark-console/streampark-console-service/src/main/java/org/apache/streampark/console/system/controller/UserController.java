@@ -32,6 +32,7 @@ import org.apache.streampark.console.system.service.UserService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
+@Hidden
 @Tag(name = "USER_TAG")
 @Slf4j
 @Validated

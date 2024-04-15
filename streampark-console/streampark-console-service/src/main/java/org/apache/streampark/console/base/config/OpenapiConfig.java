@@ -71,9 +71,4 @@ public class OpenapiConfig implements WebMvcConfigurer {
   public GroupedOpenApi publicApiV1() {
     return GroupedOpenApi.builder().group("v1").pathsToExclude("/v2/**").build();
   }
-
-  @Bean
-  public GroupedOpenApi publicApiV2() {
-    return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
-  }
 }

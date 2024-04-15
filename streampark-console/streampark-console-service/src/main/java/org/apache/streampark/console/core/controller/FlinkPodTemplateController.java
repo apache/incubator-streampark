@@ -23,6 +23,7 @@ import org.apache.streampark.flink.kubernetes.PodTemplateParser;
 
 import org.apache.commons.lang3.StringUtils;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Hidden
 @Tag(name = "FLINK_POD_TEMPLATE_TAG")
 @Slf4j
 @Validated

@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.service.ExternalLinkService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -42,6 +43,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+@Hidden
 @Tag(name = "FLINK_EXTERNAL_LINK_TAG")
 @Slf4j
 @Validated

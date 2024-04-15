@@ -30,6 +30,7 @@ import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+@Hidden
 @Tag(name = "FLINK_SQL_TAG")
 @Slf4j
 @Validated

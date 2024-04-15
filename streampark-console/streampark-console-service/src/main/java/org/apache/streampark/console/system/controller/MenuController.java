@@ -25,6 +25,7 @@ import org.apache.streampark.console.system.service.MenuService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Map;
 
+@Hidden
 @Tag(name = "MENU_TAG")
 @Slf4j
 @Validated

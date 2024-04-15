@@ -29,6 +29,7 @@ import org.apache.streampark.console.system.service.AccessTokenService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -98,6 +99,7 @@ public class AccessTokenController {
   }
 
   /** query token list */
+  @Hidden
   @Operation(summary = "List tokens")
   @Parameters({
     @Parameter(
@@ -115,6 +117,7 @@ public class AccessTokenController {
   }
 
   /** update token status */
+  @Hidden
   @Operation(summary = "Toggle token")
   @Parameters({
     @Parameter(
@@ -131,6 +134,7 @@ public class AccessTokenController {
   }
 
   /** delete token by id */
+  @Hidden
   @Operation(summary = "Delete token")
   @Parameters({
     @Parameter(
@@ -151,6 +155,7 @@ public class AccessTokenController {
    * copy cURL, hardcode now, there is no need for configuration here, because there are several
    * fixed interfaces
    */
+  @Hidden
   @Operation(summary = "Generate api with token")
   @PostMapping(value = "curl")
   public RestResponse copyRestApiCurl(
