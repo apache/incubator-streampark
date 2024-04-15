@@ -18,8 +18,8 @@
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.conf.ConfigKeys
+import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.common.util.ImplicitsUtils._
-import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
@@ -89,15 +89,19 @@ object KubernetesRetriever extends Logger {
     val clusterProvider: KubernetesClusterDescriptor =
       clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
 
-    Try {
-      clusterProvider
-        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-        .getClusterClient
-    } match {
-      case Success(v) => Some(v)
-      case Failure(e) =>
-        logError(s"Get flinkClient error, the error is: $e")
-        None
+    try {
+      Try {
+        clusterProvider
+          .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+          .getClusterClient
+      } match {
+        case Success(v) => Some(v)
+        case Failure(e) =>
+          logError(s"Get flinkClient error, the error is: $e")
+          None
+      }
+    } finally {
+      Utils.close(clusterProvider)
     }
   }
 
