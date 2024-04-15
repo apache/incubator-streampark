@@ -17,7 +17,7 @@
 
 package org.apache.streampark.gateway;
 
-import javax.annotation.Nullable;
+import org.apache.streampark.common.util.AssertUtils;
 
 import java.time.Duration;
 import java.util.Map;
@@ -82,7 +82,7 @@ public class ConfigOption<T> {
    * @return The builder for the config option with the given key.
    */
   public static OptionBuilder key(String key) {
-    checkNotNull(key);
+    AssertUtils.notNull(key);
     return new OptionBuilder(key);
   }
 
@@ -196,7 +196,7 @@ public class ConfigOption<T> {
      */
     @Deprecated
     public <T> ConfigOption<T> defaultValue(T value) {
-      checkNotNull(value);
+      AssertUtils.notNull(value);
       return new ConfigOption<>(key, value, ConfigOption.EMPTY_DESCRIPTION, value.getClass());
     }
 
@@ -245,12 +245,5 @@ public class ConfigOption<T> {
     public ConfigOption<T> noDefaultValue() {
       return new ConfigOption<>(key, null, ConfigOption.EMPTY_DESCRIPTION, clazz);
     }
-  }
-
-  public static <T> T checkNotNull(@Nullable T reference) {
-    if (reference == null) {
-      throw new NullPointerException();
-    }
-    return reference;
   }
 }

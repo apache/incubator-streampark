@@ -136,10 +136,9 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
-      if (
-        submitRequest.flinkVersion.checkVersion(
-          FlinkRestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
-      ) {
+      val eableRestoreModeState = submitRequest.flinkVersion.checkVersion(
+        FlinkRestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
+      if (eableRestoreModeState) {
         flinkConfig.setString(FlinkRestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
       }
     }
@@ -267,9 +266,8 @@ trait FlinkClientTrait extends Logger {
     submitRequest.developmentMode match {
       case FlinkDevelopmentMode.PYFLINK =>
         val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
-        if (!FsOperator.lfs.exists(pythonVenv)) {
-          throw new RuntimeException(s"$pythonVenv File does not exist")
-        }
+        AssertUtils.required(FsOperator.lfs.exists(pythonVenv), s"$pythonVenv File does not exist")
+
         flinkConfig
           // python.archives
           .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
@@ -473,17 +471,17 @@ trait FlinkClientTrait extends Logger {
     }
 
     // execution.runtime-mode
-    if (submitRequest.properties.nonEmpty) {
-      if (submitRequest.properties.containsKey(ExecutionOptions.RUNTIME_MODE.key())) {
-        programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
-        programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
-      }
+    val addRuntimeModeState =
+      submitRequest.properties.nonEmpty && submitRequest.properties.containsKey(
+        ExecutionOptions.RUNTIME_MODE.key())
+    if (addRuntimeModeState) {
+      programArgs += s"--${ExecutionOptions.RUNTIME_MODE.key()}"
+      programArgs += submitRequest.properties.get(ExecutionOptions.RUNTIME_MODE.key()).toString
     }
 
-    if (
-      submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK
-      && submitRequest.executionMode != FlinkExecutionMode.YARN_APPLICATION
-    ) {
+    val addUserJarFileState =
+      submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK && submitRequest.executionMode != FlinkExecutionMode.YARN_APPLICATION
+    if (addUserJarFileState) {
       // python file
       programArgs.add("-py")
       programArgs.add(submitRequest.userJarFile.getAbsolutePath)
@@ -574,11 +572,10 @@ trait FlinkClientTrait extends Logger {
             }
         )
 
-        if (StringUtils.isBlank(configDir)) {
-          throw new FlinkException(
-            s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
-        } else configDir
-
+        AssertUtils.required(
+          StringUtils.isNotBlank(configDir),
+          s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
+        configDir
       }
     }
   }

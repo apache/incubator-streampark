@@ -17,14 +17,19 @@
 
 package org.apache.streampark.spark.core
 
-import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.util.{Logger, PropertiesUtils}
+import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils}
+import org.apache.streampark.spark.core.util.{ParameterTool, SqlCommandParser}
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
+
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 /** <b><code>Spark</code></b> <p/> Spark Basic Traits <p/> */
 trait Spark extends Logger {
@@ -43,6 +48,8 @@ trait Spark extends Logger {
 
   // If recovery from checkpoint fails, recreate
   final protected var createOnError: Boolean = true
+
+  private[this] val lock = new ReentrantReadWriteLock().writeLock
 
   /** Entrance */
   def main(args: Array[String]): Unit = {
@@ -78,7 +85,40 @@ trait Spark extends Logger {
     }
 
     ready()
-    handle()
+
+    val parameterTool = ParameterTool.fromArgs(args)
+
+    val sparkSqls = {
+      val sql = parameterTool.get(KEY_FLINK_SQL())
+      require(StringUtils.isNotBlank(sql), "Usage: spark sql cannot be null")
+      Try(DeflaterUtils.unzipString(sql)) match {
+        case Success(value) => value
+        case Failure(_) =>
+          throw new IllegalArgumentException("Usage: spark sql is invalid or null, please check")
+      }
+    }
+
+    SqlCommandParser
+      .parseSQL(sparkSqls)
+      .foreach(
+        x => {
+          val args = if (x.operands.isEmpty) null else x.operands.head
+          val command = x.command.name
+          x.command match {
+            case _ =>
+              try {
+                lock.lock()
+                val dataFrame: DataFrame = handle(x.originSql)
+                logInfo(s"$command:$args")
+              } finally {
+                if (lock.isHeldByCurrentThread) {
+                  lock.unlock()
+                }
+              }
+          }
+        })
+
+//    handle(sparkSqls)
     start()
     destroy()
   }
@@ -110,18 +150,22 @@ trait Spark extends Logger {
       }
     }
 
-    val localConf = conf.split("\\.").last match {
-      case "conf" => PropertiesUtils.fromHoconFile(conf)
-      case "properties" => PropertiesUtils.fromPropertiesFile(conf)
-      case "yaml" | "yml" => PropertiesUtils.fromYamlFile(conf)
-      case _ =>
-        throw new IllegalArgumentException(
-          "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
+    if (conf != null) {
+      val localConf = conf.split("\\.").last match {
+        case "conf" => PropertiesUtils.fromHoconFile(conf)
+        case "properties" => PropertiesUtils.fromPropertiesFile(conf)
+        case "yaml" | "yml" => PropertiesUtils.fromYamlFile(conf)
+        case _ =>
+          throw new IllegalArgumentException(
+            "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
+      }
+
+      sparkConf.setAll(localConf)
     }
 
-    sparkConf.setAll(localConf).setAll(userArgs)
+    sparkConf.setAll(userArgs)
 
-    val appMain = sparkConf.get(KEY_SPARK_MAIN_CLASS, null)
+    val appMain = sparkConf.get(KEY_SPARK_MAIN_CLASS, "org.apache.streampark.spark.cli.SqlClient")
     if (appMain == null) {
       logError(s"[StreamPark] parameter: $KEY_SPARK_MAIN_CLASS must not be empty!")
       System.exit(1)
@@ -166,7 +210,7 @@ trait Spark extends Logger {
    * The handle phase is the entry point to the code written by the developer and is the most
    * important phase.
    */
-  def handle(): Unit
+  def handle(sql: String = null): DataFrame = sparkSession.sql(sql)
 
   /** The start phase starts the task, which is executed automatically by the framework. */
   def start(): Unit = {}

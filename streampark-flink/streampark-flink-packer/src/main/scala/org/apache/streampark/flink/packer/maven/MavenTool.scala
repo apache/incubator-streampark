@@ -20,7 +20,7 @@ package org.apache.streampark.flink.packer.maven
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{InternalConfigHolder, Workspace}
 import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
-import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.{AssertUtils, Logger, Utils}
 
 import com.google.common.collect.Lists
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
@@ -65,11 +65,11 @@ object MavenTool extends Logger {
         "central",
         Constant.DEFAULT,
         InternalConfigHolder.get(MAVEN_REMOTE_URL))
-    val remoteRepository =
-      if (
+    val remoteRepository = {
+      val buildState =
         InternalConfigHolder.get(MAVEN_AUTH_USER) == null || InternalConfigHolder.get(
           MAVEN_AUTH_PASSWORD) == null
-      ) {
+      if (buildState) {
         builder.build()
       } else {
         val authentication = new AuthenticationBuilder()
@@ -78,6 +78,7 @@ object MavenTool extends Logger {
           .build()
         builder.setAuthentication(authentication).build()
       }
+    }
     List(remoteRepository)
   }
 
@@ -160,9 +161,10 @@ object MavenTool extends Logger {
       @Nonnull outFatJarPath: String): File = {
     val jarLibs = dependencyInfo.extJarLibs
     val arts = dependencyInfo.mavenArts
-    if (jarLibs.isEmpty && arts.isEmpty) {
-      throw new Exception(s"[StreamPark] streampark-packer: empty artifacts.")
-    }
+    AssertUtils.required(
+      !(jarLibs.isEmpty && arts.isEmpty),
+      s"[StreamPark] streampark-packer: empty artifacts.")
+
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
     buildFatJar(mainClass, jarLibs ++ artFilePaths, outFatJarPath)
   }
@@ -253,11 +255,11 @@ object MavenTool extends Logger {
     override def canFilter(jar: File): Boolean = true
 
     override def isFiltered(name: String): Boolean = {
-      if (name.startsWith("META-INF/")) {
-        if (name.endsWith(".SF") || name.endsWith(".DSA") || name.endsWith(".RSA")) {
-          logInfo(s"shade ignore file: $name")
-          return true
-        }
+      val isFilteredState = name.startsWith("META-INF/") && name.endsWith(".SF") || name.endsWith(
+        ".DSA") || name.endsWith(".RSA")
+      if (isFilteredState) {
+        logInfo(s"shade ignore file: $name")
+        return true
       }
       false
     }

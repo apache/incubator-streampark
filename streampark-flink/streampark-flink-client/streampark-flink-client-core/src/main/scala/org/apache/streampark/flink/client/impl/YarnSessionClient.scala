@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
+import org.apache.streampark.common.util.{AssertUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
@@ -69,10 +69,10 @@ object YarnSessionClient extends YarnClientTrait {
       logDebug(s"kerberos Security is Enabled...")
       val useTicketCache =
         flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(
-          s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-      }
+      AssertUtils.required(
+        HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
+        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!"
+      )
     }
 
     val shipFiles = new util.ArrayList[String]()
@@ -259,12 +259,11 @@ object YarnSessionClient extends YarnClientTrait {
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
       val yarnClusterDescriptor = getSessionClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
-      if (
-        FinalApplicationStatus.UNDEFINED.equals(
-          clusterDescriptor.getYarnClient
-            .getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId))
-            .getFinalApplicationStatus)
-      ) {
+      val shutDownState = FinalApplicationStatus.UNDEFINED.equals(
+        clusterDescriptor.getYarnClient
+          .getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId))
+          .getFinalApplicationStatus)
+      if (shutDownState) {
         val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
         client = clientProvider.getClusterClient
         client.shutDownCluster()

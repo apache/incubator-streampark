@@ -80,6 +80,8 @@ object ConfigKeys {
 
   val KEY_FLINK_TABLE_PREFIX = "flink.table."
 
+  val KEY_SPARK_PROPERTY_PREFIX = "spark.property."
+
   val KEY_APP_PREFIX = "app."
 
   val KEY_SQL_PREFIX = "sql."

@@ -641,15 +641,13 @@ object SqlSplitter {
   private[this] def isSingleLineComment(curChar: Char, nextChar: Char): Boolean = {
     var flag = false
     for (singleCommentPrefix <- singleLineCommentPrefixList) {
-      if (singleCommentPrefix.length == 1) {
-        if (curChar == singleCommentPrefix.charAt(0)) {
+      singleCommentPrefix.length match {
+        case 1 if curChar == singleCommentPrefix.charAt(0) => flag = true
+        case 2
+            if curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(
+              1) =>
           flag = true
-        }
-      }
-      if (singleCommentPrefix.length == 2) {
-        if (curChar == singleCommentPrefix.charAt(0) && nextChar == singleCommentPrefix.charAt(1)) {
-          flag = true
-        }
+        case _ =>
       }
     }
     flag

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -73,6 +74,8 @@ public interface YarnQueueService extends IService<YarnQueue> {
    * @param queueLabel queue Label
    */
   void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel);
+
+  void checkQueueLabel(SparkExecutionMode executionModeEnum, String queueLabel);
 
   /**
    * Determine whether it is the default queue by the given queue label

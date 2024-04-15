@@ -37,10 +37,10 @@ class DockerPullProgress(
     var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
-    if (
+    val nonPullUpdateState =
       pullRsp == null || StringUtils.isBlank(pullRsp.getId) || StringUtils.isBlank(
         pullRsp.getStatus)
-    ) {
+    if (nonPullUpdateState) {
       return
     }
     if (pullRsp.getStatus.contains("complete")) {
@@ -79,10 +79,10 @@ class DockerPushProgress(
     var lastTime: Long) {
   // noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
-    if (
+    val nonPushUpdateState =
       pushRsp == null || StringUtils.isBlank(pushRsp.getId) || StringUtils.isBlank(
         pushRsp.getStatus)
-    ) {
+    if (nonPushUpdateState) {
       return
     }
     if (pushRsp.getStatus.contains("complete")) {

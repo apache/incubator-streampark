@@ -21,7 +21,7 @@ import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{FileUtils, HdfsUtils, Utils}
+import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils, Utils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
@@ -59,10 +59,10 @@ object YarnApplicationClient extends YarnClientTrait {
       logDebug(s"kerberos Security is Enabled...")
       val useTicketCache =
         flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(
-          s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-      }
+      AssertUtils.required(
+        HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
+        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!"
+      )
     }
     val providedLibs = {
       val array = ListBuffer(
@@ -100,9 +100,7 @@ object YarnApplicationClient extends YarnClientTrait {
 
     if (submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK) {
       val pyVenv: String = workspace.APP_PYTHON_VENV
-      if (!FsOperator.hdfs.exists(pyVenv)) {
-        throw new RuntimeException(s"$pyVenv File does not exist")
-      }
+      AssertUtils.required(FsOperator.hdfs.exists(pyVenv), s"$pyVenv File does not exist")
 
       val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
       if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
@@ -144,13 +142,14 @@ object YarnApplicationClient extends YarnClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
     var proxyUserUgi: UserGroupInformation = UserGroupInformation.getCurrentUser
     val currentUser = UserGroupInformation.getCurrentUser
-    if (!HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      if (StringUtils.isNotEmpty(submitRequest.hadoopUser)) {
-        proxyUserUgi = UserGroupInformation.createProxyUser(
-          submitRequest.hadoopUser,
-          currentUser
-        )
-      }
+    val eableProxyState =
+      !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils.isNotEmpty(
+        submitRequest.hadoopUser)
+    if (eableProxyState) {
+      proxyUserUgi = UserGroupInformation.createProxyUser(
+        submitRequest.hadoopUser,
+        currentUser
+      )
     }
 
     proxyUserUgi.doAs[SubmitResponse](new PrivilegedAction[SubmitResponse] {

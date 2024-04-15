@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.system.entity.User;
 
 /** Base Service */
@@ -44,4 +45,6 @@ public interface CommonService {
    * @return Jar
    */
   String getSqlClientJar(FlinkEnv flinkEnv);
+
+  String getSqlClientJar(SparkEnv flinkEnv);
 }

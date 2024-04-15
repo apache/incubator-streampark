@@ -21,7 +21,7 @@ import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums._
-import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import org.apache.streampark.common.util.{AssertUtils, DeflaterUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
@@ -181,27 +181,25 @@ case class SubmitRequest(
   def checkBuildResult(): Unit = {
     executionMode match {
       case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION =>
-        if (buildResult == null) {
-          throw new Exception(
-            s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
-              s",clusterId=${k8sSubmitParam.clusterId}," +
-              s",namespace=${k8sSubmitParam.kubernetesNamespace}")
-        }
-        if (!buildResult.pass) {
-          throw new Exception(
-            s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
-              s",clusterId=${k8sSubmitParam.clusterId}," +
-              s",namespace=${k8sSubmitParam.kubernetesNamespace}")
-        }
+        AssertUtils.required(
+          buildResult != null,
+          s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
+            s",clusterId=${k8sSubmitParam.clusterId}," +
+            s",namespace=${k8sSubmitParam.kubernetesNamespace}"
+        )
+        AssertUtils.required(
+          buildResult.pass,
+          s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
+            s",clusterId=${k8sSubmitParam.clusterId}," +
+            s",namespace=${k8sSubmitParam.kubernetesNamespace}"
+        )
       case _ =>
-        if (this.buildResult == null) {
-          throw new Exception(
-            s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
-        }
-        if (!this.buildResult.pass) {
-          throw new Exception(
-            s"[flink-submit] current job ${this.effectiveAppName} build failed, please check")
-        }
+        AssertUtils.required(
+          this.buildResult != null,
+          s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
+        AssertUtils.required(
+          this.buildResult.pass,
+          s"[flink-submit] current job ${this.effectiveAppName} build failed, please check")
     }
   }
 

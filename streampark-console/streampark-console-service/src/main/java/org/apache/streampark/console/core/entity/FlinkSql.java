@@ -71,6 +71,14 @@ public class FlinkSql {
     this.createTime = new Date();
   }
 
+  public FlinkSql(SparkApplication application) {
+    this.appId = application.getId();
+    this.sql = application.getSparkSql();
+    this.teamResource = application.getTeamResource();
+    this.dependency = application.getDependency();
+    this.createTime = new Date();
+  }
+
   public void decode() {
     this.setSql(DeflaterUtils.unzipString(this.sql));
   }
@@ -78,6 +86,14 @@ public class FlinkSql {
   public void setToApplication(Application application) {
     String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
     application.setFlinkSql(encode);
+    application.setDependency(this.dependency);
+    application.setTeamResource(this.teamResource);
+    application.setSqlId(this.id);
+  }
+
+  public void setToApplication(SparkApplication application) {
+    String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
+    application.setSparkSql(encode);
     application.setDependency(this.dependency);
     application.setTeamResource(this.teamResource);
     application.setSqlId(this.id);

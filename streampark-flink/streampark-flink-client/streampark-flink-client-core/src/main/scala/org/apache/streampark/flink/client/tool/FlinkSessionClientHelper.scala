@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.tool
 
-import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.{AssertUtils, Logger}
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -82,10 +82,9 @@ object FlinkSessionSubmitHelper extends Logger {
       case Failure(_) => null
     }
 
-    if (!jarUploadResponse.isSuccessful) {
-      throw new Exception(
-        s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$jarUploadResponse")
-    }
+    AssertUtils.required(
+      jarUploadResponse.isSuccessful,
+      s"[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl=$jmRestUrl, response=$jarUploadResponse")
 
     // refer to https://ci.apache.org/projects/flink/flink-docs-stable/docs/ops/rest_api/#jars-upload
     val resp = Request
