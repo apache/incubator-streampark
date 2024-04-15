@@ -19,7 +19,9 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -85,22 +87,27 @@ public class FlinkSqlController {
 
   @Operation(summary = "List the application sql")
   @PostMapping("list")
-  public RestResponse list(Long appId, RestRequest request) {
-    IPage<FlinkSql> page = flinkSqlService.page(appId, request);
+  @PermissionScope(app = "#flinkSql.appId", team = "#flinkSql.teamId")
+  public RestResponse list(FlinkSql flinkSql, RestRequest request) {
+    IPage<FlinkSql> page = flinkSqlService.page(flinkSql.getAppId(), request);
     return RestResponse.success(page);
   }
 
   @Operation(summary = "Delete sql")
   @PostMapping("delete")
   @RequiresPermissions("sql:delete")
-  public RestResponse delete(Long id) {
-    Boolean deleted = flinkSqlService.removeById(id);
+  @PermissionScope(app = "#flinkSql.appId", team = "#teamId")
+  public RestResponse delete(FlinkSql flinkSql) {
+    Boolean deleted = flinkSqlService.removeById(flinkSql.getId());
     return RestResponse.success(deleted);
   }
 
   @Operation(summary = "List sql by ids")
   @PostMapping("get")
-  public RestResponse get(String id) throws InternalException {
+  @PermissionScope(app = "#appId", team = "#teamId")
+  public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
+    ApiAlertException.throwIfTrue(
+        appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
     String[] array = id.split(",");
     FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
     flinkSql1.base64Encode();
@@ -114,8 +121,9 @@ public class FlinkSqlController {
 
   @Operation(summary = "List the applications sql histories")
   @PostMapping("history")
-  public RestResponse sqlhistory(Application application) {
-    List<FlinkSql> sqlList = flinkSqlService.history(application);
+  @PermissionScope(app = "#app.id", team = "app.teamId")
+  public RestResponse sqlhistory(Application app) {
+    List<FlinkSql> sqlList = flinkSqlService.history(app);
     return RestResponse.success(sqlList);
   }
 

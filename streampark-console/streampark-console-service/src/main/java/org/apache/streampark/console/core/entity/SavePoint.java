@@ -52,4 +52,6 @@ public class SavePoint {
   private Date triggerTime;
 
   private Date createTime;
+
+  private transient Long teamId;
 }
