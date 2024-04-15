@@ -119,7 +119,6 @@
           cpFailureRateInterval: app.cpFailureRateInterval,
           cpFailureAction: app.cpFailureAction,
         },
-        clusterId: app.clusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         serviceAccount: app.serviceAccount || null,

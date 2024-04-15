@@ -101,10 +101,6 @@
         },
         versionId: app.versionId || null,
         k8sRestExposedType: app.k8sRestExposedType,
-        clusterId: app.clusterId,
-        [app.executionMode == ExecModeEnum.YARN_SESSION
-          ? 'yarnSessionClusterId'
-          : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace || null,
         serviceAccount: app.serviceAccount || null,
@@ -114,11 +110,18 @@
         ...resetParams,
       };
 
-      if (app.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
-        Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
-      } else if (app.executionMode == ExecModeEnum.YARN_SESSION) {
-        Object.assign(defaultParams, { flinkClusterId: app.flinkClusterId });
-      } else if (app.executionMode == ExecModeEnum.STANDALONE) {
+      switch (app.executionMode) {
+        case ExecModeEnum.STANDALONE:
+          defaultParams['remoteClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.YARN_SESSION:
+          defaultParams['yarnSessionClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.KUBERNETES_SESSION:
+          defaultParams['k8sSessionClusterId'] = app.flinkClusterId;
+          break;
+        default:
+          break;
       }
 
       if (!executionMode) {
