@@ -16,14 +16,14 @@
 -->
 <template>
   <div class="relative h-full bg-gradient-primary overflow-auto">
-     <div class="flex items-center absolute right-15 top-10">
-        <AppLocalePicker
-          class="text-white enter-x"
-          v-if="getShowLocalePicker"
-          :reload="true"
-          :showText="false"
-        />
-      </div>    
+    <div class="flex items-center locale-picker-border absolute right-15 top-10">
+      <AppLocalePicker
+        class="text-white enter-x locale-picker"
+        v-if="getShowLocalePicker"
+        :reload="true"
+        :showText="false"
+      />
+    </div>
     <div class="w-full relative h-[calc(100%-120px)] min-h-700px flex items-center section">
       <div class="scribble-box w-[80%] h-full absolute overflow-hidden">
         <figure class="scribble scale-2 !opacity-10 top-50 left-0">
@@ -149,5 +149,14 @@
         }
       }
     }
+  }
+
+  .locale-picker-border {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+  }
+
+  .locale-picker {
+    padding: 6px;
   }
 </style>
