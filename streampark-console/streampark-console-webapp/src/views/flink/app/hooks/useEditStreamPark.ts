@@ -37,6 +37,7 @@ export const useEditStreamParkSchema = (
 ) => {
   const flinkSql = ref();
   const route = useRoute();
+  const appId = route.query.appId as string;
   const {
     alerts,
     flinkEnvs,
@@ -48,14 +49,14 @@ export const useEditStreamParkSchema = (
     getExecutionModeSchema,
     suggestions,
   } = useCreateAndEditSchema(dependencyRef, {
-    appId: route.query.appId as string,
+    appId: appId,
     mode: 'streampark',
   });
   const { createMessage } = useMessage();
   const [registerDifferentDrawer, { openDrawer: openDiffDrawer }] = useDrawer();
 
   async function handleChangeSQL(v: string) {
-    const res = await fetchFlinkSql({ id: v });
+    const res = await fetchFlinkSql({ id: v, appId: appId });
     flinkSql.value?.setContent(decodeByBase64(res.sql));
     console.log('res', flinkSql.value);
     unref(dependencyRef)?.setDefaultValue(JSON.parse(res.dependency || '{}'));
@@ -66,7 +67,7 @@ export const useEditStreamParkSchema = (
       createMessage.warning('Two versions must be selected for comparison');
       return Promise.reject('error, compareSQL array length less thatn 2');
     }
-    const res = await fetchFlinkSql({ id: compareSQL.join(',') });
+    const res = await fetchFlinkSql({ appId: appId, id: compareSQL.join(',') });
     const obj1 = res[0];
     const obj2 = res[1];
     const sql1 = decodeByBase64(obj1.sql);

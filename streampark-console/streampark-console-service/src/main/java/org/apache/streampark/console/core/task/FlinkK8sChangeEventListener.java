@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.enums.OptionState;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.alert.AlertService;
+import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
@@ -64,6 +65,9 @@ public class FlinkK8sChangeEventListener {
 
   private static final Cache<Long, Byte> SAVEPOINT_CACHE =
       Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+  @Autowired private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
+
+  @Autowired private FlinkK8sWatcher registerFlinkK8sWatcher;
 
   /**
    * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update

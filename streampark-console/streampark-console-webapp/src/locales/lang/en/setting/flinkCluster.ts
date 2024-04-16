@@ -50,7 +50,7 @@ export default {
     clusterName: 'Please enter cluster name',
     executionMode: 'Please enter cluster name',
     versionId: 'please select Flink Version',
-    addressRemoteMode: 'Please enter jobManager URL',
+    addressRemoteMode: 'Please type jobManager URL',
     addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
     yarnSessionClusterId: 'Please enter Yarn Session cluster',
     k8sConf: '~/.kube/config',

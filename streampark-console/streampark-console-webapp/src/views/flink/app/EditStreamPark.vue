@@ -119,7 +119,6 @@
           cpFailureRateInterval: app.cpFailureRateInterval,
           cpFailureAction: app.cpFailureAction,
         },
-        clusterId: app.clusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         serviceAccount: app.serviceAccount || null,
@@ -127,7 +126,7 @@
       };
 
       switch (app.executionMode) {
-        case ExecModeEnum.REMOTE:
+        case ExecModeEnum.STANDALONE:
           defaultParams['remoteClusterId'] = app.flinkClusterId;
           break;
         case ExecModeEnum.YARN_SESSION:

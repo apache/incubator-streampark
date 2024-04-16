@@ -21,7 +21,7 @@ import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, JobStatusWatcherConfig, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.APPLICATION
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model._
@@ -126,7 +126,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
                 case _ =>
                   touchSessionJob(trackId) match {
                     case Some(state) =>
-                      if (state.jobState == FlinkJobState.LOST) {
+                      if (FlinkJobState.isEndState(state.jobState)) {
                         // can't find that job in the k8s cluster.
                         watchController.unWatching(trackId)
                       }
@@ -222,16 +222,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
       eventBus.postSync(FlinkJobStatusChangeEvent(trackId, jobState))
     }
 
-    lazy val deployExists = KubernetesRetriever.isDeploymentExists(
-      trackId.namespace,
-      trackId.clusterId
-    )
-
-    if (FlinkJobState.isEndState(jobState.jobState) && !deployExists) {
-      // remove trackId from cache of job that needs to be untracked
-      watchController.unWatching(trackId)
-      if (trackId.executeMode == APPLICATION) {
-        watchController.endpoints.invalidate(trackId.toClusterKey)
+    if (FlinkJobState.isEndState(jobState.jobState)) {
+      trackId.executeMode match {
+        case APPLICATION =>
+          val deployExists = KubernetesRetriever.isDeploymentExists(
+            trackId.namespace,
+            trackId.clusterId
+          )
+          if (!deployExists) {
+            watchController.endpoints.invalidate(trackId.toClusterKey)
+            watchController.unWatching(trackId)
+          }
+        case SESSION =>
+          watchController.unWatching(trackId)
       }
     }
   }
@@ -307,6 +310,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val jobState = trackId match {
       case id if watchController.canceling.has(id) =>
         logger.info(s"trackId ${trackId.toString} is canceling")
+        watchController.trackIds.invalidate(id)
         FlinkJobState.CANCELED
       case _ =>
         // whether deployment exists on kubernetes cluster
@@ -386,7 +390,9 @@ object FlinkJobStatusWatcher {
     current match {
       case FlinkJobState.POS_TERMINATED | FlinkJobState.TERMINATED =>
         previous match {
-          case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
+          case FlinkJobState.CANCELLING => {
+            FlinkJobState.CANCELED
+          }
           case FlinkJobState.FAILING => FlinkJobState.FAILED
           case _ =>
             current match {

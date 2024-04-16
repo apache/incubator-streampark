@@ -118,8 +118,8 @@ export const useClusterSetting = () => {
           placeholder: t('setting.flinkCluster.placeholder.executionMode'),
           options: [
             {
-              label: 'remote',
-              value: ExecModeEnum.REMOTE,
+              label: 'standalone',
+              value: ExecModeEnum.STANDALONE,
             },
             { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },
             { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION },
@@ -147,7 +147,7 @@ export const useClusterSetting = () => {
         componentProps: {
           placeholder: t('setting.flinkCluster.placeholder.addressRemoteMode'),
         },
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.STANDALONE,
         rules: [{ required: true, message: t('setting.flinkCluster.required.address') }],
       },
       {
@@ -333,7 +333,7 @@ export const useClusterSetting = () => {
     };
 
     switch (values.executionMode) {
-      case ExecModeEnum.REMOTE:
+      case ExecModeEnum.STANDALONE:
         Object.assign(params, {
           address: values.address,
         });

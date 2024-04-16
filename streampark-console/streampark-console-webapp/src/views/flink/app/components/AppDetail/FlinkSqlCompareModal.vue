@@ -40,6 +40,7 @@
   const submitLoading = ref<boolean>(false);
   const compareRecord = reactive<Recordable>({});
   const values = useDetailProviderContext();
+  const appId = ref<any>();
 
   const [registerFlinkSqlDifferentDrawer, { openDrawer: openFlinkSqlDiffDrawer }] = useDrawer();
   const [registerModal, { closeModal }] = useModalInner((data) => {
@@ -47,8 +48,9 @@
   });
 
   async function onReceiveModalData(data) {
+    appId.value = toRaw(values).app.id;
     const res = await fetchFlinkSqlList({
-      appId: toRaw(values).app.id,
+      appId: appId.value,
       pageNo: 1,
       pageSize: 999999,
     });
@@ -83,11 +85,13 @@
     try {
       const source = await fetchFlinkSql({
         id: compareRecord.id,
+        appId: appId.value,
       });
       const sourceSql = decodeByBase64(source.sql);
       const sourceVersion = source.version;
       const target = await fetchFlinkSql({
         id: values.target,
+        appId: appId.value,
       });
       const targetSql = decodeByBase64(target.sql);
       const targetVersion = target.version;
