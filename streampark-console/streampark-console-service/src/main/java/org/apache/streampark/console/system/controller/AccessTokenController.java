@@ -171,11 +171,10 @@ public class AccessTokenController {
     if ("/flink/app/start".equalsIgnoreCase(path)) {
       resultCURL =
           curlBuilder
-              .addFormData("allowNonRestored", "false")
-              .addFormData("savePoint", "")
-              .addFormData("savePointed", "false")
-              .addFormData("teamId", teamId)
               .addFormData("id", appId)
+              .addFormData("teamId", teamId)
+              .addFormData("allowNonRestored", "false")
+              .addFormData("savePointed", "false")
               .build();
     } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
       resultCURL =
@@ -184,7 +183,6 @@ public class AccessTokenController {
               .addFormData("teamId", teamId)
               .addFormData("savePointed", "false")
               .addFormData("drain", "false")
-              .addFormData("savePoint", "")
               .build();
     }
     return RestResponse.success(resultCURL);

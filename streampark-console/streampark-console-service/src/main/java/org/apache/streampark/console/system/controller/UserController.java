@@ -98,8 +98,8 @@ public class UserController {
   }
 
   @Operation(summary = "List without token users")
-  @PermissionScope(user = "#userId")
   @RequiresPermissions("token:add")
+  @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
     return RestResponse.success(userList);
