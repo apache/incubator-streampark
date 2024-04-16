@@ -57,8 +57,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.streampark.console.base.domain.ApiDocConstant.OPENAPI_TAG;
-
 @Slf4j
 @Validated
 @RestController
@@ -146,7 +144,7 @@ public class ApplicationController {
 
   @Operation(
       summary = "Start application",
-      tags = {OPENAPI_TAG})
+      tags = {ApiDocConstant.OPENAPI_TAG})
   @Parameters({
     @Parameter(
         name = "id",
