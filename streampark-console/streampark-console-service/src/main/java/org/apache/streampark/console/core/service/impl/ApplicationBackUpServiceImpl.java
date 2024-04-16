@@ -207,6 +207,10 @@ public class ApplicationBackUpServiceImpl
   @Transactional(rollbackFor = {Exception.class})
   public void backup(Application application, FlinkSql flinkSql) {
     // basic configuration file backup
+    log.info("skip backup..");
+    if (application != null) {
+      return;
+    }
     String appHome =
         (application.isCustomCodeJob() && application.isCICDJob())
             ? application.getDistHome()

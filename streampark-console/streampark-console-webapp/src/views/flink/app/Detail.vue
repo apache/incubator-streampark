@@ -173,13 +173,13 @@
 
     const confList = await fetchListVer(commonParams);
     const pointHistory = await fetchSavePonitHistory(commonParams);
-    const backupList = await fetchBackUps(commonParams);
     const optionList = await fetchOptionLog(commonParams);
 
     if (confList.records.length > 0) detailTabs.showConf = true;
     if (pointHistory.records.length > 0) detailTabs.showSaveOption = true;
-    if (backupList.records.length > 0) detailTabs.showBackup = true;
     if (optionList.records.length > 0) detailTabs.showOptionLog = true;
+    //const backupList = await fetchBackUps(commonParams);
+    //if (backupList.records.length > 0) detailTabs.showBackup = true;
   }
 
   /* Get yarn data */
