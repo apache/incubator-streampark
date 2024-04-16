@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
@@ -48,27 +47,23 @@ public class YarnQueueController {
    * @param yarnQueue optional fields used to search.
    * @return RestResponse with IPage<{@link YarnQueue}> object.
    */
-  @ApiAccess
   @PostMapping("list")
   public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
     IPage<YarnQueue> queuePage = yarnQueueService.page(yarnQueue, restRequest);
     return RestResponse.success(queuePage);
   }
 
-  @ApiAccess
   @PostMapping("check")
   public RestResponse check(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
   }
 
-  @ApiAccess
   @PostMapping("create")
   @RequiresPermissions("yarnQueue:create")
   public RestResponse create(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
   }
 
-  @ApiAccess
   @PostMapping("update")
   @RequiresPermissions("yarnQueue:update")
   public RestResponse update(YarnQueue yarnQueue) {
@@ -76,7 +71,6 @@ public class YarnQueueController {
     return RestResponse.success();
   }
 
-  @ApiAccess
   @PostMapping("delete")
   @RequiresPermissions("yarnQueue:delete")
   public RestResponse delete(YarnQueue yarnQueue) {

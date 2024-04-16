@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -71,7 +70,6 @@ public class ApplicationBuildPipelineController {
    * @param forceBuild forced start pipeline or not
    * @return Whether the pipeline was successfully started
    */
-  @ApiAccess
   @PermissionScope(app = "#appId")
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
@@ -130,7 +128,6 @@ public class ApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
-  @ApiAccess
   @PostMapping("/detail")
   @PermissionScope(app = "#appId")
   @RequiresPermissions("app:view")

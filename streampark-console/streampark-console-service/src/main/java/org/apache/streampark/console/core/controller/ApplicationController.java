@@ -69,7 +69,6 @@ public class ApplicationController {
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @ApiAccess
   @PostMapping("get")
   @PermissionScope(app = "#app.id")
   @RequiresPermissions("app:detail")
@@ -115,7 +114,6 @@ public class ApplicationController {
     return RestResponse.success(map);
   }
 
-  @ApiAccess
   @PostMapping("list")
   @PermissionScope(team = "#app.teamId")
   @RequiresPermissions("app:view")

@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
@@ -66,7 +65,6 @@ public class SavePointController {
     return RestResponse.success(deleted);
   }
 
-  @ApiAccess
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
   @PermissionScope(app = "#savePoint.appId", team = "#savePoint.teamId")
