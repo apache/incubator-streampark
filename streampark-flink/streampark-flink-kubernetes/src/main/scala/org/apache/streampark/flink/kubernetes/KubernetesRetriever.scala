@@ -83,26 +83,22 @@ object KubernetesRetriever extends Logger {
       flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, namespace)
     }
     // retrieve flink cluster client
-    val clientFactory: ClusterClientFactory[String] =
-      clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
-
-    val clusterProvider: KubernetesClusterDescriptor =
-      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
-
-    try {
-      Try {
-        clusterProvider
-          .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-          .getClusterClient
-      } match {
-        case Success(v) => Some(v)
-        case Failure(e) =>
-          logError(s"Get flinkClient error, the error is: $e")
-          None
-      }
-    } finally {
-      Utils.close(clusterProvider)
-    }
+    clusterClientServiceLoader
+      .getClusterClientFactory(flinkConfig)
+      .createClusterDescriptor(flinkConfig)
+      .asInstanceOf[KubernetesClusterDescriptor]
+      .autoClose(
+        clusterProvider =>
+          Try {
+            clusterProvider
+              .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+              .getClusterClient
+          } match {
+            case Success(v) => Some(v)
+            case Failure(e) =>
+              logError(s"Get flinkClient error, the error is: $e")
+              None
+          })
   }
 
   /**
