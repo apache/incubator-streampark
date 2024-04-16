@@ -15,7 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <div class="h-full bg-gradient-primary overflow-auto">
+  <div class="relative h-full bg-gradient-primary overflow-auto">
+     <div class="flex items-center absolute right-15 top-10">
+        <AppLocalePicker
+          class="text-white enter-x"
+          v-if="getShowLocalePicker"
+          :reload="true"
+          :showText="false"
+        />
+      </div>    
     <div class="w-full relative h-[calc(100%-120px)] min-h-700px flex items-center section">
       <div class="scribble-box w-[80%] h-full absolute overflow-hidden">
         <figure class="scribble scale-2 !opacity-10 top-50 left-0">
@@ -72,6 +80,8 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Row, Col } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
+  import { useLocale } from '/@/locales/useLocale';
+  import { AppLocalePicker } from '/@/components/Application';
   defineProps({
     sessionTimeout: {
       type: Boolean,
@@ -79,6 +89,7 @@
   });
 
   // const globSetting = useGlobSetting();
+  const { getShowLocalePicker } = useLocale();
   const { prefixCls } = useDesign('login');
   sessionStorage.removeItem('appPageNo');
   // const title = computed(() => globSetting?.title ?? '');
