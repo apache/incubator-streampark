@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.AccessTokenState;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -152,9 +153,11 @@ public class AccessTokenController {
    * fixed interfaces
    */
   @Operation(summary = "Generate api with token")
+  @PermissionScope(app = "#appId", team = "#teamId")
   @PostMapping(value = "curl")
   public RestResponse copyRestApiCurl(
       @NotBlank(message = "{required}") String appId,
+      @NotBlank(message = "{required}") String teamId,
       @NotBlank(message = "{required}") String baseUrl,
       @NotBlank(message = "{required}") String path) {
     String resultCURL = null;
@@ -171,12 +174,14 @@ public class AccessTokenController {
               .addFormData("allowNonRestored", "false")
               .addFormData("savePoint", "")
               .addFormData("savePointed", "false")
+              .addFormData("teamId", teamId)
               .addFormData("id", appId)
               .build();
     } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
       resultCURL =
           curlBuilder
               .addFormData("id", appId)
+              .addFormData("teamId", teamId)
               .addFormData("savePointed", "false")
               .addFormData("drain", "false")
               .addFormData("savePoint", "")
