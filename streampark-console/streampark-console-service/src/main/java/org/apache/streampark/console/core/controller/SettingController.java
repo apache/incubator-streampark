@@ -28,8 +28,6 @@ import org.apache.streampark.console.core.service.SettingService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "SETTING_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -48,7 +45,6 @@ public class SettingController {
 
   @Autowired private SettingService settingService;
 
-  @Operation(summary = "List settings")
   @PostMapping("all")
   @RequiresPermissions("setting:view")
   public RestResponse all() {
@@ -58,7 +54,6 @@ public class SettingController {
     return RestResponse.success(setting);
   }
 
-  @Operation(summary = "Get setting")
   @PostMapping("get")
   @RequiresPermissions("setting:view")
   public RestResponse get(String key) {
@@ -66,7 +61,6 @@ public class SettingController {
     return RestResponse.success(setting);
   }
 
-  @Operation(summary = "Update setting")
   @PostMapping("update")
   @RequiresPermissions("setting:update")
   public RestResponse update(Setting setting) {
@@ -74,7 +68,6 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
-  @Operation(summary = "get Docker config")
   @PostMapping("docker")
   @RequiresPermissions("setting:view")
   public RestResponse docker() {
@@ -82,7 +75,6 @@ public class SettingController {
     return RestResponse.success(dockerConfig);
   }
 
-  @Operation(summary = "check docker setting")
   @PostMapping("check/docker")
   @RequiresPermissions("setting:view")
   public RestResponse checkDocker(DockerConfig dockerConfig) {
@@ -90,7 +82,6 @@ public class SettingController {
     return RestResponse.success(result);
   }
 
-  @Operation(summary = "Update docker setting")
   @PostMapping("update/docker")
   @RequiresPermissions("setting:update")
   public RestResponse updateDocker(DockerConfig dockerConfig) {
@@ -98,7 +89,6 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
-  @Operation(summary = "get sender email")
   @PostMapping("email")
   @RequiresPermissions("setting:view")
   public RestResponse email() {
@@ -106,7 +96,6 @@ public class SettingController {
     return RestResponse.success(senderEmail);
   }
 
-  @Operation(summary = "check email")
   @PostMapping("check/email")
   @RequiresPermissions("setting:view")
   public RestResponse checkEmail(SenderEmail senderEmail) {
@@ -114,7 +103,6 @@ public class SettingController {
     return RestResponse.success(result);
   }
 
-  @Operation(summary = "Update sender email")
   @PostMapping("update/email")
   @RequiresPermissions("setting:update")
   public RestResponse updateEmail(SenderEmail senderEmail) {
@@ -122,7 +110,6 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
-  @Operation(summary = "Check hadoop status")
   @PostMapping("check/hadoop")
   public RestResponse checkHadoop() {
     try {

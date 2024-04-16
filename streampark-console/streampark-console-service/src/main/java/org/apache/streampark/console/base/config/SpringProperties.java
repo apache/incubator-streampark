@@ -182,6 +182,8 @@ public class SpringProperties {
     config.put("springdoc.packages-to-scan", "org.apache.streampark.console");
     config.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher");
 
+    // metrics
+    config.put("management.health.ldap.enabled", "false");
     return config;
   }
 

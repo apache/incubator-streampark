@@ -69,7 +69,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
 
   /** closes resource, relinquishing any underlying resources. */
   override def doClose(): Unit = {
-    if (!timerSchedule.isCancelled) {
+    if (Option(timerSchedule).isDefined && !timerSchedule.isCancelled) {
       timerSchedule.cancel(true)
     }
     logInfo("[flink-k8s] FlinkMetricWatcher closed.")

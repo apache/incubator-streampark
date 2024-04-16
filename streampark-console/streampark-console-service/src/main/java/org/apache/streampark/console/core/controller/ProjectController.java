@@ -29,8 +29,6 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "PROJECT_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -52,7 +49,6 @@ public class ProjectController {
 
   @Autowired private ProjectService projectService;
 
-  @Operation(summary = "Create project")
   @PostMapping("create")
   @PermissionScope(team = "#project.teamId")
   @RequiresPermissions("project:create")
@@ -62,7 +58,6 @@ public class ProjectController {
     return projectService.create(project);
   }
 
-  @Operation(summary = "Update project")
   @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("project:update")
@@ -72,14 +67,12 @@ public class ProjectController {
     return RestResponse.success().data(update);
   }
 
-  @Operation(summary = "Get project")
   @PostMapping("get")
   @PermissionScope(team = "#project.teamId")
   public RestResponse get(Project project) {
     return RestResponse.success().data(projectService.getById(project.getId()));
   }
 
-  @Operation(summary = "Build project")
   @PostMapping("build")
   @RequiresPermissions("project:build")
   @PermissionScope(team = "#project.teamId")
@@ -88,7 +81,6 @@ public class ProjectController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get project build logs")
   @PostMapping("buildlog")
   @RequiresPermissions("project:build")
   @PermissionScope(team = "#teamId")
@@ -99,7 +91,6 @@ public class ProjectController {
     return projectService.getBuildLog(id, startOffset);
   }
 
-  @Operation(summary = "List projects")
   @PostMapping("list")
   @RequiresPermissions("project:view")
   @PermissionScope(team = "#project.teamId")
@@ -111,7 +102,6 @@ public class ProjectController {
     return RestResponse.success().data(page);
   }
 
-  @Operation(summary = "List git project branches")
   @PostMapping("branches")
   @PermissionScope(team = "#project.teamId")
   public RestResponse branches(Project project) {
@@ -119,7 +109,6 @@ public class ProjectController {
     return RestResponse.success().data(branches);
   }
 
-  @Operation(summary = "Delete project")
   @PostMapping("delete")
   @RequiresPermissions("project:delete")
   @PermissionScope(team = "#project.teamId")
@@ -128,7 +117,6 @@ public class ProjectController {
     return RestResponse.success().data(deleted);
   }
 
-  @Operation(summary = "Authenticate git project")
   @PostMapping("gitcheck")
   @PermissionScope(team = "#project.teamId")
   public RestResponse gitCheck(Project project) {
@@ -136,7 +124,6 @@ public class ProjectController {
     return RestResponse.success().data(error.getType());
   }
 
-  @Operation(summary = "Check the project")
   @PostMapping("exists")
   @PermissionScope(team = "#project.teamId")
   public RestResponse exists(Project project) {
@@ -144,7 +131,6 @@ public class ProjectController {
     return RestResponse.success().data(exists);
   }
 
-  @Operation(summary = "List project modules")
   @PostMapping("modules")
   @PermissionScope(team = "#project.teamId")
   public RestResponse modules(Project project) {
@@ -152,7 +138,6 @@ public class ProjectController {
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project jars")
   @PostMapping("jars")
   @PermissionScope(team = "#project.teamId")
   public RestResponse jars(Project project) {
@@ -160,7 +145,6 @@ public class ProjectController {
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project configurations")
   @PostMapping("listconf")
   @PermissionScope(team = "#project.teamId")
   public RestResponse listConf(Project project) {
@@ -168,7 +152,6 @@ public class ProjectController {
     return RestResponse.success().data(list);
   }
 
-  @Operation(summary = "List the team projects")
   @PostMapping("select")
   @PermissionScope(team = "#teamId")
   public RestResponse select(@RequestParam Long teamId) {

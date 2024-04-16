@@ -37,13 +37,11 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -59,7 +57,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name = "FLINK_APPLICATION_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -72,7 +69,6 @@ public class ApplicationController {
 
   @Autowired private ApplicationLogService applicationLogService;
 
-  @Operation(summary = "Get application")
   @ApiAccess
   @PostMapping("get")
   @PermissionScope(app = "#app.id")
@@ -82,7 +78,6 @@ public class ApplicationController {
     return RestResponse.success(application);
   }
 
-  @Operation(summary = "Create application")
   @PermissionScope(team = "#app.teamId")
   @PostMapping("create")
   @RequiresPermissions("app:create")
@@ -91,23 +86,6 @@ public class ApplicationController {
     return RestResponse.success(saved);
   }
 
-  @Operation(
-      summary = "Copy application",
-      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
-  @Parameters({
-    @Parameter(
-        name = "id",
-        description = "copied target app id",
-        in = ParameterIn.QUERY,
-        required = true,
-        example = "100000"),
-    @Parameter(
-        name = "jobName",
-        description = "new application name",
-        in = ParameterIn.QUERY,
-        example = "copy-app"),
-    @Parameter(name = "args", description = "new application args", in = ParameterIn.QUERY)
-  })
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
@@ -130,7 +108,6 @@ public class ApplicationController {
     return RestResponse.success(true);
   }
 
-  @Operation(summary = "Get applications dashboard data")
   @PostMapping("dashboard")
   @PermissionScope(team = "#app.teamId")
   public RestResponse dashboard(Application app) {
@@ -138,7 +115,6 @@ public class ApplicationController {
     return RestResponse.success(map);
   }
 
-  @Operation(summary = "List applications")
   @ApiAccess
   @PostMapping("list")
   @PermissionScope(team = "#app.teamId")
@@ -148,7 +124,6 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
-  @Operation(summary = "Mapping application")
   @AppUpdated
   @PostMapping("mapping")
   @PermissionScope(app = "#app.id")
@@ -158,7 +133,6 @@ public class ApplicationController {
     return RestResponse.success(flag);
   }
 
-  @Operation(summary = "Revoke application")
   @AppUpdated
   @PermissionScope(app = "#app.id")
   @PostMapping("revoke")
@@ -170,7 +144,7 @@ public class ApplicationController {
 
   @Operation(
       summary = "Start application",
-      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
+      tags = {ApiDocConstant.OPENAPI_TAG})
   @Parameters({
     @Parameter(
         name = "id",
@@ -195,7 +169,6 @@ public class ApplicationController {
         name = "allowNonRestored",
         description = "ignore savepoint if cannot be restored",
         in = ParameterIn.QUERY,
-        required = false,
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess
@@ -222,7 +195,7 @@ public class ApplicationController {
 
   @Operation(
       summary = "Cancel application",
-      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
+      tags = {ApiDocConstant.OPENAPI_TAG})
   @ApiAccess
   @Parameters({
     @Parameter(
@@ -261,7 +234,6 @@ public class ApplicationController {
   }
 
   /** force stop(stop normal start or in progress) */
-  @Operation(summary = "Force stop application")
   @PermissionScope(app = "#app.id")
   @PostMapping("forcedStop")
   @RequiresPermissions("app:cancel")
@@ -270,34 +242,29 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get application on yarn proxy address")
   @PostMapping("yarn")
   public RestResponse yarn() {
     return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
   }
 
-  @Operation(summary = "Get application on yarn name")
   @PostMapping("name")
   public RestResponse yarnName(Application app) {
     String yarnName = applicationService.getYarnName(app);
     return RestResponse.success(yarnName);
   }
 
-  @Operation(summary = "Check the application exist status")
   @PostMapping("checkName")
   public RestResponse checkName(Application app) {
     AppExistsState exists = applicationService.checkExists(app);
     return RestResponse.success(exists.get());
   }
 
-  @Operation(summary = "Get application conf")
   @PostMapping("readConf")
   public RestResponse readConf(String config) throws IOException {
     String content = applicationService.readConf(config);
     return RestResponse.success(content);
   }
 
-  @Operation(summary = "Get application main-class")
   @PostMapping("main")
   @PermissionScope(app = "#app.id")
   public RestResponse getMain(Application app) {
@@ -305,7 +272,6 @@ public class ApplicationController {
     return RestResponse.success(mainClass);
   }
 
-  @Operation(summary = "List application backups")
   @PostMapping("backups")
   @PermissionScope(app = "#backUp.appId")
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
@@ -313,7 +279,6 @@ public class ApplicationController {
     return RestResponse.success(backups);
   }
 
-  @Operation(summary = "List application operation logs")
   @PostMapping("optionlog")
   @PermissionScope(app = "#log.appId")
   public RestResponse log(ApplicationLog log, RestRequest request) {
@@ -321,7 +286,6 @@ public class ApplicationController {
     return RestResponse.success(applicationList);
   }
 
-  @Operation(summary = "Delete application operation log")
   @PermissionScope(app = "#log.appId")
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
@@ -330,7 +294,6 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
-  @Operation(summary = "Delete application")
   @PermissionScope(app = "#app.id")
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
@@ -339,7 +302,6 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
-  @Operation(summary = "Backup application when deleted")
   @PermissionScope(app = "#backUp.appId")
   @PostMapping("deletebak")
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
@@ -347,7 +309,6 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
-  @Operation(summary = "Check the application jar")
   @PostMapping("checkjar")
   public RestResponse checkjar(String jar) {
     File file = new File(jar);
@@ -359,7 +320,6 @@ public class ApplicationController {
     }
   }
 
-  @Operation(summary = "Upload the application jar")
   @PostMapping("upload")
   @RequiresPermissions("app:create")
   public RestResponse upload(MultipartFile file) throws Exception {
@@ -367,7 +327,6 @@ public class ApplicationController {
     return RestResponse.success(uploadPath);
   }
 
-  @Hidden
   @PostMapping("verifySchema")
   public RestResponse verifySchema(String path) {
     final URI uri = URI.create(path);
@@ -390,7 +349,6 @@ public class ApplicationController {
     return restResponse;
   }
 
-  @Operation(summary = "Check the application savepoint path")
   @PostMapping("checkSavepointPath")
   @PermissionScope(app = "#app.id")
   public RestResponse checkSavepointPath(Application app) throws Exception {
@@ -402,27 +360,6 @@ public class ApplicationController {
     }
   }
 
-  @Operation(summary = "Get application on k8s deploy logs")
-  @Parameters({
-    @Parameter(
-        name = "id",
-        description = "app id",
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "offset",
-        description = "number of log lines offset",
-        required = true,
-        example = "0",
-        schema = @Schema(implementation = int.class)),
-    @Parameter(
-        name = "limit",
-        description = "number of log lines loaded at once",
-        required = true,
-        example = "100",
-        schema = @Schema(implementation = int.class)),
-  })
   @PermissionScope(app = "#id")
   @PostMapping(value = "k8sStartLog")
   public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {

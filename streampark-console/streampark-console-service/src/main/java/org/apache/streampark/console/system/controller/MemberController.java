@@ -28,8 +28,6 @@ import org.apache.streampark.console.system.service.MemberService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -44,7 +42,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.util.List;
 
-@Tag(name = "MEMBER_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -53,7 +50,6 @@ public class MemberController {
 
   @Autowired private MemberService memberService;
 
-  @Operation(summary = "List members")
   @PostMapping("list")
   @RequiresPermissions("member:view")
   public RestResponse memberList(RestRequest restRequest, Member member) {
@@ -61,7 +57,6 @@ public class MemberController {
     return RestResponse.success(userList);
   }
 
-  @Operation(summary = "List candidate users")
   @PostMapping("candidateUsers")
   @RequiresPermissions("member:add")
   public RestResponse candidateUsers(Long teamId) {
@@ -69,21 +64,18 @@ public class MemberController {
     return RestResponse.success(userList);
   }
 
-  @Operation(summary = "List teams")
   @PostMapping("teams")
   public RestResponse listTeams(Long userId) {
     List<Team> teamList = memberService.findUserTeams(userId);
     return RestResponse.success(teamList);
   }
 
-  @Operation(summary = "Check the username")
   @PostMapping("check/user")
   public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
     Member result = this.memberService.findByUserName(teamId, userName);
     return RestResponse.success(result == null);
   }
 
-  @Operation(summary = "Create member")
   @PermissionScope(team = "#member.teamId")
   @PostMapping("post")
   @RequiresPermissions("member:add")
@@ -92,7 +84,6 @@ public class MemberController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Delete member")
   @PermissionScope(team = "#member.teamId")
   @DeleteMapping("delete")
   @RequiresPermissions("member:delete")
@@ -101,7 +92,6 @@ public class MemberController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Update member")
   @PermissionScope(team = "#member.teamId")
   @PutMapping("update")
   @RequiresPermissions("member:update")

@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,7 +46,6 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Tag(name = "PASSPORT_TAG")
 @Validated
 @RestController
 @RequestMapping("passport")
@@ -57,7 +55,6 @@ public class PassportController {
 
   @Autowired private Authenticator authenticator;
 
-  @Operation(summary = "Signin")
   @PostMapping("signin")
   public RestResponse signin(
       HttpServletRequest request,
