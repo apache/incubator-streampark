@@ -25,9 +25,6 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,8 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Hidden
-@Tag(name = "FLINK_CLUSTER_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -47,28 +42,24 @@ public class FlinkClusterController {
 
   @Autowired private FlinkClusterService flinkClusterService;
 
-  @Operation(summary = "List flink clusters")
   @PostMapping("list")
   public RestResponse list() {
     List<FlinkCluster> flinkClusters = flinkClusterService.listCluster();
     return RestResponse.success(flinkClusters);
   }
 
-  @Operation(summary = "Get flink cluster remote address")
   @PostMapping("remoteUrl")
   public RestResponse remoteUrl(Long id) {
     FlinkCluster cluster = flinkClusterService.getById(id);
     return RestResponse.success(cluster.getAddress());
   }
 
-  @Operation(summary = "Check the cluster status")
   @PostMapping("check")
   public RestResponse check(FlinkCluster cluster) {
     ResponseResult checkResult = flinkClusterService.check(cluster);
     return RestResponse.success(checkResult);
   }
 
-  @Operation(summary = "Create flink cluster")
   @PostMapping("create")
   @RequiresPermissions("cluster:create")
   public RestResponse create(FlinkCluster cluster) {
@@ -76,7 +67,6 @@ public class FlinkClusterController {
     return RestResponse.success(success);
   }
 
-  @Operation(summary = "Update flink cluster")
   @PostMapping("update")
   @RequiresPermissions("cluster:update")
   public RestResponse update(FlinkCluster cluster) {
@@ -84,28 +74,24 @@ public class FlinkClusterController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get flink cluster")
   @PostMapping("get")
   public RestResponse get(Long id) throws InternalException {
     FlinkCluster cluster = flinkClusterService.getById(id);
     return RestResponse.success(cluster);
   }
 
-  @Operation(summary = "Start flink cluster")
   @PostMapping("start")
   public RestResponse start(Long id) {
     flinkClusterService.start(id);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Shutdown flink cluster")
   @PostMapping("shutdown")
   public RestResponse shutdown(Long id) {
     flinkClusterService.shutdown(id);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Delete flink cluster")
   @PostMapping("delete")
   public RestResponse delete(Long id) {
     flinkClusterService.delete(id);

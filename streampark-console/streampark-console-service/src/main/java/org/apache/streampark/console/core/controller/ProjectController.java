@@ -28,9 +28,6 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -43,8 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Hidden
-@Tag(name = "PROJECT_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -53,7 +48,6 @@ public class ProjectController {
 
   @Autowired private ProjectService projectService;
 
-  @Operation(summary = "Create project")
   @PostMapping("create")
   @RequiresPermissions("project:create")
   public RestResponse create(Project project) {
@@ -62,7 +56,6 @@ public class ProjectController {
     return projectService.create(project);
   }
 
-  @Operation(summary = "Update project")
   @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("project:update")
@@ -71,13 +64,11 @@ public class ProjectController {
     return RestResponse.success().data(update);
   }
 
-  @Operation(summary = "Get project")
   @PostMapping("get")
   public RestResponse get(Long id) {
     return RestResponse.success().data(projectService.getById(id));
   }
 
-  @Operation(summary = "Build project")
   @PostMapping("build")
   @RequiresPermissions("project:build")
   public RestResponse build(Long id) throws Exception {
@@ -85,7 +76,6 @@ public class ProjectController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get project build logs")
   @PostMapping("buildlog")
   @RequiresPermissions("project:build")
   public RestResponse buildLog(
@@ -93,7 +83,6 @@ public class ProjectController {
     return projectService.getBuildLog(id, startOffset);
   }
 
-  @Operation(summary = "List projects")
   @PostMapping("list")
   @RequiresPermissions("project:view")
   public RestResponse list(Project project, RestRequest restRequest) {
@@ -104,14 +93,12 @@ public class ProjectController {
     return RestResponse.success().data(page);
   }
 
-  @Operation(summary = "List git project branches")
   @PostMapping("branches")
   public RestResponse branches(Project project) {
     List<String> branches = project.getAllBranches();
     return RestResponse.success().data(branches);
   }
 
-  @Operation(summary = "Delete project")
   @PostMapping("delete")
   @RequiresPermissions("project:delete")
   public RestResponse delete(Long id) {
@@ -119,42 +106,36 @@ public class ProjectController {
     return RestResponse.success().data(deleted);
   }
 
-  @Operation(summary = "Authenticate git project")
   @PostMapping("gitcheck")
   public RestResponse gitCheck(Project project) {
     GitAuthorizedError error = project.gitCheck();
     return RestResponse.success().data(error.getType());
   }
 
-  @Operation(summary = "Check the project")
   @PostMapping("exists")
   public RestResponse exists(Project project) {
     boolean exists = projectService.checkExists(project);
     return RestResponse.success().data(exists);
   }
 
-  @Operation(summary = "List project modules")
   @PostMapping("modules")
   public RestResponse modules(Long id) {
     List<String> result = projectService.modules(id);
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project jars")
   @PostMapping("jars")
   public RestResponse jars(Project project) {
     List<String> result = projectService.jars(project);
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project configurations")
   @PostMapping("listconf")
   public RestResponse listConf(Project project) {
     List<Map<String, Object>> list = projectService.listConf(project);
     return RestResponse.success().data(list);
   }
 
-  @Operation(summary = "List the team projects")
   @PostMapping("select")
   public RestResponse select(@RequestParam Long teamId) {
     List<Project> list = projectService.findByTeamId(teamId);

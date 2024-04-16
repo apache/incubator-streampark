@@ -24,11 +24,6 @@ import org.apache.streampark.console.core.service.ExternalLinkService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -43,8 +38,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Hidden
-@Tag(name = "FLINK_EXTERNAL_LINK_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -53,7 +46,6 @@ public class ExternalLinkController {
 
   @Autowired private ExternalLinkService externalLinkService;
 
-  @Operation(summary = "List external link")
   @PostMapping("/list")
   @RequiresPermissions("externalLink:view")
   public RestResponse list() {
@@ -61,10 +53,6 @@ public class ExternalLinkController {
     return RestResponse.success(externalLink);
   }
 
-  @Operation(
-      summary = "Get the application external links",
-      description = "Render external link by app id")
-  @Parameters({@Parameter(name = "appId", required = true, example = "100000")})
   @PostMapping("/render")
   public RestResponse render(
       @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
@@ -72,7 +60,6 @@ public class ExternalLinkController {
     return RestResponse.success(renderedExternalLink);
   }
 
-  @Operation(summary = "Create external link")
   @PostMapping("/create")
   @RequiresPermissions("externalLink:create")
   public RestResponse create(@Valid ExternalLink externalLink) {
@@ -80,7 +67,6 @@ public class ExternalLinkController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Update external link")
   @PostMapping("/update")
   @RequiresPermissions("externalLink:update")
   public RestResponse update(@Valid ExternalLink externalLink) {
@@ -89,8 +75,6 @@ public class ExternalLinkController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Delete external link")
-  @Parameters({@Parameter(name = "appId", required = true, example = "100000")})
   @DeleteMapping("/delete")
   @RequiresPermissions("externalLink:delete")
   public RestResponse delete(

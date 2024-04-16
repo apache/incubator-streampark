@@ -30,9 +30,6 @@ import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -44,8 +41,6 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Hidden
-@Tag(name = "FLINK_SQL_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -58,7 +53,6 @@ public class FlinkSqlController {
 
   @Autowired private SqlCompleteService sqlComplete;
 
-  @Operation(summary = "Verify sql")
   @PostMapping("verify")
   public RestResponse verify(String sql, Long versionId, Long teamId) {
     sql = variableService.replaceVariable(teamId, sql);
@@ -85,14 +79,12 @@ public class FlinkSqlController {
     }
   }
 
-  @Operation(summary = "List the application sql")
   @PostMapping("list")
   public RestResponse list(Long appId, RestRequest request) {
     IPage<FlinkSql> page = flinkSqlService.page(appId, request);
     return RestResponse.success(page);
   }
 
-  @Operation(summary = "Delete sql")
   @PostMapping("delete")
   @RequiresPermissions("sql:delete")
   public RestResponse delete(Long id) {
@@ -100,7 +92,6 @@ public class FlinkSqlController {
     return RestResponse.success(deleted);
   }
 
-  @Operation(summary = "List sql by ids")
   @PostMapping("get")
   public RestResponse get(String id) throws InternalException {
     String[] array = id.split(",");
@@ -114,14 +105,12 @@ public class FlinkSqlController {
     return RestResponse.success(new FlinkSql[] {flinkSql1, flinkSql2});
   }
 
-  @Operation(summary = "List the applications sql histories")
   @PostMapping("history")
   public RestResponse sqlhistory(Application application) {
     List<FlinkSql> sqlList = flinkSqlService.history(application);
     return RestResponse.success(sqlList);
   }
 
-  @Operation(summary = "Get the complete sql")
   @PostMapping("sqlComplete")
   public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
     return RestResponse.success().put("word", sqlComplete.getComplete(sql));

@@ -29,12 +29,6 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -44,8 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
 
-@Hidden
-@Tag(name = "SAVEPOINT_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -56,21 +48,18 @@ public class SavePointController {
 
   @Autowired private SavePointService savePointService;
 
-  @Operation(summary = "Get application savepoint latest")
   @PostMapping("latest")
   public RestResponse latest(Long appId) {
     SavePoint savePoint = savePointService.getLatest(appId);
     return RestResponse.success(savePoint);
   }
 
-  @Operation(summary = "List application savepoint histories")
   @PostMapping("history")
   public RestResponse history(SavePoint savePoint, RestRequest request) {
     IPage<SavePoint> page = savePointService.page(savePoint, request);
     return RestResponse.success(page);
   }
 
-  @Operation(summary = "Delete savepoint")
   @PostMapping("delete")
   @RequiresPermissions("savepoint:delete")
   public RestResponse delete(Long id) throws InternalException {
@@ -80,21 +69,6 @@ public class SavePointController {
     return RestResponse.success(deleted);
   }
 
-  @Operation(
-      summary = "Trigger savepoint",
-      description = "trigger savepoint for specified application")
-  @Parameters({
-    @Parameter(
-        name = "appId",
-        description = "app id",
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "savepointPath",
-        description = "specified savepoint path",
-        schema = @Schema(implementation = String.class))
-  })
   @ApiAccess
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
