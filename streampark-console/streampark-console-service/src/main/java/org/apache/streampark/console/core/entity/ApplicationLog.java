@@ -49,4 +49,6 @@ public class ApplicationLog {
 
   /** exception at the start */
   private String exception;
+
+  private transient String teamId;
 }

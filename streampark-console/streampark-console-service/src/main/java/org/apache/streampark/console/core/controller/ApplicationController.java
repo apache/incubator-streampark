@@ -142,10 +142,24 @@ public class ApplicationController {
     return RestResponse.success();
   }
 
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
+  @PostMapping(value = "check_start")
+  @RequiresPermissions("app:start")
+  public RestResponse checkStart(Application app) {
+    AppExistsState stateEnum = applicationService.checkStart(app);
+    return RestResponse.success(stateEnum.get());
+  }
+
   @Operation(
       summary = "Start application",
       tags = {ApiDocConstant.OPENAPI_TAG})
   @Parameters({
+    @Parameter(
+        name = "Authorization",
+        description = "Access authorization token",
+        in = ParameterIn.HEADER,
+        required = true,
+        schema = @Schema(implementation = String.class)),
     @Parameter(
         name = "id",
         description = "start app id",
@@ -154,16 +168,23 @@ public class ApplicationController {
         example = "100000",
         schema = @Schema(implementation = Long.class)),
     @Parameter(
+        name = "teamId",
+        description = "current user teamId",
+        in = ParameterIn.QUERY,
+        required = true,
+        example = "100000",
+        schema = @Schema(implementation = Long.class)),
+    @Parameter(
         name = "savePointed",
         description = "restored app from the savepoint or latest checkpoint",
         in = ParameterIn.QUERY,
-        required = true,
         example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false")),
     @Parameter(
         name = "savePoint",
         description = "savepoint or checkpoint path",
         in = ParameterIn.QUERY,
+        required = false,
         schema = @Schema(implementation = String.class)),
     @Parameter(
         name = "allowNonRestored",
@@ -172,7 +193,7 @@ public class ApplicationController {
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
   @ApiAccess
-  @PermissionScope(app = "#app.id")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")
   public RestResponse start(@Parameter(hidden = true) Application app) {
@@ -185,19 +206,17 @@ public class ApplicationController {
     }
   }
 
-  @PermissionScope(app = "#app.id")
-  @PostMapping(value = "check_start")
-  @RequiresPermissions("app:start")
-  public RestResponse checkStart(Application app) {
-    AppExistsState stateEnum = applicationService.checkStart(app);
-    return RestResponse.success(stateEnum.get());
-  }
-
   @Operation(
       summary = "Cancel application",
       tags = {ApiDocConstant.OPENAPI_TAG})
   @ApiAccess
   @Parameters({
+    @Parameter(
+        name = "Authorization",
+        description = "Access authorization token",
+        in = ParameterIn.HEADER,
+        required = true,
+        schema = @Schema(implementation = String.class)),
     @Parameter(
         name = "id",
         description = "cancel app id",
@@ -206,10 +225,16 @@ public class ApplicationController {
         example = "100000",
         schema = @Schema(implementation = Long.class)),
     @Parameter(
+        name = "teamId",
+        description = "current user teamId",
+        in = ParameterIn.QUERY,
+        required = true,
+        example = "100000",
+        schema = @Schema(implementation = Long.class)),
+    @Parameter(
         name = "savePointed",
         description = "trigger savepoint before taking stopping",
         in = ParameterIn.QUERY,
-        required = true,
         schema = @Schema(implementation = boolean.class, defaultValue = "false")),
     @Parameter(
         name = "savePoint",
@@ -221,11 +246,10 @@ public class ApplicationController {
         name = "drain",
         description = "send max watermark before canceling",
         in = ParameterIn.QUERY,
-        required = true,
         example = "false",
         schema = @Schema(implementation = boolean.class, defaultValue = "false"))
   })
-  @PermissionScope(app = "#app.id")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "cancel")
   @RequiresPermissions("app:cancel")
   public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
@@ -248,12 +272,14 @@ public class ApplicationController {
   }
 
   @PostMapping("name")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   public RestResponse yarnName(Application app) {
     String yarnName = applicationService.getYarnName(app);
     return RestResponse.success(yarnName);
   }
 
   @PostMapping("checkName")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   public RestResponse checkName(Application app) {
     AppExistsState exists = applicationService.checkExists(app);
     return RestResponse.success(exists.get());
@@ -266,27 +292,27 @@ public class ApplicationController {
   }
 
   @PostMapping("main")
-  @PermissionScope(app = "#app.id")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   public RestResponse getMain(Application app) {
     String mainClass = applicationService.getMain(app);
     return RestResponse.success(mainClass);
   }
 
   @PostMapping("backups")
-  @PermissionScope(app = "#backUp.appId")
+  @PermissionScope(app = "#backUp.appId", team = "#backUp.teamId")
   public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
     IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
     return RestResponse.success(backups);
   }
 
   @PostMapping("optionlog")
-  @PermissionScope(app = "#log.appId")
+  @PermissionScope(app = "#log.appId", team = "#log.teamId")
   public RestResponse log(ApplicationLog log, RestRequest request) {
     IPage<ApplicationLog> applicationList = applicationLogService.page(log, request);
     return RestResponse.success(applicationList);
   }
 
-  @PermissionScope(app = "#log.appId")
+  @PermissionScope(app = "#log.appId", team = "#log.teamId")
   @PostMapping("deleteOperationLog")
   @RequiresPermissions("app:delete")
   public RestResponse deleteOperationLog(ApplicationLog log) {
@@ -294,7 +320,7 @@ public class ApplicationController {
     return RestResponse.success(deleted);
   }
 
-  @PermissionScope(app = "#app.id")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping("delete")
   @RequiresPermissions("app:delete")
   public RestResponse delete(Application app) throws InternalException {
@@ -350,7 +376,7 @@ public class ApplicationController {
   }
 
   @PostMapping("checkSavepointPath")
-  @PermissionScope(app = "#app.id")
+  @PermissionScope(app = "#app.id", team = "#app.teamId")
   public RestResponse checkSavepointPath(Application app) throws Exception {
     String error = applicationService.checkSavepointPath(app);
     if (error == null) {

@@ -47,8 +47,8 @@ public class OpenapiConfig implements WebMvcConfigurer {
     return new OpenAPI()
         .info(
             new Info()
-                .title("Apache StreamPark Api Docs")
-                .description("Apache StreamPark Api Docs")
+                .title("Apache StreamPark Open API")
+                .description("Apache StreamPark Open API for third-party system integration")
                 .contact(
                     new Contact()
                         .name("Apache StreamPark")
@@ -71,6 +71,6 @@ public class OpenapiConfig implements WebMvcConfigurer {
 
   @Bean
   public GroupedOpenApi publicApiV1() {
-    return GroupedOpenApi.builder().group("v1").pathsToMatch(paths).build();
+    return GroupedOpenApi.builder().group("Open API").pathsToMatch(paths).build();
   }
 }

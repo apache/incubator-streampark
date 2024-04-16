@@ -1355,7 +1355,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             clusterId,
             application.getJobId(),
             appParam.getSavePointed(),
-            appParam.getDrain(),
+            appParam.getDrain() == null ? false : appParam.getDrain(),
             customSavepoint,
             namespace);
 
@@ -1509,7 +1509,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     starting(application);
-    application.setAllowNonRestored(appParam.getAllowNonRestored());
+
+    application.setAllowNonRestored(
+        appParam.getAllowNonRestored() == null ? false : appParam.getAllowNonRestored());
 
     String appConf;
     String flinkUserJar = null;
@@ -1855,7 +1857,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   private String getSavePointed(Application appParam) {
-    if (appParam.getSavePointed()) {
+    if (appParam.getSavePointed() != null && appParam.getSavePointed()) {
       if (StringUtils.isBlank(appParam.getSavePoint())) {
         SavePoint savePoint = savePointService.getLatest(appParam.getId());
         if (savePoint != null) {

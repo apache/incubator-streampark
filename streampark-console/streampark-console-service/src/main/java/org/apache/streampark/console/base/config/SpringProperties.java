@@ -173,14 +173,7 @@ public class SpringProperties {
     config.put("spring.servlet.multipart.max-request-size", "-1");
 
     // swagger-ui
-    config.put("knife4j.enable", "false");
-    config.put("knife4j.basic.enable", "false");
-    config.put("springdoc.api-docs.enabled", "false");
-    config.put("knife4j.basic.username", "admin");
-    config.put("knife4j.basic.password", "streampark");
-    config.put("springdoc.swagger-ui.path", "/swagger-ui.html");
-    config.put("springdoc.packages-to-scan", "org.apache.streampark.console");
-    config.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher");
+    config.put("springdoc.api-docs.enabled", "true");
 
     // metrics
     config.put("management.health.ldap.enabled", "false");
