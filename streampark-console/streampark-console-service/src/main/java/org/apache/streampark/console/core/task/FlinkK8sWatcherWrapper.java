@@ -18,10 +18,13 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
@@ -29,6 +32,7 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.model.TrackId;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.flink.configuration.JobManagerOptions;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
@@ -40,6 +44,8 @@ import org.springframework.context.annotation.Lazy;
 import javax.annotation.Nonnull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
@@ -62,6 +68,8 @@ public class FlinkK8sWatcherWrapper {
   @Lazy @Autowired private ApplicationService applicationService;
 
   @Lazy @Autowired private FlinkClusterService flinkClusterService;
+
+  @Lazy @Autowired private FlinkEnvService flinkEnvService;
 
   /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
   @Bean(destroyMethod = "close")
@@ -110,19 +118,34 @@ public class FlinkK8sWatcherWrapper {
   }
 
   public TrackId toTrackId(Application app) {
+    FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
+    Properties properties = flinkEnv.getFlinkConfig();
+
+    Map<String, String> dynamicProperties =
+        PropertiesUtils.extractDynamicPropertiesAsJava(app.getDynamicProperties());
+    String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
+    if (archiveDir != null) {
+      properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
+    }
     if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
       return TrackId.onApplication(
           app.getK8sNamespace(),
           app.getJobName(),
           app.getId(),
           app.getJobId(),
-          app.getTeamId().toString());
+          app.getTeamId().toString(),
+          properties);
     } else if (app.getExecutionModeEnum() == ExecutionMode.KUBERNETES_NATIVE_SESSION) {
       FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
       String namespace = flinkCluster.getK8sNamespace();
       String clusterId = flinkCluster.getClusterId();
       return TrackId.onSession(
-          namespace, clusterId, app.getId(), app.getJobId(), app.getTeamId().toString());
+          namespace,
+          clusterId,
+          app.getId(),
+          app.getJobId(),
+          app.getTeamId().toString(),
+          properties);
     } else {
       throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
     }

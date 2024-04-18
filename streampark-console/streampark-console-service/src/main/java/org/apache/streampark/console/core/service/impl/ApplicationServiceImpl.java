@@ -1635,7 +1635,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         SubmitRequest.apply(
             flinkEnv.getFlinkVersion(),
             ExecutionMode.of(application.getExecutionMode()),
-            getProperties(application),
+            getProperties(application, flinkEnv),
             flinkEnv.getFlinkConf(),
             DevelopmentMode.of(application.getJobType()),
             application.getId(),
@@ -1749,7 +1749,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         });
   }
 
-  private Map<String, Object> getProperties(Application application) {
+  private Map<String, Object> getProperties(Application application, FlinkEnv flinkEnv) {
     Map<String, Object> properties = application.getOptionMap();
     if (ExecutionMode.isRemoteMode(application.getExecutionModeEnum())) {
       FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -1787,11 +1787,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-      try {
-        HadoopUtils.yarnClient();
-        properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
-      } catch (Exception e) {
-        // skip
+      String archiveDir =
+          flinkEnv.getFlinkConfig().getProperty(JobManagerOptions.ARCHIVE_DIR.key());
+      if (archiveDir != null) {
+        properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
       }
     }
 

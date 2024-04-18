@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 
 @Getter
 @Setter
@@ -89,6 +90,15 @@ public class FlinkEnv implements Serializable {
   public Map<String, String> convertFlinkYamlAsMap() {
     String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
     return PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+  }
+
+  @JsonIgnore
+  public Properties getFlinkConfig() {
+    String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+    Properties flinkConfig = new Properties();
+    Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+    flinkConfig.putAll(config);
+    return flinkConfig;
   }
 
   @JsonIgnore

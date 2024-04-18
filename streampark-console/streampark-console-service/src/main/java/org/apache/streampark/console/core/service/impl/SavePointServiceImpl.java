@@ -150,7 +150,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     if (cpThreshold == 0) {
-      String flinkConfNumRetained = flinkEnv.convertFlinkYamlAsMap().get(numRetainedKey);
+      String flinkConfNumRetained = flinkEnv.getFlinkConfig().getProperty(numRetainedKey);
       int numRetainedDefaultValue = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue();
       if (flinkConfNumRetained != null) {
         try {
@@ -273,7 +273,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       // flink
       FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
       savepointPath =
-          flinkEnv.convertFlinkYamlAsMap().get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+          flinkEnv.getFlinkConfig().getProperty(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
     }
 
     return savepointPath;
