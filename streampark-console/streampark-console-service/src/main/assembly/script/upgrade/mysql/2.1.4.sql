@@ -27,7 +27,7 @@ SET a.`flink_cluster_id` = c.`id`;
 
 UPDATE `t_flink_app`
 SET `cluster_id` = `app_id`
-WHERE `execution_mode` IN (2,3,5);
+WHERE `execution_mode` IN (2,3,4);
 
 ALTER TABLE `t_flink_app` DROP COLUMN `app_id`;
 
