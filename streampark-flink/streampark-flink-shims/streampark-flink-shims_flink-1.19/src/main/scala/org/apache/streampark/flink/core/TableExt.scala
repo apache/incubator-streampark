@@ -15,20 +15,28 @@
  * limitations under the License.
  */
 
-use streampark;
+package org.apache.streampark.flink.core
 
-SET NAMES utf8mb4;
-SET foreign_key_checks = 0;
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.table.api.{Table => FlinkTable}
+import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
+import org.apache.flink.types.Row
 
-UPDATE `t_flink_app` a INNER JOIN `t_flink_cluster` c
-ON a.`cluster_id` = c.`cluster_id`
-AND a.`execution_mode` = 5
-SET a.`flink_cluster_id` = c.`id`;
+object TableExt {
 
-UPDATE `t_flink_app`
-SET `cluster_id` = `app_id`
-WHERE `execution_mode` IN (2,3,4);
+  class Table(val table: FlinkTable) {
+    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+  }
 
-ALTER TABLE `t_flink_app` DROP COLUMN `app_id`;
+  class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
 
-SET foreign_key_checks = 1;
+    def \\ : DataStream[Row] = toDataStream
+
+    def >>[T: TypeInformation](implicit context: StreamTableContext): DataStream[T] = {
+      context.isConvertedToDataStream = true
+      super.toAppendStream
+    }
+  }
+
+}

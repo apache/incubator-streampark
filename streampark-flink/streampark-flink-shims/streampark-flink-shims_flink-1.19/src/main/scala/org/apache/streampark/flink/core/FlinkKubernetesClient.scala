@@ -14,21 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.streampark.flink.core
 
-use streampark;
+import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient
+import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService
 
-SET NAMES utf8mb4;
-SET foreign_key_checks = 0;
+import java.util.Optional
 
-UPDATE `t_flink_app` a INNER JOIN `t_flink_cluster` c
-ON a.`cluster_id` = c.`cluster_id`
-AND a.`execution_mode` = 5
-SET a.`flink_cluster_id` = c.`id`;
+class FlinkKubernetesClient(kubeClient: FlinkKubeClient)
+  extends FlinkKubernetesClientTrait(kubeClient) {
 
-UPDATE `t_flink_app`
-SET `cluster_id` = `app_id`
-WHERE `execution_mode` IN (2,3,4);
+  override def getService(serviceName: String): Optional[KubernetesService] = {
+    kubeClient.getService(serviceName)
+  }
 
-ALTER TABLE `t_flink_app` DROP COLUMN `app_id`;
-
-SET foreign_key_checks = 1;
+}
