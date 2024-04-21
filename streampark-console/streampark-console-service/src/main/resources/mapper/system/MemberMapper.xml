@@ -71,14 +71,25 @@
     </select>
 
     <select id="findUsersNotInTeam" resultType="org.apache.streampark.console.system.entity.User">
-        select tu.* from t_user tu
-        where tu.user_id
+        select u.user_id,
+            u.username,
+            u.nick_name,
+            u.user_type,
+            u.login_type,
+            u.status,
+            u.email,
+            u.create_time,
+            u.modify_time,
+            u.sex,
+            u.description
+        from t_user u
+        where u.user_id
         not in (
-                    select u.user_id
-                        from t_user u join t_member m
-                        on m.team_id = #{teamId}
-                        and m.user_id = u.user_id
-                )
+            select u.user_id
+            from t_user u join t_member m
+            on m.team_id = #{teamId}
+            and m.user_id = u.user_id
+        )
     </select>
 
 </mapper>

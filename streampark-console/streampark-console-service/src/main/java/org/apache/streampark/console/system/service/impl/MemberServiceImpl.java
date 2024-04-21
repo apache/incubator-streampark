@@ -21,6 +21,8 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.enums.UserType;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -54,6 +56,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   @Autowired private RoleService roleService;
 
   @Autowired private TeamService teamService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Override
   @Transactional
@@ -153,6 +156,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Override
   public void deleteMember(Member memberArg) {
+    checkPermission(memberArg);
     Member member =
         Optional.ofNullable(this.getById(memberArg.getId()))
             .orElseThrow(
@@ -163,8 +167,21 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     userService.clearLastTeam(member.getUserId(), member.getTeamId());
   }
 
+  private void checkPermission(Member member) {
+    User user = serviceHelper.getLoginUser();
+    ApiAlertException.throwIfTrue(user == null, "Permission denied, invalid login");
+    if (user.getUserType() == UserType.USER) {
+      List<Team> teamList = this.findUserTeams(user.getUserId());
+      Optional<Team> team =
+          teamList.stream().filter(c -> c.getId().equals(member.getTeamId())).findFirst();
+      ApiAlertException.throwIfTrue(
+          !team.isPresent(), "Permission denied, The current user is not in the team");
+    }
+  }
+
   @Override
   public void updateMember(Member member) {
+    checkPermission(member);
     Member oldMember =
         Optional.ofNullable(this.getById(member.getId()))
             .orElseThrow(
