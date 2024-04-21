@@ -115,7 +115,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   def checkVersion(throwException: Boolean = true): Boolean = {
     version.split("\\.").map(_.trim.toInt) match {
-      case Array(1, v, _) if v >= 12 && v <= 18 => true
+      case Array(1, v, _) if v >= 12 && v <= 19 => true
       case _ =>
         if (throwException) {
           throw new UnsupportedOperationException(s"Unsupported flink version: $version")
