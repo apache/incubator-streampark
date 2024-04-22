@@ -122,6 +122,9 @@ streampark:
     max-backup-num: 5
     # default running once a day
     exec-cron: 0 0 1 * * ?
+  project-build:
+    # Number of projects allowed to be running at the same time , If there is no limit, -1 can be configured
+    max-build-num: 6
 
   shiro:
     # token timeout, unit second

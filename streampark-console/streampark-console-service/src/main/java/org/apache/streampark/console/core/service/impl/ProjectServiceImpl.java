@@ -442,6 +442,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
   }
 
+  @Override
+  public Long selectCurrentBuildCount() {
+    return this.baseMapper.selectCurrentBuildCount();
+  }
+
   private Project remakeProject(Project project) {
     if (Objects.nonNull(project.getId())) {
       return this.baseMapper.selectById(project.getId());

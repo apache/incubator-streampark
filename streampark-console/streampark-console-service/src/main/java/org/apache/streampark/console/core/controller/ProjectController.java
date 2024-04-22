@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +52,9 @@ import java.util.Map;
 public class ProjectController {
 
   @Autowired private ProjectService projectService;
+
+  @Value("${streampark.project-build.max-build-num:6}")
+  public Long maxProjectBuildNum;
 
   @Operation(summary = "Create project")
   @PostMapping("create")
@@ -79,6 +84,15 @@ public class ProjectController {
   @PostMapping("build")
   @RequiresPermissions("project:build")
   public RestResponse build(Long id) throws Exception {
+    Long currentBuildCount = projectService.selectCurrentBuildCount();
+    if (maxProjectBuildNum > 0 && currentBuildCount > maxProjectBuildNum) {
+      String errorMessage =
+          String.format(
+              "【StreamPark】The number of running Build projects exceeds the maximum number:%d of max-build-num",
+              maxProjectBuildNum);
+      log.error(errorMessage);
+      return RestResponse.fail(ResponseCode.CODE_FAIL, "internal server error: {}", errorMessage);
+    }
     projectService.build(id);
     return RestResponse.success();
   }

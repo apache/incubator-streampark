@@ -162,4 +162,11 @@ public interface ProjectService extends IService<Project> {
    * @return Check git
    */
   GitAuthorizedErrorEnum gitCheck(Project project);
+
+  /**
+   * Gets current running build project data
+   *
+   * @return build number
+   */
+  Long selectCurrentBuildCount();
 }

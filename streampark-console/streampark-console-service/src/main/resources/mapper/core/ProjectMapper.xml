@@ -90,4 +90,11 @@
         </where>
     </select>
 
+    <select id="selectCurrentBuildCount" resultType="java.lang.Long">
+        select count(*) as buildRunningNumber
+        from t_flink_project
+        where build_state = 0
+    </select>
+
+
 </mapper>
