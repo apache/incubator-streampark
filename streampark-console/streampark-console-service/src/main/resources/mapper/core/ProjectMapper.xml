@@ -95,6 +95,4 @@
         from t_flink_project
         where build_state = 0
     </select>
-
-
 </mapper>
