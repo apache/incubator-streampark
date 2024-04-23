@@ -64,7 +64,7 @@ export default {
       label: 'Docker 命名空间',
       desc: 'Docker 构建环境和目标镜像注册使用的命名空间',
     },
-    userName: {
+    username: {
       label: 'Docker 用户名',
       desc: 'Docker 容器服务认证用户名',
     },
