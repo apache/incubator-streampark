@@ -36,7 +36,6 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
@@ -50,11 +49,33 @@ import java.nio.file.Path;
 @ActiveProfiles("test")
 @AutoConfigureTestEntityManager
 @AutoConfigureWebTestClient(timeout = "60000")
-@TestPropertySource(locations = {"classpath:application-test.yml"})
-@ExtendWith({MockitoExtension.class, SpringExtension.class})
 @SpringBootTest(
     classes = StreamParkConsoleBootstrap.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+    properties = {
+      "server.port=10000",
+      "spring.application.name=Apache StreamPark",
+      "spring.main.banner-mode=false",
+      "spring.aop.proxy-target-class=true",
+      "spring.messages.encoding=utf-8",
+      "spring.main.allow-circular-references=true",
+      "spring.mvc.converters.preferred-json-mapper=jackson",
+      "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
+      "spring.jackson.time-zone=GMT+8",
+      "spring.jackson.deserialization.fail-on-unknown-properties=false",
+      "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
+      "datasource.dialect=h2",
+      "spring.datasource.driver-class-name=org.h2.Driver",
+      "spring.datasource.username=sa",
+      "spring.datasource.password=sa",
+      "spring.datasource.url=jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+      "spring.sql.init.data-locations=classpath:db/data-h2.sql",
+      "spring.sql.init.continue-on-error=true",
+      "spring.sql.init.username=sa",
+      "spring.sql.init.password=sa",
+      "spring.sql.init.mode=always"
+    })
+@ExtendWith({MockitoExtension.class, SpringExtension.class})
 public abstract class SpringUnitTestBase {
 
   protected static final Logger LOG = LoggerFactory.getLogger(SpringUnitTestBase.class);
