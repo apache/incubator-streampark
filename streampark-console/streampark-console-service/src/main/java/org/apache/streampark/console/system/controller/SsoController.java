@@ -49,7 +49,7 @@ public class SsoController {
 
   @Autowired private Authenticator authenticator;
 
-  @Value("${pac4j.properties.principalNameAttribute:#{null}}")
+  @Value("${sso.properties.principalNameAttribute:#{null}}")
   private String principalNameAttribute;
 
   @Value("${sso.enable:#{false}}")
