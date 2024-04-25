@@ -64,7 +64,7 @@ export default {
       label: 'Docker namespace',
       desc: 'Namespace for docker image used in docker building env and target image register',
     },
-    userName: {
+    username: {
       label: 'Docker Username',
       desc: 'Docker container service authentication username',
     },

@@ -39,7 +39,9 @@ import java.util.LinkedHashMap;
 @Slf4j
 /** Plugin for {@link ShiroConfig.java} to load SSO config if enabled */
 public class SsoShiroPlugin {
+
   @Autowired private Config ssoConfig;
+
   @Autowired private ShiroService shiroService;
 
   @Value("${sso.enable:#{false}}")

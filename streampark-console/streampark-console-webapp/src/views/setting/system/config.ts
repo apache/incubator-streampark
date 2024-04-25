@@ -47,12 +47,12 @@ export const settingFormSchema: SettingForm = {
       required: true,
     },
     {
-      field: 'userName',
-      label: t('setting.system.docker.userName.label'),
-      helpMessage: t('setting.system.docker.userName.desc'),
+      field: 'username',
+      label: t('setting.system.docker.username.label'),
+      helpMessage: t('setting.system.docker.username.desc'),
       component: 'Input',
       componentProps: {
-        placeholder: t('setting.system.docker.userName.label'),
+        placeholder: t('setting.system.docker.username.label'),
       },
       required: true,
     },
