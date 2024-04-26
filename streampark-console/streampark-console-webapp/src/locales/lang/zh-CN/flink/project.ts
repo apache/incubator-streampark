@@ -62,7 +62,7 @@ export default {
     cvsIsRequiredMessage: '资源来源必选',
     repositoryURLIsRequiredMessage: '(项目)仓库地址必填',
     pomSpecifiesModuleMessage: '指定编译pom.xml的模块 如未指定，则在根路径pom.xml下找到',
-    projectIsbuildingMessage: '当前项目正在构件中',
+    projectIsbuildingMessage: '当前项目正在构建中',
     projectIsbuildFailedMessage: '构建失败',
     deleteProjectSuccessMessage: '删除成功',
     deleteProjectFailedMessage: '删除事变',
