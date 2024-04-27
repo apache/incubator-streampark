@@ -17,6 +17,7 @@
 package org.apache.streampark.flink.packer
 
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.flink.packer.docker.DockerImageExist
 import org.apache.streampark.flink.packer.docker.DockerRetriever.dockerClientConf
 
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
@@ -38,6 +39,22 @@ class DockerClientTest extends AnyWordSpec with BeforeAndAfterAll with Matchers 
           Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
         .responseTimeout(Duration.ofSeconds(
           InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)))
+  }
+
+  "Docker Image Exist" should {
+    "return true if the image exists" in {
+      val dockerImageExist = new DockerImageExist()
+      val imageName = "flink:1.18.1-scala_2.12-java8"
+      val result = dockerImageExist.doesDockerImageExist(imageName)
+      assert(result)
+    }
+
+    "return false if the image does not exist" in {
+      val dockerImageExist = new DockerImageExist()
+      val imageName = "flink:1.18.1-scala_2.12-java8-fail"
+      val result = dockerImageExist.doesDockerImageExist(imageName)
+      assert(!result)
+    }
   }
 
 }
