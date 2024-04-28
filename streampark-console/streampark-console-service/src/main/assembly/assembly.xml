@@ -67,6 +67,12 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/../src/main/assembly/conf</directory>
+            <outputDirectory>conf</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/logs</directory>
             <outputDirectory>logs</outputDirectory>
             <fileMode>0755</fileMode>
@@ -103,9 +109,7 @@
             <lineEnding>unix</lineEnding>
             <fileMode>0755</fileMode>
             <includes>
-                <include>*.yml</include>
-                <include>*.properties</include>
-                <include>logback*.xml</include>
+                <include>logback-spring.xml</include>
             </includes>
         </fileSet>
         <fileSet>

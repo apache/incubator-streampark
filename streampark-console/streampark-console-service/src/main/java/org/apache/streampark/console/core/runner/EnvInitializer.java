@@ -79,8 +79,6 @@ public class EnvInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) throws Exception {
 
-    checkAppHome();
-
     // init InternalConfig
     initConfig();
 
@@ -143,19 +141,6 @@ public class EnvInitializer implements ApplicationRunner {
     createMvnLocalRepoDir();
 
     initialized.add(storageType);
-  }
-
-  private static void checkAppHome() {
-    final String appHome = WebUtils.getAppHome();
-    if (StringUtils.isBlank(appHome)) {
-      throw new ExceptionInInitializerError(
-          String.format(
-              "[StreamPark] Workspace path check failed,"
-                  + " The system initialization check failed. If started local for development and debugging,"
-                  + " please ensure the -D%s parameter is clearly specified,"
-                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-              ConfigKeys.KEY_APP_HOME()));
-    }
   }
 
   private void prepareWorkspace(
