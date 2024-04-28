@@ -300,6 +300,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   }
 
   @Override
+  public Long selectCurrentBuildCount() {
+    return this.baseMapper.selectCurrentBuildCount();
+  }
+
+  @Override
   public List<Map<String, Object>> listConf(Project project) {
     try {
       File file = new File(project.getDistHome(), project.getModule());

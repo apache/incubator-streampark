@@ -57,4 +57,11 @@ public interface ProjectService extends IService<Project> {
   List<Application> getApplications(Project project);
 
   boolean checkExists(Project project);
+
+  /**
+   * Gets current running build project data
+   *
+   * @return build number
+   */
+  Long selectCurrentBuildCount();
 }
