@@ -1,43 +1,12 @@
-<div align="center">
-    <br/>
-    <h1>
-        <a href="https://streampark.apache.org" target="_blank" rel="noopener noreferrer">
-        <img width="600" src="https://streampark.apache.org/image/logo_name.png" alt="StreamPark logo">
-        </a>
-    </h1>
-    <strong style="font-size: 1.5rem">Make stream processing easier!!!</strong>
-</div>
+# Apache StreamPark Web UI
 
-<br/>
-
-<p align="center">
-  <img src="https://tokei.rs/b1/github/apache/streampark">
-  <img src="https://img.shields.io/github/v/release/apache/streampark.svg">
-  <img src="https://img.shields.io/github/stars/apache/streampark">
-  <img src="https://img.shields.io/github/forks/apache/streampark">
-  <img src="https://img.shields.io/github/issues/apache/streampark">
-  <img src="https://img.shields.io/github/downloads/apache/streampark/total.svg">
-  <img src="https://img.shields.io/github/languages/count/apache/streampark">
-  <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg"></a>
-</p>
-
-<div align="center">
-
-**[Official Website](https://streampark.apache.org)**
-
-</div>
-
-#### English | [中文](README.zh-CN.md)
-
-# Apache StreamPark (Incubating)
-
-Make stream processing easier
-
-> A magical framework that make stream processing easier!
+> [!NOTE]
+>
+> This console is a fork to [Vue vben admin](https://github.com/vbenjs/vue-vben-admin). Check [LICENSE](/LICENSE) and [license-vue-vben-admin.txt](/dist-material/release-docs/licenses/ui-licenses/license-vue-vben-admin.txt) for more details.
 
 ![](https://streampark.apache.org/image/dashboard.png)
 
-### Use Gitpod
+## Use Gitpod
 
 Open the project in Gitpod (free online dev environment for GitHub) and start coding immediately.
 
