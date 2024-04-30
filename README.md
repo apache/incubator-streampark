@@ -32,7 +32,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/ASFStreamPark?label=follow&logo=x&style=for-the-badge)](https://twitter.com/ASFStreamPark)
 
 **[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
-**[Documentation](https://streampark.apache.org/docs/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
+**[Official Documentation](https://streampark.apache.org/docs/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 
 ![](https://streampark.apache.org/image/dashboard-preview.png)
@@ -48,7 +48,7 @@
 > Apache StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
 
 * Apache Flink & Apache Spark application development scaffold
-* Support multiple versions of Flink & Spark
+* Support multiple versions of Apache Flink & Apache Spark
 * Wide range of out-of-the-box connectors
 * One-stop stream processing operation platform
 * Support catalog、olap、streaming-warehouse etc.
@@ -61,7 +61,7 @@
 - [Start with Docker](docker/README.md)
 - [Start with Kubernetes](helm/README.md)
 
-Click [Official documentation](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+Click [Official Documentation](https://streampark.apache.org/docs/user-guide/quick-start) for more information
 
 ## 🔨 How to Build
 
