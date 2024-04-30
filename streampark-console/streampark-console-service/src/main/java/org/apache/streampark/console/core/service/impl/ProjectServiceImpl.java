@@ -50,6 +50,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,6 +83,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Autowired private ApplicationService applicationService;
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
+
+  @Value("${streampark.project.max-build:6}")
+  public Long maxProjectBuildNum;
 
   private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
@@ -193,6 +197,14 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public void build(Long id) throws Exception {
+    Long currentBuildCount = this.baseMapper.getBuildingCount();
+
+    ApiAlertException.throwIfTrue(
+        maxProjectBuildNum > -1 && currentBuildCount > maxProjectBuildNum,
+        String.format(
+            "The number of running Build projects exceeds the maximum number: %d of max-build-num",
+            maxProjectBuildNum));
+
     Project project = getById(id);
     this.baseMapper.updateBuildState(project.getId(), BuildState.BUILDING.get());
     String logPath = getBuildLogPath(id);

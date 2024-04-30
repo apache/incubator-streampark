@@ -61,6 +61,9 @@ streampark:
     http-auth: 'simple'  # default simple, or kerberos
   # flink on yarn or spark on yarn, HADOOP_USER_NAME
   hadoop-user-name: hdfs
+  project:
+    # Number of projects allowed to be running at the same time , If there is no limit, -1 can be configured
+    max-build: 16
 
 # flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
 security:
