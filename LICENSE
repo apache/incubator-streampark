@@ -226,6 +226,7 @@ MIT License
 
 The following components are provided under the MIT License
 These files from https://github.com/vbenjs/vue-vben-admin
+The text of the license is included in dist-material/release-docs/licenses/ui-licenses/license-vue-vben-admin.txt
 
 streampark-console/streampark-console-webapp/src/App.vue
 streampark-console/streampark-console-webapp/src/main.ts
