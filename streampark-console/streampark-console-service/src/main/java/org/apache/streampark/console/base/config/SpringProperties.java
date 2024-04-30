@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.config;
 
+import org.apache.streampark.common.conf.ConfigConst;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,10 +46,10 @@ public class SpringProperties {
       SystemPropertyUtils.set("spring.config.location", oldConfig.getAbsolutePath());
       return new Properties();
     } else {
-      // 1) get spring config
-      Properties springConfig = getSpringConfig();
-      // 2) get user config
+      // 1) get user config
       Properties userConfig = getUserConfig();
+      // 2) get spring config
+      Properties springConfig = getSpringConfig();
       // 3) merge config
       mergeConfig(userConfig, springConfig);
       // 4) datasource
@@ -122,32 +122,24 @@ public class SpringProperties {
         });
   }
 
-  private static boolean useOldConfig() {
-    String appHome = WebUtils.getAppHome();
-    if (appHome == null) {
-      return false;
-    }
-    File file = new File(appHome + "/conf/application.yml");
-    return file.exists();
-  }
-
   private static Properties getUserConfig() {
     String appHome = WebUtils.getAppHome();
+    if (StringUtils.isBlank(appHome)) {
+      throw new ExceptionInInitializerError(
+          String.format(
+              "[StreamPark] The system initialization check failed. If started local for development and debugging,"
+                  + " please ensure the -D%s parameter is clearly specified,"
+                  + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+              ConfigConst.KEY_APP_HOME()));
+    }
     Properties properties = new Properties();
-    if (appHome != null) {
-      File file = new File(appHome + "/conf/config.yaml");
-      if (file.exists() && file.isFile()) {
-        Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
-        properties.putAll(config);
-        return properties;
-      }
-      throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
-    } else {
-      InputStream inputStream =
-          SpringProperties.class.getClassLoader().getResourceAsStream("config.yaml");
-      Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(inputStream);
+    File file = new File(appHome, "conf/config.yaml");
+    if (file.exists() && file.isFile()) {
+      Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(file.getAbsolutePath());
       properties.putAll(config);
       return properties;
+    } else {
+      throw new ExceptionInInitializerError(file.getAbsolutePath() + " not found, please check.");
     }
   }
 
