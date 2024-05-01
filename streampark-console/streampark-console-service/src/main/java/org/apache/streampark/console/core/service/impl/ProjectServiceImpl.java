@@ -55,6 +55,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +92,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Qualifier("streamparkBuildExecutor")
   @Autowired
   private Executor executorService;
+
+  @Value("${streampark.project.max-build:6}")
+  private Long maxProjectBuildNum;
 
   @Override
   public RestResponse create(Project project) {
@@ -225,6 +229,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public void build(Long id) throws Exception {
+    Long currentBuildCount = this.baseMapper.getBuildingCount();
+    ApiAlertException.throwIfTrue(
+        maxProjectBuildNum > -1 && currentBuildCount > maxProjectBuildNum,
+        String.format(
+            "The number of running Build projects exceeds the maximum number: %d of max-build-num",
+            maxProjectBuildNum));
     Project project = getById(id);
     this.baseMapper.updateBuildState(project.getId(), BuildStateEnum.BUILDING.get());
     String logPath = getBuildLogPath(id);
