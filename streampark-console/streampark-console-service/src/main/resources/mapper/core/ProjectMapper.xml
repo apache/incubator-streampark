@@ -89,5 +89,8 @@
             </if>
         </where>
     </select>
+    <select id="getBuildingCount" resultType="java.lang.Long">
+        select count(1) from t_flink_project where build_state = 0
+    </select>
 
 </mapper>

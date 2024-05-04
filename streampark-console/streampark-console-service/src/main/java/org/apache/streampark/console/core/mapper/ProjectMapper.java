@@ -38,4 +38,6 @@ public interface ProjectMapper extends BaseMapper<Project> {
   boolean existsByTeamId(@Param("teamId") Long teamId);
 
   List<Project> selectProjectsByTeamId(@Param("teamId") Long teamId);
+
+  Long getBuildingCount();
 }
