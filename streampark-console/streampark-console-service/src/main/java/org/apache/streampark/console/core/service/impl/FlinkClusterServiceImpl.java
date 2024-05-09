@@ -104,19 +104,19 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     ResponseResult result = new ResponseResult();
     result.setStatus(0);
 
-    // 1) Check name is already exists
+    // 1) Check name if already exists
     Boolean existsByClusterName =
         this.existsByClusterName(cluster.getClusterName(), cluster.getId());
     if (existsByClusterName) {
-      result.setMsg("ClusterName is already exists, please check!");
+      result.setMsg("ClusterName already exists, please check!");
       result.setStatus(1);
       return result;
     }
 
-    // 2) Check target-cluster is already exists
+    // 2) Check target-cluster if already exists
     String clusterId = cluster.getClusterId();
     if (StringUtils.isNotBlank(clusterId) && this.existsByClusterId(clusterId, cluster.getId())) {
-      result.setMsg("The clusterId " + clusterId + " is already exists,please check!");
+      result.setMsg("The clusterId " + clusterId + " already exists,please check!");
       result.setStatus(2);
       return result;
     }

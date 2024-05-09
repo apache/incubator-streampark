@@ -78,7 +78,7 @@ export default {
   },
   fail: {
     title: 'Failed create AlertConfig',
-    subTitle: 'alertName {0} is already exists!',
+    subTitle: 'alertName {0} already exists!',
     update: 'Failed update AlertConfig',
   },
   success: {

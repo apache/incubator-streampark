@@ -30,7 +30,7 @@ export default {
   executionMode: 'Execution Mode',
   historyVersion: 'History Version',
   resource: 'Resource',
-  resourcePlaceHolder: 'please choose resource',
+  resourcePlaceHolder: 'Please choose resource',
   selectAppPlaceHolder: 'choose app jar',
   dependency: 'Dependency',
   appConf: 'Application Conf',
@@ -244,30 +244,30 @@ export default {
     terminated: 'TERMINATED',
   },
   addAppTips: {
-    developmentModePlaceholder: 'please select job type',
+    developmentModePlaceholder: 'Please select job type',
     developmentModeIsRequiredMessage: 'Job Type is required',
-    executionModePlaceholder: 'please select execution mode',
+    executionModePlaceholder: 'Please select execution mode',
     executionModeIsRequiredMessage: 'Execution Mode is required',
     hadoopEnvInitMessage:
       'Hadoop environment initialization failed, please check the environment settings',
     resourceFromMessage: 'resource from is required',
     mainClassPlaceholder: 'Please enter Main class',
     mainClassIsRequiredMessage: 'Program Main is required',
-    projectPlaceholder: 'Please select Project',
+    projectPlaceholder: 'Please select project',
     projectIsRequiredMessage: 'Project is required',
     projectModulePlaceholder: 'Please select module of this project',
-    appTypePlaceholder: 'Please select Application type',
+    appTypePlaceholder: 'Please select application type',
     appTypeIsRequiredMessage: 'Application Type is required',
     programJarIsRequiredMessage: 'Program Jar is required',
     useSysHadoopConf: 'Use System Hadoop Conf',
     flinkVersionIsRequiredMessage: 'Flink Version is required',
-    appNamePlaceholder: 'Please enter application Name',
-    appNameIsRequiredMessage: 'The application Name is required',
-    appNameNotUniqueMessage: 'The application Name is already exists, must be unique. ',
+    appNamePlaceholder: 'Please enter application name',
+    appNameIsRequiredMessage: 'The application name is required',
+    appNameNotUniqueMessage: 'The application name already exists, must be unique. ',
     appNameExistsInYarnMessage:
-      'The application name is already exists in YARN, cannot be repeated. Please check',
+      'The application name already exists in YARN, cannot be repeated. Please check',
     appNameExistsInK8sMessage:
-      'The application name is already exists in Kubernetes,cannot be repeated. Please check',
+      'The application name already exists in Kubernetes,cannot be repeated. Please check',
     appNameNotValid:
       'The application name is invalid, must be (Chinese or English or "-" or "_"), two consecutive spaces cannot appear.Please check',
     flinkClusterIsRequiredMessage: 'Flink Cluster is required',
@@ -275,7 +275,7 @@ export default {
     tagsPlaceholder: 'Please enter tags,if more than one, separate them with commas(,)',
     parallelismPlaceholder: 'The parallelism with which to run the program',
     slotsOfPerTaskManagerPlaceholder: 'Number of slots per TaskManager',
-    restartSizePlaceholder: 'restart max size',
+    restartSizePlaceholder: 'Restart max size',
     alertTemplatePlaceholder: 'Alert Template',
     totalMemoryOptionsPlaceholder: 'Please select the resource parameters to set',
     tmPlaceholder: 'Please select the resource parameters to set',
@@ -293,7 +293,7 @@ export default {
     hadoopXmlConfigFileTips:
       'Automatically copy configuration files from system environment parameters',
     dynamicPropertiesPlaceholder:
-      '$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)',
+      'Enter $key=$value,if there are multiple parameters,you can enter them on the new line (-D <arg>)',
   },
   noteInfo: {
     note: 'Note',
@@ -308,7 +308,7 @@ export default {
     totalMemoryNote:
       'Explicitly configuring both "total process memory" and "total Flink memory" is not recommended. It may lead to deployment failures due to potential memory configuration conflicts. Configuring other memory components also requires caution as it can produce further configuration conflicts, The easiest way is to set "total process memory"',
     dynamicProperties:
-      'It works the same as -D$property=$value in CLI mode, Allows specifying multiple generic configuration options. The available options can be found from',
+      'It works the same as -D$property=$value in CLI mode, allows specifying multiple generic configuration options. The available options can be found from',
     yarnQueue:
       'It\'s used to quickly specify not only "yarn.application.name" but also "yarn.application.node-label". For example, "queue1" represents the value of "yarn.application.name" is "queue1", but "queue1{\'@\'}label1,label2" represents that the value of "yarn.application.name" is "queue1" and the value of "yarn.application.node-label" is "label1,label2". The queue and label are joined by {\'@\'}.',
   },

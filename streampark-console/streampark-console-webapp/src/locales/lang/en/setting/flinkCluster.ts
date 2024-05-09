@@ -49,8 +49,8 @@ export default {
   placeholder: {
     addType: 'Please select cluster Add Type',
     clusterName: 'Please enter cluster name',
-    executionMode: 'Please enter cluster name',
-    versionId: 'please select Flink Version',
+    executionMode: 'Please enter execution mode',
+    versionId: 'Please select flink version',
     addressRemoteMode: 'Please enter jobManager URL',
     addressNoRemoteMode: 'Please enter cluster address,  e.g: http://host:port',
     yarnSessionClusterId: 'Please enter Yarn Session cluster',
@@ -65,7 +65,7 @@ export default {
     clusterDescription: 'Please enter description for this application',
   },
   required: {
-    address: 'cluster address is required',
+    address: 'Cluster address is required',
     executionMode: 'Execution Mode is required',
     clusterId: 'Yarn Session Cluster is required',
     versionId: 'Flink Version is required',

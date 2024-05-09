@@ -397,7 +397,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         return Optional.of(value);
       }
       log.warn(
-          "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be gt 0");
+          "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be greater than 0");
     } catch (NumberFormatException e) {
       log.warn(
           "This value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
@@ -425,11 +425,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         return value;
       }
       log.warn(
-          "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be gt 0, default value: {} will be use",
+          "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be greater than 0, default value: {} will be used",
           MAX_RETAINED_CHECKPOINTS.defaultValue());
     } catch (NumberFormatException e) {
       log.warn(
-          "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be use",
+          "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be used",
           flinkEnv.getFlinkHome(),
           flinkConfNumRetained);
     }
