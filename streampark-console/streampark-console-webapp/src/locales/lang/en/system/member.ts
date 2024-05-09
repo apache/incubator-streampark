@@ -29,6 +29,6 @@ export default {
     createTime: 'Create Time',
     modifyTime: 'Modify Time',
   },
-  userNameRequire: 'please select a user name',
-  roleRequire: 'please select role',
+  userNameRequire: 'Please select a user name',
+  roleRequire: 'Please select a role',
 };

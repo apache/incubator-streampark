@@ -269,7 +269,7 @@ export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) 
       <Input.TextArea
         rows={8}
         name="dynamicProperties"
-        placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
+        placeholder="Enter $key=$value,if there are multiple parameters,you can enter them on the new line(-D <arg>)"
         value={model[field]}
         onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
       />

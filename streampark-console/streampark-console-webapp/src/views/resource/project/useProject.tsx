@@ -70,8 +70,8 @@ export const useProject = () => {
         componentProps: {
           placeholder: t('flink.project.form.projectTypePlaceholder'),
           options: [
-            { label: 'apache flink', value: ProjectTypeEnum.FLINK, disabled: false },
-            { label: 'apache spark', value: ProjectTypeEnum.SPARK, disabled: true },
+            { label: 'Apache Flink', value: ProjectTypeEnum.FLINK, disabled: false },
+            { label: 'Apache Spark', value: ProjectTypeEnum.SPARK, disabled: true },
           ],
           showSearch: true,
           optionFilterProp: 'children',

@@ -26,9 +26,9 @@ export default {
   table: {
     title: 'Team List',
     teamName: 'Team Name',
-    teamNamePlaceholder: 'please enter Team Name',
+    teamNamePlaceholder: 'Please enter team name',
     description: 'Description',
-    descriptionMessage: 'exceeds maximum length limit of 100 characters',
-    teamMessage: 'teamName must be at least 4 characters',
+    descriptionMessage: 'Exceeds maximum length limit of 100 characters',
+    teamMessage: 'Team name must be at least 4 characters',
   },
 };

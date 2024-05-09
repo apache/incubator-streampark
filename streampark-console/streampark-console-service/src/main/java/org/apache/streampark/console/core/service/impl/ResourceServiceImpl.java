@@ -320,7 +320,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     boolean exists =
         existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
     if (exists) {
-      return buildExceptResponse(new RuntimeException("connector is already exists"), 4);
+      return buildExceptResponse(new RuntimeException("connector already exists"), 4);
     }
 
     if (resourceParam.getId() != null

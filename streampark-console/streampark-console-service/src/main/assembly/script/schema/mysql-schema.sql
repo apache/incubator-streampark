@@ -311,25 +311,6 @@ create table `t_variable` (
   unique key `un_team_vcode_inx` (`team_id`,`variable_code`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
--- ----------------------------
--- Table of t_resource
--- ----------------------------
-drop table if exists `t_resource`;
-create table `t_resource` (
-  `id` bigint not null auto_increment,
-  `resource_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the resource file',
-  `resource_type` int not null comment '0:app 1:common 2:connector 3:format 4:udf',
-  `resource` text collate utf8mb4_general_ci comment 'resource content, including jars and poms',
-  `engine_type` int not null comment 'compute engine type, 0:apache flink 1:apache spark',
-  `main_class` varchar(255) collate utf8mb4_general_ci default null,
-  `description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
-  `creator_id` bigint collate utf8mb4_general_ci not null comment 'user id of creator',
-  `team_id` bigint collate utf8mb4_general_ci not null comment 'team id',
-  `create_time` datetime default null comment 'create time',
-  `modify_time` datetime default null comment 'modify time',
-  primary key (`id`) using btree,
-  unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Table structure for t_role
@@ -541,11 +522,11 @@ create table `t_yarn_queue` (
 -- ----------------------------
 drop table if exists `t_resource`;
 create table if not exists `t_resource` (
-`id` bigint not null auto_increment primary key,
+`id` bigint not null auto_increment ,
 `resource_name` varchar(128) not null comment 'The name of the resource',
 `resource_type` int not null comment '0:app 1:common 2:connector 3:format 4:udf',
 `resource_path` varchar(255) default null,
-`resource` text,
+`resource` text comment 'resource content, including jars and poms',
 `engine_type` int not null comment 'compute engine type, 0:apache flink 1:apache spark',
 `main_class` varchar(255) default null,
 `description` text default null comment 'More detailed description of resource',
@@ -554,8 +535,10 @@ create table if not exists `t_resource` (
 `connector_optional_options` text default null,
 `team_id` bigint not null comment 'team id',
 `create_time` datetime default null comment 'create time',
-`modify_time` datetime not null default current_timestamp comment 'modify time'
-);
+`modify_time` datetime not null default current_timestamp comment 'modify time',
+ primary key (`id`) using btree,
+ unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 
 -- ----------------------------

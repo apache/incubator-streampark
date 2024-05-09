@@ -28,9 +28,9 @@ export default {
   searchPlaceholder: 'please enter a keyword search',
   form: {
     projectName: 'Project Name',
-    projectNamePlaceholder: 'please input Project Name',
+    projectNamePlaceholder: 'Please input project name',
     projectType: 'Project Type',
-    projectTypePlaceholder: 'please select project type',
+    projectTypePlaceholder: 'Please select project type',
     cvs: 'CVS',
     prvkeyPath: 'Private Key Path',
     prvkeyPathPlaceholder: 'private key path, e.g: ~/.ssh/id_rsa',
@@ -47,7 +47,7 @@ export default {
     branchesPlaceholder: 'Select a branch',
     pom: 'POM',
     pomPlaceholder:
-      'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xmlh',
+      'By default,lookup pom.xml in root path,you can manually specify the module to compile pom.xml',
     buildArgs: 'Build Argument',
     buildArgsPlaceholder: 'Build Argument, e.g: -Pprod',
     description: 'description',
@@ -57,12 +57,12 @@ export default {
   },
   operationTips: {
     projectNameIsRequiredMessage: 'Project Name is required',
-    projectNameIsUniqueMessage: 'The Project Name is already exists. Please check',
+    projectNameIsUniqueMessage: 'The Project Name already exists. Please check',
     projectTypeIsRequiredMessage: 'Project Type is required',
     cvsIsRequiredMessage: 'CVS is required',
     repositoryURLIsRequiredMessage: 'Repository URL is required',
     pomSpecifiesModuleMessage:
-      'Specifies the module to compile pom.xml If it is not specified, it is found under the root path pom.xml',
+      'Specifies the module to compile pom.xml if it is not specified, it is found under the root path pom.xml',
     projectIsbuildingMessage: 'The current project is building',
     projectIsbuildFailedMessage: 'Build Fail',
     deleteProjectSuccessMessage: 'delete successful',
