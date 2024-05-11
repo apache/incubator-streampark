@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.base.handler;
 
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
@@ -51,21 +52,21 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = UnauthenticatedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public RestResponse handelUnauthenticatedException(UnauthenticatedException e) {
-    log.info("Unauthenticated: {}", e.getMessage());
+    log.error("Unauthenticated.", e);
     return RestResponse.fail("Unauthenticated.", ResponseCode.CODE_UNAUTHORIZED);
   }
 
   @ExceptionHandler(value = AuthenticationException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public RestResponse handelUnauthenticatedException(AuthenticationException e) {
-    log.info("Permission denied: {}", e.getMessage());
+    log.error("Permission denied.", e);
     return RestResponse.fail("Permission denied.", ResponseCode.CODE_UNAUTHORIZED);
   }
 
   @ExceptionHandler(value = AbstractApiException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(AbstractApiException e) {
-    log.info("api exception：{}", e.getMessage());
+    log.error("api exception:", e);
     return RestResponse.fail(e.getMessage(), e.getResponseCode());
   }
 
@@ -73,7 +74,9 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @Order(value = Ordered.HIGHEST_PRECEDENCE)
   public RestResponse handleException(Exception e) {
-    return RestResponse.fail("internal server error: " + e.getMessage(), ResponseCode.CODE_FAIL);
+    log.error("internal server error:", e);
+    return RestResponse.fail(
+        "internal server error: " + Utils.stringifyException(e), ResponseCode.CODE_FAIL);
   }
 
   /**
@@ -85,6 +88,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BindException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public RestResponse validExceptionHandler(BindException e) {
+    log.error("bind exception:", e);
     StringBuilder message = new StringBuilder();
     List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
     for (FieldError error : fieldErrors) {
@@ -103,6 +107,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public RestResponse handleConstraintViolationException(ConstraintViolationException e) {
+    log.error("constraint violation exception:", e);
     StringBuilder message = new StringBuilder();
     Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
     for (ConstraintViolation<?> violation : violations) {
