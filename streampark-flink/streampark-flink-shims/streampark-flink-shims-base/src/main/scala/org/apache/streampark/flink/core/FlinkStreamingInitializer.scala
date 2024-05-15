@@ -83,7 +83,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val config = argsMap.get(KEY_APP_CONF(), null) match {
       case null | "" =>
         throw new ExceptionInInitializerError(
-          "[StreamPark] Usage:can't fond config,please set \"--conf $path \" in main arguments")
+          "[StreamPark] Usage:can't find config,please set \"--conf $path \" in main arguments")
       case file => file
     }
     val configMap = parseConfig(config)

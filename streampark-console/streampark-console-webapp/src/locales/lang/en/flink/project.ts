@@ -25,7 +25,7 @@ export default {
     successful: 'SUCCESSFUL',
     failed: 'FAILED',
   },
-  searchPlaceholder: 'please enter a keyword search',
+  searchPlaceholder: 'Please enter a keyword to search',
   form: {
     projectName: 'Project Name',
     projectNamePlaceholder: 'Please input project name',

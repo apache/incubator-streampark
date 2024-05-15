@@ -96,7 +96,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         } else {
           useBlinkPlanner.setAccessible(true)
           useBlinkPlanner.invoke(builder)
-          logInfo("blinkPlanner will be use.")
+          logInfo("blinkPlanner will be used.")
         }
       case PlannerType.OLD =>
         val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
@@ -105,14 +105,14 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         } else {
           useOldPlanner.setAccessible(true)
           useOldPlanner.invoke(builder)
-          logInfo("useOldPlanner will be use.")
+          logInfo("useOldPlanner will be used.")
         }
       case PlannerType.ANY =>
         val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
         if (useAnyPlanner == null) {
           logWarn("useAnyPlanner deprecated")
         } else {
-          logInfo("useAnyPlanner will be use.")
+          logInfo("useAnyPlanner will be used.")
           useAnyPlanner.setAccessible(true)
           useAnyPlanner.invoke(builder)
         }
@@ -180,7 +180,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
       val argsMap = ParameterTool.fromArgs(args)
       argsMap.get(KEY_APP_CONF(), null) match {
         case null | "" =>
-          logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
+          logWarn("Usage:can't find config,you can set \"--conf $path \" in main arguments")
           val parameter = ParameterTool.fromSystemProperties().mergeWith(argsMap)
           FlinkConfiguration(parameter, new Configuration(), new Configuration())
         case file =>
