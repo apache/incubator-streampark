@@ -250,7 +250,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean checkAlter(Application appParam) {
     Long appId = appParam.getId();
-    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
+    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum() && FlinkAppStateEnum.FINISHED != appParam.getStateEnum()) {
       return false;
     }
     long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
