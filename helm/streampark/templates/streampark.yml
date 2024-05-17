@@ -63,8 +63,13 @@ spec:
           command: ["bash","-c","bash ./bin/streampark.sh start_docker"]
           {{- if .Values.spec.livenessProbe.enabled }}
           livenessProbe:
-            exec:
-              command: [ "curl", "-s", "http://localhost:10000/actuator/health/liveness" ]
+            httpGet:
+            {{- if .Values.spec.livenessProbe.containerPort }}
+              port: {{ .Values.spec.livenessProbe.containerPort }}
+            {{- else  }}
+              port: {{ .Values.spec.containerPort }}
+            {{- end }}
+              path: {{ .Values.spec.livenessProbe.livenessPath }}
             initialDelaySeconds: {{ .Values.spec.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.spec.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.spec.livenessProbe.timeoutSeconds }}
@@ -73,8 +78,13 @@ spec:
           {{- end }}
           {{- if .Values.spec.readinessProbe.enabled }}
           readinessProbe:
-            exec:
-              command: [ "curl", "-s", "http://localhost:10000/actuator/health/readiness" ]
+            httpGet:
+            {{- if .Values.spec.livenessProbe.containerPort }}
+              port: {{ .Values.spec.readinessProbe.containerPort }}
+            {{- else  }}
+              port: {{ .Values.spec.containerPort }}
+            {{- end }}
+              path: {{ .Values.spec.readinessProbe.readinessPath }}
             initialDelaySeconds: {{ .Values.spec.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.spec.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.spec.readinessProbe.timeoutSeconds }}
@@ -83,7 +93,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: streampark-default-config-volume
-              mountPath: /usr/local/service/streampark/conf
+              mountPath: /streampark/conf
           resources:
           {{- toYaml .Values.spec.resources | nindent 12 }}
       volumes:
