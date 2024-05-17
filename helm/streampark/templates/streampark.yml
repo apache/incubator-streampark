@@ -79,7 +79,7 @@ spec:
           {{- if .Values.spec.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
-            {{- if .Values.spec.livenessProbe.containerPort }}
+            {{- if .Values.spec.readinessProbe.containerPort }}
               port: {{ .Values.spec.readinessProbe.containerPort }}
             {{- else  }}
               port: {{ .Values.spec.containerPort }}
