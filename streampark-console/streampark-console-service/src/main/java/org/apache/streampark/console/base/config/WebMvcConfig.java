@@ -25,21 +25,40 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMvcConfig extends OncePerRequestFilter implements WebMvcConfigurer {
 
   @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
+
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+    if (request.getMethod().equals(HttpMethod.TRACE.name())) {
+      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    } else {
+      filterChain.doFilter(request, response);
+    }
+  }
 
   @Override
   public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -54,10 +73,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     registry
         .addMapping("/**")
         .allowedOriginPatterns("*")
-        .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+        .allowedMethods(
+            HttpMethod.GET.name(),
+            HttpMethod.POST.name(),
+            HttpMethod.PUT.name(),
+            HttpMethod.DELETE.name(),
+            HttpMethod.OPTIONS.name())
         .allowedHeaders("*")
         .allowCredentials(true)
         .maxAge(3600);
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
   }
 
   @Bean
@@ -66,10 +95,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
     module.addSerializer(Long.class, ToStringSerializer.instance);
     module.addSerializer(Long.TYPE, ToStringSerializer.instance);
     return module;
-  }
-
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(uploadFileTypeInterceptor).addPathPatterns("/flink/app/upload");
   }
 }
