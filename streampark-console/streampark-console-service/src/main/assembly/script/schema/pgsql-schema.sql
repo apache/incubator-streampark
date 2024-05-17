@@ -415,7 +415,8 @@ create table "public"."t_flink_log" (
   "success" boolean,
   "exception" text collate "pg_catalog"."default",
   "option_time" timestamp(6),
-  "option_name" int2
+  "option_name" int2,
+  "user_id" int8
 )
 ;
 alter table "public"."t_flink_log" add constraint "t_flink_log_pkey" primary key ("id");

@@ -18,7 +18,7 @@ export default {
   login: 'Login',
   errorLogList: 'Error Log',
   notice: {
-    message: 'notification message',
-    exception: 'Abnormal alarm',
+    message: 'Notification Message',
+    exception: 'Abnormal Alarm',
   },
 };

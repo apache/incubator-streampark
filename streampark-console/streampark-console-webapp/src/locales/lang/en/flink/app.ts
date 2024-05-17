@@ -165,7 +165,7 @@ export default {
     errorStack: 'Error Stack',
     logTitle: 'Start Log : Job Name [ {0} ]',
     refreshTime: 'last refresh time',
-    refresh: 'refresh',
+    refresh: 'Refresh',
     start: 'Start Job',
     stop: 'Stop Job',
     savepoint: 'Trigger Savepoint',
