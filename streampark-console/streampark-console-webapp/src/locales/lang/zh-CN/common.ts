@@ -53,5 +53,8 @@ export default {
 
   createTime: '创建时间',
   modifyTime: '修改时间',
-  description: '描述',
+  // description: '描述',
+  description: '作业描述',
+  addJob: '新建作业',
+  editJob: '编辑作业',
 };

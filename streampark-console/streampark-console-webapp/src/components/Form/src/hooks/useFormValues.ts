@@ -116,19 +116,27 @@ export function useFormValues({
   }
 
   function initDefault() {
+    // console.log('initDefault', initDefault);
+    
     const schemas = unref(getSchema);
+    // console.log('schemas', schemas);
+    
     const obj: Recordable = {};
     schemas.forEach((item) => {
       const { defaultValue } = item;
+      // console.log(!isNullOrUnDef(defaultValue));
       if (!isNullOrUnDef(defaultValue)) {
         obj[item.field] = defaultValue;
-
+        // console.log(obj);
+        
         if (formModel[item.field] === undefined) {
           formModel[item.field] = defaultValue;
         }
       }
     });
     defaultValueRef.value = cloneDeep(obj);
+    // console.log(defaultValueRef.value);
+    
   }
 
   return { handleFormValues, initDefault };

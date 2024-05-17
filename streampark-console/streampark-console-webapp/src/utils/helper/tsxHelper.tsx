@@ -5,6 +5,9 @@ import { isFunction } from '/@/utils/is';
  * @description:  Get slot to prevent empty error
  */
 export function getSlot(slots: Slots, slot = 'default', data?: any) {
+  // console.log('slots', slots);
+  // console.log('slot', slot);
+  
   if (!slots || !Reflect.has(slots, slot)) {
     return null;
   }

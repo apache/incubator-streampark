@@ -35,7 +35,7 @@ export function useForm(props?: Props): UseFormReturnType {
 
     formRef.value = instance;
     loadedRef.value = true;
-
+    console.log('register' ,formRef.value);
     watch(
       () => props,
       () => {

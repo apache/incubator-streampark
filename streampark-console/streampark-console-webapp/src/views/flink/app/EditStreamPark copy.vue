@@ -72,8 +72,6 @@
     tmPodTemplate: '',
   });
 
-  let initFormModel = reactive<Recordable>({});
-
   const { handleResetApplication, defaultOptions } = useEdit();
   const {
     alerts,
@@ -280,6 +278,7 @@
     const res = await fetchGet({ id: appId as string });
     let configId = '';
     const confVersion = await fetchConfHistory({ id: route.query.appId });
+    
     confVersion.forEach((conf: Recordable) => {
       if (conf.effective) {
         configId = conf.id;
@@ -287,8 +286,6 @@
     });
     configVersions.value = confVersion;
     Object.assign(app, res);
-    initFormModel = {...res}
-    console.log('initFormData', initFormModel);
     Object.assign(defaultOptions, JSON.parse(app.options || '{}'));
     if (app.jobType == JobTypeEnum.SQL) {
       fetchFlinkHistory({ id: appId }).then((res) => {
@@ -308,27 +305,21 @@
       });
     });
 
-    console.log('defaultFormValue', defaultFormValue);
     setFieldsValue({
+      jobType: res.jobType,
+      appType: res.appType,
+      executionMode: res.executionMode,
+      flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
+      dependency: '',
+      module: res.module,
+      configId,
+      sqlId: app.sqlId,
+      flinkSqlHistory: app.sqlId,
+      versionId: app.versionId,
+      projectName: app.projectName,
+      project: app.projectId,
       ...defaultFormValue,
-      ...initFormModel,
-    })
-    // setFieldsValue({
-    //   jobType: res.jobType,
-    //   appType: res.appType,
-    //   executionMode: res.executionMode,
-    //   flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
-    //   dependency: '',
-    //   module: res.module,
-    //   configId,
-    //   sqlId: app.sqlId,
-    //   flinkSqlHistory: app.sqlId,
-    //   versionId: app.versionId,
-    //   projectName: app.projectName,
-    //   project: app.projectId,
-    //   ...defaultFormValue,
-    //   // ...initFormData,
-    // });
+    });
     nextTick(() => {
       unref(flinkSql)?.setContent(decodeByBase64(res.flinkSql));
 
@@ -360,8 +351,6 @@
       createMessage.warning(t('flink.app.editStreamPark.appidCheck'));
       return;
     }
-    console.log('父组件');
-    
     handleStreamParkInfo();
   });
 </script>
@@ -371,7 +360,6 @@
       @register="registerForm"
       @submit="handleAppUpdate"
       :schemas="getEditStreamParkFormSchema"
-      :initFormModel="initFormModel"
     >
       <template #podTemplate>
         <PomTemplateTab

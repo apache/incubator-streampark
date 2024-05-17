@@ -118,6 +118,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
   }
 
   async function handleStart(app: Recordable) {
+    
     if (app.flinkVersion == null) {
       Swal.fire('Failed', 'please set flink version first.', 'error');
     } else {

@@ -16,6 +16,7 @@
  */
 
 export default {
+  alertAdd: 'Add New Job', // new add@wangyao
   id: 'ID',
   appName: 'Job Name',
   searchName: 'Job Name',
@@ -324,4 +325,13 @@ export default {
     yarnQueue:
       'It\'s used to quickly specify not only "yarn.application.name" but also "yarn.application.node-label". For example, "queue1" represents the value of "yarn.application.name" is "queue1", but "queue1{\'@\'}label1,label2" represents that the value of "yarn.application.name" is "queue1" and the value of "yarn.application.node-label" is "label1,label2". The queue and label are joined by {\'@\'}.',
   },
+  // new Add@wangyao
+  addDrawerMenu: {
+    attribute: 'attribute',
+    configuration: 'configuration',
+    editAttr: 'edit attribute',
+    editConfig: 'edit configure',
+    attributeValidateTips: 'The properties option has required field left unfilled',
+    configValidateTips: 'The configuration option has required fields left unfilled'
+  }
 };

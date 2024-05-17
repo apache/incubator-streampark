@@ -56,6 +56,7 @@ export const renderInputDropdown = (
   formModel: Recordable,
   field: string,
   componentProps: { placeholder: string; options: Array<string> },
+  isDisabled?: boolean
 ) => {
   return (
     <Input
@@ -64,6 +65,7 @@ export const renderInputDropdown = (
       allowClear
       value={formModel[field]}
       onInput={(e) => (formModel[field] = e.target.value)}
+      disabled={isDisabled}
     >
       {{
         addonAfter: () => (
@@ -267,7 +269,7 @@ export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
   );
 };
 
-export const renderJobName = ({ model, field }: RenderCallbackParams) => {
+export const renderJobName = ({ model, field }: RenderCallbackParams, isDisabled?: boolean) => {
   return (
     <div>
       <Input
@@ -275,6 +277,7 @@ export const renderJobName = ({ model, field }: RenderCallbackParams) => {
         placeholder={t('flink.app.addAppTips.appNamePlaceholder')}
         value={model[field]}
         onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
+        disabled={isDisabled ?? false}
       />
       <p class="conf-desc mt-10px">
         <span class="note-info">
@@ -307,12 +310,13 @@ export const renderJobName = ({ model, field }: RenderCallbackParams) => {
   );
 };
 
-export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams) => {
+export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams, isDisabled?: boolean) => {
   return (
     <Select
       placeholder={t('flink.app.flinkCluster')}
       value={model[field]}
       onChange={(value: any) => (model[field] = value)}
+      disabled={isDisabled ?? false}
     >
       {clusters.map((item) => {
         return (
@@ -465,6 +469,7 @@ export const renderSqlHistory = (
   { model, flinkSqlHistory },
   { handleChangeSQL, handleCompareOk }: { handleChangeSQL: Fn; handleCompareOk: Fn },
 ) => {
+  console.log("model:", model)
   const { createConfirm } = useMessage();
   const compareSQL = ref<string[]>([]);
 

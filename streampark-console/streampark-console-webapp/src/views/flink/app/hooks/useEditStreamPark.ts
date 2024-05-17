@@ -116,83 +116,83 @@ export const useEditStreamParkSchema = (
   }
   const getEditStreamParkFormSchema = computed((): FormSchema[] => {
     return [
-      ...getFlinkTypeSchema.value,
-      ...getExecutionModeSchema.value,
-      ...getFlinkClusterSchemas.value,
-      {
-        field: 'flinkSqlHistory',
-        label: t('flink.app.historyVersion'),
-        component: 'Select',
-        render: ({ model }) =>
-          renderSqlHistory(
-            { model, flinkSqlHistory: unref(flinkSqlHistory) },
-            { handleChangeSQL, handleCompareOk },
-          ),
-        ifShow: ({ values }) => {
-          return values.jobType == JobTypeEnum.SQL && unref(flinkSqlHistory).length > 1;
-        },
-        required: true,
-      },
+      // ...getFlinkTypeSchema.value,
+      // ...getExecutionModeSchema.value,
+      // ...getFlinkClusterSchemas.value,
+      // {
+      //   field: 'flinkSqlHistory',
+      //   label: t('flink.app.historyVersion'),
+      //   component: 'Select',
+      //   render: ({ model }) =>
+      //     renderSqlHistory(
+      //       { model, flinkSqlHistory: unref(flinkSqlHistory) },
+      //       { handleChangeSQL, handleCompareOk },
+      //     ),
+      //   ifShow: ({ values }) => {
+      //     return values.jobType == JobTypeEnum.SQL && unref(flinkSqlHistory).length > 1;
+      //   },
+      //   required: true,
+      // },
       ...getFlinkSqlSchema.value,
-      {
-        field: 'projectName',
-        label: 'Project',
-        component: 'Input',
-        render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
-        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
-      },
-      { field: 'project', label: 'ProjectId', component: 'Input', show: false },
-      {
-        field: 'module',
-        label: 'Application',
-        component: 'Input',
-        render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
-        ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
-      },
-      {
-        field: 'dependency',
-        label: t('flink.app.dependency'),
-        component: 'Input',
-        slot: 'dependency',
-        ifShow: ({ values }) => {
-          return values.jobType == JobTypeEnum.SQL
-            ? true
-            : values?.appType == AppTypeEnum.APACHE_FLINK;
-        },
-      },
-      { field: 'configId', label: 'configId', component: 'Input', show: false },
-      { field: 'config', label: '', component: 'Input', show: false },
-      { field: 'strategy', label: '', component: 'Input', show: false },
-      {
-        field: 'appConf',
-        label: 'Application conf',
-        component: 'Input',
-        slot: 'appConf',
-        ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
-      },
-      {
-        field: 'compareConf',
-        label: 'Compare conf',
-        component: 'Input',
-        slot: 'compareConf',
-        defaultValue: [],
-        ifShow: ({ values }) => {
-          return (
-            values.jobType == JobTypeEnum.JAR &&
-            values.strategy == UseStrategyEnum.USE_EXIST &&
-            unref(configVersions).length > 1
-          );
-        },
-      },
-      {
-        field: 'useSysHadoopConf',
-        label: 'Use System Hadoop Conf',
-        component: 'Switch',
-        slot: 'useSysHadoopConf',
-        defaultValue: false,
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
-      },
-      ...getFlinkFormOtherSchemas.value,
+      // {
+      //   field: 'projectName',
+      //   label: 'Project',
+      //   component: 'Input',
+      //   render: ({ model }) => h(Alert, { message: model.projectName, type: 'info' }),
+      //   ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.projectName,
+      // },
+      // { field: 'project', label: 'ProjectId', component: 'Input', show: false },
+      // {
+      //   field: 'module',
+      //   label: 'Application',
+      //   component: 'Input',
+      //   render: ({ model }) => h(Alert, { message: model.module, type: 'info' }),
+      //   ifShow: ({ model, values }) => values.jobType != JobTypeEnum.SQL && model.module,
+      // },
+      // {
+      //   field: 'dependency',
+      //   label: t('flink.app.dependency'),
+      //   component: 'Input',
+      //   slot: 'dependency',
+      //   ifShow: ({ values }) => {
+      //     return values.jobType == JobTypeEnum.SQL
+      //       ? true
+      //       : values?.appType == AppTypeEnum.APACHE_FLINK;
+      //   },
+      // },
+      // { field: 'configId', label: 'configId', component: 'Input', show: false },
+      // { field: 'config', label: '', component: 'Input', show: false },
+      // { field: 'strategy', label: '', component: 'Input', show: false },
+      // {
+      //   field: 'appConf',
+      //   label: 'Application conf',
+      //   component: 'Input',
+      //   slot: 'appConf',
+      //   ifShow: ({ values }) => values.jobType != JobTypeEnum.SQL,
+      // },
+      // {
+      //   field: 'compareConf',
+      //   label: 'Compare conf',
+      //   component: 'Input',
+      //   slot: 'compareConf',
+      //   defaultValue: [],
+      //   ifShow: ({ values }) => {
+      //     return (
+      //       values.jobType == JobTypeEnum.JAR &&
+      //       values.strategy == UseStrategyEnum.USE_EXIST &&
+      //       unref(configVersions).length > 1
+      //     );
+      //   },
+      // },
+      // {
+      //   field: 'useSysHadoopConf',
+      //   label: 'Use System Hadoop Conf',
+      //   component: 'Switch',
+      //   slot: 'useSysHadoopConf',
+      //   defaultValue: false,
+      //   ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
+      // },
+      // ...getFlinkFormOtherSchemas.value,
     ];
   });
   return {

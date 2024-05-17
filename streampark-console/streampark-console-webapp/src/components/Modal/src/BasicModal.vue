@@ -204,6 +204,7 @@
 
       function handleOk(e: Event) {
         emit('ok', e);
+        console.log('提交');
       }
 
       function handleHeightChange(height: string) {

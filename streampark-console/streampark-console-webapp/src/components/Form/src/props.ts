@@ -11,6 +11,10 @@ export const basicProps = {
     type: Object as PropType<Recordable>,
     default: () => ({}),
   },
+  initFormModel: {
+    type: Object as PropType<Recordable>,
+    default: () => ({}),
+  },
   // Label width Fixed width
   labelWidth: {
     type: [Number, String] as PropType<number | string>,

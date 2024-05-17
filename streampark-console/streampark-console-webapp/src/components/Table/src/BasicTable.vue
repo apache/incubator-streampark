@@ -1,5 +1,6 @@
 <template>
   <div ref="wrapRef" :class="getWrapperClass">
+    {{ $slots }}
     <BasicForm
       ref="formRef"
       submitOnReset
@@ -24,6 +25,7 @@
         v-show="getEmptyDataIsShowTable"
         @change="handleTableChange"
       >
+        
         <template
           #[item]="data"
           v-for="item in omit(Object.keys($slots), 'insertTable')"

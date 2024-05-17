@@ -55,6 +55,7 @@ import { AppTypeEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/flink/setting';
+
 const { t } = useI18n();
 export interface HistoryRecord {
   k8sNamespace: Array<string>;
@@ -64,6 +65,7 @@ export interface HistoryRecord {
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
   edit?: { appId: string; mode: 'streampark' | 'flink' },
+  isDisabled? : boolean,
 ) => {
   const flinkEnvs = ref<FlinkEnv[]>([]);
   const alerts = ref<AlertSetting[]>([]);
@@ -105,7 +107,9 @@ export const useCreateAndEditSchema = (
         component: 'Input',
         slot: 'flinkSql',
         ifShow: ({ values }) => {
+          // console.log('edit',edit);
           if (edit?.appId) {
+            // console.log(values);
             return values?.jobType == JobTypeEnum.SQL;
           } else {
             return values?.jobType == 'sql';
@@ -113,6 +117,26 @@ export const useCreateAndEditSchema = (
         },
         rules: [{ required: true, message: t('flink.app.addAppTips.flinkSqlIsRequiredMessage') }],
       },
+      // { field: 'configOverride', label: '', component: 'Input', show: false },
+      // {
+      //   field: 'isSetConfig',
+      //   label: t('flink.app.appConf'),
+      //   component: 'Switch',
+      //   ifShow: ({ values }) => {
+      //     if (edit?.appId) {
+      //       return values?.jobType == JobTypeEnum.SQL && !isK8sExecMode(values.executionMode);
+      //     } else {
+      //       return values?.jobType == 'sql' && !isK8sExecMode(values.executionMode);
+      //     }
+      //   },
+      //   render({ model, field }) {
+      //     return renderIsSetConfig(model, field, registerConfDrawer, openConfDrawer);
+      //   },
+      // },
+    ];
+  });
+  const getFlinkSqlOtherSchema = computed((): FormSchema[] => {
+    return [
       { field: 'configOverride', label: '', component: 'Input', show: false },
       {
         field: 'isSetConfig',
@@ -179,12 +203,13 @@ export const useCreateAndEditSchema = (
   const getFlinkClusterSchemas = computed((): FormSchema[] => {
     return [
       {
-        field: 'versionId',
+        field: 'versionId', // Flink 版本
         label: t('flink.app.flinkVersion'),
         component: 'Select',
         componentProps: {
           placeholder: t('flink.app.flinkVersion'),
           options: unref(flinkEnvs),
+          disabled: !!isDisabled ? isDisabled : false,
           fieldNames: { label: 'flinkName', value: 'id', options: 'options' },
           onChange: (value) => handleFlinkVersion(value),
         },
@@ -193,21 +218,21 @@ export const useCreateAndEditSchema = (
         ],
       },
       {
-        field: 'remoteClusterId',
-        label: t('flink.app.flinkCluster'),
+        field: 'remoteClusterId', // remote模式
+        label: t('flink.app.flinkCluster'), // Flink 集群
         component: 'Select',
-        render: (param) => renderFlinkCluster(getExecutionCluster(ExecModeEnum.STANDALONE), param),
+        render: (param) => renderFlinkCluster(getExecutionCluster(ExecModeEnum.STANDALONE), param, isDisabled),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.STANDALONE,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
         ],
       },
       {
-        field: 'yarnSessionClusterId',
-        label: t('flink.app.flinkCluster'),
+        field: 'yarnSessionClusterId', // Yarn Session 模式集群ID
+        label: t('flink.app.flinkCluster'), // Flink 集群
         component: 'Select',
         render: (param) =>
-          renderFlinkCluster(getExecutionCluster(ExecModeEnum.YARN_SESSION), param),
+          renderFlinkCluster(getExecutionCluster(ExecModeEnum.YARN_SESSION), param, isDisabled),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
@@ -215,10 +240,10 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'k8sSessionClusterId',
-        label: t('flink.app.flinkCluster'),
+        label: t('flink.app.flinkCluster'), // Flink 集群
         component: 'Select',
         render: (param) =>
-          renderFlinkCluster(getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION), param),
+          renderFlinkCluster(getExecutionCluster(ExecModeEnum.KUBERNETES_SESSION), param, isDisabled),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
@@ -248,14 +273,14 @@ export const useCreateAndEditSchema = (
       },
       {
         field: 'flinkImage',
-        label: t('flink.app.flinkBaseDockerImage'),
+        label: t('flink.app.flinkBaseDockerImage'), // Flink基础docker镜像
         component: 'Input',
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
             placeholder: t('flink.app.addAppTips.flinkImagePlaceholder'),
             options: unref(historyRecord)?.k8sSessionClusterId || [],
-          }),
+          }, isDisabled),
         rules: [{ required: true, message: t('flink.app.addAppTips.flinkImageIsRequiredMessage') }],
       },
       {
@@ -358,7 +383,7 @@ export const useCreateAndEditSchema = (
         },
       },
       {
-        field: 'restartSize',
+        field: 'restartSize', 
         label: t('flink.app.restartSize'),
         ifShow: ({ values }) =>
           edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode),
@@ -369,7 +394,7 @@ export const useCreateAndEditSchema = (
         },
       },
       {
-        field: 'alertId',
+        field: 'alertId', // 告警模板
         label: t('flink.app.faultAlertTemplate'),
         component: 'Select',
         componentProps: {
@@ -480,10 +505,183 @@ export const useCreateAndEditSchema = (
     ];
   });
 
+  // configurate
+  const getFlinkFormConfigSchemas = computed((): FormSchema[] => {
+    const commonInputNum = {
+      min: 0,
+      step: 1,
+      class: '!w-full',
+    };
+    return [
+      {
+        field: 'tags', // 作业标签
+        label: t('flink.app.tags'),
+        component: 'Input',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.tagsPlaceholder'),
+        },
+      },
+      {
+        field: 'resolveOrder', // 类加载顺序
+        label: t('flink.app.resolveOrder'),
+        component: 'Select',
+        componentProps: { placeholder: 'classloader.resolve-order', options: resolveOrder },
+        rules: [{ required: true, message: 'Resolve Order is required', type: 'number' }],
+      },
+      {
+        field: 'parallelism', // 并行度
+        label: t('flink.app.parallelism'),
+        component: 'InputNumber',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.parallelismPlaceholder'),
+          ...commonInputNum,
+        },
+      },
+      {
+        field: 'slot', // 任务槽数
+        label: t('flink.app.dashboard.taskSlots'),
+        component: 'InputNumber',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.slotsOfPerTaskManagerPlaceholder'),
+          ...commonInputNum,
+        },
+      },
+      // {
+      //   field: 'restartSize', // (失败后)重启次数
+      //   label: t('flink.app.restartSize'),
+      //   ifShow: ({ values }) =>
+      //     edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode),
+      //   component: 'InputNumber',
+      //   componentProps: {
+      //     placeholder: t('flink.app.addAppTips.restartSizePlaceholder'),
+      //     ...commonInputNum,
+      //   },
+      // },
+      // {
+      //   field: 'alertId', // 告警模板
+      //   label: t('flink.app.faultAlertTemplate'),
+      //   component: 'Select',
+      //   componentProps: {
+      //     placeholder: t('flink.app.addAppTips.alertTemplatePlaceholder'),
+      //     options: unref(alerts),
+      //     fieldNames: { label: 'alertName', value: 'id', options: 'options' },
+      //   },
+      // },
+      // {
+      //   field: 'checkPointFailure', // checkPoint失败策略
+      //   label: t('flink.app.checkPointFailureOptions'),
+      //   component: 'InputNumber',
+      //   renderColContent: renderInputGroup,
+      //   show: ({ values }) => (edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode)),
+      // },
+      ...getConfigSchemas(),
+      {
+        field: 'totalOptions', // 总内存
+        label: t('flink.app.totalMemoryOptions'),
+        component: 'Select',
+        render: renderTotalMemory,
+      },
+      {
+        field: 'totalItem', // 选择总内存，显示item
+        label: 'totalItem',
+        component: 'Select',
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'totalOptions', field, '.memory', true),
+      },
+      {
+        field: 'jmOptions', // JM 内存
+        label: t('flink.app.jmMemoryOptions'),
+        component: 'Select',
+        componentProps: {
+          showSearch: true,
+          allowClear: true,
+          mode: 'multiple',
+          maxTagCount: 2,
+          placeholder: t('flink.app.addAppTips.totalMemoryOptionsPlaceholder'),
+          fieldNames: { label: 'name', value: 'key', options: 'options' },
+          options: optionData.filter((x) => x.group === 'jobmanager-memory'),
+        },
+      },
+      {
+        field: 'jmOptionsItem', // 选择JM内存时 显示对应的item
+        label: 'jmOptionsItem',
+        component: 'Select',
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'jmOptions', field, 'jobmanager.memory.'),
+      },
+      {
+        field: 'tmOptions', // TM内存
+        label: t('flink.app.tmMemoryOptions'),
+        component: 'Select',
+        componentProps: {
+          showSearch: true,
+          allowClear: true,
+          mode: 'multiple',
+          maxTagCount: 2,
+          placeholder: t('flink.app.addAppTips.tmPlaceholder'),
+          fieldNames: { label: 'name', value: 'key', options: 'options' },
+          options: optionData.filter((x) => x.group === 'taskmanager-memory'),
+        },
+      },
+      {
+        field: 'tmOptionsItem',
+        label: 'tmOptionsItem',
+        component: 'Select',
+        renderColContent: ({ model, field }) =>
+          renderOptionsItems(model, 'tmOptions', field, 'taskmanager.memory.'),
+      },
+      {
+        field: 'dynamicProperties', // 动态参数
+        label: t('flink.app.dynamicProperties'),
+        component: 'Input',
+        render: (renderCallbackParams) => renderDynamicProperties(renderCallbackParams),
+      },
+    ]
+  })
+  // attr other 
+  const getFlinkFormAttrOtherSchemas = computed((): FormSchema[] => {
+    return [
+      {
+        field: 'restartSize', // (失败后)重启次数
+        label: t('flink.app.restartSize'),
+        ifShow: ({ values }) => {
+          console.log("restartSize", values)
+          return edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode)
+        },
+        component: 'InputNumber',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.restartSizePlaceholder'),
+          min: 0,
+          step: 1,
+          class: '!w-full',
+        },
+      },
+      {
+        field: 'alertId', // 告警模板
+        label: t('flink.app.faultAlertTemplate'),
+        component: 'Select',
+        componentProps: {
+          placeholder: t('flink.app.addAppTips.alertTemplatePlaceholder'),
+          options: unref(alerts),
+          fieldNames: { label: 'alertName', value: 'id', options: 'options' },
+        },
+      },
+      {
+        field: 'checkPointFailure', // checkPoint失败策略
+        label: t('flink.app.checkPointFailureOptions'),
+        component: 'InputNumber',
+        renderColContent: renderInputGroup,
+        show: ({ values }) => {
+          console.log("chekPont", values)
+          return (edit?.mode == 'flink' ? true : !isK8sExecMode(values.executionMode))
+        },
+      },
+    ]
+  })
   const getFlinkTypeSchema = computed((): FormSchema[] => {
     return [
       {
-        field: 'jobType',
+        field: 'jobType',// 作业模式
         label: t('flink.app.developmentMode'),
         component: 'Input',
         render: ({ model }) => {
@@ -507,7 +705,7 @@ export const useCreateAndEditSchema = (
         },
       },
       {
-        field: 'appType',
+        field: 'appType',// 作业类型
         label: t('flink.app.appType'),
         component: 'Input',
         render: ({ model }) => {
@@ -536,6 +734,7 @@ export const useCreateAndEditSchema = (
         componentProps: {
           placeholder: t('flink.app.addAppTips.executionModePlaceholder'),
           options: executionModes,
+          disabled: !!isDisabled ? isDisabled : false,
         },
         rules: [
           {
@@ -566,6 +765,36 @@ export const useCreateAndEditSchema = (
       },
     ];
   });
+  // new add@wangyao
+  const getFlinkNameDetailSchema = computed((): FormSchema[] => {
+    return [
+      {
+        field: 'jobName',
+        label: t('flink.app.appName'),
+        component: 'Input',
+        render: (renderCallbackParams) => renderJobName(renderCallbackParams, isDisabled),
+        componentProps: {
+          disabled: !!isDisabled ? isDisabled : false,
+        },
+        dynamicRules: ({ model }) => {
+          return [
+            {
+              required: true,
+              trigger: 'blur',
+              validator: (rule: RuleObject, value: StoreValue) =>
+                getJobNameCheck(rule, value, model),
+            },
+          ];
+        },
+      },
+      {
+        field: 'description',
+        label: t('common.description'),
+        component: 'InputTextArea',
+        componentProps: { rows: 4, placeholder: t('flink.app.addAppTips.descriptionPlaceholder') },
+      },
+    ]
+  })
 
   onMounted(async () => {
     //get flinkEnv
@@ -615,10 +844,14 @@ export const useCreateAndEditSchema = (
     historyRecord,
     suggestions,
     getFlinkSqlSchema,
+    getFlinkSqlOtherSchema,
     getFlinkClusterSchemas,
     getFlinkFormOtherSchemas,
     getFlinkTypeSchema,
     getExecutionModeSchema,
+    getFlinkNameDetailSchema,
+    getFlinkFormConfigSchemas,
+    getFlinkFormAttrOtherSchemas,
     openConfDrawer,
   };
 };

@@ -50,6 +50,7 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+  import AddAlert from './AddAlert.vue';
   const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
@@ -75,6 +76,8 @@
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+// @new add
+const [registerAlertModal, { openModal: openAlertModal }] = useModal();
 
   const [registerTable, { reload, getLoading, setPagination }] = useTable({
     rowKey: 'id',
@@ -183,7 +186,6 @@
       width: 180,
     },
   });
-
   const { getTableActions, formConfig } = useAppTableAction(
     openStartModal,
     openStopModal,
@@ -192,8 +194,8 @@
     openBuildDrawer,
     handlePageDataReload,
     optionApps,
+    openAlertModal
   );
-
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
@@ -228,6 +230,31 @@
     start();
   }, 2000);
 
+// @new add
+  // openAlertModal(true, {
+  //     alertId: 1,
+  //     alertName: 'item.alertName',
+  //     alertType: 'item.alertTypeTags',
+  //     alertEmail: 'emailParams.contacts',
+  //     alertDingURL: 'dingTalkParams.alertDingURL',
+  //     dingtalkToken: 'dingTalkParams.token',
+  //     dingtalkSecretToken: 'dingTalkParams.secretToken',
+  //     alertDingUser: 'dingTalkParams.contacts',
+  //     dingtalkIsAtAll: 'dingTalkParams.isAtAll',
+  //     dingtalkSecretEnable: 'dingTalkParams.secretEnable',
+  //     weToken: 'weComParams.token',
+  //     larkToken: 'larkParams.token',
+  //     larkIsAtAll: 'larkParams.isAtAl',
+  //     larkSecretEnable: 'larkParams.secretEnable',
+  //     larkSecretToken: 'larkParams.secretToken',
+  //   });
+
+    // async function getAlertSetting() {
+    //   const res = await fetchAlertSetting();
+    //   res.map((a) => (a.alertTypeTags = computeAlertType(a.alertType)));
+    //   alerts.value = res;
+    // }
+
   onMounted(() => {
     // If there is a page, jump to the page number of the record
     const currentPage = sessionStorage.getItem('appPageNo');
@@ -253,6 +280,10 @@
       class="app_list !px-0 pt-20px"
       :formConfig="formConfig"
     >
+      <!-- @new add 0428 start -->
+      <!-- @click="handleCreate" -->
+
+      <!-- @new add 0428 end -->
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
@@ -346,6 +377,8 @@
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />
     <BuildDrawer @register="registerBuildDrawer" />
+    <!-- // @new add -->
+    <AddAlert @register="registerAlertModal" width="850px" />
   </PageWrapper>
 </template>
 <style lang="less">

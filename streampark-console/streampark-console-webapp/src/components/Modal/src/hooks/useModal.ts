@@ -35,6 +35,7 @@ export function useModal(): UseModalReturnType {
   const uid = ref<string>('');
 
   function register(modalMethod: ModalMethods, uuid: string) {
+    // console.log('注册');
     if (!getCurrentInstance()) {
       throw new Error('useModal() can only be used inside setup() or functional components!');
     }
@@ -55,10 +56,12 @@ export function useModal(): UseModalReturnType {
   }
 
   const getInstance = () => {
+    console.log(modal);
     const instance = unref(modal);
     if (!instance) {
       error('useModal instance is undefined!');
     }
+    console.log(instance);
     return instance;
   };
 
@@ -76,6 +79,8 @@ export function useModal(): UseModalReturnType {
     },
 
     openModal: <T = any>(visible = true, data?: T, openOnSet = true): void => {
+      console.log('打开弹窗');
+      // console.log(getInstance());
       getInstance()?.setModalProps({
         visible: visible,
       });
@@ -94,6 +99,8 @@ export function useModal(): UseModalReturnType {
     },
 
     closeModal: () => {
+      console.log('关闭');
+      
       getInstance()?.setModalProps({ visible: false });
     },
   };

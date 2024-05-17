@@ -19,6 +19,7 @@
           :setFormModel="setFormModel"
         >
           <template #[item]="data" v-for="item in Object.keys($slots)">
+            <!-- {{ $slots }} -->
             <slot :name="item" v-bind="data || {}"></slot>
           </template>
         </FormItem>
@@ -70,7 +71,10 @@
     props: basicProps,
     emits: ['advanced-change', 'reset', 'submit', 'register', 'field-value-change'],
     setup(props, { emit, attrs }) {
-      const formModel = reactive<Recordable>({});
+      const formModel = reactive<Recordable>(props.initFormModel.value || {});
+      console.log(formModel);
+      
+      // const formModel = reactive<Recordable>({});
       const modalFn = useModalContext();
 
       const advanceState = reactive<AdvanceState>({
@@ -118,6 +122,7 @@
 
       const getSchema = computed((): FormSchema[] => {
         const schemas: FormSchema[] = unref(schemaRef) || (unref(getProps).schemas as any);
+        // 循环作业名称、作业标签、创建者、作业类型
         for (const schema of schemas) {
           const { defaultValue, component } = schema;
           // handle date type
@@ -132,6 +137,7 @@
               schema.defaultValue = def;
             }
           }
+          // console.log("basicFormSchema:", schema);
         }
         if (unref(getProps).showAdvancedButton) {
           return cloneDeep(
@@ -141,7 +147,6 @@
           return cloneDeep(schemas as FormSchema[]);
         }
       });
-
       const { handleToggleAdvanced } = useAdvanced({
         advanceState,
         emit,
@@ -233,6 +238,7 @@
       watch(
         () => formModel,
         useDebounceFn(() => {
+          console.log('formModel', formModel);
           unref(getProps).submitOnChange && handleSubmit();
         }, 300),
         { deep: true },
@@ -281,8 +287,10 @@
       onMounted(() => {
         initDefault();
         emit('register', formActionType);
+        console.log('子组件');
+        console.log('$$',props.initFormModel);
+        // console.log('slots', slots);
       });
-
       return {
         getBindValue,
         handleToggleAdvanced,
@@ -319,6 +327,7 @@
       &-with-help {
         margin-bottom: 6px;
       }
+
       /*
       &:not(.ant-form-item-with-help) {
         margin-bottom: 24px;

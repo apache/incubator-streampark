@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 export default {
+  alertAdd: '创建新作业', // new add@wangyao
   id: '作业ID',
   appName: '作业名称',
   searchName: '作业名称',
@@ -313,4 +314,13 @@ export default {
     yarnQueue:
       '此输入不仅支持快速设置 "yarn.application.name" 还支持设置 "yarn.application.node-label"。例如，输入 "queue1" 表示 "yarn.application.name" 的值为 "queue1"，而输入 "queue1{\'@\'}label1,label2" 则表示 "yarn.application.name" 设置为 "queue1" 且 "yarn.application.node-label" 设置为 "label1,label2"。Queue 和 label 之间使用 {\'@\'} 分隔。',
   },
+  // new Add@wangyao
+  addDrawerMenu: {
+    attribute: '属性',
+    configuration: '配置',
+    editAttr: '编辑属性',
+    editConfig: '编辑配置',
+    attributeValidateTips: '属性选项有必填字段未填',
+    configValidateTips: '配置选项有必填字段未填'
+  }
 };

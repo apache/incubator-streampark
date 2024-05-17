@@ -74,7 +74,14 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       host: true,
       port: VITE_PORT,
       // Load proxy configuration from .env
-      proxy: createProxy(VITE_PROXY),
+      // proxy: createProxy(VITE_PROXY),
+      proxy: {  
+        '/basic-api': {
+          target: 'http://192.168.0.100:10000',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/basic-api/, '')
+        },
+      }
     },
     esbuild: {
       pure: VITE_DROP_CONSOLE ? ['console.log', 'debugger'] : [],

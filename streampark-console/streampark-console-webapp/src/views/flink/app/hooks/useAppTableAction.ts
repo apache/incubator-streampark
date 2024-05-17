@@ -35,7 +35,6 @@ import { usePermission } from '/@/hooks/web/usePermission';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { isFunction, isObject } from '/@/utils/is';
 
-// Create form configurations and operation functions in the application table
 export const useAppTableAction = (
   openStartModal: Fn,
   openStopModal: Fn,
@@ -44,6 +43,7 @@ export const useAppTableAction = (
   openBuildDrawer: Fn,
   handlePageDataReload: Fn,
   optionApps: Recordable,
+  openAlertModal: Fn
 ) => {
   const { t } = useI18n();
   const tagsOptions = ref<Recordable>([]);
@@ -62,9 +62,10 @@ export const useAppTableAction = (
     users,
   } = useFlinkApplication(openStartModal);
   /* Operation button list */
+  // 操作列表
   function getActionList(record: AppListRecord, currentPageNo: number): ActionItem[] {
     return [
-      {
+      {// 发布作业
         tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
@@ -76,7 +77,7 @@ export const useAppTableAction = (
         icon: 'ant-design:cloud-upload-outlined',
         onClick: handleCheckReleaseApp.bind(null, record),
       },
-      {
+      {// 发布详情
         tooltip: { title: t('flink.app.operation.releaseDetail') },
         ifShow:
           [ReleaseStateEnum.FAILED, ReleaseStateEnum.RELEASING].includes(record.release) ||
@@ -85,14 +86,14 @@ export const useAppTableAction = (
         icon: 'ant-design:container-outlined',
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
-      {
+      {// 启动作业
         tooltip: { title: t('flink.app.operation.start') },
         ifShow: handleIsStart(record, optionApps),
         auth: 'app:start',
         icon: 'ant-design:play-circle-outlined',
         onClick: handleAppCheckStart.bind(null, record),
       },
-      {
+      {// 取消作业
         tooltip: { title: t('flink.app.operation.cancel') },
         ifShow:
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
@@ -100,19 +101,19 @@ export const useAppTableAction = (
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleCancel.bind(null, record),
       },
-      {
+      {// 编辑作业
         tooltip: { title: t('flink.app.operation.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
         onClick: handleEdit.bind(null, record, currentPageNo),
       },
-      {
+      {// 作业详情
         tooltip: { title: t('flink.app.operation.detail') },
         auth: 'app:detail',
         icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
       },
-      {
+      {// 查看 Flink 启动日志
         tooltip: { title: t('flink.app.operation.startLog') },
         ifShow: [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(
           record.executionMode,
@@ -121,7 +122,7 @@ export const useAppTableAction = (
         icon: 'ant-design:code-outlined',
         onClick: () => openLogModal(true, { app: record }),
       },
-      {
+      {// 触发 Savepoint
         tooltip: { title: t('flink.app.operation.savepoint') },
         ifShow:
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
@@ -129,20 +130,20 @@ export const useAppTableAction = (
         icon: 'ant-design:camera-outlined',
         onClick: handleSavepoint.bind(null, record),
       },
-      {
+      {// 强制停止作业
         tooltip: { title: t('flink.app.operation.force') },
         ifShow: handleCanStop(record),
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleForcedStop.bind(null, record),
       },
-      {
+      {// 复制作业
         label: t('flink.app.operation.copy'),
         auth: 'app:copy',
         icon: 'ant-design:copy-outlined',
         onClick: handleCopy.bind(null, record),
       },
-      {
+      {// 重新映射作业
         label: t('flink.app.operation.remapping'),
         ifShow: [
           AppStateEnum.ADDED,
@@ -160,7 +161,7 @@ export const useAppTableAction = (
         icon: 'ant-design:deployment-unit-outlined',
         onClick: handleMapping.bind(null, record),
       },
-      {
+      {// 删除
         popConfirm: {
           title: t('flink.app.operation.deleteTip'),
           confirm: handleDelete.bind(null, record),
@@ -199,6 +200,8 @@ export const useAppTableAction = (
     const tableAction = getActionList(record, currentPageNo).filter((item: ActionItem) =>
       actionIsShow(item),
     );
+    // console.log('record',record); 行数据
+    // console.log(tableAction);
     const actions = tableAction.splice(0, 3).map((item: ActionItem) => {
       if (item.label) {
         item.tooltip = {
@@ -208,6 +211,7 @@ export const useAppTableAction = (
       }
       return item;
     });
+    // console.log(actions); 行操作
     return {
       actions,
       dropDownActions: tableAction.map((item: ActionItem) => {
@@ -219,7 +223,9 @@ export const useAppTableAction = (
   /* Click to edit */
   function handleEdit(app: AppListRecord, currentPageNo: number) {
     // Record the current page number
+    console.log('当前行数据为', app);
     sessionStorage.setItem('appPageNo', String(currentPageNo || 1));
+    // sessionStorage.setItem('editJobModalParams', JSON.stringify(app));
     flinkAppStore.setApplicationId(app.id);
     if (app.appType == AppTypeEnum.STREAMPARK_FLINK) {
       // jobType( 1 custom code 2: flinkSQL)
@@ -269,7 +275,11 @@ export const useAppTableAction = (
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
-        router.push({ path: '/flink/app/add' });
+        // router.push({ path: '/flink/app/add' });
+        // @newadd 0428
+        // openAlertModal(true, {})
+        openAlertModal()
+        console.log('添加');
       },
       schemas: [
         {

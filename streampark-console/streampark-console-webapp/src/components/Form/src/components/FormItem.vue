@@ -1,6 +1,6 @@
 <script lang="tsx">
   import type { PropType, Ref } from 'vue';
-  import { computed, defineComponent, toRefs, unref } from 'vue';
+  import { computed, defineComponent, toRefs, unref, onMounted } from 'vue';
   import type { FormActionType, FormProps, FormSchema } from '../types/form';
   import type { ValidationRule } from 'ant-design-vue/lib/form/Form';
   import type { TableActionType } from '/@/components/Table';
@@ -59,6 +59,7 @@
         const { allDefaultValues, formModel, schema } = props;
         const { mergeDynamicData } = props.formProps;
         return {
+          // test: 'aa',
           field: schema.field,
           model: formModel,
           values: {
@@ -368,6 +369,12 @@
         }
       }
 
+      onMounted(()=> {
+        // console.log('FormItem组件',props.schema);
+        // console.log('getValues', unref(getValues));
+        // console.log('slots',slots);
+        
+      })
       return () => {
         const { colProps = {}, colSlot, renderColContent, component } = props.schema;
         if (!componentMap.has(component)) {
