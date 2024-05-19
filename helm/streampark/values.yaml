@@ -87,7 +87,9 @@ spec:
   ## More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   livenessProbe:
     enabled: true
-    initialDelaySeconds: "90"
+    containerPort: 10000
+    livenessPath: "/actuator/health/liveness"
+    initialDelaySeconds: "45"
     periodSeconds: "30"
     timeoutSeconds: "20"
     failureThreshold: "3"
@@ -97,7 +99,9 @@ spec:
   ## More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   readinessProbe:
     enabled: true
-    initialDelaySeconds: "90"
+    containerPort: 10000
+    readinessPath: "/actuator/health/liveness"
+    initialDelaySeconds: "45"
     periodSeconds: "30"
     timeoutSeconds: "20"
     failureThreshold: "3"
