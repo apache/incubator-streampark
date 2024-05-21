@@ -52,14 +52,14 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(Exception e) {
-    log.info("Internal server error：", e);
+    log.error("Internal server error：", e);
     return RestResponse.fail(ResponseCode.CODE_FAIL, "internal server error: {}", e.getMessage());
   }
 
   @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
-    log.info("not supported request method，exception：{}", e.getMessage());
+    log.error("not supported request method，exception：{}", e);
     return RestResponse.fail(
         ResponseCode.CODE_FAIL, "not supported request method，exception：{}", e.getMessage());
   }
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = AbstractApiException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(AbstractApiException e) {
-    log.info("api exception：{}", e.getMessage());
+    log.error("api exception：{}", e);
     return RestResponse.fail(e.getResponseCode(), e.getMessage());
   }
 
@@ -113,6 +113,6 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = UnauthorizedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public void handleUnauthorizedException(Exception e) {
-    log.info("Permission denied，{}", e.getMessage());
+    log.error("Permission denied，{}", e);
   }
 }
