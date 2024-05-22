@@ -91,6 +91,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       optional.ifPresent(x -> x.setSettingValue(value));
       return true;
     } catch (Exception e) {
+      log.error("update setting failed!", e);
       return false;
     }
   }
@@ -139,7 +140,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       }
       return senderEmail;
     } catch (Exception e) {
-      log.warn("Fault Alert Email is not set.");
+      log.warn("Fault Alert Email is not set.", e);
     }
     return null;
   }

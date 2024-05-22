@@ -327,7 +327,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       return list;
     } catch (Exception e) {
-      log.info(e.getMessage());
+      log.error(e.getMessage());
     }
     return null;
   }
