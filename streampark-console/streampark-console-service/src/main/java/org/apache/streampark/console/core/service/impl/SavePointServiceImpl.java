@@ -369,6 +369,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       try {
         result = this.getSavePointPath(application);
       } catch (Exception e) {
+        log.error(
+            "Error in getting savepoint path for triggering savepoint for app:{}",
+            application.getId(),
+            e);
         throw new ApiAlertException(
             "Error in getting savepoint path for triggering savepoint for app "
                 + application.getId(),
@@ -426,6 +430,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       removeById(id);
       return true;
     } catch (Exception e) {
+      log.error("Delete application {} failed!", id, e);
       throw new InternalException(e.getMessage());
     }
   }

@@ -332,6 +332,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     try {
       file.transferTo(saveFile);
     } catch (Exception e) {
+      log.error("Upload file {} failed!", fileName, e);
       throw new ApiDetailException(e);
     }
     return saveFile.getAbsolutePath();
@@ -495,7 +496,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         HdfsOperator.delete(path);
       }
     } catch (Exception e) {
-      // skip
+      log.error("Remove application {} failed!", appId, e);
     }
   }
 
@@ -678,6 +679,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           .toCompletableFuture()
           .get(5, TimeUnit.SECONDS);
     } else {
+      log.error("Job executionMode must be kubernetes-session|kubernetes-application.");
       throw new ApiAlertException(
           "Job executionMode must be kubernetes-session|kubernetes-application.");
     }
@@ -805,6 +807,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
       return true;
     } else {
+      log.error("Create application failed!");
       throw new ApiAlertException("create application failed");
     }
   }
@@ -1842,7 +1845,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           YarnClient yarnClient = HadoopUtils.yarnClient();
           yarnClient.killApplication(applications.get(0).getApplicationId());
         }
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+        log.error("Stopped failed!", e);
       }
     }
   }

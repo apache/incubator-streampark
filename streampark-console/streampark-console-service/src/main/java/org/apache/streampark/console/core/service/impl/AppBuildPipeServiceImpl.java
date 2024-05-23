@@ -418,6 +418,7 @@ public class AppBuildPipeServiceImpl
       } else if (resourceFrom == ResourceFrom.UPLOAD) {
         userJar = new File(WebUtils.getAppTempDir(), app.getJar());
       } else {
+        log.error("ResourceFrom error:{}.", resourceFrom);
         throw new IllegalArgumentException("ResourceFrom error: " + resourceFrom);
       }
       // 2) copy user jar to localUpload DIR
