@@ -327,6 +327,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       }
       return list;
     } catch (Exception e) {
+      log.error("List conf Failed!", e);
       log.error(e.getMessage());
     }
     return null;

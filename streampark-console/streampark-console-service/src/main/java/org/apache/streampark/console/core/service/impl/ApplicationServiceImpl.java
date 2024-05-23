@@ -332,7 +332,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     try {
       file.transferTo(saveFile);
     } catch (Exception e) {
-      log.error("upload file {} failed!", fileName, e);
+      log.error("Upload file {} failed!", fileName, e);
       throw new ApiDetailException(e);
     }
     return saveFile.getAbsolutePath();
@@ -496,7 +496,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         HdfsOperator.delete(path);
       }
     } catch (Exception e) {
-      log.error(Utils.stringifyException(e));
+      log.error("Remove application {} failed!", appId, e);
     }
   }
 
@@ -807,7 +807,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
       return true;
     } else {
-      log.error("create application failed");
+      log.error("Create application failed!");
       throw new ApiAlertException("create application failed");
     }
   }
@@ -1846,7 +1846,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           yarnClient.killApplication(applications.get(0).getApplicationId());
         }
       } catch (Exception e) {
-        log.error("doStopped failed!", e);
+        log.error("Stopped failed!", e);
       }
     }
   }

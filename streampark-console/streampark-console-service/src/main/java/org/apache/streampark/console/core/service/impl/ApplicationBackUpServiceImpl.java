@@ -199,7 +199,7 @@ public class ApplicationBackUpServiceImpl
       removeById(id);
       return true;
     } catch (Exception e) {
-      log.error("delete application {} failed!", id, e);
+      log.error("Delete application {} failed!", id, e);
       throw new InternalException(e.getMessage());
     }
   }

@@ -168,7 +168,7 @@ public class FlinkCluster implements Serializable {
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception e) {
-        log.error("verify cluster {} connection failed!", address, e);
+        log.error("Verify cluster {} connection failed!", address, e);
       }
       return false;
     } else if (ExecutionMode.YARN_SESSION.equals(this.getExecutionModeEnum())) {
@@ -180,7 +180,7 @@ public class FlinkCluster implements Serializable {
         JacksonUtils.read(result, Overview.class);
         return true;
       } catch (Exception e) {
-        log.error("verify cluster connection failed!", e);
+        log.error("Verify cluster connection failed!", e);
       }
       return false;
     }
