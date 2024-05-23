@@ -191,7 +191,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
       }
       return senderEmail;
     } catch (Exception e) {
-      log.warn("Fault Alert Email is not set.");
+      log.error("Fault Alert Email is not set.");
     }
     return null;
   }

@@ -145,7 +145,7 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         }
         scanner.close();
       } catch (Exception e) {
-        log.info("Error while FstTree ini that: {}", e.getMessage());
+        log.error("Error while FstTree ini that: {}", e.getMessage());
       }
     }
 
