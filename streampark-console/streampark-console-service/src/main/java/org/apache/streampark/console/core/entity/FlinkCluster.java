@@ -42,6 +42,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Data
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
@@ -152,8 +154,8 @@ public class FlinkCluster implements Serializable {
           this.address,
           RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
       return new URI(address);
-    } catch (Exception ignored) {
-      //
+    } catch (Exception e) {
+      log.error("FlinkCluster getRemoteURI error", e);
     }
     return null;
   }
