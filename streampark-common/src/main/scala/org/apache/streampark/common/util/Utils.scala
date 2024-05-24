@@ -71,7 +71,14 @@ object Utils extends Logger {
 
   def getJarManifest(jarFile: File): jar.Manifest = {
     requireCheckJarFile(jarFile.toURL)
-    new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
+    var jarInputStream: JarInputStream = null;
+    try {
+      jarInputStream = new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile)))
+      jarInputStream.getManifest
+    } finally {
+      if (jarInputStream != null)
+        jarInputStream.close
+    }
   }
 
   def getJarManClass(jarFile: File): String = {
