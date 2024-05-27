@@ -20,7 +20,7 @@ export default {
     version: 'Version',
     // user dropdown
     dropdownItemDoc: 'Document',
-    ChangePassword: 'ChangePassword',
+    ChangePassword: 'Change Password',
     dropdownItemLoginOut: 'Login Out',
 
     tooltipErrorLog: 'Error log',
@@ -105,7 +105,7 @@ export default {
     tabDetail: 'Tab Detail',
     tabsQuickBtn: 'Tabs quick button',
     tabsRedoBtn: 'Tabs redo button',
-    tabsFoldBtn: 'Tabs flod button',
+    tabsFoldBtn: 'Tabs fold button',
     sidebar: 'Sidebar',
     header: 'Header',
     footer: 'Footer',

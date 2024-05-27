@@ -348,7 +348,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       // get jarFile error
       return buildExceptResponse(e, 1);
     }
-    ApiAlertException.throwIfTrue(jarFile == null, "flink app jar must exist.");
+    ApiAlertException.throwIfTrue(
+        jarFile == null || !jarFile.exists(), "flink app jar must exist.");
     Map<String, Serializable> resp = new HashMap<>(0);
     resp.put(STATE, 0);
     if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
