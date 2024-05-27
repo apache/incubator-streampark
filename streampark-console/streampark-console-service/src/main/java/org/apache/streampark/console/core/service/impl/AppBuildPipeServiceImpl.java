@@ -712,7 +712,7 @@ public class AppBuildPipeServiceImpl
               });
       return dependencyInfo.merge(mvnArtifacts, jarLibs);
     } catch (Exception e) {
-      log.warn("Merge team dependency failed.", e);
+      log.error("Merge team dependency failed.", e);
       return dependencyInfo;
     }
   }

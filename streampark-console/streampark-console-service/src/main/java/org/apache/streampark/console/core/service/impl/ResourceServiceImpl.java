@@ -389,7 +389,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           try {
             connectorResource.setClassName(factoryClassName);
             connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
-          } catch (Exception ignored) {
+          } catch (Exception e) {
+            log.error(
+                "Failed to set class name or factory identifier for connector resource. Class name: "
+                    + factoryClassName
+                    + ", Factory identifier: "
+                    + factory.factoryIdentifier(),
+                e);
           }
 
           try {
@@ -398,8 +404,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .requiredOptions()
                 .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setRequiredOptions(requiredOptions);
-          } catch (Exception ignored) {
-
+          } catch (Exception e) {
+            log.error("Failed to set required options for connector resource. " + e);
           }
 
           try {
@@ -408,7 +414,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .optionalOptions()
                 .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setOptionalOptions(optionalOptions);
-          } catch (Exception ignored) {
+          } catch (Exception e) {
+            log.error("Fail to set optional options for connector resource. " + e);
           }
           return connectorResource;
         }
