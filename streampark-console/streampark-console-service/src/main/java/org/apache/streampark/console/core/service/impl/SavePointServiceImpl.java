@@ -303,18 +303,20 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private String getClusterId(Application application, FlinkCluster cluster) {
     if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-      return application.getClusterId();
-    }
-    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
+      return FlinkExecutionMode.isKubernetesSessionMode(application.getExecutionMode())
+          ? cluster.getClusterId()
+          : application.getClusterId();
+    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION.equals(application.getFlinkExecutionMode())) {
         AssertUtils.notNull(
             cluster,
             String.format(
                 "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         return cluster.getClusterId();
+      } else {
+        return application.getClusterId();
       }
-      return application.getAppId();
     }
     return null;
   }

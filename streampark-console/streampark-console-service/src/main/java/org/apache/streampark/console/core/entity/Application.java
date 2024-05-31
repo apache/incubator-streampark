@@ -81,9 +81,6 @@ public class Application implements Serializable {
   private String jobName;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String appId;
-
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String jobId;
 
   /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
@@ -93,7 +90,7 @@ public class Application implements Serializable {
   /** flink version */
   private Long versionId;
 
-  /** k8s cluster id */
+  /** 1. yarn application id(on yarn) 2. k8s application id (on k8s application) */
   private String clusterId;
 
   /** flink docker base image */

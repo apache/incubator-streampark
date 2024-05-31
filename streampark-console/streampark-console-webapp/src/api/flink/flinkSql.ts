@@ -43,7 +43,7 @@ export function fetchFlinkSqlList(data) {
   });
 }
 
-export function fetchRemoveFlinkSql(data: { id: string }): Promise<boolean> {
+export function fetchRemoveFlinkSql(data: { appId: any; id: any }): Promise<boolean> {
   return defHttp.post({
     url: FLINK_SQL_API.DELETE,
     data,

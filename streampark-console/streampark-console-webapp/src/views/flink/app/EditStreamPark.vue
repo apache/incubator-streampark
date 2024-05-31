@@ -121,14 +121,23 @@
           cpFailureRateInterval: app.cpFailureRateInterval,
           cpFailureAction: app.cpFailureAction,
         },
-        clusterId: app.clusterId,
-        [app.executionMode == ExecModeEnum.YARN_SESSION
-          ? 'yarnSessionClusterId'
-          : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
+      switch (app.executionMode) {
+        case ExecModeEnum.REMOTE:
+          defaultParams['remoteClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.YARN_SESSION:
+          defaultParams['yarnSessionClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.KUBERNETES_SESSION:
+          defaultParams['k8sSessionClusterId'] = app.flinkClusterId;
+          break;
+        default:
+          break;
+      }
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }

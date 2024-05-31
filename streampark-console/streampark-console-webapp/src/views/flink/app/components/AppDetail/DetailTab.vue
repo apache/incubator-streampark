@@ -232,6 +232,7 @@
     try {
       const res = await fetchFlinkSql({
         id: record.id,
+        appId: record.appId,
       });
       openFlinkDrawer(true, {
         sql: decodeByBase64(res.sql),
@@ -251,8 +252,8 @@
 
   /* delete flink sql */
   async function handleDeleteFlinkSql(record: Recordable) {
-    await fetchRemoveFlinkSql({ id: record.id });
-    reloadFlinkSql();
+    await fetchRemoveFlinkSql({ id: record.id, appId: record.appId });
+    await reloadFlinkSql();
   }
 
   function handleCompare(record: Recordable) {
@@ -344,7 +345,7 @@
 
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
-    await fetchRemoveSavePoint({ id: record.id });
+    await fetchRemoveSavePoint({ id: record.id, appId: record.appId });
     reloadSavePoint();
   }
 

@@ -674,12 +674,12 @@ public class FlinkAppHttpWatcher {
   }
 
   private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {
-    String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+    String reqURL = "ws/v1/cluster/apps/".concat(application.getClusterId());
     return yarnRestRequest(reqURL, YarnAppInfo.class);
   }
 
   private Overview httpOverview(Application application) throws IOException {
-    String appId = application.getAppId();
+    String appId = application.getClusterId();
     if (appId != null
         && (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()
             || FlinkExecutionMode.YARN_PER_JOB == application.getFlinkExecutionMode())) {
@@ -708,7 +708,7 @@ public class FlinkAppHttpWatcher {
         reqURL = String.format(format, jmURL);
       } else {
         String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId());
+        reqURL = String.format(format, application.getClusterId());
       }
       return yarnRestRequest(reqURL, JobsOverview.class);
     }
@@ -743,7 +743,7 @@ public class FlinkAppHttpWatcher {
         reqURL = String.format(format, jmURL, application.getJobId());
       } else {
         String format = "proxy/%s/" + flinkUrl;
-        reqURL = String.format(format, application.getAppId(), application.getJobId());
+        reqURL = String.format(format, application.getClusterId(), application.getJobId());
       }
       return yarnRestRequest(reqURL, CheckPoints.class);
     }
