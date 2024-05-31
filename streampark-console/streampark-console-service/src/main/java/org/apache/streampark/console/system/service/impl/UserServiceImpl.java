@@ -240,34 +240,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     return baseMapper.selectUsersByAppOwner(teamId);
   }
 
-  /**
-   * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized
-   * config info of frontend
-   *
-   * @param user user
-   * @return UserInfo
-   */
-  @Override
-  public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
-    Map<String, Object> userInfo = new HashMap<>(8);
-
-    // 1) token & expire
-    if (token != null) {
-      userInfo.put("token", token.getToken());
-      userInfo.put("expire", token.getExpireAt());
-    }
-
-    // 2) user
-    user.dataMasking();
-    userInfo.put("user", user);
-
-    // 3) permissions
-    Set<String> permissions = this.listPermissions(user.getUserId(), teamId);
-    userInfo.put("permissions", permissions);
-
-    return userInfo;
-  }
-
   @Override
   public void transferResource(Long userId, Long targetUserId) {
     applicationManageService.changeOwnership(userId, targetUserId);
@@ -300,10 +272,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(shiroProperties.getJwtTimeOut());
     String expireTimeStr = DateUtils.formatFullTime(expireTime);
-    JWTToken jwtToken = new JWTToken(token, expireTimeStr, 1);
+    JWTToken jwtToken = new JWTToken(token, expireTimeStr);
     String userId = RandomStringUtils.randomAlphanumeric(20);
     user.setId(userId);
     Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
     return RestResponse.success(userInfo);
+  }
+
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void deleteUser(Long userId) {
+    removeById(userId);
+    this.memberService.removeByUserId(userId);
+  }
+
+  /**
+   * generate user info, contains: 1.token, 2.vue router, 3.role, 4.permission, 5.personalized
+   * config info of frontend
+   *
+   * @param user user
+   * @return UserInfo
+   */
+  @Override
+  public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
+    Map<String, Object> userInfo = new HashMap<>(8);
+
+    // 1) token & expire
+    if (token != null) {
+      userInfo.put("token", token.getToken());
+      userInfo.put("expire", token.getExpireAt());
+    }
+
+    // 2) user
+    user.dataMasking();
+    userInfo.put("user", user);
+
+    // 3) permissions
+    Set<String> permissions = this.listPermissions(user.getUserId(), teamId);
+    userInfo.put("permissions", permissions);
+
+    return userInfo;
   }
 }

@@ -28,10 +28,6 @@ import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -48,7 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-@Tag(name = "ALERT_TAG")
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -60,35 +55,30 @@ public class AlertController {
 
   private final AlertService alertService;
 
-  @Operation(summary = "Create alert config")
   @PostMapping(value = "/add")
   public RestResponse createAlertConfig(@RequestBody AlertConfigParams params) {
     boolean save = alertConfigService.save(AlertConfig.of(params));
     return RestResponse.success(save);
   }
 
-  @Operation(summary = "Check alert config exist")
   @PostMapping(value = "/exists")
   public RestResponse verifyAlertConfig(@RequestBody AlertConfigParams params) {
     boolean exist = alertConfigService.exist(AlertConfig.of(params));
     return RestResponse.success(exist);
   }
 
-  @Operation(summary = "Update alert config")
   @PostMapping(value = "/update")
   public RestResponse updateAlertConfig(@RequestBody AlertConfigParams params) {
     boolean update = alertConfigService.updateById(AlertConfig.of(params));
     return RestResponse.success(update);
   }
 
-  @Operation(summary = "Get alert config")
   @PostMapping("/get")
   public RestResponse getAlertConfig(@RequestBody AlertConfigParams params) {
     AlertConfig alertConfig = alertConfigService.getById(params.getId());
     return RestResponse.success(AlertConfigParams.of(alertConfig));
   }
 
-  @Operation(summary = "List alert configs (Pagination)")
   @PostMapping(value = "/list")
   public RestResponse alertConfigsPaginationList(
       @RequestBody AlertConfigParams params, RestRequest request) {
@@ -96,15 +86,12 @@ public class AlertController {
     return RestResponse.success(page);
   }
 
-  @Operation(summary = "List alert configs")
   @PostMapping(value = "/listWithOutPage")
   public RestResponse alertConfigsList() {
     List<AlertConfig> page = alertConfigService.list();
     return RestResponse.success(page);
   }
 
-  @Operation(summary = "Delete alert config")
-  @Parameters({@Parameter(name = "id", required = true, description = "config id")})
   @DeleteMapping("/delete")
   public RestResponse deleteAlertConfig(
       @RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
@@ -112,7 +99,6 @@ public class AlertController {
     return RestResponse.success(result);
   }
 
-  @Operation(summary = "Send alert config")
   @PostMapping("/send")
   public RestResponse sendAlert(Long id) throws AlertException {
     AlertTemplate alertTemplate = new AlertTemplate();

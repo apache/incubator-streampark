@@ -45,13 +45,13 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -121,7 +121,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private SettingService settingService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
@@ -321,7 +321,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   public boolean create(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-    appParam.setUserId(commonService.getUserId());
+    appParam.setUserId(serviceHelper.getUserId());
     appParam.setState(FlinkAppStateEnum.ADDED.getValue());
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -431,7 +431,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     newApp.setResourceFrom(oldApp.getResourceFrom());
     newApp.setProjectId(oldApp.getProjectId());
     newApp.setModule(oldApp.getModule());
-    newApp.setUserId(commonService.getUserId());
+    newApp.setUserId(serviceHelper.getUserId());
     newApp.setState(FlinkAppStateEnum.ADDED.getValue());
     newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     newApp.setOptionState(OptionStateEnum.NONE.getValue());

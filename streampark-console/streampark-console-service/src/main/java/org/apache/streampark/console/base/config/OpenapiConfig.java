@@ -42,11 +42,16 @@ import java.util.Collections;
 public class OpenapiConfig implements WebMvcConfigurer {
 
   private static final String OPEN_API_INFO_OVERVIEW = "Apache StreamPark Api Docs";
+  private static final String OPEN_API_INFO_DESCRIPTION =
+      "Apache StreamPark Open API for third-party system integration";
   private static final String OPEN_API_INFO_VERSION = "2.2.0-SNAPSHOT";
   private static final String OPEN_API_INFO_LICENSE_NAME = "Apache-2.0 license";
   private static final String OPEN_API_INFO_CONTACT_NAME = "Apache StreamPark";
   private static final String OPEN_API_INFO_CONTACT_URL = "https://streampark.apache.org";
   private static final String OPEN_API_INFO_CONTACT_EMAIL = "dev@streampark.apache.org";
+  private static final String OPEN_API_GROUP = "Open API";
+
+  private final String[] paths = new String[] {"/flink/app/start", "/flink/app/cancel"};
 
   @Bean
   public OpenAPI apiV1Info() {
@@ -54,7 +59,7 @@ public class OpenapiConfig implements WebMvcConfigurer {
         .info(
             new Info()
                 .title(OPEN_API_INFO_OVERVIEW)
-                .description(OPEN_API_INFO_OVERVIEW)
+                .description(OPEN_API_INFO_DESCRIPTION)
                 .contact(
                     new Contact()
                         .name(OPEN_API_INFO_CONTACT_NAME)
@@ -77,11 +82,6 @@ public class OpenapiConfig implements WebMvcConfigurer {
 
   @Bean
   public GroupedOpenApi publicApiV1() {
-    return GroupedOpenApi.builder().group("v1").pathsToExclude("/v2/**").build();
-  }
-
-  @Bean
-  public GroupedOpenApi publicApiV2() {
-    return GroupedOpenApi.builder().group("v2").pathsToMatch("/v2/**").build();
+    return GroupedOpenApi.builder().group(OPEN_API_GROUP).pathsToMatch(paths).build();
   }
 }

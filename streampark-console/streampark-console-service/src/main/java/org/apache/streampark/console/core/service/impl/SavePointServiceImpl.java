@@ -40,6 +40,7 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -101,7 +102,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  @Autowired private CommonServiceImpl commonService;
+  @Autowired private ServiceHelper commonService;
 
   @Qualifier("triggerSavepointExecutor")
   @Autowired

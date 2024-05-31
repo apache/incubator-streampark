@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 public class JWTFilter extends BasicHttpAuthenticationFilter {
+
   private static final String TOKEN = "Authorization";
 
   @Override

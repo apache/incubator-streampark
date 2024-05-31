@@ -23,7 +23,7 @@ import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -54,7 +54,7 @@ import org.springframework.stereotype.Component;
 public class StreamParkAspect {
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
   @Autowired private MemberService memberService;
   @Autowired private ApplicationManageService applicationManageService;
 
@@ -101,7 +101,7 @@ public class StreamParkAspect {
     PermissionScope permissionScope =
         methodSignature.getMethod().getAnnotation(PermissionScope.class);
 
-    User currentUser = commonService.getCurrentUser();
+    User currentUser = serviceHelper.getLoginUser();
     ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
     boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;

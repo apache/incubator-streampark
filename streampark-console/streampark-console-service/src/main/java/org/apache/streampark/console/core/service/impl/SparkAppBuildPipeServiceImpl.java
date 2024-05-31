@@ -47,10 +47,10 @@ import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.SparkEnvService;
@@ -109,7 +109,7 @@ public class SparkAppBuildPipeServiceImpl
 
   @Autowired private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private SettingService settingService;
 
@@ -148,7 +148,7 @@ public class SparkAppBuildPipeServiceImpl
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
 
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
@@ -298,7 +298,7 @@ public class SparkAppBuildPipeServiceImpl
             } else {
               Message message =
                   new Message(
-                      commonService.getUserId(),
+                      serviceHelper.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -410,7 +410,7 @@ public class SparkAppBuildPipeServiceImpl
       case PYFLINK:
         return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
-        String sqlDistJar = commonService.getSqlClientJar(sparkEnv);
+        String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
         if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);

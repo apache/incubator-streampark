@@ -19,10 +19,12 @@ package org.apache.streampark.console.system.authentication;
 
 import org.apache.shiro.authc.AuthenticationToken;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /** JSON Web Token */
-@Data
+@Getter
+@Setter
 public class JWTToken implements AuthenticationToken {
 
   private static final long serialVersionUID = 1L;
@@ -31,16 +33,13 @@ public class JWTToken implements AuthenticationToken {
 
   private String expireAt;
 
-  private int signType;
-
   public JWTToken(String token) {
     this.token = token;
   }
 
-  public JWTToken(String token, String expireAt, int signType) {
+  public JWTToken(String token, String expireAt) {
     this.token = token;
     this.expireAt = expireAt;
-    this.signType = signType;
   }
 
   @Override
