@@ -24,7 +24,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
@@ -80,8 +79,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private ApplicationInfoService applicationInfoService;
 
   @Autowired private ResourceService resourceService;
-
-  @Autowired private ShiroProperties shiroProperties;
 
   @Override
   public User getByUsername(String username) {
@@ -270,7 +267,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         WebUtils.encryptToken(
             JWTUtil.sign(
                 user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
-    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(shiroProperties.getJwtTimeOut());
+    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
     String expireTimeStr = DateUtils.formatFullTime(expireTime);
     JWTToken jwtToken = new JWTToken(token, expireTimeStr);
     String userId = RandomStringUtils.randomAlphanumeric(20);
