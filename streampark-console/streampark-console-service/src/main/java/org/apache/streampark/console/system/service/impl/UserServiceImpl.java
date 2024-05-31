@@ -27,6 +27,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.properties.ShiroProperties;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -293,10 +294,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     updateLoginTime(user.getUsername());
-    String token = WebUtils.encryptToken(JWTUtil.sign(user.getUserId(), user.getUsername()));
+    String token =
+        WebUtils.encryptToken(
+            JWTUtil.sign(
+                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(shiroProperties.getJwtTimeOut());
     String expireTimeStr = DateUtils.formatFullTime(expireTime);
-    JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+    JWTToken jwtToken = new JWTToken(token, expireTimeStr, 1);
     String userId = RandomStringUtils.randomAlphanumeric(20);
     user.setId(userId);
     Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);

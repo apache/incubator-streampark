@@ -78,10 +78,9 @@ public class AccessTokenController {
   @RequiresPermissions("token:add")
   public RestResponse createToken(
       @NotBlank(message = "{required}") Long userId,
-      String expireTime,
       @RequestParam(required = false) String description)
       throws InternalException {
-    return accessTokenService.generateToken(userId, expireTime, description);
+    return accessTokenService.create(userId, description);
   }
 
   @Operation(summary = "Verify current user token")

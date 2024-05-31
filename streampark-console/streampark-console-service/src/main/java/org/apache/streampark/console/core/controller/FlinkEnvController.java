@@ -23,8 +23,6 @@ import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "FLINK_ENV_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -43,21 +40,18 @@ public class FlinkEnvController {
 
   @Autowired private FlinkEnvService flinkEnvService;
 
-  @Operation(summary = "Get flink environment")
   @PostMapping("list")
   public RestResponse list() {
     List<FlinkEnv> flinkEnvList = flinkEnvService.list();
     return RestResponse.success(flinkEnvList);
   }
 
-  @Operation(summary = "Verify flink environment")
   @PostMapping("check")
   public RestResponse check(FlinkEnv version) {
     FlinkEnvCheckEnum checkResp = flinkEnvService.check(version);
     return RestResponse.success(checkResp.getCode());
   }
 
-  @Operation(summary = "Create flink environment")
   @PostMapping("create")
   public RestResponse create(FlinkEnv version) {
     try {
@@ -68,7 +62,6 @@ public class FlinkEnvController {
     return RestResponse.success(true);
   }
 
-  @Operation(summary = "Get flink environment")
   @PostMapping("get")
   public RestResponse get(Long id) throws Exception {
     FlinkEnv flinkEnv = flinkEnvService.getById(id);
@@ -76,14 +69,12 @@ public class FlinkEnvController {
     return RestResponse.success(flinkEnv);
   }
 
-  @Operation(summary = "Sync flink environment conf")
   @PostMapping("sync")
   public RestResponse sync(Long id) throws Exception {
     flinkEnvService.syncConf(id);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Update flink environment")
   @PostMapping("update")
   public RestResponse update(FlinkEnv version) throws Exception {
     try {
@@ -94,21 +85,18 @@ public class FlinkEnvController {
     return RestResponse.success(true);
   }
 
-  @Operation(summary = "Delete flink environment")
   @PostMapping("delete")
   public RestResponse delete(Long id) {
     flinkEnvService.removeById(id);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Check flink environment is valid, else throw exception")
   @PostMapping("validity")
   public RestResponse validity(FlinkEnv version) {
     flinkEnvService.validity(version.getId());
     return RestResponse.success(true);
   }
 
-  @Operation(summary = "Update flink environment as default")
   @PostMapping("default")
   public RestResponse setDefault(Long id) {
     flinkEnvService.setDefault(id);

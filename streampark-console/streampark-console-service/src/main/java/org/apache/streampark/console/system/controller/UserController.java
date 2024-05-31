@@ -21,9 +21,7 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.PermissionAction;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
-import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -112,7 +110,6 @@ public class UserController {
   }
 
   @Operation(summary = "Update password")
-  @PermissionAction(id = "#user.userId", type = PermissionTypeEnum.USER)
   @PutMapping("password")
   public RestResponse updatePassword(User user) throws Exception {
     userService.updatePassword(user);

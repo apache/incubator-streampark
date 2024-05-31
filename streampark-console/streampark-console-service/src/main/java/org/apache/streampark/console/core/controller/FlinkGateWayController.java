@@ -22,8 +22,6 @@ import org.apache.streampark.console.core.entity.FlinkGateWay;
 import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 
-@Tag(name = "FLINK_GATEWAY_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -49,27 +46,23 @@ public class FlinkGateWayController {
 
   private final FlinkGateWayService flinkGatewayService;
 
-  @Operation(summary = "List flink gateways")
   @GetMapping("list")
   public RestResponse list() {
     return RestResponse.success(flinkGatewayService.list());
   }
 
-  @Operation(summary = "Create flink gateway")
   @PostMapping("create")
   public RestResponse create(@RequestBody FlinkGateWay flinkGateWay) {
     flinkGatewayService.create(flinkGateWay);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Check flink gateway name")
   @GetMapping("check/name")
   public RestResponse checkName(
       @NotNull(message = "The Gateway name cannot be null") @RequestParam("name") String name) {
     return RestResponse.success(flinkGatewayService.existsByGatewayName(name));
   }
 
-  @Operation(summary = "Check flink gateway address")
   @GetMapping("check/address")
   public RestResponse checkAddress(
       @NotNull(message = "The Gateway address cannot be null") @RequestParam("address")
@@ -79,20 +72,17 @@ public class FlinkGateWayController {
     return RestResponse.success(gatewayVersion);
   }
 
-  @Operation(summary = "Update flink gateway")
   @PutMapping("update")
   public RestResponse update(@RequestBody FlinkGateWay flinkGateWay) {
     flinkGatewayService.update(flinkGateWay);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get flink gateway by id")
   @GetMapping("get/{id}")
   public RestResponse get(@PathVariable Long id) {
     return RestResponse.success(flinkGatewayService.getById(id));
   }
 
-  @Operation(summary = "Delete flink gateway by id")
   @DeleteMapping("delete")
   public RestResponse delete(
       @NotNull(message = "The Gateway id cannot be null") @RequestParam("id") Long id) {

@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 import org.apache.streampark.console.core.service.ProjectService;
@@ -28,8 +29,6 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -42,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "PROJECT_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -51,8 +49,8 @@ public class ProjectController {
 
   @Autowired private ProjectService projectService;
 
-  @Operation(summary = "Create project")
   @PostMapping("create")
+  @PermissionScope(team = "#project.teamId")
   @RequiresPermissions("project:create")
   public RestResponse create(Project project) {
     ApiAlertException.throwIfNull(
@@ -60,40 +58,42 @@ public class ProjectController {
     return projectService.create(project);
   }
 
-  @Operation(summary = "Update project")
   @AppUpdated
   @PostMapping("update")
   @RequiresPermissions("project:update")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse update(Project project) {
     boolean update = projectService.update(project);
     return RestResponse.success().data(update);
   }
 
-  @Operation(summary = "Get project")
   @PostMapping("get")
-  public RestResponse get(Long id) {
-    return RestResponse.success().data(projectService.getById(id));
+  @PermissionScope(team = "#project.teamId")
+  public RestResponse get(Project project) {
+    return RestResponse.success().data(projectService.getById(project.getId()));
   }
 
-  @Operation(summary = "Build project")
   @PostMapping("build")
   @RequiresPermissions("project:build")
-  public RestResponse build(Long id) throws Exception {
-    projectService.build(id);
+  @PermissionScope(team = "#project.teamId")
+  public RestResponse build(Project project) throws Exception {
+    projectService.build(project.getId());
     return RestResponse.success();
   }
 
-  @Operation(summary = "Get project build logs")
   @PostMapping("buildlog")
   @RequiresPermissions("project:build")
+  @PermissionScope(team = "#teamId")
   public RestResponse buildLog(
-      Long id, @RequestParam(value = "startOffset", required = false) Long startOffset) {
+      Long id,
+      @RequestParam(value = "startOffset", required = false) Long startOffset,
+      Long teamId) {
     return projectService.getBuildLog(id, startOffset);
   }
 
-  @Operation(summary = "List projects")
   @PostMapping("list")
   @RequiresPermissions("project:view")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse list(Project project, RestRequest restRequest) {
     if (project.getTeamId() == null) {
       return RestResponse.success(Collections.emptyList());
@@ -102,60 +102,60 @@ public class ProjectController {
     return RestResponse.success().data(page);
   }
 
-  @Operation(summary = "List git project branches")
   @PostMapping("branches")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse branches(Project project) {
-    List<String> branches = projectService.getAllBranches(project);
+    List<String> branches = project.getAllBranches();
     return RestResponse.success().data(branches);
   }
 
-  @Operation(summary = "Delete project")
   @PostMapping("delete")
   @RequiresPermissions("project:delete")
-  public RestResponse delete(Long id) {
-    Boolean deleted = projectService.removeById(id);
+  @PermissionScope(team = "#project.teamId")
+  public RestResponse delete(Project project) {
+    Boolean deleted = projectService.removeById(project.getId());
     return RestResponse.success().data(deleted);
   }
 
-  @Operation(summary = "Authenticate git project")
   @PostMapping("gitcheck")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse gitCheck(Project project) {
-    GitAuthorizedErrorEnum error = projectService.gitCheck(project);
+    GitAuthorizedErrorEnum error = project.gitCheck();
     return RestResponse.success().data(error.getType());
   }
 
-  @Operation(summary = "Check the project")
   @PostMapping("exists")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse exists(Project project) {
     boolean exists = projectService.exists(project);
     return RestResponse.success().data(exists);
   }
 
-  @Operation(summary = "List project modules")
   @PostMapping("modules")
-  public RestResponse modules(Long id) {
-    List<String> result = projectService.listModules(id);
+  @PermissionScope(team = "#project.teamId")
+  public RestResponse modules(Project project) {
+    List<String> result = projectService.listModules(project.getId());
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project jars")
   @PostMapping("jars")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse jars(Project project) {
     List<String> result = projectService.listJars(project);
     return RestResponse.success().data(result);
   }
 
-  @Operation(summary = "List project configurations")
   @PostMapping("listconf")
+  @PermissionScope(team = "#project.teamId")
   public RestResponse listConf(Project project) {
-    List<Map<String, Object>> confList = projectService.listConf(project);
-    return RestResponse.success().data(confList);
+    List<Map<String, Object>> list = projectService.listConf(project);
+    return RestResponse.success().data(list);
   }
 
-  @Operation(summary = "List the team projects")
   @PostMapping("select")
+  @PermissionScope(team = "#teamId")
   public RestResponse select(@RequestParam Long teamId) {
-    List<Project> projectList = projectService.listByTeamId(teamId);
-    return RestResponse.success().data(projectList);
+    List<Project> list = projectService.listByTeamId(teamId);
+    return RestResponse.success().data(list);
   }
 }

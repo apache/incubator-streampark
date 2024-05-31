@@ -57,7 +57,7 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     Assertions.assertEquals("admin", username);
     User user = userService.getByUsername(username);
     Assertions.assertNotNull(user);
-    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username));
+    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getSalt()));
 
     // list
     AccessToken mockToken1 = new AccessToken();

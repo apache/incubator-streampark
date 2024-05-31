@@ -19,15 +19,12 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +32,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "YARN_QUEUE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -51,31 +47,23 @@ public class YarnQueueController {
    * @param yarnQueue optional fields used to search.
    * @return RestResponse with IPage<{@link YarnQueue}> object.
    */
-  @Operation(summary = "List yarn queues")
-  @ApiAccess
   @PostMapping("list")
   public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
     IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
     return RestResponse.success(queuePage);
   }
 
-  @Operation(summary = "Check yarn queue valid")
-  @ApiAccess
   @PostMapping("check")
   public RestResponse check(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
   }
 
-  @Operation(summary = "Create yarn queue")
-  @ApiAccess
   @PostMapping("create")
   @RequiresPermissions("yarnQueue:create")
   public RestResponse create(YarnQueue yarnQueue) {
     return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
   }
 
-  @Operation(summary = "Update yarn queue")
-  @ApiAccess
   @PostMapping("update")
   @RequiresPermissions("yarnQueue:update")
   public RestResponse update(YarnQueue yarnQueue) {
@@ -83,10 +71,6 @@ public class YarnQueueController {
     return RestResponse.success();
   }
 
-  @Operation(
-      summary = "Delete yarn queue",
-      description = "delete by (team id & yarn queue) or yarn queue id")
-  @ApiAccess
   @PostMapping("delete")
   @RequiresPermissions("yarnQueue:delete")
   public RestResponse delete(YarnQueue yarnQueue) {
