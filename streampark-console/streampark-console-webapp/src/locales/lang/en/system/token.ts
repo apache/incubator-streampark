@@ -24,7 +24,6 @@ export default {
     title: 'Token List',
     userName: 'User Name',
     token: 'Token',
-    expireTime: 'Expire Time',
     status: 'Status',
   },
   operation: {
