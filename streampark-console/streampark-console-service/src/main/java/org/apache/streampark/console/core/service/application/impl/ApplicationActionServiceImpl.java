@@ -34,6 +34,7 @@ import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
+import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -54,12 +55,12 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
@@ -83,7 +84,6 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
@@ -151,7 +151,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private SettingService settingService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
@@ -241,7 +241,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
 
     if (appParam.getSavePointed()) {
       FlinkAppHttpWatcher.addSavepoint(application.getId());
@@ -253,7 +253,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     application.setOptionTime(new Date());
     this.baseMapper.updateById(application);
 
-    Long userId = commonService.getUserId();
+    Long userId = serviceHelper.getUserId();
     if (!application.getUserId().equals(userId)) {
       FlinkAppHttpWatcher.addCanceledApp(application.getId(), userId);
     }
@@ -266,23 +266,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       customSavepoint = appParam.getSavePoint();
       if (StringUtils.isBlank(customSavepoint)) {
         customSavepoint = savePointService.getSavePointPath(appParam);
-      }
-    }
-
-    String clusterId = null;
-    if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-      clusterId = application.getClusterId();
-    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
-        FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
-        ApiAlertException.throwIfNull(
-            cluster,
-            String.format(
-                "The yarn session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                application.getFlinkClusterId()));
-        clusterId = cluster.getClusterId();
-      } else {
-        clusterId = application.getAppId();
       }
     }
 
@@ -301,6 +284,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       properties.put(RestOptions.PORT.key(), activeAddress.getPort());
     }
 
+    Tuple2<String, String> clusterIdNamespace = getNamespaceClusterId(application);
+    String namespace = clusterIdNamespace.t1;
+    String clusterId = clusterIdNamespace.t2;
+
     CancelRequest cancelRequest =
         new CancelRequest(
             application.getId(),
@@ -313,7 +300,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             appParam.getDrain(),
             customSavepoint,
             appParam.getNativeFormat(),
-            application.getK8sNamespace());
+            namespace);
 
     final Date triggerTime = new Date();
     CompletableFuture<CancelResponse> cancelFuture =
@@ -439,8 +426,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             flinkK8sDataTypeConverter.genDefaultFlinkDeploymentIngressDef());
 
     Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
-    String flinkUserJar = userJarAndAppConf.f0;
-    String appConf = userJarAndAppConf.f1;
+    String flinkUserJar = userJarAndAppConf.t1;
+    String appConf = userJarAndAppConf.t2;
 
     BuildResult buildResult = buildPipeline.getBuildResult();
     if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
@@ -498,7 +485,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setOptionName(OperationEnum.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
     return applicationLog;
   }
 
@@ -518,9 +505,13 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
       }
     }
-    application.setAppId(response.clusterId());
     if (StringUtils.isNoneEmpty(response.jobId())) {
       application.setJobId(response.jobId());
+    }
+
+    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      application.setClusterId(response.clusterId());
+      applicationLog.setYarnAppId(response.clusterId());
     }
 
     if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
@@ -637,7 +628,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
         AssertUtils.notNull(flinkSql);
         // 1) dist_userJar
-        String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+        String sqlDistJar = serviceHelper.getFlinkSqlClientJar(flinkEnv);
         // 2) appConfig
         appConf =
             applicationConfig == null
@@ -847,5 +838,35 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfFalse(
         flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
         "[StreamPark] The flink cluster not running, please start it");
+  }
+
+  private Tuple2<String, String> getNamespaceClusterId(Application application) {
+    String clusterId = null;
+    String k8sNamespace = null;
+    FlinkCluster cluster;
+    switch (application.getFlinkExecutionMode()) {
+      case YARN_APPLICATION:
+      case YARN_PER_JOB:
+      case YARN_SESSION:
+        clusterId = application.getClusterId();
+        break;
+      case KUBERNETES_NATIVE_APPLICATION:
+        clusterId = application.getJobName();
+        k8sNamespace = application.getK8sNamespace();
+        break;
+      case KUBERNETES_NATIVE_SESSION:
+        cluster = flinkClusterService.getById(application.getFlinkClusterId());
+        ApiAlertException.throwIfNull(
+            cluster,
+            String.format(
+                "The Kubernetes session clusterId=%s can't found, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                application.getFlinkClusterId()));
+        clusterId = cluster.getClusterId();
+        k8sNamespace = cluster.getK8sNamespace();
+        break;
+      default:
+        break;
+    }
+    return Tuple2.of(k8sNamespace, clusterId);
   }
 }

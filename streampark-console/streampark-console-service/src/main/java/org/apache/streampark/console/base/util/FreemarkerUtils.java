@@ -18,6 +18,7 @@
 package org.apache.streampark.console.base.util;
 
 import freemarker.cache.StringTemplateLoader;
+import freemarker.core.TemplateClassResolver;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -31,45 +32,41 @@ import java.io.StringWriter;
 @Slf4j
 public class FreemarkerUtils {
   private static final Configuration CONFIGURATION;
-  private static final String ALERT_TEMPLATE = "classpath:alert-template";
-  private static final String TEMPLATE = "template";
-  private static final String ENCODING = "UTF-8";
 
   static {
     SpringTemplateLoader templateLoader =
-        new SpringTemplateLoader(new DefaultResourceLoader(), ALERT_TEMPLATE);
+        new SpringTemplateLoader(new DefaultResourceLoader(), "classpath:alert-template");
     CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
+    CONFIGURATION.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
     CONFIGURATION.setTemplateLoader(templateLoader);
-    CONFIGURATION.setDefaultEncoding(ENCODING);
+    CONFIGURATION.setDefaultEncoding("UTF-8");
   }
-
-  private FreemarkerUtils() {}
 
   public static Template loadTemplateFile(String fileName) throws ExceptionInInitializerError {
     try {
       return CONFIGURATION.getTemplate(fileName);
     } catch (IOException e) {
       log.error("{} not found!", fileName);
-      throw new ExceptionInInitializerError(String.format("%s not found!", fileName));
+      throw new ExceptionInInitializerError(fileName + " not found!");
     }
   }
 
   public static Template loadTemplateString(String template) throws Exception {
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
+    configuration.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
     StringTemplateLoader stringTemplateLoader = new StringTemplateLoader();
-    stringTemplateLoader.putTemplate(TEMPLATE, template);
+    stringTemplateLoader.putTemplate("template", template);
     configuration.setTemplateLoader(stringTemplateLoader);
-    return configuration.getTemplate(TEMPLATE);
+    return configuration.getTemplate("template");
   }
 
   public static String format(Template template, Object dataModel) throws TemplateException {
-    String result = null;
     try (StringWriter writer = new StringWriter()) {
       template.process(dataModel, writer);
-      result = writer.toString();
+      return writer.toString();
     } catch (IOException e) {
       log.error(e.getMessage());
     }
-    return result;
+    return null;
   }
 }

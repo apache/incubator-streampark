@@ -52,10 +52,10 @@ import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
@@ -124,7 +124,7 @@ public class SparkApplicationActionServiceImpl
 
   @Autowired private FlinkSqlService flinkSqlService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private AppBuildPipeService appBuildPipeService;
 
@@ -202,7 +202,7 @@ public class SparkApplicationActionServiceImpl
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
     applicationLog.setYarnAppId(application.getClusterId());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
 
     if (appParam.getSavePointed()) {
       FlinkAppHttpWatcher.addSavepoint(application.getId());
@@ -214,7 +214,7 @@ public class SparkApplicationActionServiceImpl
     application.setOptionTime(new Date());
     this.baseMapper.updateById(application);
 
-    Long userId = commonService.getUserId();
+    Long userId = serviceHelper.getUserId();
     if (!application.getUserId().equals(userId)) {
       FlinkAppHttpWatcher.addCanceledApp(application.getId(), userId);
     }
@@ -344,7 +344,7 @@ public class SparkApplicationActionServiceImpl
     applicationLog.setOptionName(OperationEnum.START.getValue());
     applicationLog.setAppId(application.getId());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
 
     // set the latest to Effective, (it will only become the current effective at this time)
     //    applicationManageService.toEffective(application);
@@ -501,7 +501,8 @@ public class SparkApplicationActionServiceImpl
         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
         AssertUtils.notNull(flinkSql);
         // 1) dist_userJar
-        String sqlDistJar = commonService.getSqlClientJar(sparkEnv);
+        // todo
+        String sqlDistJar = serviceHelper.getFlinkSqlClientJar(null);
         // 2) appConfig
         appConf =
             applicationConfig == null

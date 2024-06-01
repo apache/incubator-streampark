@@ -206,6 +206,13 @@ export default {
     copy: '复制作业',
     remapping: '重新映射作业',
     deleteTip: '你确定要删除这个作业?',
+    triggerSavePoint: '触发 savepoint',
+    enableSavePoint: '在 Flink 作业取消之前触发 savepoint',
+    customSavepoint: '指定 savepoint 保存路径',
+    enableDrain: '在触发 savepoint 和停止作业之前发送 MAX_WATERMARK',
+    invalidSavePoint: 'savepoint 路径无效: ',
+    canceling: '当前作业正在停止中',
+    starting: '当前作业正在启动中',
   },
   dashboard: {
     availableTaskSlots: '可用的任务槽数',

@@ -25,8 +25,6 @@ import org.apache.streampark.console.system.service.TeamService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-@Tag(name = "TEAM_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -48,21 +45,18 @@ public class TeamController {
 
   @Autowired private TeamService teamService;
 
-  @Operation(summary = "List teams")
   @PostMapping("list")
   public RestResponse teamList(RestRequest restRequest, Team team) {
     IPage<Team> teamList = teamService.getPage(team, restRequest);
     return RestResponse.success(teamList);
   }
 
-  @Operation(summary = "Check the team name")
   @PostMapping("check/name")
   public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
     Team result = this.teamService.getByName(teamName);
     return RestResponse.success(result == null);
   }
 
-  @Operation(summary = "Create team")
   @PostMapping("post")
   @RequiresPermissions("team:add")
   public RestResponse addTeam(@Valid Team team) {
@@ -70,7 +64,6 @@ public class TeamController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Delete team")
   @DeleteMapping("delete")
   @RequiresPermissions("team:delete")
   public RestResponse deleteTeam(Team team) {
@@ -78,7 +71,6 @@ public class TeamController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Update team")
   @PutMapping("update")
   @RequiresPermissions("team:update")
   public RestResponse updateTeam(Team team) {

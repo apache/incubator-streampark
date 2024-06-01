@@ -15,15 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.annotation;
+package org.apache.streampark.console.core.enums;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Arrays;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ApiAccess {
-  boolean value() default true;
+public enum AuthenticationType {
+  SIGN(1),
+
+  OPENAPI(2);
+
+  private final Integer value;
+
+  AuthenticationType(int value) {
+    this.value = value;
+  }
+
+  public int get() {
+    return this.value;
+  }
+
+  public static AuthenticationType of(Integer value) {
+    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+  }
 }

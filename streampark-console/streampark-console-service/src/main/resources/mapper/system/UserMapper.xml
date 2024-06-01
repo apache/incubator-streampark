@@ -23,7 +23,6 @@
         <result column="nick_name" jdbcType="VARCHAR" property="nickName"/>
         <result column="password" jdbcType="VARCHAR" property="password"/>
         <result column="email" jdbcType="VARCHAR" property="email"/>
-        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
         <result column="status" jdbcType="CHAR" property="status"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
@@ -34,38 +33,87 @@
         <result column="login_type" jdbcType="INTEGER" property="loginType"/>
     </resultMap>
 
+    <sql id="userColumn">
+        u.user_id,
+        u.username,
+        u.nick_name,
+        u.user_type,
+        u.login_type,
+        u.status,
+        u.email,
+        u.create_time,
+        u.modify_time,
+        u.sex,
+        u.description
+    </sql>
+
     <select id="selectPage" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
-        select * from t_user
+        select <include refid="userColumn"></include>
+        from t_user u
         <where>
             <if test="user.username != null and user.username != ''">
-                and username like concat('%', '${user.username}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and u.username like concat('%', #{user.username},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and u.username like '%' || #{user.username} || '%'
+                </if>
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
-                and create_time &gt; #{user.createTimeFrom}
+                and u.create_time &gt; #{user.createTimeFrom}
             </if>
             <if test="user.createTimeTo!= null and user.createTimeTo !=''">
-                and create_time &lt; #{user.createTimeTo}
+                and u.create_time &lt; #{user.createTimeTo}
             </if>
             <if test="user.sex != null and user.sex != ''">
-                and sex = #{user.sex}
+                and u.sex = #{user.sex}
             </if>
             <if test="user.status != null and user.status != ''">
-                and status = #{user.status}
+                and u.status = #{user.status}
+            </if>
+        </where>
+    </select>
+
+    <select id="findUserDetail" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
+        select <include refid="userColumn"></include>
+        from t_user u
+        <where>
+            <if test="user.username != null and user.username != ''">
+                <if test="_databaseId == 'mysql'">
+                    and u.username like concat('%', #{user.username},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and u.username like '%' || #{user.username} || '%'
+                </if>
+            </if>
+            <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
+                and u.create_time &gt; #{user.createTimeFrom}
+            </if>
+            <if test="user.createTimeTo!= null and user.createTimeTo !=''">
+                and u.create_time &lt; #{user.createTimeTo}
+            </if>
+            <if test="user.sex != null and user.sex != ''">
+                and u.sex = #{user.sex}
+            </if>
+            <if test="user.status != null and user.status != ''">
+                and u.status = #{user.status}
             </if>
         </where>
     </select>
 
     <select id="selectNoTokenUsers" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
-        select u.* from t_user u left join t_access_token t
+        select <include refid="userColumn"></include>
+        from t_user u left join t_access_token t
         on u.user_id = t.user_id
         where t.user_id is null
     </select>
 
     <select id="selectUsersByAppOwner" resultType="org.apache.streampark.console.system.entity.User" parameterType="org.apache.streampark.console.system.entity.User">
-        select u.* from t_user u inner join (
-            select distinct(user_id) as user_id
-            from t_flink_app
-            where team_id = #{teamId}
+        select <include refid="userColumn"></include>
+        from t_user u inner join (
+        select distinct(user_id) as user_id
+        from t_flink_app
+        where team_id = #{teamId}
         ) t
         on u.user_id = t.user_id
     </select>

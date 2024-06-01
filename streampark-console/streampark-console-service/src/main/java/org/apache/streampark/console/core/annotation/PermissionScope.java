@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.properties;
+package org.apache.streampark.console.core.annotation;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Data
-@Configuration
-@ConfigurationProperties(prefix = "streampark.shiro")
-public class ShiroProperties {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PermissionScope {
 
-  private String anonUrl;
+  String user() default "";
 
-  /** token default effective time: 1d */
-  private Long jwtTimeOut = 86400L;
+  String team() default "";
+
+  String app() default "";
 }

@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.bean.RobotResponse;
 import org.apache.streampark.console.core.service.alert.AlertNotifyService;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.net.util.Base64;
 
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
@@ -37,14 +38,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,12 +55,18 @@ import java.util.StringJoiner;
 @Service
 @Lazy
 public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
-  private final Template template = FreemarkerUtils.loadTemplateFile("alert-dingTalk.ftl");
+  private Template template;
 
   private final RestTemplate alertRestTemplate;
 
   public DingTalkAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
     this.alertRestTemplate = alertRestTemplate;
+  }
+
+  @PostConstruct
+  public void loadTemplateFile() throws Exception {
+    String template = "alert-dingTalk.ftl";
+    this.template = FreemarkerUtils.loadTemplateFile(template);
   }
 
   @Override
@@ -74,57 +80,35 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
       if (StringUtils.hasLength(contacts)) {
         Collections.addAll(contactList, contacts.split(","));
       }
-      String title = renderTitle(alertTemplate, contactList);
-      Map<String, Object> contactMap = renderContact(contactList, dingTalkParams);
+      String title = alertTemplate.getTitle();
+      if (!contactList.isEmpty()) {
+        StringJoiner joiner = new StringJoiner(",@", title + " @", "");
+        contactList.forEach(joiner::add);
+        title = joiner.toString();
+      }
+      Map<String, Object> contactMap = new HashMap<>();
+      contactMap.put("atMobiles", contactList);
+      contactMap.put("isAtAll", BooleanUtils.toBoolean(dingTalkParams.getIsAtAll()));
+
       // format markdown
       String markdown = FreemarkerUtils.format(template, alertTemplate);
-      Map<String, String> contentMap = renderContent(title, markdown);
-      Map<String, Object> bodyMap = renderBody(contentMap, contactMap);
 
-      sendMessage(dingTalkParams, bodyMap);
+      Map<String, String> content = new HashMap<>();
+      content.put("title", title);
+      content.put("text", markdown);
+
+      Map<String, Object> body = new HashMap<>();
+      body.put("msgtype", "markdown");
+      body.put("markdown", content);
+      body.put("at", contactMap);
+
+      sendMessage(dingTalkParams, body);
       return true;
     } catch (AlertException alertException) {
       throw alertException;
     } catch (Exception e) {
-      throw new AlertException("Failed send DingTalk alert", e);
+      throw new AlertException("Failed send dingTalk alert", e);
     }
-  }
-
-  @Nonnull
-  private Map<String, Object> renderBody(
-      Map<String, String> content, Map<String, Object> contactMap) {
-    Map<String, Object> body = new HashMap<>();
-    body.put("msgtype", "markdown");
-    body.put("markdown", content);
-    body.put("at", contactMap);
-    return body;
-  }
-
-  @Nonnull
-  private Map<String, String> renderContent(String title, String markdown) {
-    Map<String, String> content = new HashMap<>();
-    content.put("title", title);
-    content.put("text", markdown);
-    return content;
-  }
-
-  @Nonnull
-  private Map<String, Object> renderContact(
-      List<String> contactList, AlertDingTalkParams dingTalkParams) {
-    Map<String, Object> contactMap = new HashMap<>();
-    contactMap.put("atMobiles", contactList);
-    contactMap.put("isAtAll", BooleanUtils.toBoolean(dingTalkParams.getIsAtAll()));
-    return contactMap;
-  }
-
-  private String renderTitle(AlertTemplate alertTemplate, List<String> contactList) {
-    String title = alertTemplate.getTitle();
-    if (!contactList.isEmpty()) {
-      StringJoiner joiner = new StringJoiner(",@", title + " @", "");
-      contactList.forEach(joiner::add);
-      title = joiner.toString();
-    }
-    return title;
   }
 
   private void sendMessage(AlertDingTalkParams params, Map<String, Object> body)
@@ -141,16 +125,16 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
     } catch (Exception e) {
       log.error("Failed to request DingTalk robot alarm,\nurl:{}", url, e);
       throw new AlertException(
-          String.format("Failed to request DingTalk robot alert,%nurl:%s", url), e);
+          String.format("Failed to request DingTalk robot alert,\nurl:%s", url), e);
     }
     if (robotResponse == null) {
       throw new AlertException(
-          String.format("Failed to request DingTalk robot alert,%nurl:%s", url));
+          String.format("Failed to request DingTalk robot alert,\nurl:%s", url));
     }
     if (robotResponse.getErrcode() != 0) {
       throw new AlertException(
           String.format(
-              "Failed to request DingTalk robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
+              "Failed to request DingTalk robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
               url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
     }
   }
@@ -162,23 +146,19 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
    * @return the webhook
    */
   private String getWebhook(AlertDingTalkParams params) {
-    String urlPef = "https://oapi.dingtalk.com/robot/send";
+    String urlPrefix = "https://oapi.dingtalk.com/robot/send";
     if (StringUtils.hasLength(params.getAlertDingURL())) {
-      urlPef = params.getAlertDingURL();
+      urlPrefix = params.getAlertDingURL().replaceFirst("\\?.*", "");
     }
-    if (!urlPef.endsWith("access_token=")) {
-      urlPef += "?access_token=";
-    }
-
     String url;
     if (params.getSecretEnable()) {
       Long timestamp = System.currentTimeMillis();
       url =
           String.format(
-              "%s%s&timestamp=%d&sign=%s",
-              urlPef, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+              "%s?access_token=%s&timestamp=%d&sign=%s",
+              urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
     } else {
-      url = String.format("%s%s", urlPef, params.getToken());
+      url = String.format("%s?access_token=%s", urlPrefix, params.getToken());
     }
     if (log.isDebugEnabled()) {
       log.debug("The alarm robot url of DingTalk contains signature is {}", url);
@@ -203,7 +183,7 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
       Mac mac = Mac.getInstance("HmacSHA256");
       mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
       byte[] signData = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
-      String sign = URLEncoder.encode(new String(Base64.getEncoder().encode(signData)), "UTF-8");
+      String sign = URLEncoder.encode(new String(Base64.encodeBase64(signData)), "UTF-8");
       if (log.isDebugEnabled()) {
         log.debug("Calculate the signature success, sign:{}", sign);
       }

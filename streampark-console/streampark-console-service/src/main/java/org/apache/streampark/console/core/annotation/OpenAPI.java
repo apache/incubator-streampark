@@ -15,26 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.annotation;
 
-import java.util.Arrays;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public enum PermissionTypeEnum {
-  USER(1),
-  TEAM(2),
-  APP(3);
-
-  private final int value;
-
-  public int get() {
-    return this.value;
-  }
-
-  PermissionTypeEnum(int value) {
-    this.value = value;
-  }
-
-  public static PermissionTypeEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OpenAPI {
+  boolean value() default true;
 }

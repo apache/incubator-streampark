@@ -108,7 +108,7 @@ export const userDetail = (
   }
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
-    await fetchRemoveSavePoint({ id: record.id });
+    await fetchRemoveSavePoint({ id: record.id, appId: record.appId });
     reloadSavePoint();
   }
 

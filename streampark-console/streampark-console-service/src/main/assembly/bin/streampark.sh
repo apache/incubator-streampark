@@ -42,6 +42,13 @@ if [[ "`tty`" != "not a tty" ]]; then
     have_tty=1
 fi
 
+# Bugzilla 37848: When no TTY is available, don't output to console
+have_tty=0
+# shellcheck disable=SC2006
+if [[ "`tty`" != "not a tty" ]]; then
+    have_tty=1
+fi
+
  # Only use colors if connected to a terminal
 if [[ ${have_tty} -eq 1 ]]; then
   PRIMARY=$(printf '\033[38;5;082m')
@@ -203,7 +210,7 @@ fi
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
-if [ ! -z "$CLASSPATH" ]; then
+if [[ ! -z "$CLASSPATH" ]]; then
   CLASSPATH="$CLASSPATH":
 fi
 CLASSPATH="$CLASSPATH"
@@ -222,7 +229,7 @@ if ${cygwin}; then
   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
 fi
 
-if [ -z "$USE_NOHUP" ]; then
+if [[ -z "$USE_NOHUP" ]]; then
   if $hpux; then
     USE_NOHUP="true"
   else
@@ -230,18 +237,18 @@ if [ -z "$USE_NOHUP" ]; then
   fi
 fi
 unset NOHUP
-if [ "$USE_NOHUP" = "true" ]; then
+if [[ "$USE_NOHUP" = "true" ]]; then
   NOHUP="nohup"
 fi
 
-PARAM_CLI="org.apache.streampark.flink.core.conf.ParameterCli"
+BASH_UTIL="org.apache.streampark.console.base.util.BashJavaUtils"
 
 APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
 
 JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
-JVM_ARGS="-server"
-if [ -f $JVM_OPTS_FILE ]; then
+JVM_ARGS=""
+if [[ -f $JVM_OPTS_FILE ]]; then
   while read line
   do
       if [[ "$line" == -* ]]; then
@@ -265,39 +272,38 @@ print_logo() {
   printf '      %s  ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        %s\n'          $PRIMARY $RESET
   printf '      %s /____/\__/_/   \___/\__,_/_/ /_/ /_/ ____/\__,_/_/  /_/|_|       %s\n'          $PRIMARY $RESET
   printf '      %s                                   /_/                            %s\n\n'        $PRIMARY $RESET
-  printf '      %s   Version:  2.2.0 %s\n'                                                         $BLUE   $RESET
+  printf '      %s   Version:  2.1.4 %s\n'                                                         $BLUE   $RESET
   printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                  $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
 }
 
-parse_yaml() {
-   local prefix=$2
-   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
-   sed -ne "s|^\($s\):|\1|" \
-        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
-        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
-   awk -F$fs '{
-      indent = length($1)/2;
-      vname[indent] = $2;
-      for (i in vname) {if (i > indent) {delete vname[i]}}
-      if (length($3) > 0) {
-         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
-      }
-   }'
+init_env() {
+  # shellcheck disable=SC2006
+  CONFIG="${APP_CONF}/application.yml"
+  if [[ -f "$CONFIG" ]] ; then
+    echo_y """[WARN] in the \"conf\" directory, found the \"application.yml\" file. The \"application.yml\" file is deprecated.
+       For compatibility, this application.yml will be used preferentially. The latest configuration file is \"config.yaml\". It is recommended to use \"config.yaml\".
+       Note: \"application.yml\" will be completely deprecated in version 2.2.0. """
+  else
+    CONFIG="${APP_CONF}/config.yaml"
+    if [[ ! -f "$CONFIG" ]] ; then
+      echo_r "can not found config.yaml in \"conf\" directory, please check."
+      exit 1;
+    fi
+  fi
 }
 
 # shellcheck disable=SC2120
 get_pid() {
-  if [ -f "$APP_PID" ]; then
-    if [ -s "$APP_PID" ]; then
+  if [[ -f "$APP_PID" ]]; then
+    if [[ -s "$APP_PID" ]]; then
       # shellcheck disable=SC2155
       # shellcheck disable=SC2006
       local PID=`cat "$APP_PID"`
       kill -0 $PID >/dev/null 2>&1
       # shellcheck disable=SC2181
-      if [ $? -eq 0 ]; then
+      if [[ $? -eq 0 ]]; then
         echo $PID
         exit 0
       fi
@@ -307,31 +313,25 @@ get_pid() {
   fi
 
   # shellcheck disable=SC2006
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
+  local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG"`
+  if [[ x"${serverPort}" == x"" ]]; then
+    echo_r "server.port is required, please check $CONFIG"
     exit 1;
-  fi
-
-  # shellcheck disable=SC2046
-  eval $(parse_yaml "${PROPER}" "conf_")
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2155
-  # shellcheck disable=SC2116
-  local serverPort=$(echo "$conf_server_port")
-  # shellcheck disable=SC2006
-  # shellcheck disable=SC2155
-  local used=`lsof -i:"$serverPort" | wc -l`
-  if [ "$used" -gt 0 ]; then
-    # shellcheck disable=SC2006
-    local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
-    if [ ! -z $PID ]; then
-      echo $PID
-    else
-      echo 0
-    fi
   else
-    echo 0
+     # shellcheck disable=SC2006
+      # shellcheck disable=SC2155
+      local used=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --check_port "$serverPort"`
+      if [[ x"${used}" == x"used" ]]; then
+        # shellcheck disable=SC2006
+        local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
+        if [[ ! -z $PID ]]; then
+          echo $PID
+        else
+          echo 0
+        fi
+      else
+        echo 0
+      fi
   fi
 }
 
@@ -340,7 +340,7 @@ start() {
   # shellcheck disable=SC2006
   local PID=$(get_pid)
 
-  if [ $PID -gt 0 ]; then
+  if [[ $PID -gt 0 ]]; then
     # shellcheck disable=SC2006
     echo_r "StreamPark is already running pid: $PID , start aborted!"
     exit 1
@@ -358,31 +358,20 @@ start() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
-    exit 1;
-  else
-    echo_g "Usage: config file: $PROPER ";
-  fi
+   # shellcheck disable=SC2006
+   local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "streampark.workspace.local" "$CONFIG"`
+   if [[ ! -d $workspace ]]; then
+     echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in $CONFIG"
+     echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
+     exit 1;
+   fi
 
-  # shellcheck disable=SC2046
-  eval $(parse_yaml "${PROPER}" "conf_")
-  # shellcheck disable=SC2001
-  # shellcheck disable=SC2154
-  # shellcheck disable=SC2155
-  local workspace=$(echo "$conf_streampark_workspace_local" | sed 's/#.*$//g')
-  if [[ ! -d $workspace ]]; then
-    echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in application.yml"
-    echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
-    exit 1;
-  fi
   if [[ ! -w $workspace ]] || [[ ! -r $workspace ]]; then
       echo_r "ERROR: streampark.workspace.local: \"$workspace\" Permission denied! "
       exit 1;
   fi
 
-  if [ "${HADOOP_HOME}"x == ""x ]; then
+  if [[ "${HADOOP_HOME}"x == ""x ]]; then
     echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
@@ -413,9 +402,7 @@ start() {
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
-
-  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
@@ -423,7 +410,6 @@ start() {
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
-    -Dspring.config.location="${PROPER}" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN >> "$APP_OUT" 2>&1 "&"
 
@@ -455,15 +441,7 @@ start_docker() {
     echo_w "Using APP_PID:   $APP_PID"
   fi
 
-  local PROPER="${APP_CONF}/application.yml"
-  if [[ ! -f "$PROPER" ]] ; then
-    echo_r "ERROR: config file application.yml invalid or not found! ";
-    exit 1;
-  else
-    echo_g "Usage: config file: $PROPER ";
-  fi
-
-  if [ "${HADOOP_HOME}"x == ""x ]; then
+  if [[ "${HADOOP_HOME}"x == ""x ]]; then
     echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
@@ -490,14 +468,9 @@ start_docker() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  # shellcheck disable=SC2034
-  # shellcheck disable=SC2006
-  # shellcheck disable=SC2155
-  local ADD_OPENS=`$_RUNJAVA -cp "$APP_CLASSPATH" $PARAM_CLI --vmopt`
-
   JVM_OPTS="${JVM_OPTS} -XX:-UseContainerSupport"
 
-  local JAVA_OPTS="$ADD_OPENS $JVM_OPTS $DEBUG_OPTS"
+  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
@@ -505,14 +478,14 @@ start_docker() {
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
-    -Dspring.config.location="${PROPER}" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN
 
 }
 
 debug() {
-  if [ ! -n "$DEBUG_PORT" ]; then
+  # shellcheck disable=SC2236
+  if [[ ! -n "$DEBUG_PORT" ]]; then
     echo_r "If start with debug mode,Please fill in the debug port like: bash streampark.sh debug 10002 "
   else
     DEBUG_OPTS="""
@@ -540,17 +513,17 @@ stop() {
   # shellcheck disable=SC2006
   echo_g "StreamPark stopping with the PID: $PID"
 
-  kill -9 $PID
+  kill -9 "$PID"
 
   while [ $SLEEP -ge 0 ]; do
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
-    kill -0 $PID >/dev/null 2>&1
+    kill -0 "$PID" >/dev/null 2>&1
     # shellcheck disable=SC2181
-    if [ $? -gt 0 ]; then
+    if [[ $? -gt 0 ]]; then
       rm -f "$APP_PID" >/dev/null 2>&1
-      if [ $? != 0 ]; then
-        if [ -w "$APP_PID" ]; then
+      if [[ $? != 0 ]]; then
+        if [[ -w "$APP_PID" ]]; then
           cat /dev/null > "$APP_PID"
         else
           echo_r "The PID file could not be removed."
@@ -560,7 +533,7 @@ stop() {
       break
     fi
 
-    if [ $SLEEP -gt 0 ]; then
+    if [[ $SLEEP -gt 0 ]]; then
        sleep 1
     fi
     # shellcheck disable=SC2006
@@ -568,7 +541,7 @@ stop() {
     SLEEP=`expr $SLEEP - 1 `
   done
 
-  if [ "$SLEEP" -lt 0 ]; then
+  if [[ "$SLEEP" -lt 0 ]]; then
      echo_r "StreamPark has not been killed completely yet. The process might be waiting on some system call or might be UNINTERRUPTIBLE."
   fi
 }
@@ -577,7 +550,7 @@ status() {
   # shellcheck disable=SC2155
   # shellcheck disable=SC2006
   local PID=$(get_pid)
-  if [ $PID -eq 0 ]; then
+  if [[ $PID -eq 0 ]]; then
     echo_r "StreamPark is not running"
   else
     echo_g "StreamPark is running pid is: $PID"
@@ -593,6 +566,7 @@ restart() {
 
 main() {
   print_logo
+  init_env
   case "$1" in
     "debug")
         DEBUG_PORT=$2

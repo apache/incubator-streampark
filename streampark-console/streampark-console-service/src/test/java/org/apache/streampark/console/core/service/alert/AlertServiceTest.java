@@ -159,7 +159,7 @@ class AlertServiceTest {
     Application application = new Application();
     application.setStartTime(new Date());
     application.setJobName("Test My Job");
-    application.setAppId("1234567890");
+    application.setClusterId("1234567890");
     application.setAlertId(1L);
 
     application.setRestartCount(5);
@@ -202,7 +202,7 @@ class AlertServiceTest {
       duration = application.getEndTime().getTime() - application.getStartTime().getTime();
     }
     String format = "%s/proxy/%s/";
-    String url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getAppId());
+    String url = String.format(format, YarnUtils.getRMWebAppURL(false), application.getClusterId());
 
     AlertTemplate template = new AlertTemplate();
     template.setJobName(application.getJobName());

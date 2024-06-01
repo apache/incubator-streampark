@@ -90,7 +90,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     Map<String, String> placeholderValueMap = new HashMap<>();
     placeholderValueMap.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
     placeholderValueMap.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
-    placeholderValueMap.put(PlaceholderTypeEnum.YARN_ID.get(), app.getAppId());
+    placeholderValueMap.put(PlaceholderTypeEnum.YARN_ID.get(), app.getClusterId());
     PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("{", "}");
     link.setRenderedLinkUrl(
         propertyPlaceholderHelper.replacePlaceholders(

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
@@ -79,28 +80,34 @@ public class ShiroRealm extends AuthorizingRealm {
   protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
       throws AuthenticationException {
     // The token here is passed from the executeLogin method of JWTFilter and has been decrypted
-    String token = (String) authenticationToken.getCredentials();
-    String username = JWTUtil.getUserName(token);
+    String credential = (String) authenticationToken.getCredentials();
+    String username = JWTUtil.getUserName(credential);
+
     if (StringUtils.isBlank(username)) {
-      throw new AuthenticationException("Token verification failed");
+      throw new AuthenticationException("the authorization token is invalid");
     }
     // Query user information by username
     User user = userService.getByUsername(username);
 
-    if (user == null) {
-      throw new AuthenticationException("ERROR Incorrect username or password!");
+    if (user == null || !JWTUtil.verify(credential, username, user.getSalt())) {
+      throw new AuthenticationException("the authorization token verification failed.");
     }
 
-    if (!JWTUtil.verify(token, username)) {
+    AuthenticationType authType = JWTUtil.getAuthType(credential);
+    if (authType == AuthenticationType.OPENAPI) {
       // Check whether the token belongs to the api and whether the permission is valid
-      String tokenDb = WebUtils.encryptToken(token);
-      boolean effective = accessTokenService.checkTokenEffective(user.getUserId(), tokenDb);
-      if (!effective) {
+      AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
+      if (accessToken == null
+          || !accessToken.getToken().equals(WebUtils.encryptToken(credential))) {
+        throw new AuthenticationException("the openapi authorization token is invalid");
+      }
+      if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
         throw new AuthenticationException(
-            "Token checked failed: 1-[Browser Request] please check the username or password; 2-[Api Request] please check the user status or accessToken status");
+            "the openapi authorization token has been disabled, please contact the administrator");
       }
       SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
     }
-    return new SimpleAuthenticationInfo(token, token, "streampark_shiro_realm");
+
+    return new SimpleAuthenticationInfo(credential, credential, "streampark_shiro_realm");
   }
 }

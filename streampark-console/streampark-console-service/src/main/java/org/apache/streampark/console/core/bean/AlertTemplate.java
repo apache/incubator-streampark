@@ -67,7 +67,7 @@ public class AlertTemplate implements Serializable {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getFlinkExecutionMode(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getClusterId())
         .setStartTime(application.getStartTime())
         .setEndTime(application.getEndTime())
         .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -87,7 +87,7 @@ public class AlertTemplate implements Serializable {
     return new AlertTemplateBuilder()
         .setDuration(application.getStartTime(), application.getEndTime())
         .setJobName(application.getJobName())
-        .setLink(application.getFlinkExecutionMode(), application.getAppId())
+        .setLink(application.getFlinkExecutionMode(), application.getClusterId())
         .setStartTime(application.getStartTime())
         .setType(2)
         .setCpFailureRateInterval(

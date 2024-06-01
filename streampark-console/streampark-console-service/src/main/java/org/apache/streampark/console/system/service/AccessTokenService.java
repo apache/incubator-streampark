@@ -32,13 +32,11 @@ public interface AccessTokenService extends IService<AccessToken> {
    * Generate token based on user ID's expiration time and description
    *
    * @param userId User id
-   * @param expireTime expiration
    * @param description more description
    * @return RestResponse
    * @throws InternalException
    */
-  RestResponse generateToken(Long userId, String expireTime, String description)
-      throws InternalException;
+  RestResponse create(Long userId, String description) throws InternalException;
 
   /**
    * Retrieves a page of {@link AccessToken} objects based on the provided parameters.

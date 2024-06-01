@@ -21,10 +21,9 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
-import org.apache.streampark.console.core.enums.PermissionTypeEnum;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.TeamService;
@@ -34,11 +33,10 @@ import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +48,6 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "USER_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -61,9 +58,8 @@ public class UserController {
 
   @Autowired private TeamService teamService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
-  @Operation(summary = "List users")
   @PostMapping("list")
   @RequiresPermissions(
       value = {"user:view", "app:view"},
@@ -73,7 +69,6 @@ public class UserController {
     return RestResponse.success(userList);
   }
 
-  @Operation(summary = "Create user")
   @PostMapping("post")
   @RequiresPermissions("user:add")
   public RestResponse addUser(@Valid User user) throws Exception {
@@ -82,14 +77,13 @@ public class UserController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Update user")
   @PutMapping("update")
+  @PermissionScope(user = "#user.id")
   @RequiresPermissions("user:update")
   public RestResponse updateUser(@Valid User user) throws Exception {
     return this.userService.updateUser(user);
   }
 
-  @Operation(summary = "Transfer User's Resource")
   @PutMapping("transferResource")
   @RequiresPermissions("user:update")
   public RestResponse transferResource(Long userId, Long targetUserId) {
@@ -97,29 +91,33 @@ public class UserController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "List without token users")
+  @DeleteMapping("delete")
+  @PermissionScope(user = "#userId")
+  @RequiresPermissions("user:delete")
+  public RestResponse deleteUser(Long userId) throws Exception {
+    this.userService.deleteUser(userId);
+    return RestResponse.success();
+  }
+
   @PostMapping("getNoTokenUser")
   public RestResponse getNoTokenUser() {
     List<User> userList = this.userService.listNoTokenUser();
     return RestResponse.success(userList);
   }
 
-  @Operation(summary = "Check the username")
   @PostMapping("check/name")
   public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
     boolean result = this.userService.getByUsername(username) == null;
     return RestResponse.success(result);
   }
 
-  @Operation(summary = "Update password")
-  @PermissionAction(id = "#user.userId", type = PermissionTypeEnum.USER)
   @PutMapping("password")
+  @PermissionScope(user = "#user.id")
   public RestResponse updatePassword(User user) throws Exception {
     userService.updatePassword(user);
     return RestResponse.success();
   }
 
-  @Operation(summary = "Reset password")
   @PutMapping("password/reset")
   @RequiresPermissions("user:reset")
   public RestResponse resetPassword(@NotBlank(message = "{required}") String username)
@@ -128,7 +126,6 @@ public class UserController {
     return RestResponse.success(newPass);
   }
 
-  @Operation(summary = "Init the user teams")
   @PostMapping("initTeam")
   public RestResponse initTeam(Long teamId, Long userId) {
     Team team = teamService.getById(teamId);
@@ -139,14 +136,13 @@ public class UserController {
     return RestResponse.success();
   }
 
-  @Operation(summary = "Set the current user teams")
   @PostMapping("setTeam")
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
       return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
     }
-    User user = commonService.getCurrentUser();
+    User user = serviceHelper.getLoginUser();
     ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
     // 1) set the latest team
     userService.setLastTeam(teamId, user.getUserId());
@@ -158,7 +154,6 @@ public class UserController {
     return new RestResponse().data(infoMap);
   }
 
-  @Operation(summary = "List the team users")
   @PostMapping("appOwners")
   public RestResponse appOwners(Long teamId) {
     List<User> userList = userService.listByTeamId(teamId);

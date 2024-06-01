@@ -47,41 +47,24 @@
     schemas: [
       {
         field: 'stopSavePointed',
-        label: 'Savepoint',
+        label: t('flink.app.operation.triggerSavePoint'),
         component: 'Switch',
         componentProps: {
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
         defaultValue: true,
-        afterItem: () => h('span', { class: 'tip-info' }, 'trigger savePoint before taking cancel'),
+        afterItem: () =>
+          h('span', { class: 'conf-switch' }, t('flink.app.operation.enableSavePoint')),
       },
       {
         field: 'customSavepoint',
-        label: 'Custom Savepoint',
+        label: 'Savepoint path',
         component: 'Input',
         componentProps: {
-          placeholder: 'Entry the custom savepoint path',
+          placeholder: t('flink.app.operation.customSavepoint'),
           allowClear: true,
         },
-        afterItem: () => h('span', { class: 'tip-info' }, 'cancel job with savepoint path'),
-        ifShow: ({ values }) => !!values.stopSavePointed,
-      },
-      {
-        field: 'nativeFormat',
-        label: 'NativeFormat',
-        component: 'Switch',
-        componentProps: {
-          checkedChildren: 'ON',
-          unCheckedChildren: 'OFF',
-        },
-        defaultValue: false,
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'tip-info' },
-            'Note: native format savepoint is supported since flink 1.15',
-          ),
         ifShow: ({ values }) => !!values.stopSavePointed,
       },
       {
@@ -93,27 +76,26 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        afterItem: () => h('span', { class: 'tip-info' }, 'Send max watermark before stopped'),
+        ifShow: ({ values }) => !!values.stopSavePointed,
+        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.operation.enableDrain')),
       },
     ],
     colon: true,
     showActionButtonGroup: false,
     labelCol: { lg: { span: 7, offset: 0 }, sm: { span: 7, offset: 0 } },
     wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
-    baseColProps: { span: 24 },
+    baseColProps: { span: 23 },
   });
 
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain, nativeFormat } =
-        (await validate()) as Recordable;
+      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
         savePointed: stopSavePointed,
         savePoint: customSavepoint,
         drain: drain,
-        nativeFormat: nativeFormat,
       };
 
       if (stopSavePointed) {
@@ -122,22 +104,22 @@
             savePoint: customSavepoint,
           });
           if (data.data === false) {
-            createErrorSwal('custom savepoint path is invalid, ' + data.message);
+            await createErrorSwal(t('flink.app.operation.invalidSavePoint') + data.message);
           } else {
-            handleStopAction(stopReq);
+            await handleStopAction(stopReq);
           }
         } else {
           const { data } = await fetchCheckSavepointPath({
             id: app.id,
           });
           if (data.data) {
-            handleStopAction(stopReq);
+            await handleStopAction(stopReq);
           } else {
-            createErrorSwal(data.message);
+            await createErrorSwal(data.message);
           }
         }
       } else {
-        handleStopAction(stopReq);
+        await handleStopAction(stopReq);
       }
       emit('updateOption', {
         type: 'stopping',
@@ -153,7 +135,7 @@
     await fetchCancel(stopReq);
     Swal.fire({
       icon: 'success',
-      title: 'The current job is canceling',
+      title: t('flink.app.operation.canceling'),
       showConfirmButton: false,
       timer: 2000,
     });
@@ -171,6 +153,6 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-30px" />
+    <BasicForm @register="registerForm" class="!pt-40px" />
   </BasicModal>
 </template>

@@ -17,18 +17,14 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.console.base.properties.ShiroProperties;
-import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
@@ -41,24 +37,10 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
   private static final String TOKEN = "Authorization";
 
-  private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
   @Override
   protected boolean isAccessAllowed(
       ServletRequest request, ServletResponse response, Object mappedValue)
       throws UnauthorizedException {
-    HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-    ShiroProperties properties = SpringContextUtils.getBean(ShiroProperties.class);
-    String[] anonUrl =
-        StringUtils.splitByWholeSeparatorPreserveAllTokens(
-            properties.getAnonUrl(), StringPool.COMMA);
-
-    for (String url : anonUrl) {
-      if (pathMatcher.match(url.trim(), httpServletRequest.getRequestURI())) {
-        return true;
-      }
-    }
-
     if (isLoginAttempt(request, response)) {
       return executeLogin(request, response);
     }
@@ -69,21 +51,27 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
   protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
     HttpServletRequest req = (HttpServletRequest) request;
     String token = req.getHeader(TOKEN);
-    return StringUtils.isNotBlank(token);
+    return token != null;
   }
 
   @Override
   protected boolean executeLogin(ServletRequest request, ServletResponse response) {
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
     String token = httpServletRequest.getHeader(TOKEN);
-    JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
-    try {
-      getSubject(request, response).login(jwtToken);
-      return true;
-    } catch (Exception e) {
-      log.error("Error in executeLogin, token {}, jwtToken {}", token, jwtToken, e);
+    AuthenticationType type = JWTUtil.getAuthType(WebUtils.decryptToken(token));
+    if (type == null) {
       return false;
     }
+    if (type == AuthenticationType.OPENAPI) {
+      JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
+      try {
+        getSubject(request, response).login(jwtToken);
+        return true;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /** cross-domain support */

@@ -37,9 +37,9 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -96,7 +96,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private FlinkSqlService flinkSqlService;
 
@@ -150,7 +150,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       transferTeamResource(resource.getTeamId(), upFile);
     }
 
-    resource.setCreatorId(commonService.getUserId());
+    resource.setCreatorId(serviceHelper.getUserId());
     this.save(resource);
   }
 

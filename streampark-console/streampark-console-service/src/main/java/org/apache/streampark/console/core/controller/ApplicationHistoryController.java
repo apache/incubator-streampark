@@ -23,8 +23,6 @@ import org.apache.streampark.console.core.service.application.ApplicationInfoSer
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-@Tag(name = "FLINK_APPLICATION_HISTORY_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -44,7 +41,6 @@ public class ApplicationHistoryController {
 
   @Autowired private ApplicationInfoService applicationInfoService;
 
-  @Operation(summary = "List the upload jar history records")
   @PostMapping("uploadJars")
   @RequiresPermissions("app:create")
   public RestResponse listUploadJars() {
@@ -52,7 +48,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(jars);
   }
 
-  @Operation(summary = "List the k8s namespace history records")
   @PostMapping("k8sNamespaces")
   @RequiresPermissions("app:create")
   public RestResponse listK8sNamespace() {
@@ -60,7 +55,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(namespaces);
   }
 
-  @Operation(summary = "List the session cluster history records")
   @PostMapping("sessionClusterIds")
   @RequiresPermissions("app:create")
   public RestResponse listSessionClusterId(int executionMode) {
@@ -78,7 +72,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(clusterIds);
   }
 
-  @Operation(summary = "List the flink base image history records")
   @PostMapping("flinkBaseImages")
   @RequiresPermissions("app:create")
   public RestResponse listFlinkBaseImage() {
@@ -86,7 +79,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(images);
   }
 
-  @Operation(summary = "List the flink pod template history records")
   @PostMapping("flinkPodTemplates")
   @RequiresPermissions("app:create")
   public RestResponse listPodTemplate() {
@@ -94,7 +86,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(templates);
   }
 
-  @Operation(summary = "List the flink JM pod template history records")
   @PostMapping("flinkJmPodTemplates")
   @RequiresPermissions("app:create")
   public RestResponse listJmPodTemplate() {
@@ -102,7 +93,6 @@ public class ApplicationHistoryController {
     return RestResponse.success(templates);
   }
 
-  @Operation(summary = "List the flink TM pod template history records")
   @PostMapping("flinkTmPodTemplates")
   @RequiresPermissions("app:create")
   public RestResponse listTmPodTemplate() {

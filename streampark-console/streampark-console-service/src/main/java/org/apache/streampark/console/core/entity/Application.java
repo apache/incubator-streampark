@@ -81,9 +81,6 @@ public class Application implements Serializable {
   private String jobName;
 
   @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String appId;
-
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String jobId;
 
   /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
@@ -93,7 +90,7 @@ public class Application implements Serializable {
   /** flink version */
   private Long versionId;
 
-  /** k8s cluster id */
+  /** 1. yarn application id(on yarn) 2. k8s application id (on k8s application) */
   private String clusterId;
 
   /** flink docker base image */
@@ -256,6 +253,7 @@ public class Application implements Serializable {
   private transient String createTimeTo;
   private transient String backUpDescription;
   private transient String yarnQueue;
+  private transient String serviceAccount;
 
   /** Flink Web UI Url */
   private transient String flinkRestUrl;
@@ -549,10 +547,10 @@ public class Application implements Serializable {
   @SneakyThrows
   @SuppressWarnings("unchecked")
   public Map<String, Object> getHotParamsMap() {
-    if (StringUtils.isNotBlank(this.hotParams)) {
-      Map<String, Object> hotParamsMap = JacksonUtils.read(this.hotParams, Map.class);
-      hotParamsMap.entrySet().removeIf(entry -> entry.getValue() == null);
-      return hotParamsMap;
+    if (this.hotParams != null) {
+      Map<String, Object> map = JacksonUtils.read(this.hotParams, Map.class);
+      map.entrySet().removeIf(entry -> entry.getValue() == null);
+      return map;
     }
     return Collections.EMPTY_MAP;
   }
@@ -572,7 +570,12 @@ public class Application implements Serializable {
     if (needFillYarnQueueLabel(executionModeEnum)) {
       hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
     }
-    if (MapUtils.isNotEmpty(hotParams)) {
+    if (executionModeEnum == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+      if (StringUtils.isNotBlank(appParam.getServiceAccount())) {
+        hotParams.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT(), appParam.getServiceAccount());
+      }
+    }
+    if (!hotParams.isEmpty()) {
       this.setHotParams(JacksonUtils.write(hotParams));
     }
   }

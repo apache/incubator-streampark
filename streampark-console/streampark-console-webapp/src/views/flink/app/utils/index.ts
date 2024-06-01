@@ -115,9 +115,9 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
   ) {
     if (!yarn) {
       const res = await fetchYarn();
-      window.open(res + '/proxy/' + app['appId'] + '/');
+      window.open(res + '/proxy/' + app['clusterId'] + '/');
     } else {
-      window.open(yarn + '/proxy/' + app['appId'] + '/');
+      window.open(yarn + '/proxy/' + app['clusterId'] + '/');
     }
   } else {
     if (app.flinkRestUrl) {
@@ -265,6 +265,19 @@ export function handleDependencyJsonToPom(json, pomMap, jarMap) {
   }
 }
 
+function getFlinkClusterId(values: Recordable) {
+  if (values.executionMode == ExecModeEnum.YARN_SESSION) {
+    return values.yarnSessionClusterId;
+  }
+  if (values.executionMode == ExecModeEnum.REMOTE) {
+    return values.remoteClusterId;
+  }
+  if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+    return values.k8sSessionClusterId;
+  }
+  return null;
+}
+
 export function handleSubmitParams(
   params: Recordable,
   values: Recordable,
@@ -288,17 +301,14 @@ export function handleSubmitParams(
     restartSize: values.restartSize,
     alertId: values.alertId,
     description: values.description,
-    hadoopUser: values.hadoopUser,
     k8sNamespace: values.k8sNamespace || null,
     clusterId: values.clusterId || null,
-    flinkClusterId:
-      (values.executionMode == ExecModeEnum.YARN_SESSION
-        ? values.yarnSessionClusterId
-        : values.flinkClusterId) || null,
+    flinkClusterId: getFlinkClusterId(values),
     flinkImage: values.flinkImage || null,
   });
   if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
     Object.assign(params, {
+      serviceAccount: values.serviceAccount,
       k8sPodTemplate: k8sTemplate.podTemplate,
       k8sJmPodTemplate: k8sTemplate.jmPodTemplate,
       k8sTmPodTemplate: k8sTemplate.tmPodTemplate,
