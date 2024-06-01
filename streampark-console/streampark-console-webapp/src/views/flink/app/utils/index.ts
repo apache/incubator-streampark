@@ -301,7 +301,6 @@ export function handleSubmitParams(
     restartSize: values.restartSize,
     alertId: values.alertId,
     description: values.description,
-    hadoopUser: values.hadoopUser,
     k8sNamespace: values.k8sNamespace || null,
     clusterId: values.clusterId || null,
     flinkClusterId: getFlinkClusterId(values),

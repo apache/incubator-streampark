@@ -76,7 +76,6 @@
   const {
     alerts,
     flinkEnvs,
-    flinkClusters,
     flinkSql,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
@@ -215,14 +214,13 @@
         flinkSql: values.flinkSql,
         config,
         format: values.isSetConfig ? 1 : null,
-        teamResource: JSON.stringify(values.teamResource),
         dependency:
           dependency.pom === undefined && dependency.jar === undefined
             ? null
             : JSON.stringify(dependency),
       };
       handleSubmitParams(params, values, k8sTemplate);
-      handleUpdateApp(params);
+      await handleUpdateApp(params);
     } catch (error) {
       createMessage.error('edit error');
       submitLoading.value = false;
@@ -258,16 +256,6 @@
 
   /* Send submission interface */
   async function handleUpdateApp(params: Recordable) {
-    if (params.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
-      const cluster =
-        unref(flinkClusters).filter((c) => {
-          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
-        })[0] || null;
-      if (cluster) {
-        Object.assign(params, { clusterId: cluster.clusterId });
-      }
-    }
-
     try {
       const updated = await fetchUpdate(params);
       if (updated) {

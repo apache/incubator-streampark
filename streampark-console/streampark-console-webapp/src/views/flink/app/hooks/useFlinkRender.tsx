@@ -39,7 +39,7 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum } from '/@/enums/flinkEnum';
+import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum, ClusterStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
@@ -262,6 +262,38 @@ export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
   );
 };
 
+export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackParams) => {
+  return (
+    <Select
+      placeholder={t('flink.app.flinkCluster')}
+      value={model[field]}
+      onChange={(value: any) => (model[field] = value)}
+    >
+      {clusters.map((item) => {
+        return (
+          <Select.Option key={item.id}>
+            {item.label}
+            <span style="margin-left: 50px;">
+              {item.state == ClusterStateEnum.CREATED && (
+                <Tag color="#108ee9">{t('flink.app.clusterState.created')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.RUNNING && (
+                <Tag color="#52c41a">{t('flink.app.clusterState.started')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.CANCELED && (
+                <Tag color="#fa8c16">{t('flink.app.clusterState.canceled')}</Tag>
+              )}
+              {item.state == ClusterStateEnum.LOST && (
+                <Tag color="#333333">{t('flink.app.clusterState.lost')}</Tag>
+              )}
+            </span>
+          </Select.Option>
+        );
+      })}
+    </Select>
+  );
+};
+
 /* render memory option */
 export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) => {
   return (
@@ -269,7 +301,7 @@ export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) 
       <Input.TextArea
         rows={8}
         name="dynamicProperties"
-        placeholder="Enter $key=$value,if there are multiple parameters,you can enter them on the new line(-D <arg>)"
+        placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
         value={model[field]}
         onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
       />
@@ -278,7 +310,6 @@ export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) 
           <Tag color="#2db7f5" class="tag-note">
             {t('flink.app.noteInfo.note')}
           </Tag>
-          {t('flink.app.noteInfo.dynamicProperties')}
           <a
             href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html"
             target="_blank"
