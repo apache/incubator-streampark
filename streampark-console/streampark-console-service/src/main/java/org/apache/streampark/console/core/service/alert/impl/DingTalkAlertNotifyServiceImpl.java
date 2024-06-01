@@ -146,23 +146,19 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
    * @return the webhook
    */
   private String getWebhook(AlertDingTalkParams params) {
-    String urlPef = "https://oapi.dingtalk.com/robot/send";
+    String urlPrefix = "https://oapi.dingtalk.com/robot/send";
     if (StringUtils.hasLength(params.getAlertDingURL())) {
-      urlPef = params.getAlertDingURL();
+      urlPrefix = params.getAlertDingURL().replaceFirst("\\?.*", "");
     }
-    if (!urlPef.endsWith("access_token=")) {
-      urlPef += "?access_token=";
-    }
-
     String url;
     if (params.getSecretEnable()) {
       Long timestamp = System.currentTimeMillis();
       url =
           String.format(
-              "%s%s&timestamp=%d&sign=%s",
-              urlPef, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+              "%s?access_token=%s&timestamp=%d&sign=%s",
+              urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
     } else {
-      url = String.format("%s%s", urlPef, params.getToken());
+      url = String.format("%s?access_token=%s", urlPrefix, params.getToken());
     }
     if (log.isDebugEnabled()) {
       log.debug("The alarm robot url of DingTalk contains signature is {}", url);

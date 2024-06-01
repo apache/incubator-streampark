@@ -19,22 +19,33 @@ package org.apache.streampark.console.base.util;
 
 import org.apache.streampark.common.util.PropertiesUtils;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Map;
 
 public class BashJavaUtils {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     String action = args[0].toLowerCase();
     String[] actionArgs = Arrays.copyOfRange(args, 1, args.length);
 
     switch (action) {
-      case "--yaml":
+      case "--get_yaml":
         String key = actionArgs[0];
         String conf = actionArgs[1];
         Map<String, String> confMap = PropertiesUtils.fromYamlFileAsJava(conf);
         String value = confMap.get(key);
         System.out.println(value);
+        break;
+      case "--check_port":
+        Integer port = Integer.parseInt(actionArgs[0]);
+        try {
+          new ServerSocket(port);
+          System.out.println("free");
+        } catch (Exception e) {
+          System.out.println("used");
+        }
         break;
       default:
         break;

@@ -313,15 +313,15 @@ get_pid() {
   fi
 
   # shellcheck disable=SC2006
-  local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --yaml "server.port" "$CONFIG"`
+  local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG"`
   if [[ x"${serverPort}" == x"" ]]; then
     echo_r "server.port is required, please check $CONFIG"
     exit 1;
   else
      # shellcheck disable=SC2006
       # shellcheck disable=SC2155
-      local used=`lsof -i:"$serverPort" | wc -l`
-      if [[ "$used" -gt 0 ]]; then
+      local used=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --check_port "$serverPort"`
+      if [[ x"${used}" == x"used" ]]; then
         # shellcheck disable=SC2006
         local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
         if [[ ! -z $PID ]]; then
@@ -359,7 +359,7 @@ start() {
   fi
 
    # shellcheck disable=SC2006
-   local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --yaml "streampark.workspace.local" "$CONFIG"`
+   local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "streampark.workspace.local" "$CONFIG"`
    if [[ ! -d $workspace ]]; then
      echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in $CONFIG"
      echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
