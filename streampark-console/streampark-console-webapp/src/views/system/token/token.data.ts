@@ -112,13 +112,4 @@ export const formSchema: FormSchema[] = [
     label: t('common.description'),
     component: 'InputTextArea',
   },
-  {
-    field: 'expireTime',
-    label: t('system.token.table.expireTime'),
-    component: 'DatePicker',
-    defaultValue: dayjs('9999-01-01'),
-    componentProps: {
-      disabled: true,
-    },
-  },
 ];
