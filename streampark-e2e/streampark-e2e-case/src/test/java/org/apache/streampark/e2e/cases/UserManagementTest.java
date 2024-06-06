@@ -38,8 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserManagementTest {
     private static RemoteWebDriver browser;
 
-    private static final String tenant = System.getProperty("user.name");
-
     private static final String userName = "admin";
 
     private static final String password = "streampark";

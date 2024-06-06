@@ -19,21 +19,21 @@ version: "3.8"
 
 services:
   streampark:
-    image: apache/streampark:dev-basic
+    image: apache/streampark:ci-basic
     command: bash bin/streampark.sh start_docker
     build:
-        context: ./
-        dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile
     ports:
-        - 10000:10000
-        - 10030:10030
+      - 10000:10000
+      - 10030:10030
     environment:
       - SPRING_PROFILES_ACTIVE=h2
       - TZ=Asia/Shanghai
     privileged: true
     restart: unless-stopped
     networks:
-        - e2e
+      - e2e
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:10000" ]
       interval: 5s
