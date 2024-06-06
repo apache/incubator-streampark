@@ -129,10 +129,22 @@ class UserManagementTest {
 ### Mac M1
 Add VM options to the test configuration in IntelliJ IDEA:
 ```
+# In this mode you need to install docker desktop for mac and run it with locally
 -Dm1_chip=true
 ```
 
-### Running streampark locally(without Docker)
+### Running locally(without Docker)
 ```
+# In this mode you need to start frontend and backend services locally
 -Dlocal=true
 ```
+
+### Running locally(with Docker)
+```
+# In this mode you only need to install docker locally
+```
+
+- To run the tests locally, you need to have the StreamPark running locally. You should add `streampark-e2e/pom.xml` to the maven project
+Since it does not participate in project compilation, it is not in the main project.
+- Running run test class `org.apache.streampark.e2e.cases.UserManagementTest` in the IDE. After execution, the test video will be saved as mp4 in a local temporary directory. Such as
+`/var/folders/hf/123/T/record-3123/PASSED-[engine:junit-jupiter]/[class:org.apache.streampark.e2e.cases.UserManagementTest]-20240606-152333.mp4`

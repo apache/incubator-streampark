@@ -62,7 +62,7 @@ jobs:
       - name: Build Image
         run: |
           ./build.sh \
-          docker build -f docker/Dockerfile . -t apache/streampark:ci
+          && docker build -f docker/Dockerfile . -t apache/streampark:ci
       - name: Export Docker Images
         run: |
           docker save apache/streampark:ci -o /tmp/standalone-image.tar \
