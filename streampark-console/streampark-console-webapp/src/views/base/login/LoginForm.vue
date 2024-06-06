@@ -62,6 +62,7 @@
         block
         @click="handleLogin"
         :loading="loading"
+        classNames="login-button"
       >
         {{ loginText.buttonText }}
       </Button>

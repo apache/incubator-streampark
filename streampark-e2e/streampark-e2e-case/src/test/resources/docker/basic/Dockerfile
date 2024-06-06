@@ -14,39 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-root = true
 
-[*]
-charset = utf-8
-end_of_line = lf
-indent_style = space
-indent_size = 4
-trim_trailing_whitespace = true
-insert_final_newline = true
-max_line_length = 140
-
-[*.scala]
-indent_size = 2
-
-[{*.yml, *.yaml}]
-indent_size = 2
-
-[*.json]
-indent_size = 2
-
-[*.py]
-indent_size = 4
-
-[*.sh]
-indent_size = 2
-
-[*.md]
-trim_trailing_whitespace = false
-
-[*.yaml]
-indent_size = 2
-
-[*.yml]
-indent_size = 2
-
-
+FROM apache/streampark:dev

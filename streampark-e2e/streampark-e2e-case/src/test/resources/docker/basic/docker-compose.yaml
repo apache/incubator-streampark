@@ -6,7 +6,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,39 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-root = true
 
-[*]
-charset = utf-8
-end_of_line = lf
-indent_style = space
-indent_size = 4
-trim_trailing_whitespace = true
-insert_final_newline = true
-max_line_length = 140
+version: "3.8"
 
-[*.scala]
-indent_size = 2
+services:
+  streampark:
+    image: apache/streampark:dev-basic
+    command: bash bin/streampark.sh start_docker
+    build:
+        context: ./
+        dockerfile: ./Dockerfile
+    ports:
+        - 10000:10000
+        - 10030:10030
+    environment:
+      - SPRING_PROFILES_ACTIVE=h2
+      - TZ=Asia/Shanghai
+    privileged: true
+    restart: unless-stopped
+    networks:
+        - e2e
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:10000" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
 
-[{*.yml, *.yaml}]
-indent_size = 2
-
-[*.json]
-indent_size = 2
-
-[*.py]
-indent_size = 4
-
-[*.sh]
-indent_size = 2
-
-[*.md]
-trim_trailing_whitespace = false
-
-[*.yaml]
-indent_size = 2
-
-[*.yml]
-indent_size = 2
-
-
+networks:
+  e2e:
