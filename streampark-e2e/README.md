@@ -26,18 +26,18 @@ Every page of StreamPark is abstracted into a class for better maintainability.
 ### Example
 
 The login page is abstracted
-as [`LoginPage`](streampark-e2e-case/src/test/java/org/apache/StreamPark/e2e/pages/LoginPage.java), with the
+as [`LoginPage`](streampark-e2e-case/src/test/java/org/apache/streampark/e2e/pages/LoginPage.java), with the
 following fields,
 
 ```java
 public final class LoginPage {
-    @FindBy(id = "inputUsername")
+    @FindBy(id = "form_item_account")
     private WebElement inputUsername;
 
-    @FindBy(id = "inputPassword")
+    @FindBy(id = "form_item_password")
     private WebElement inputPassword;
 
-    @FindBy(id = "btnLogin")
+    @FindBy(xpath = "//button[contains(@classnames, 'login-button')]")
     private WebElement buttonLogin;
 }
 ```
@@ -78,8 +78,8 @@ the `docker-compose.yaml` files to automatically set up the environment in the t
 
 ```java
 
-@StreamPark(composeFiles = "docker/tenant/docker-compose.yaml")
-class TenantE2ETest {
+@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+class UserManagementTest {
 }
 ```
 
@@ -88,8 +88,8 @@ will be automatically injected via the testing framework.
 
 ```java
 
-@StreamPark(composeFiles = "docker/tenant/docker-compose.yaml")
-class TenantE2ETest {
+@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+class UserManagementTest {
     private RemoteWebDriver browser;
 }
 ```
@@ -98,13 +98,20 @@ Then the field `browser` can be used in the test methods.
 
 ```java
 
-@StreamPark(composeFiles = "docker/tenant/docker-compose.yaml")
-class TenantE2ETest {
+@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+class UserManagementTest {
     private RemoteWebDriver browser;
 
     @Test
-    void testLogin() {
-        final LoginPage page = new LoginPage(browser); // <<-- use the browser injected
+    @Order(10)
+    void testCreateUser() {
+        final UserManagementPage userManagementPage = new UserManagementPage(browser);
+        userManagementPage.createUser(newUserName, "test", password, newUserEmail, UserManagementUserType.ADMIN);
+
+        Awaitility.await().untilAsserted(() -> assertThat(userManagementPage.userList())
+            .as("User list should contain newly-created user")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains(newUserName)));
     }
 }
 ```
@@ -112,5 +119,20 @@ class TenantE2ETest {
 ## Notes
 
 - For UI tests, it's common that the pages might need some time to load, or the operations might need some time to
-  complete, we can use `await().untilAsserted(() -> {})` to wait for the assertions.
+  complete, we can use `await().untilAsserted(() -> {})` to wait for the assertions. And use `new webDriverWait(driver, ExpectedConditions)` to wait for the elements to be present or clickable.
+- For better maintainability, it's recommended to abstract the pages into classes, and use the Page Object Model design
+  pattern.
 
+
+## Local development
+
+### Mac M1
+Add VM options to the test configuration in IntelliJ IDEA:
+```
+-Dm1_chip=true
+```
+
+### Running streampark locally(without Docker)
+```
+-Dlocal=true
+```

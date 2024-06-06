@@ -19,6 +19,7 @@
 
 package org.apache.streampark.e2e.pages;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import org.openqa.selenium.WebElement;
@@ -31,15 +32,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
 
 @Getter
+@Slf4j
 public final class LoginPage extends NavBarPage {
-    private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
     @FindBy(id = "form_item_account")
     private WebElement inputUsername;
 
