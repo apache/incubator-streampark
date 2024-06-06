@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-FROM apache/streampark:dev
+FROM apache/streampark:ci
