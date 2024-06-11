@@ -26,8 +26,14 @@ import org.apache.commons.io.output.NullOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -107,6 +113,17 @@ public class BashJavaUtils {
           writer.close();
           System.exit(0);
         } catch (IOException e) {
+          System.exit(1);
+        }
+        break;
+      case "--download":
+        try {
+          URL url = new URL(actionArgs[0]);
+          Path path = Paths.get(actionArgs[1]).toAbsolutePath().normalize();
+          try (InputStream inStream = url.openStream()) {
+            Files.copy(inStream, path, StandardCopyOption.REPLACE_EXISTING);
+          }
+        } catch (Exception e) {
           System.exit(1);
         }
         break;

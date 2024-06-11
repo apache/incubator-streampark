@@ -171,25 +171,30 @@ SP_NAME="apache-streampark_2.12-${SP_VERSION}-incubating-bin"
 SP_TAR="${SP_NAME}.tar.gz"
 SP_URL="https://archive.apache.org/dist/incubator/streampark/${SP_VERSION}/${SP_TAR}"
 SP_HOME="${WORK_DIR}"/"${SP_NAME}"
+SP_PATH="${WORK_DIR}"/"${SP_TAR}"
 SP_CONFIG="${SP_HOME}/conf/config.yaml"
 
 download() {
   local url=$1
   local name=$2
+  local path=$3
   if command -v wget > /dev/null; then
-     wget "$url" || rm -f "$name"
+     wget "$url" -O "$path" || rm -f "$path"
      # shellcheck disable=SC2181
      if [[ $? -ne 0 ]]; then
-        echo_r "download $name failed. url: $url"
+        echo_r "download $name failed."
         exit 1
      fi
   elif command -v curl > /dev/null; then
-     curl "$url" -f -L || rm -f "$name"
+     curl -o "$path" "$url" -f -L || rm -f "$path"
      # shellcheck disable=SC2181
      if [[ $? -ne 0 ]]; then
-       echo_r "download $name failed. url: $url"
+       echo_r "download $name failed."
        exit 1
      fi
+  else
+    echo_r "wget and curl command not found, please install them first."
+    exit 1
   fi
 }
 
@@ -198,7 +203,7 @@ BASH_UTIL="org.apache.streampark.console.base.util.BashJavaUtils"
 # 1). download streampark.
 echo_g "download streampark..."
 
-# download "$SP_URL" "$SP_TAR"
+download "$SP_URL" "$SP_TAR" "$SP_PATH"
 tar -xvf "${SP_TAR}" >/dev/null 2>&1 \
     && rm -r "${SP_TAR}" \
     && mkdir "${SP_HOME}"/flink \
@@ -225,11 +230,12 @@ else
   FLINK_URL="https://archive.apache.org/dist/flink/${FLINK_NAME}/${FLINK_NAME}-bin-scala_2.12.tgz"
   FLINK_TAR="${FLINK_NAME}-bin-scala_2.12.tgz"
   FLINK_HOME="${WORK_DIR}"/${SP_NAME}/flink/${FLINK_NAME}
+  FLINK_PATH="${WORK_DIR}"/"${FLINK_TAR}"
   FLINK_CONF="${FLINK_HOME}/conf/config.yaml"
 
   # 1) download flink
   echo_g "download flink..."
-  download "$FLINK_URL" "$FLINK_TAR"
+  download "$FLINK_URL" "$FLINK_TAR" "$FLINK_PATH"
   tar -xvf "${FLINK_TAR}" >/dev/null 2>&1 \
     && rm -r "${FLINK_TAR}" \
     && mv "$FLINK_NAME" "${WORK_DIR}"/"${SP_NAME}"/flink
