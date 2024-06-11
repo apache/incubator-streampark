@@ -23,14 +23,14 @@
 have_tty=0
 # shellcheck disable=SC2006
 if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
+  have_tty=1
 fi
 
 # Bugzilla 37848: When no TTY is available, don't output to console
 have_tty=0
 # shellcheck disable=SC2006
 if [[ "`tty`" != "not a tty" ]]; then
-    have_tty=1
+  have_tty=1
 fi
 
  # Only use colors if connected to a terminal
@@ -47,17 +47,17 @@ else
 fi
 
 echo_r () {
-    # Color red: Error, Failed
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  "$BLUE" "$RESET" "$RED" "$RESET"
+  # Color red: Error, Failed
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[%sStreamPark%s] %s$1%s\n"  "$BLUE" "$RESET" "$RED" "$RESET"
 }
 
 echo_g () {
-    # Color green: Success
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[%sStreamPark%s] %s$1%s\n"  "$BLUE" "$RESET" "$GREEN" "$RESET"
+  # Color green: Success
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[%sStreamPark%s] %s$1%s\n"  "$BLUE" "$RESET" "$GREEN" "$RESET"
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -179,19 +179,19 @@ download() {
   local name=$2
   local path=$3
   if command -v wget > /dev/null; then
-     wget "$url" -O "$path" || rm -f "$path"
-     # shellcheck disable=SC2181
-     if [[ $? -ne 0 ]]; then
-        echo_r "download $name failed."
-        exit 1
-     fi
+    wget "$url" -O "$path" || rm -f "$path"
+    # shellcheck disable=SC2181
+    if [[ $? -ne 0 ]]; then
+      echo_r "download $name failed."
+      exit 1
+    fi
   elif command -v curl > /dev/null; then
-     curl -o "$path" "$url" -f -L || rm -f "$path"
-     # shellcheck disable=SC2181
-     if [[ $? -ne 0 ]]; then
-       echo_r "download $name failed."
-       exit 1
-     fi
+    curl -o "$path" "$url" -f -L || rm -f "$path"
+    # shellcheck disable=SC2181
+    if [[ $? -ne 0 ]]; then
+      echo_r "download $name failed."
+      exit 1
+    fi
   else
     echo_r "wget and curl command not found, please install them first."
     exit 1
