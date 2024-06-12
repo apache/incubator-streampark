@@ -38,7 +38,7 @@ import java.util.List;
 
 @Getter
 public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn-primary')]//span[contains(text(), 'Add New')]")
+    @FindBy(xpath = "//span[contains(., 'User List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
     private WebElement buttonCreateUser;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
@@ -56,6 +56,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
     public UserManagementPage createUser(String userName, String nickName, String password, String email, UserManagementUserType userManagementUserType) {
         waitForPageLoading();
 
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateUser));
         buttonCreateUser.click();
         createUserForm.inputUserName().sendKeys(userName);
         createUserForm.inputNickName().sendKeys(nickName);
