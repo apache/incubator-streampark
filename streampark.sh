@@ -182,19 +182,47 @@ download() {
     wget "$url" -O "$path" || rm -f "$path"
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]]; then
-      echo_r "download $name failed."
+      echo_r "download $name failed, please try again."
       exit 1
     fi
   elif command -v curl > /dev/null; then
     curl -o "$path" "$url" -f -L || rm -f "$path"
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]]; then
-      echo_r "download $name failed."
+      echo_r "download $name failed, please try again."
       exit 1
     fi
   else
-    echo_r "wget and curl command not found, please install them first."
-    exit 1
+    echo "
+      import java.io.InputStream;
+      import java.net.URL;
+      import java.nio.file.Files;
+      import java.nio.file.Path;
+      import java.nio.file.Paths;
+      import java.nio.file.StandardCopyOption;
+
+      public class Downloader {
+        public static void main(String[] args) {
+          try {
+            URL url = new URL(args[0]);
+            Path path = Paths.get(args[1]).toAbsolutePath().normalize();
+            try (InputStream inStream = url.openStream()) {
+              Files.copy(inStream, path, StandardCopyOption.REPLACE_EXISTING);
+            }
+          } catch (Exception e) {
+            System.exit(1);
+          }
+        }
+      }" > "${WORK_DIR}"/Downloader.java
+
+    "$JAVA_HOME/bin/javac" "${WORK_DIR}"/Downloader.java && rm -f "${WORK_DIR}"/Downloader.java
+
+    "$JAVA_HOME/bin/java" -cp "${WORK_DIR}" Downloader "$url" "$path" && rm -f "${WORK_DIR}"/Downloader.class
+
+    if [[ $? -ne 0 ]]; then
+      echo_r "download $name failed, please try again."
+      exit 1
+    fi
   fi
 }
 
