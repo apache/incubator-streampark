@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.system.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,9 @@ public class QuickStartRunner implements ApplicationRunner {
 
   @Autowired private FlinkSqlService flinkSqlService;
 
-  private static Long demoAppId = 100000L;
+  @Autowired private UserService userService;
+
+  private static Long defaultId = 100000L;
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
@@ -61,6 +64,9 @@ public class QuickStartRunner implements ApplicationRunner {
     Map<String, String> quickstart = map.get("quickstart");
 
     if (!quickstart.isEmpty() && quickstart.size() == 3) {
+
+      userService.setLastTeam(defaultId, defaultId);
+
       // 1) create flinkEnv
       FlinkEnv flinkEnv = new FlinkEnv();
       flinkEnv.setFlinkName(quickstart.get("flink_name"));
@@ -74,11 +80,11 @@ public class QuickStartRunner implements ApplicationRunner {
       flinkCluster.setClusterState(ClusterState.STARTED.getValue());
       flinkCluster.setExecutionMode(ExecutionMode.REMOTE.getMode());
       flinkCluster.setAddress("http://localhost:" + quickstart.get("flink_port"));
-      flinkClusterService.create(flinkCluster, 100000L);
+      flinkClusterService.create(flinkCluster, defaultId);
 
       // 3) set flink version and cluster
       Application app = new Application();
-      app.setId(demoAppId);
+      app.setId(defaultId);
       Application application = applicationService.getApp(app);
       application.setFlinkClusterId(flinkCluster.getId());
       application.setVersionId(flinkEnv.getId());
@@ -90,7 +96,7 @@ public class QuickStartRunner implements ApplicationRunner {
       boolean success = applicationService.update(application);
       if (success) {
         // 4) build application
-        applicationService.buildApplication(demoAppId, false);
+        applicationService.buildApplication(defaultId, false);
       }
     }
   }
