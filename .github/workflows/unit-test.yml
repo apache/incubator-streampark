@@ -64,7 +64,7 @@ jobs:
       - name: Check codestyle
         run: ./mvnw -B -q -nsu checkstyle:check spotless:check
   unit-test:
-    name: "maven-compile (java-${{ matrix.java }})"
+    name: "Unit-Test (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
