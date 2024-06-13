@@ -38,7 +38,7 @@ public class HadoopContainer extends GenericContainer<HadoopContainer> {
 
   // Hadoop version is 2.7.0
   private static final DockerImageName DOCKER_IMAGE_NAME =
-      DockerImageName.parse("sequenceiq/hadoop-docker:latest");
+      DockerImageName.parse("sequenceiq/hadoop-docker:2.7.1");
 
   public static final Map<Integer, Integer> MAPPED_PORTS =
       new HashMap<Integer, Integer>() {
