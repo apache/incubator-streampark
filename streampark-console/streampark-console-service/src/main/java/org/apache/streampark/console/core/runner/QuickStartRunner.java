@@ -63,7 +63,7 @@ public class QuickStartRunner implements ApplicationRunner {
         PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
     Map<String, String> quickstart = map.get("quickstart");
 
-    if (!quickstart.isEmpty() && quickstart.size() == 3) {
+    if (quickstart != null && quickstart.size() == 3) {
 
       userService.setLastTeam(defaultId, defaultId);
 
