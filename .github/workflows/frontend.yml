@@ -70,4 +70,6 @@ jobs:
           if [[ ${{ contains(needs.*.result, 'success') }} == 'false' ]]; then
             echo "Frontend Build Failed!"
             exit -1
+          else
+            echo "Frontend Build Success!"
           fi
