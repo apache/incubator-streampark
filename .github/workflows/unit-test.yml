@@ -88,6 +88,7 @@ jobs:
     needs: [ unit-test, license-header, code-style ]
     if: always()
     steps:
+      - uses: actions/checkout@v4
       - name: Status
         run: |
           if [[ ${{ contains(needs.*.result, 'success') }} == 'false' ]]; then

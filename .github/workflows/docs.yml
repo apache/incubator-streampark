@@ -58,6 +58,7 @@ jobs:
       - dead-link
     if: always()
     steps:
+      - uses: actions/checkout@v4
       - name: Status
         run: |
           if [[ ${{ contains(needs.*.result, 'failure') }} == 'true' || ${{ contains(needs.*.result, 'cancelled') }} == 'true' ]]; then
