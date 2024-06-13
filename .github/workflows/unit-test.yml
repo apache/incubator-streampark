@@ -90,7 +90,7 @@ jobs:
     steps:
       - name: Status
         run: |
-          if [[ ${{ needs.*.result }} != 'success' ]]; then
+          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
             echo "Unit-Test Failed!"
             exit -1
           fi
