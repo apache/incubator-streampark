@@ -90,7 +90,7 @@ jobs:
     steps:
       - name: Status
         run: |
-          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
+          if [[ ${{ contains(needs.*.result, 'success') }} == 'false' ]]; then
             echo "Backend Build Failed!"
             exit -1
           fi
