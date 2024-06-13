@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: Maven Package Test
+name: Backend
 
 on:
   push:
@@ -81,4 +81,16 @@ jobs:
         run: ./mvnw -B clean install -Pshaded -DskipTests
       - name: Test with Maven
         run: ./mvnw -B test
-
+  result:
+    name: Backend - Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ build, license-header, code-style ]
+    if: always()
+    steps:
+      - name: Status
+        run: |
+          if [[ ${{ needs.*.result }} != 'success']]; then
+            echo "Backend Build Failed!"
+            exit -1
+          fi
