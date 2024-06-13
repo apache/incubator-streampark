@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: Status
         run: |
-          if [[ ${{ needs.*.result }} != 'success']]; then
+          if [[ ${{ needs.*.result }} != 'success' ]]; then
             echo "Frontend Build Failed!"
             exit -1
           fi

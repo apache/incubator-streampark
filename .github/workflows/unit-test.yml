@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: Backend
+name: Unit-Test
 
 on:
   push:
@@ -37,7 +37,7 @@ on:
 
 
 concurrency:
-  group: backend-${{ github.workflow }}-${{ github.ref }}
+  group: unit-test-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -63,8 +63,8 @@ jobs:
           submodules: true
       - name: Check codestyle
         run: ./mvnw -B -q -nsu checkstyle:check spotless:check
-  build:
-    name: "Backend-Build (java-${{ matrix.java }})"
+  unit-test:
+    name: "maven-compile (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -79,18 +79,18 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: "adopt"
           cache: "maven"
-      - name: Backend Build with Maven
-        run: ./mvnw -B clean install -Pshaded -DskipTests
+      - name: Unit-Test with Maven
+        run: ./mvnw clean -B test
   result:
-    name: Backend - Result
+    name: Unit-Test - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ build, license-header, code-style ]
+    needs: [ unit-test, license-header, code-style ]
     if: always()
     steps:
       - name: Status
         run: |
           if [[ ${{ needs.*.result }} != 'success' ]]; then
-            echo "Backend Build Failed!"
+            echo "Unit-Test Failed!"
             exit -1
           fi

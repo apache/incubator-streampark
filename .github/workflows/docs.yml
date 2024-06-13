@@ -33,7 +33,7 @@ name: Docs
 
 
 concurrency:
-  group: doc-${{ github.event.pull_request.number || github.ref }}
+  group: docs-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 
