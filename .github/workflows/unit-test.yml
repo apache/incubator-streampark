@@ -1,0 +1,97 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Unit-Test
+
+on:
+  push:
+    branches:
+      - dev
+      - release-*
+      - dev-*
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streampark-console/streampark-console-webapp/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streampark-console/streampark-console-webapp/**'
+
+
+concurrency:
+  group: unit-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  license-header:
+    if: github.repository == 'apache/incubator-streampark'
+    name: License header
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Check license header
+        uses: apache/skywalking-eyes/header@main
+  code-style:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Code style
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Check codestyle
+        run: ./mvnw -B -q -nsu checkstyle:check spotless:check
+  unit-test:
+    name: "Unit-Test (java-${{ matrix.java }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 8 , 11 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up java ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "adopt"
+          cache: "maven"
+      - name: Unit-Test with Maven
+        run: ./mvnw clean -B test
+  result:
+    name: Unit-Test - Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ unit-test, license-header, code-style ]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Status
+        run: |
+          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
+            echo "Unit-Test Failed!"
+            exit -1
+          fi

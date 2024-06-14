@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-name: Maven Package Test
+name: Backend
 
 on:
   push:
@@ -34,8 +34,10 @@ on:
       - 'deploy/**'
       - 'script/**'
       - 'streampark-console/streampark-console-webapp/**'
+
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: backend-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -62,7 +64,7 @@ jobs:
       - name: Check codestyle
         run: ./mvnw -B -q -nsu checkstyle:check spotless:check
   build:
-    name: "maven-compile (java-${{ matrix.java }})"
+    name: "Backend-Build (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -77,8 +79,18 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: "adopt"
           cache: "maven"
-      - name: Build with Maven
+      - name: Backend Build with Maven
         run: ./mvnw -B clean install -Pshaded -DskipTests
-      - name: Test with Maven
-        run: ./mvnw -B test
-
+  result:
+    name: Backend - Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ build, license-header, code-style ]
+    if: always()
+    steps:
+      - name: Status
+        run: |
+          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
+            echo "Backend Build Failed!"
+            exit -1
+          fi

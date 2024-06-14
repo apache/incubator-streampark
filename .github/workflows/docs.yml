@@ -33,7 +33,7 @@ name: Docs
 
 
 concurrency:
-  group: doc-${{ github.event.pull_request.number || github.ref }}
+  group: docs-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 
@@ -51,13 +51,14 @@ jobs:
             markdown-link-check -c .dlc.json -q "$file"
           done
   result:
-    name: Docs
+    name: Docs - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:
       - dead-link
     if: always()
     steps:
+      - uses: actions/checkout@v4
       - name: Status
         run: |
           if [[ ${{ contains(needs.*.result, 'failure') }} == 'true' || ${{ contains(needs.*.result, 'cancelled') }} == 'true' ]]; then
