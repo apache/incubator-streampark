@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.AppExistsState;
@@ -67,7 +68,7 @@ public interface ApplicationService extends IService<Application> {
 
   String readConf(String config) throws IOException;
 
-  Application getApp(Application app);
+  Application getApp(Application application);
 
   String getMain(Application application);
 
@@ -128,4 +129,6 @@ public interface ApplicationService extends IService<Application> {
   AppExistsState checkStart(Application app);
 
   List<ApplicationReport> getYARNApplication(String appName);
+
+  RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception;
 }
