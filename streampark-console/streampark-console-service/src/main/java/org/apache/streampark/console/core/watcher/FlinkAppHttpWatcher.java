@@ -243,10 +243,7 @@ public class FlinkAppHttpWatcher {
       processJobState(application, jobOptional);
     }
     log.debug(
-        "FlinkAppHttpWatcher getStateFromFlink, application: {}, jobsOverview: {}, jobOptional: {}",
-        application,
-        jobsOverview,
-        jobOptional);
+        "getStateFromFlink abnormal, application: {}, jobsOverview: {}", application, jobsOverview);
   }
 
   private void processJobState(Application application, Optional<JobsOverview.Job> jobOptional)
