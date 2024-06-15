@@ -20,6 +20,7 @@
 package org.apache.streampark.e2e.cases;
 
 
+import lombok.SneakyThrows;
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
@@ -33,8 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
-
-import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -147,6 +146,101 @@ public class ApplicationsFlink118OnYarnTest {
     @Test
     @Order(40)
     void testDeleteFlinkApplicationOnYarnApplicationMode() {
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.deleteApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> {
+            browser.navigate().refresh();
+
+            assertThat(
+                applicationsPage.applicationsList()
+            ).noneMatch(
+                it -> it.getText().contains(applicationName)
+            );
+        });
+    }
+
+    @Test
+    @Order(50)
+    void testCreateFlinkApplicationOnYarnPerJobMode() {
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
+        String flinkSQL = "CREATE TABLE datagen (\n" +
+            "f_sequence INT,\n" +
+            "f_random INT,\n" +
+            "f_random_str STRING,\n" +
+            "ts AS localtimestamp,\n" +
+            "WATERMARK FOR ts AS ts\n" +
+            ") WITH (\n" +
+            "'connector' = 'datagen',\n" +
+            "'rows-per-second'='5',\n" +
+            "'fields.f_sequence.kind'='sequence',\n" +
+            "'fields.f_sequence.start'='1',\n" +
+            "'fields.f_sequence.end'='100',\n" +
+            "'fields.f_random.min'='1',\n" +
+            "'fields.f_random.max'='100',\n" +
+            "'fields.f_random_str.length'='10'\n" +
+            ");\n" +
+            "\n" +
+            "CREATE TABLE print_table (\n" +
+            "f_sequence INT,\n" +
+            "f_random INT,\n" +
+            "f_random_str STRING\n" +
+            ") WITH (\n" +
+            "'connector' = 'print'\n" +
+            ");\n" +
+            "\n" +
+            "INSERT INTO print_table select f_sequence,f_random,f_random_str from datagen;";
+        applicationsDynamicParams.flinkSQL(flinkSQL);
+        applicationsPage.createApplication().addApplication(ApplicationForm.DevelopmentMode.FLINK_SQL,
+            ApplicationForm.ExecutionMode.YARN_PER_JOB,
+            applicationName,
+            flinkName,
+            applicationsDynamicParams);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain newly-created application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains(applicationName)));
+    }
+
+    @Test
+    @Order(60)
+    void testReleaseFlinkApplicationOnYarnPerJobMode() {
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.releaseApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain released application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains("SUCCESS")));
+    }
+
+    @Test
+    @Order(70)
+    void testStartFlinkApplicationOnYarnPerJobMode() {
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.startApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain started application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains("RUNNING")));
+
+        Awaitility.await()
+            .untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+                .as("Applications list should contain finished application")
+                .extracting(WebElement::getText)
+                .anyMatch(it -> it.contains("FINISHED")));
+    }
+
+    @Test
+    @Order(80)
+    void testDeleteFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.deleteApplication(applicationName);

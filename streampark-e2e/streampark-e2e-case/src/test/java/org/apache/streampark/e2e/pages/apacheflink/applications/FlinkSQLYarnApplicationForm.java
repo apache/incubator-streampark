@@ -52,7 +52,7 @@ public final class FlinkSQLYarnApplicationForm {
     }
 
     @SneakyThrows
-    public FlinkSQLYarnApplicationForm addYarnApplication(String flinkVersion, String flinkSql) {
+    public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
         buttonFlinkVersionDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
         selectFlinkVersion.stream()
@@ -64,20 +64,5 @@ public final class FlinkSQLYarnApplicationForm {
         new FlinkSQLEditor(driver).content(flinkSql);
 
         return this;
-    }
-
-    public enum DevelopmentMode {
-        CUSTOM_CODE,
-        FLINK_SQL,
-        PYTHON_FLINK
-    }
-
-    public enum ExecutionMode {
-        REMOTE,
-        YARN_APPLICATION,
-        YARN_SESSION,
-        KUBERNETES_SESSION,
-        KUBERNETES_APPLICATION,
-        YARN_PER_JOB
     }
 }

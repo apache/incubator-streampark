@@ -19,10 +19,10 @@
  */
 package org.apache.streampark.e2e.pages.apacheflink.applications;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.apacheflink.applications.entity.ApplicationsDynamicParams;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -78,6 +78,7 @@ public final class ApplicationForm {
                                           String applicationName,
                                           String flinkVersion,
                                           ApplicationsDynamicParams applicationsDynamicParams) {
+        Thread.sleep(1000);
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
@@ -113,7 +114,7 @@ public final class ApplicationForm {
                             )
                             .click();
                         new FlinkSQLYarnApplicationForm(driver)
-                            .addYarnApplication(flinkVersion, applicationsDynamicParams.flinkSQL());
+                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
                         break;
                     case YARN_SESSION:
                         selectExecutionMode.stream()
@@ -146,6 +147,8 @@ public final class ApplicationForm {
                             .orElseThrow(() -> new IllegalArgumentException(String.format("Execution mode not found: %s", executionMode.desc()))
                             )
                             .click();
+                        new FlinkSQLYarnApplicationForm(driver)
+                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
                         break;
                     default:
                         throw new IllegalArgumentException(String.format("Unknown execution mode: %s", executionMode.desc()));
