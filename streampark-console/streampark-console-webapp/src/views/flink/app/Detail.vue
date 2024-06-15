@@ -29,7 +29,7 @@
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
+  import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
   import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
   import { useIntervalFn, useClipboard } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app/app.type';
@@ -178,8 +178,6 @@
     if (confList.records.length > 0) detailTabs.showConf = true;
     if (pointHistory.records.length > 0) detailTabs.showSaveOption = true;
     if (optionList.records.length > 0) detailTabs.showOptionLog = true;
-    //const backupList = await fetchBackUps(commonParams);
-    //if (backupList.records.length > 0) detailTabs.showBackup = true;
   }
 
   /* Get yarn data */

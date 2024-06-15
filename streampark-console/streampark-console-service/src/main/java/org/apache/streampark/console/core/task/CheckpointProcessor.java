@@ -90,7 +90,7 @@ public class CheckpointProcessor {
         return;
       }
 
-      Long latestChkId = getLatestCheckpointedId(appId, checkPointKey.getCheckPointId());
+      Long latestChkId = getLatestCheckpointId(appId, checkPointKey.getCheckPointId());
       if (checkSaveAsCheckpoint(checkPoint, latestChkId)) {
         checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
         saveSavepoint(checkPoint, application.getId());
@@ -131,6 +131,18 @@ public class CheckpointProcessor {
     }
   }
 
+  // issue: https://github.com/apache/incubator-streampark/issues/3749
+  public void resetCheckpointNum(Long appId) {
+    checkPointCache
+        .asMap()
+        .forEach(
+            (k, v) -> {
+              if (k.startsWith(appId.toString())) {
+                checkPointCache.invalidate(k);
+              }
+            });
+  }
+
   private boolean checkSaveAsCheckpoint(@Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
     return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
   }
@@ -148,7 +160,7 @@ public class CheckpointProcessor {
   }
 
   @Nullable
-  private Long getLatestCheckpointedId(Long appId, String cacheId) {
+  private Long getLatestCheckpointId(Long appId, String cacheId) {
     return checkPointCache.get(
         cacheId,
         key -> {

@@ -79,6 +79,7 @@ import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.task.CheckpointProcessor;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -213,6 +214,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
+
+  @Autowired private CheckpointProcessor checkpointProcessor;
 
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors() * 4);
 
@@ -1690,6 +1693,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
           // 3) success
           applicationLog.setSuccess(true);
+
+          // issue: https://github.com/apache/incubator-streampark/issues/3749
+          if (appParam.getSavePointed() == null || !appParam.getSavePointed()) {
+            checkpointProcessor.resetCheckpointNum(appParam.getId());
+          }
+
           if (response.flinkConfig() != null) {
             String jmMemory = response.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
             if (jmMemory != null) {
