@@ -88,9 +88,8 @@ public class SpringProperties {
         break;
       case "h2":
         String h2Dir = userConfig.getProperty("datasource.h2-data-dir", null);
-
         if (StringUtils.isBlank(h2Dir)) {
-          h2Dir = "~/streampark/metadata";
+          h2Dir = System.getProperty("user.home", "~") + "/streampark/metadata";
         } else {
           h2Dir += h2Dir.endsWith("/") ? "metadata" : "/metadata";
         }
