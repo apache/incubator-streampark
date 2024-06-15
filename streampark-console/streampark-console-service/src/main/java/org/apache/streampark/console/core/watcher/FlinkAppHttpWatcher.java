@@ -240,9 +240,10 @@ public class FlinkAppHttpWatcher {
     JobsOverview jobsOverview = httpJobsOverview(application);
     Optional<JobsOverview.Job> jobOptional = getJobsOverviewJob(application, jobsOverview);
     if (jobOptional.isPresent()) {
-
       processJobState(application, jobOptional);
     }
+    log.debug(
+        "getStateFromFlink abnormal, application: {}, jobsOverview: {}", application, jobsOverview);
   }
 
   private void processJobState(Application application, Optional<JobsOverview.Job> jobOptional)
@@ -279,12 +280,16 @@ public class FlinkAppHttpWatcher {
     Optional<JobsOverview.Job> optional;
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.isYarnPerJobOrAppMode(execMode)) {
-      optional =
-          !jobsOverview.getJobs().isEmpty()
-              ? jobsOverview.getJobs().stream()
-                  .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
-                  .findFirst()
-              : Optional.empty();
+      if (jobsOverview.getJobs() != null) {
+        optional =
+            jobsOverview.getJobs().size() > 1
+                ? jobsOverview.getJobs().stream()
+                    .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
+                    .findFirst()
+                : jobsOverview.getJobs().stream().findFirst();
+      } else {
+        optional = Optional.empty();
+      }
     } else {
       optional =
           jobsOverview.getJobs().stream()
