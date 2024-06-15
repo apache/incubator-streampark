@@ -27,6 +27,7 @@ import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
@@ -48,7 +49,15 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
 
-    private final CreateUserForm createUserForm = new CreateUserForm();
+    @FindBy(xpath = "//div[contains(@class, 'ant-dropdown-content')]//span[contains(text(), 'Delete')]")
+    private WebElement deleteButton;
+
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    private WebElement deleteConfirmButton;
+
+    private final StartJobForm startJobForm = new StartJobForm();
+
+    private final CancelJobForm cancelJobForm = new CancelJobForm();
 
     public ApplicationsPage(RemoteWebDriver driver) {
         super(driver);
@@ -58,47 +67,77 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         buttonCreateApplication.click();
-
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/flink/app/add"));
         return new ApplicationForm(driver);
     }
 
-    public ApplicationsPage editUser(String userName, String email, UserManagementUserType userManagementUserType, UserManagementStatus userManagementStatus) {
+    public ApplicationsPage deleteApplication(String applicationName) {
+        waitForPageLoading();
+
+        WebElement extraButton = applicationsList()
+            .stream()
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/..")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No extra button in applications list"))
+            ;
+        Actions actions = new Actions(this.driver);
+        actions.moveToElement(extraButton).perform();
+        deleteButton.click();
+        deleteConfirmButton.click();
+
+        return this;
+    }
+
+    public ApplicationsPage startApplication(String applicationName) {
         waitForPageLoading();
 
         applicationsList()
             .stream()
-            .filter(it -> it.getText().contains(userName))
-            .flatMap(it -> it.findElements(By.xpath("//button[contains(@tooltip,'modify user')]")).stream())
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:start')]")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in user list"))
+            .orElseThrow(() -> new RuntimeException("No start button in applications list"))
             .click();
 
-        createUserForm.inputEmail().sendKeys(Keys.CONTROL+"a");
-        createUserForm.inputEmail().sendKeys(Keys.BACK_SPACE);
-        createUserForm.inputEmail().sendKeys(email);
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(startJobForm().radioFromSavepoint()));
+        startJobForm.radioFromSavepoint().click();
+        startJobForm.buttonSubmit().click();
 
-        createUserForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(createUserForm.selectUserType));
-        createUserForm.selectUserType
+        return this;
+    }
+
+    public ApplicationsPage releaseApplication(String applicationName) {
+        waitForPageLoading();
+
+        applicationsList()
             .stream()
-            .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:release')]")).stream())
+            .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("No %s in userType dropdown list", userManagementUserType)))
+            .orElseThrow(() -> new RuntimeException("No release button in applications list"))
             .click();
 
-        switch (userManagementStatus) {
-            case LOCKED:
-                createUserForm.radioLocked.click();
-                break;
-            case EFFECTIVE:
-                createUserForm.radioEffective.click();
-                break;
-            default:
-                throw new RuntimeException("Unknown user management status");
-        }
+        return this;
+    }
 
-        createUserForm.buttonSubmit().click();
+    public ApplicationsPage cancelApplication(String applicationName) {
+        waitForPageLoading();
+
+        applicationsList()
+            .stream()
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:cancel')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No cancel button in applications list"))
+            .click();
+
+        cancelJobForm.radioFromSavepoint().click();
+        cancelJobForm.buttonSubmit().click();
 
         return this;
     }
@@ -108,42 +147,34 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     }
 
     @Getter
-    public class CreateUserForm {
-        CreateUserForm() {
+    public class StartJobForm {
+        StartJobForm() {
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "formUserName")
-        private WebElement inputUserName;
+        @FindBy(xpath = "//button[@id='startApplicationModal_startSavePointed']//span[contains(text(), 'ON')]")
+        private WebElement radioFromSavepoint;
 
-        @FindBy(id = "form_item_nickName")
-        private WebElement inputNickName;
-
-        @FindBy(id = "form_item_password")
-        private WebElement inputPassword;
-
-        @FindBy(id = "form_item_email")
-        private WebElement inputEmail;
-
-        @FindBys({
-            @FindBy(css = "[codefield=userType]"),
-            @FindBy(className = "ant-select-item-option-content")
-        })
-        private List<WebElement> selectUserType;
-
-        @FindBy(css = "[codefield=userType] > .ant-select-selector")
-        private WebElement btnSelectUserTypeDropdown;
-
-        @FindBy(xpath = "//label[contains(@class, 'ant-radio-wrapper')]/span[contains(., 'lock')]")
-        private WebElement radioLocked;
-
-        @FindBy(xpath = "//label[contains(@class, 'ant-radio-wrapper')]/span[contains(., 'effective')]")
-        private WebElement radioEffective;
-
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
         private WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        private WebElement buttonCancel;
+    }
+
+    @Getter
+    public class CancelJobForm {
+        CancelJobForm() {
+            PageFactory.initElements(driver, this);
+        }
+
+        @FindBy(xpath = "//span[contains(text(), 'ON')]")
+        private WebElement radioFromSavepoint;
+
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
+        private WebElement buttonSubmit;
+
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
         private WebElement buttonCancel;
     }
 }

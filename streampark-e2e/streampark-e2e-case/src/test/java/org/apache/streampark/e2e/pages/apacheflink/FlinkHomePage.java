@@ -62,6 +62,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         createFlinkHomeForm.inputDescription().sendKeys(description);
         createFlinkHomeForm.buttonSubmit().click();
 
+        waitForClickFinish();
         return this;
     }
 
@@ -82,6 +83,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         createFlinkHomeForm.inputFlinkName().sendKeys(newFlinkName);
         createFlinkHomeForm.buttonSubmit().click();
 
+        waitForClickFinish();
         return this;
     }
 
@@ -99,11 +101,16 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
         deleteConfirmButton.click();
 
+        waitForClickFinish();
         return this;
     }
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/flink/home"));
+    }
+
+    private void waitForClickFinish() {
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
     }
 
     @Getter
