@@ -1,0 +1,4 @@
+[submodule ".github/actions/paths-filter"]
+	path = .github/actions/paths-filter
+	url = https://github.com/dorny/paths-filter.git
+	branch = de90cc6fb38fc0963ad72b210f1f284cd68cea36
