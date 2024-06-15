@@ -9,7 +9,7 @@ services:
     streampark-console:
         image: apache/streampark:2.2.0
 ```
-
+test
 ### 2. docker-compose up
 
 ```shell
