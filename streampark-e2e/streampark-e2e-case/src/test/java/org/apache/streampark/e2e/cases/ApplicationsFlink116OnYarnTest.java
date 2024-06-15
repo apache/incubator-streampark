@@ -69,7 +69,7 @@ public class ApplicationsFlink116OnYarnTest {
 
     @Test
     @Order(10)
-    void testCreateFlinkApplication() {
+    void testCreateFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
@@ -114,7 +114,7 @@ public class ApplicationsFlink116OnYarnTest {
 
     @Test
     @Order(20)
-    void testReleaseFlinkApplication() {
+    void testReleaseFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.releaseApplication(applicationName);
@@ -127,7 +127,7 @@ public class ApplicationsFlink116OnYarnTest {
 
     @Test
     @Order(30)
-    void testStartFlinkApplication() {
+    void testStartFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.startApplication(applicationName);
@@ -146,7 +146,7 @@ public class ApplicationsFlink116OnYarnTest {
 
     @Test
     @Order(40)
-    void testDeleteFlinkApplication() {
+    void testDeleteFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.deleteApplication(applicationName);
