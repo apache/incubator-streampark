@@ -29,11 +29,6 @@ on:
       - 'script/**'
       - 'streampark-console/streampark-console-webapp/**'
   pull_request:
-    paths-ignore:
-      - '**.md'
-      - 'deploy/**'
-      - 'script/**'
-      - 'streampark-console/streampark-console-webapp/**'
 
 
 concurrency:
@@ -41,10 +36,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  paths-filter:
+    name: Unit-Test-Path-Filter
+    runs-on: ubuntu-latest
+    outputs:
+      not-ignore: ${{ steps.filter.outputs.not-ignore }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter
+        id: filter
+        with:
+          filters: |
+            not-ignore:
+              - '!(**.md)'
   license-header:
-    if: github.repository == 'apache/incubator-streampark'
     name: License header
     runs-on: ubuntu-latest
+    if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
+    needs: paths-filter
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
@@ -56,6 +65,7 @@ jobs:
     if: github.repository == 'apache/incubator-streampark'
     name: Code style
     runs-on: ubuntu-latest
+    needs: license-header
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
@@ -66,6 +76,7 @@ jobs:
   build:
     name: "Backend-Build (java-${{ matrix.java }})"
     runs-on: ubuntu-latest
+    needs: code-style
     strategy:
       fail-fast: false
       matrix:
@@ -85,11 +96,15 @@ jobs:
     name: Backend - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ build, license-header, code-style ]
+    needs: [ paths-filter, build, license-header, code-style ]
     if: always()
     steps:
       - name: Status
         run: |
+          if [[ ${{ needs.paths-filter.outputs.not-ignore }} == 'false' && ${{ github.event_name }} == 'pull_request' ]]; then
+            echo "Skip Backend!"
+            exit 0
+          fi
           if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
             echo "Backend Build Failed!"
             exit -1
