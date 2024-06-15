@@ -43,6 +43,7 @@ public class ShiroConfig {
 
     LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
     filterChainDefinitionMap.put("/actuator/**", "anon");
+    filterChainDefinitionMap.put("/h2-console/**", "anon");
 
     filterChainDefinitionMap.put("/doc.html", "anon");
     filterChainDefinitionMap.put("/swagger-ui.html", "anon");

@@ -87,17 +87,38 @@ public class SpringProperties {
         springConfig.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
         break;
       case "h2":
-        springConfig.put("spring.datasource.driver-class-name", "org.h2.Driver");
-        springConfig.put("spring.datasource.username", "sa");
-        springConfig.put("spring.datasource.password", "sa");
+        String h2Dir = userConfig.getProperty("datasource.h2-data-dir", null);
+
+        if (StringUtils.isBlank(h2Dir)) {
+          h2Dir = "~/streampark/metadata";
+        } else {
+          h2Dir += h2Dir.endsWith("/") ? "metadata" : "/metadata";
+        }
+
         springConfig.put(
             "spring.datasource.url",
-            "jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'");
+            String.format(
+                "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+                h2Dir));
+
+        String userName = userConfig.getProperty("spring.datasource.username", "admin");
+        String password = userConfig.getProperty("spring.datasource.password", "streampark");
+
+        springConfig.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
+        springConfig.put("spring.datasource.driver-class-name", "org.h2.Driver");
+        springConfig.put("spring.datasource.username", userName);
+        springConfig.put("spring.datasource.password", password);
         springConfig.put("spring.sql.init.data-locations", "classpath:db/data-h2.sql");
         springConfig.put("spring.sql.init.continue-on-error", "true");
-        springConfig.put("spring.sql.init.username", "sa");
-        springConfig.put("spring.sql.init.password", "sa");
+        springConfig.put("spring.sql.init.username", userName);
+        springConfig.put("spring.sql.init.password", password);
         springConfig.put("spring.sql.init.mode", "always");
+
+        // h2
+        springConfig.put("spring.h2.console.path", "/h2-console");
+        springConfig.put("spring.h2.console.enabled", true);
+        springConfig.put("spring.h2.console.settings.web-allow-others", true);
+        springConfig.put("spring.h2.console.settings.trace", true);
         break;
       default:
         throw new UnsupportedOperationException("Unsupported datasource dialect: " + dialect);
