@@ -43,7 +43,7 @@ jobs:
         with:
           filters: |
             not-ignore:
-              - '!(**.md)'
+              - '!**/*.md'
   build:
     name: Build
     runs-on: ${{ matrix.os }}
