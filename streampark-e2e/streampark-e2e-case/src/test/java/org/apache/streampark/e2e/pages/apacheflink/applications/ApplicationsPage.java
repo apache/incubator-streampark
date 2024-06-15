@@ -17,11 +17,11 @@
  * under the License.
  *
  */
-package org.apache.streampark.e2e.pages.apacheflink;
+package org.apache.streampark.e2e.pages.apacheflink.applications;
 
 import lombok.Getter;
+import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
-import org.apache.streampark.e2e.pages.system.SystemPage;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
 import org.openqa.selenium.By;
@@ -39,11 +39,11 @@ import java.util.List;
 
 @Getter
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
-    @FindBy(xpath = "//span[contains(., 'User List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateUser;
+    @FindBy(xpath = "//div[contains(@class, 'app_list')]//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    private WebElement buttonCreateApplication;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
-    private List<WebElement> userList;
+    private List<WebElement> applicationsList;
 
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
@@ -54,33 +54,18 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         super(driver);
     }
 
-    public ApplicationsPage createUser(String userName, String nickName, String password, String email, UserManagementUserType userManagementUserType) {
+    public ApplicationForm createApplication() {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateUser));
-        buttonCreateUser.click();
-        createUserForm.inputUserName().sendKeys(userName);
-        createUserForm.inputNickName().sendKeys(nickName);
-        createUserForm.inputPassword().sendKeys(password);
-        createUserForm.inputEmail().sendKeys(email);
+        buttonCreateApplication.click();
 
-        createUserForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(createUserForm.selectUserType));
-        createUserForm.selectUserType
-            .stream()
-            .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("No %s in userType dropdown list", userManagementUserType)))
-            .click();
-
-        createUserForm.buttonSubmit().click();
-        return this;
+        return new ApplicationForm(driver);
     }
 
     public ApplicationsPage editUser(String userName, String email, UserManagementUserType userManagementUserType, UserManagementStatus userManagementStatus) {
         waitForPageLoading();
 
-        userList()
+        applicationsList()
             .stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(it -> it.findElements(By.xpath("//button[contains(@tooltip,'modify user')]")).stream())
@@ -119,7 +104,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/system/user"));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/flink/app"));
     }
 
     @Getter

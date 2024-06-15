@@ -20,6 +20,7 @@
 package org.apache.streampark.e2e.pages.apacheflink;
 
 import lombok.Getter;
+import org.apache.streampark.e2e.pages.apacheflink.applications.ApplicationsPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
 import org.openqa.selenium.WebElement;

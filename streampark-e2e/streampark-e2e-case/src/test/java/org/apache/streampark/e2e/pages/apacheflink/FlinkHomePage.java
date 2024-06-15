@@ -28,7 +28,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -39,13 +38,13 @@ import java.util.List;
 @Getter
 public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
     @FindBy(xpath = "//span[contains(., 'Flink Home')]/..//button[contains(@class, 'ant-btn')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateUser;
+    private WebElement buttonCreateFlinkHome;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
-    private List<WebElement> userList;
+    @FindBy(xpath = "//div[contains(@class, 'ant-spin-container')]")
+    private List<WebElement> flinkHomeList;
 
-    @FindBy(className = "ant-form-item-explain-error")
-    private List<WebElement> errorMessageList;
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'Yes')]")
+    private WebElement deleteConfirmButton;
 
     private final CreateFlinkHomeForm createFlinkHomeForm = new CreateFlinkHomeForm();
 
@@ -53,72 +52,58 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         super(driver);
     }
 
-    public FlinkHomePage createUser(String userName, String nickName, String password, String email, UserManagementUserType userManagementUserType) {
+    public FlinkHomePage createFlinkHome(String flinkName, String flinkHome, String description) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateUser));
-        buttonCreateUser.click();
-        createFlinkHomeForm.inputUserName().sendKeys(userName);
-        createFlinkHomeForm.inputNickName().sendKeys(nickName);
-        createFlinkHomeForm.inputPassword().sendKeys(password);
-        createFlinkHomeForm.inputEmail().sendKeys(email);
-
-        createFlinkHomeForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(createFlinkHomeForm.selectUserType));
-        createFlinkHomeForm.selectUserType
-            .stream()
-            .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("No %s in userType dropdown list", userManagementUserType)))
-            .click();
-
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
+        buttonCreateFlinkHome.click();
+        createFlinkHomeForm.inputFlinkName().sendKeys(flinkName);
+        createFlinkHomeForm.inputFlinkHome().sendKeys(flinkHome);
+        createFlinkHomeForm.inputDescription().sendKeys(description);
         createFlinkHomeForm.buttonSubmit().click();
+
         return this;
     }
 
-    public FlinkHomePage editUser(String userName, String email, UserManagementUserType userManagementUserType, UserManagementStatus userManagementStatus) {
+    public FlinkHomePage editFlinkHome(String oldFlinkName, String newFlinkName) {
         waitForPageLoading();
 
-        userList()
+        flinkHomeList()
             .stream()
-            .filter(it -> it.getText().contains(userName))
-            .flatMap(it -> it.findElements(By.xpath("//button[contains(@tooltip,'modify user')]")).stream())
+            .filter(it -> it.getText().contains(oldFlinkName))
+            .flatMap(it -> it.findElements(By.xpath("//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'edit')]")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in user list"))
+            .orElseThrow(() -> new RuntimeException("No edit button in flink home list"))
             .click();
 
-        createFlinkHomeForm.inputEmail().sendKeys(Keys.CONTROL+"a");
-        createFlinkHomeForm.inputEmail().sendKeys(Keys.BACK_SPACE);
-        createFlinkHomeForm.inputEmail().sendKeys(email);
-
-        createFlinkHomeForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(createFlinkHomeForm.selectUserType));
-        createFlinkHomeForm.selectUserType
-            .stream()
-            .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException(String.format("No %s in userType dropdown list", userManagementUserType)))
-            .click();
-
-        switch (userManagementStatus) {
-            case LOCKED:
-                createFlinkHomeForm.radioLocked.click();
-                break;
-            case EFFECTIVE:
-                createFlinkHomeForm.radioEffective.click();
-                break;
-            default:
-                throw new RuntimeException("Unknown user management status");
-        }
-
+        createFlinkHomeForm.inputFlinkName().sendKeys(Keys.CONTROL+"a");
+        createFlinkHomeForm.inputFlinkName().sendKeys(Keys.BACK_SPACE);
+        createFlinkHomeForm.inputFlinkName().sendKeys(newFlinkName);
         createFlinkHomeForm.buttonSubmit().click();
+
+        return this;
+    }
+
+    public FlinkHomePage deleteFlinkHome(String flinkName) {
+        waitForPageLoading();
+
+        flinkHomeList()
+                .stream()
+                .filter(it -> it.getText().contains(flinkName))
+                .flatMap(it -> it.findElements(By.xpath("//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'delete')]")).stream())
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No delete button in flink home list"))
+                .click();
+
+        deleteConfirmButton.click();
 
         return this;
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/system/user"));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/flink/home"));
     }
 
     @Getter
