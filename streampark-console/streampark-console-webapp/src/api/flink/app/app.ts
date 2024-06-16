@@ -36,7 +36,7 @@ enum APP_API {
   NAME = '/flink/app/name',
   CHECK_NAME = '/flink/app/checkName',
   CANCEL = '/flink/app/cancel',
-  FORCED_STOP = '/flink/app/forcedStop',
+  ABORT = '/flink/app/abort',
   DELETE = '/flink/app/delete',
   DELETE_BAK = '/flink/app/deletebak',
   CREATE = '/flink/app/create',
@@ -170,8 +170,8 @@ export function fetchDeleteOperationLog(id: string) {
  * @param params id:string
  * @returns
  */
-export function fetchForcedStop(data: { id: string }): Promise<boolean> {
-  return defHttp.post({ url: APP_API.FORCED_STOP, data });
+export function fetchAbort(data: { id: string }): Promise<boolean> {
+  return defHttp.post({ url: APP_API.ABORT, data });
 }
 
 export function fetchCheckStart(data): Promise<AxiosResponse<number>> {

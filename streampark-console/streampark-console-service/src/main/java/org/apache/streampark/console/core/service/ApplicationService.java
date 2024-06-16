@@ -102,7 +102,7 @@ public interface ApplicationService extends IService<Application> {
 
   boolean checkBuildAndUpdate(Application app);
 
-  void forcedStop(Application app);
+  void abort(Application app);
 
   boolean existsRunningJobByClusterId(Long clusterId);
 

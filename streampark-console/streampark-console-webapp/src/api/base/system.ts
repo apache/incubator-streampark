@@ -19,10 +19,8 @@ import {
   RolePageParams,
   RolePageListGetResultModel,
   MenuListModel,
-  UserListGetResultModel,
 } from './model/systemModel';
 import { defHttp } from '/@/utils/http/axios';
-import { BasicPageParams } from '/@/api/model/baseModel';
 
 enum Api {
   MenuList = '/menu/list',

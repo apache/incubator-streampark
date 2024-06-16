@@ -16,13 +16,6 @@
  */
 
 -- ----------------------------
--- Records of t_team
--- ----------------------------
-insert into `t_team` values (100000, 'default', 'The default team', now(), now());
-insert into `t_team` values (100001, 'test', 'The test team', now(), now());
-
-
--- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
 insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null, null , null, 100000, 1, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test');
@@ -245,10 +238,16 @@ insert into `t_setting` values (15, 'ingress.mode.default', null, 'Ingress domai
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100001, 'test1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100002, 'test2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100003, 'test3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100001, 'test1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100002, 'test2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100003, 'test3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100001, '1', now(), now(),null,'0',null,null);
+
+-- ----------------------------
+-- Records of t_team
+-- ----------------------------
+insert into `t_team` values (100000, 'default', 'The default team', now(), now());
+insert into `t_team` values (100001, 'test', 'The test team', now(), now());
 
 -- ----------------------------
 -- Records of t_member

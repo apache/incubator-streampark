@@ -28,6 +28,7 @@ import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -61,6 +62,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MemberService memberService;
 
   @Autowired private MenuService menuService;
+
+  @Autowired private TeamService teamService;
 
   @Override
   public User findByName(String username) {
@@ -201,7 +204,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   }
 
   @Override
-  public void fillInTeam(User user) {
+  public void setDefaultTeam(User user) {
     if (user.getLastTeamId() == null) {
       List<Team> teams = memberService.findUserTeams(user.getUserId());
       if (CollectionUtils.isEmpty(teams)) {

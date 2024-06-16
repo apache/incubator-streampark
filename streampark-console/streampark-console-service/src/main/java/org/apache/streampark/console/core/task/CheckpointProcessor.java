@@ -90,7 +90,7 @@ public class CheckpointProcessor {
         return;
       }
 
-      Long latestChkId = getLatestCheckpointedId(appId, checkPointKey.getCheckPointId());
+      Long latestChkId = getLatestCheckpointId(appId, checkPointKey.getCheckPointId());
       if (checkSaveAsCheckpoint(checkPoint, latestChkId)) {
         checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
         saveSavepoint(checkPoint, application.getId());
@@ -148,7 +148,7 @@ public class CheckpointProcessor {
   }
 
   @Nullable
-  private Long getLatestCheckpointedId(Long appId, String cacheId) {
+  private Long getLatestCheckpointId(Long appId, String cacheId) {
     return checkPointCache.get(
         cacheId,
         key -> {

@@ -56,7 +56,7 @@ export const useAppTableAction = (
     handleCheckReleaseApp,
     handleAppCheckStart,
     handleCanStop,
-    handleForcedStop,
+    handleAbort,
     handleCopy,
     handleMapping,
     users,
@@ -134,7 +134,7 @@ export const useAppTableAction = (
         ifShow: handleCanStop(record),
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
-        onClick: handleForcedStop.bind(null, record),
+        onClick: handleAbort.bind(null, record),
       },
       {
         label: t('flink.app.operation.copy'),
