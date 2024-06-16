@@ -79,7 +79,7 @@ public class PassportController {
     }
 
     // set team
-    userService.fillInTeam(user);
+    userService.setDefaultTeam(user);
 
     // no team.
     if (user.getLastTeamId() == null) {

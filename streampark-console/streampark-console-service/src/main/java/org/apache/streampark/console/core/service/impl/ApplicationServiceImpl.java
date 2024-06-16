@@ -1192,7 +1192,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   }
 
   @Override
-  public void forcedStop(Application app) {
+  public void abort(Application app) {
     CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(app.getId());
     CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(app.getId());
     Application application = this.baseMapper.getApp(app);
@@ -1207,7 +1207,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       cancelFuture.cancel(true);
     }
     if (startFuture == null && cancelFuture == null) {
-      this.doStopped(app);
+      this.doAbort(app);
     }
   }
 
@@ -1374,7 +1374,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     TrackId trackId =
         application.isKubernetesModeJob() ? k8sWatcherWrapper.toTrackId(application) : null;
 
-    cancelFuture.whenComplete(
+    cancelFuture.whenCompleteAsync(
         (cancelResponse, throwable) -> {
           cancelFutureMap.remove(application.getId());
 
@@ -1385,9 +1385,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             applicationLogService.save(applicationLog);
 
             if (throwable instanceof CancellationException) {
-              doStopped(application);
+              doAbort(application);
             } else {
-              log.error("stop flink job failed.", throwable);
+              log.error("abort flink job failed.", throwable);
               application.setOptionState(OptionState.NONE.getValue());
               application.setState(FlinkAppState.FAILED.getValue());
               updateById(application);
@@ -1662,7 +1662,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     startFutureMap.put(application.getId(), future);
 
-    future.whenComplete(
+    future.whenCompleteAsync(
         (response, throwable) -> {
           // 1) remove Future
           startFutureMap.remove(application.getId());
@@ -1675,7 +1675,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             applicationLog.setSuccess(false);
             applicationLogService.save(applicationLog);
             if (throwable instanceof CancellationException) {
-              doStopped(application);
+              doAbort(application);
             } else {
               Application app = getById(appParam.getId());
               app.setState(FlinkAppState.FAILED.getValue());
@@ -1832,7 +1832,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return properties;
   }
 
-  private void doStopped(Application appParam) {
+  private void doAbort(Application appParam) {
     Application application = getById(appParam);
     application.setOptionState(OptionState.NONE.getValue());
     application.setState(FlinkAppState.CANCELED.getValue());
@@ -1855,7 +1855,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           yarnClient.killApplication(applications.get(0).getApplicationId());
         }
       } catch (Exception e) {
-        log.error("Stopped failed!", e);
+        log.error("job abort failed!", e);
       }
     }
   }
