@@ -87,18 +87,18 @@ public class SpringProperties {
         springConfig.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
         break;
       case "h2":
-        String h2Dir = userConfig.getProperty("datasource.h2-data-dir", null);
-        if (StringUtils.isBlank(h2Dir)) {
-          h2Dir = System.getProperty("user.home", "~") + "/streampark/h2-data/metadata";
+        String h2DataDir = userConfig.getProperty("datasource.h2-data-dir", null);
+        if (StringUtils.isBlank(h2DataDir)) {
+          h2DataDir = System.getProperty("user.home", "~") + "/streampark/h2-data/metadata";
         } else {
-          h2Dir += h2Dir.endsWith("/") ? "metadata" : "/metadata";
+          h2DataDir += h2DataDir.endsWith("/") ? "metadata" : "/metadata";
         }
 
         springConfig.put(
             "spring.datasource.url",
             String.format(
                 "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
-                h2Dir));
+                h2DataDir));
 
         String userName = userConfig.getProperty("spring.datasource.username", "admin");
         String password = userConfig.getProperty("spring.datasource.password", "streampark");
