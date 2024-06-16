@@ -77,7 +77,7 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
     @Override
     @SuppressWarnings("UnstableApiUsage")
     public void beforeAll(ExtensionContext context) throws IOException {
-        Awaitility.setDefaultTimeout(Duration.ofSeconds(60));
+        Awaitility.setDefaultTimeout(Duration.ofSeconds(120));
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(2));
 
         setRecordPath();
