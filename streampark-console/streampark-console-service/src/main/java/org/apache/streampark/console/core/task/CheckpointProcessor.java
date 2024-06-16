@@ -131,18 +131,6 @@ public class CheckpointProcessor {
     }
   }
 
-  // issue: https://github.com/apache/incubator-streampark/issues/3749
-  public void resetCheckpointNum(Long appId) {
-    checkPointCache
-        .asMap()
-        .forEach(
-            (k, v) -> {
-              if (k.startsWith(appId.toString())) {
-                checkPointCache.invalidate(k);
-              }
-            });
-  }
-
   private boolean checkSaveAsCheckpoint(@Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
     return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
   }
