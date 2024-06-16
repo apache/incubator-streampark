@@ -27,7 +27,6 @@ import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -105,7 +104,7 @@ public class YarnQueueLabelExpression {
 
   public static Map<String, String> getQueueLabelMap(String queueLabelExp) {
     if (StringUtils.isBlank(queueLabelExp)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     YarnQueueLabelExpression yarnQueueLabelExpression = of(queueLabelExp);
     Map<String, String> queueLabelMap = new HashMap<>(2);
