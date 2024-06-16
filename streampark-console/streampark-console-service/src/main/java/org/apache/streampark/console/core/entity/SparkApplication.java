@@ -422,7 +422,7 @@ public class SparkApplication implements Serializable {
   @SuppressWarnings("unchecked")
   public Map<String, Object> getOptionMap() {
     if (StringUtils.isBlank(this.options)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
     optionMap.entrySet().removeIf(entry -> entry.getValue() == null);

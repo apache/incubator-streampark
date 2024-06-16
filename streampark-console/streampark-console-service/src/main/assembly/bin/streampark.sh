@@ -132,7 +132,7 @@ APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_LIB="$APP_BASE"/lib
 APP_LOG="$APP_BASE"/logs
-APP_PID="$APP_BASE"/streampark.pid
+APP_PID="$APP_BASE"/.pid
 APP_OUT="$APP_LOG"/streampark.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
@@ -241,10 +241,16 @@ if [[ "$USE_NOHUP" = "true" ]]; then
   NOHUP="nohup"
 fi
 
+CONFIG="${APP_CONF}/config.yaml"
+# shellcheck disable=SC2006
+if [[ ! -f "$CONFIG" ]] ; then
+  echo_r "can not found config.yaml in \"conf\" directory, please check."
+  exit 1;
+fi
+
 BASH_UTIL="org.apache.streampark.console.base.util.BashJavaUtils"
-
 APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
-
+SERVER_PORT=$($_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG")
 JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
 JVM_ARGS=""
@@ -276,21 +282,8 @@ print_logo() {
   printf '      %s   WebSite:  https://streampark.apache.org%s\n'                                  $BLUE   $RESET
   printf '      %s   GitHub :  http://github.com/apache/streampark%s\n\n'                          $BLUE   $RESET
   printf '      %s   ──────── Apache StreamPark, Make stream processing easier ô~ô!%s\n\n'         $PRIMARY  $RESET
-}
-
-init_env() {
-  # shellcheck disable=SC2006
-  CONFIG="${APP_CONF}/application.yml"
-  if [[ -f "$CONFIG" ]] ; then
-    echo_y """[WARN] in the \"conf\" directory, found the \"application.yml\" file. The \"application.yml\" file is deprecated.
-       For compatibility, this application.yml will be used preferentially. The latest configuration file is \"config.yaml\". It is recommended to use \"config.yaml\".
-       Note: \"application.yml\" will be completely deprecated in version 2.2.0. """
-  else
-    CONFIG="${APP_CONF}/config.yaml"
-    if [[ ! -f "$CONFIG" ]] ; then
-      echo_r "can not found config.yaml in \"conf\" directory, please check."
-      exit 1;
-    fi
+  if [[ "$1"x == "start"x ]]; then
+    printf '      %s                   http://localhost:%s %s\n\n'                                 $PRIMARY $SERVER_PORT   $RESET
   fi
 }
 
@@ -313,19 +306,19 @@ get_pid() {
   fi
 
   # shellcheck disable=SC2006
-  local serverPort=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG"`
-  if [[ x"${serverPort}" == x"" ]]; then
+  if [[ "${SERVER_PORT}"x == ""x ]]; then
     echo_r "server.port is required, please check $CONFIG"
     exit 1;
   else
      # shellcheck disable=SC2006
       # shellcheck disable=SC2155
-      local used=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --check_port "$serverPort"`
-      if [[ x"${used}" == x"used" ]]; then
+      local used=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --check_port "$SERVER_PORT"`
+      if [[ "${used}"x == "used"x ]]; then
         # shellcheck disable=SC2006
         local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
+        # shellcheck disable=SC2236
         if [[ ! -z $PID ]]; then
-          echo $PID
+          echo "$PID"
         else
           echo 0
         fi
@@ -411,7 +404,7 @@ start() {
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
-    $APP_MAIN >> "$APP_OUT" 2>&1 "&"
+    $APP_MAIN "$@" >> "$APP_OUT" 2>&1 "&"
 
     local PID=$!
     local IS_NUMBER="^[0-9]+$"
@@ -565,27 +558,31 @@ restart() {
 }
 
 main() {
-  print_logo
-  init_env
   case "$1" in
     "debug")
         DEBUG_PORT=$2
         debug
         ;;
     "start")
-        start
+        shift
+        start "$@"
+        [[ $? -eq 0 ]] && print_logo "start"
         ;;
     "start_docker")
+        print_logo
         start_docker
         ;;
     "stop")
+        print_logo
         stop
         ;;
     "status")
+        print_logo
         status
         ;;
     "restart")
         restart
+        [[ $? -eq 0 ]] && print_logo "start"
         ;;
     *)
         echo_r "Unknown command: $1"

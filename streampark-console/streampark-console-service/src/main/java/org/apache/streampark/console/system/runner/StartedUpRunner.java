@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.runner;
 
-import org.apache.streampark.common.util.Utils;
+import org.apache.streampark.common.util.SystemPropertyUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Order
 @Slf4j
@@ -37,7 +39,20 @@ public class StartedUpRunner implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     if (context.isActive()) {
-      Utils.printLogo("streampark-console start successful");
+      String port = SystemPropertyUtils.get("server.port", "10000");
+      System.out.println("\n");
+      System.out.println("        _____ __                                             __       ");
+      System.out.println("       / ___// /_________  ____ _____ ___  ____  ____ ______/ /__     ");
+      System.out.println("       \\__ \\/ __/ ___/ _ \\/ __ `/ __ `__ \\/ __ \\  __ `/ ___/ //_/");
+      System.out.println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ");
+      System.out.println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ");
+      System.out.println("                                       /_/                        \n\n");
+      System.out.println("    Version:  2.2.0                                                   ");
+      System.out.println("    WebSite:  https://streampark.apache.org                           ");
+      System.out.println("    GitHub :  https://github.com/apache/incubator-streampark          ");
+      System.out.println("    Info   :  streampark-console start successful                     ");
+      System.out.println("    Local  :  http://localhost:" + port);
+      System.out.println("    Time   :  " + LocalDateTime.now() + "\n\n");
     }
   }
 }

@@ -86,8 +86,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -437,14 +437,14 @@ public class SparkAppBuildPipeServiceImpl
   @Override
   public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
         new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
 
     List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
     if (CollectionUtils.isEmpty(appBuildPipelines)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return appBuildPipelines.stream()
         .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));
