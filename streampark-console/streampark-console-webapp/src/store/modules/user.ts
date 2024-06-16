@@ -134,7 +134,6 @@ export const useUserStore = defineStore({
     async setTeamId(data: { teamId: string; userId?: string | number }): Promise<boolean> {
       try {
         const { refreshMenu } = usePermission();
-
         // The userId passed in is the binding operation at login
         if (data.userId) {
           await fetchInitUserTeam(data as { teamId: string; userId: string });
