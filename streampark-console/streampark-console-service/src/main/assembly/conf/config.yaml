@@ -35,7 +35,7 @@ server:
 # system database, default h2, mysql|pgsql|h2
 datasource:
   dialect: h2  #h2, mysql, pgsql
-  h2-data-dir:  # if datasource.dialect is h2 ,you can configure the data dir
+  h2-data-dir: ~/streampark/h2-data # if datasource.dialect is h2 ,you can configure the data dir
   # if datasource.dialect is mysql or pgsql, you need to configure the following connection information
   # mysql/postgresql/h2 connect user
   username:
