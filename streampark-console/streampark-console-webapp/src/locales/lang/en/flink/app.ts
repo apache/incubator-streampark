@@ -214,7 +214,7 @@ export default {
     savepoint: 'Trigger Savepoint',
     detail: 'View Detail',
     startLog: 'See Flink Start log',
-    force: 'Forced Stop Job',
+    abort: 'Abort Job',
     copy: 'Copy Job',
     remapping: 'Remapping Job',
     deleteTip: 'Are you sure delete this job ?',

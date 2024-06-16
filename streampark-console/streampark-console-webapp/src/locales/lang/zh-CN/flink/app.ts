@@ -202,7 +202,7 @@ export default {
     savepoint: '触发 Savepoint',
     detail: '作业详情',
     startLog: '查看 Flink 启动日志',
-    force: '强制停止作业',
+    abort: '终止作业',
     copy: '复制作业',
     remapping: '重新映射作业',
     deleteTip: '你确定要删除这个作业?',
