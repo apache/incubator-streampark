@@ -25,6 +25,7 @@ import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.util
+import java.util.Scanner
 import java.util.stream.Collectors
 
 import scala.collection.convert.ImplicitConversions._
@@ -280,6 +281,23 @@ object FileUtils {
         .autoClose(stream => stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n")))
     }
     null
+  }
+
+  @throws[IOException]
+  def readString(file: File): String = {
+    require(file != null && file.isFile)
+    val reader = new FileReader(file)
+    val scanner = new Scanner(reader)
+    val buffer = new mutable.StringBuilder()
+    if (scanner.hasNextLine) {
+      buffer.append(scanner.nextLine())
+    }
+    while (scanner.hasNextLine) {
+      buffer.append("\r\n")
+      buffer.append(scanner.nextLine())
+    }
+    Utils.close(scanner, reader)
+    buffer.toString()
   }
 
 }

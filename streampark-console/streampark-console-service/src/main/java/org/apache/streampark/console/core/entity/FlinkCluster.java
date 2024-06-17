@@ -42,16 +42,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Data
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
@@ -134,7 +135,7 @@ public class FlinkCluster implements Serializable {
   @SneakyThrows
   public Map<String, Object> getOptionMap() {
     if (StringUtils.isBlank(this.options)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
     if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
@@ -152,8 +153,8 @@ public class FlinkCluster implements Serializable {
           this.address,
           RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
       return new URI(address);
-    } catch (Exception ignored) {
-      //
+    } catch (Exception e) {
+      log.error("FlinkCluster getRemoteURI error", e);
     }
     return null;
   }
@@ -165,7 +166,7 @@ public class FlinkCluster implements Serializable {
         HttpClientUtils.httpGetRequest(
             restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
     if (StringUtils.isBlank(json)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     List<Map<String, String>> confList =
         JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {});

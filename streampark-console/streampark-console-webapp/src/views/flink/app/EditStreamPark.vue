@@ -76,7 +76,6 @@
   const {
     alerts,
     flinkEnvs,
-    flinkClusters,
     flinkSql,
     getEditStreamParkFormSchema,
     registerDifferentDrawer,
@@ -121,14 +120,23 @@
           cpFailureRateInterval: app.cpFailureRateInterval,
           cpFailureAction: app.cpFailureAction,
         },
-        clusterId: app.clusterId,
-        [app.executionMode == ExecModeEnum.YARN_SESSION
-          ? 'yarnSessionClusterId'
-          : 'flinkClusterId']: app.flinkClusterId,
         flinkImage: app.flinkImage,
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
+      switch (app.executionMode) {
+        case ExecModeEnum.REMOTE:
+          defaultParams['remoteClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.YARN_SESSION:
+          defaultParams['yarnSessionClusterId'] = app.flinkClusterId;
+          break;
+        case ExecModeEnum.KUBERNETES_SESSION:
+          defaultParams['k8sSessionClusterId'] = app.flinkClusterId;
+          break;
+        default:
+          break;
+      }
       if (!executionMode) {
         Object.assign(defaultParams, { executionMode: app.executionMode });
       }
@@ -206,14 +214,13 @@
         flinkSql: values.flinkSql,
         config,
         format: values.isSetConfig ? 1 : null,
-        teamResource: JSON.stringify(values.teamResource),
         dependency:
           dependency.pom === undefined && dependency.jar === undefined
             ? null
             : JSON.stringify(dependency),
       };
       handleSubmitParams(params, values, k8sTemplate);
-      handleUpdateApp(params);
+      await handleUpdateApp(params);
     } catch (error) {
       createMessage.error('edit error');
       submitLoading.value = false;
@@ -249,16 +256,6 @@
 
   /* Send submission interface */
   async function handleUpdateApp(params: Recordable) {
-    if (params.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
-      const cluster =
-        unref(flinkClusters).filter((c) => {
-          return c.id == params.flinkClusterId && c.clusterState === ClusterStateEnum.RUNNING;
-        })[0] || null;
-      if (cluster) {
-        Object.assign(params, { clusterId: cluster.clusterId });
-      }
-    }
-
     try {
       const updated = await fetchUpdate(params);
       if (updated) {

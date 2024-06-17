@@ -17,24 +17,16 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.ApiAccess;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -46,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "FLINK_APPLICATION_BUILD_PIPELINE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -55,27 +46,7 @@ public class ApplicationBuildPipelineController {
 
   @Autowired private AppBuildPipeService appBuildPipeService;
 
-  /**
-   * Release application building pipeline.
-   *
-   * @param appId application id
-   * @param forceBuild forced start pipeline or not
-   * @return Whether the pipeline was successfully started
-   */
-  @Operation(
-      summary = "Release application",
-      tags = {ApiDocConstant.FLINK_APP_OP_TAG})
-  @Parameters({
-    @Parameter(name = "appId", description = "app id", required = true, example = "100000"),
-    @Parameter(
-        name = "forceBuild",
-        description = "force build",
-        required = true,
-        example = "false",
-        schema = @Schema(defaultValue = "false", implementation = boolean.class))
-  })
-  @ApiAccess
-  @PermissionAction(id = "#appId", type = PermissionTypeEnum.APP)
+  @PermissionScope(app = "#appId")
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
@@ -93,9 +64,8 @@ public class ApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
-  @Operation(summary = "Get application release pipeline")
-  @ApiAccess
   @PostMapping("/detail")
+  @PermissionScope(app = "#appId")
   @RequiresPermissions("app:view")
   public RestResponse getBuildProgressDetail(Long appId) {
     Map<String, Object> details = new HashMap<>(0);

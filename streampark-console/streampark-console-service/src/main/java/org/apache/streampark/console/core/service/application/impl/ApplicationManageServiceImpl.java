@@ -45,13 +45,13 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -121,7 +121,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private SettingService settingService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
@@ -321,7 +321,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   public boolean create(Application appParam) {
     ApiAlertException.throwIfNull(
         appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-    appParam.setUserId(commonService.getUserId());
+    appParam.setUserId(serviceHelper.getUserId());
     appParam.setState(FlinkAppStateEnum.ADDED.getValue());
     appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -395,63 +395,64 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         !existsByJobName,
         "[StreamPark] Application names can't be repeated, copy application failed.");
 
-    Application oldApp = getById(appParam.getId());
+    Application persist = getById(appParam.getId());
     Application newApp = new Application();
     String jobName = appParam.getJobName();
 
     newApp.setJobName(jobName);
     newApp.setClusterId(
-        FlinkExecutionMode.isSessionMode(oldApp.getFlinkExecutionMode())
-            ? oldApp.getClusterId()
-            : jobName);
-    newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
-    newApp.setVersionId(oldApp.getVersionId());
+        FlinkExecutionMode.isSessionMode(persist.getFlinkExecutionMode())
+            ? persist.getClusterId()
+            : null);
+    newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : persist.getArgs());
+    newApp.setVersionId(persist.getVersionId());
 
-    newApp.setFlinkClusterId(oldApp.getFlinkClusterId());
-    newApp.setRestartSize(oldApp.getRestartSize());
-    newApp.setJobType(oldApp.getJobType());
-    newApp.setOptions(oldApp.getOptions());
-    newApp.setDynamicProperties(oldApp.getDynamicProperties());
-    newApp.setResolveOrder(oldApp.getResolveOrder());
-    newApp.setExecutionMode(oldApp.getExecutionMode());
-    newApp.setFlinkImage(oldApp.getFlinkImage());
-    newApp.setK8sNamespace(oldApp.getK8sNamespace());
-    newApp.setK8sRestExposedType(oldApp.getK8sRestExposedType());
-    newApp.setK8sPodTemplate(oldApp.getK8sPodTemplate());
-    newApp.setK8sJmPodTemplate(oldApp.getK8sJmPodTemplate());
-    newApp.setK8sTmPodTemplate(oldApp.getK8sTmPodTemplate());
-    newApp.setK8sHadoopIntegration(oldApp.getK8sHadoopIntegration());
-    newApp.setDescription(oldApp.getDescription());
-    newApp.setAlertId(oldApp.getAlertId());
-    newApp.setCpFailureAction(oldApp.getCpFailureAction());
-    newApp.setCpFailureRateInterval(oldApp.getCpFailureRateInterval());
-    newApp.setCpMaxFailureInterval(oldApp.getCpMaxFailureInterval());
-    newApp.setMainClass(oldApp.getMainClass());
-    newApp.setAppType(oldApp.getAppType());
-    newApp.setResourceFrom(oldApp.getResourceFrom());
-    newApp.setProjectId(oldApp.getProjectId());
-    newApp.setModule(oldApp.getModule());
-    newApp.setUserId(commonService.getUserId());
+    newApp.setFlinkClusterId(persist.getFlinkClusterId());
+    newApp.setRestartSize(persist.getRestartSize());
+    newApp.setJobType(persist.getJobType());
+    newApp.setOptions(persist.getOptions());
+    newApp.setDynamicProperties(persist.getDynamicProperties());
+    newApp.setResolveOrder(persist.getResolveOrder());
+    newApp.setExecutionMode(persist.getExecutionMode());
+    newApp.setFlinkImage(persist.getFlinkImage());
+    newApp.setK8sNamespace(persist.getK8sNamespace());
+    newApp.setK8sRestExposedType(persist.getK8sRestExposedType());
+    newApp.setK8sPodTemplate(persist.getK8sPodTemplate());
+    newApp.setK8sJmPodTemplate(persist.getK8sJmPodTemplate());
+    newApp.setK8sTmPodTemplate(persist.getK8sTmPodTemplate());
+    newApp.setK8sHadoopIntegration(persist.getK8sHadoopIntegration());
+    newApp.setDescription(persist.getDescription());
+    newApp.setAlertId(persist.getAlertId());
+    newApp.setCpFailureAction(persist.getCpFailureAction());
+    newApp.setCpFailureRateInterval(persist.getCpFailureRateInterval());
+    newApp.setCpMaxFailureInterval(persist.getCpMaxFailureInterval());
+    newApp.setMainClass(persist.getMainClass());
+    newApp.setAppType(persist.getAppType());
+    newApp.setResourceFrom(persist.getResourceFrom());
+    newApp.setProjectId(persist.getProjectId());
+    newApp.setModule(persist.getModule());
+    newApp.setUserId(serviceHelper.getUserId());
     newApp.setState(FlinkAppStateEnum.ADDED.getValue());
     newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
     newApp.setOptionState(OptionStateEnum.NONE.getValue());
+    newApp.setHotParams(persist.getHotParams());
+
+    // createTime & modifyTime
     Date date = new Date();
     newApp.setCreateTime(date);
     newApp.setModifyTime(date);
-    newApp.setHotParams(oldApp.getHotParams());
 
-    newApp.setJar(oldApp.getJar());
-    newApp.setJarCheckSum(oldApp.getJarCheckSum());
-    newApp.setTags(oldApp.getTags());
-    newApp.setTeamId(oldApp.getTeamId());
-    newApp.setHadoopUser(oldApp.getHadoopUser());
+    newApp.setJar(persist.getJar());
+    newApp.setJarCheckSum(persist.getJarCheckSum());
+    newApp.setTags(persist.getTags());
+    newApp.setTeamId(persist.getTeamId());
+    newApp.setDependency(persist.getDependency());
 
     boolean saved = save(newApp);
     if (saved) {
       if (newApp.isFlinkSqlJob()) {
         FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
         newApp.setFlinkSql(copyFlinkSql.getSql());
-        newApp.setTeamResource(copyFlinkSql.getTeamResource());
         newApp.setDependency(copyFlinkSql.getDependency());
         FlinkSql flinkSql = new FlinkSql(newApp);
         flinkSqlService.create(flinkSql);
@@ -470,7 +471,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       return newApp.getId();
     } else {
       throw new ApiAlertException(
-          "create application from copy failed, copy source app: " + oldApp.getJobName());
+          "create application from copy failed, copy source app: " + persist.getJobName());
     }
   }
 

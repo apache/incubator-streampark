@@ -17,17 +17,22 @@
 
 package org.apache.streampark.console.system.controller;
 
+import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
+import org.apache.streampark.console.system.authentication.JWTToken;
+import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.security.Authenticator;
 import org.apache.streampark.console.system.service.UserService;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,12 +41,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-@Tag(name = "PASSPORT_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -58,7 +66,6 @@ public class PassportController {
   @Value("${ldap.enable:#{false}}")
   private Boolean ldapEnable;
 
-  @Operation(summary = "SigninType")
   @PostMapping("signtype")
   public RestResponse type() {
     List<String> types = new ArrayList<>();
@@ -72,25 +79,61 @@ public class PassportController {
     return RestResponse.success(types);
   }
 
-  @Operation(summary = "Signin")
   @PostMapping("signin")
   public RestResponse signin(
+      HttpServletRequest request,
+      HttpServletResponse response,
       @NotBlank(message = "{required}") String username,
       @NotBlank(message = "{required}") String password,
       @NotBlank(message = "{required}") String loginType)
       throws Exception {
 
-    if (StringUtils.isBlank(username)) {
-      return RestResponse.success().put(RestResponse.CODE_KEY, 0);
+    if (StringUtils.isEmpty(username)) {
+      return RestResponse.success().put("code", 0);
     }
+
     User user = authenticator.authenticate(username, password, loginType);
-    return userService.getLoginUserInfo(user);
+
+    if (user == null) {
+      return RestResponse.success().put("code", 0);
+    }
+
+    if (User.STATUS_LOCK.equals(user.getStatus())) {
+      return RestResponse.success().put("code", 1);
+    }
+
+    // set team
+    userService.fillInTeam(user);
+
+    // no team.
+    if (user.getLastTeamId() == null) {
+      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+    }
+
+    this.userService.updateLoginTime(username);
+    String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
+
+    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
+    String ttl = DateUtils.formatFullTime(expireTime);
+
+    // shiro login
+    JWTToken loginToken = new JWTToken(sign, ttl);
+    SecurityUtils.getSubject().login(loginToken);
+
+    // generate UserInfo
+    String token = WebUtils.encryptToken(sign);
+    JWTToken jwtToken = new JWTToken(token, ttl);
+    String userId = RandomStringUtils.randomAlphanumeric(20);
+    user.setId(userId);
+    Map<String, Object> userInfo =
+        userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+
+    return new RestResponse().data(userInfo);
   }
 
-  @Operation(summary = "Signout")
   @PostMapping("signout")
   public RestResponse signout() {
-    SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
+    SecurityUtils.getSubject().logout();
     return new RestResponse();
   }
 }

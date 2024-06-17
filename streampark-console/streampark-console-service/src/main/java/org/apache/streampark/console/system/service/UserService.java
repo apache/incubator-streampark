@@ -166,4 +166,6 @@ public interface UserService extends IService<User> {
    * @return RestResponse
    */
   RestResponse getLoginUserInfo(User user);
+
+  void deleteUser(Long userId);
 }

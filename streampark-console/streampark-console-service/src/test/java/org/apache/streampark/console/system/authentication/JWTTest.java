@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
+import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.auth0.jwt.JWT;
@@ -38,6 +39,8 @@ class JWTTest extends SpringUnitTestBase {
         JWTUtil.sign(
             10000L,
             userName,
+            "streampark",
+            AuthenticationType.SIGN,
             DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 
     assert token != null;

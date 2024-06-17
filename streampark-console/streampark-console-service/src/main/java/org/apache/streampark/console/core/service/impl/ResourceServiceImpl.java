@@ -37,9 +37,9 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -96,7 +96,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
   @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private FlinkSqlService flinkSqlService;
 
@@ -150,7 +150,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       transferTeamResource(resource.getTeamId(), upFile);
     }
 
-    resource.setCreatorId(commonService.getUserId());
+    resource.setCreatorId(serviceHelper.getUserId());
     this.save(resource);
   }
 
@@ -348,7 +348,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       // get jarFile error
       return buildExceptResponse(e, 1);
     }
-    ApiAlertException.throwIfTrue(jarFile == null, "flink app jar must exist.");
+    ApiAlertException.throwIfTrue(
+        jarFile == null || !jarFile.exists(), "flink app jar must exist.");
     Map<String, Serializable> resp = new HashMap<>(0);
     resp.put(STATE, 0);
     if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
@@ -388,7 +389,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
           try {
             connectorResource.setClassName(factoryClassName);
             connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
-          } catch (Exception ignored) {
+          } catch (Exception e) {
+            log.error(
+                "Failed to set class name or factory identifier for connector resource. Class name: "
+                    + factoryClassName
+                    + ", Factory identifier: "
+                    + factory.factoryIdentifier(),
+                e);
           }
 
           try {
@@ -397,8 +404,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .requiredOptions()
                 .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setRequiredOptions(requiredOptions);
-          } catch (Exception ignored) {
-
+          } catch (Exception e) {
+            log.error("Failed to set required options for connector resource. " + e);
           }
 
           try {
@@ -407,7 +414,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .optionalOptions()
                 .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setOptionalOptions(optionalOptions);
-          } catch (Exception ignored) {
+          } catch (Exception e) {
+            log.error("Fail to set optional options for connector resource. " + e);
           }
           return connectorResource;
         }

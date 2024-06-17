@@ -26,7 +26,6 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
@@ -81,8 +80,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   private ExecutorService executorService;
 
   @Autowired private FlinkEnvService flinkEnvService;
-
-  @Autowired private CommonService commonService;
 
   @Autowired private ApplicationInfoService applicationInfoService;
 
@@ -141,8 +138,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   }
 
   @Override
-  public Boolean create(FlinkCluster flinkCluster) {
-    flinkCluster.setUserId(commonService.getUserId());
+  public Boolean create(FlinkCluster flinkCluster, Long userId) {
+    flinkCluster.setUserId(userId);
     return internalCreate(flinkCluster);
   }
 

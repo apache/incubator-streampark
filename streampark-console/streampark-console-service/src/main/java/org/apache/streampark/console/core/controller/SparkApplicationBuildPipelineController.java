@@ -18,14 +18,12 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionAction;
+import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.enums.PermissionTypeEnum;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "SPARK_APPLICATION_BUILD_PIPELINE_TAG")
 @Slf4j
 @Validated
 @RestController
@@ -53,9 +50,9 @@ public class SparkApplicationBuildPipelineController {
    * @param forceBuild forced start pipeline or not
    * @return Whether the pipeline was successfully started
    */
-  @PermissionAction(id = "#appId", type = PermissionTypeEnum.APP)
   @PostMapping(value = "build")
   @RequiresPermissions("app:create")
+  @PermissionScope(app = "#appId")
   public RestResponse buildApplication(Long appId, boolean forceBuild) {
     try {
       boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
@@ -71,10 +68,9 @@ public class SparkApplicationBuildPipelineController {
    * @param appId application id
    * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
    */
-  //  @Operation(summary = "Get application release pipeline")
-  //  @ApiAccess
   @PostMapping("/detail")
   @RequiresPermissions("app:view")
+  @PermissionScope(app = "#appId")
   public RestResponse getBuildProgressDetail(Long appId) {
     Map<String, Object> details = new HashMap<>(0);
     Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);

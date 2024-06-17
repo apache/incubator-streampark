@@ -43,7 +43,7 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
   void testCrudToken() throws Exception {
     Long mockUserId = 100000L;
     String expireTime = "9999-01-01 00:00:00";
-    RestResponse restResponse = accessTokenService.generateToken(mockUserId, expireTime, "");
+    RestResponse restResponse = accessTokenService.create(mockUserId, "");
     Assertions.assertNotNull(restResponse);
     Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
 
@@ -57,7 +57,7 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     Assertions.assertEquals("admin", username);
     User user = userService.getByUsername(username);
     Assertions.assertNotNull(user);
-    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username));
+    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getSalt()));
 
     // list
     AccessToken mockToken1 = new AccessToken();

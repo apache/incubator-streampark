@@ -20,6 +20,7 @@ import { ExecModeEnum, FailoverStrategyEnum, ReleaseStateEnum } from '/@/enums/f
 export const getMonacoOptions = (readOnly: boolean) => {
   return {
     selectOnLineNumbers: false,
+    foldingStrategy: 'indentation', // code fragmentation
     overviewRulerBorder: false, // Don't scroll bar borders
     autoClosingBrackets: 'always',
     autoClosingDelete: 'always',

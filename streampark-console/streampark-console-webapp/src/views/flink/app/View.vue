@@ -194,11 +194,6 @@
     optionApps,
   );
 
-  // build Detail
-  function openBuildProgressDetailDrawer(app: AppListRecord) {
-    openBuildDrawer(true, { appId: app.id });
-  }
-
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint

@@ -39,7 +39,7 @@
   const { t } = useI18n();
 
   const flinkSql = ref();
-  const vertifyRes = reactive({
+  const verifyRes = reactive({
     errorMsg: '',
     verified: false,
     errorStart: 0,
@@ -55,6 +55,9 @@
       type: String,
       default: '',
     },
+    appId: {
+      type: String as PropType<Nullable<string>>,
+    },
     versionId: {
       type: String as PropType<Nullable<string>>,
     },
@@ -68,7 +71,7 @@
   /* verify */
   async function handleVerifySql() {
     if (isEmpty(props.value)) {
-      vertifyRes.errorMsg = 'empty sql';
+      verifyRes.errorMsg = 'empty sql';
       return false;
     }
 
@@ -83,22 +86,22 @@
         });
         const success = data.data === true || data.data === 'true';
         if (success) {
-          vertifyRes.verified = true;
-          vertifyRes.errorMsg = '';
+          verifyRes.verified = true;
+          verifyRes.errorMsg = '';
           syntaxError();
           return true;
         } else {
-          vertifyRes.errorStart = parseInt(data.start);
-          vertifyRes.errorEnd = parseInt(data.end);
+          verifyRes.errorStart = parseInt(data.start);
+          verifyRes.errorEnd = parseInt(data.end);
           switch (data.type) {
             case 4:
-              vertifyRes.errorMsg = 'Unsupported sql';
+              verifyRes.errorMsg = 'Unsupported sql';
               break;
             case 5:
-              vertifyRes.errorMsg = "SQL is not endWith ';'";
+              verifyRes.errorMsg = "SQL is not endWith ';'";
               break;
             default:
-              vertifyRes.errorMsg = data.message;
+              verifyRes.errorMsg = data.message;
               break;
           }
           syntaxError();
@@ -116,14 +119,14 @@
     if (editor) {
       const model = editor.getModel();
       const monaco = await getMonacoInstance();
-      if (vertifyRes.errorMsg) {
+      if (verifyRes.errorMsg) {
         try {
           monaco.editor.setModelMarkers(model, 'sql', [
             {
-              startLineNumber: vertifyRes.errorStart,
-              endLineNumber: vertifyRes.errorEnd,
+              startLineNumber: verifyRes.errorStart,
+              endLineNumber: verifyRes.errorEnd,
               severity: monaco.MarkerSeverity.Error,
-              message: vertifyRes.errorMsg,
+              message: verifyRes.errorMsg,
             },
           ]);
         } catch (e) {
@@ -173,7 +176,7 @@
   const flinkEditorClass = computed(() => {
     return {
       ...fullEditorClass.value,
-      ['syntax-' + (vertifyRes.errorMsg ? 'false' : 'true')]: true,
+      ['syntax-' + (verifyRes.errorMsg ? 'false' : 'true')]: true,
     };
   });
 
@@ -226,11 +229,11 @@
     </ButtonGroup>
     <div class="flex items-center justify-between" v-else>
       <div class="mt-10px flex-1 mr-10px overflow-hidden whitespace-nowrap">
-        <div class="text-red-600 overflow-ellipsis overflow-hidden" v-if="vertifyRes.errorMsg">
-          {{ vertifyRes.errorMsg }}
+        <div class="text-red-600 overflow-ellipsis overflow-hidden" v-if="verifyRes.errorMsg">
+          {{ verifyRes.errorMsg }}
         </div>
         <div v-else class="text-green-700">
-          <span v-if="vertifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+          <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
         </div>
       </div>
       <div class="flinksql-tool">
@@ -262,9 +265,9 @@
     </div>
   </div>
   <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
-    <span class="text-red-600" v-if="vertifyRes.errorMsg"> {{ vertifyRes.errorMsg }} </span>
+    <span class="text-red-600" v-if="verifyRes.errorMsg"> {{ verifyRes.errorMsg }} </span>
     <span v-else class="text-green-700">
-      <span v-if="vertifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+      <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
     </span>
   </p>
 </template>

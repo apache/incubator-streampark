@@ -27,7 +27,6 @@
         <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
         <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
         <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
-        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="version_id" jdbcType="BIGINT" property="versionId"/>
         <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
         <result column="flink_cluster_id" jdbcType="BIGINT" property="flinkClusterId"/>
@@ -119,15 +118,15 @@
 
     <select id="selectPage" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
         select
-            t.*,
-            p.name as projectName,
-            u.username,
-           case
-               when trim(u.nick_name) = ''
-                   then u.username
-               else u.nick_name
-            end as nickname,
-            v.version as flinkVersion
+        t.*,
+        p.name as projectName,
+        u.username,
+        case
+        when trim(u.nick_name) = ''
+        then u.username
+        else u.nick_name
+        end as nickname,
+        v.version as flinkVersion
         from t_flink_app t
         inner join t_user u
         on t.user_id = u.user_id
@@ -150,18 +149,24 @@
                 and t.execution_mode = #{app.executionMode}
             </if>
             <if test="app.jobName != null and app.jobName != ''">
-                and t.job_name like concat('%', '${app.jobName}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and t.job_name like concat('%', #{app.jobName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.job_name like '%' || #{app.jobName} || '%'
+                </if>
             </if>
             <if test="app.projectName != null and app.projectName != ''">
-                and p.name like concat('%', '${app.projectName}', '%')
-            </if>
-            <if test="app.appId != null and app.appId != ''">
-                and t.app_id = #{app.appId}
+                <if test="_databaseId == 'mysql'">
+                    and p.name like concat('%', #{app.projectName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and p.name like '%' || #{app.projectName} || '%'
+                </if>
             </if>
             <if test="app.state != null and app.state != ''">
                 and t.state = #{app.state}
             </if>
-
             <if test="app.userId != null and app.userId != ''">
                 and t.user_id = #{app.userId}
             </if>
@@ -172,7 +177,12 @@
                 </foreach>
             </if>
             <if test="app.tags != null and app.tags != ''">
-                and t.tags like concat('%', '${app.tags}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and t.tags like concat('%', #{app.tags},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.tags like '%' || #{app.tags} || '%'
+                </if>
             </if>
         </where>
     </select>
@@ -273,11 +283,11 @@
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">
         update t_flink_app
         <set>
+            <if test="app.clusterId != null">
+                cluster_id=#{app.clusterId},
+            </if>
             <if test="app.jobId != null">
                 job_id=#{app.jobId},
-            </if>
-            <if test="app.appId != null">
-                app_id=#{app.appId},
             </if>
             end_time=null,
             state=14,

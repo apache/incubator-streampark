@@ -16,6 +16,8 @@
  */
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.ImplicitsUtils.AutoCloseImplicits
+
 import org.apache.commons.lang3.StringUtils
 
 import java.io._
@@ -71,7 +73,8 @@ object Utils extends Logger {
 
   def getJarManifest(jarFile: File): jar.Manifest = {
     requireCheckJarFile(jarFile.toURL)
-    new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
+    new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile)))
+      .autoClose(_.getManifest)
   }
 
   def getJarManClass(jarFile: File): String = {

@@ -232,6 +232,7 @@
     try {
       const res = await fetchFlinkSql({
         id: record.id,
+        appId: record.appId,
       });
       openFlinkDrawer(true, {
         sql: decodeByBase64(res.sql),
@@ -246,13 +247,13 @@
   /* delete configuration */
   async function handleDeleteConf(record: Recordable) {
     await fetchRemoveConf({ id: record.id });
-    reloadConf();
+    await reloadConf();
   }
 
   /* delete flink sql */
   async function handleDeleteFlinkSql(record: Recordable) {
-    await fetchRemoveFlinkSql({ id: record.id });
-    reloadFlinkSql();
+    await fetchRemoveFlinkSql({ id: record.id, appId: record.appId });
+    await reloadFlinkSql();
   }
 
   function handleCompare(record: Recordable) {
@@ -344,18 +345,18 @@
 
   /* delete savePoint */
   async function handleDeleteSavePoint(record: Recordable) {
-    await fetchRemoveSavePoint({ id: record.id });
-    reloadSavePoint();
+    await fetchRemoveSavePoint({ id: record.id, appId: record.appId });
+    await reloadSavePoint();
   }
 
   async function handleDeleteBackup(record: Recordable) {
     await fetchRemoveBackup(record.id);
-    reloadBackup();
+    await reloadBackup();
   }
 
   async function handleDeleteOperationLog(record: Recordable) {
     await fetchDeleteOperationLog(record.id);
-    reloadOperationLog();
+    await reloadOperationLog();
   }
 
   /* copy path */
@@ -377,8 +378,43 @@
 </script>
 <template>
   <div>
-    <Tabs :defaultActiveKey="1" class="mt-15px" :animated="false" :tab-bar-gutter="0">
-      <TabPane key="1" tab="Option" force-render>
+    <Tabs :defaultActiveKey="1" class="mt-15px" :tab-bar-gutter="0">
+      <TabPane key="1" :tab="t('flink.app.detail.detailTab.detailTabName.operationLog')">
+        <BasicTable @register="registerLogsTable">
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'optionName'">
+              <Tag color="blue" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
+              <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
+              <Tag color="cyan" v-if="record.optionName === OperationEnum.SAVEPOINT">
+                Savepoint
+              </Tag>
+              <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
+            </template>
+            <template v-if="column.dataIndex === 'yarnAppId'">
+              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
+                {{ record.yarnAppId }}
+              </a>
+            </template>
+            <template v-if="column.dataIndex === 'jobManagerUrl'">
+              <a type="link" :href="record.jobManagerUrl" target="_blank">
+                {{ record.jobManagerUrl }}
+              </a>
+            </template>
+            <template v-if="column.dataIndex === 'optionTime'">
+              <Icon icon="ant-design:clock-circle-outlined" />
+              {{ record.optionTime }}
+            </template>
+            <template v-if="column.dataIndex === 'success'">
+              <Tag class="bold-tag" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
+              <Tag class="bold-tag" color="#f5222d" v-else> FAILED </Tag>
+            </template>
+            <template v-if="column.dataIndex === 'operation'">
+              <TableAction :actions="getOperationLogAction(record)" />
+            </template>
+          </template>
+        </BasicTable>
+      </TabPane>
+      <TabPane key="2" :tab="t('flink.app.detail.detailTab.detailTabName.option')">
         <Descriptions bordered size="middle" layout="vertical">
           <DescriptionItem v-for="(v, k) in JSON.parse(app.options || '{}')" :key="k" :label="k">
             {{ v }}
@@ -386,7 +422,7 @@
         </Descriptions>
       </TabPane>
       <TabPane
-        key="2"
+        key="3"
         :tab="t('flink.app.detail.detailTab.detailTabName.configuration')"
         v-if="app && app.appType === AppTypeEnum.STREAMPARK_FLINK && tabConf.showConf"
       >
@@ -424,7 +460,7 @@
         </BasicTable>
       </TabPane>
       <TabPane
-        key="3"
+        key="4"
         :tab="t('flink.app.detail.detailTab.detailTabName.flinkSql')"
         v-if="app.jobType === JobTypeEnum.SQL"
       >
@@ -472,7 +508,7 @@
         </BasicTable>
       </TabPane>
       <TabPane
-        key="4"
+        key="5"
         :tab="t('flink.app.detail.detailTab.detailTabName.savepoint')"
         v-if="tabConf.showSaveOption"
       >
@@ -500,7 +536,7 @@
         </BasicTable>
       </TabPane>
       <TabPane
-        key="5"
+        key="6"
         :tab="t('flink.app.detail.detailTab.detailTabName.backup')"
         v-if="tabConf.showBackup"
       >
@@ -513,45 +549,6 @@
             </template>
             <template v-if="column.dataIndex === 'operation'">
               <TableAction :actions="getBackupAction(record)" />
-            </template>
-          </template>
-        </BasicTable>
-      </TabPane>
-      <TabPane
-        key="6"
-        :tab="t('flink.app.detail.detailTab.detailTabName.operationLog')"
-        v-if="tabConf.showOptionLog"
-      >
-        <BasicTable @register="registerLogsTable">
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex === 'optionName'">
-              <Tag color="blue" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
-              <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
-              <Tag color="cyan" v-if="record.optionName === OperationEnum.SAVEPOINT">
-                Savepoint
-              </Tag>
-              <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
-            </template>
-            <template v-if="column.dataIndex === 'yarnAppId'">
-              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
-                {{ record.yarnAppId }}
-              </a>
-            </template>
-            <template v-if="column.dataIndex === 'jobManagerUrl'">
-              <a type="link" :href="record.jobManagerUrl" target="_blank">
-                {{ record.jobManagerUrl }}
-              </a>
-            </template>
-            <template v-if="column.dataIndex === 'optionTime'">
-              <Icon icon="ant-design:clock-circle-outlined" />
-              {{ record.optionTime }}
-            </template>
-            <template v-if="column.dataIndex === 'success'">
-              <Tag class="bold-tag" color="#52c41a" v-if="record.success"> SUCCESS </Tag>
-              <Tag class="bold-tag" color="#f5222d" v-else> FAILED </Tag>
-            </template>
-            <template v-if="column.dataIndex === 'operation'">
-              <TableAction :actions="getOperationLogAction(record)" />
             </template>
           </template>
         </BasicTable>

@@ -29,8 +29,8 @@ import scala.reflect.ClassTag
 
 object FlinkClient extends Logger {
 
-  private[this] val FLINK_CLIENT_ENDPOINT_CLASS =
-    "org.apache.streampark.flink.client.FlinkClientEndpoint"
+  private[this] val FLINK_CLIENT_ENTRYPOINT_CLASS =
+    "org.apache.streampark.flink.client.FlinkClientEntrypoint"
 
   private[this] val SUBMIT_REQUEST =
     "org.apache.streampark.flink.client.bean.SubmitRequest" -> "submit"
@@ -81,7 +81,7 @@ object FlinkClient extends Logger {
     FlinkShimsProxy.proxy(
       flinkVersion,
       (classLoader: ClassLoader) => {
-        val submitClass = classLoader.loadClass(FLINK_CLIENT_ENDPOINT_CLASS)
+        val submitClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS)
         val requestClass = classLoader.loadClass(requestBody._1)
         val method = submitClass.getDeclaredMethod(requestBody._2, requestClass)
         method.setAccessible(true)

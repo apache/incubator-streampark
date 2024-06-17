@@ -50,11 +50,11 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -105,8 +105,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,7 +129,7 @@ public class AppBuildPipeServiceImpl
 
   @Autowired private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private SettingService settingService;
 
@@ -335,7 +335,7 @@ public class AppBuildPipeServiceImpl
             } else {
               Message message =
                   new Message(
-                      commonService.getUserId(),
+                      serviceHelper.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -399,7 +399,7 @@ public class AppBuildPipeServiceImpl
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
     return applicationLog;
   }
 
@@ -580,7 +580,7 @@ public class AppBuildPipeServiceImpl
       case PYFLINK:
         return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
-        String sqlDistJar = commonService.getSqlClientJar(flinkEnv);
+        String sqlDistJar = serviceHelper.getFlinkSqlClientJar(flinkEnv);
         if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);
@@ -615,14 +615,14 @@ public class AppBuildPipeServiceImpl
   @Override
   public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
         new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
 
     List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
     if (CollectionUtils.isEmpty(appBuildPipelines)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return appBuildPipelines.stream()
         .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));
@@ -712,7 +712,7 @@ public class AppBuildPipeServiceImpl
               });
       return dependencyInfo.merge(mvnArtifacts, jarLibs);
     } catch (Exception e) {
-      log.warn("Merge team dependency failed.", e);
+      log.error("Merge team dependency failed.", e);
       return dependencyInfo;
     }
   }

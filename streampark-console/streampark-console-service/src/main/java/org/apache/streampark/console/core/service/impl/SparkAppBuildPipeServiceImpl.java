@@ -47,10 +47,10 @@ import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.CommonService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.SparkEnvService;
@@ -86,8 +86,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,7 +109,7 @@ public class SparkAppBuildPipeServiceImpl
 
   @Autowired private ApplicationBackUpService backUpService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
   @Autowired private SettingService settingService;
 
@@ -148,7 +148,7 @@ public class SparkAppBuildPipeServiceImpl
     applicationLog.setOptionName(RELEASE.getValue());
     applicationLog.setAppId(app.getId());
     applicationLog.setOptionTime(new Date());
-    applicationLog.setUserId(commonService.getUserId());
+    applicationLog.setUserId(serviceHelper.getUserId());
 
     // check if you need to go through the build process (if the jar and pom have changed,
     // you need to go through the build process, if other common parameters are modified,
@@ -298,7 +298,7 @@ public class SparkAppBuildPipeServiceImpl
             } else {
               Message message =
                   new Message(
-                      commonService.getUserId(),
+                      serviceHelper.getUserId(),
                       app.getId(),
                       app.getJobName().concat(" release failed"),
                       ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -410,7 +410,7 @@ public class SparkAppBuildPipeServiceImpl
       case PYFLINK:
         return String.format("%s/%s", app.getAppHome(), app.getJar());
       case FLINK_SQL:
-        String sqlDistJar = commonService.getSqlClientJar(sparkEnv);
+        String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
         if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
           String clientPath = Workspace.remote().APP_CLIENT();
           return String.format("%s/%s", clientPath, sqlDistJar);
@@ -437,14 +437,14 @@ public class SparkAppBuildPipeServiceImpl
   @Override
   public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
         new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
 
     List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
     if (CollectionUtils.isEmpty(appBuildPipelines)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return appBuildPipelines.stream()
         .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));

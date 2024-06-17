@@ -22,19 +22,13 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
-import org.apache.streampark.console.core.service.CommonService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,49 +39,26 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Tag(name = "ACCESS_TOKEN_TAG")
 @RestController
 @RequestMapping("token")
 public class AccessTokenController {
 
   @Autowired private AccessTokenService accessTokenService;
 
-  @Autowired private CommonService commonService;
+  @Autowired private ServiceHelper serviceHelper;
 
-  /** generate token string */
-  @Operation(summary = "Create token")
-  @Parameters({
-    @Parameter(
-        name = "userId",
-        description = "user id",
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "expireTime",
-        description = "token expire time, yyyy-MM-dd HH:mm:ss",
-        required = true,
-        example = "9999-01-01 00:00:00",
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
-        name = "description",
-        description = "token description",
-        schema = @Schema(implementation = String.class))
-  })
   @PostMapping(value = "create")
   @RequiresPermissions("token:add")
   public RestResponse createToken(
       @NotBlank(message = "{required}") Long userId,
-      String expireTime,
       @RequestParam(required = false) String description)
       throws InternalException {
-    return accessTokenService.generateToken(userId, expireTime, description);
+    return accessTokenService.create(userId, description);
   }
 
-  @Operation(summary = "Verify current user token")
   @PostMapping(value = "check")
   public RestResponse verifyToken() {
-    Long userId = commonService.getUserId();
+    Long userId = serviceHelper.getUserId();
     RestResponse restResponse = RestResponse.success();
     if (userId != null) {
       AccessToken accessToken = accessTokenService.getByUserId(userId);
@@ -104,49 +75,19 @@ public class AccessTokenController {
     return restResponse;
   }
 
-  /** query token list */
-  @Operation(summary = "List tokens")
-  @Parameters({
-    @Parameter(
-        name = "userId",
-        in = ParameterIn.QUERY,
-        description = "user id",
-        schema = @Schema(implementation = Long.class))
-  })
   @PostMapping(value = "list")
   @RequiresPermissions("token:view")
-  public RestResponse tokensList(
-      RestRequest restRequest, @Parameter(hidden = true) AccessToken accessToken) {
+  public RestResponse tokensList(RestRequest restRequest, AccessToken accessToken) {
     IPage<AccessToken> accessTokens = accessTokenService.getPage(accessToken, restRequest);
     return RestResponse.success(accessTokens);
   }
 
-  /** update token status */
-  @Operation(summary = "Toggle token")
-  @Parameters({
-    @Parameter(
-        name = "tokenId",
-        description = "token id",
-        required = true,
-        example = "1",
-        schema = @Schema(implementation = Long.class))
-  })
   @PostMapping("toggle")
   @RequiresPermissions("token:add")
   public RestResponse toggleToken(@NotNull(message = "{required}") Long tokenId) {
     return accessTokenService.toggleToken(tokenId);
   }
 
-  /** delete token by id */
-  @Operation(summary = "Delete token")
-  @Parameters({
-    @Parameter(
-        name = "tokenId",
-        description = "token id",
-        required = true,
-        example = "1",
-        schema = @Schema(implementation = Long.class))
-  })
   @DeleteMapping(value = "delete")
   @RequiresPermissions("token:delete")
   public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
@@ -158,7 +99,6 @@ public class AccessTokenController {
    * copy cURL, hardcode now, there is no need for configuration here, because there are several
    * fixed interfaces
    */
-  @Operation(summary = "Generate api with token")
   @PostMapping(value = "curl")
   public RestResponse copyRestApiCurl(
       @NotBlank(message = "{required}") String appId,
@@ -170,7 +110,7 @@ public class AccessTokenController {
     curlBuilder
         .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
         .addHeader(
-            "Authorization", accessTokenService.getByUserId(commonService.getUserId()).getToken());
+            "Authorization", accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
 
     if ("/flink/app/start".equalsIgnoreCase(path)) {
       resultCURL =

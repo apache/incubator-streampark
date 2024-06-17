@@ -52,11 +52,6 @@ export const columns: BasicColumn[] = [
     dataIndex: 'createTime',
   },
   {
-    title: t('system.token.table.expireTime'),
-    dataIndex: 'expireTime',
-    sorter: true,
-  },
-  {
     title: t('system.token.table.status'),
     dataIndex: 'userStatus',
     width: 100,
@@ -116,14 +111,5 @@ export const formSchema: FormSchema[] = [
     field: 'description',
     label: t('common.description'),
     component: 'InputTextArea',
-  },
-  {
-    field: 'expireTime',
-    label: t('system.token.table.expireTime'),
-    component: 'DatePicker',
-    defaultValue: dayjs('9999-01-01'),
-    componentProps: {
-      disabled: true,
-    },
   },
 ];

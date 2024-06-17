@@ -17,12 +17,14 @@
 
 package org.apache.streampark.console.base.handler;
 
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.UnauthenticatedException;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +33,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,32 +44,39 @@ import javax.validation.Path;
 import java.util.List;
 import java.util.Set;
 
-/** A global exception handler that takes over all exceptions */
 @Slf4j
 @RestControllerAdvice
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(value = Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public RestResponse handleException(Exception e) {
-    log.info("Internal server error：", e);
-    return RestResponse.fail(ResponseCode.CODE_FAIL, "internal server error: {}", e.getMessage());
+  @ExceptionHandler(value = UnauthenticatedException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public RestResponse handelUnauthenticatedException(UnauthenticatedException e) {
+    log.error("Unauthenticated.", e);
+    return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Unauthenticated.");
   }
 
-  @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public RestResponse handleException(HttpRequestMethodNotSupportedException e) {
-    log.info("not supported request method，exception：{}", e.getMessage());
-    return RestResponse.fail(
-        ResponseCode.CODE_FAIL, "not supported request method，exception：{}", e.getMessage());
+  @ExceptionHandler(value = AuthenticationException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public RestResponse handelUnauthenticatedException(AuthenticationException e) {
+    log.error("Permission denied.", e);
+    return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Permission denied.");
   }
 
   @ExceptionHandler(value = AbstractApiException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public RestResponse handleException(AbstractApiException e) {
-    log.info("api exception：{}", e.getMessage());
+    log.error("api exception:", e);
     return RestResponse.fail(e.getResponseCode(), e.getMessage());
+  }
+
+  @ExceptionHandler(value = Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @Order(value = Ordered.HIGHEST_PRECEDENCE)
+  public RestResponse handleException(Exception e) {
+    log.error("internal server error:", e);
+    return RestResponse.fail(
+        ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
   }
 
   /**
@@ -80,6 +88,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BindException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public RestResponse validExceptionHandler(BindException e) {
+    log.error("bind exception:", e);
     StringBuilder message = new StringBuilder();
     List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
     for (FieldError error : fieldErrors) {
@@ -98,6 +107,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = ConstraintViolationException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public RestResponse handleConstraintViolationException(ConstraintViolationException e) {
+    log.error("constraint violation exception:", e);
     StringBuilder message = new StringBuilder();
     Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
     for (ConstraintViolation<?> violation : violations) {
@@ -108,11 +118,5 @@ public class GlobalExceptionHandler {
     }
     message = new StringBuilder(message.substring(0, message.length() - 1));
     return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
-  }
-
-  @ExceptionHandler(value = UnauthorizedException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public void handleUnauthorizedException(Exception e) {
-    log.info("Permission denied，{}", e.getMessage());
   }
 }

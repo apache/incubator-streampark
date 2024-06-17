@@ -134,6 +134,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
    * @return the webhook
    */
   private String getWebhook(AlertLarkParams params) {
+    larkProxyUrl = larkProxyUrl.replaceFirst("/open-apis/bot/v2/hook/(.*)", "");
     String url = String.format(larkProxyUrl + "/open-apis/bot/v2/hook/%s", params.getToken());
     if (log.isDebugEnabled()) {
       log.debug("The alarm robot url of Lark is {}", url);

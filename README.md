@@ -32,7 +32,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/ASFStreamPark?label=follow&logo=x&style=for-the-badge)](https://twitter.com/ASFStreamPark)
 
 **[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
-**[Official Documentation](https://streampark.apache.org/docs/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
+**[Official Documentation](https://streampark.apache.org/docs/get-started/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 
 ![](https://streampark.apache.org/image/dashboard-preview.png)
@@ -61,7 +61,7 @@
 - [Start with Docker](docker/README.md)
 - [Start with Kubernetes](helm/README.md)
 
-Click [Official Documentation](https://streampark.apache.org/docs/user-guide/quick-start) for more information
+Click [Official Documentation](https://streampark.apache.org/docs/framework/quick-start) for more information
 
 ## 🔨 How to Build
 
@@ -71,7 +71,7 @@ cd incubator-streampark
 ./build.sh
 ```
 
-🗄 Details:how to [Development](https://streampark.apache.org/docs/user-guide/development)
+🗄 Details:how to [Development](https://streampark.apache.org/docs/development/development)
 
 ## 🧑‍💻 Downloads
 

@@ -40,6 +40,7 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
@@ -101,7 +102,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  @Autowired private CommonServiceImpl commonService;
+  @Autowired private ServiceHelper commonService;
 
   @Qualifier("triggerSavepointExecutor")
   @Autowired
@@ -302,18 +303,20 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   private String getClusterId(Application application, FlinkCluster cluster) {
     if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-      return application.getClusterId();
-    }
-    if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
-      if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()) {
+      return FlinkExecutionMode.isKubernetesSessionMode(application.getExecutionMode())
+          ? cluster.getClusterId()
+          : application.getClusterId();
+    } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+      if (FlinkExecutionMode.YARN_SESSION.equals(application.getFlinkExecutionMode())) {
         AssertUtils.notNull(
             cluster,
             String.format(
                 "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
                 application.getFlinkClusterId()));
         return cluster.getClusterId();
+      } else {
+        return application.getClusterId();
       }
-      return application.getAppId();
     }
     return null;
   }
@@ -399,7 +402,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
       log.warn(
           "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be greater than 0");
     } catch (NumberFormatException e) {
-      log.warn(
+      log.error(
           "This value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
     }
     return Optional.empty();
@@ -428,7 +431,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
           "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be greater than 0, default value: {} will be used",
           MAX_RETAINED_CHECKPOINTS.defaultValue());
     } catch (NumberFormatException e) {
-      log.warn(
+      log.error(
           "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be used",
           flinkEnv.getFlinkHome(),
           flinkConfNumRetained);

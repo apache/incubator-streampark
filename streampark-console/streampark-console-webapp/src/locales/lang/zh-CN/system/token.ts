@@ -24,7 +24,6 @@ export default {
     title: 'Token 列表',
     userName: '用户名',
     token: 'Token',
-    expireTime: '过期时间',
     status: '状态',
   },
   operation: {
