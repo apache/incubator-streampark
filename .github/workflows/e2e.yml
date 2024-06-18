@@ -115,6 +115,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Echo free space
+        run: |
+          echo "Runner Free space:"
+          df -h
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
@@ -133,7 +137,8 @@ jobs:
           path: /tmp
       - name: Load Docker Images
         run: |
-          docker load -i /tmp/standalone-image.tar
+          docker load -i /tmp/standalone-image.tar \
+          && rm -f /tmp/standalone-image.tar
       - name: Run Test
         run: |
           ./mvnw -B -f streampark-e2e/pom.xml -am \
