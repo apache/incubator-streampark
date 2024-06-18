@@ -17,5 +17,10 @@
 
 [submodule ".github/actions/paths-filter"]
 	path = .github/actions/paths-filter
-	url = https://github.com/dorny/paths-filter.git
+	url = https://github.com/dorny/paths-filter
 	branch = de90cc6fb38fc0963ad72b210f1f284cd68cea36
+
+[submodule ".github/actions/maximize-build-space"]
+	path = .github/actions/maximize-build-space
+	url = https://github.com/easimon/maximize-build-space
+	branch = fc881a613ad2a34aca9c9624518214ebc21dfc0c
