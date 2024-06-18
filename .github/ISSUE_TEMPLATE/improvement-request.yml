@@ -1,0 +1,144 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Improvement request
+title: "[Improvement] Improvement title"
+description: Suggest an improvement for StreamPark
+labels: ["improvement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For better global communication, Please write in English.
+
+        If you feel the description in English is not clear, then you can append description in Chinese, thanks! (如果您觉得英文描述不清楚，可以附加中文描述，谢谢)
+
+  - type: checkboxes
+    attributes:
+      label: Search before asking
+      description: >
+        Please make sure to search in the [issues](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22improvement%22)
+        first to see whether the same issue was reported already.
+      options:
+        - label: >
+            I had searched in the [issues](https://github.com/apache/incubator-streampark/issues?q=is%3Aissue+label%3A%22improvement%22) and found
+            no similar issues.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Java Version
+      description: Provide Java Version.
+      placeholder: >
+        Please provide the version of Java.
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Scala Version
+      description: Provide Scala version.
+      options:
+        - 2.11.x
+        - 2.12.x
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: StreamPark Version
+      description: Provide StreamPark version.
+      placeholder: >
+        Please provide the version of StreamPark.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Flink Version
+      description: Provide Flink Version.
+      placeholder: >
+        Please provide the version of Flink.
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: deploy mode
+      description: Which mode deploy the flink job?
+      options:
+        - yarn-application
+        - yarn-session
+        - yarn-perjob
+        - remote
+        - kubernetes-application
+        - kubernetes-session
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: What happened
+      description: Describe what happened.
+      placeholder: >
+        Please provide the context in which the problem occurred and explain what happened
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Error Exception
+      description: Provide the error exception when you run your command.
+      placeholder: >
+        Please provide the error exception here.
+      render: log
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: Provide the screenshots if necessary.
+      placeholder: >
+        Please copy-paste the screenshots here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Are you willing to submit PR?
+      description: >
+        This is absolutely not required, but we are happy to guide you in the contribution process
+        especially if you already have a good understanding of how to implement the fix.
+        StreamPark is a totally community-driven project and we love to bring new contributors in.
+      options:
+        - label: Yes I am willing to submit a PR!(您是否要贡献这个PR?)
+
+  - type: checkboxes
+    attributes:
+      label: Code of Conduct
+      description: |
+        The Code of Conduct helps create a safe space for everyone. We require that everyone agrees to it.
+      options:
+        - label: >
+            I agree to follow this project's
+            [Code of Conduct](https://www.apache.org/foundation/policies/conduct)
+          required: true
+
+  - type: markdown
+    attributes:
+      value: "Thanks for completing our form, and we will reply you as soon as possible."
