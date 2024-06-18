@@ -107,7 +107,7 @@ jobs:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
       - name: Maximize runner space
-        uses: easimon/maximize-build-space@v10
+        uses: ./.github/actions/maximize-build-space
         with:
           root-reserve-mb: 512
           swap-size-mb: 1024
