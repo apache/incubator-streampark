@@ -106,6 +106,19 @@ jobs:
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
+      - name: Maximize runner space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Echo free space
+        run: |
+          echo "Free space:"
+          df -h
       - uses: actions/checkout@v4
         with:
           submodules: true
