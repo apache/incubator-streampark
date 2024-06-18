@@ -31,7 +31,7 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
-  import { fetchCheckStart, fetchForcedStop, fetchStart } from '/@/api/flink/app';
+  import { fetchCheckStart, fetchAbort, fetchStart } from '/@/api/flink/app';
   import { AppExistsEnum } from '/@/enums/flinkEnum';
 
   const SelectOption = Select.Option;
@@ -116,7 +116,7 @@
       id: receiveData.application.id,
     });
     if (resp.data.data === AppExistsEnum.IN_YARN) {
-      await fetchForcedStop({
+      await fetchAbort({
         id: receiveData.application.id,
       });
     }

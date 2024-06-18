@@ -51,7 +51,7 @@ import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/flinkEnv.type';
 import { AlertSetting } from '/@/api/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/flinkCluster.type';
-import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/setting';
@@ -63,6 +63,7 @@ export interface HistoryRecord {
   k8sSessionClusterId: Array<string>;
   flinkImage: Array<string>;
 }
+
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
   edit?: { appId: string; mode: 'streampark' | 'flink' },
