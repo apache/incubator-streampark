@@ -39,7 +39,12 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum, ClusterStateEnum } from '/@/enums/flinkEnum';
+import {
+  CandidateTypeEnum,
+  FailoverStrategyEnum,
+  RestoreModeEnum,
+  ClusterStateEnum,
+} from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';

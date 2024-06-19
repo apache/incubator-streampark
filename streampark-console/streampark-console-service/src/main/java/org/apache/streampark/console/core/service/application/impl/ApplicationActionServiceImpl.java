@@ -206,7 +206,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   @Override
-  public void forcedStop(Long id) {
+  public void abort(Long id) {
     CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
     CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(id);
     Application application = this.baseMapper.selectApp(id);
@@ -225,7 +225,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       cancelFuture.cancel(true);
     }
     if (startFuture == null && cancelFuture == null) {
-      this.doStopped(id);
+      this.doAbort(id);
     }
   }
 
@@ -308,7 +308,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     cancelFutureMap.put(application.getId(), cancelFuture);
 
-    cancelFuture.whenComplete(
+    cancelFuture.whenCompleteAsync(
         (cancelResponse, throwable) -> {
           cancelFutureMap.remove(application.getId());
 
@@ -319,7 +319,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             applicationLogService.save(applicationLog);
 
             if (throwable instanceof CancellationException) {
-              doStopped(application.getId());
+              doAbort(application.getId());
             } else {
               log.error("stop flink job failed.", throwable);
               application.setOptionState(OptionStateEnum.NONE.getValue());
@@ -465,7 +465,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     startFutureMap.put(application.getId(), future);
 
-    future.whenComplete(
+    future.whenCompleteAsync(
         (response, throwable) -> {
           // 1) remove Future
           startFutureMap.remove(application.getId());
@@ -567,7 +567,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     applicationLog.setSuccess(false);
     applicationLogService.save(applicationLog);
     if (throwable instanceof CancellationException) {
-      doStopped(application.getId());
+      doAbort(application.getId());
     } else {
       Application app = getById(appParam.getId());
       app.setState(FlinkAppStateEnum.FAILED.getValue());
@@ -782,7 +782,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     return properties;
   }
 
-  private void doStopped(Long id) {
+  private void doAbort(Long id) {
     Application application = getById(id);
     application.setOptionState(OptionStateEnum.NONE.getValue());
     application.setState(FlinkAppStateEnum.CANCELED.getValue());
