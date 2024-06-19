@@ -92,7 +92,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         return this;
     }
 
-    @SneakyThrows
     public ApplicationsPage startApplication(String applicationName) {
         waitForPageLoading();
 
