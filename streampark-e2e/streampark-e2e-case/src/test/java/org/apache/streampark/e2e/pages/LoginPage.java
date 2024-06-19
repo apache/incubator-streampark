@@ -20,6 +20,7 @@
 package org.apache.streampark.e2e.pages;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import org.openqa.selenium.WebElement;
@@ -81,6 +82,7 @@ public final class LoginPage extends NavBarPage {
 
         new WebDriverWait(driver, Duration.ofSeconds(30))
             .until(ExpectedConditions.urlContains("/flink/app"));
+        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         return new NavBarPage(driver);
     }
 

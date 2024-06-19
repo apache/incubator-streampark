@@ -20,7 +20,9 @@
 package org.apache.streampark.e2e.pages.apacheflink.applications;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
@@ -90,6 +92,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         return this;
     }
 
+    @SneakyThrows
     public ApplicationsPage startApplication(String applicationName) {
         waitForPageLoading();
 
@@ -102,6 +105,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No start button in applications list"))
             .click();
 
+        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(startJobForm().radioFromSavepoint()));
         startJobForm.radioFromSavepoint().click();
         startJobForm.buttonSubmit().click();
