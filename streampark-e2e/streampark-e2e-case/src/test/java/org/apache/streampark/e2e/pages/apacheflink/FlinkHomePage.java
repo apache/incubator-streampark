@@ -21,8 +21,6 @@ package org.apache.streampark.e2e.pages.apacheflink;
 
 import lombok.Getter;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -62,7 +60,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         createFlinkHomeForm.inputDescription().sendKeys(description);
         createFlinkHomeForm.buttonSubmit().click();
 
-        waitForClickFinish();
+        waitForClickFinish("create successful");
         return this;
     }
 
@@ -83,7 +81,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         createFlinkHomeForm.inputFlinkName().sendKeys(newFlinkName);
         createFlinkHomeForm.buttonSubmit().click();
 
-        waitForClickFinish();
+        waitForClickFinish("update successful");
         return this;
     }
 
@@ -101,7 +99,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
         deleteConfirmButton.click();
 
-        waitForClickFinish();
+        waitForClickFinish("flink home is removed");
         return this;
     }
 
@@ -109,8 +107,9 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/flink/home"));
     }
 
-    private void waitForClickFinish() {
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
+    private void waitForClickFinish(String message) {
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", message))));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", message))));
     }
 
     @Getter
