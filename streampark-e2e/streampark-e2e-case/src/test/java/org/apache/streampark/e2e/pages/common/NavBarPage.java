@@ -66,7 +66,6 @@ public class NavBarPage {
             return nav.cast(new ApacheFlinkPage(driver));
         }
 
-
         if (nav == SystemPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(systemTab));
             String tabOpenStateXpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
