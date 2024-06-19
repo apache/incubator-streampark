@@ -29,7 +29,6 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.service.SettingService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +58,6 @@ import static org.apache.streampark.common.enums.StorageType.LFS;
 public class EnvInitializer implements ApplicationRunner {
 
   @Autowired private ApplicationContext context;
-
-  @Autowired private SettingService settingService;
 
   private final Set<StorageType> initialized = new HashSet<>(2);
 
@@ -169,6 +166,12 @@ public class EnvInitializer implements ApplicationRunner {
     if (!fsOperator.exists(appJars)) {
       log.info(mkdirLog, appJars);
       fsOperator.mkdirs(appJars);
+    }
+
+    String appPlugins = workspace.APP_PLUGINS();
+    if (!fsOperator.exists(appPlugins)) {
+      log.info(mkdirLog, appPlugins);
+      fsOperator.mkdirs(appPlugins);
     }
 
     // 2. upload jar.
