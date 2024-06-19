@@ -82,7 +82,6 @@ public final class LoginPage extends NavBarPage {
 
         new WebDriverWait(driver, Duration.ofSeconds(30))
             .until(ExpectedConditions.urlContains("/flink/app"));
-        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         return new NavBarPage(driver);
     }
 
