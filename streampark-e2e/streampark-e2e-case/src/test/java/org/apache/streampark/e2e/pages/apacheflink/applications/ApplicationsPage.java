@@ -104,11 +104,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No start button in applications list"))
             .click();
 
+        String startJobFormMessage = "Start Job";
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", startJobFormMessage))));
+        startJobForm.radioFromSavepoint().click();
+        startJobForm.buttonSubmit().click();
         String startPopUpMessage = "The current job is starting";
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", startPopUpMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", startPopUpMessage))));
-        startJobForm.radioFromSavepoint().click();
-        startJobForm.buttonSubmit().click();
 
         return this;
     }
