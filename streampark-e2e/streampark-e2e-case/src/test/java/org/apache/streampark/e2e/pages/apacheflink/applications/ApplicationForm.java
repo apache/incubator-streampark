@@ -22,6 +22,7 @@ package org.apache.streampark.e2e.pages.apacheflink.applications;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.apacheflink.applications.entity.ApplicationsDynamicParams;
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -78,7 +79,7 @@ public final class ApplicationForm {
                                           String applicationName,
                                           String flinkVersion,
                                           ApplicationsDynamicParams applicationsDynamicParams) {
-        Thread.sleep(1000);
+        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
