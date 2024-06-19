@@ -105,7 +105,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .click();
 
         String startJobFormMessage = "Start Job";
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", startJobFormMessage))));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(.,'%s')]", startJobFormMessage))));
         startJobForm.radioFromSavepoint().click();
         startJobForm.buttonSubmit().click();
         String startPopUpMessage = "The current job is starting";
