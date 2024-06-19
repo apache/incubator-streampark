@@ -20,7 +20,6 @@
 package org.apache.streampark.e2e.pages;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import org.openqa.selenium.WebElement;

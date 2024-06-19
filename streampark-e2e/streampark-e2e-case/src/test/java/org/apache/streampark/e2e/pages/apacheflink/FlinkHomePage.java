@@ -20,11 +20,7 @@
 package org.apache.streampark.e2e.pages.apacheflink;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
-import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
