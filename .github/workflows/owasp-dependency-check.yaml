@@ -24,6 +24,7 @@ on:
   pull_request:
     paths:
       - '**/pom.xml'
+
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 -Dmaven.wagon.http.retryHandler.count=3
 
