@@ -368,17 +368,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   public void start(Application appParam, boolean auto) throws Exception {
     // 1) check application
     final Application application = getById(appParam.getId());
-    AssertUtils.notNull(application);
-    ApiAlertException.throwIfTrue(
-        !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
-
-    checkApplicationMode(application);
-
-    AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
-    AssertUtils.notNull(buildPipeline);
-
-    FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-    ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
+    checkApplication(application);
 
     // if manually started, clear the restart flag
     if (!auto) {
@@ -390,12 +380,14 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setSavePointed(true);
       application.setRestartCount(application.getRestartCount() + 1);
     }
+
     // 2) update app state to starting...
     starting(application);
     ApplicationLog applicationLog = constructAppLog(application);
     // set the latest to Effective, (it will only become the current effective at this time)
     applicationManageService.toEffective(application);
 
+    // 3) generate the submitrequest configuration
     Map<String, Object> extraParameter = new HashMap<>(0);
     if (application.isFlinkSqlJob()) {
       FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
@@ -409,14 +401,10 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     //      See: org.apache.streampark.flink.client.bean.KubernetesSubmitParam
     KubernetesSubmitParam kubernetesSubmitParam = applyKubernetesSubmitParam(application);
 
+    FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
     Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
-    String flinkUserJar = userJarAndAppConf.t1;
-    String appConf = userJarAndAppConf.t2;
 
-    BuildResult buildResult = buildPipeline.getBuildResult();
-    if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
-      buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-    }
+    BuildResult buildResult = buildResult(application, userJarAndAppConf.t1);
 
     // Get the args after placeholder replacement
     String applicationArgs =
@@ -432,7 +420,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             application.getId(),
             new JobID().toHexString(),
             application.getJobName(),
-            appConf,
+            userJarAndAppConf.t2,
             application.getApplicationType(),
             getSavePointed(appParam),
             appParam.getRestoreMode() == null
@@ -825,14 +813,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   }
 
   /**
-   * This method checks the execution mode of the application and performs necessary actions. If the
-   * execution mode is remote or session, it checks before starting the application. If the
-   * execution mode is Yarn, it checks if a task with the same name is already running in the Yarn
-   * queue.
+   * Check the application before starting
    *
-   * @param application The application to be checked.
+   * @param application
    */
-  private void checkApplicationMode(Application application) {
+  private void checkApplication(Application application) {
+    AssertUtils.notNull(application);
+    ApiAlertException.throwIfTrue(
+        !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
+
     // If the execution mode is remote or session, check before starting the application
     if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
         || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
@@ -846,6 +835,28 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
           "[StreamPark] The same task name is already running in the yarn queue");
     }
+
+    AssertUtils.notNull(appBuildPipeService.getById(application.getId()));
+
+    ApiAlertException.throwIfNull(
+        flinkEnvService.getByIdOrDefault(application.getVersionId()),
+        "[StreamPark] can no found flink version");
+  }
+
+  /**
+   * Get the build result
+   *
+   * @param application
+   * @param flinkUserJar
+   * @return
+   */
+  public BuildResult buildResult(Application application, String flinkUserJar) {
+    AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+    BuildResult buildResult = buildPipeline.getBuildResult();
+    if (FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode()) {
+      buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
+    }
+    return buildResult;
   }
 
   private KubernetesSubmitParam applyKubernetesSubmitParam(Application application) {
