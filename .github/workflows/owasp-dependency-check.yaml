@@ -31,6 +31,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,3 +50,4 @@ jobs:
         with:
           name: dependency report
           path: target/dependency-check-report.html
+          retention-days: 3
