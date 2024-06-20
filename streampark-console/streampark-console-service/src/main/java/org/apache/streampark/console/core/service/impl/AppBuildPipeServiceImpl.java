@@ -515,7 +515,7 @@ public class AppBuildPipeServiceImpl
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
-            app.getClusterId(),
+            app.getJobName(),
             app.getK8sNamespace(),
             app.getFlinkImage(),
             app.getK8sPodTemplates(),
