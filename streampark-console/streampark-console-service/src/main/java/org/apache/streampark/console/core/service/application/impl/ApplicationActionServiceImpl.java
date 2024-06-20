@@ -372,16 +372,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfTrue(
         !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 
-    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
-        || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
-      checkBeforeStart(application);
-    }
-
-    if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
-      ApiAlertException.throwIfTrue(
-          !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
-          "[StreamPark] The same task name is already running in the yarn queue");
-    }
+    checkApplicationMode(application);
 
     AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
     AssertUtils.notNull(buildPipeline);
@@ -416,14 +407,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     // TODO Need to display more K8s submission parameters in the front-end UI.
     //      See: org.apache.streampark.flink.client.bean.KubernetesSubmitParam
-    KubernetesSubmitParam kubernetesSubmitParam =
-        KubernetesSubmitParam.apply(
-            application.getClusterId(),
-            application.getK8sName(),
-            application.getK8sNamespace(),
-            application.getFlinkImage(),
-            application.getK8sRestExposedTypeEnum(),
-            flinkK8sDataTypeConverter.genDefaultFlinkDeploymentIngressDef());
+    KubernetesSubmitParam kubernetesSubmitParam = applyKubernetesSubmitParam(application);
 
     Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
     String flinkUserJar = userJarAndAppConf.t1;
@@ -838,6 +822,40 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     ApiAlertException.throwIfFalse(
         flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
         "[StreamPark] The flink cluster not running, please start it");
+  }
+
+  /**
+   * This method checks the execution mode of the application and performs necessary actions. If the
+   * execution mode is remote or session, it checks before starting the application. If the
+   * execution mode is Yarn, it checks if a task with the same name is already running in the Yarn
+   * queue.
+   *
+   * @param application The application to be checked.
+   */
+  private void checkApplicationMode(Application application) {
+    // If the execution mode is remote or session, check before starting the application
+    if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
+        || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
+      checkBeforeStart(application);
+    }
+
+    // If the execution mode is Yarn, check if a task with the same name is already running in the
+    // Yarn queue
+    if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
+      ApiAlertException.throwIfTrue(
+          !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
+          "[StreamPark] The same task name is already running in the yarn queue");
+    }
+  }
+
+  private KubernetesSubmitParam applyKubernetesSubmitParam(Application application) {
+    return KubernetesSubmitParam.apply(
+        application.getClusterId(),
+        application.getK8sName(),
+        application.getK8sNamespace(),
+        application.getFlinkImage(),
+        application.getK8sRestExposedTypeEnum(),
+        flinkK8sDataTypeConverter.genDefaultFlinkDeploymentIngressDef());
   }
 
   private Tuple2<String, String> getNamespaceClusterId(Application application) {
