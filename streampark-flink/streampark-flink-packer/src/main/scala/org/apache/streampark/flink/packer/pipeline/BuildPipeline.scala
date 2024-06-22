@@ -22,7 +22,7 @@ import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
 
 import java.util.concurrent.{Callable, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.util.{Failure, Success, Try}
@@ -79,7 +79,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   protected val stepsStatus: mutable.Map[Int, (PipelineStepStatusEnum, Long)] =
     mutable.Map(
-      pipeType.getSteps.asScala
+      pipeType.getSteps
         .map(e => e._1.toInt -> (PipelineStepStatusEnum.waiting -> System.currentTimeMillis))
         .toSeq: _*)
 

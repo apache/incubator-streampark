@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 
 @Data
 @TableName("t_flink_env")
@@ -157,5 +158,14 @@ public class FlinkEnv implements Serializable {
       return this.version.split("\\.")[2];
     }
     return null;
+  }
+
+  @JsonIgnore
+  public Properties getFlinkConfig() {
+    String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
+    Properties flinkConfig = new Properties();
+    Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+    flinkConfig.putAll(config);
+    return flinkConfig;
   }
 }

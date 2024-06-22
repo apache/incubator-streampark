@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.kubernetes.event
 
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 import org.apache.streampark.flink.kubernetes.model.TrackId
 
 /**
  * Notification of expecting changes to flink job state cache held internally by K8sFlinkMonitor.
  */
-case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobStateEnum.Value, pollTime: Long)
+case class FlinkJobStateEvent(trackId: TrackId, jobState: FlinkJobState.Value, pollTime: Long)
   extends BuildInEvent

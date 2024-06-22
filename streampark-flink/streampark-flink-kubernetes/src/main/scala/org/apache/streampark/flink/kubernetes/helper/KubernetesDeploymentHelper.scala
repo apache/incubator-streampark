@@ -37,7 +37,7 @@ object KubernetesDeploymentHelper extends Logger {
     KubernetesRetriever
       .newK8sClient()
       .autoClose(
-        client =>
+        client => {
           Try {
             client.pods
               .inNamespace(nameSpace)
@@ -53,42 +53,51 @@ object KubernetesDeploymentHelper extends Logger {
               .list
               .getItems
               .toList
-          }.getOrElse(List.empty[Pod]))
+          }.getOrElse(List.empty[Pod])
+        })
   }
 
-  def getDeploymentStatusChanges(nameSpace: String, deploymentName: String): Boolean = {
+  def isDeploymentError(nameSpace: String, deploymentName: String): Boolean = {
     Try {
       val pods = getPods(nameSpace, deploymentName)
       val podStatus = pods.head.getStatus
       podStatus.getPhase match {
-        case "Unknown" => return true
-        case "Failed" => return true
-        case "Pending" => return false
+        case "Unknown" => true
+        case "Failed" => true
+        case "Pending" => false
         case _ => podStatus.getContainerStatuses.head.getLastState.getTerminated != null
       }
     }.getOrElse(true)
   }
 
-  def getTheNumberOfTaskDeploymentRetries(nameSpace: String, deploymentName: String): Integer = {
-    val pods = getPods(nameSpace, deploymentName)
-    pods.head.getStatus.getContainerStatuses.head.getRestartCount
-  }
-
-  def deleteTaskDeployment(nameSpace: String, deploymentName: String): Boolean = {
+  private[this] def deleteDeployment(nameSpace: String, deploymentName: String): Unit = {
     KubernetesRetriever
       .newK8sClient()
       .autoClose(
-        client =>
-          Try {
-            val r = client.apps.deployments
-              .inNamespace(nameSpace)
-              .withName(deploymentName)
-              .delete
-            Boolean.unbox(r)
-          }.getOrElse(false))
+        client => {
+          val map = client.apps.deployments.inNamespace(nameSpace)
+          map.withLabel("app", deploymentName).delete
+          map.withName(deploymentName).delete
+        })
   }
 
-  def isTheK8sConnectionNormal(): Boolean = {
+  private[this] def deleteConfigMap(nameSpace: String, deploymentName: String): Unit = {
+    KubernetesRetriever
+      .newK8sClient()
+      .autoClose(
+        client => {
+          val map = client.configMaps().inNamespace(nameSpace)
+          map.withLabel("app", deploymentName).delete
+          map.withName(deploymentName).delete
+        })
+  }
+
+  def delete(nameSpace: String, deploymentName: String): Unit = {
+    deleteDeployment(nameSpace, deploymentName)
+    deleteConfigMap(nameSpace, deploymentName)
+  }
+
+  def checkConnection(): Boolean = {
     Try(new DefaultKubernetesClient) match {
       case Success(client) =>
         client.close()
@@ -128,21 +137,6 @@ object KubernetesDeploymentHelper extends Logger {
             Files.asCharSink(file, Charsets.UTF_8).write(log)
             path
           }.getOrElse(null))(error => throw error)
-  }
-
-  def deleteTaskConfigMap(nameSpace: String, deploymentName: String): Boolean = {
-    KubernetesRetriever
-      .newK8sClient()
-      .autoClose(
-        client =>
-          Try {
-            val r = client
-              .configMaps()
-              .inNamespace(nameSpace)
-              .withLabel("app", deploymentName)
-              .delete
-            Boolean.unbox(r)
-          }.getOrElse(false))
   }
 
   private[kubernetes] def getJobLog(jobId: String): String = {

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum;
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.Getter;
 
@@ -148,13 +148,12 @@ public enum FlinkAppStateEnum {
 
   /**
    * Type conversion bridging Deprecated, see {@link
-   * org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverter}
    */
   @Deprecated
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static FlinkAppStateEnum fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-      if (FlinkJobStateEnum.K8S_INITIALIZING() == flinkJobState) {
+      if (FlinkJobState.K8S_INITIALIZING() == flinkJobState) {
         return INITIALIZING;
       }
       return of(flinkJobState.toString());
@@ -162,7 +161,7 @@ public enum FlinkAppStateEnum {
 
     /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static Enumeration.Value toK8sFlinkJobState(FlinkAppStateEnum flinkAppStateEnum) {
-      return FlinkJobStateEnum.of(flinkAppStateEnum.name());
+      return FlinkJobState.of(flinkAppStateEnum.name());
     }
   }
 }

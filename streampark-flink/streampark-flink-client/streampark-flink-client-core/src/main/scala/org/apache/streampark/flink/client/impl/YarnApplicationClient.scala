@@ -32,7 +32,6 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
-import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.security.UserGroupInformation
@@ -187,42 +186,6 @@ object YarnApplicationClient extends YarnClientTrait {
         }
       }
     })
-
-//    SecurityUtils.install(new SecurityConfiguration(flinkConfig))
-//    SecurityUtils.getInstalledContext.runSecured(
-//      () => {
-//        val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-//        val clientFactory =
-//          clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-//        val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-//        var clusterClient: ClusterClient[ApplicationId] = null
-//        try {
-//          val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-//          logInfo(s"""
-//                     |------------------------<<specification>>-------------------------
-//                     |$clusterSpecification
-//                     |------------------------------------------------------------------
-//                     |""".stripMargin)
-//
-//          val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
-//          var applicationId: ApplicationId = null
-//          var jobManagerUrl: String = null
-//          clusterClient = clusterDescriptor
-//            .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-//            .getClusterClient
-//          applicationId = clusterClient.getClusterId
-//          jobManagerUrl = clusterClient.getWebInterfaceURL
-//          logInfo(s"""
-//                     |-------------------------<<applicationId>>------------------------
-//                     |Flink Job Started: applicationId: $applicationId
-//                     |__________________________________________________________________
-//                     |""".stripMargin)
-//
-//          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
-//        } finally {
-//          Utils.close(clusterDescriptor, clusterClient)
-//        }
-//      })
   }
 
 }

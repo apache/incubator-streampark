@@ -96,9 +96,6 @@ public class Application implements Serializable {
   /** flink docker base image */
   private String flinkImage;
 
-  /** The resource name of the flink job on k8s, equivalent to clusterId in application mode. */
-  private String k8sName;
-
   /** k8s namespace */
   private String k8sNamespace = Constant.DEFAULT;
 
@@ -598,6 +595,10 @@ public class Application implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  public boolean isKubernetesModeJob() {
+    return FlinkExecutionMode.isKubernetesMode(this.getFlinkExecutionMode());
   }
 
   public static class SFunc {
