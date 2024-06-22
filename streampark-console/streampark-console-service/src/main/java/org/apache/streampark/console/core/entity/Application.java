@@ -216,8 +216,6 @@ public class Application implements Serializable {
   @TableField(updateStrategy = FieldStrategy.IGNORED)
   private String tags;
 
-  private Boolean probing = false;
-
   /** running job */
   private transient JobsOverview.Task overview;
 

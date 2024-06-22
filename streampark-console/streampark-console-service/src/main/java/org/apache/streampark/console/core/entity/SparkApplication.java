@@ -212,8 +212,6 @@ public class SparkApplication implements Serializable {
 
   private String tags;
 
-  private Boolean probing = false;
-
   /** running job */
   private transient JobsOverview.Task overview;
 

@@ -75,7 +75,6 @@
         <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
         <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
-        <result column="probing" jdbcType="INTEGER" property="probing"/>
     </resultMap>
 
     <update id="resetOptionState">
@@ -263,21 +262,6 @@
         inner join t_user u
         on t.user_id = u.user_id
         where t.team_id=#{teamId}
-    </select>
-
-    <select id="selectProbeApps" resultType="org.apache.streampark.console.core.entity.Application">
-        select
-            t.*,
-            u.username,
-            case
-                when trim(u.nick_name) = ''
-                    then u.username
-                else u.nick_name
-                end as nick_name
-        from t_flink_app t
-        inner join t_user u
-        on t.user_id = u.user_id
-        where t.probing = true or (t.tracking = 1 and t.state = 13)
     </select>
 
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">

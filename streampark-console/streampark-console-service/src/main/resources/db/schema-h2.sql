@@ -95,7 +95,6 @@ create table if not exists `t_flink_app` (
   `ingress_template` text ,
   `default_mode_ingress` text ,
   `tags` varchar(500) default null,
-  `probing` tinyint default 0,
   `hadoop_user` varchar(500) default null,
   primary key(`id`)
 );
@@ -573,7 +572,6 @@ create table if not exists `t_spark_app` (
     `ingress_template` text ,
     `default_mode_ingress` text ,
     `tags` varchar(500) default null,
-    `probing` tinyint default 0,
     `hadoop_user` varchar(500) default null,
     primary key(`id`)
     );

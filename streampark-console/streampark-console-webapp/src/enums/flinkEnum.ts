@@ -115,8 +115,6 @@ export enum AppStateEnum {
   POS_TERMINATED = 19,
   /** job SUCCEEDED on yarn */
   SUCCEEDED = 20,
-  /** has killed in Yarn */
-  PROBING = 21,
   /** Job auto Health probe */
   KILLED = -9,
 }

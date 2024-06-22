@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
@@ -66,15 +65,13 @@ public class FlinkK8sChangeEventListener {
 
   @Lazy @Autowired private ApplicationManageService applicationManageService;
 
-  @Autowired private ApplicationInfoService applicationInfoService;
-
   @Lazy @Autowired private AlertService alertService;
 
   @Lazy @Autowired private FlinkCheckpointProcessor checkpointProcessor;
 
   @Qualifier("streamparkNotifyExecutor")
   @Autowired
-  private Executor executorService;
+  private Executor executor;
 
   /**
    * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update
@@ -101,14 +98,7 @@ public class FlinkK8sChangeEventListener {
         || FlinkAppStateEnum.LOST == state
         || FlinkAppStateEnum.RESTARTING == state
         || FlinkAppStateEnum.FINISHED == state) {
-      executorService.execute(
-          () -> {
-            if (app.getProbing()) {
-              log.info("application with id {} is probing, don't send alert", app.getId());
-              return;
-            }
-            alertService.alert(app.getAlertId(), AlertTemplate.of(app, state));
-          });
+      executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
     }
   }
 

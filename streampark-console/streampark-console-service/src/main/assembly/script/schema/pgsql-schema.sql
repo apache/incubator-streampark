@@ -250,7 +250,6 @@ create table "public"."t_flink_app" (
   "ingress_template" text collate "pg_catalog"."default",
   "default_mode_ingress" text collate "pg_catalog"."default",
   "tags" varchar(500) collate "pg_catalog"."default",
-  "probing" boolean default false,
   "hadoop_user" varchar(63) collate "pg_catalog"."default"
 )
 ;
@@ -619,20 +618,20 @@ create sequence "public"."streampark_t_resource_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_resource" (
-                                       "id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
-                                       "resource_name" varchar(128) collate "pg_catalog"."default" not null,
-                                       "resource_type" int4,
-                                       "resource_path" varchar(255) default null,
-                                       "resource" text collate "pg_catalog"."default",
-                                       "engine_type" int4,
-                                       "main_class" varchar(255) collate "pg_catalog"."default",
-                                       "description" text collate "pg_catalog"."default" default null,
-                                       "creator_id" int8  not null,
-                                       "connector_required_options" text default null,
-                                       "connector_optional_options" text default null,
-                                       "team_id" int8  not null,
-                                       "create_time" timestamp(6),
-                                       "modify_time" timestamp(6)
+   "id" int8 not null default nextval('streampark_t_resource_id_seq'::regclass),
+   "resource_name" varchar(128) collate "pg_catalog"."default" not null,
+   "resource_type" int4,
+   "resource_path" varchar(255) default null,
+   "resource" text collate "pg_catalog"."default",
+   "engine_type" int4,
+   "main_class" varchar(255) collate "pg_catalog"."default",
+   "description" text collate "pg_catalog"."default" default null,
+   "creator_id" int8  not null,
+   "connector_required_options" text default null,
+   "connector_optional_options" text default null,
+   "team_id" int8  not null,
+   "create_time" timestamp(6),
+   "modify_time" timestamp(6)
 )
 ;
 comment on column "public"."t_resource"."id" is 'Resource id';
