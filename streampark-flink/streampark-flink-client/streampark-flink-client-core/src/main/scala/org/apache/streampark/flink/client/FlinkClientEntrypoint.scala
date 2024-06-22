@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.client
 
-import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.common.enums.FlinkExecutionMode
 import org.apache.streampark.common.enums.FlinkExecutionMode._
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
@@ -32,14 +31,8 @@ object FlinkClientEntrypoint {
     YARN_APPLICATION -> YarnApplicationClient,
     YARN_SESSION -> YarnSessionClient,
     YARN_PER_JOB -> YarnPerJobClient,
-    KUBERNETES_NATIVE_SESSION -> {
-      if (K8sFlinkConfig.isV2Enabled) KubernetesSessionClientV2
-      else KubernetesNativeSessionClient
-    },
-    KUBERNETES_NATIVE_APPLICATION -> {
-      if (K8sFlinkConfig.isV2Enabled) KubernetesApplicationClientV2
-      else KubernetesNativeApplicationClient
-    }
+    KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
+    KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient
   )
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -72,11 +65,7 @@ object FlinkClientEntrypoint {
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     deployRequest.executionMode match {
       case YARN_SESSION => YarnSessionClient.deploy(deployRequest)
-      case KUBERNETES_NATIVE_SESSION =>
-        K8sFlinkConfig.isV2Enabled match {
-          case true => KubernetesSessionClientV2.deploy(deployRequest)
-          case _ => KubernetesNativeSessionClient.deploy(deployRequest)
-        }
+      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(deployRequest)
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${deployRequest.executionMode} deploy cluster ")
@@ -86,18 +75,7 @@ object FlinkClientEntrypoint {
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     shutDownRequest.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(shutDownRequest)
-      case KUBERNETES_NATIVE_SESSION =>
-        K8sFlinkConfig.isV2Enabled match {
-          case true => KubernetesSessionClientV2.shutdown(shutDownRequest)
-          case _ => KubernetesNativeSessionClient.shutdown(shutDownRequest)
-        }
-      case KUBERNETES_NATIVE_APPLICATION =>
-        K8sFlinkConfig.isV2Enabled match {
-          case true => KubernetesApplicationClientV2.shutdown(shutDownRequest)
-          case _ =>
-            throw new UnsupportedOperationException(
-              s"Unsupported ${shutDownRequest.executionMode} shutdown application ")
-        }
+      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(shutDownRequest)
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${shutDownRequest.executionMode} shutdown cluster ")

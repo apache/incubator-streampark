@@ -17,16 +17,15 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.conf.ConfigKeys
-import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.common.util.ImplicitsUtils._
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
+import org.apache.streampark.common.util.Logger
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
-import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -35,7 +34,7 @@ import org.apache.hc.core5.util.Timeout
 
 import javax.annotation.Nullable
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
@@ -47,6 +46,8 @@ object KubernetesRetriever extends Logger {
   // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
   val FLINK_REST_AWAIT_TIMEOUT_SEC: Timeout =
     Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue())
+
+  private val DEPLOYMENT_LOST_TIME = collection.mutable.Map[String, Long]()
 
   /** get new KubernetesClient */
   @throws(classOf[KubernetesClientException])
@@ -65,7 +66,7 @@ object KubernetesRetriever extends Logger {
   def newFinkClusterClient(
       clusterId: String,
       @Nullable namespace: String,
-      executeMode: FlinkK8sExecuteModeEnum.Value): Option[ClusterClient[String]] = {
+      executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
     // build flink config
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
@@ -104,39 +105,68 @@ object KubernetesRetriever extends Logger {
   /**
    * check whether deployment exists on kubernetes cluster
    *
-   * @param name
-   *   deployment name
    * @param namespace
    *   deployment namespace
+   * @param deploymentName
+   *   deployment name
    */
-  def isDeploymentExists(name: String, namespace: String): Boolean = {
+  def isDeploymentExists(namespace: String, deploymentName: String): Boolean = {
+
     KubernetesRetriever
       .newK8sClient()
       .autoClose(
-        client =>
+        client => {
           client
             .apps()
             .deployments()
             .inNamespace(namespace)
-            .withLabel("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL)
+            .withLabel("type", "flink-native-kubernetes")
             .list()
             .getItems
-            .asScala
-            .exists(e => e.getMetadata.getName == name))(_ => false)
+            .exists(_.getMetadata.getName == deploymentName)
+        }) {
+        e =>
+          logWarn(
+            s"""
+               |[StreamPark] check deploymentExists WARN,
+               |namespace: $namespace,
+               |deploymentName: $deploymentName,
+               |error: $e
+               |""".stripMargin
+          )
+          val key = s"${namespace}_$deploymentName"
+          DEPLOYMENT_LOST_TIME.get(key) match {
+            case Some(time) =>
+              val timeOut = 1000 * 60 * 3L
+              if (System.currentTimeMillis() - time >= timeOut) {
+                logError(
+                  s"""
+                     |[StreamPark] check deploymentExists Failed,
+                     |namespace: $namespace,
+                     |deploymentName: $deploymentName,
+                     |detail: deployment: $deploymentName Not Found more than 3 minutes, $e
+                     |""".stripMargin
+                )
+                DEPLOYMENT_LOST_TIME -= key
+                return false
+              }
+              return true
+            case _ =>
+              DEPLOYMENT_LOST_TIME += key -> System.currentTimeMillis()
+              true
+          }
+      }
   }
 
   /** retrieve flink jobManager rest url */
   def retrieveFlinkRestUrl(clusterKey: ClusterKey): Option[String] = {
-    KubernetesRetriever
+    val client = KubernetesRetriever
       .newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
       .getOrElse(return None)
-      .autoClose(
-        client => {
-          val url =
-            IngressController.ingressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
-          logger.info(s"retrieve flink jobManager rest url: $url")
-          Some(url)
-        })
+    val url =
+      IngressController.getIngressUrlAddress(clusterKey.namespace, clusterKey.clusterId, client)
+    logger.info(s"retrieve flink jobManager rest url: $url")
+    Some(url)
   }
 
 }
