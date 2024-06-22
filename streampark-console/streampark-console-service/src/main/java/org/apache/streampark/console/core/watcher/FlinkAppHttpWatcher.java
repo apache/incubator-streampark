@@ -560,6 +560,7 @@ public class FlinkAppHttpWatcher {
         doPersistMetrics(application, false);
         break;
       case CANCELED:
+      case FINISHED:
         log.info(
             "FlinkAppHttpWatcher getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
             currentState.name());
