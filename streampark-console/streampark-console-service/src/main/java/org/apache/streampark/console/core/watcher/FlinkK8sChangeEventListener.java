@@ -60,7 +60,6 @@ import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.
  *
  * @link org.apache.streampark.console.core.watcher.FlinkK8sChangeListenerV2
  */
-@Deprecated
 @Slf4j
 @Component
 public class FlinkK8sChangeEventListener {
