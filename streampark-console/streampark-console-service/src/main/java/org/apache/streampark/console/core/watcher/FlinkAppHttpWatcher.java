@@ -670,12 +670,12 @@ public class FlinkAppHttpWatcher {
   }
 
   private static boolean isKubernetesApp(Application application) {
-    return FlinkK8sWatcherWrapper.isKubernetesApp(application);
+    return application.isKubernetesModeJob();
   }
 
   private static boolean isKubernetesApp(Long appId) {
     Application app = WATCHING_APPS.get(appId);
-    return FlinkK8sWatcherWrapper.isKubernetesApp(app);
+    return app.isKubernetesModeJob();
   }
 
   private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {

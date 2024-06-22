@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
-import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{FlinkK8sWatchController, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
@@ -28,7 +27,7 @@ import org.apache.flink.kubernetes.kubeclient.resources.{CompatibleKubernetesWat
 
 import javax.annotation.concurrent.ThreadSafe
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 /**
  * K8s Event Watcher for Flink Native-K8s Mode. Currently only flink-native-application mode events
@@ -64,20 +63,28 @@ class FlinkK8sEventWatcher(implicit watchController: FlinkK8sWatchController)
 
   override def doWatch(): Unit = {
     // watch k8s deployment events
-    k8sClient
-      .apps()
-      .deployments()
-      .withLabel("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL)
-      .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
-        override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
-          handleDeploymentEvent(action, event)
-        }
-      })
+    Try {
+      k8sClient
+        .apps()
+        .deployments()
+        .withLabel("type", "flink-native-kubernetes")
+        .watch(new CompatibleKubernetesWatcher[Deployment, CompKubernetesDeployment] {
+          override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
+            handleDeploymentEvent(action, event)
+          }
+        })
+    } match {
+      case Failure(e) =>
+        logError(s"k8sClient error: $e")
+      case _ =>
+    }
   }
 
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
+    // if (!cachePool.isInTracking(TrackId.onApplication(namespace, clusterId)))
+    //  return
     // just tracking every flink-k8s-native event :)
     watchController.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId),

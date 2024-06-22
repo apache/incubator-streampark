@@ -40,8 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.LOST;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 /** This implementation is currently used for probe on yarn,remote,K8s mode */
 @Slf4j
@@ -53,6 +51,8 @@ public class FlinkAppLostWatcher {
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
   @Autowired private AlertService alertService;
+
+  @Autowired private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
 
   /** probe interval every 30 seconds */
   private static final Duration PROBE_INTERVAL = Duration.ofSeconds(30);
@@ -168,8 +168,8 @@ public class FlinkAppLostWatcher {
   }
 
   private void monitorApplication(Application application) {
-    if (isKubernetesApp(application)) {
-      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
+    if (application.isKubernetesModeJob()) {
+      k8SFlinkTrackMonitor.doWatching(flinkK8sWatcherWrapper.toTrackId(application));
     } else {
       FlinkAppHttpWatcher.doWatching(application);
     }

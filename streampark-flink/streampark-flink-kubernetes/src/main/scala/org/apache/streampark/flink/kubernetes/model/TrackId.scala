@@ -17,26 +17,29 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+
+import java.lang.{Boolean => JavaBool, Long => JavaLong}
+import java.util.Properties
 
 import scala.util.Try
 
 /** tracking identifier for flink on kubernetes */
 case class TrackId(
-    executeMode: FlinkK8sExecuteModeEnum.Value,
-    namespace: String = Constant.DEFAULT,
+    executeMode: FlinkK8sExecuteMode.Value,
+    namespace: String = "default",
     clusterId: String,
-    appId: Long,
+    appId: JavaLong = null,
     jobId: String,
-    groupId: String) {
+    groupId: String,
+    properties: Properties) {
 
   def isLegal: Boolean = {
     executeMode match {
-      case FlinkK8sExecuteModeEnum.APPLICATION =>
+      case FlinkK8sExecuteMode.APPLICATION =>
         Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
-      case FlinkK8sExecuteModeEnum.SESSION =>
+      case FlinkK8sExecuteMode.SESSION =>
         Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(
           jobId.nonEmpty).getOrElse(false)
       case _ => false
@@ -49,7 +52,7 @@ case class TrackId(
   def toClusterKey: ClusterKey = ClusterKey(executeMode, namespace, clusterId)
 
   override def hashCode(): Int = {
-    Utils.hashCode(executeMode, clusterId, namespace, appId, jobId, groupId)
+    Utils.hashCode(executeMode, clusterId, namespace, appId, jobId, groupId, properties)
   }
 
   override def equals(obj: Any): Boolean = {
@@ -60,7 +63,8 @@ case class TrackId(
         this.namespace == that.namespace &&
         this.appId == that.appId &&
         this.jobId == that.jobId &&
-        this.groupId == that.groupId
+        this.groupId == that.groupId &&
+        this.properties == that.properties
       case _ => false
     }
   }
@@ -73,8 +77,9 @@ object TrackId {
       clusterId: String,
       appId: Long,
       jobId: String,
-      groupId: String): TrackId = {
-    this(FlinkK8sExecuteModeEnum.SESSION, namespace, clusterId, appId, jobId, groupId)
+      groupId: String,
+      properties: Properties): TrackId = {
+    this(FlinkK8sExecuteMode.SESSION, namespace, clusterId, appId, jobId, groupId, properties)
   }
 
   def onApplication(
@@ -82,7 +87,8 @@ object TrackId {
       clusterId: String,
       appId: Long,
       jobId: String = null,
-      groupId: String): TrackId = {
-    this(FlinkK8sExecuteModeEnum.APPLICATION, namespace, clusterId, appId, jobId, groupId)
+      groupId: String,
+      properties: Properties): TrackId = {
+    this(FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, appId, jobId, groupId, properties)
   }
 }

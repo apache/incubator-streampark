@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
@@ -46,7 +45,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
-import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
+import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
@@ -84,7 +83,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 
 @Slf4j
 @Service
@@ -108,11 +106,11 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
-  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
-
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Autowired private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
 
   @Override
   public Map<String, Serializable> getDashboardDataMap(Long teamId) {
@@ -154,10 +152,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric =
-        K8sFlinkConfig.isV2Enabled()
-            ? flinkK8sObserver.getAggClusterMetricCV(teamId)
-            : k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
     if (k8sMetric != null) {
       totalJmMemory += k8sMetric.totalJmMemory();
       totalTmMemory += k8sMetric.totalTmMemory();
@@ -471,8 +466,9 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
           return AppExistsStateEnum.IN_YARN;
         }
         // check whether clusterId, namespace, jobId on kubernetes
-        if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
+        if (appParam.isKubernetesModeJob()
+            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
+                flinkK8sWatcherWrapper.toTrackId(appParam))) {
           return AppExistsStateEnum.IN_KUBERNETES;
         }
       }
@@ -487,8 +483,9 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         return AppExistsStateEnum.IN_YARN;
       }
       // check whether clusterId, namespace, jobId on kubernetes
-      if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-          && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
+      if (appParam.isKubernetesModeJob()
+          && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
+              flinkK8sWatcherWrapper.toTrackId(appParam))) {
         return AppExistsStateEnum.IN_KUBERNETES;
       }
     }

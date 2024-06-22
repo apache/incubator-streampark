@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.YarnUtils;
@@ -31,7 +30,6 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
-import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.DeployRequest;
 import org.apache.streampark.flink.client.bean.DeployResponse;
@@ -86,8 +84,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
   @Autowired private YarnQueueService yarnQueueService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
-
-  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
 
   @Override
   public List<FlinkCluster> listAvailableCluster() {
@@ -160,9 +156,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     if (ret && FlinkExecutionMode.isRemoteMode(flinkCluster.getExecutionMode())) {
       FlinkClusterWatcher.addWatching(flinkCluster);
     }
-    if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserver.watchFlinkCluster(flinkCluster);
-    }
     return ret;
   }
 
@@ -189,9 +182,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       flinkCluster.setEndTime(null);
       updateById(flinkCluster);
       FlinkClusterWatcher.addWatching(flinkCluster);
-      if (shouldWatchForK8s(flinkCluster)) {
-        flinkK8sObserver.watchFlinkCluster(flinkCluster);
-      }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       flinkCluster.setClusterState(ClusterState.FAILED.getState());
@@ -216,9 +206,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
       FlinkClusterWatcher.addWatching(flinkCluster);
     } else {
       updateFlinkClusterForNonRemoteModes(paramOfCluster, flinkCluster);
-    }
-    if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserver.watchFlinkCluster(flinkCluster);
     }
     updateById(flinkCluster);
   }
@@ -279,17 +266,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     checkActiveIfNeeded(flinkCluster);
 
     // 3) check job if running on cluster
-    if (shouldWatchForK8s(cluster)) {
-      boolean existActiveJobs = flinkK8sObserver.existActiveJobsOnFlinkCluster(flinkCluster);
-      ApiAlertException.throwIfTrue(
-          existActiveJobs,
-          "Due to the presence of active jobs on the cluster, the cluster should not be shutdown");
-    } else {
-      boolean existsRunningJob =
-          applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
-      ApiAlertException.throwIfTrue(
-          existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
-    }
+    boolean existsRunningJob =
+        applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
+    ApiAlertException.throwIfTrue(
+        existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
     return true;
   }
 
@@ -359,10 +339,6 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
           ClusterState.isRunning(flinkCluster.getClusterStateEnum()),
           "Flink cluster is running, cannot be delete, please check.");
     }
-    if (shouldWatchForK8s(flinkCluster)) {
-      flinkK8sObserver.unwatchFlinkCluster(flinkCluster);
-    }
-
     ApiAlertException.throwIfTrue(
         applicationInfoService.existsByClusterId(id),
         "Some app on this cluster, the cluster cannot be delete, please check.");
@@ -484,10 +460,5 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                 "The FlinkExecutionMode %s can't %s!", executionModeEnum.getName(), action));
     }
     return null;
-  }
-
-  private boolean shouldWatchForK8s(FlinkCluster flinkCluster) {
-    return K8sFlinkConfig.isV2Enabled()
-        && FlinkExecutionMode.isKubernetesSessionMode(flinkCluster.getExecutionMode());
   }
 }
