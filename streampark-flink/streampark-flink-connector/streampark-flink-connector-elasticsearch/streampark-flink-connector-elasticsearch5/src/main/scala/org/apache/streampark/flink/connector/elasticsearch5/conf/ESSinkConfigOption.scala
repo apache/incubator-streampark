@@ -23,7 +23,7 @@ import org.apache.streampark.common.util.ConfigUtils
 import java.net.InetSocketAddress
 import java.util.{Map => JavaMap, Properties}
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 object ESSinkConfigOption {
   val ES_SINK_PREFIX = "es.sink"
@@ -70,7 +70,7 @@ class ESSinkConfigOption(prefixStr: String, properties: Properties) extends Seri
   )
 
   def getInternalConfig(): JavaMap[String, String] = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "").asScala.asJava
+    ConfigUtils.getConf(prop, prefix)(alias = "")
   }
 
 }

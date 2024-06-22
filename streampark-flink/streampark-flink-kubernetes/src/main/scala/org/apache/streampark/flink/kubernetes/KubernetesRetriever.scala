@@ -34,7 +34,7 @@ import org.apache.hc.core5.util.Timeout
 
 import javax.annotation.Nullable
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {
@@ -123,7 +123,6 @@ object KubernetesRetriever extends Logger {
             .withLabel("type", "flink-native-kubernetes")
             .list()
             .getItems
-            .asScala
             .exists(_.getMetadata.getName == deploymentName)
         }) {
         e =>
