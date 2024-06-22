@@ -98,7 +98,7 @@ public class FlinkAppHttpWatcher {
   // option interval within 10 seconds
   private static final Duration OPTION_INTERVAL = Duration.ofSeconds(10);
 
-  private final Timeout HTTP_TIMEOUT = Timeout.ofSeconds(5);
+  private static final Timeout HTTP_TIMEOUT = Timeout.ofSeconds(5);
 
   /**
    *
