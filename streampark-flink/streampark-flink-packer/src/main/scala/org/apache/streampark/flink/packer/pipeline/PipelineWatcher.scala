@@ -22,25 +22,25 @@ trait PipeWatcher {
 
   /** called when the pipeline is launched. */
   @throws[Exception]
-  def onStart(snapshot: PipeSnapshot): Unit
+  def onStart(snapshot: PipelineSnapshot): Unit
 
   /** called when the any status of building step is changed. */
   @throws[Exception]
-  def onStepStateChange(snapshot: PipeSnapshot): Unit
+  def onStepStateChange(snapshot: PipelineSnapshot): Unit
 
   /**
    * called when the pipeline is finished, or you can get the results directly from the
    * BuildPipeline.launch() synchronously.
    */
   @throws[Exception]
-  def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit
+  def onFinish(snapshot: PipelineSnapshot, result: BuildResult): Unit
 }
 
 class SilentPipeWatcher extends PipeWatcher {
 
-  override def onStart(snapshot: PipeSnapshot): Unit = {}
+  override def onStart(snapshot: PipelineSnapshot): Unit = {}
 
-  override def onStepStateChange(snapshot: PipeSnapshot): Unit = {}
+  override def onStepStateChange(snapshot: PipelineSnapshot): Unit = {}
 
-  override def onFinish(snapshot: PipeSnapshot, result: BuildResult): Unit = {}
+  override def onFinish(snapshot: PipelineSnapshot, result: BuildResult): Unit = {}
 }

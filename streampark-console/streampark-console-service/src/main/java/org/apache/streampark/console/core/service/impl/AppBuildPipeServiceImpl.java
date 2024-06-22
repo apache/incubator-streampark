@@ -73,8 +73,8 @@ import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildReque
 import org.apache.streampark.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
@@ -207,7 +207,7 @@ public class AppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -285,14 +285,14 @@ public class AppBuildPipeServiceImpl
           }
 
           @Override
-          public void onStepStateChange(PipeSnapshot snapshot) {
+          public void onStepStateChange(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
           }
 
           @Override
-          public void onFinish(PipeSnapshot snapshot, BuildResult result) {
+          public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
