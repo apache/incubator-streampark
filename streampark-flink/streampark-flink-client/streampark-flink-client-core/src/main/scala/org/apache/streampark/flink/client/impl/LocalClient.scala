@@ -17,13 +17,11 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.client.deployment.executors.RemoteExecutor
-import org.apache.flink.client.program.{ClusterClient, MiniClusterClient, PackagedProgram}
-import org.apache.flink.client.program.MiniClusterClient.MiniClusterId
+import org.apache.flink.client.program.MiniClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 

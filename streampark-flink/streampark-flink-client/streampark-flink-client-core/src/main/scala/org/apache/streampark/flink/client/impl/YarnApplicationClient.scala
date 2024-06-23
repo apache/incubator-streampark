@@ -21,7 +21,7 @@ import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils, Utils}
+import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils}
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
@@ -29,7 +29,6 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.util.HadoopUtils

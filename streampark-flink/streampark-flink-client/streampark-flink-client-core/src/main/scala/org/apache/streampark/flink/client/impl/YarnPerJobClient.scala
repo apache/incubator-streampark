@@ -17,14 +17,12 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
-import org.apache.streampark.flink.client.impl.YarnSessionClient.logError
 import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
+import org.apache.flink.client.program.PackagedProgram
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget

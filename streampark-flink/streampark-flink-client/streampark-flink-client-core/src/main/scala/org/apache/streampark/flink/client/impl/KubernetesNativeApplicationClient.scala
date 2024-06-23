@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.enums.FlinkExecutionMode
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
