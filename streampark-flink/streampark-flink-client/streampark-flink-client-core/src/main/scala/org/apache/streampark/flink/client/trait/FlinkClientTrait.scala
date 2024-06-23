@@ -24,7 +24,6 @@ import org.apache.streampark.common.enums._
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util._
 import org.apache.streampark.flink.client.bean.{SubmitResponse, _}
-import org.apache.streampark.flink.client.impl.YarnSessionClient.logError
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 
@@ -41,8 +40,6 @@ import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.flink.yarn.YarnClusterDescriptor
-import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
