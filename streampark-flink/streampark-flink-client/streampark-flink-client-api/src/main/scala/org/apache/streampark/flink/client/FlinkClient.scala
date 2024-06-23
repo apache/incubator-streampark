@@ -26,7 +26,6 @@ import java.security.Permission
 
 import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
 
 object FlinkClient extends Logger {
 

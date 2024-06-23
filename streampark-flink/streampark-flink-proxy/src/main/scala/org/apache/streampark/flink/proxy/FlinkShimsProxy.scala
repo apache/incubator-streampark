@@ -78,7 +78,7 @@ object FlinkShimsProxy extends Logger {
   }
 
   // need to load all flink-table dependencies compatible with different versions
-  def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
+  private def getVerifySqlLibClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
     logInfo(s"Add verify sql lib,flink version: $flinkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${flinkVersion.fullVersion}", {
@@ -107,7 +107,7 @@ object FlinkShimsProxy extends Logger {
     )
   }
 
-  def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
+  private def addShimsUrls(flinkVersion: FlinkVersion, addShimUrl: File => Unit): Unit = {
     val appHome = System.getProperty(ConfigKeys.KEY_APP_HOME)
     require(
       appHome != null,
@@ -168,7 +168,7 @@ object FlinkShimsProxy extends Logger {
         val libURL = getFlinkHomeLib(
           flinkVersion.flinkHome,
           "lib",
-          file => (!file.getName.startsWith("log4j") && file.getName.endsWith(".jar")))
+          file => !file.getName.startsWith("log4j") && file.getName.endsWith(".jar"))
         val shimsUrls = ListBuffer[URL](libURL: _*)
 
         // 2) add all shims jar
@@ -203,8 +203,8 @@ object FlinkShimsProxy extends Logger {
     val arrayOutputStream = new ByteArrayOutputStream
     new ObjectOutputStream(arrayOutputStream)
       .autoClose(
-        objectOutputStream => {
-          objectOutputStream.writeObject(obj)
+        out => {
+          out.writeObject(obj)
           val byteArrayInputStream = new ByteArrayInputStream(arrayOutputStream.toByteArray)
           new ClassLoaderObjectInputStream(loader, byteArrayInputStream).autoClose(_.readObject())
         })
