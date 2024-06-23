@@ -85,39 +85,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   private[this] lazy val envSettings = {
 
     val builder = EnvironmentSettings.newInstance()
-
-    Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER)))
-      .getOrElse(PlannerType.BLINK) match {
-      case PlannerType.BLINK =>
-        val useBlinkPlanner =
-          Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
-        if (useBlinkPlanner == null) {
-          logWarn("useBlinkPlanner deprecated")
-        } else {
-          useBlinkPlanner.setAccessible(true)
-          useBlinkPlanner.invoke(builder)
-          logInfo("blinkPlanner will be used.")
-        }
-      case PlannerType.OLD =>
-        val useOldPlanner = Try(builder.getClass.getDeclaredMethod("useOldPlanner")).getOrElse(null)
-        if (useOldPlanner == null) {
-          logWarn("useOldPlanner deprecated")
-        } else {
-          useOldPlanner.setAccessible(true)
-          useOldPlanner.invoke(builder)
-          logInfo("useOldPlanner will be used.")
-        }
-      case PlannerType.ANY =>
-        val useAnyPlanner = Try(builder.getClass.getDeclaredMethod("useAnyPlanner")).getOrElse(null)
-        if (useAnyPlanner == null) {
-          logWarn("useAnyPlanner deprecated")
-        } else {
-          logInfo("useAnyPlanner will be used.")
-          useAnyPlanner.setAccessible(true)
-          useAnyPlanner.invoke(builder)
-        }
-    }
-
+    
     val buildWith =
       (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
