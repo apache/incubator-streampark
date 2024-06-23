@@ -20,19 +20,13 @@
 package org.apache.streampark.e2e.pages.apacheflink.applications;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
-import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
-import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;

@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.apacheflink.applications.entity.ApplicationsDynamicParams;
 import org.apache.streampark.e2e.pages.common.Constants;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -61,6 +60,12 @@ public final class ApplicationForm {
     @FindBy(id = "form_item_jobName")
     private WebElement inputApplicationName;
 
+    @FindBys({
+        @FindBy(css = "[codefield=resolveOrder]"),
+        @FindBy(className = "ant-select-item-option-content")
+    })
+    private List<WebElement> selectResolveOrder;
+
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
     private WebElement buttonSubmit;
 
@@ -69,13 +74,13 @@ public final class ApplicationForm {
 
     public ApplicationForm(WebDriver driver) {
         this.driver = driver;
-
         PageFactory.initElements(driver, this);
     }
 
     @SneakyThrows
     public ApplicationForm addApplication(DevelopmentMode developmentMode,
                                           ExecutionMode executionMode,
+                                          ResolveOrder resolveOrder,
                                           String applicationName,
                                           String flinkVersion,
                                           ApplicationsDynamicParams applicationsDynamicParams) {
@@ -83,6 +88,7 @@ public final class ApplicationForm {
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
+
         switch (developmentMode) {
             case CUSTOM_CODE:
                 selectDevelopmentMode.stream()
@@ -165,10 +171,29 @@ public final class ApplicationForm {
             default:
                 throw new IllegalArgumentException(String.format("Unknown development mode: %s", developmentMode));
         }
+
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectResolveOrder));
+
+        switch (resolveOrder) {
+            case PARENT_FIRST:
+                selectResolveOrder().stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(ResolveOrder.PARENT_FIRST.toString()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("ResolveOrder not found: %s", resolveOrder.desc)))
+                    .click();
+                break;
+            case CHILD_FIRST:
+                selectResolveOrder().stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(ResolveOrder.CHILD_FIRST.toString()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("ResolveOrder not found: %s", resolveOrder.desc)))
+                    .click();
+                break;
+        }
+
         inputApplicationName.sendKeys(applicationName);
 
         buttonSubmit.click();
-
         return this;
     }
 
@@ -199,6 +224,19 @@ public final class ApplicationForm {
         private final String desc;
 
         ExecutionMode(String desc) {
+            this.desc = desc;
+        }
+    }
+
+
+    @Getter
+    public enum ResolveOrder {
+        PARENT_FIRST("parent-first"),
+        CHILD_FIRST("child-first");
+
+        private final String desc;
+
+        ResolveOrder(String desc) {
             this.desc = desc;
         }
     }

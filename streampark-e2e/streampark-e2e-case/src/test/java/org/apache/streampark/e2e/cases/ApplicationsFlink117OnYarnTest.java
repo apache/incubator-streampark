@@ -100,6 +100,7 @@ public class ApplicationsFlink117OnYarnTest {
         applicationsDynamicParams.flinkSQL(flinkSQL);
         applicationsPage.createApplication().addApplication(ApplicationForm.DevelopmentMode.FLINK_SQL,
             ApplicationForm.ExecutionMode.YARN_APPLICATION,
+            ApplicationForm.ResolveOrder.PARENT_FIRST,
             applicationName,
             flinkName,
             applicationsDynamicParams);
@@ -195,6 +196,7 @@ public class ApplicationsFlink117OnYarnTest {
         applicationsDynamicParams.flinkSQL(flinkSQL);
         applicationsPage.createApplication().addApplication(ApplicationForm.DevelopmentMode.FLINK_SQL,
             ApplicationForm.ExecutionMode.YARN_PER_JOB,
+            ApplicationForm.ResolveOrder.PARENT_FIRST,
             applicationName,
             flinkName,
             applicationsDynamicParams);

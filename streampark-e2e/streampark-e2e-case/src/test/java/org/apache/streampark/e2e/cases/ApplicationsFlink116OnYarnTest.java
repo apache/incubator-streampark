@@ -100,6 +100,7 @@ public class ApplicationsFlink116OnYarnTest {
         applicationsDynamicParams.flinkSQL(flinkSQL);
         applicationsPage.createApplication().addApplication(ApplicationForm.DevelopmentMode.FLINK_SQL,
             ApplicationForm.ExecutionMode.YARN_APPLICATION,
+            ApplicationForm.ResolveOrder.PARENT_FIRST,
             applicationName,
             flinkName,
             applicationsDynamicParams);
@@ -193,8 +194,10 @@ public class ApplicationsFlink116OnYarnTest {
             "\n" +
             "INSERT INTO print_table select f_sequence,f_random,f_random_str from datagen;";
         applicationsDynamicParams.flinkSQL(flinkSQL);
-        applicationsPage.createApplication().addApplication(ApplicationForm.DevelopmentMode.FLINK_SQL,
+        applicationsPage.createApplication().addApplication(
+            ApplicationForm.DevelopmentMode.FLINK_SQL,
             ApplicationForm.ExecutionMode.YARN_PER_JOB,
+            ApplicationForm.ResolveOrder.PARENT_FIRST,
             applicationName,
             flinkName,
             applicationsDynamicParams);
