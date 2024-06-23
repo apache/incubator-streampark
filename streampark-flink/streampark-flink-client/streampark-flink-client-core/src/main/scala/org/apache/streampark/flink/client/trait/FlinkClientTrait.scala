@@ -158,7 +158,8 @@ trait FlinkClientTrait extends Logger {
       case Success(resp) => resp
       case Failure(e) =>
         logError(
-          s"flink job ${submitRequest.appName} start failed, executionMode: ${submitRequest.executionMode.getName}, detail: $e")
+          s"flink job ${submitRequest.appName} start failed, executionMode: ${submitRequest.executionMode.getName}, detail: ${ExceptionUtils
+              .stringifyException(e)}")
         throw e
     }
   }

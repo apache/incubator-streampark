@@ -26,6 +26,7 @@ import java.security.Permission
 
 import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 
 object FlinkClient extends Logger {
 
@@ -52,6 +53,8 @@ object FlinkClient extends Logger {
     try {
       System.setSecurityManager(new ExitSecurityManager())
       proxy[SubmitResponse](submitRequest, submitRequest.flinkVersion, SUBMIT_REQUEST)
+    } catch {
+      case e: Exception => throw e
     } finally {
       System.setSecurityManager(securityManager)
     }
