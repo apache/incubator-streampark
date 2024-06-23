@@ -461,7 +461,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           startFutureMap.remove(application.getId());
           // 2) exception
           if (throwable != null) {
-            log.error("Failed to submit job, ", throwable);
             processForException(appParam, throwable, applicationLog, application);
             return;
           }
