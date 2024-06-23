@@ -19,8 +19,9 @@
  */
 package org.apache.streampark.e2e.pages.system;
 
-import lombok.Getter;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
+
+import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -35,100 +36,106 @@ import java.util.List;
 
 @Getter
 public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
-    @FindBy(xpath = "//span[contains(., 'Team List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateTeam;
+  @FindBy(
+      xpath =
+          "//span[contains(., 'Team List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+  private WebElement buttonCreateTeam;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
-    private List<WebElement> teamList;
+  @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+  private List<WebElement> teamList;
 
-    @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
+  @FindBy(className = "swal2-html-container")
+  private List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(text(), 'OK')]")
-    private WebElement errorMessageConfirmButton;
+  @FindBy(xpath = "//button[contains(text(), 'OK')]")
+  private WebElement errorMessageConfirmButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
-    private WebElement deleteConfirmButton;
+  @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+  private WebElement deleteConfirmButton;
 
-    private final CreateTeamForm createTeamForm = new CreateTeamForm();
+  private final CreateTeamForm createTeamForm = new CreateTeamForm();
 
-    public TeamManagementPage(RemoteWebDriver driver) {
-        super(driver);
+  public TeamManagementPage(RemoteWebDriver driver) {
+    super(driver);
+  }
+
+  public TeamManagementPage createTeam(String teamName, String description) {
+    waitForPageLoading();
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+        .until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
+    buttonCreateTeam.click();
+    createTeamForm.inputTeamName().sendKeys(teamName);
+    createTeamForm.inputDescription().sendKeys(description);
+
+    createTeamForm.buttonSubmit().click();
+    return this;
+  }
+
+  public TeamManagementPage editTeam(String teamName, String description) {
+    waitForPageLoading();
+
+    teamList().stream()
+        .filter(it -> it.getText().contains(teamName))
+        .flatMap(
+            it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]")).stream())
+        .filter(WebElement::isDisplayed)
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No edit button in team list"))
+        .click();
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+        .until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
+    createTeamForm.inputDescription().sendKeys(Keys.CONTROL + "a");
+    createTeamForm.inputDescription().sendKeys(Keys.BACK_SPACE);
+    createTeamForm.inputDescription().sendKeys(description);
+
+    createTeamForm.buttonSubmit().click();
+
+    return this;
+  }
+
+  public TeamManagementPage deleteTeam(String teamName) {
+    waitForPageLoading();
+
+    teamList().stream()
+        .filter(it -> it.getText().contains(teamName))
+        .flatMap(
+            it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]")).stream())
+        .filter(WebElement::isDisplayed)
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No delete button in team list"))
+        .click();
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+        .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+
+    deleteConfirmButton.click();
+
+    return this;
+  }
+
+  private void waitForPageLoading() {
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+        .until(ExpectedConditions.urlContains("/system/team"));
+  }
+
+  @Getter
+  public class CreateTeamForm {
+    CreateTeamForm() {
+      PageFactory.initElements(driver, this);
     }
 
-    public TeamManagementPage createTeam(String teamName, String description) {
-        waitForPageLoading();
+    @FindBy(id = "TeamEditForm_teamName")
+    private WebElement inputTeamName;
 
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
-        buttonCreateTeam.click();
-        createTeamForm.inputTeamName().sendKeys(teamName);
-        createTeamForm.inputDescription().sendKeys(description);
+    @FindBy(id = "TeamEditForm_description")
+    private WebElement inputDescription;
 
-        createTeamForm.buttonSubmit().click();
-        return this;
-    }
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+    private WebElement buttonSubmit;
 
-    public TeamManagementPage editTeam(String teamName, String description) {
-        waitForPageLoading();
-
-        teamList()
-            .stream()
-            .filter(it -> it.getText().contains(teamName))
-            .flatMap(it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]")).stream())
-            .filter(WebElement::isDisplayed)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in team list"))
-            .click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
-        createTeamForm.inputDescription().sendKeys(Keys.CONTROL+"a");
-        createTeamForm.inputDescription().sendKeys(Keys.BACK_SPACE);
-        createTeamForm.inputDescription().sendKeys(description);
-
-        createTeamForm.buttonSubmit().click();
-
-        return this;
-    }
-
-    public TeamManagementPage deleteTeam(String teamName) {
-        waitForPageLoading();
-
-        teamList()
-            .stream()
-            .filter(it -> it.getText().contains(teamName))
-            .flatMap(it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]")).stream())
-            .filter(WebElement::isDisplayed)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No delete button in team list"))
-            .click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
-
-        deleteConfirmButton.click();
-
-        return this;
-    }
-
-    private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.urlContains("/system/team"));
-    }
-
-    @Getter
-    public class CreateTeamForm {
-        CreateTeamForm() {
-            PageFactory.initElements(driver, this);
-        }
-
-        @FindBy(id = "TeamEditForm_teamName")
-        private WebElement inputTeamName;
-
-        @FindBy(id = "TeamEditForm_description")
-        private WebElement inputDescription;
-
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
-        private WebElement buttonSubmit;
-
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
-    }
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+    private WebElement buttonCancel;
+  }
 }

@@ -21,8 +21,9 @@ package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
-import org.apache.streampark.e2e.pages.apacheflink.FlinkHomePage;
+import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
+import org.apache.streampark.e2e.pages.flink.FlinkHomePage;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -34,68 +35,73 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
 public class FlinkHomeTest {
-    private static RemoteWebDriver browser;
+  private static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
+  private static final String userName = "admin";
 
-    private static final String password = "streampark";
+  private static final String password = "streampark";
 
-    private static final String teamName = "default";
+  private static final String teamName = "default";
 
-    private static final String flinkName = "flink-1.18.1";
+  private static final String flinkName = "flink-1.18.1";
 
-    private static final String flinkHome = "/flink-1.18.1";
+  private static final String flinkHome = "/flink-1.18.1";
 
-    private static final String flinkDescription = "description test";
+  private static final String flinkDescription = "description test";
 
-    private static final String newFlinkHome = "flink_1.18.1";
+  private static final String newFlinkHome = "flink_1.18.1";
 
-    @BeforeAll
-    public static void setup() {
-        new LoginPage(browser)
-            .login(userName, password, teamName)
-            .goToNav(ApacheFlinkPage.class)
-            .goToTab(FlinkHomePage.class);
-    }
+  @BeforeAll
+  public static void setup() {
+    new LoginPage(browser)
+        .login(userName, password, teamName)
+        .goToNav(ApacheFlinkPage.class)
+        .goToTab(FlinkHomePage.class);
+  }
 
-    @Test
-    @Order(10)
-    void testCreateFlinkHome() {
-        final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
-        flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
+  @Test
+  @Order(10)
+  void testCreateFlinkHome() {
+    final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
+    flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
 
-        Awaitility.await().untilAsserted(() -> assertThat(flinkHomePage.flinkHomeList())
-            .as("Flink Home list should contain newly-created flink home")
-            .extracting(WebElement::getText)
-            .anyMatch(it -> it.contains(flinkName)));
-    }
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(flinkHomePage.flinkHomeList())
+                    .as("Flink Home list should contain newly-created flink home")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(flinkName)));
+  }
 
-    @Test
-    @Order(20)
-    void testEditFlinkHome() {
-        final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
-        flinkHomePage.editFlinkHome(flinkName, newFlinkHome);
+  @Test
+  @Order(20)
+  void testEditFlinkHome() {
+    final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
+    flinkHomePage.editFlinkHome(flinkName, newFlinkHome);
 
-        Awaitility.await().untilAsserted(() -> assertThat(flinkHomePage.flinkHomeList())
-            .as("Flink Home list should contain edited flink home")
-            .extracting(WebElement::getText)
-            .anyMatch(it -> it.contains(newFlinkHome)));
-    }
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(flinkHomePage.flinkHomeList())
+                    .as("Flink Home list should contain edited flink home")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(newFlinkHome)));
+  }
 
-    @Test
-    @Order(30)
-    void testDeleteFlinkHome() {
-        final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
-        flinkHomePage.deleteFlinkHome(newFlinkHome);
+  @Test
+  @Order(30)
+  void testDeleteFlinkHome() {
+    final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
+    flinkHomePage.deleteFlinkHome(newFlinkHome);
 
-        Awaitility.await().untilAsserted(() -> {
-            browser.navigate().refresh();
+    Awaitility.await()
+        .untilAsserted(
+            () -> {
+              browser.navigate().refresh();
 
-            assertThat(
-                flinkHomePage.flinkHomeList()
-            ).noneMatch(
-                it -> it.getText().contains(newFlinkHome)
-            );
-        });
-    }
+              assertThat(flinkHomePage.flinkHomeList())
+                  .noneMatch(it -> it.getText().contains(newFlinkHome));
+            });
+  }
 }

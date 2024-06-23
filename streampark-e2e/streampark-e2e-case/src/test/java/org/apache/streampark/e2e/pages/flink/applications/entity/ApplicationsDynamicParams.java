@@ -17,11 +17,11 @@
  * under the License.
  *
  */
-package org.apache.streampark.e2e.pages.apacheflink.applications.entity;
+package org.apache.streampark.e2e.pages.flink.applications.entity;
 
 import lombok.Data;
 
 @Data
 public class ApplicationsDynamicParams {
-    private String flinkSQL;
+  private String flinkSQL;
 }

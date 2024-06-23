@@ -20,6 +20,6 @@
 package org.apache.streampark.e2e.pages.system.entity;
 
 public enum UserManagementUserType {
-    ADMIN,
-    USER
+  ADMIN,
+  USER
 }
