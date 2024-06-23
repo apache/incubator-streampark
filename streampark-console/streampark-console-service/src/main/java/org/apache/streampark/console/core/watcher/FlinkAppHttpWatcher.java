@@ -292,20 +292,24 @@ public class FlinkAppHttpWatcher {
     FlinkExecutionMode execMode = application.getFlinkExecutionMode();
     if (FlinkExecutionMode.YARN_APPLICATION.equals(execMode)
         || FlinkExecutionMode.YARN_PER_JOB.equals(execMode)) {
-      optional =
-          jobsOverview.getJobs().size() > 1
-              ? jobsOverview.getJobs().stream()
-                  .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
-                  .findFirst()
-              : jobsOverview.getJobs().stream().findFirst();
+      if (jobsOverview.getJobs() != null) {
+        optional =
+            jobsOverview.getJobs().size() > 1
+                ? jobsOverview.getJobs().stream()
+                    .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
+                    .findFirst()
+                : jobsOverview.getJobs().stream().findFirst();
+      } else {
+        optional = Optional.empty();
+      }
     } else {
       optional =
           jobsOverview.getJobs().stream()
               .filter(x -> x.getId().equals(application.getJobId()))
               .findFirst();
     }
-    if (optional.isPresent()) {
 
+    if (optional.isPresent()) {
       JobsOverview.Job jobOverview = optional.get();
       FlinkAppStateEnum currentState = FlinkAppStateEnum.of(jobOverview.getState());
 

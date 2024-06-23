@@ -34,7 +34,7 @@ import scala.collection.JavaConverters._
  *   StepSeq -> (PipeStepStatus -> status update timestamp)
  */
 
-case class PipeSnapshot(
+case class PipelineSnapshot(
     appName: String,
     pipeType: PipelineTypeEnum,
     pipeStatus: PipelineStatusEnum,

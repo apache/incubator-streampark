@@ -606,10 +606,6 @@ public class SparkApplicationManageServiceImpl
                         .collect(Collectors.toSet())));
   }
 
-  public List<SparkApplication> listProbeApps() {
-    return this.baseMapper.selectProbeApps();
-  }
-
   @Override
   public boolean checkBuildAndUpdate(SparkApplication appParam) {
     boolean build = appParam.getBuild();

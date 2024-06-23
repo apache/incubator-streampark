@@ -43,9 +43,9 @@
 ## 🚀 Abstract
 
 ----
-<h4>Apache StreamPark is a stream processing development framework and professional management platform. </h4>
+<h4>Apache StreamPark™ is a stream processing development framework and application management platform. </h4>
 
-> Apache StreamPark is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
+> Apache StreamPark™ is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
 
 * Apache Flink & Apache Spark application development scaffold
 * Support multiple versions of Apache Flink & Apache Spark
@@ -53,8 +53,6 @@
 * One-stop stream processing operation platform
 * Support catalog、olap、streaming-warehouse etc.
 * ...
-
-![](https://streampark.apache.org/image/sqlide.png)
 
 ## 🚀 QuickStart
 
@@ -79,7 +77,7 @@ Download address for run-directly software package: https://streampark.apache.or
 
 ## 💋 Our users
 
-Various companies and organizations use StreamPark for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
+Various companies and organizations use Apache StreamPark™ for research, production and commercial products. Are you using this project? [Welcome to add your company](https://github.com/apache/incubator-streampark/issues/163)!
 
 ![Our users](https://streampark.apache.org/image/users.png)
 
@@ -100,7 +98,7 @@ We welcome your suggestions, comments (including criticisms), comments and contr
 ### 📤 Subscribe Mailing Lists
 Mail List is the most recognized form of communication in Apache community. See how to [Join the Mailing Lists](https://streampark.apache.org/community/contribution_guide/mailing_lists)
 
-Thank you to all the people who already contributed to StreamPark!
+Thank you to all the people who already contributed to Apache StreamPark™!
 
 [![contrib graph](https://contrib.rocks/image?repo=apache/streampark)](https://github.com/apache/incubator-streampark/graphs/contributors)
 

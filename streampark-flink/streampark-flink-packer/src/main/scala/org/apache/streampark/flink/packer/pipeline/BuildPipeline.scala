@@ -84,7 +84,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         .toSeq: _*)
 
   /** use to identify the log record that belongs to which pipeline instance */
-  protected val logSuffix: String = s"appName=${offerBuildParam.appName}"
+  private val logSuffix: String = s"appName=${offerBuildParam.appName}"
 
   protected var watcher: PipeWatcher = new SilentPipeWatcher
 
@@ -171,7 +171,7 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
     super.logError(s"[streampark-packer] $msg | $logSuffix", throwable)
 
   /** intercept snapshot */
-  def snapshot: PipeSnapshot = PipeSnapshot(
+  def snapshot: PipelineSnapshot = PipelineSnapshot(
     offerBuildParam.appName,
     pipeType,
     getPipeStatus,

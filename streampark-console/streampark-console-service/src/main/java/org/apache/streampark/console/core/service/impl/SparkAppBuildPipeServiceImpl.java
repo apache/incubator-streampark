@@ -61,8 +61,8 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.SparkYarnApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnApplicationBuildPipeline;
@@ -180,7 +180,7 @@ public class SparkAppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -258,14 +258,14 @@ public class SparkAppBuildPipeServiceImpl
           }
 
           @Override
-          public void onStepStateChange(PipeSnapshot snapshot) {
+          public void onStepStateChange(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
           }
 
           @Override
-          public void onFinish(PipeSnapshot snapshot, BuildResult result) {
+          public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
