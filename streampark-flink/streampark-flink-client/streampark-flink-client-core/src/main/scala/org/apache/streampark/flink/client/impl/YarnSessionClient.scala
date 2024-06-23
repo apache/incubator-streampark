@@ -46,6 +46,7 @@ object YarnSessionClient extends YarnClientTrait {
    * @param flinkConfig
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(s"""
@@ -102,7 +103,7 @@ object YarnSessionClient extends YarnClientTrait {
     val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
     val clusterDescriptor = yarnClusterDescriptor._2
     val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-    val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+    val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
     val jobGraph = programJobGraph._2
     val client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient

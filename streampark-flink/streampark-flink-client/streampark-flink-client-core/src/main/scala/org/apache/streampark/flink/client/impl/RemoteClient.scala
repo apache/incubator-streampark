@@ -17,19 +17,17 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean.{CancelRequest, CancelResponse, SavepointRequestTrait, SavepointResponse, SubmitRequest, SubmitResponse, TriggerSavepointRequest}
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.{DefaultClusterClientServiceLoader, StandaloneClusterDescriptor, StandaloneClusterId}
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
+import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 
+import java.io.File
 import java.lang.{Integer => JavaInt}
-
-import scala.util.{Failure, Success, Try}
 
 /** Submit Job to Remote Cluster */
 object RemoteClient extends FlinkClientTrait {
@@ -39,8 +37,11 @@ object RemoteClient extends FlinkClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    //  submit job
-    super.trySubmit(submitRequest, flinkConfig)(jobGraphSubmit, restApiSubmit)
+
+    // 2) submit job
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
+      jobGraphSubmit,
+      restApiSubmit)
   }
 
   override def doCancel(
@@ -100,62 +101,47 @@ object RemoteClient extends FlinkClientTrait {
   /** Submit flink session job via rest api. */
   // noinspection DuplicatedCode
   @throws[Exception]
-  def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
+  def restApiSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration,
+      fatJar: File): SubmitResponse = {
     // retrieve standalone session cluster and submit flink job on session mode
     var clusterDescriptor: StandaloneClusterDescriptor = null;
     var client: ClusterClient[StandaloneClusterId] = null
-    Try {
-      val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
-      val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
-      clusterDescriptor = standAloneDescriptor._2
+    val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+    val yarnClusterId: StandaloneClusterId = standAloneDescriptor._1
+    clusterDescriptor = standAloneDescriptor._2
 
-      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
-      val jobId =
-        FlinkSessionSubmitHelper.submitViaRestApi(
-          client.getWebInterfaceURL,
-          submitRequest.userJarFile,
-          flinkConfig)
-      logInfo(
-        s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-    } match {
-      case Success(s) => s
-      case Failure(e) =>
-        logError(s"${submitRequest.executionMode} mode submit by restApi fail.")
-        throw e
-    }
+    client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
+    val jobId =
+      FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
+    logInfo(
+      s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+    val resp = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    closeSubmit(submitRequest, client, clusterDescriptor)
+    resp
   }
 
   /** Submit flink session job with building JobGraph via Standalone ClusterClient api. */
   @throws[Exception]
-  def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    var clusterDescriptor: StandaloneClusterDescriptor = null;
-    var packageProgram: PackagedProgram = null
-    var client: ClusterClient[StandaloneClusterId] = null
-    try {
-      val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
-      clusterDescriptor = standAloneDescriptor._2
-      // build JobGraph
-      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
-      packageProgram = programJobGraph._1
-      val jobGraph = programJobGraph._2
-      client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
-      val jobId = client.submitJob(jobGraph).get().toString
-      logInfo(
-        s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-      val result = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-      result
-    } catch {
-      case e: Exception =>
-        logError(s"${submitRequest.executionMode} mode submit by jobGraph fail.")
-        e.printStackTrace()
-        throw e
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packageProgram)
-      }
-      Utils.close(client, clusterDescriptor)
-    }
+  def jobGraphSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration,
+      jarFile: File): SubmitResponse = {
+
+    val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
+    val clusterDescriptor = standAloneDescriptor._2
+    // build JobGraph
+    val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+    val packageProgram = packageProgramJobGraph._1
+    val jobGraph = packageProgramJobGraph._2
+    val client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
+    val jobId = client.submitJob(jobGraph).get().toString
+    logInfo(
+      s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+    val result = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    closeSubmit(submitRequest, packageProgram, client, clusterDescriptor)
+    result
   }
 
   /**

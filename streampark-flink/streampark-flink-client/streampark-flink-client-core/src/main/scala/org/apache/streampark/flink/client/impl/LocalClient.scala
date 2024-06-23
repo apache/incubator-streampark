@@ -43,7 +43,7 @@ object LocalClient extends FlinkClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
 
     // build JobGraph
-    val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+    val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
     val jobGraph = programJobGraph._2
     val client = createLocalCluster(flinkConfig)

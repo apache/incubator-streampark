@@ -25,9 +25,7 @@ import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
-import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 /**
@@ -62,13 +60,10 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
-    var clusterDescriptor: KubernetesClusterDescriptor = null
-    var clusterClient: ClusterClient[String] = null
-
     val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
-    clusterDescriptor = descriptor
+    val clusterDescriptor = descriptor
     val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-    clusterClient = clusterDescriptor
+    val clusterClient = clusterDescriptor
       .deployApplicationCluster(clusterSpecification, applicationConfig)
       .getClusterClient
 
@@ -80,25 +75,31 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       clusterClient.getWebInterfaceURL)
     logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
 
-    closeSubmit(submitRequest, clusterClient, clusterDescriptor)
+    closeSubmit(submitRequest, clusterDescriptor, clusterClient)
     result
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf.safeSet(
       DeploymentOptions.TARGET,
       FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doCancel(cancelRequest, flinkConfig)
+    executeClientAction(
+      cancelRequest,
+      flinkConf,
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        client.shutDownCluster()
+        CancelResponse(resp)
+      }
+    )
   }
 
   override def doTriggerSavepoint(
-      triggerSavepointRequest: TriggerSavepointRequest,
+      request: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
     flinkConf.safeSet(
       DeploymentOptions.TARGET,
       FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doTriggerSavepoint(triggerSavepointRequest, flinkConf)
+    super.doTriggerSavepoint(request, flinkConf)
   }
 }

@@ -47,9 +47,9 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
         covertToServiceExposedType(submitRequest.flinkRestExposedType))
 
-    val addBuildParamState =
+    if (
       submitRequest.buildResult != null && submitRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION
-    if (addBuildParamState) {
+    ) {
       val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
       buildResult.podTemplatePaths.foreach(
         p => {
@@ -89,13 +89,17 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
     executeClientAction(
       cancelRequest,
       flinkConfig,
-      (jobId, clusterClient) => {
-        val actionResult = super.cancelJob(cancelRequest, jobId, clusterClient)
-        CancelResponse(actionResult)
-      })
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        if (cancelRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+          client.shutDownCluster()
+        }
+        CancelResponse(resp)
+      }
+    )
   }
 
-  private[this] def executeClientAction[O, R <: SavepointRequestTrait](
+  private[client] def executeClientAction[O, R <: SavepointRequestTrait](
       request: R,
       flinkConfig: Configuration,
       actFunc: (JobID, ClusterClient[_]) => O): O = {
@@ -162,8 +166,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
 
   def getK8sClusterDescriptor(flinkConfig: Configuration): KubernetesClusterDescriptor = {
     val clientFactory = new KubernetesClusterClientFactory()
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-    clusterDescriptor
+    clientFactory.createClusterDescriptor(flinkConfig)
   }
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =

@@ -49,6 +49,7 @@ object YarnApplicationClient extends YarnClientTrait {
   private[this] lazy val workspace = Workspace.remote
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
       submitRequest.flinkVersion.flinkHome)
     val currentUser = UserGroupInformation.getCurrentUser

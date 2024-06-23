@@ -39,6 +39,7 @@ import scala.collection.convert.ImplicitConversions._
 object YarnPerJobClient extends YarnClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     // execution.target
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
@@ -80,7 +81,7 @@ object YarnPerJobClient extends YarnClientTrait {
                  |------------------------------------------------------------------
                  |""".stripMargin)
 
-      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+      val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packagedProgram = programJobGraph._1
       val jobGraph = programJobGraph._2
 

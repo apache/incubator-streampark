@@ -35,7 +35,8 @@ case class DeployRequest(
     properties: JavaMap[String, Any],
     clusterId: String,
     id: Long,
-    @Nullable k8sDeployParam: KubernetesDeployParam) {
+    @Nullable k8sParam: KubernetesDeployParam)
+  extends DeployRequestTrait {
 
   private[client] lazy val hdfsWorkspace = {
 

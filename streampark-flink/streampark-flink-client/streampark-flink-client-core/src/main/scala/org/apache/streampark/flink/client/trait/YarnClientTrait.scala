@@ -39,6 +39,13 @@ import scala.util.Try
 /** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
 
+  override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    flinkConfig
+      .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
+      .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
+      .safeSet(YarnConfigOptions.APPLICATION_TAGS, "streampark")
+  }
+
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](
       savepointRequestTrait: R,
       flinkConf: Configuration,
