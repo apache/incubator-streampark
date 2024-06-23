@@ -218,25 +218,24 @@ public class ApplicationsFlink116OnYarnTest {
             .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-//    This test cannot be executed due to a bug, and will be put online after issue #3761 fixed
-//    @Test
-//    @Order(70)
-//    void testStartFlinkApplicationOnYarnPerJobMode() {
-//        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-//
-//        applicationsPage.startApplication(applicationName);
-//
-//        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
-//            .as("Applications list should contain started application")
-//            .extracting(WebElement::getText)
-//            .anyMatch(it -> it.contains("RUNNING")));
-//
-//        Awaitility.await()
-//            .untilAsserted(() -> assertThat(applicationsPage.applicationsList())
-//                .as("Applications list should contain finished application")
-//                .extracting(WebElement::getText)
-//                .anyMatch(it -> it.contains("FINISHED")));
-//    }
+    @Test
+    @Order(70)
+    void testStartFlinkApplicationOnYarnPerJobMode() {
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.startApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain started application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains("RUNNING")));
+
+        Awaitility.await()
+            .untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+                .as("Applications list should contain finished application")
+                .extracting(WebElement::getText)
+                .anyMatch(it -> it.contains("FINISHED")));
+    }
 
     @Test
     @Order(80)
