@@ -43,27 +43,16 @@ object LocalClient extends FlinkClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    var packageProgram: PackagedProgram = null
-    var client: ClusterClient[MiniClusterId] = null
-    try {
-      // build JobGraph
-      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
-      packageProgram = programJobGraph._1
-      val jobGraph = programJobGraph._2
-      client = createLocalCluster(flinkConfig)
-      val jobId = client.submitJob(jobGraph).get().toString
-      SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packageProgram)
-      }
-      Utils.close(client)
-    }
+
+    // build JobGraph
+    val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
+    val packageProgram = programJobGraph._1
+    val jobGraph = programJobGraph._2
+    val client = createLocalCluster(flinkConfig)
+    val jobId = client.submitJob(jobGraph).get().toString
+    val resp = SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    closeSubmit(submitRequest, packageProgram, client)
+    resp
   }
 
   override def doTriggerSavepoint(

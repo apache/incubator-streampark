@@ -66,30 +66,23 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var clusterClient: ClusterClient[String] = null
 
-    try {
-      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
-      clusterDescriptor = descriptor
-      val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-      clusterClient = clusterDescriptor
-        .deployApplicationCluster(clusterSpecification, applicationConfig)
-        .getClusterClient
+    val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+    clusterDescriptor = descriptor
+    val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
+    clusterClient = clusterDescriptor
+      .deployApplicationCluster(clusterSpecification, applicationConfig)
+      .getClusterClient
 
-      val clusterId = clusterClient.getClusterId
-      val result = SubmitResponse(
-        clusterId,
-        flinkConfig.toMap,
-        submitRequest.jobId,
-        clusterClient.getWebInterfaceURL)
-      logInfo(
-        s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
-      result
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        throw e
-    } finally {
-      Utils.close(clusterDescriptor, clusterClient)
-    }
+    val clusterId = clusterClient.getClusterId
+    val result = SubmitResponse(
+      clusterId,
+      flinkConfig.toMap,
+      submitRequest.jobId,
+      clusterClient.getWebInterfaceURL)
+    logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
+
+    closeSubmit(submitRequest, clusterClient, clusterDescriptor)
+    result
   }
 
   override def doCancel(

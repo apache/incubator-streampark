@@ -23,7 +23,8 @@ import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util._
-import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.client.bean.{SubmitResponse, _}
+import org.apache.streampark.flink.client.impl.YarnSessionClient.logError
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 
@@ -40,6 +41,8 @@ import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.flink.yarn.YarnClusterDescriptor
+import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.{Collections, List => JavaList, Map => JavaMap}
 
@@ -135,9 +138,9 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
-      val eableRestoreModeState = submitRequest.flinkVersion.checkVersion(
+      val enableRestoreModeState = submitRequest.flinkVersion.checkVersion(
         FlinkRestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
-      if (eableRestoreModeState) {
+      if (enableRestoreModeState) {
         flinkConfig.setString(FlinkRestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
       }
     }
@@ -154,8 +157,13 @@ trait FlinkClientTrait extends Logger {
 
     setConfig(submitRequest, flinkConfig)
 
-    doSubmit(submitRequest, flinkConfig)
-
+    Try(doSubmit(submitRequest, flinkConfig)) match {
+      case Success(resp) => resp
+      case Failure(e) =>
+        logError(
+          s"flink job ${submitRequest.appName} start failed, executionMode: ${submitRequest.executionMode.getName}, detail: $e")
+        throw e
+    }
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -200,7 +208,6 @@ trait FlinkClientTrait extends Logger {
     doCancel(cancelRequest, flinkConf)
   }
 
-  @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest, flinkConf: Configuration): SubmitResponse
 
   @throws[Exception]
@@ -588,4 +595,16 @@ trait FlinkClientTrait extends Logger {
     clientWrapper.triggerSavepoint(jobID, savepointPath, savepointRequest.nativeFormat).get()
   }
 
+  def closeSubmit(submitRequest: SubmitRequest, close: AutoCloseable*): Unit = {
+    close.foreach(
+      x => {
+        if (x.isInstanceOf[PackagedProgram]) {
+          if (submitRequest.safePackageProgram) {
+            Utils.close(x)
+          }
+        } else {
+          Utils.close(x)
+        }
+      })
+  }
 }

@@ -141,10 +141,10 @@ object YarnApplicationClient extends YarnClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
     var proxyUserUgi: UserGroupInformation = UserGroupInformation.getCurrentUser
     val currentUser = UserGroupInformation.getCurrentUser
-    val eableProxyState =
+    val enableProxyState =
       !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils.isNotEmpty(
         submitRequest.hadoopUser)
-    if (eableProxyState) {
+    if (enableProxyState) {
       proxyUserUgi = UserGroupInformation.createProxyUser(
         submitRequest.hadoopUser,
         currentUser
@@ -157,33 +157,31 @@ object YarnApplicationClient extends YarnClientTrait {
         val clientFactory =
           clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-        var clusterClient: ClusterClient[ApplicationId] = null
-        try {
-          val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-          logInfo(s"""
-                     |------------------------<<specification>>-------------------------
-                     |$clusterSpecification
-                     |------------------------------------------------------------------
-                     |""".stripMargin)
+        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+        logInfo(s"""
+                   |------------------------<<specification>>-------------------------
+                   |$clusterSpecification
+                   |------------------------------------------------------------------
+                   |""".stripMargin)
 
-          val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
-          var applicationId: ApplicationId = null
-          var jobManagerUrl: String = null
-          clusterClient = clusterDescriptor
-            .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-            .getClusterClient
-          applicationId = clusterClient.getClusterId
-          jobManagerUrl = clusterClient.getWebInterfaceURL
-          logInfo(s"""
-                     |-------------------------<<applicationId>>------------------------
-                     |Flink Job Started: applicationId: $applicationId
-                     |__________________________________________________________________
-                     |""".stripMargin)
+        val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
+        var applicationId: ApplicationId = null
+        var jobManagerUrl: String = null
+        val clusterClient = clusterDescriptor
+          .deployApplicationCluster(clusterSpecification, applicationConfiguration)
+          .getClusterClient
+        applicationId = clusterClient.getClusterId
+        jobManagerUrl = clusterClient.getWebInterfaceURL
+        logInfo(s"""
+                   |-------------------------<<applicationId>>------------------------
+                   |Flink Job Started: applicationId: $applicationId
+                   |__________________________________________________________________
+                   |""".stripMargin)
 
+        val resp =
           SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
-        } finally {
-          Utils.close(clusterDescriptor, clusterClient)
-        }
+        closeSubmit(submitRequest, clusterClient, clusterDescriptor)
+        resp
       }
     })
   }
