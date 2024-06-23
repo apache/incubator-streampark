@@ -85,7 +85,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   private[this] lazy val envSettings = {
 
     val builder = EnvironmentSettings.newInstance()
-    
+
     val buildWith =
       (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
