@@ -259,10 +259,10 @@ public class ApplicationController {
 
   /** force stop(stop normal start or in progress) */
   @PermissionScope(app = "#app.id")
-  @PostMapping("forcedStop")
+  @PostMapping("abort")
   @RequiresPermissions("app:cancel")
-  public RestResponse forcedStop(Application app) {
-    applicationActionService.forcedStop(app.getId());
+  public RestResponse abort(Application app) {
+    applicationActionService.abort(app.getId());
     return RestResponse.success();
   }
 

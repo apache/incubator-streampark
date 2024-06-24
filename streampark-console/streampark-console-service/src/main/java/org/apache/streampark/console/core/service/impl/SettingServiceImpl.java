@@ -153,6 +153,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         result.setStatus(500);
         result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
       }
+      log.warn("Failed to validate Docker registry, error:", e);
     }
     return result;
   }

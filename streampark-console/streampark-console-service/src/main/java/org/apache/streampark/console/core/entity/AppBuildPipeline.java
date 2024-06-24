@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeError;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineStepStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
@@ -253,7 +253,7 @@ public class AppBuildPipeline {
   }
 
   /** Create object from PipeSnapshot */
-  public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
+  public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipelineSnapshot snapshot) {
     return new AppBuildPipeline()
         .setPipeType(snapshot.pipeType())
         .setPipeStatus(snapshot.pipeStatus())

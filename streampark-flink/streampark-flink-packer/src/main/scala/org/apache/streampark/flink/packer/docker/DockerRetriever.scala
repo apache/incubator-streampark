@@ -42,7 +42,7 @@ object DockerRetriever {
    * docker http client builder, use ApacheDockerHttpClient by default todo support custom http
    * client configuration parameters in unified configurations in the future
    */
-  lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder =
+  private lazy val dockerHttpClientBuilder: ApacheDockerHttpClient.Builder =
     new ApacheDockerHttpClient.Builder()
       .dockerHost(dockerClientConf.getDockerHost)
       .sslConfig(dockerClientConf.getSSLConfig)
@@ -59,10 +59,10 @@ object DockerRetriever {
   }
 
   /** set docker-host for kata */
-  def setDockerHost(): Unit = {
-    val dockerhost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
-    if (Utils.isNotEmpty(dockerhost)) {
-      val dockerHostUri: URI = new URI(dockerhost)
+  private def setDockerHost(): Unit = {
+    val dockerHost: String = InternalConfigHolder.get(CommonConfig.DOCKER_HOST)
+    if (Utils.isNotEmpty(dockerHost)) {
+      val dockerHostUri: URI = new URI(dockerHost)
       dockerHttpClientBuilder.dockerHost(dockerHostUri)
     }
   }

@@ -17,7 +17,7 @@
 import { Alert, Form, Input, Tag } from 'ant-design-vue';
 import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
-import { fetchCheckName, fetchCopy, fetchForcedStop, fetchMapping } from '/@/api/flink/app';
+import { fetchCheckName, fetchCopy, fetchAbort, fetchMapping } from '/@/api/flink/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/flinkBuild';
 import { fetchSavePonitHistory } from '/@/api/flink/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
@@ -168,7 +168,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     }
     return false;
   }
-  function handleForcedStop(app: Recordable) {
+  function handleAbort(app: Recordable) {
     let option = 'starting';
     const optionState = app['optionState'];
     const stateMap = {
@@ -189,21 +189,21 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     }
     Swal.fire({
       title: 'Are you sure?',
-      text: `current job is ${option}, are you sure forced stop?`,
+      text: `current job is ${option}, are you sure abort the job?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, forced stop!',
+      confirmButtonText: 'Yes, abort job!',
       denyButtonText: `No, cancel`,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
     }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire('forced stopping', '', 'success');
-        const res = await fetchForcedStop({
+        Swal.fire('abort job', '', 'success');
+        const res = await fetchAbort({
           id: app.id,
         });
         if (res) {
-          createMessage.success('forced stopping');
+          createMessage.success('abort job starting');
         }
         return Promise.resolve();
       }
@@ -383,7 +383,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     handleCheckReleaseApp,
     handleAppCheckStart,
     handleCanStop,
-    handleForcedStop,
+    handleAbort,
     handleCopy,
     handleMapping,
     users,

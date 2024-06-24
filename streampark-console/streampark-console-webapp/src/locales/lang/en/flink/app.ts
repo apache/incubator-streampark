@@ -214,7 +214,7 @@ export default {
     savepoint: 'Trigger Savepoint',
     detail: 'View Detail',
     startLog: 'See Flink Start log',
-    force: 'Forced Stop Job',
+    abort: 'Abort Job',
     copy: 'Copy Job',
     remapping: 'Remapping Job',
     deleteTip: 'Are you sure delete this job ?',
@@ -275,8 +275,18 @@ export default {
       'The application name already exists in YARN, cannot be repeated. Please check',
     appNameExistsInK8sMessage:
       'The application name already exists in Kubernetes,cannot be repeated. Please check',
+    appNameValid: 'The job name is invalid',
+    appNameRole: 'The job name must follow these rules: ',
     appNameNotValid:
       'The application name is invalid, must be (Chinese or English or "-" or "_"), two consecutive spaces cannot appear.Please check',
+    K8sSessionClusterIdRole: 'The Kubernetes clusterId must follow the following rules:',
+    appNameK8sClusterIdRole:
+      'The current deployment mode is kubernetes application mode, and the job name will be used as the clusterId in kubernetes. Therefore, the job name must follow the following rules:',
+    appNameK8sClusterIdRoleLength: 'must be no more than 45 characters',
+    appNameK8sClusterIdRoleRegexp:
+      'must only contain lowercase alphanumeric characters and "-"，The required format is [a-z]([-a-z0-9]*[a-z0-9])',
+    appNameRoleContent:
+      'must be (Chinese or English or "-" or "_"), two consecutive spaces cannot appear.Please check',
     flinkClusterIsRequiredMessage: 'Flink Cluster is required',
     flinkSqlIsRequiredMessage: 'Flink SQL is required',
     tagsPlaceholder: 'Please enter tags,if more than one, separate them with commas(,)',
@@ -296,7 +306,7 @@ export default {
     flinkImagePlaceholder:
       'Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8',
     flinkImageIsRequiredMessage: 'Flink Base Docker Image is required',
-    k8sRestExposedTypePlaceholder: 'kubernetes.rest-service.exposed.type',
+    k8sRestExposedTypePlaceholder: 'Kubernetes Rest-Service Exposed Type',
     hadoopXmlConfigFileTips:
       'Automatically copy configuration files from system environment parameters',
     dynamicPropertiesPlaceholder:

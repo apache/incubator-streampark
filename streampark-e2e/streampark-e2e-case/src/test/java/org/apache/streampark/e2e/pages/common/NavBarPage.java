@@ -59,7 +59,7 @@ public class NavBarPage {
     public <T extends NavBarItem> T goToNav(Class<T> nav) {
         if (nav == ApacheFlinkPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(apacheFlinkTab));
-            String tabOpenStateXpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]/../../li[contains(@class, 'streampark-menu-opened')]";
+            String tabOpenStateXpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
             if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
                 apacheFlinkTab.click();
             }
@@ -68,7 +68,7 @@ public class NavBarPage {
 
         if (nav == SystemPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(systemTab));
-            String tabOpenStateXpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]/../../li[contains(@class, 'streampark-menu-opened')]";
+            String tabOpenStateXpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
             if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
                 systemTab.click();
             }

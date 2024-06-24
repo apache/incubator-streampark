@@ -52,18 +52,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes-core_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-dataformat-yaml</artifactId>
-                    <groupId>com.fasterxml.jackson.dataformat</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-yarn${scala.binary.flink.version}</artifactId>
             <version>${flink.version}</version>
@@ -104,22 +92,6 @@
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <!-- ZIO -->
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-logging_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-streams_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.zio</groupId>
-            <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
         </dependency>
     </dependencies>
 

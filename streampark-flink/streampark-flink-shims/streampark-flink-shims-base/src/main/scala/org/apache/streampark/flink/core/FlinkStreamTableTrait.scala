@@ -16,7 +16,6 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 

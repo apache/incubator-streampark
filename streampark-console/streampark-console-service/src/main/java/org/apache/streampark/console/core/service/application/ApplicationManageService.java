@@ -164,11 +164,4 @@ public interface ApplicationManageService extends IService<Application> {
    */
   List<Application> listByTeamIdAndExecutionModes(
       Long teamId, Collection<FlinkExecutionMode> executionModeEnums);
-
-  /**
-   * Retrieves a list of applications be probing or need to probe.
-   *
-   * @return a list of applications be probing or need to probe.
-   */
-  List<Application> listProbeApps();
 }

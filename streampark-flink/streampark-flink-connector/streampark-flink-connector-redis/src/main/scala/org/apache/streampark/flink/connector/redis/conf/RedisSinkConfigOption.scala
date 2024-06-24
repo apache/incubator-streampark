@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.ConfigUtils
 
 import java.util.Properties
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 object RedisSinkConfigOption {
   val REDIS_SINK_PREFIX = "redis.sink"
@@ -83,7 +83,7 @@ class RedisSinkConfigOption(prefixStr: String, properties: Properties) extends S
   )
 
   def getInternalConfig(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "")
+    ConfigUtils.getConf(prop, prefix)(alias = "")
   }
 
 }

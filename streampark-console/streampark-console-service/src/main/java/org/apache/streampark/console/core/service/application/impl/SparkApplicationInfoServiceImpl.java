@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkExecutionMode;
@@ -45,7 +44,6 @@ import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
-import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
@@ -102,8 +100,6 @@ public class SparkApplicationInfoServiceImpl
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
-  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
-
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
@@ -157,12 +153,7 @@ public class SparkApplicationInfoServiceImpl
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric;
-    if (K8sFlinkConfig.isV2Enabled()) {
-      k8sMetric = flinkK8sObserver.getAggClusterMetricCV(teamId);
-    } else {
-      k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
-    }
+    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
     if (k8sMetric != null) {
       totalJmMemory += k8sMetric.totalJmMemory();
       totalTmMemory += k8sMetric.totalTmMemory();

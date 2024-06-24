@@ -19,7 +19,7 @@ package org.apache.streampark.flink.connector.failover
 
 import org.junit.jupiter.api.{Assertions, Test}
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 class SinkRequestTest {
   @Test
@@ -32,7 +32,7 @@ class SinkRequestTest {
       "insert into table_2(col1, col2, col3) values(11, 22, 33)",
     )
 
-    val sinkRequest = SinkRequest(statementsList.asJava)
+    val sinkRequest = SinkRequest(statementsList)
 
     // expected result
     val expectedSqlStatement = List(
