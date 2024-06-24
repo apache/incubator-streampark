@@ -109,9 +109,12 @@ jobs:
       - name: Maximize runner space
         uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c
         with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
+          root-reserve-mb: 100352
+          swap-size-mb: 2048
           remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-docker-images: 'true'
       - uses: actions/checkout@v4
         with:
           submodules: true
