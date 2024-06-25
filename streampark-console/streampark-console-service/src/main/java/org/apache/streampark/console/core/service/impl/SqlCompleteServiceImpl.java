@@ -206,7 +206,6 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
         Character nowChar = word.charAt(loc);
         if (!nowStep.containsKey(nowChar)) {
           // maybe wrong typing
-          breakLoc.loc = loc;
           break;
         }
         nowStep = nowStep.get(nowChar).getNext();
