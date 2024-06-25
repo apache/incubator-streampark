@@ -23,7 +23,7 @@ RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
     && apt install software-properties-common -y \
     && add-apt-repository ppa:openjdk-r/ppa -y
 RUN apt update && apt install -y openjdk-8-jdk
-RUN JAVA_PATH=$(ls -l /usr/lib/jvm | grep java-8-openjdk-arm64 | grep ^d | awk -F ' ' '{print $9}'); \
+RUN JAVA_PATH=$(ls -l /usr/lib/jvm | grep java-8-openjdk | grep ^d | awk -F ' ' '{print $9}'); \
     if [ -z "${JAVA_PATH}" ];then \
         echo "JAVA_PATH not found: $JAVA_PATH"; \
         exit 2; \
