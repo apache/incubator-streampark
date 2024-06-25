@@ -36,6 +36,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,7 +50,10 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
   private static final Logger logger = LoggerFactory.getLogger(UploadFileTypeInterceptor.class);
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+  public boolean preHandle(
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler)
       throws Exception {
     if (request instanceof MultipartHttpServletRequest) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -58,9 +62,13 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
         MultipartFile multipartFile = multipartRequest.getFile(file);
         ApiAlertException.throwIfNull(
             multipartFile, "File to upload can't be null. Upload file failed.");
-        boolean isJarOrPyFile =
-            FileUtils.isJarFileType(multipartFile.getInputStream())
-                || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
+        boolean isJarOrPyFile = false;
+        if (multipartFile != null) {
+          isJarOrPyFile =
+              FileUtils.isJarFileType(multipartFile.getInputStream())
+                  || isPythonFileType(
+                      multipartFile.getContentType(), multipartFile.getInputStream());
+        }
         ApiAlertException.throwIfFalse(
             isJarOrPyFile,
             "Illegal file type, Only support standard jar files. Upload file failed.");
@@ -88,9 +96,9 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public void postHandle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      Object handler,
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler,
       ModelAndView modelAndView)
       throws Exception {
     HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
@@ -98,7 +106,10 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public void afterCompletion(
-      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler,
+      Exception ex)
       throws Exception {
     HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
   }

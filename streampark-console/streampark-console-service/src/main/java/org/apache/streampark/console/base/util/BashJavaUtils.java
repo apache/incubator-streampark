@@ -39,7 +39,7 @@ import java.util.Map;
 
 public class BashJavaUtils {
 
-  private static String localhost = "localhost";
+  private static final String localhost = "localhost";
 
   public static void main(String[] args) throws IOException {
     String action = args[0].toLowerCase();

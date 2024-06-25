@@ -59,7 +59,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -183,7 +182,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     handleSavepointResponseFuture(application, applicationLog, savepointFuture);
   }
 
-  @NotNull
+  @Nonnull
   private ApplicationLog getApplicationLog(Application application) {
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
