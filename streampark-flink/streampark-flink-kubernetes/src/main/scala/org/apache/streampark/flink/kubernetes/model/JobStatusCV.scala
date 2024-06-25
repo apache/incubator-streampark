@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkJobState
 
 /**
  * @param jobState
@@ -34,7 +34,7 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobStateEnum
  *   tracking polling result receive timestamp
  */
 case class JobStatusCV(
-    jobState: FlinkJobStateEnum.Value,
+    jobState: FlinkJobState.Value,
     jobId: String,
     jobName: String = "",
     jobStartTime: Long = -1,
@@ -42,4 +42,12 @@ case class JobStatusCV(
     duration: Long = 0,
     taskTotal: Int = 0,
     pollEmitTime: Long,
-    pollAckTime: Long)
+    pollAckTime: Long) {
+
+  def diff(that: JobStatusCV): Boolean = {
+    that == null ||
+    that.jobState != this.jobState ||
+    that.jobId != this.jobId
+  }
+
+}

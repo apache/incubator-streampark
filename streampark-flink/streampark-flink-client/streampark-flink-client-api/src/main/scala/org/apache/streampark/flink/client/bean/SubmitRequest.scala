@@ -52,10 +52,12 @@ case class SubmitRequest(
     savePoint: String,
     restoreMode: FlinkRestoreMode,
     args: String,
+    @Nullable clusterId: String,
     @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
-    @Nullable k8sSubmitParam: KubernetesSubmitParam,
-    @Nullable extraParameter: JavaMap[String, Any]) {
+    @Nullable extraParameter: JavaMap[String, Any],
+    @Nullable kubernetesNamespace: String,
+    @Nullable flinkRestExposedType: FlinkK8sRestExposedType) {
 
   private[this] lazy val appProperties: Map[String, String] = getParameterMap(
     KEY_FLINK_PROPERTY_PREFIX)
@@ -184,14 +186,14 @@ case class SubmitRequest(
         AssertUtils.required(
           buildResult != null,
           s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
-            s",clusterId=${k8sSubmitParam.clusterId}," +
-            s",namespace=${k8sSubmitParam.kubernetesNamespace}"
+            s",clusterId=$clusterId," +
+            s",namespace=$kubernetesNamespace"
         )
         AssertUtils.required(
           buildResult.pass,
           s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
-            s",clusterId=${k8sSubmitParam.clusterId}," +
-            s",namespace=${k8sSubmitParam.kubernetesNamespace}"
+            s",clusterId=$clusterId," +
+            s",namespace=$kubernetesNamespace"
         )
       case _ =>
         AssertUtils.required(

@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.factories.FactoryUtil;
@@ -132,8 +132,9 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
         try (ClusterClient<?> clusterClient =
             (ClusterClient<?>)
                 KubernetesRetriever.newFinkClusterClient(
-                    clusterId, k8sNamespace, FlinkK8sExecuteModeEnum.of(executionModeEnum))) {
-          restAddress = IngressController.ingressUrlAddress(k8sNamespace, clusterId, clusterClient);
+                    clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionModeEnum))) {
+          restAddress =
+              IngressController.getIngressUrlAddress(k8sNamespace, clusterId, clusterClient);
         } catch (Exception e) {
           throw new IllegalArgumentException("get k8s rest address error", e);
         }

@@ -36,6 +36,7 @@ import org.apache.streampark.console.core.service.application.ApplicationInfoSer
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.util.Timeout;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -66,6 +67,8 @@ public class FlinkClusterWatcher {
   @Autowired private AlertService alertService;
 
   @Autowired private ApplicationInfoService applicationInfoService;
+
+  private static final Timeout HTTP_TIMEOUT = Timeout.ofSeconds(5L);
 
   @Qualifier("flinkClusterWatchingExecutor")
   @Autowired
@@ -233,7 +236,7 @@ public class FlinkClusterWatcher {
   private ClusterState getStateFromYarnRestApi(FlinkCluster flinkCluster) {
     String yarnUrl = "ws/v1/cluster/apps/".concat(flinkCluster.getClusterId());
     try {
-      String result = YarnUtils.restRequest(yarnUrl);
+      String result = YarnUtils.restRequest(yarnUrl, HTTP_TIMEOUT);
       if (null == result) {
         return ClusterState.UNKNOWN;
       }

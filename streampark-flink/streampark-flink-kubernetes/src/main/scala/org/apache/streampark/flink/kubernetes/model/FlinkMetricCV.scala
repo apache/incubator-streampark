@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.kubernetes.model
 
 /** flink cluster metric info */
-@Deprecated
 case class FlinkMetricCV(
     groupId: String = null,
     totalJmMemory: Integer = 0,

@@ -96,9 +96,6 @@ public enum SparkAppStateEnum {
   /** Job SUCCEEDED on yarn. */
   SUCCEEDED(20),
 
-  /** Job auto Health probe */
-  PROBING(21),
-
   /** Has killed in Yarn. */
   KILLED(-9);
 

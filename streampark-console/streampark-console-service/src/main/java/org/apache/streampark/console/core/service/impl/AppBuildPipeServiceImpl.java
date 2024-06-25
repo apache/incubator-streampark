@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
@@ -74,12 +73,11 @@ import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildReque
 import org.apache.streampark.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipelineV2;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
@@ -209,7 +207,7 @@ public class AppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -287,14 +285,14 @@ public class AppBuildPipeServiceImpl
           }
 
           @Override
-          public void onStepStateChange(PipeSnapshot snapshot) {
+          public void onStepStateChange(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
           }
 
           @Override
-          public void onFinish(PipeSnapshot snapshot, BuildResult result) {
+          public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
@@ -474,9 +472,6 @@ public class AppBuildPipeServiceImpl
             buildFlinkK8sApplicationBuildRequest(
                 app, mainClass, flinkUserJar, flinkEnv, dockerConfig);
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
-        if (K8sFlinkConfig.isV2Enabled()) {
-          return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
-        }
         return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
       default:
         throw new UnsupportedOperationException(
@@ -515,7 +510,7 @@ public class AppBuildPipeServiceImpl
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
-            app.getClusterId(),
+            app.getJobName(),
             app.getK8sNamespace(),
             app.getFlinkImage(),
             app.getK8sPodTemplates(),

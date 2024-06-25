@@ -164,11 +164,4 @@ public interface SparkApplicationManageService extends IService<SparkApplication
    */
   List<SparkApplication> listByTeamIdAndExecutionModes(
       Long teamId, Collection<SparkExecutionMode> executionModeEnums);
-
-  /**
-   * Retrieves a list of applications be probing or need to probe.
-   *
-   * @return a list of applications be probing or need to probe.
-   */
-  List<SparkApplication> listProbeApps();
 }

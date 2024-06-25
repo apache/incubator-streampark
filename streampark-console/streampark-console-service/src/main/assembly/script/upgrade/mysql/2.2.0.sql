@@ -44,9 +44,6 @@ alter table `t_flink_sql`
     add column `team_resource` varchar(64) default null;
 
 alter table `t_flink_app`
-    add column `probing` tinyint default 0;
-
-alter table `t_flink_app`
     add column `hadoop_user` varchar(64) default null;
 
 alter table `t_flink_cluster`

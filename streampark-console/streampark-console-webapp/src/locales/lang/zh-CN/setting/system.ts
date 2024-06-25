@@ -30,7 +30,7 @@ export default {
       name: '控制台配置',
     },
     ingressSetting: {
-      name: 'k8s Ingress 配置',
+      name: 'Kubernetes Ingress 配置',
     },
   },
   update: {

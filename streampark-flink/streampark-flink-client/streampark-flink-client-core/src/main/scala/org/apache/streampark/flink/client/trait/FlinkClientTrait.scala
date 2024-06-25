@@ -39,7 +39,6 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgram, Packaged
 import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
-import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.util.{Collections, List => JavaList, Map => JavaMap}
@@ -76,9 +75,9 @@ trait FlinkClientTrait extends Logger {
          |    appName          : ${submitRequest.appName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
-         |    k8sNamespace     : ${submitRequest.k8sSubmitParam.kubernetesNamespace}
-         |    flinkExposedType : ${submitRequest.k8sSubmitParam.flinkRestExposedType}
-         |    clusterId        : ${submitRequest.k8sSubmitParam.clusterId}
+         |    k8sNamespace     : ${submitRequest.kubernetesNamespace}
+         |    flinkExposedType : ${submitRequest.flinkRestExposedType}
+         |    clusterId        : ${submitRequest.clusterId}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    savePoint        : ${submitRequest.savePoint}
          |    properties       : ${submitRequest.properties.mkString(" ")}

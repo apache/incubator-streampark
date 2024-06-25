@@ -24,7 +24,7 @@ import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.api.model.{Config => _}
@@ -40,12 +40,7 @@ import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-/**
- * Kubernetes native session mode submit.
- * @deprecated
- *   Please use [[KubernetesSessionClientV2]] instead.
- */
-@Deprecated
+/** Kubernetes native session mode submit. */
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {
 
   @throws[Exception]
@@ -54,7 +49,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): SubmitResponse = {
     // require parameters
     require(
-      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      StringUtils.isNotBlank(submitRequest.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
     super.trySubmit(submitRequest, flinkConfig)(jobGraphSubmit, restApiSubmit)
@@ -66,9 +61,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     Try {
       // get jm rest url of flink session cluster
       val clusterKey = ClusterKey(
-        FlinkK8sExecuteModeEnum.SESSION,
-        submitRequest.k8sSubmitParam.kubernetesNamespace,
-        submitRequest.k8sSubmitParam.clusterId)
+        FlinkK8sExecuteMode.SESSION,
+        submitRequest.kubernetesNamespace,
+        submitRequest.clusterId)
       val jmRestUrl = KubernetesRetriever
         .retrieveFlinkRestUrl(clusterKey)
         .getOrElse(throw new Exception(

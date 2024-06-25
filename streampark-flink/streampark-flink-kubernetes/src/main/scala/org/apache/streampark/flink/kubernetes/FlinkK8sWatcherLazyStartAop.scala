@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.conf.K8sFlinkConfig
 import org.apache.streampark.flink.kubernetes.event.BuildInEvent
 import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrackId}
 
@@ -28,37 +27,37 @@ import org.apache.streampark.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, 
 trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
 
   abstract override def doWatching(trackId: TrackId): Unit = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.doWatching(trackId)
   }
 
   abstract override def unWatching(trackId: TrackId): Unit = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.unWatching(trackId)
   }
 
   abstract override def isInWatching(trackId: TrackId): Boolean = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.isInWatching(trackId)
   }
 
   abstract override def getAllWatchingIds: Set[TrackId] = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.getAllWatchingIds
   }
 
   abstract override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.getJobStatus(trackId)
   }
 
   abstract override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.getJobStatus(trackIds)
   }
 
   abstract override def getAllJobStatus: Map[CacheKey, JobStatusCV] = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.getAllJobStatus
   }
 
@@ -73,12 +72,12 @@ trait FlinkK8sWatcherLazyStartAop extends FlinkK8sWatcher {
   }
 
   abstract override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.checkIsInRemoteCluster(trackId)
   }
 
   abstract override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {
-    if (!K8sFlinkConfig.isV2Enabled) start()
+    start()
     super.postEvent(event, sync)
   }
 

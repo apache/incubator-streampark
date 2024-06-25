@@ -27,7 +27,6 @@ import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
@@ -203,31 +202,31 @@ object PropertiesUtils extends Logger {
   }
 
   def fromYamlTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlText(text).asJava)
+    new JavaMap[String, String](fromYamlText(text))
 
   def fromHoconTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconText(text).asJava)
+    new JavaMap[String, String](fromHoconText(text))
 
   def fromPropertiesTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesText(text).asJava)
+    new JavaMap[String, String](fromPropertiesText(text))
 
   def fromYamlFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(filename).asJava)
+    new JavaMap[String, String](fromYamlFile(filename))
 
   def fromHoconFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(filename).asJava)
+    new JavaMap[String, String](fromHoconFile(filename))
 
   def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+    new JavaMap[String, String](fromPropertiesFile(filename))
 
   def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+    new JavaMap[String, String](fromYamlFile(inputStream))
 
   def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(inputStream).asJava)
+    new JavaMap[String, String](fromHoconFile(inputStream))
 
   def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
+    new JavaMap[String, String](fromPropertiesFile(inputStream))
 
   /**
    * @param file
@@ -370,13 +369,13 @@ object PropertiesUtils extends Logger {
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
-    new JavaMap[String, String](extractDynamicProperties(properties).asJava)
+    new JavaMap[String, String](extractDynamicProperties(properties))
 
   @Nonnull def extractMultipleArgumentsAsJava(
       args: Array[String]): JavaMap[String, JavaMap[String, String]] = {
     val map =
-      extractMultipleArguments(args).map(c => c._1 -> new JavaMap[String, String](c._2.asJava))
-    new JavaMap[String, JavaMap[String, String]](map.asJava)
+      extractMultipleArguments(args).map(c => c._1 -> new JavaMap[String, String](c._2))
+    new JavaMap[String, JavaMap[String, String]](map)
   }
 
 }
