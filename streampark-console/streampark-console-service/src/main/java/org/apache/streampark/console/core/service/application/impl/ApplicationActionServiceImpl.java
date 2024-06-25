@@ -106,6 +106,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
+
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
@@ -468,7 +470,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         });
   }
 
-  @NotNull
+  @Nonnull
   private ApplicationLog constructAppLog(Application application) {
     ApplicationLog applicationLog = new ApplicationLog();
     applicationLog.setOptionName(OperationEnum.START.getValue());

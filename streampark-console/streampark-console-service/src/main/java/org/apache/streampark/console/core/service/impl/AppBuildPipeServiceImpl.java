@@ -478,18 +478,16 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  @NotNull
+  @Nonnull
   private FlinkYarnApplicationBuildRequest buildFlinkYarnApplicationBuildRequest(
-      @NotNull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
-    FlinkYarnApplicationBuildRequest yarnAppRequest =
-        new FlinkYarnApplicationBuildRequest(
-            app.getJobName(),
-            mainClass,
-            localWorkspace,
-            yarnProvidedPath,
-            app.getDevelopmentMode(),
-            getMergedDependencyInfo(app));
-    return yarnAppRequest;
+      @Nonnull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
+    return new FlinkYarnApplicationBuildRequest(
+        app.getJobName(),
+        mainClass,
+        localWorkspace,
+        yarnProvidedPath,
+        app.getDevelopmentMode(),
+        getMergedDependencyInfo(app));
   }
 
   @Nonnull

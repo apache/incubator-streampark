@@ -138,7 +138,7 @@ public class SparkAppBuildPipeServiceImpl
    * @return Whether the pipeline was successfully started
    */
   @Override
-  public boolean buildApplication(@NotNull Long appId, boolean forceBuild) {
+  public boolean buildApplication(@Nonnull Long appId, boolean forceBuild) {
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
