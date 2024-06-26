@@ -14,40 +14,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+FROM ubuntu:22.04
 
-FROM alpine:3.16 as deps-stage
-COPY . /
-WORKDIR /
-RUN tar zxvf dist/apache-streampark*-*-bin.tar.gz \
-&& mv apache-streampark*-*-bin streampark
+USER root
 
-FROM docker:dind
-WORKDIR /streampark
-COPY --from=deps-stage /streampark /streampark
+# Install basic tools
+RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
+    && apt install software-properties-common -y \
+    && add-apt-repository ppa:openjdk-r/ppa -y
+RUN apt update && apt install -y openjdk-8-jdk
+RUN JAVA_PATH=$(ls -l /usr/lib/jvm | grep java-8-openjdk | grep ^d | awk -F ' ' '{print $9}'); \
+    if [ -z "${JAVA_PATH}" ];then \
+        echo "JAVA_PATH not found: $JAVA_PATH"; \
+        exit 2; \
+    else \
+        ln -s /usr/lib/jvm/$JAVA_PATH/ /usr/lib/jvm/jdk8; \
+    fi
+ENV JAVA_HOME=/usr/lib/jvm/jdk8
 
-ENV NODE_VERSION=16.1.0
-ENV NPM_VERSION=7.11.2
 
-RUN apk add openjdk8 \
-    && apk add maven \
-    && apk add wget \
-    && apk add vim \
-    && apk add bash \
-    && apk add curl
+# Install docker
+RUN \
+    # Add Docker's official GPG key:
+    apt update && \
+    apt install -y ca-certificates curl gnupg && \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    # Add the repository to Apt sources:
+    echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt update && \
+    # Install the Docker packages.
+    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
-ENV MAVEN_HOME=/usr/share/java/maven-3
-ENV PATH $JAVA_HOME/bin:$PATH
-ENV PATH $MAVEN_HOME/bin:$PATH
 
-RUN wget "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && tar zxvf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
-    && rm "node-v$NODE_VERSION-linux-x64.tar.gz" \
-    && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
-    && curl -LO https://dl.k8s.io/release/v1.23.0/bin/linux/amd64/kubectl \
-    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+# Install Tini
+ARG TARGETPLATFORM
+ENV TINI_VERSION v0.19.0
+RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
+RUN \
+    if [ "$TARGETPLATFORM" = "linux/amd64" ];then \
+        TINI_PLATFORM=amd64; \
+        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ];then \
+        TINI_PLATFORM=arm64; \
+        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
+    else \
+        echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
+        exit 2;  \
+    fi
+RUN chmod +x /usr/sbin/tini
 
-RUN mkdir -p ~/.kube
 
-EXPOSE 10000
-EXPOSE 10030
+# Install StreamPark
+COPY dist/apache-streampark*-*-bin.tar.gz /
+RUN tar -zxvf apache-streampark*-*-bin.tar.gz \
+    && mv apache-streampark*-*-bin streampark \
+    && rm -f apache-streampark*-*-bin.tar.gz
+
+
+ENTRYPOINT ["/usr/sbin/tini", "--", "/streampark/bin/streampark.sh", "start_docker"]
