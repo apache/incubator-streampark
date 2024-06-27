@@ -791,7 +791,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           YarnClient yarnClient = HadoopUtils.yarnClient();
           yarnClient.killApplication(applications.get(0).getApplicationId());
         }
-      } catch (Exception ignored) {
+      } catch (Exception exception) {
+        log.error("Kill yarn application failed.", exception);
       }
     }
   }
