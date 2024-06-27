@@ -141,10 +141,10 @@ object YarnApplicationClient extends YarnClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
     var proxyUserUgi: UserGroupInformation = UserGroupInformation.getCurrentUser
     val currentUser = UserGroupInformation.getCurrentUser
-    val eableProxyState =
+    val enableProxyState =
       !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils.isNotEmpty(
         submitRequest.hadoopUser)
-    if (eableProxyState) {
+    if (enableProxyState) {
       proxyUserUgi = UserGroupInformation.createProxyUser(
         submitRequest.hadoopUser,
         currentUser
