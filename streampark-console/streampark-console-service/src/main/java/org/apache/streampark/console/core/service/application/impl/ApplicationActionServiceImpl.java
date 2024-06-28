@@ -575,8 +575,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
   /**
    * Check whether a job with the same name is running in the yarn queue
    *
-   * @param jobName
-   * @return
+   * @param jobName job name
+   * @return true if the job is running, false otherwise
    */
   private boolean checkAppRepeatInYarn(String jobName) {
     try {
@@ -750,12 +750,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     if (FlinkExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
-      try {
-        HadoopUtils.yarnClient();
-        properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
-      } catch (Exception e) {
-        // skip
-      }
+      properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
     }
 
     if (application.getAllowNonRestored()) {
@@ -798,6 +793,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
           yarnClient.killApplication(applications.get(0).getApplicationId());
         }
       } catch (Exception exception) {
+        log.error("Kill yarn application failed.", exception);
       }
     }
   }

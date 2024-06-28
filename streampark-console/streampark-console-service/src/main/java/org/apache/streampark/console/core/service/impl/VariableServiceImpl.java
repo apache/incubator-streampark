@@ -76,7 +76,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
     ApiAlertException.throwIfTrue(
         this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
-        "Sorry, the variable code already exists.");
+        "The variable code already exists.");
 
     variable.setCreatorId(serviceHelper.getUserId());
     this.save(variable);
@@ -85,7 +85,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public void remove(Variable variable) {
     ApiAlertException.throwIfTrue(
-        isDependByApplications(variable), "Sorry, the variable is actually used.");
+        isDependByApplications(variable), "The variable is actually used.");
     this.removeById(variable);
   }
 
@@ -119,12 +119,12 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
   @Override
   public void updateVariable(Variable variable) {
     // region update variable
-    ApiAlertException.throwIfNull(variable.getId(), "Sorry, the variable id cannot be null.");
+    ApiAlertException.throwIfNull(variable.getId(), "The variable id cannot be null.");
     Variable findVariable = this.baseMapper.selectById(variable.getId());
-    ApiAlertException.throwIfNull(findVariable, "Sorry, the variable does not exist.");
+    ApiAlertException.throwIfNull(findVariable, "The variable does not exist.");
     ApiAlertException.throwIfFalse(
         findVariable.getVariableCode().equals(variable.getVariableCode()),
-        "Sorry, the variable code cannot be updated.");
+        "The variable code cannot be updated.");
     this.baseMapper.updateById(variable);
     // endregion
 

@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 @Slf4j
@@ -84,7 +83,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   }
 
   @Override
-  public boolean create(FlinkEnv version) throws Exception {
+  public boolean create(FlinkEnv version) {
     long count = this.baseMapper.selectCount(null);
     version.setIsDefault(count == 0);
     version.setCreateTime(new Date());
@@ -106,7 +105,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   }
 
   @Override
-  public void update(FlinkEnv version) throws IOException {
+  public void update(FlinkEnv version) {
     FlinkEnv flinkEnv = getById(version.getId());
     checkOrElseAlert(flinkEnv);
     flinkEnv.setDescription(version.getDescription());

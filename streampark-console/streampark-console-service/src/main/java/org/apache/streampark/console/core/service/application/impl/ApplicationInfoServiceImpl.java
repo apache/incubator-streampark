@@ -443,59 +443,34 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public AppExistsStateEnum checkExists(Application appParam) {
 
-    if (!checkJobName(appParam.getJobName())) {
+    String jobName = appParam.getJobName();
+    Long appParamId = appParam.getId();
+
+    if (StringUtils.isBlank(jobName)
+        || !JOB_NAME_PATTERN.matcher(jobName.trim()).matches()
+        || !SINGLE_SPACE_PATTERN.matcher(jobName.trim()).matches()) {
       return AppExistsStateEnum.INVALID;
     }
 
-    boolean existsByJobName = this.existsByJobName(appParam.getJobName());
-
-    if (appParam.getId() != null) {
-      Application app = getById(appParam.getId());
-      if (app.getJobName().equals(appParam.getJobName())) {
-        return AppExistsStateEnum.NO;
-      }
-
-      if (existsByJobName) {
-        return AppExistsStateEnum.IN_DB;
-      }
-
-      // has stopped status
-      if (FlinkAppStateEnum.isEndState(app.getState())) {
-        // check whether jobName exists on yarn
-        if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
-            && YarnUtils.isContains(appParam.getJobName())) {
-          return AppExistsStateEnum.IN_YARN;
-        }
-        // check whether clusterId, namespace, jobId on kubernetes
-        if (appParam.isKubernetesModeJob()
-            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
-                flinkK8sWatcherWrapper.toTrackId(appParam))) {
-          return AppExistsStateEnum.IN_KUBERNETES;
-        }
-      }
-    } else {
-      if (existsByJobName) {
-        return AppExistsStateEnum.IN_DB;
-      }
-
-      // check whether jobName exists on yarn
-      if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
-          && YarnUtils.isContains(appParam.getJobName())) {
-        return AppExistsStateEnum.IN_YARN;
-      }
-      // check whether clusterId, namespace, jobId on kubernetes
-      if (appParam.isKubernetesModeJob()
-          && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
-              flinkK8sWatcherWrapper.toTrackId(appParam))) {
-        return AppExistsStateEnum.IN_KUBERNETES;
-      }
+    Application application =
+        baseMapper.selectOne(
+            new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+    if (application != null && !application.getId().equals(appParamId)) {
+      return AppExistsStateEnum.IN_DB;
     }
-    return AppExistsStateEnum.NO;
-  }
 
-  private boolean existsByJobName(String jobName) {
-    return baseMapper.exists(
-        new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+    if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
+        && YarnUtils.isContains(jobName)) {
+      return AppExistsStateEnum.IN_YARN;
+    }
+
+    if (appParam.isKubernetesModeJob()
+        && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
+            flinkK8sWatcherWrapper.toTrackId(appParam))) {
+      return AppExistsStateEnum.IN_KUBERNETES;
+    }
+
+    return AppExistsStateEnum.NO;
   }
 
   @Override
@@ -552,13 +527,5 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     } else {
       return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
     }
-  }
-
-  private Boolean checkJobName(String jobName) {
-    if (!StringUtils.isBlank(jobName.trim())) {
-      return JOB_NAME_PATTERN.matcher(jobName).matches()
-          && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
-    }
-    return false;
   }
 }
