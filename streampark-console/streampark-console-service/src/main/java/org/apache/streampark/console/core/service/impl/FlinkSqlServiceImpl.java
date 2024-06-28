@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -83,14 +84,17 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             .orderByDesc(FlinkSql::getVersion);
 
     Page<FlinkSql> flinkSqlPage = baseMapper.selectPage(page, queryWrapper);
-    if (!flinkSqlPage.getRecords().isEmpty()) {
-      FlinkSql flinkSql = flinkSqlPage.getRecords().get(0);
-      if (decode) {
-        flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
-      }
-      return flinkSql;
-    }
-    return null;
+    return Optional.ofNullable(flinkSqlPage.getRecords())
+        .filter(records -> !records.isEmpty())
+        .map(records -> records.get(0))
+        .map(
+            flinkSql -> {
+              if (decode) {
+                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+              }
+              return flinkSql;
+            })
+        .orElse(null);
   }
 
   @Override
@@ -125,13 +129,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
     List<FlinkSql> sqlList = this.baseMapper.selectList(queryWrapper);
     FlinkSql effective = getEffective(appId, false);
-    if (effective != null && !sqlList.isEmpty()) {
-      for (FlinkSql sql : sqlList) {
-        if (sql.getId().equals(effective.getId())) {
-          sql.setEffective(true);
-          break;
-        }
-      }
+    if (effective != null) {
+      sqlList.stream()
+          .filter(sql -> sql.getId().equals(effective.getId()))
+          .findFirst()
+          .ifPresent(sql -> sql.setEffective(true));
     }
     return sqlList;
   }

@@ -100,9 +100,8 @@ public class FactoryUtil {
               if (loadResult.hasFailed()) {
                 if (loadResult.getError() instanceof NoClassDefFoundError) {
                   LOG.debug(
-                      "NoClassDefFoundError when loading a "
-                          + Factory.class
-                          + ". This is expected when trying to load a format dependency but load failed.",
+                      "NoClassDefFoundError when loading a {}. This is expected when trying to load a format dependency but load failed.",
+                      Factory.class,
                       loadResult.getError());
                   // After logging, we just ignore this failure
                   return;
