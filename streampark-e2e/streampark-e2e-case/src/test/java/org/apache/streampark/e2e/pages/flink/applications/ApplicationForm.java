@@ -72,6 +72,7 @@ public final class ApplicationForm {
 
   public ApplicationForm(WebDriver driver) {
     this.driver = driver;
+
     PageFactory.initElements(driver, this);
   }
 
@@ -88,7 +89,6 @@ public final class ApplicationForm {
     buttonDevelopmentModeDropdown.click();
     new WebDriverWait(driver, Duration.ofSeconds(10))
         .until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
-
     switch (developmentMode) {
       case CUSTOM_CODE:
         selectDevelopmentMode.stream()
@@ -195,10 +195,10 @@ public final class ApplicationForm {
         throw new IllegalArgumentException(
             String.format("Unknown development mode: %s", developmentMode));
     }
-
     inputApplicationName.sendKeys(applicationName);
 
     buttonSubmit.click();
+
     return this;
   }
 

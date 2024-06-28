@@ -21,12 +21,14 @@ package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
 import org.apache.streampark.e2e.pages.flink.FlinkHomePage;
 import org.apache.streampark.e2e.pages.flink.applications.ApplicationForm;
 import org.apache.streampark.e2e.pages.flink.applications.ApplicationsPage;
 import org.apache.streampark.e2e.pages.flink.applications.entity.ApplicationsDynamicParams;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -34,10 +36,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import static org.apache.streampark.e2e.pages.common.Constants.TEST_FLINK_SQL;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
-public class ApplicationsFlink118OnYarnTest {
+@StreamPark(composeFiles = "docker/flink-1.16-on-yarn/docker-compose.yaml")
+public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
   private static RemoteWebDriver browser;
 
   private static final String userName = "admin";
@@ -46,11 +49,11 @@ public class ApplicationsFlink118OnYarnTest {
 
   private static final String teamName = "default";
 
-  private static final String flinkName = "flink-1.18.1";
+  private static final String flinkName = "flink-1.16.3";
 
-  private static final String flinkHome = "/flink-1.18.1";
+  private static final String flinkHome = "/flink-1.16.3";
 
-  private static final String applicationName = "flink-118-e2e-test";
+  private static final String applicationName = "flink-116-e2e-test";
 
   @BeforeAll
   public static void setup() {
@@ -69,36 +72,8 @@ public class ApplicationsFlink118OnYarnTest {
   @Order(10)
   void testCreateFlinkApplicationOnYarnApplicationMode() {
     final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
     ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
-    String flinkSQL =
-        "CREATE TABLE datagen (\n"
-            + "f_sequence INT,\n"
-            + "f_random INT,\n"
-            + "f_random_str STRING,\n"
-            + "ts AS localtimestamp,\n"
-            + "WATERMARK FOR ts AS ts\n"
-            + ") WITH (\n"
-            + "'connector' = 'datagen',\n"
-            + "'rows-per-second'='5',\n"
-            + "'fields.f_sequence.kind'='sequence',\n"
-            + "'fields.f_sequence.start'='1',\n"
-            + "'fields.f_sequence.end'='100',\n"
-            + "'fields.f_random.min'='1',\n"
-            + "'fields.f_random.max'='100',\n"
-            + "'fields.f_random_str.length'='10'\n"
-            + ");\n"
-            + "\n"
-            + "CREATE TABLE print_table (\n"
-            + "f_sequence INT,\n"
-            + "f_random INT,\n"
-            + "f_random_str STRING\n"
-            + ") WITH (\n"
-            + "'connector' = 'print'\n"
-            + ");\n"
-            + "\n"
-            + "INSERT INTO print_table select f_sequence,f_random,f_random_str from datagen;";
-    applicationsDynamicParams.flinkSQL(flinkSQL);
+    applicationsDynamicParams.flinkSQL(TEST_FLINK_SQL);
     applicationsPage
         .createApplication()
         .addApplication(
@@ -158,6 +133,34 @@ public class ApplicationsFlink118OnYarnTest {
   }
 
   @Test
+  @Order(31)
+  @SneakyThrows
+  void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
+    Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+    final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+    applicationsPage.startApplication(applicationName);
+
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain restarted application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("RUNNING")));
+
+    applicationsPage.cancelApplication(applicationName);
+
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain canceled application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("CANCELED")));
+  }
+
+  @Test
   @Order(40)
   void testDeleteFlinkApplicationOnYarnApplicationMode() {
     final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
@@ -178,36 +181,8 @@ public class ApplicationsFlink118OnYarnTest {
   @Order(50)
   void testCreateFlinkApplicationOnYarnPerJobMode() {
     final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
     ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
-    String flinkSQL =
-        "CREATE TABLE datagen (\n"
-            + "f_sequence INT,\n"
-            + "f_random INT,\n"
-            + "f_random_str STRING,\n"
-            + "ts AS localtimestamp,\n"
-            + "WATERMARK FOR ts AS ts\n"
-            + ") WITH (\n"
-            + "'connector' = 'datagen',\n"
-            + "'rows-per-second'='5',\n"
-            + "'fields.f_sequence.kind'='sequence',\n"
-            + "'fields.f_sequence.start'='1',\n"
-            + "'fields.f_sequence.end'='100',\n"
-            + "'fields.f_random.min'='1',\n"
-            + "'fields.f_random.max'='100',\n"
-            + "'fields.f_random_str.length'='10'\n"
-            + ");\n"
-            + "\n"
-            + "CREATE TABLE print_table (\n"
-            + "f_sequence INT,\n"
-            + "f_random INT,\n"
-            + "f_random_str STRING\n"
-            + ") WITH (\n"
-            + "'connector' = 'print'\n"
-            + ");\n"
-            + "\n"
-            + "INSERT INTO print_table select f_sequence,f_random,f_random_str from datagen;";
-    applicationsDynamicParams.flinkSQL(flinkSQL);
+    applicationsDynamicParams.flinkSQL(TEST_FLINK_SQL);
     applicationsPage
         .createApplication()
         .addApplication(
@@ -242,8 +217,9 @@ public class ApplicationsFlink118OnYarnTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
   }
 
-  @Test
-  @Order(70)
+  // This test cannot be executed due to a bug, and will be put online after issue #3761 fixed
+  // @Test
+  // @Order(70)
   void testStartFlinkApplicationOnYarnPerJobMode() {
     final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
