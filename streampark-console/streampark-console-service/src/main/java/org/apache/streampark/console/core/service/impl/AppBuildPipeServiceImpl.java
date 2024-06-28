@@ -91,7 +91,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -479,18 +478,16 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  @NotNull
+  @Nonnull
   private FlinkYarnApplicationBuildRequest buildFlinkYarnApplicationBuildRequest(
-      @NotNull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
-    FlinkYarnApplicationBuildRequest yarnAppRequest =
-        new FlinkYarnApplicationBuildRequest(
-            app.getJobName(),
-            mainClass,
-            localWorkspace,
-            yarnProvidedPath,
-            app.getDevelopmentMode(),
-            getMergedDependencyInfo(app));
-    return yarnAppRequest;
+      @Nonnull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
+    return new FlinkYarnApplicationBuildRequest(
+        app.getJobName(),
+        mainClass,
+        localWorkspace,
+        yarnProvidedPath,
+        app.getDevelopmentMode(),
+        getMergedDependencyInfo(app));
   }
 
   @Nonnull
