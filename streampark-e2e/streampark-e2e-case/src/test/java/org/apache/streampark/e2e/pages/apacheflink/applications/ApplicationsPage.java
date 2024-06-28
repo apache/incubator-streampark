@@ -57,10 +57,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
     private WebElement deleteConfirmButton;
 
-    private final StartJobForm startJobForm = new StartJobForm();
-
-    private final CancelJobForm cancelJobForm = new CancelJobForm();
-
     public ApplicationsPage(RemoteWebDriver driver) {
         super(driver);
     }
@@ -104,6 +100,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No start button in applications list"))
             .click();
 
+        StartJobForm startJobForm = new StartJobForm();
         String startJobFormMessage = "Start Job";
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(.,'%s')]", startJobFormMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint()));
@@ -143,8 +140,15 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No cancel button in applications list"))
             .click();
 
+        CancelJobForm cancelJobForm = new CancelJobForm();
+        String cancelJobFormMessage = "Stop Job";
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(.,'%s')]", cancelJobFormMessage))));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint()));
         cancelJobForm.radioFromSavepoint().click();
         cancelJobForm.buttonSubmit().click();
+        String cancelPopUpMessage = "The current job is canceling";
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", cancelPopUpMessage))));
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(String.format("//*[contains(text(),'%s')]", cancelPopUpMessage))));
 
         return this;
     }
@@ -162,7 +166,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         @FindBy(xpath = "//button[@id='startApplicationModal_startSavePointed']//span[contains(text(), 'ON')]")
         private WebElement radioFromSavepoint;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
+        @FindBy(xpath = "//div[contains(.,'Start Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
         private WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
@@ -178,7 +182,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         @FindBy(xpath = "//span[contains(text(), 'ON')]")
         private WebElement radioFromSavepoint;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
+        @FindBy(xpath = "//div[contains(.,'Stop Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
         private WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")

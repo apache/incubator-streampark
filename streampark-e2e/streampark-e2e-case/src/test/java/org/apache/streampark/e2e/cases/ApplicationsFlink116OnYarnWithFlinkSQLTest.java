@@ -20,6 +20,7 @@
 package org.apache.streampark.e2e.cases;
 
 
+import lombok.SneakyThrows;
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.apacheflink.ApacheFlinkPage;
@@ -27,6 +28,7 @@ import org.apache.streampark.e2e.pages.apacheflink.FlinkHomePage;
 import org.apache.streampark.e2e.pages.apacheflink.applications.ApplicationForm;
 import org.apache.streampark.e2e.pages.apacheflink.applications.ApplicationsPage;
 import org.apache.streampark.e2e.pages.apacheflink.applications.entity.ApplicationsDynamicParams;
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,8 +38,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
-public class ApplicationsFlink117OnYarnTest {
+@StreamPark(composeFiles = "docker/flink-1.16-on-yarn/docker-compose.yaml")
+public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
     private static RemoteWebDriver browser;
 
     private static final String userName = "admin";
@@ -46,11 +48,11 @@ public class ApplicationsFlink117OnYarnTest {
 
     private static final String teamName = "default";
 
-    private static final String flinkName = "flink-1.17.2";
+    private static final String flinkName = "flink-1.16.3";
 
-    private static final String flinkHome = "/flink-1.17.2";
+    private static final String flinkHome = "/flink-1.16.3";
 
-    private static final String applicationName = "flink-117-e2e-test";
+    private static final String applicationName = "flink-116-e2e-test";
 
     @BeforeAll
     public static void setup() {
@@ -140,6 +142,28 @@ public class ApplicationsFlink117OnYarnTest {
             .as("Applications list should contain finished application")
             .extracting(WebElement::getText)
             .anyMatch(it -> it.contains("FINISHED")));
+    }
+
+    @Test
+    @Order(31)
+    @SneakyThrows
+    void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
+        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.startApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain restarted application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains("RUNNING")));
+
+        applicationsPage.cancelApplication(applicationName);
+
+        Awaitility.await().untilAsserted(() -> assertThat(applicationsPage.applicationsList())
+            .as("Applications list should contain canceled application")
+            .extracting(WebElement::getText)
+            .anyMatch(it -> it.contains("CANCELED")));
     }
 
     @Test
