@@ -21,7 +21,6 @@ package org.apache.streampark.e2e.pages.flink;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
-import org.apache.streampark.e2e.pages.flink.applications.ApplicationsPage;
 
 import lombok.Getter;
 import org.openqa.selenium.WebElement;
