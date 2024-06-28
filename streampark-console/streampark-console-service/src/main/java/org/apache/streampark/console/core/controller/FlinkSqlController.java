@@ -117,7 +117,7 @@ public class FlinkSqlController {
 
   @PostMapping("history")
   @PermissionScope(app = "#app.id", team = "#app.teamId")
-  public RestResponse sqlhistory(Application app) {
+  public RestResponse history(Application app) {
     List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(app.getId());
     return RestResponse.success(sqlList);
   }
