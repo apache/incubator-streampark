@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.enums.FlinkExecutionMode
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
@@ -26,9 +25,7 @@ import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
-import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 /**
@@ -63,50 +60,46 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
-    var clusterDescriptor: KubernetesClusterDescriptor = null
-    var clusterClient: ClusterClient[String] = null
+    val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+    val clusterDescriptor = descriptor
+    val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
+    val clusterClient = clusterDescriptor
+      .deployApplicationCluster(clusterSpecification, applicationConfig)
+      .getClusterClient
 
-    try {
-      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
-      clusterDescriptor = descriptor
-      val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-      clusterClient = clusterDescriptor
-        .deployApplicationCluster(clusterSpecification, applicationConfig)
-        .getClusterClient
+    val clusterId = clusterClient.getClusterId
+    val result = SubmitResponse(
+      clusterId,
+      flinkConfig.toMap,
+      submitRequest.jobId,
+      clusterClient.getWebInterfaceURL)
+    logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
 
-      val clusterId = clusterClient.getClusterId
-      val result = SubmitResponse(
-        clusterId,
-        flinkConfig.toMap,
-        submitRequest.jobId,
-        clusterClient.getWebInterfaceURL)
-      logInfo(
-        s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
-      result
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        throw e
-    } finally {
-      Utils.close(clusterDescriptor, clusterClient)
-    }
+    closeSubmit(submitRequest, clusterDescriptor, clusterClient)
+    result
   }
 
-  override def doCancel(
-      cancelRequest: CancelRequest,
-      flinkConfig: Configuration): CancelResponse = {
-    flinkConfig.safeSet(
+  override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
+    flinkConf.safeSet(
       DeploymentOptions.TARGET,
       FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doCancel(cancelRequest, flinkConfig)
+    executeClientAction(
+      cancelRequest,
+      flinkConf,
+      (jobId, client) => {
+        val resp = super.cancelJob(cancelRequest, jobId, client)
+        client.shutDownCluster()
+        CancelResponse(resp)
+      }
+    )
   }
 
   override def doTriggerSavepoint(
-      triggerSavepointRequest: TriggerSavepointRequest,
+      request: TriggerSavepointRequest,
       flinkConf: Configuration): SavepointResponse = {
     flinkConf.safeSet(
       DeploymentOptions.TARGET,
       FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getName)
-    super.doTriggerSavepoint(triggerSavepointRequest, flinkConf)
+    super.doTriggerSavepoint(request, flinkConf)
   }
 }

@@ -17,7 +17,7 @@
  * under the License.
  *
  */
-package org.apache.streampark.e2e.pages.apacheflink.applications;
+package org.apache.streampark.e2e.pages.flink.applications;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -34,35 +34,38 @@ import java.util.List;
 
 @Getter
 public final class FlinkSQLYarnApplicationForm {
-    private WebDriver driver;
+  private WebDriver driver;
 
-    @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonFlinkVersionDropdown;
+  @FindBy(
+      xpath =
+          "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
+  private WebElement buttonFlinkVersionDropdown;
 
-    @FindBys({
-        @FindBy(css = "[codefield=versionId]"),
-        @FindBy(className = "ant-select-item-option-content")
-    })
-    private List<WebElement> selectFlinkVersion;
+  @FindBys({
+    @FindBy(css = "[codefield=versionId]"),
+    @FindBy(className = "ant-select-item-option-content")
+  })
+  private List<WebElement> selectFlinkVersion;
 
-    public FlinkSQLYarnApplicationForm(WebDriver driver) {
-        this.driver = driver;
+  public FlinkSQLYarnApplicationForm(WebDriver driver) {
+    this.driver = driver;
 
-        PageFactory.initElements(driver, this);
-    }
+    PageFactory.initElements(driver, this);
+  }
 
-    @SneakyThrows
-    public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
-        buttonFlinkVersionDropdown.click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
-        selectFlinkVersion.stream()
-            .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
-            .click();
+  @SneakyThrows
+  public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
+    buttonFlinkVersionDropdown.click();
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+        .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
+    selectFlinkVersion.stream()
+        .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
+        .click();
 
-        new FlinkSQLEditor(driver).content(flinkSql);
+    new FlinkSQLEditor(driver).content(flinkSql);
 
-        return this;
-    }
+    return this;
+  }
 }
