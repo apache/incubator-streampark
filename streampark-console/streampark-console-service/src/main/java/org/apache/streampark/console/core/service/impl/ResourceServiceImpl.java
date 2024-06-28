@@ -208,6 +208,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       }
     }
 
+    if (resource.getResourceType() == ResourceTypeEnum.FLINK_APP) {
+      findResource.setMainClass(resource.getMainClass());
+    }
     findResource.setDescription(resource.getDescription());
     baseMapper.updateById(findResource);
   }
