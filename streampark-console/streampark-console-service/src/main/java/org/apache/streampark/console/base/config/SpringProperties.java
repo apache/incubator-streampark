@@ -47,7 +47,7 @@ public class SpringProperties {
   }
 
   private static void dataSourceConfig(Properties userConfig, Properties springConfig) {
-    String dialect = userConfig.getProperty("datasource.dialect", "").toString();
+    String dialect = userConfig.getProperty("datasource.dialect", "");
     if (StringUtils.isBlank(dialect)) {
       throw new ExceptionInInitializerError(
           "datasource.dialect is required, please check config.yaml");
@@ -86,8 +86,8 @@ public class SpringProperties {
                 "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
                 h2DataDir));
 
-        String userName = userConfig.getProperty("spring.datasource.username", "admin");
-        String password = userConfig.getProperty("spring.datasource.password", "streampark");
+        String userName = userConfig.getProperty("datasource.username", "admin");
+        String password = userConfig.getProperty("datasource.password", "streampark");
 
         springConfig.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
         springConfig.put("spring.datasource.driver-class-name", "org.h2.Driver");
@@ -166,6 +166,7 @@ public class SpringProperties {
 
     // multipart
     config.put("spring.servlet.multipart.enabled", "true");
+    config.put("spring.servlet.multipart.resolve-lazily", "true");
     config.put("spring.servlet.multipart.max-file-size", "-1");
     config.put("spring.servlet.multipart.max-request-size", "-1");
 

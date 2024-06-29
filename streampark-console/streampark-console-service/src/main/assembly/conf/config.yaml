@@ -42,8 +42,10 @@ datasource:
     # mysql/postgresql/h2 connect password
     password:
     # mysql/postgresql connect jdbcURL
-    # mysql example: datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
-    # postgresql example: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+    # mysql example:
+    # datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+    # postgresql:
+    # jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
     url:
 
 streampark:
