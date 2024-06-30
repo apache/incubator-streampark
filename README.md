@@ -43,30 +43,28 @@
 ## 🚀 Abstract
 
 ----
-<h4>Apache StreamPark™ is a stream processing development framework and application management platform. </h4>
+<h4> Apache StreamPark™ is a stream processing development framework and application management platform. </h4>
 
-> Apache StreamPark™ is a streaming application development framework. Aimed at ease building and managing streaming applications, StreamPark provides development framework for writing stream processing application with Apache Flink and Apache Spark, More other engines will be supported in the future. Also, StreamPark is a professional management platform for streaming application, including application development, debugging, interactive query, deployment, operation, maintenance, etc. It was initially known as StreamX and renamed to StreamPark in August 2022.
+> Apache StreamPark™ is a streaming application development framework that provides a development framework for developing stream processing application with Apache Flink and Apache Spark, Also, StreamPark is a professional management platform for streaming application, Its core capabilities include application development, debugging, deployment, operation, etc.  Drastically simplifies streaming apps’ development and operations, enabling enterprises to derive immediate insight from their data in real-time.
 
-* Apache Flink & Apache Spark application development scaffold
-* Support multiple versions of Apache Flink & Apache Spark
-* Wide range of out-of-the-box connectors
+* Easy-to-use Apache Flink and Apache Spark application development framework
 * One-stop stream processing operation platform
+* Support multiple versions of Apache Flink & Apache Spark
+* Out-of-the-box connectors
 * Support catalog、olap、streaming-warehouse etc.
-* ...
 
 ## 🚀 QuickStart
 
-- [Start with Docker](docker/README.md)
-- [Start with Kubernetes](helm/README.md)
+```shell
+curl -L https://github.com/apache/streampark/raw/dev/streampark.sh | sh
+```
 
 Click [Official Documentation](https://streampark.apache.org/docs/framework/quick-start) for more information
 
 ## 🔨 How to Build
 
 ```shell
-git clone git@github.com:apache/incubator-streampark.git
-cd incubator-streampark
-./build.sh
+git clone git@github.com:apache/incubator-streampark.git && incubator-streampark/build.sh
 ```
 
 🗄 Details:how to [Development](https://streampark.apache.org/docs/development/development)

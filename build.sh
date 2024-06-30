@@ -152,10 +152,10 @@ while [[ -h "$PRG" ]]; do
   fi
 done
 
-
 # Get standard environment variables
+# shellcheck disable=SC2164
 # shellcheck disable=SC2006
-PRG_DIR=`dirname "$PRG"`
+PRG_DIR=`cd "$(dirname "$PRG")" >/dev/null; pwd`
 
 print_logo() {
   printf '\n'
