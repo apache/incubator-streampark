@@ -19,35 +19,34 @@
 
 package org.apache.streampark.e2e.core;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.junit.jupiter.api.extension.ExtensionContext;
-
-import lombok.RequiredArgsConstructor;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor
 final class TestDescription implements org.testcontainers.lifecycle.TestDescription {
-    private static final String UNKNOWN_NAME = "unknown";
+  private static final String UNKNOWN_NAME = "unknown";
 
-    private final ExtensionContext context;
+  private final ExtensionContext context;
 
-    @Override
-    public String getTestId() {
-        return context.getUniqueId();
+  @Override
+  public String getTestId() {
+    return context.getUniqueId();
+  }
+
+  @Override
+  public String getFilesystemFriendlyName() {
+    final String contextId = context.getUniqueId();
+    try {
+      return (contextId == null || contextId.trim().isEmpty())
+          ? UNKNOWN_NAME
+          : URLEncoder.encode(contextId, UTF_8.toString());
+    } catch (UnsupportedEncodingException e) {
+      return UNKNOWN_NAME;
     }
-
-    @Override
-    public String getFilesystemFriendlyName() {
-        final String contextId = context.getUniqueId();
-        try {
-            return (contextId == null || contextId.trim().isEmpty())
-                    ? UNKNOWN_NAME
-                    : URLEncoder.encode(contextId, UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            return UNKNOWN_NAME;
-        }
-    }
+  }
 }

@@ -17,10 +17,11 @@
  * under the License.
  *
  */
-package org.apache.streampark.e2e.pages.system;
+package org.apache.streampark.e2e.pages.flink;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
+import org.apache.streampark.e2e.pages.flink.applications.ApplicationsPage;
 
 import lombok.Getter;
 import org.openqa.selenium.WebElement;
@@ -32,49 +33,39 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 @Getter
-public final class SystemPage extends NavBarPage implements NavBarItem {
+public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
   @FindBy(
       xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'User Management')]//..")
-  private WebElement menuUserManagement;
+          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Applications')]//..")
+  private WebElement menuApplications;
 
   @FindBy(
       xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Token Management')]//..")
-  private WebElement menuTokenManagement;
+          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Flink Home')]//..")
+  private WebElement menuFlinkHome;
 
   @FindBy(
       xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Role Management')]//..")
-  private WebElement menuRoleManagement;
+          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Clusters')]//..")
+  private WebElement menuClusters;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Team Management')]//..")
-  private WebElement menuTeamManagement;
-
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Member Management')]//..")
-  private WebElement menuMemberManagement;
-
-  public SystemPage(RemoteWebDriver driver) {
+  public ApacheFlinkPage(RemoteWebDriver driver) {
     super(driver);
   }
 
-  public <T extends SystemPage.Tab> T goToTab(Class<T> tab) {
-    if (tab == UserManagementPage.class) {
+  public <T extends ApacheFlinkPage.Tab> T goToTab(Class<T> tab) {
+    if (tab == ApplicationsPage.class) {
       new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
-      menuUserManagement.click();
-      return tab.cast(new UserManagementPage(driver));
+          .until(ExpectedConditions.elementToBeClickable(menuApplications));
+      menuApplications.click();
+      return tab.cast(new ApplicationsPage(driver));
     }
 
-    if (tab == TeamManagementPage.class) {
+    if (tab == FlinkHomePage.class) {
       new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
-      menuTeamManagement.click();
-      return tab.cast(new TeamManagementPage(driver));
+          .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
+      menuFlinkHome.click();
+      return tab.cast(new FlinkHomePage(driver));
     }
 
     throw new UnsupportedOperationException("Unknown tab: " + tab.getName());

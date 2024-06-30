@@ -30,4 +30,5 @@ case class ShutDownRequest(
     @Nullable properties: JavaMap[String, Any],
     clusterId: String,
     id: Long,
-    @Nullable kubernetesDeployParam: KubernetesDeployParam)
+    @Nullable k8sParam: KubernetesDeployParam)
+  extends DeployRequestTrait

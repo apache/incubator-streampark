@@ -27,14 +27,14 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
   def triggerSavepoint(
       jobID: JobID,
       savepointDir: String,
-      nativeFormat: Boolean): CompletableFuture[String] = {
+      nativeFormat: Boolean = false): CompletableFuture[String] = {
     clusterClient.triggerSavepoint(jobID, savepointDir)
   }
 
   def cancelWithSavepoint(
       jobID: JobID,
       savepointDir: String,
-      nativeFormat: Boolean): CompletableFuture[String] = {
+      nativeFormat: Boolean = false): CompletableFuture[String] = {
     clusterClient.cancelWithSavepoint(jobID, savepointDir)
   }
 
@@ -42,7 +42,7 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
       jobID: JobID,
       advanceToEndOfEventTime: Boolean,
       savepointDir: String,
-      nativeFormat: Boolean): CompletableFuture[String] =
+      nativeFormat: Boolean = false): CompletableFuture[String] =
     clusterClient.stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDir)
 
 }

@@ -26,7 +26,7 @@ RUN sudo chown -R hadoop.hadoop /streampark \
 ENV FLINK_VERSION 1.16.3
 
 # Install Flink
-RUN sudo wget --no-check-certificate -O /flink-${FLINK_VERSION}-bin-scala_2.12.tgz https://dlcdn.apache.org/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-scala_2.12.tgz \
+RUN sudo wget --no-check-certificate -O /flink-${FLINK_VERSION}-bin-scala_2.12.tgz https://archive.apache.org/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-scala_2.12.tgz \
     && cd / \
     && sudo tar -zxf flink-${FLINK_VERSION}-bin-scala_2.12.tgz \
     && sudo chown -R hadoop.hadoop /flink-${FLINK_VERSION}

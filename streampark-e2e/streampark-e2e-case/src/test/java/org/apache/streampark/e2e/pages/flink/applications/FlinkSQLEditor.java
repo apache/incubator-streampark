@@ -17,7 +17,7 @@
  * under the License.
  *
  */
-package org.apache.streampark.e2e.pages.apacheflink.applications;
+package org.apache.streampark.e2e.pages.flink.applications;
 
 import lombok.Getter;
 import org.openqa.selenium.WebDriver;
@@ -32,24 +32,27 @@ import java.time.Duration;
 
 @Getter
 public final class FlinkSQLEditor {
-    @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line')]")
-    private WebElement flinkSqlEditor;
+  @FindBy(
+      xpath =
+          "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line')]")
+  private WebElement flinkSqlEditor;
 
-    private WebDriver driver;
+  private WebDriver driver;
 
-    public FlinkSQLEditor(WebDriver driver) {
-        PageFactory.initElements(driver, this);
-        this.driver = driver;
-    }
+  public FlinkSQLEditor(WebDriver driver) {
+    PageFactory.initElements(driver, this);
+    this.driver = driver;
+  }
 
-    public FlinkSQLEditor content(String content) {
-        new WebDriverWait(this.driver, Duration.ofSeconds(20)).until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
+  public FlinkSQLEditor content(String content) {
+    new WebDriverWait(this.driver, Duration.ofSeconds(20))
+        .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
 
-        flinkSqlEditor.click();
+    flinkSqlEditor.click();
 
-        Actions actions = new Actions(this.driver);
-        actions.moveToElement(flinkSqlEditor).sendKeys(content).perform();
+    Actions actions = new Actions(this.driver);
+    actions.moveToElement(flinkSqlEditor).sendKeys(content).perform();
 
-        return this;
-    }
+    return this;
+  }
 }

@@ -25,6 +25,7 @@ import org.apache.streampark.e2e.pages.system.SystemPage;
 import org.apache.streampark.e2e.pages.system.UserManagementPage;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,63 +37,76 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class UserManagementTest {
-    private static RemoteWebDriver browser;
+  private static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
+  private static final String userName = "admin";
 
-    private static final String password = "streampark";
+  private static final String password = "streampark";
 
-    private static final String teamName = "default";
+  private static final String teamName = "default";
 
-    private static final String newUserName = "test_new";
+  private static final String newUserName = "test_new";
 
-    private static final String newUserEmail = "test@email.com";
+  private static final String newUserEmail = "test@email.com";
 
-    @BeforeAll
-    public static void setup() {
-        new LoginPage(browser)
-            .login(userName, password, teamName)
-            .goToNav(SystemPage.class)
-            .goToTab(UserManagementPage.class);
-    }
+  @BeforeAll
+  public static void setup() {
+    new LoginPage(browser)
+        .login(userName, password, teamName)
+        .goToNav(SystemPage.class)
+        .goToTab(UserManagementPage.class);
+  }
 
-    @Test
-    @Order(10)
-    void testCreateUser() {
-        final UserManagementPage userManagementPage = new UserManagementPage(browser);
-        userManagementPage.createUser(newUserName, "test", password, newUserEmail, UserManagementUserType.ADMIN);
+  @Test
+  @Order(10)
+  void testCreateUser() {
+    final UserManagementPage userManagementPage = new UserManagementPage(browser);
+    userManagementPage.createUser(
+        newUserName, "test", password, newUserEmail, UserManagementUserType.ADMIN);
 
-        Awaitility.await().untilAsserted(() -> assertThat(userManagementPage.userList())
-            .as("User list should contain newly-created user")
-            .extracting(WebElement::getText)
-            .anyMatch(it -> it.contains(newUserName)));
-    }
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(userManagementPage.userList())
+                    .as("User list should contain newly-created user")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(newUserName)));
+  }
 
-    @Test
-    @Order(20)
-    void testCreateDuplicateUser() {
-        final UserManagementPage userManagementPage = new UserManagementPage(browser);
-        userManagementPage.createUser(newUserName, "test", password, "test@email.com", UserManagementUserType.ADMIN);
+  @Test
+  @Order(20)
+  void testCreateDuplicateUser() {
+    final UserManagementPage userManagementPage = new UserManagementPage(browser);
+    userManagementPage.createUser(
+        newUserName, "test", password, "test@email.com", UserManagementUserType.ADMIN);
 
-        Awaitility.await().untilAsserted(() -> assertThat(userManagementPage.errorMessageList())
-            .as("User Name Duplicated Error message should be displayed")
-            .extracting(WebElement::getText)
-            .anyMatch(it -> it.contains("Sorry the username already exists")));
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(userManagementPage.errorMessageList())
+                    .as("User Name Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("Sorry the username already exists")));
 
-        userManagementPage.createUserForm().buttonCancel().click();
-    }
+    userManagementPage.createUserForm().buttonCancel().click();
+  }
 
-    @Test
-    @Order(30)
-    void testEditUser() {
-        final UserManagementPage userManagementPage = new UserManagementPage(browser);
-        String editEmail = "edit_" + newUserEmail;
+  @Test
+  @Order(30)
+  void testEditUser() {
+    final UserManagementPage userManagementPage = new UserManagementPage(browser);
+    String editEmail = "edit_" + newUserEmail;
 
-        userManagementPage.editUser(newUserName, editEmail, UserManagementUserType.ADMIN, UserManagementStatus.LOCKED);
+    userManagementPage.editUser(
+        newUserName, editEmail, UserManagementUserType.ADMIN, UserManagementStatus.LOCKED);
 
-        Awaitility.await().untilAsserted(() -> assertThat(userManagementPage.userList())
-            .as("User list should contain edited user")
-            .extracting(WebElement::getText)
-            .anyMatch(it -> it.contains(UserManagementStatus.LOCKED.toString().toLowerCase())));
-    }
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(userManagementPage.userList())
+                    .as("User list should contain edited user")
+                    .extracting(WebElement::getText)
+                    .anyMatch(
+                        it -> it.contains(UserManagementStatus.LOCKED.toString().toLowerCase())));
+  }
 }
