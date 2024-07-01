@@ -19,7 +19,7 @@ version: "3.8"
 
 services:
   streampark:
-    image: apache/streampark:ci-basic
+    image: apache/streampark:dev
     command: bash bin/streampark.sh start_docker
     build:
       context: ./
