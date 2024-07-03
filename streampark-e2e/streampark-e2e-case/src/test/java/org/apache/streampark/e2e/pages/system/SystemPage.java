@@ -75,6 +75,13 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
             return tab.cast(new RoleManagementPage(driver));
         }
 
+        if (tab == MemberManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
+            menuMemberManagement.click();
+            return tab.cast(new MemberManagementPage(driver));
+        }
+
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
     }
 
