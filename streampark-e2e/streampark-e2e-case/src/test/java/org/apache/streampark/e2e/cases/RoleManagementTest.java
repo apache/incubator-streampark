@@ -45,7 +45,7 @@ public class RoleManagementTest {
 
   private static final String newDescription = "new_description";
 
-    private static final String existMenuName = "Apache Flink";
+  private static final String existMenuName = "Apache Flink";
 
   @BeforeAll
   public static void setup() {
@@ -59,8 +59,7 @@ public class RoleManagementTest {
   @Order(10)
   void testCreateUser() {
     final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
-      roleManagementPage.createRole(
-        newRoleName, newDescription, existMenuName);
+    roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
 
     Awaitility.await()
         .untilAsserted(
@@ -74,37 +73,36 @@ public class RoleManagementTest {
   @Test
   @Order(20)
   void testCreateDuplicateRole() {
-      final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
-      roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
+    final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
+    roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
 
-      Awaitility.await()
-          .untilAsserted(
-              () ->
-                  assertThat(roleManagementPage.errorMessageList())
-                      .as("Role Name Duplicated Error message should be displayed")
-                      .extracting(WebElement::getText)
-                      .anyMatch(it -> it.contains("Sorry, the role name already exists")));
+    Awaitility.await()
+        .untilAsserted(
+            () ->
+                assertThat(roleManagementPage.errorMessageList())
+                    .as("Role Name Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("Sorry, the role name already exists")));
 
-      roleManagementPage.createRoleForm().buttonCancel().click();
+    roleManagementPage.createRoleForm().buttonCancel().click();
   }
     @Test
     @Order(30)
     void testEditRole() {
-        final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
+      final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
 
-        String newEditDescription = newDescription + "_edit";
-        String newEditMenuName = "System";
-        roleManagementPage.editRole(
-            newRoleName, newEditDescription, newEditMenuName);
+      String newEditDescription = newDescription + "_edit";
+      String newEditMenuName = "System";
+      roleManagementPage.editRole(newRoleName, newEditDescription, newEditMenuName);
 
-        //TODO: there is no description filed value actual exist
-//        Awaitility.await()
-//            .untilAsserted(
-//                () ->
-//                    assertThat(roleManagementPage.roleList())
-//                        .as("Role list should contain newly-created role")
-//                        .extracting(WebElement::getText)
-//                        .anyMatch(it -> it.contains(newEditDescription)));
+    //TODO: there is no description filed value actual exist
+    //       Awaitility.await()
+    //           .untilAsserted(
+    //               () ->
+    //                   assertThat(roleManagementPage.roleList())
+    //                       .as("Role list should contain newly-created role")
+    //                       .extracting(WebElement::getText)
+    //                       .anyMatch(it -> it.contains(newEditDescription)));
     }
 
     @Test
@@ -114,11 +112,11 @@ public class RoleManagementTest {
 
       roleManagementPage.deleteRole(newRoleName);
 
-        Awaitility.await()
-            .untilAsserted(
-                () ->
-                    assertThat(roleManagementPage.roleList())
-                        .extracting(WebElement::getText)
-                        .noneMatch(it -> it.contains(newRoleName)));
+      Awaitility.await()
+          .untilAsserted(
+              () ->
+                  assertThat(roleManagementPage.roleList())
+                      .extracting(WebElement::getText)
+                      .noneMatch(it -> it.contains(newRoleName)));
     }
 }
