@@ -15,53 +15,35 @@
 # limitations under the License.
 
 version: '3.8'
+
 services:
-  streampark-console:
+  streampark:
     image: apache/streampark:2.2.0
-    command: ${RUN_COMMAND}
     ports:
-      - 10000:10000
-      - 10030:10030
-    env_file: .env
+      - "10000:10000"
+      - "10030:10030"
+    environment:
+      - TZ=Asia/Shanghai
+      - DATASOURCE_DIALECT=h2 # h2, mysql, pgsql
+#     If use mysql or pgsql, please set the following parameters
+#     - DATASOURCE_URL=jdbc:mysql://localhost:3306/streampark?useSSL=false&useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+#     - DATASOURCE_URL=jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+#     - DATASOURCE_USERNAME=root
+#     - DATASOURCE_PASSWORD=streampark
     volumes:
-      - flink:/streampark/flink/${FLINK}
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/etc/hosts:ro
       - ~/.kube:/root/.kube:ro
     privileged: true
-    restart: unless-stopped
+    restart: always
     networks:
       - streampark
-
-  flink-jobmanager:
-    image: ${FLINK_IMAGE}
-    ports:
-      - "8081:8081"
-    command: jobmanager
-    volumes:
-      - flink:/opt/flink
-    env_file: .env
-    restart: unless-stopped
-    privileged: true
-    networks:
-      - streampark
-
-  flink-taskmanager:
-    image: ${FLINK_IMAGE}
-    depends_on:
-      - flink-jobmanager
-    command: taskmanager
-    deploy:
-      replicas: 1
-    env_file: .env
-    restart: unless-stopped
-    privileged: true
-    networks:
-      - streampark
+    healthcheck:
+      test: [ "CMD", "curl", "http://streampark:10000" ]
+      interval: 5s
+      timeout: 5s
+      retries: 120
 
 networks:
   streampark:
     driver: bridge
-
-volumes:
-  flink:

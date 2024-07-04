@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
@@ -55,10 +54,9 @@ import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.utils.FlinkK8sDataTypeConverterStub;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
-import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
+import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
@@ -92,9 +90,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.isKubernetesApp;
 
 @Slf4j
 @Service
@@ -131,13 +126,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
   @Autowired private ResourceService resourceService;
 
-  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
-
-  @Autowired private FlinkK8sDataTypeConverterStub flinkK8sDataTypeConverter;
-
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
 
   @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
   @PostConstruct
   public void resetOptionState() {
@@ -170,12 +163,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
   public boolean mapping(Application appParam) {
     boolean mapping = this.baseMapper.mapping(appParam);
     Application application = getById(appParam.getId());
-    if (isKubernetesApp(application)) {
+    if (application.isKubernetesModeJob()) {
       // todo mark
-      k8SFlinkTrackMonitor.doWatching(toTrackId(application));
-      if (K8sFlinkConfig.isV2Enabled()) {
-        flinkK8sObserver.watchApplication(application);
-      }
+      k8SFlinkTrackMonitor.doWatching(k8sWatcherWrapper.toTrackId(application));
     } else {
       FlinkAppHttpWatcher.doWatching(application);
     }
@@ -211,11 +201,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     // 8) remove app
     removeApp(application);
-    if (isKubernetesApp(application)) {
-      k8SFlinkTrackMonitor.unWatching(toTrackId(application));
-      if (K8sFlinkConfig.isV2Enabled()) {
-        flinkK8sObserver.unWatchById(application.getId());
-      }
+    if (application.isKubernetesModeJob()) {
+      k8SFlinkTrackMonitor.unWatching(k8sWatcherWrapper.toTrackId(application));
     } else {
       FlinkAppHttpWatcher.unWatching(appId);
     }
@@ -271,9 +258,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                 record -> {
                   // status of flink job on kubernetes mode had been automatically persisted to db
                   // in time.
-                  if (isKubernetesApp(record)) {
+                  if (record.isKubernetesModeJob()) {
                     // set duration
-                    String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(toTrackId(record));
+                    String restUrl =
+                        k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
                     record.setFlinkRestUrl(restUrl);
                     setAppDurationIfNeeded(record, now);
                   }
@@ -350,18 +338,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
     }
 
-    if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getFlinkExecutionMode()) {
-        case KUBERNETES_NATIVE_APPLICATION:
-          appParam.setK8sName(appParam.getClusterId());
-          break;
-        case KUBERNETES_NATIVE_SESSION:
-          appParam.setK8sName(
-              flinkK8sDataTypeConverter.genSessionJobK8sCRName(appParam.getClusterId()));
-          break;
-      }
-    }
-
     if (save(appParam)) {
       if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
         FlinkSql flinkSql = new FlinkSql(appParam);
@@ -374,11 +350,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     } else {
       throw new ApiAlertException("create application failed");
     }
-  }
-
-  private boolean shouldHandleK8sName(Application app) {
-    return K8sFlinkConfig.isV2Enabled()
-        && FlinkExecutionMode.isKubernetesMode(app.getExecutionMode());
   }
 
   private boolean existsByJobName(String jobName) {
@@ -584,20 +555,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         break;
     }
 
-    if (shouldHandleK8sName(appParam)) {
-      switch (appParam.getFlinkExecutionMode()) {
-        case KUBERNETES_NATIVE_APPLICATION:
-          application.setK8sName(appParam.getClusterId());
-          break;
-        case KUBERNETES_NATIVE_SESSION:
-          if (!Objects.equals(application.getClusterId(), appParam.getClusterId())) {
-            application.setK8sName(
-                flinkK8sDataTypeConverter.genSessionJobK8sCRName(appParam.getClusterId()));
-          }
-          break;
-      }
-    }
-
     // Flink Sql job...
     if (application.isFlinkSqlJob()) {
       updateFlinkSqlJob(application, appParam);
@@ -723,10 +680,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                         .collect(Collectors.toSet())));
   }
 
-  public List<Application> listProbeApps() {
-    return this.baseMapper.selectProbeApps();
-  }
-
   @Override
   public boolean checkBuildAndUpdate(Application appParam) {
     boolean build = appParam.getBuild();
@@ -789,8 +742,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
       }
     }
     // add flink web url info for k8s-mode
-    if (isKubernetesApp(application)) {
-      String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(toTrackId(application));
+    if (application.isKubernetesModeJob()) {
+      String restUrl =
+          k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
       application.setFlinkRestUrl(restUrl);
 
       // set duration

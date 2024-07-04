@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
@@ -74,12 +73,11 @@ import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildReque
 import org.apache.streampark.flink.packer.pipeline.FlinkK8sSessionBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkRemotePerJobBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.FlinkYarnApplicationBuildRequest;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sApplicationBuildPipelineV2;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkK8sSessionBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkRemoteBuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.impl.FlinkYarnApplicationBuildPipeline;
@@ -93,7 +91,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -105,8 +102,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -209,7 +206,7 @@ public class AppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -287,14 +284,14 @@ public class AppBuildPipeServiceImpl
           }
 
           @Override
-          public void onStepStateChange(PipeSnapshot snapshot) {
+          public void onStepStateChange(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
           }
 
           @Override
-          public void onFinish(PipeSnapshot snapshot, BuildResult result) {
+          public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
@@ -474,9 +471,6 @@ public class AppBuildPipeServiceImpl
             buildFlinkK8sApplicationBuildRequest(
                 app, mainClass, flinkUserJar, flinkEnv, dockerConfig);
         log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
-        if (K8sFlinkConfig.isV2Enabled()) {
-          return FlinkK8sApplicationBuildPipelineV2.of(k8sApplicationBuildRequest);
-        }
         return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
       default:
         throw new UnsupportedOperationException(
@@ -484,18 +478,16 @@ public class AppBuildPipeServiceImpl
     }
   }
 
-  @NotNull
+  @Nonnull
   private FlinkYarnApplicationBuildRequest buildFlinkYarnApplicationBuildRequest(
-      @NotNull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
-    FlinkYarnApplicationBuildRequest yarnAppRequest =
-        new FlinkYarnApplicationBuildRequest(
-            app.getJobName(),
-            mainClass,
-            localWorkspace,
-            yarnProvidedPath,
-            app.getDevelopmentMode(),
-            getMergedDependencyInfo(app));
-    return yarnAppRequest;
+      @Nonnull Application app, String mainClass, String localWorkspace, String yarnProvidedPath) {
+    return new FlinkYarnApplicationBuildRequest(
+        app.getJobName(),
+        mainClass,
+        localWorkspace,
+        yarnProvidedPath,
+        app.getDevelopmentMode(),
+        getMergedDependencyInfo(app));
   }
 
   @Nonnull
@@ -515,7 +507,7 @@ public class AppBuildPipeServiceImpl
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
-            app.getClusterId(),
+            app.getJobName(),
             app.getK8sNamespace(),
             app.getFlinkImage(),
             app.getK8sPodTemplates(),
@@ -615,14 +607,14 @@ public class AppBuildPipeServiceImpl
   @Override
   public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
         new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
 
     List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
     if (CollectionUtils.isEmpty(appBuildPipelines)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return appBuildPipelines.stream()
         .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));

@@ -197,13 +197,9 @@ public class ApplicationController {
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")
-  public RestResponse start(@Parameter(hidden = true) Application app) {
-    try {
-      applicationActionService.start(app, false);
-      return RestResponse.success(true);
-    } catch (Exception e) {
-      return RestResponse.success(false).message(e.getMessage());
-    }
+  public RestResponse start(@Parameter(hidden = true) Application app) throws Exception {
+    applicationActionService.start(app, false);
+    return RestResponse.success(true);
   }
 
   @Operation(
@@ -259,10 +255,10 @@ public class ApplicationController {
 
   /** force stop(stop normal start or in progress) */
   @PermissionScope(app = "#app.id")
-  @PostMapping("forcedStop")
+  @PostMapping("abort")
   @RequiresPermissions("app:cancel")
-  public RestResponse forcedStop(Application app) {
-    applicationActionService.forcedStop(app.getId());
+  public RestResponse abort(Application app) {
+    applicationActionService.abort(app.getId());
     return RestResponse.success();
   }
 
@@ -336,14 +332,9 @@ public class ApplicationController {
   }
 
   @PostMapping("checkjar")
-  public RestResponse checkjar(String jar) {
-    File file = new File(jar);
-    try {
-      Utils.requireCheckJarFile(file.toURI().toURL());
-      return RestResponse.success(true);
-    } catch (IOException e) {
-      return RestResponse.success(file).message(e.getLocalizedMessage());
-    }
+  public RestResponse checkjar(String jar) throws IOException {
+    Utils.requireCheckJarFile(new File(jar).toURI().toURL());
+    return RestResponse.success(true);
   }
 
   @PostMapping("upload")

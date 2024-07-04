@@ -27,7 +27,6 @@ import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
@@ -70,13 +69,12 @@ object PropertiesUtils extends Logger {
             })
           .toMap
       case text =>
-        val value = text match {
-          case null => ""
-          case other => other.toString
-        }
-        prefix match {
-          case "" => proper += k -> value
-          case other => proper += s"$other.$k" -> value
+        if (text != null) {
+          val value = text.toString.trim
+          prefix match {
+            case "" => proper += k -> value
+            case other => proper += s"$other.$k" -> value
+          }
         }
         proper.toMap
     }
@@ -204,31 +202,31 @@ object PropertiesUtils extends Logger {
   }
 
   def fromYamlTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlText(text).asJava)
+    new JavaMap[String, String](fromYamlText(text))
 
   def fromHoconTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconText(text).asJava)
+    new JavaMap[String, String](fromHoconText(text))
 
   def fromPropertiesTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesText(text).asJava)
+    new JavaMap[String, String](fromPropertiesText(text))
 
   def fromYamlFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(filename).asJava)
+    new JavaMap[String, String](fromYamlFile(filename))
 
   def fromHoconFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(filename).asJava)
+    new JavaMap[String, String](fromHoconFile(filename))
 
   def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(filename).asJava)
+    new JavaMap[String, String](fromPropertiesFile(filename))
 
   def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(inputStream).asJava)
+    new JavaMap[String, String](fromYamlFile(inputStream))
 
   def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(inputStream).asJava)
+    new JavaMap[String, String](fromHoconFile(inputStream))
 
   def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(inputStream).asJava)
+    new JavaMap[String, String](fromPropertiesFile(inputStream))
 
   /**
    * @param file
@@ -276,7 +274,7 @@ object PropertiesUtils extends Logger {
 
   /** extract flink configuration from application.properties */
   @Nonnull def extractDynamicProperties(properties: String): Map[String, String] = {
-    if (StringUtils.isBlank(properties)) Map.empty[String, String]
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
     else {
       val map = mutable.Map[String, String]()
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
@@ -308,28 +306,76 @@ object PropertiesUtils extends Logger {
   @Nonnull def extractArguments(args: String): List[String] = {
     val programArgs = new ArrayBuffer[String]()
     if (StringUtils.isNotEmpty(args)) {
-      val array = args.split("\\s+")
-      val iter = array.iterator
-      while (iter.hasNext) {
-        val v = iter.next()
-        val p = v.take(1)
-        p match {
-          case "'" | "\"" =>
-            var value = v
-            if (!v.endsWith(p)) {
-              while (!value.endsWith(p) && iter.hasNext) {
-                value += s" ${iter.next()}"
-              }
+      return extractArguments(args.split("\\s+"))
+    }
+    programArgs.toList
+  }
+
+  def extractArguments(array: Array[String]): List[String] = {
+    val programArgs = new ArrayBuffer[String]()
+    val iter = array.iterator
+    while (iter.hasNext) {
+      val v = iter.next()
+      val p = v.take(1)
+      p match {
+        case "'" | "\"" =>
+          var value = v
+          if (!v.endsWith(p)) {
+            while (!value.endsWith(p) && iter.hasNext) {
+              value += s" ${iter.next()}"
             }
-            programArgs += value.substring(1, value.length - 1)
-          case _ => programArgs += v
-        }
+          }
+          programArgs += value.substring(1, value.length - 1)
+        case _ =>
+          val regexp = "(.*)='(.*)'$"
+          if (v.matches(regexp)) {
+            programArgs += v.replaceAll(regexp, "$1=$2")
+          } else {
+            val regexp = "(.*)=\"(.*)\"$"
+            if (v.matches(regexp)) {
+              programArgs += v.replaceAll(regexp, "$1=$2")
+            } else {
+              programArgs += v
+            }
+          }
       }
     }
     programArgs.toList
   }
 
+  def extractMultipleArguments(array: Array[String]): Map[String, Map[String, String]] = {
+    val iter = array.iterator
+    val map = mutable.Map[String, mutable.Map[String, String]]()
+    while (iter.hasNext) {
+      val v = iter.next()
+      v.take(2) match {
+        case "--" =>
+          val kv = iter.next()
+          val regexp = "(.*)=(.*)"
+          if (kv.matches(regexp)) {
+            val values = kv.split("=")
+            val k1 = values(0).trim
+            val v1 = values(1).replaceAll("^['|\"]|['|\"]$", "")
+            val k = v.drop(2)
+            map.get(k) match {
+              case Some(m) => m += k1 -> v1
+              case _ => map += k -> mutable.Map(k1 -> v1)
+            }
+          }
+        case _ =>
+      }
+    }
+    map.map(x => x._1 -> x._2.toMap).toMap
+  }
+
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
-    new JavaMap[String, String](extractDynamicProperties(properties).asJava)
+    new JavaMap[String, String](extractDynamicProperties(properties))
+
+  @Nonnull def extractMultipleArgumentsAsJava(
+      args: Array[String]): JavaMap[String, JavaMap[String, String]] = {
+    val map =
+      extractMultipleArguments(args).map(c => c._1 -> new JavaMap[String, String](c._2))
+    new JavaMap[String, JavaMap[String, String]](map)
+  }
 
 }

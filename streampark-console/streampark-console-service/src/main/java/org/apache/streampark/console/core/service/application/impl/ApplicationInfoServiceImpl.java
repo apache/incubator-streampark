@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.Constant;
-import org.apache.streampark.common.conf.K8sFlinkConfig;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
@@ -46,7 +45,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
-import org.apache.streampark.console.core.watcher.FlinkK8sObserverStub;
+import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper;
@@ -84,7 +83,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
-import static org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper.Bridge.toTrackId;
 
 @Slf4j
 @Service
@@ -108,11 +106,11 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
   @Autowired private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
-  @Autowired private FlinkK8sObserverStub flinkK8sObserver;
-
   @Autowired private FlinkClusterService flinkClusterService;
 
   @Autowired private FlinkClusterWatcher flinkClusterWatcher;
+
+  @Autowired private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
 
   @Override
   public Map<String, Serializable> getDashboardDataMap(Long teamId) {
@@ -154,10 +152,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     // merge metrics from flink kubernetes cluster
-    FlinkMetricCV k8sMetric =
-        K8sFlinkConfig.isV2Enabled()
-            ? flinkK8sObserver.getAggClusterMetricCV(teamId)
-            : k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
+    FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
     if (k8sMetric != null) {
       totalJmMemory += k8sMetric.totalJmMemory();
       totalTmMemory += k8sMetric.totalTmMemory();
@@ -250,7 +245,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public boolean checkAlter(Application appParam) {
     Long appId = appParam.getId();
-    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
+    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()
+        && FlinkAppStateEnum.FINISHED != appParam.getStateEnum()) {
       return false;
     }
     long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
@@ -447,57 +443,34 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
   @Override
   public AppExistsStateEnum checkExists(Application appParam) {
 
-    if (!checkJobName(appParam.getJobName())) {
+    String jobName = appParam.getJobName();
+    Long appParamId = appParam.getId();
+
+    if (StringUtils.isBlank(jobName)
+        || !JOB_NAME_PATTERN.matcher(jobName.trim()).matches()
+        || !SINGLE_SPACE_PATTERN.matcher(jobName.trim()).matches()) {
       return AppExistsStateEnum.INVALID;
     }
 
-    boolean existsByJobName = this.existsByJobName(appParam.getJobName());
-
-    if (appParam.getId() != null) {
-      Application app = getById(appParam.getId());
-      if (app.getJobName().equals(appParam.getJobName())) {
-        return AppExistsStateEnum.NO;
-      }
-
-      if (existsByJobName) {
-        return AppExistsStateEnum.IN_DB;
-      }
-
-      // has stopped status
-      if (FlinkAppStateEnum.isEndState(app.getState())) {
-        // check whether jobName exists on yarn
-        if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
-            && YarnUtils.isContains(appParam.getJobName())) {
-          return AppExistsStateEnum.IN_YARN;
-        }
-        // check whether clusterId, namespace, jobId on kubernetes
-        if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
-          return AppExistsStateEnum.IN_KUBERNETES;
-        }
-      }
-    } else {
-      if (existsByJobName) {
-        return AppExistsStateEnum.IN_DB;
-      }
-
-      // check whether jobName exists on yarn
-      if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
-          && YarnUtils.isContains(appParam.getJobName())) {
-        return AppExistsStateEnum.IN_YARN;
-      }
-      // check whether clusterId, namespace, jobId on kubernetes
-      if (FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-          && k8SFlinkTrackMonitor.checkIsInRemoteCluster(toTrackId(appParam))) {
-        return AppExistsStateEnum.IN_KUBERNETES;
-      }
+    Application application =
+        baseMapper.selectOne(
+            new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+    if (application != null && !application.getId().equals(appParamId)) {
+      return AppExistsStateEnum.IN_DB;
     }
-    return AppExistsStateEnum.NO;
-  }
 
-  private boolean existsByJobName(String jobName) {
-    return baseMapper.exists(
-        new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+    if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
+        && YarnUtils.isContains(jobName)) {
+      return AppExistsStateEnum.IN_YARN;
+    }
+
+    if (appParam.isKubernetesModeJob()
+        && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
+            flinkK8sWatcherWrapper.toTrackId(appParam))) {
+      return AppExistsStateEnum.IN_KUBERNETES;
+    }
+
+    return AppExistsStateEnum.NO;
   }
 
   @Override
@@ -554,13 +527,5 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     } else {
       return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
     }
-  }
-
-  private Boolean checkJobName(String jobName) {
-    if (!StringUtils.isBlank(jobName.trim())) {
-      return JOB_NAME_PATTERN.matcher(jobName).matches()
-          && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
-    }
-    return false;
   }
 }

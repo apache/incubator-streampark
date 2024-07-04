@@ -24,7 +24,11 @@ insert into `t_team` values (100001, 'test', 'The test team', now(), now());
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, null, '0', 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test', 0, null);
+INSERT INTO `t_flink_app` (
+    `id`, `team_id`, `job_type`, `execution_mode`, `job_name`, `user_id`, `app_type`, `state`, `restart_size`,
+    `description`,`resolve_order`,`option_state`,`tracking`,`create_time`, `modify_time`,`release`, `build`,
+    `k8s_hadoop_integration`,`tags`
+) VALUES (100000, 100000, 2, 4, 'Flink SQL Demo', 100000, 1, '0', 0, 'Flink SQL Demo', 0, 0, 0, now(), now(), 1, 1, 0, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective

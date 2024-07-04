@@ -16,7 +16,6 @@
  */
 package org.apache.streampark.flink.core
 
-import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
@@ -46,9 +45,6 @@ abstract class FlinkTableTrait(val parameter: ParameterTool, private val tableEn
   }
 
   def sql(sql: String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
-
-  private[flink] def sqlWithCallBack(sql: String = null)(implicit
-      callback: Unit => String = null): Unit = FlinkSqlExecutor.executeSql(sql, parameter, this)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 

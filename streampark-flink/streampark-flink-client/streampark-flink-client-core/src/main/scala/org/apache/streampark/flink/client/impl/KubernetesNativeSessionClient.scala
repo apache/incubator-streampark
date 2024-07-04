@@ -24,28 +24,24 @@ import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
+import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.{KubernetesConfigOptions, KubernetesDeploymentTarget}
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientFactory}
 
+import java.io.File
+
 import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
 
-/**
- * Kubernetes native session mode submit.
- * @deprecated
- *   Please use [[KubernetesSessionClientV2]] instead.
- */
-@Deprecated
+/** Kubernetes native session mode submit. */
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {
 
   @throws[Exception]
@@ -54,73 +50,59 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): SubmitResponse = {
     // require parameters
     require(
-      StringUtils.isNotBlank(submitRequest.k8sSubmitParam.clusterId),
+      StringUtils.isNotBlank(submitRequest.clusterId),
       s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
     )
-    super.trySubmit(submitRequest, flinkConfig)(jobGraphSubmit, restApiSubmit)
+    super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
+      jobGraphSubmit,
+      restApiSubmit)
   }
 
   /** Submit flink session job via rest api. */
   @throws[Exception]
-  def restApiSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    Try {
-      // get jm rest url of flink session cluster
-      val clusterKey = ClusterKey(
-        FlinkK8sExecuteModeEnum.SESSION,
-        submitRequest.k8sSubmitParam.kubernetesNamespace,
-        submitRequest.k8sSubmitParam.clusterId)
-      val jmRestUrl = KubernetesRetriever
-        .retrieveFlinkRestUrl(clusterKey)
-        .getOrElse(throw new Exception(
+  def restApiSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration,
+      fatJar: File): SubmitResponse = {
+
+    // get jm rest url of flink session cluster
+    val clusterKey = ClusterKey(
+      FlinkK8sExecuteMode.SESSION,
+      submitRequest.kubernetesNamespace,
+      submitRequest.clusterId)
+    val jmRestUrl = KubernetesRetriever
+      .retrieveFlinkRestUrl(clusterKey)
+      .getOrElse(
+        throw new Exception(
           s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
-      // submit job via rest api
-      val jobId =
-        FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, submitRequest.userJarFile, flinkConfig)
-      SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
-    } match {
-      case Success(s) => s
-      case Failure(e) =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        throw e
-    }
+    // submit job via rest api
+    val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
+    SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
   }
 
   /** Submit flink session job with building JobGraph via ClusterClient api. */
   @throws[Exception]
-  def jobGraphSubmit(submitRequest: SubmitRequest, flinkConfig: Configuration): SubmitResponse = {
-    // retrieve k8s cluster and submit flink job on session mode
-    var clusterDescriptor: KubernetesClusterDescriptor = null
-    var packageProgram: PackagedProgram = null
-    var client: ClusterClient[String] = null
-
-    try {
-      clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
-      // build JobGraph
-      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
-      packageProgram = programJobGraph._1
-      val jobGraph = programJobGraph._2
-      // retrieve client and submit JobGraph
-      client = clusterDescriptor
-        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-        .getClusterClient
-      val submitResult = client.submitJob(jobGraph)
-      val jobId = submitResult.get().toString
-      val result =
-        SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
-      logInfo(
-        s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
-      result
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packageProgram)
-      }
-      Utils.close(clusterDescriptor, client)
-    }
+  def jobGraphSubmit(
+      submitRequest: SubmitRequest,
+      flinkConfig: Configuration,
+      jarFile: File): SubmitResponse = {
+    val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
+    // build JobGraph
+    val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+    val packageProgram = packageProgramJobGraph._1
+    val jobGraph = packageProgramJobGraph._2
+    // retrieve client and submit JobGraph
+    val client = clusterDescriptor
+      .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+      .getClusterClient
+    val submitResult = client.submitJob(jobGraph)
+    val jobId = submitResult.get().toString
+    val result =
+      SubmitResponse(client.getClusterId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    logInfo(
+      s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId: $jobId")
+    closeSubmit(submitRequest, packageProgram, client, client)
+    result
   }
 
   override def doCancel(
@@ -132,6 +114,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     super.doCancel(cancelRequest, flinkConfig)
   }
 
+  @throws[Exception]
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     logInfo(
       s"""
@@ -140,64 +123,36 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
          |    execMode         : ${deployRequest.executionMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
-         |    namespace        : ${deployRequest.k8sDeployParam.kubernetesNamespace}
-         |    exposedType      : ${deployRequest.k8sDeployParam.flinkRestExposedType}
-         |    serviceAccount   : ${deployRequest.k8sDeployParam.serviceAccount}
-         |    flinkImage       : ${deployRequest.k8sDeployParam.flinkImage}
+         |    namespace        : ${deployRequest.k8sParam.kubernetesNamespace}
+         |    exposedType      : ${deployRequest.k8sParam.flinkRestExposedType}
+         |    serviceAccount   : ${deployRequest.k8sParam.serviceAccount}
+         |    flinkImage       : ${deployRequest.k8sParam.flinkImage}
          |    properties       : ${deployRequest.properties.mkString(",")}
          |--------------------------------------------------------------------------------------------------------
          |""".stripMargin)
+
+    val flinkConfig = getFlinkK8sConfig(deployRequest)
+    val kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
+
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
-    var kubeClient: FlinkKubeClient = null
-    try {
-      val flinkConfig =
-        extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
-      flinkConfig
-        .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
-        .safeSet(
-          KubernetesConfigOptions.NAMESPACE,
-          deployRequest.k8sDeployParam.kubernetesNamespace)
-        .safeSet(
-          KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
-          deployRequest.k8sDeployParam.serviceAccount)
-        .safeSet(
-          KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-          ServiceExposedType.valueOf(deployRequest.k8sDeployParam.flinkRestExposedType.getName))
-        .safeSet(KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId)
-        .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.k8sDeployParam.flinkImage)
-        .safeSet(
-          KubernetesConfigOptions.KUBE_CONFIG_FILE,
-          getDefaultKubernetesConf(deployRequest.k8sDeployParam.kubeConf))
-        .safeSet(
-          DeploymentOptionsInternal.CONF_DIR,
-          s"${deployRequest.flinkVersion.flinkHome}/conf")
 
+    try {
       val kubernetesClusterDescriptor = getK8sClusterDescriptorAndSpecification(flinkConfig)
       clusterDescriptor = kubernetesClusterDescriptor._1
-      kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
-      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
 
-      if (
-        deployRequest.clusterId != null && kubeClientWrapper
-          .getService(deployRequest.clusterId)
-          .isPresent
-      ) {
+      val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
+      val kubeService = kubeClientWrapper.getService(deployRequest.clusterId)
+
+      if (kubeService.isPresent) {
         client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
       } else {
         client =
           clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
       }
-      if (client.getWebInterfaceURL != null) {
-        DeployResponse(client.getWebInterfaceURL, client.getClusterId)
-      } else {
-        null
-      }
+      DeployResponse(address = client.getWebInterfaceURL, clusterId = client.getClusterId)
     } catch {
-      case e: Exception =>
-        logError(s"start flink session fail in ${deployRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
+      case e: Exception => DeployResponse(error = e)
     } finally {
       Utils.close(client, clusterDescriptor, kubeClient)
     }
@@ -206,32 +161,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     var kubeClient: FlinkKubeClient = null
     try {
-      val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
-      shutDownRequest.properties.foreach(
-        m =>
-          m._2 match {
-            case v if v != null => flinkConfig.setString(m._1, m._2.toString)
-            case _ =>
-          })
-      flinkConfig
-        .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
-        .safeSet(
-          KubernetesConfigOptions.NAMESPACE,
-          shutDownRequest.kubernetesDeployParam.kubernetesNamespace)
-        .safeSet(
-          KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
-          shutDownRequest.kubernetesDeployParam.serviceAccount)
-        .safeSet(
-          KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
-          ServiceExposedType.valueOf(
-            shutDownRequest.kubernetesDeployParam.flinkRestExposedType.getName))
-        .safeSet(KubernetesConfigOptions.CLUSTER_ID, shutDownRequest.clusterId)
-        .safeSet(
-          KubernetesConfigOptions.CONTAINER_IMAGE,
-          shutDownRequest.kubernetesDeployParam.flinkImage)
-        .safeSet(
-          KubernetesConfigOptions.KUBE_CONFIG_FILE,
-          getDefaultKubernetesConf(shutDownRequest.kubernetesDeployParam.kubeConf))
+      val flinkConfig = getFlinkK8sConfig(shutDownRequest)
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
       val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
 
@@ -262,4 +192,23 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig)
   }
+
+  private[this] def getFlinkK8sConfig[R <: DeployRequestTrait](deployRequest: R): Configuration = {
+    extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
+      .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.k8sParam.kubernetesNamespace)
+      .safeSet(
+        KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT,
+        deployRequest.k8sParam.serviceAccount)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, deployRequest.clusterId)
+      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, deployRequest.k8sParam.flinkImage)
+      .safeSet(
+        KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
+        ServiceExposedType.valueOf(deployRequest.k8sParam.flinkRestExposedType.getName))
+      .safeSet(
+        KubernetesConfigOptions.KUBE_CONFIG_FILE,
+        getDefaultKubernetesConf(deployRequest.k8sParam.kubeConf))
+      .safeSet(DeploymentOptionsInternal.CONF_DIR, s"${deployRequest.flinkVersion.flinkHome}/conf")
+  }
+
 }

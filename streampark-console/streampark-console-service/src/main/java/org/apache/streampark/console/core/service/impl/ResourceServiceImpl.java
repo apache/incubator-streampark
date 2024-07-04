@@ -208,6 +208,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
       }
     }
 
+    if (resource.getResourceType() == ResourceTypeEnum.FLINK_APP) {
+      findResource.setMainClass(resource.getMainClass());
+    }
     findResource.setDescription(resource.getDescription());
     baseMapper.updateById(findResource);
   }
@@ -391,10 +394,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
           } catch (Exception e) {
             log.error(
-                "Failed to set class name or factory identifier for connector resource. Class name: "
-                    + factoryClassName
-                    + ", Factory identifier: "
-                    + factory.factoryIdentifier(),
+                "Failed to set class name or factory identifier for connector resource. Class name: {}, Factory identifier: {}",
+                factoryClassName,
+                factory.factoryIdentifier(),
                 e);
           }
 
@@ -405,7 +407,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setRequiredOptions(requiredOptions);
           } catch (Exception e) {
-            log.error("Failed to set required options for connector resource. " + e);
+            log.error("Failed to set required options for connector resource.", e);
           }
 
           try {
@@ -415,14 +417,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
             connectorResource.setOptionalOptions(optionalOptions);
           } catch (Exception e) {
-            log.error("Fail to set optional options for connector resource. " + e);
+            log.error("Fail to set optional options for connector resource.", e);
           }
           return connectorResource;
         }
       }
       return null;
     } catch (Exception e) {
-      log.error("getConnectorResource failed. " + e);
+      log.error("getConnectorResource failed.", e);
     }
     return null;
   }
@@ -467,8 +469,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     ApiAlertException.throwIfNull(resource, "The resource does not exist.");
 
     ApiAlertException.throwIfTrue(
-        isDependByApplications(resource),
-        "Sorry, the resource is still in use, cannot be removed.");
+        isDependByApplications(resource), "The resource is still in use, cannot be removed.");
   }
 
   private boolean isDependByApplications(Resource resource) {

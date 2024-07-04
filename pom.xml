@@ -81,7 +81,6 @@
         <module>streampark-flink</module>
         <module>streampark-spark</module>
         <module>streampark-console</module>
-        <module>streampark-tests</module>
     </modules>
 
     <properties>
@@ -124,8 +123,6 @@
         <commons-lang3.version>3.8.1</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
-        <zio.version>2.0.15</zio.version>
-        <zio-logging.version>2.1.13</zio-logging.version>
         <pprint.version>0.8.1</pprint.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
@@ -139,7 +136,7 @@
         <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
         <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
-        <owasp-dependency-check-maven.version>8.2.1</owasp-dependency-check-maven.version>
+        <owasp-dependency-check-maven.version>9.2.0</owasp-dependency-check-maven.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
@@ -444,33 +441,6 @@
                 <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- ZIO -->
-            <dependency>
-                <groupId>dev.zio</groupId>
-                <artifactId>zio-logging_${scala.binary.version}</artifactId>
-                <version>${zio-logging.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>dev.zio</groupId>
-                <artifactId>zio-streams_${scala.binary.version}</artifactId>
-                <version>${zio.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>dev.zio</groupId>
-                <artifactId>zio-concurrent_${scala.binary.version}</artifactId>
-                <version>${zio.version}</version>
-            </dependency>
-
-            <!-- pprint -->
-            <dependency>
-                <groupId>com.lihaoyi</groupId>
-                <artifactId>pprint_${scala.binary.version}</artifactId>
-                <version>${pprint.version}</version>
-            </dependency>
-
         </dependencies>
 
     </dependencyManagement>
@@ -784,9 +754,10 @@
                     <version>${owasp-dependency-check-maven.version}</version>
                     <configuration>
                         <skip>${skipDependencyCheck}</skip>
-                        <format>ALL</format>
                         <skipProvidedScope>true</skipProvidedScope>
+                        <skipRuntimeScope>true</skipRuntimeScope>
                         <skipSystemScope>true</skipSystemScope>
+                        <failBuildOnCVSS>7</failBuildOnCVSS>
                     </configuration>
                     <executions>
                         <execution>

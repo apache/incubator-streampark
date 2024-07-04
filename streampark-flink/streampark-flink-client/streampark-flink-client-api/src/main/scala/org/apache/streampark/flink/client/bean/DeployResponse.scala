@@ -17,6 +17,4 @@
 
 package org.apache.streampark.flink.client.bean
 
-import javax.annotation.Nullable
-
-case class DeployResponse(@Nullable address: String = "", clusterId: String)
+case class DeployResponse(address: String = null, clusterId: String = null, error: Throwable = null)

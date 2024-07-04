@@ -27,7 +27,9 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
 import org.apache.hadoop.yarn.util.RMHAUtils
 import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.core5.util.Timeout
 
+import java.io.IOException
 import java.net.InetAddress
 import java.security.PrivilegedExceptionAction
 import java.util
@@ -243,42 +245,35 @@ object YarnUtils extends Logger {
    *   url
    * @return
    */
-  def restRequest(url: String): String = {
+  @throws[IOException]
+  def restRequest(url: String, timeout: Timeout): String = {
     if (url == null) return null
-
     url match {
       case u if u.matches("^http(|s)://.*") =>
-        Try(request(url)) match {
+        Try(request(url, timeout)) match {
           case Success(v) => v
           case Failure(e) =>
             if (hasYarnHttpKerberosAuth) {
-              logError(s"yarnUtils authRestRequest error, url: $u, detail: $e")
+              throw new IOException(s"yarnUtils authRestRequest error, url: $u, detail: $e")
             } else {
-              logError(s"yarnUtils restRequest error, url: $u, detail: $e")
+              throw new IOException(s"yarnUtils restRequest error, url: $u, detail: $e")
             }
-            null
         }
       case _ =>
-        Try(request(s"${getRMWebAppURL()}/$url")) match {
+        Try(request(s"${getRMWebAppURL()}/$url", timeout)) match {
           case Success(v) => v
           case Failure(_) =>
-            Utils.retry[String](5) {
-              request(s"${getRMWebAppURL(true)}/$url")
-            } match {
+            Utils.retry[String](5)(request(s"${getRMWebAppURL(true)}/$url", timeout)) match {
               case Success(v) => v
               case Failure(e) =>
-                logError(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
-                null
+                throw new IOException(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
             }
         }
     }
   }
 
-  private[this] def request(reqUrl: String): String = {
-    val config = RequestConfig
-      .custom()
-      .setConnectTimeout(5000, TimeUnit.MILLISECONDS)
-      .build()
+  private[this] def request(reqUrl: String, timeout: Timeout): String = {
+    val config = RequestConfig.custom.setConnectTimeout(timeout).build
     if (hasYarnHttpKerberosAuth) {
       HadoopUtils
         .getUgi()
@@ -290,9 +285,7 @@ object YarnUtils extends Logger {
     } else {
       val url =
         if (!hasYarnHttpSimpleAuth) reqUrl
-        else {
-          s"$reqUrl?user.name=${HadoopConfigUtils.hadoopUserName}"
-        }
+        else s"$reqUrl?user.name=${HadoopConfigUtils.hadoopUserName}"
       HttpClientUtils.httpGetRequest(url, config)
     }
   }

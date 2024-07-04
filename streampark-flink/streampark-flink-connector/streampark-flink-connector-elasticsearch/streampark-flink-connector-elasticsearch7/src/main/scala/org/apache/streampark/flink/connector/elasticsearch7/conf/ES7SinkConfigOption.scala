@@ -25,7 +25,7 @@ import org.apache.http.HttpHost
 import java.net.InetSocketAddress
 import java.util.{Map => JavaMap, Properties}
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 object ES7SinkConfigOption {
 
@@ -163,7 +163,7 @@ class ES7SinkConfigOption(prefixStr: String, properties: Properties) extends Ser
     defaultValue = true)
 
   def getInternalConfig(): JavaMap[String, String] = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)(alias = "").asScala.asJava
+    ConfigUtils.getConf(prop, prefix)(alias = "")
   }
 
 }

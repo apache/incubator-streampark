@@ -61,8 +61,8 @@ import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.SparkYarnApplicationBuildRequest;
 import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnApplicationBuildPipeline;
@@ -74,7 +74,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -86,8 +85,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,7 +138,7 @@ public class SparkAppBuildPipeServiceImpl
    * @return Whether the pipeline was successfully started
    */
   @Override
-  public boolean buildApplication(@NotNull Long appId, boolean forceBuild) {
+  public boolean buildApplication(@Nonnull Long appId, boolean forceBuild) {
     // check the build environment
     checkBuildEnv(appId, forceBuild);
 
@@ -180,7 +179,7 @@ public class SparkAppBuildPipeServiceImpl
     pipeline.registerWatcher(
         new PipeWatcher() {
           @Override
-          public void onStart(PipeSnapshot snapshot) {
+          public void onStart(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
@@ -258,14 +257,14 @@ public class SparkAppBuildPipeServiceImpl
           }
 
           @Override
-          public void onStepStateChange(PipeSnapshot snapshot) {
+          public void onStepStateChange(PipelineSnapshot snapshot) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
             saveEntity(buildPipeline);
           }
 
           @Override
-          public void onFinish(PipeSnapshot snapshot, BuildResult result) {
+          public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
             AppBuildPipeline buildPipeline =
                 AppBuildPipeline.fromPipeSnapshot(snapshot)
                     .setAppId(app.getId())
@@ -437,14 +436,14 @@ public class SparkAppBuildPipeServiceImpl
   @Override
   public Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds) {
     if (CollectionUtils.isEmpty(appIds)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
         new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
 
     List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
     if (CollectionUtils.isEmpty(appBuildPipelines)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     return appBuildPipelines.stream()
         .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));

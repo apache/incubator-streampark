@@ -20,18 +20,7 @@ package org.apache.streampark.common.conf
 /** Flink kubernetes Configuration for v1 version */
 object K8sFlinkConfig {
 
-  lazy val isV2Enabled: Boolean = InternalConfigHolder.get(ENABLE_V2)
-
-  val ENABLE_V2: InternalOption = InternalOption(
-    key = "streampark.flink-k8s.enable-v2",
-    defaultValue = false,
-    classType = classOf[java.lang.Boolean],
-    description =
-      "Whether to enable the v2 version(base on flink-kubernetes-operator) of flink kubernetes operation"
-  )
-
   //  ======= deprecated =======
-
   @Deprecated
   val jobStatusTrackTaskTimeoutSec: InternalOption = InternalOption(
     key = "streampark.flink-k8s.tracking.polling-task-timeout-sec.job-status",

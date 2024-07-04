@@ -577,10 +577,6 @@ The text of each license is the standard Apache 2.0 license. https://www.apache.
     https://mvnrepository.com/artifact/org.pac4j/pac4j-oauth/4.5.7 Apache-2.0
     https://mvnrepository.com/artifact/org.pac4j/pac4j-oidc/4.5.7 Apache-2.0
     https://mvnrepository.com/artifact/io.fabric8/kubernetes-client/6.8.0 Apache-2.0
-    https://mvnrepository.com/artifact/dev.zio/zio_2.12/2.0.15 Apache-2.0
-    https://mvnrepository.com/artifact/dev.zio/zio-streams_2.12/2.0.15 Apache-2.0
-    https://mvnrepository.com/artifact/dev.zio/zio-concurrent_2.12/2.0.15 Apache-2.0
-    https://mvnrepository.com/artifact/dev.zio/zio-http_2.12/3.0.0-RC2 Apache-2.0
     https://maven.apache.org/wrapper Apache-2.0
     mvnw files from https://github.com/apache/maven-wrapper Apache 2.0
     streampark-console/streampark-console-service/src/main/assembly/bin/setclasspath.sh from https://github.com/apache/tomcat
@@ -727,9 +723,6 @@ The text of each license is also included in licenses/LICENSE-[project].txt.
     https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.7.30 MIT
     https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.24 MIT
     https://mvnrepository.com/artifact/com.auth0/java-jwt/4.0.0 MIT
-    https://mvnrepository.com/artifact/com.lihaoyi/pprint_2.12/0.8.1 MIT
-    https://mvnrepository.com/artifact/com.lihaoyi/os-lib_2.12/0.8.1 MIT
-    https://mvnrepository.com/artifact/com.lihaoyi/upickle_2.12/0.8.1 MIT
     https://mvnrepository.com/artifact/com.github.scribejava/scribejava-apis/7.1.1 MIT
     https://mvnrepository.com/artifact/com.github.scribejava/scribejava-core/7.1.1 MIT
 

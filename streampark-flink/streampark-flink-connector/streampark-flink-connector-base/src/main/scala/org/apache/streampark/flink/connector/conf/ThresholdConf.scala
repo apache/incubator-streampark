@@ -22,7 +22,7 @@ import org.apache.streampark.flink.connector.conf.FailoverStorageType.{Console, 
 
 import java.util.Properties
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.collection.convert.ImplicitConversions._
 
 case class ThresholdConf(prefixStr: String, parameters: Properties) {
@@ -41,8 +41,8 @@ case class ThresholdConf(prefixStr: String, parameters: Properties) {
   def getFailoverConfig: Properties = {
     storageType match {
       case Console | NONE => null
-      case Kafka => ConfigUtils.getConf(parameters.toMap.asJava, "failover.kafka.")
-      case MySQL => ConfigUtils.getConf(parameters.toMap.asJava, "failover.mysql.")
+      case Kafka => ConfigUtils.getConf(parameters.toMap, "failover.kafka.")
+      case MySQL => ConfigUtils.getConf(parameters.toMap, "failover.mysql.")
       case _ =>
         throw new IllegalArgumentException(
           s"[StreamPark] usage error! failover.storage must not be null! ")

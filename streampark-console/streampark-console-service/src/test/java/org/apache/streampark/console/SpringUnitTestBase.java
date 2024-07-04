@@ -83,7 +83,6 @@ public abstract class SpringUnitTestBase {
   @BeforeAll
   public static void init(@TempDir File tempPath) throws IOException {
     // Skip the EnvInitializer#run method by flag in System.properties.
-    // See https://github.com/apache/incubator-streampark/issues/2014
     LOG.info("Start mock EnvInitializer init.");
     String mockedHome = tempPath.getAbsolutePath();
     Path localWorkspace =

@@ -25,7 +25,7 @@ import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 
 import java.util.Properties
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 object ClickHouseSinkConfigOption {
 
@@ -124,7 +124,7 @@ class ClickHouseSinkConfigOption(prefixStr: String, properties: Properties) exte
     })
 
   def getInternalConfig(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)("")
+    ConfigUtils.getConf(prop, prefix)("")
   }
 
 }

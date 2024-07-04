@@ -288,16 +288,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public List<String> listJars(Project project) {
-    List<String> jarList = new ArrayList<>(0);
     ApiAlertException.throwIfNull(
         project.getModule(), "Project module can't be null, please check.");
-    File apps = new File(project.getDistHome(), project.getModule());
-    for (File file : Objects.requireNonNull(apps.listFiles())) {
-      if (file.getName().endsWith(Constant.JAR_SUFFIX)) {
-        jarList.add(file.getName());
-      }
-    }
-    return jarList;
+    File projectModuleDir = new File(project.getDistHome(), project.getModule());
+    return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
+        .map(File::getName)
+        .filter(name -> name.endsWith(Constant.JAR_SUFFIX))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -324,11 +321,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return false;
       }
     }
-    LambdaQueryWrapper<Project> queryWrapper =
+    return this.baseMapper.exists(
         new LambdaQueryWrapper<Project>()
             .eq(Project::getName, project.getName())
-            .eq(Project::getTeamId, project.getTeamId());
-    return this.baseMapper.selectCount(queryWrapper) > 0;
+            .eq(Project::getTeamId, project.getTeamId()));
   }
 
   @Override

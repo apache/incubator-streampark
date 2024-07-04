@@ -51,7 +51,7 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
    * @param flinkCluster FlinkCluster to be create
    * @return Whether the creation is successful
    */
-  Boolean create(FlinkCluster flinkCluster);
+  Boolean create(FlinkCluster flinkCluster, Long userId);
 
   /**
    * Remove flink cluster

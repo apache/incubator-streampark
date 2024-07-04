@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.language.implicitConversions
@@ -24,6 +25,10 @@ import scala.language.implicitConversions
 trait FlinkWatcher extends AutoCloseable {
 
   private[this] val started: AtomicBoolean = new AtomicBoolean(false)
+
+  private val CPU_NUM = Math.max(4, Runtime.getRuntime.availableProcessors * 2)
+
+  val watchExecutor = new ScheduledThreadPoolExecutor(CPU_NUM)
 
   /**
    * Start watcher process. This method should be a thread-safe implementation of light locking and
@@ -50,6 +55,7 @@ trait FlinkWatcher extends AutoCloseable {
       this.doStop()
     }
     doClose()
+    watchExecutor.shutdownNow()
   }
 
   /**

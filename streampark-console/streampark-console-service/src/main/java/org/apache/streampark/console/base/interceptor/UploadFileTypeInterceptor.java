@@ -20,12 +20,7 @@ package org.apache.streampark.console.base.interceptor;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.ParseContext;
+import org.apache.tika.Tika;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.xml.sax.helpers.DefaultHandler;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,7 +44,10 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
   private static final Logger logger = LoggerFactory.getLogger(UploadFileTypeInterceptor.class);
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+  public boolean preHandle(
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler)
       throws Exception {
     if (request instanceof MultipartHttpServletRequest) {
       MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -58,39 +56,21 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
         MultipartFile multipartFile = multipartRequest.getFile(file);
         ApiAlertException.throwIfNull(
             multipartFile, "File to upload can't be null. Upload file failed.");
-        boolean isJarOrPyFile =
-            FileUtils.isJarFileType(multipartFile.getInputStream())
-                || isPythonFileType(multipartFile.getContentType(), multipartFile.getInputStream());
+        InputStream input = multipartFile.getInputStream();
+        boolean isJarOrPyFile = FileUtils.isJarFileType(input) || isPythonFile(input);
         ApiAlertException.throwIfFalse(
             isJarOrPyFile,
-            "Illegal file type, Only support standard jar files. Upload file failed.");
+            "Illegal file type, Only support standard jar or python files. Upload file failed.");
       }
     }
     return true;
   }
 
-  private boolean isPythonFileType(String contentType, InputStream input) {
-    if (StringUtils.isBlank(contentType) || input == null) {
-      throw new RuntimeException("The contentType or inputStream can not be null");
-    }
-    try {
-      Metadata metadata = new Metadata();
-      AutoDetectParser parser = new AutoDetectParser();
-      parser.parse(input, new DefaultHandler(), metadata, new ParseContext());
-      String mimeType = metadata.get(HttpHeaders.CONTENT_TYPE);
-      return contentType.contains("text/x-python")
-          && MediaType.TEXT_PLAIN.toString().equals(mimeType);
-    } catch (Exception e) {
-      logger.warn("MimeType parse failed", e);
-      return false;
-    }
-  }
-
   @Override
   public void postHandle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      Object handler,
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler,
       ModelAndView modelAndView)
       throws Exception {
     HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
@@ -98,8 +78,22 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
   @Override
   public void afterCompletion(
-      HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+      @Nonnull HttpServletRequest request,
+      @Nonnull HttpServletResponse response,
+      @Nonnull Object handler,
+      Exception ex)
       throws Exception {
     HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+  }
+
+  private boolean isPythonFile(InputStream input) {
+    try {
+      Tika tika = new Tika();
+      String mimeType = tika.detect(input);
+      return mimeType.equals("text/x-python");
+    } catch (Exception e) {
+      logger.warn("check upload file type failed.", e);
+      return false;
+    }
   }
 }

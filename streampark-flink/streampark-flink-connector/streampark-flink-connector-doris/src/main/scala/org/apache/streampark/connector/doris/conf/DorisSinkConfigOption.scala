@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.ConfigUtils
 
 import java.util.Properties
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 object DorisSinkConfigOption {
   val DORIS_SINK_PREFIX = "doris.sink"
@@ -139,10 +139,10 @@ class DorisSinkConfigOption(prefixStr: String, properties: Properties) extends S
     classType = classOf[String])
 
   def getInternalConfig(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)("")
+    ConfigUtils.getConf(prop, prefix)("")
   }
   def getInternalProperties(): Properties = {
-    ConfigUtils.getConf(prop.asScala.asJava, prefix)(".properties")
+    ConfigUtils.getConf(prop, prefix)(".properties")
   }
 
 }

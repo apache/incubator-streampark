@@ -29,7 +29,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
 public final class MybatisPager<T> {
 
   public static <T> Page<T> getPage(RestRequest request) {

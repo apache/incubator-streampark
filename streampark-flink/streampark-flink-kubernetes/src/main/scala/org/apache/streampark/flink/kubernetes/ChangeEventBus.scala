@@ -17,18 +17,24 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.streampark.common.util.ThreadUtils
+
 import com.google.common.eventbus.{AsyncEventBus, EventBus}
 
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 class ChangeEventBus {
 
+  private val CPU_NUM = Math.max(4, Runtime.getRuntime.availableProcessors * 2)
+
   private val execPool = new ThreadPoolExecutor(
-    Runtime.getRuntime.availableProcessors * 5,
-    Runtime.getRuntime.availableProcessors * 10,
+    CPU_NUM,
+    CPU_NUM * 5,
     60L,
     TimeUnit.SECONDS,
-    new LinkedBlockingQueue[Runnable](1024))
+    new LinkedBlockingQueue[Runnable],
+    ThreadUtils.threadFactory("streampark-k8s-watching-thread")
+  )
 
   private[kubernetes] val asyncEventBus =
     new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool)

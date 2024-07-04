@@ -37,8 +37,6 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
   List<Application> selectAppsByTeamId(@Param("teamId") Long teamId);
 
-  List<Application> selectProbeApps();
-
   boolean mapping(@Param("app") Application appParam);
 
   List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);

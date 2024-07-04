@@ -38,8 +38,6 @@ public interface SparkApplicationMapper extends BaseMapper<SparkApplication> {
 
   void persistMetrics(@Param("app") SparkApplication application);
 
-  List<SparkApplication> selectProbeApps();
-
   boolean mapping(@Param("app") SparkApplication appParam);
 
   List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);

@@ -20,13 +20,7 @@ on:
   push:
     branches:
       - dev
-    paths:
-      - '.github/workflows/frontend.yml'
-      - 'streampark-console/streampark-console-webapp/**'
   pull_request:
-    paths:
-      - '.github/workflows/frontend.yml'
-      - 'streampark-console/streampark-console-webapp/**'
 
 defaults:
   run:
@@ -37,15 +31,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  paths-filter:
+    name: Frontend-Path-Filter
+    runs-on: ubuntu-latest
+    outputs:
+      not-ignore: ${{ steps.filter.outputs.not-ignore }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            not-ignore:
+              - '!**/*.md'
   build:
     name: Build
     runs-on: ${{ matrix.os }}
+    if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
+    needs: paths-filter
     timeout-minutes: 20
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Set up Node.js
@@ -58,3 +67,21 @@ jobs:
           pnpm install
           pnpm run lint:lint-staged
           pnpm run build
+  result:
+    name: Frontend - Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ paths-filter, build, build ]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Status
+        run: |
+          if [[ ${{ needs.paths-filter.outputs.not-ignore }} == 'false' && ${{ github.event_name }} == 'pull_request' ]]; then
+            echo "Skip Frontend!"
+            exit 0
+          fi
+          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
+            echo "Frontend Build Failed!"
+            exit -1
+          fi

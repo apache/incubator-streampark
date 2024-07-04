@@ -24,7 +24,6 @@ import org.apache.streampark.flink.packer.pipeline._
 
 import java.io.File
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for flink standalone session mode */
@@ -65,7 +64,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
         execStep(3) {
           request.developmentMode match {
             case FlinkDevelopmentMode.PYFLINK =>
-              val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts.asJava)
+              val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
               mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
             case _ => List[String]()
           }

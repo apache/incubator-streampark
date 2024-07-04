@@ -17,11 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.Logger
+import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.flink.kubernetes.model._
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 
+import java.util.Objects
 import java.util.concurrent.TimeUnit
 
 import scala.collection.convert.ImplicitConversions._
@@ -80,10 +81,11 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   def collectAccGroupMetric(groupId: String): FlinkMetricCV = {
     // get cluster metrics that in tracking
     val empty = FlinkMetricCV.empty(groupId)
-    getActiveWatchingIds() match {
+    getActiveWatchingIds().filter(_.groupId == groupId) match {
       case k if k.isEmpty => empty
       case k =>
-        flinkMetrics.getAll(for (elem <- k) yield ClusterKey.of(elem)) match {
+        flinkMetrics.getAll(
+          for (elem <- k if elem.groupId == groupId) yield ClusterKey.of(elem)) match {
           case m if m.isEmpty => empty
           case m => m.values.fold(empty)((x, y) => x + y)
         }
@@ -92,7 +94,9 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
 
   /** get flink job-manager rest url from cache which will auto refresh when it it empty. */
   def getClusterRestUrl(clusterKey: ClusterKey): Option[String] = {
-    Option(endpoints.get(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
+    Option(endpoints.get(clusterKey))
+      .filter(_.nonEmpty)
+      .orElse(refreshClusterRestUrl(clusterKey))
   }
 
   /** refresh flink job-manager rest url from remote flink cluster, and cache it. */
@@ -107,9 +111,19 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
 }
 
 //----cache----
-case class CacheKey(key: java.lang.Long) extends Serializable
+case class CacheKey(key: java.lang.Long) extends Serializable {
+  override def hashCode(): Int = Utils.hashCode(key)
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: CacheKey => Objects.equals(key, that.key)
+      case _ => false
+    }
+  }
+}
 
 class TrackIdCache {
+
   private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
@@ -153,7 +167,9 @@ class JobStatusCache {
   def getAsMap(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] =
     cache.getAllPresent(trackIds.map(t => t.appId)).toMap
 
-  def get(k: TrackId): JobStatusCV = cache.getIfPresent(CacheKey(k.appId))
+  def get(k: TrackId): JobStatusCV = {
+    cache.getIfPresent(CacheKey(k.appId))
+  }
 
   def invalidate(k: TrackId): Unit = cache.invalidate(CacheKey(k.appId))
 

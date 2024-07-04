@@ -23,7 +23,6 @@ import java.util.*;
 
 
 public class ParameterTool  {
-    private static final long serialVersionUID = 15345346345L;
 
     protected static final String NO_VALUE_KEY = "__NO_VALUE_KEY";
 

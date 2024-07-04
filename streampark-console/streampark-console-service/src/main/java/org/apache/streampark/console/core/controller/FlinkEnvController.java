@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -53,12 +52,8 @@ public class FlinkEnvController {
   }
 
   @PostMapping("create")
-  public RestResponse create(FlinkEnv version) {
-    try {
-      flinkEnvService.create(version);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
+  public RestResponse create(FlinkEnv version) throws Exception {
+    flinkEnvService.create(version);
     return RestResponse.success(true);
   }
 
@@ -76,12 +71,8 @@ public class FlinkEnvController {
   }
 
   @PostMapping("update")
-  public RestResponse update(FlinkEnv version) throws Exception {
-    try {
-      flinkEnvService.update(version);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
+  public RestResponse update(FlinkEnv version) {
+    flinkEnvService.update(version);
     return RestResponse.success(true);
   }
 

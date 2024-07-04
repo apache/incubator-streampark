@@ -34,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -109,7 +109,7 @@ public class ApplicationConfig {
                   },
                   Map.Entry::getValue));
     }
-    return Collections.emptyMap();
+    return new HashMap<>();
   }
 
   @Nullable
@@ -126,7 +126,7 @@ public class ApplicationConfig {
       case HOCON:
         return PropertiesUtils.fromHoconTextAsJava(DeflaterUtils.unzipString(this.content));
       default:
-        return Collections.emptyMap();
+        return new HashMap<>();
     }
   }
 }

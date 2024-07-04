@@ -127,6 +127,9 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     val dockerConf = request.dockerConfig
     val baseImageTag = request.flinkBaseImage.trim
     val pushImageTag = {
+      if (request.k8sNamespace.isEmpty || request.clusterId.isEmpty) {
+        throw new IllegalArgumentException("k8sNamespace or clusterId cannot be empty")
+      }
       val expectedImageTag = s"streampark-flinkjob-${request.k8sNamespace}-${request.clusterId}"
       compileTag(expectedImageTag, dockerConf.registerAddress, dockerConf.imageNamespace)
     }

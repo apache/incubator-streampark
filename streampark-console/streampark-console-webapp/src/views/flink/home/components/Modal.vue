@@ -92,7 +92,15 @@
   /* form submit */
   async function handleSubmit() {
     changeOkLoading(true);
-    const formValue = await validate();
+    let formValue;
+    try {
+      formValue = await validate();
+    } catch (error) {
+      console.warn('validate error:', error);
+      return;
+    } finally {
+      changeOkLoading(false);
+    }
     // Detection environment
     const { data: resp } = await fetchCheckEnv({
       id: versionId.value,

@@ -39,7 +39,13 @@ import { handleConfTemplate } from '/@/api/flink/config';
 import { decodeByBase64 } from '/@/utils/cipher';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { SelectValue } from 'ant-design-vue/lib/select';
-import { CandidateTypeEnum, FailoverStrategyEnum, RestoreModeEnum, ClusterStateEnum } from '/@/enums/flinkEnum';
+import {
+  CandidateTypeEnum,
+  FailoverStrategyEnum,
+  RestoreModeEnum,
+  ClusterStateEnum,
+  ExecModeEnum,
+} from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
@@ -291,6 +297,45 @@ export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackPar
         );
       })}
     </Select>
+  );
+};
+
+export const renderJobName = ({ model, field }: RenderCallbackParams) => {
+  return (
+    <div>
+      <Input
+        name="jobName"
+        placeholder={t('flink.app.addAppTips.appNamePlaceholder')}
+        value={model[field]}
+        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
+      />
+      <p class="conf-desc mt-10px">
+        <span class="note-info">
+          <Tag color="#2db7f5" class="tag-note">
+            {t('flink.app.noteInfo.note')}
+          </Tag>
+          {model.executionMode == ExecModeEnum.KUBERNETES_APPLICATION && (
+            <span>
+              {t('flink.app.addAppTips.appNameK8sClusterIdRole')}
+              <div>
+                <Tag color="orange"> 1.</Tag>
+                {t('flink.app.addAppTips.appNameK8sClusterIdRoleLength')}
+              </div>
+              <div>
+                <Tag color="orange"> 2.</Tag>
+                {t('flink.app.addAppTips.appNameK8sClusterIdRoleRegexp')}
+              </div>
+            </span>
+          )}
+          {model.executionMode != ExecModeEnum.KUBERNETES_APPLICATION && (
+            <span>
+              <span>{t('flink.app.addAppTips.appNameRole')}</span>
+              <span>{t('flink.app.addAppTips.appNameRoleContent')}</span>
+            </span>
+          )}
+        </span>
+      </p>
+    </div>
   );
 };
 

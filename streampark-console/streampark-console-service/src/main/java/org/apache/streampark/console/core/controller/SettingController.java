@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -110,12 +111,8 @@ public class SettingController {
   }
 
   @PostMapping("check/hadoop")
-  public RestResponse checkHadoop() {
-    try {
-      HadoopUtils.hdfs().getStatus();
-      return RestResponse.success(true);
-    } catch (Exception e) {
-      return RestResponse.success(false).message(e.getMessage());
-    }
+  public RestResponse checkHadoop() throws IOException {
+    HadoopUtils.hdfs().getStatus();
+    return RestResponse.success(true);
   }
 }

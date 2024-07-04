@@ -29,6 +29,7 @@ import {
   renderTotalMemory,
   renderYarnQueue,
   renderFlinkCluster,
+  renderJobName,
 } from './useFlinkRender';
 
 import { fetchCheckName } from '/@/api/flink/app';
@@ -51,7 +52,7 @@ import { fetchFlinkEnv, fetchListFlinkEnv } from '/@/api/flink/flinkEnv';
 import { FlinkEnv } from '/@/api/flink/flinkEnv.type';
 import { AlertSetting } from '/@/api/setting/types/alert.type';
 import { FlinkCluster } from '/@/api/flink/flinkCluster.type';
-import { AppTypeEnum, ClusterStateEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
+import { AppTypeEnum, ExecModeEnum, JobTypeEnum } from '/@/enums/flinkEnum';
 import { isK8sExecMode } from '../utils';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCheckHadoop } from '/@/api/setting';
@@ -63,6 +64,7 @@ export interface HistoryRecord {
   k8sSessionClusterId: Array<string>;
   flinkImage: Array<string>;
 }
+
 export const useCreateAndEditSchema = (
   dependencyRef: Ref | null,
   edit?: { appId: string; mode: 'streampark' | 'flink' },
@@ -278,25 +280,32 @@ export const useCreateAndEditSchema = (
   });
 
   /* Detect job name field */
-  async function getJobNameCheck(_rule: RuleObject, value: StoreValue) {
+  async function getJobNameCheck(_rule: RuleObject, value: StoreValue, model: Recordable) {
     if (value === null || value === undefined || value === '') {
       return Promise.reject(t('flink.app.addAppTips.appNameIsRequiredMessage'));
-    } else {
-      const params = { jobName: value };
-      if (edit?.appId) Object.assign(params, { id: edit.appId });
-      const res = await fetchCheckName(params);
-      switch (parseInt(res)) {
-        case 0:
-          return Promise.resolve();
-        case 1:
-          return Promise.reject(t('flink.app.addAppTips.appNameNotUniqueMessage'));
-        case 2:
-          return Promise.reject(t('flink.app.addAppTips.appNameExistsInYarnMessage'));
-        case 3:
-          return Promise.reject(t('flink.app.addAppTips.appNameExistsInK8sMessage'));
-        default:
-          return Promise.reject(t('flink.app.addAppTips.appNameNotValid'));
+    }
+    if (model.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
+      const regexp = /^(?=.{1,45}$)[a-z]([-a-z0-9]*[a-z0-9])$/;
+      if (!regexp.test(value)) {
+        return Promise.reject(t('flink.app.addAppTips.appNameValid'));
       }
+    }
+    const params = { jobName: value };
+    if (edit?.appId) {
+      Object.assign(params, { id: edit.appId });
+    }
+    const res = await fetchCheckName(params);
+    switch (parseInt(res)) {
+      case 0:
+        return Promise.resolve();
+      case 1:
+        return Promise.reject(t('flink.app.addAppTips.appNameNotUniqueMessage'));
+      case 2:
+        return Promise.reject(t('flink.app.addAppTips.appNameExistsInYarnMessage'));
+      case 3:
+        return Promise.reject(t('flink.app.addAppTips.appNameExistsInK8sMessage'));
+      default:
+        return Promise.reject(t('flink.app.addAppTips.appNameValid'));
     }
   }
 
@@ -312,8 +321,16 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.appName'),
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.appNamePlaceholder') },
-        dynamicRules: () => {
-          return [{ required: true, trigger: 'blur', validator: getJobNameCheck }];
+        render: (param) => renderJobName(param),
+        dynamicRules: ({ model }) => {
+          return [
+            {
+              required: true,
+              trigger: 'blur',
+              validator: (rule: RuleObject, value: StoreValue) =>
+                getJobNameCheck(rule, value, model),
+            },
+          ];
         },
       },
       {

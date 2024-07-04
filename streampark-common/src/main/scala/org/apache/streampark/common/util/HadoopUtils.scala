@@ -39,7 +39,7 @@ import java.util
 import java.util.{Timer, TimerTask}
 import java.util.concurrent._
 
-import scala.collection.JavaConversions._
+import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object HadoopUtils extends Logger {

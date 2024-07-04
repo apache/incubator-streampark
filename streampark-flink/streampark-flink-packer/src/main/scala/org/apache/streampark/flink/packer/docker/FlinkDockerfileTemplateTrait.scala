@@ -47,7 +47,7 @@ trait FlinkDockerfileTemplateTrait {
   def innerMainJarPath: String = s"local:///opt/flink/usrlib/$mainJarName"
 
   /** output dockerfile name */
-  val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
+  protected val DEFAULT_DOCKER_FILE_NAME = "Dockerfile"
   protected val FLINK_LIB_PATH = "lib"
   protected val FLINK_HOME: String = "$FLINK_HOME"
 

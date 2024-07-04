@@ -17,14 +17,14 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.commons.collections.{CollectionUtils, MapUtils}
+import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
 
 import java.util
 import java.util.{List => JList, Map => JMap}
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 import scala.language.postfixOps
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
@@ -51,7 +51,7 @@ object PodTemplateParser {
    *   complemented pod template
    */
   def completeInitPodTemplate(podTemplateContent: String): String = {
-    if (StringUtils.isBlank(podTemplateContent)) {
+    if (podTemplateContent == null || podTemplateContent.trim.isEmpty) {
       return POD_TEMPLATE_INIT_CONTENT
     }
     val yaml = new Yaml
@@ -70,9 +70,10 @@ object PodTemplateParser {
           }))
     }
 
-    val enableSpecState = root.containsKey("spec") && Try(
-      !root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)
-    if (enableSpecState) {
+    if (
+      root.containsKey("spec")
+      && Try(!root.get("spec").asInstanceOf[JMap[String, Any]].isEmpty).getOrElse(false)
+    ) {
       res.put("spec", root.get("spec"))
     }
     yaml.dumpAsMap(res)
@@ -90,7 +91,7 @@ object PodTemplateParser {
    *   pod template content
    */
   def completeHostAliasSpec(hosts: JMap[String, String], podTemplateContent: String): String = {
-    if (MapUtils.isEmpty(hosts)) return podTemplateContent
+    if (hosts.isEmpty) return podTemplateContent
     try {
       val content = completeInitPodTemplate(podTemplateContent)
       // convert hosts map to host alias
@@ -118,7 +119,7 @@ object PodTemplateParser {
   private[this] def covertHostsMapToHostAliasNode(
       hosts: JMap[String, String]): util.ArrayList[util.LinkedHashMap[String, Any]] =
     new util.ArrayList(
-      hosts.asScala
+      hosts
         .map(e => e._1.trim -> e._2.trim)
         .groupBy(_._2)
         .mapValues(_.keys)
@@ -127,10 +128,10 @@ object PodTemplateParser {
           e => {
             val map = new util.LinkedHashMap[String, Any]()
             map.put("ip", e._1)
-            map.put("hostnames", new util.ArrayList(e._2.toList.asJava))
+            map.put("hostnames", new util.ArrayList(e._2.toList))
             map
           })
-        .asJava)
+    )
 
   /**
    * Extract host-ip map from pod template. When parser pod template error, it would return empty
@@ -143,7 +144,7 @@ object PodTemplateParser {
    */
   def extractHostAliasMap(podTemplateContent: String): JMap[String, String] = {
     val hosts = new util.LinkedHashMap[String, String](0)
-    if (StringUtils.isBlank(podTemplateContent)) {
+    if (podTemplateContent == null || podTemplateContent.isEmpty) {
       return hosts
     }
     try {
@@ -160,13 +161,13 @@ object PodTemplateParser {
       if (CollectionUtils.isEmpty(hostAliases)) {
         return hosts
       }
-      for (hostAlias <- hostAliases.asScala) {
+      for (hostAlias <- hostAliases) {
         breakable {
           if (!hostAlias.containsKey("ip") && !hostAlias.containsKey("hostnames")) break
           val ip = hostAlias.get("ip").asInstanceOf[String]
           if (StringUtils.isBlank(ip)) break
           val hostnames = hostAlias.get("hostnames").asInstanceOf[JList[String]]
-          hostnames.asScala
+          hostnames
             .filter(StringUtils.isNotBlank(_))
             .foreach(hosts.put(_, ip))
         }

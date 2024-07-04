@@ -24,7 +24,7 @@ import org.apache.streampark.flink.client.bean._
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
-import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
+import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
@@ -36,7 +36,6 @@ import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions._
 
 /** Submit Job to YARN Session Cluster */
@@ -47,6 +46,7 @@ object YarnSessionClient extends YarnClientTrait {
    * @param flinkConfig
    */
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
+    super.setConfig(submitRequest, flinkConfig)
     flinkConfig
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     logInfo(s"""
@@ -96,41 +96,28 @@ object YarnSessionClient extends YarnClientTrait {
                |""".stripMargin)
   }
 
+  @throws[Exception]
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    var clusterDescriptor: YarnClusterDescriptor = null
-    var packageProgram: PackagedProgram = null
-    var client: ClusterClient[ApplicationId] = null
-    try {
-      val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
-      clusterDescriptor = yarnClusterDescriptor._2
-      val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-      val programJobGraph = super.getJobGraph(submitRequest, flinkConfig)
-      packageProgram = programJobGraph._1
-      val jobGraph = programJobGraph._2
+    val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
+    val clusterDescriptor = yarnClusterDescriptor._2
+    val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
+    val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+    val packageProgram = programJobGraph._1
+    val jobGraph = programJobGraph._2
+    val client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
+    val jobId = client.submitJob(jobGraph).get().toString
+    val jobManagerUrl = client.getWebInterfaceURL
 
-      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
-      val jobId = client.submitJob(jobGraph).get().toString
-      val jobManagerUrl = client.getWebInterfaceURL
-
-      logInfo(s"""
-                 |-------------------------<<applicationId>>------------------------
-                 |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
-                 |__________________________________________________________________
-                 |""".stripMargin)
-      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packageProgram)
-      }
-      Utils.close(client, clusterDescriptor)
-    }
+    logInfo(s"""
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
+               |__________________________________________________________________
+               |""".stripMargin)
+    val resp = SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
+    closeSubmit(submitRequest, packageProgram, client, clusterDescriptor)
+    resp
   }
 
   private[this] def executeClientAction[O, R <: SavepointRequestTrait](

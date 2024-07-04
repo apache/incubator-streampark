@@ -53,7 +53,7 @@
         const status = parseInt(res.status);
         if (status === 0) {
           const resp = await fetchCreateCluster(params);
-          if (resp) {
+          if (resp.data.code == 200) {
             Swal.fire({
               icon: 'success',
               title: values.clusterName.concat(

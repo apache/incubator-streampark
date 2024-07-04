@@ -213,8 +213,6 @@ public class SparkApplication implements Serializable {
 
   private String tags;
 
-  private Boolean probing = false;
-
   /** running job */
   private transient JobsOverview.Task overview;
 
@@ -419,7 +417,7 @@ public class SparkApplication implements Serializable {
   @SuppressWarnings("unchecked")
   public Map<String, Object> getOptionMap() {
     if (StringUtils.isBlank(this.options)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
     optionMap.entrySet().removeIf(entry -> entry.getValue() == null);

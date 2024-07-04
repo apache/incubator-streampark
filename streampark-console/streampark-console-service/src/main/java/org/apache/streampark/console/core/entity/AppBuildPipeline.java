@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeError;
-import org.apache.streampark.flink.packer.pipeline.PipeSnapshot;
+import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineStepStatusEnum;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
@@ -46,7 +46,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -122,7 +121,7 @@ public class AppBuildPipeline {
   @JsonIgnore
   public Map<Integer, PipelineStepStatusEnum> getStepStatus() {
     if (StringUtils.isBlank(stepStatusJson)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     try {
       return JacksonUtils.read(
@@ -130,7 +129,7 @@ public class AppBuildPipeline {
     } catch (JsonProcessingException e) {
       log.error(
           "json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
   }
 
@@ -153,7 +152,7 @@ public class AppBuildPipeline {
   @JsonIgnore
   public Map<Integer, Long> getStepStatusTimestamp() {
     if (StringUtils.isBlank(stepStatusTimestampJson)) {
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
     try {
       return JacksonUtils.read(
@@ -163,7 +162,7 @@ public class AppBuildPipeline {
           "json parse error on ApplicationBuildPipeline, stepStatusJson={}",
           stepStatusTimestampJson,
           e);
-      return Collections.emptyMap();
+      return new HashMap<>();
     }
   }
 
@@ -254,7 +253,7 @@ public class AppBuildPipeline {
   }
 
   /** Create object from PipeSnapshot */
-  public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipeSnapshot snapshot) {
+  public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipelineSnapshot snapshot) {
     return new AppBuildPipeline()
         .setPipeType(snapshot.pipeType())
         .setPipeStatus(snapshot.pipeStatus())

@@ -66,5 +66,5 @@ public interface ApplicationActionService extends IService<Application> {
    *
    * @param id the application's id which need to be stopped
    */
-  void forcedStop(Long id);
+  void abort(Long id);
 }

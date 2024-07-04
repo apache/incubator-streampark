@@ -23,6 +23,7 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -42,6 +43,8 @@ import java.util.List;
 public class FlinkClusterController {
 
   @Autowired private FlinkClusterService flinkClusterService;
+
+  @Autowired private ServiceHelper serviceHelper;
 
   @PostMapping("availableList")
   public RestResponse listAvailableCluster() {
@@ -70,7 +73,8 @@ public class FlinkClusterController {
   @PostMapping("create")
   @RequiresPermissions("cluster:create")
   public RestResponse create(FlinkCluster cluster) {
-    Boolean success = flinkClusterService.create(cluster);
+    Long userId = serviceHelper.getUserId();
+    Boolean success = flinkClusterService.create(cluster, userId);
     return RestResponse.success(success);
   }
 

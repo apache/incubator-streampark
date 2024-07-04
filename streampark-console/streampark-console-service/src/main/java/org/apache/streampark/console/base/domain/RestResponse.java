@@ -35,9 +35,7 @@ public class RestResponse extends HashMap<String, Object> {
   private static final long serialVersionUID = 1L;
 
   public static RestResponse success(Object data) {
-    RestResponse resp = new RestResponse();
-    resp.put(STATUS_KEY, STATUS_SUCCESS);
-    resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
+    RestResponse resp = success();
     resp.put(DATA_KEY, data);
     return resp;
   }

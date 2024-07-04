@@ -30,7 +30,7 @@ import scala.util.Try
 /** Garbage resource collector during packing. */
 object PackerResourceGC extends Logger {
 
-  val appWorkspacePath: String = Workspace.local.APP_WORKSPACE
+  private val appWorkspacePath: String = Workspace.local.APP_WORKSPACE
 
   /**
    * Start a building legacy resources collection process.

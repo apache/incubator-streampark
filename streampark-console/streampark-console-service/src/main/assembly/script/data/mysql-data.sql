@@ -30,7 +30,11 @@ insert into `t_team` values (100000, 'default', null, now(), now());
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
-insert into `t_flink_app` values (100000, 100000, 2, 4, null, null, 'Flink SQL Demo', null, null, null, null, null, null , null, 100000, null, 1, null, null, null, null, null, null, null, null, 0, 0, null, null, null, null, null, null, 'Flink SQL Demo', 0, null, null, null, null, null, null, null, 0, 0, now(), now(), null, 1, 1, null, null, null, null, null, null, 0, null, null, null, 'streampark,test', 0, null);
+INSERT INTO `t_flink_app` (
+    `id`, `team_id`, `job_type`, `execution_mode`, `job_name`, `user_id`, `app_type`, `state`, `restart_size`,
+    `description`,`resolve_order`,`option_state`,`tracking`,`create_time`, `modify_time`,`release`, `build`,
+    `k8s_hadoop_integration`,`tags`
+) VALUES (100000, 100000, 2, 4, 'Flink SQL Demo', 100000, 1, 0, 0, 'Flink SQL Demo', 0, 0, 0, now(), now(), 1, 1, 0, 'streampark,test');
 
 -- ----------------------------
 -- Records of t_flink_effective
@@ -293,7 +297,7 @@ insert into `t_setting` values (15, 'ingress.mode.default', null, 'Ingress domai
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, null, '1', now(), now(),null,0,null,null);
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(),null,0,null,null);
 
 -- ----------------------------
 -- Records of t_member

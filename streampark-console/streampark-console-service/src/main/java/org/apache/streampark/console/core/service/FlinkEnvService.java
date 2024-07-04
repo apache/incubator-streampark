@@ -38,10 +38,9 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * Create a new instance.
    *
    * @param version The version of FlinkEnv to use.
-   * @throws Exception if an error occurs during the creation process.
    * @return true if the instance is successfully created, false otherwise.
    */
-  boolean create(FlinkEnv version) throws Exception;
+  boolean create(FlinkEnv version);
 
   /**
    * Deletes a Flink environment with the provided ID.
@@ -54,9 +53,8 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
    * Updates the specified version of Flink environment.
    *
    * @param version the version of Flink environment to update
-   * @throws IOException if an I/O error occurs during the update process
    */
-  void update(FlinkEnv version) throws IOException;
+  void update(FlinkEnv version);
 
   /**
    * Get flink version by application id.

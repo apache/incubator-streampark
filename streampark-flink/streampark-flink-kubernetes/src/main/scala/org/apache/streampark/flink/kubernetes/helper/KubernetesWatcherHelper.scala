@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.helper
 
+import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{DefaultFlinkK8sWatcher, FlinkK8sWatcher}
 
 import java.util.{Timer, TimerTask}
@@ -24,7 +25,7 @@ import java.util.{Timer, TimerTask}
 import scala.language.implicitConversions
 
 /** Debug helper for FlinkTrackMonitor, only for streampark development, debugging scenarios. */
-object KubernetesWatcherHelper {
+object KubernetesWatcherHelper extends Logger {
 
   implicit private def funcToTimerTask(fun: () => Unit): TimerTask = new TimerTask() {
     def run(): Unit = fun()
@@ -35,7 +36,7 @@ object KubernetesWatcherHelper {
   def watchJobStatusCacheSize(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
-        println(
+        logInfo(
           s"[flink-k8s][status-size]-${System.currentTimeMillis} => " +
             s"${k8sWatcher.getAllJobStatus.size}"),
       0,
@@ -45,7 +46,7 @@ object KubernetesWatcherHelper {
   def watchAggClusterMetricsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
-        println(
+        logInfo(
           s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
             s"${k8sWatcher.getAccGroupMetrics()}"),
       0,
@@ -55,7 +56,7 @@ object KubernetesWatcherHelper {
   def watchClusterMetricsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
-        println(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
+        logInfo(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
           s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().size} | " +
           s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().mkString(",")}"),
       0,
@@ -66,7 +67,7 @@ object KubernetesWatcherHelper {
   def watchJobStatusCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
     new Timer().scheduleAtFixedRate(
       () =>
-        println(
+        logInfo(
           s"[flink-k8s][status]-${System.currentTimeMillis} =>" +
             s"count=${k8sWatcher.getAllJobStatus.size} | " +
             s" ${k8sWatcher.getAllJobStatus.mkString(", ")}"),
@@ -78,35 +79,32 @@ object KubernetesWatcherHelper {
   def watchTrackIdsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
-        println(
+        logInfo(
           s"[flink-k8s][trackIds]-${System.currentTimeMillis} => " +
             s"${k8sWatcher.getAllWatchingIds.mkString(",")}"),
       0,
       1500)
   }
 
-  // print trackId cache size info
   def watchTrackIdsCacheSize(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
-        println(
+        logInfo(
           s"[flink-k8s][trackIds-size]-${System.currentTimeMillis} => " +
             s"${k8sWatcher.getAllWatchingIds.size}"),
       0,
       1500)
   }
 
-  // print k8s event cache detail
   def watchK8sEventCache(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
     new Timer().scheduleAtFixedRate(
       () =>
-        println(s"[flink-k8s][k8s-event]-${System.currentTimeMillis} => " +
+        logInfo(s"[flink-k8s][k8s-event]-${System.currentTimeMillis} => " +
           s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().size} | " +
           s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().mkString(",")}"),
       0,
       1500
     )
   }
-  // scalastyle:on println
 
 }

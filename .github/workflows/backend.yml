@@ -1,0 +1,111 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Backend
+
+on:
+  push:
+    branches:
+      - dev
+      - release-*
+      - dev-*
+    paths-ignore:
+      - '**.md'
+      - 'deploy/**'
+      - 'script/**'
+      - 'streampark-console/streampark-console-webapp/**'
+  pull_request:
+
+
+concurrency:
+  group: backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paths-filter:
+    name: Backend-Path-Filter
+    runs-on: ubuntu-latest
+    outputs:
+      not-ignore: ${{ steps.filter.outputs.not-ignore }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            not-ignore:
+              - '!**/*.md'
+  license-header:
+    name: License header
+    runs-on: ubuntu-latest
+    if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
+    needs: paths-filter
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Check license header
+        uses: apache/skywalking-eyes/header@main
+  code-style:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Code style
+    runs-on: ubuntu-latest
+    needs: license-header
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Check codestyle
+        run: ./mvnw -B -q -nsu checkstyle:check spotless:check
+  build:
+    name: "Backend-Build (java-${{ matrix.java }})"
+    runs-on: ubuntu-latest
+    needs: code-style
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 8 , 11 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up java ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "adopt"
+          cache: "maven"
+      - name: Backend Build with Maven
+        run: ./mvnw -B clean install -Pshaded -DskipTests
+  result:
+    name: Backend - Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ paths-filter, build, license-header, code-style ]
+    if: always()
+    steps:
+      - name: Status
+        run: |
+          if [[ ${{ needs.paths-filter.outputs.not-ignore }} == 'false' && ${{ github.event_name }} == 'pull_request' ]]; then
+            echo "Skip Backend!"
+            exit 0
+          fi
+          if [[ ${{ contains(needs.*.result, 'success') }} != 'true' ]]; then
+            echo "Backend Build Failed!"
+            exit -1
+          fi

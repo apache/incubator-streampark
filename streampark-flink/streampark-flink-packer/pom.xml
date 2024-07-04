@@ -30,7 +30,7 @@
         <eclipse.aether.version>1.1.0</eclipse.aether.version>
         <maven.aether.version>3.3.9</maven.aether.version>
         <maven.shade.version>3.2.4</maven.shade.version>
-        <docker.client.version>3.2.13</docker.client.version>
+        <docker.client.version>3.3.6</docker.client.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
@@ -45,12 +45,6 @@
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-kubernetes_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-kubernetes-core_${scala.binary.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -17,14 +17,30 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import org.apache.streampark.common.Constant
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteModeEnum
+import org.apache.streampark.common.util.Utils
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 /** flink cluster identifier on kubernetes */
 case class ClusterKey(
-    executeMode: FlinkK8sExecuteModeEnum.Value,
-    namespace: String = Constant.DEFAULT,
-    clusterId: String)
+    executeMode: FlinkK8sExecuteMode.Value,
+    namespace: String = "default",
+    clusterId: String) {
+
+  override def toString: String = executeMode.toString + namespace + clusterId
+
+  override def hashCode(): Int = Utils.hashCode(executeMode, namespace, clusterId)
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: ClusterKey =>
+        this.executeMode == that.executeMode &&
+        this.namespace == that.namespace &&
+        this.clusterId == that.clusterId
+      case _ => false
+    }
+  }
+
+}
 
 object ClusterKey {
   def of(trackId: TrackId): ClusterKey =

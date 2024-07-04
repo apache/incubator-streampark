@@ -33,7 +33,14 @@ github:
   protected_branches:
     dev:
       required_status_checks:
+        # strict means "Require branches to be up to date before merging".
         strict: true
+        contexts:
+          - Backend - Result
+          - E2E - Result
+          - Docs - Result
+          - Frontend - Result
+          - Unit-Test - Result
       required_pull_request_reviews:
         dismiss_stale_reviews: true
         required_approving_review_count: 1
