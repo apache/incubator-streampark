@@ -39,7 +39,7 @@ trait SparkClientTrait extends Logger {
          |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
-         |-------------------------------------------------------------------------------------------
+         |------------------------------------------------------------------------------`-------------
          |""".stripMargin)
 
     submitRequest.developmentMode match {
@@ -64,10 +64,8 @@ trait SparkClientTrait extends Logger {
          |----------------------------------------- spark job cancel --------------------------------
          |     userSparkHome     : ${cancelRequest.sparkVersion.sparkHome}
          |     sparkVersion      : ${cancelRequest.sparkVersion.version}
-         |     clusterId         : ${cancelRequest.clusterId}
          |     withDrain         : ${cancelRequest.withDrain}
          |     nativeFormat      : ${cancelRequest.nativeFormat}
-         |     appId             : ${cancelRequest.clusterId}
          |     jobId             : ${cancelRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)

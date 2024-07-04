@@ -29,7 +29,6 @@ case class CancelRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
     @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
     jobId: String,
     withDrain: Boolean,
     nativeFormat: Boolean)
