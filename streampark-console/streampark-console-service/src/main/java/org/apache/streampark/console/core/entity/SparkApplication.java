@@ -31,6 +31,7 @@ import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
@@ -298,10 +299,8 @@ public class SparkApplication implements Serializable {
   public Boolean shouldTracking() {
     switch (getStateEnum()) {
       case ADDED:
-      case CREATED:
       case FINISHED:
       case FAILED:
-      case CANCELED:
       case TERMINATED:
       case POS_TERMINATED:
         return false;
@@ -318,9 +317,7 @@ public class SparkApplication implements Serializable {
   public boolean isCanBeStart() {
     switch (getStateEnum()) {
       case ADDED:
-      case CREATED:
       case FAILED:
-      case CANCELED:
       case FINISHED:
       case LOST:
       case TERMINATED:
@@ -344,8 +341,8 @@ public class SparkApplication implements Serializable {
   }
 
   @JsonIgnore
-  public FlinkAppStateEnum getStateEnum() {
-    return FlinkAppStateEnum.of(state);
+  public SparkAppStateEnum getStateEnum() {
+    return SparkAppStateEnum.of(state);
   }
 
   @JsonIgnore

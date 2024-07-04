@@ -25,12 +25,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class JobsOverview implements Serializable {
-
-  private Job[] jobs;
-
-  @Data
-  public static class Job implements Serializable {
+public class Job implements Serializable {
     @JsonProperty("jobId")
     private Long id;
 
@@ -44,28 +39,27 @@ public class JobsOverview implements Serializable {
 
     private String status;
 
-    private String numTasks;
+    private Integer numTasks;
 
-    private String numActiveTasks;
+    private Integer numActiveTasks;
 
-    private String numCompletedTasks;
+    private Integer numCompletedTasks;
 
-    private String numSkippedTasks;
+    private Integer numSkippedTasks;
 
-    private String numFailedTasks;
+    private Integer numFailedTasks;
 
-    private String numKilledTasks;
+    private Integer numKilledTasks;
 
-    private String numCompletedIndices;
+    private Integer numCompletedIndices;
 
-    private String numActiveStages;
+    private Integer numActiveStages;
 
-    private String numCompletedStages;
+    private Integer numCompletedStages;
 
-    private String numSkippedStages;
+    private Integer numSkippedStages;
 
-    private String numFailedStages;
+    private Integer numFailedStages;
 
     private Map<String, Object> killedTasksSummary;
-  }
 }

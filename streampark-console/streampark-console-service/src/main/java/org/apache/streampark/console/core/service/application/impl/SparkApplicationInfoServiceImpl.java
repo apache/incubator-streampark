@@ -222,13 +222,14 @@ public class SparkApplicationInfoServiceImpl
 
   @Override
   public boolean checkAlter(SparkApplication appParam) {
-    Long appId = appParam.getId();
-    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
-      return false;
-    }
-    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
-    long appUserId = appParam.getUserId();
-    return cancelUserId != -1 && cancelUserId != appUserId;
+    //    Long appId = appParam.getId();
+    //    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
+    //      return false;
+    //    }
+    //    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
+    //    long appUserId = appParam.getUserId();
+    //    return cancelUserId != -1 && cancelUserId != appUserId;
+    return true;
   }
 
   @Override
