@@ -107,7 +107,7 @@
     },
     {
       label: generatedLabelIcon('ant-design:book-outlined', t('common.description')),
-      field: 'remark',
+      field: 'description',
     },
     {
       label: generatedLabelIcon(`ant-design:clock-circle-outlined`, t('common.createTime')),
