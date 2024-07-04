@@ -565,11 +565,12 @@
                             <includes>
                                 <include>src/main/java/**/*.java</include>
                                 <include>src/test/java/**/*.java</include>
+                                <include>streampark-e2e/streampark-e2e-case/src/test/java/**/*.java</include>
+                                <include>streampark-e2e/streampark-e2e-core/src/main/java/**/*.java</include>
                             </includes>
-                            <googleJavaFormat>
-                                <version>1.7</version>
-                                <style>GOOGLE</style>
-                            </googleJavaFormat>
+                            <eclipse>
+                                <file>${maven.multiModuleProjectDirectory}/style/spotless_streampark_formatter.xml</file>
+                            </eclipse>
                             <importOrder>
                                 <order>
                                     org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#
@@ -596,7 +597,7 @@
                             <scalafmt>
                                 <version>${spotless.scalafmt.version}</version>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <file>${maven.multiModuleProjectDirectory}/.scalafmt.conf</file>
+                                <file>${maven.multiModuleProjectDirectory}/style/.scalafmt.conf</file>
                             </scalafmt>
                         </scala>
                     </configuration>

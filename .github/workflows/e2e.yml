@@ -56,10 +56,22 @@ jobs:
           submodules: true
       - name: Check license header
         uses: apache/skywalking-eyes/header@main
+  code-style:
+    if: github.repository == 'apache/incubator-streampark'
+    name: Code style
+    runs-on: ubuntu-latest
+    needs: license-header
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Check codestyle
+        run: ./mvnw -B -q -nsu checkstyle:check spotless:check
   build:
     name: E2E-Build
     runs-on: ubuntu-latest
-    needs: license-header
+    needs: code-style
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -155,7 +167,7 @@ jobs:
     name: E2E - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ paths-filter, license-header, build, e2e ]
+    needs: [ paths-filter, license-header, code-style, build, e2e ]
     if: always()
     steps:
       - name: Status
