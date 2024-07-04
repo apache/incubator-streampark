@@ -41,57 +41,58 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-  @Autowired private UploadFileTypeInterceptor uploadFileTypeInterceptor;
+    @Autowired
+    private UploadFileTypeInterceptor uploadFileTypeInterceptor;
 
-  private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {
-    HttpMethod.POST.name(),
-    HttpMethod.GET.name(),
-    HttpMethod.PUT.name(),
-    HttpMethod.OPTIONS.name(),
-    HttpMethod.DELETE.name()
-  };
+    private static final String[] CORS_MAPPINGS_ALLOWED_METHODS = {
+            HttpMethod.POST.name(),
+            HttpMethod.GET.name(),
+            HttpMethod.PUT.name(),
+            HttpMethod.OPTIONS.name(),
+            HttpMethod.DELETE.name()
+    };
 
-  @Override
-  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-    converters.add(new ByteArrayHttpMessageConverter());
-    converters.add(new StringHttpMessageConverter());
-    converters.add(new ResourceHttpMessageConverter());
-    converters.add(new AllEncompassingFormHttpMessageConverter());
-  }
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(new ByteArrayHttpMessageConverter());
+        converters.add(new StringHttpMessageConverter());
+        converters.add(new ResourceHttpMessageConverter());
+        converters.add(new AllEncompassingFormHttpMessageConverter());
+    }
 
-  /**
-   * Used to solve cross-domain problems
-   *
-   * @param registry
-   */
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry
-        .addMapping("/**")
-        .allowedOriginPatterns("*")
-        .allowedMethods(CORS_MAPPINGS_ALLOWED_METHODS)
-        .allowedHeaders("*")
-        .allowCredentials(true)
-        .maxAge(3600);
-  }
+    /**
+     * Used to solve cross-domain problems
+     *
+     * @param registry
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry
+                .addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods(CORS_MAPPINGS_ALLOWED_METHODS)
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
 
-  @Bean
-  public Module jacksonModule() {
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(Long.class, ToStringSerializer.instance);
-    module.addSerializer(Long.TYPE, ToStringSerializer.instance);
-    return module;
-  }
+    @Bean
+    public Module jacksonModule() {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Long.class, ToStringSerializer.instance);
+        module.addSerializer(Long.TYPE, ToStringSerializer.instance);
+        return module;
+    }
 
-  /**
-   * Add an interceptor.
-   *
-   * @param registry
-   */
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry
-        .addInterceptor(uploadFileTypeInterceptor)
-        .addPathPatterns("/flink/app/upload", "/resource/upload");
-  }
+    /**
+     * Add an interceptor.
+     *
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry
+                .addInterceptor(uploadFileTypeInterceptor)
+                .addPathPatterns("/flink/app/upload", "/resource/upload");
+    }
 }

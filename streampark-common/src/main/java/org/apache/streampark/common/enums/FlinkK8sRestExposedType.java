@@ -23,45 +23,45 @@ import javax.annotation.Nullable;
 /** kubernetes.rest-service.exposed.type */
 public enum FlinkK8sRestExposedType {
 
-  /** LoadBalancer */
-  LOAD_BALANCER("LoadBalancer", 0),
+    /** LoadBalancer */
+    LOAD_BALANCER("LoadBalancer", 0),
 
-  /** ClusterIP */
-  CLUSTER_IP("ClusterIP", 1),
+    /** ClusterIP */
+    CLUSTER_IP("ClusterIP", 1),
 
-  /** NodePort */
-  NODE_PORT("NodePort", 2);
+    /** NodePort */
+    NODE_PORT("NodePort", 2);
 
-  private final String name;
+    private final String name;
 
-  private final Integer type;
+    private final Integer type;
 
-  FlinkK8sRestExposedType(@Nonnull String name, @Nonnull Integer type) {
-    this.name = name;
-    this.type = type;
-  }
-
-  /**
-   * Try to resolve the given Flink K8s Rest-Exposed type value into a known {@link
-   * FlinkK8sRestExposedType} enum.
-   */
-  @Nullable
-  public static FlinkK8sRestExposedType of(@Nullable Integer value) {
-    for (FlinkK8sRestExposedType order : values()) {
-      if (order.type.equals(value)) {
-        return order;
-      }
+    FlinkK8sRestExposedType(@Nonnull String name, @Nonnull Integer type) {
+        this.name = name;
+        this.type = type;
     }
-    return null;
-  }
 
-  @Nonnull
-  public String getName() {
-    return name;
-  }
+    /**
+     * Try to resolve the given Flink K8s Rest-Exposed type value into a known {@link
+     * FlinkK8sRestExposedType} enum.
+     */
+    @Nullable
+    public static FlinkK8sRestExposedType of(@Nullable Integer value) {
+        for (FlinkK8sRestExposedType order : values()) {
+            if (order.type.equals(value)) {
+                return order;
+            }
+        }
+        return null;
+    }
 
-  @Nonnull
-  public Integer getType() {
-    return type;
-  }
+    @Nonnull
+    public String getName() {
+        return name;
+    }
+
+    @Nonnull
+    public Integer getType() {
+        return type;
+    }
 }

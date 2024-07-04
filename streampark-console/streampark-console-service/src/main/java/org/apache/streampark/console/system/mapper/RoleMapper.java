@@ -27,5 +27,5 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 public interface RoleMapper extends BaseMapper<Role> {
 
-  IPage<Role> selectPage(Page<Role> page, @Param("role") Role role);
+    IPage<Role> selectPage(Page<Role> page, @Param("role") Role role);
 }

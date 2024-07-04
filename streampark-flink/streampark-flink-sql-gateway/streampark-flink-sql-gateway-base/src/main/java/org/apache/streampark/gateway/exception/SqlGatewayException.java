@@ -19,17 +19,18 @@ package org.apache.streampark.gateway.exception;
 
 /** General exception for SQL gateway related errors. */
 public class SqlGatewayException extends RuntimeException {
-  private static final long serialVersionUID = 1L;
 
-  public SqlGatewayException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = 1L;
 
-  public SqlGatewayException(String message, Throwable e) {
-    super(message, e);
-  }
+    public SqlGatewayException(String message) {
+        super(message);
+    }
 
-  public SqlGatewayException(Throwable e) {
-    super(e);
-  }
+    public SqlGatewayException(String message, Throwable e) {
+        super(message, e);
+    }
+
+    public SqlGatewayException(Throwable e) {
+        super(e);
+    }
 }

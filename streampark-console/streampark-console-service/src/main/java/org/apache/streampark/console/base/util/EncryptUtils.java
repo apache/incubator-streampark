@@ -29,45 +29,46 @@ import java.util.Base64;
 
 public class EncryptUtils {
 
-  private static final int KEY_SIZE = 128;
+    private static final int KEY_SIZE = 128;
 
-  private static final String DEFAULT_KEY = DigestUtils.md5Hex("ApacheStreamPark");
+    private static final String DEFAULT_KEY = DigestUtils.md5Hex("ApacheStreamPark");
 
-  private static final String ALGORITHM = "AES";
+    private static final String ALGORITHM = "AES";
 
-  private static final String RNG_ALGORITHM = "SHA1PRNG";
+    private static final String RNG_ALGORITHM = "SHA1PRNG";
 
-  private EncryptUtils() {}
+    private EncryptUtils() {
+    }
 
-  public static String encrypt(String content) throws Exception {
-    return encrypt(content, DEFAULT_KEY);
-  }
+    public static String encrypt(String content) throws Exception {
+        return encrypt(content, DEFAULT_KEY);
+    }
 
-  public static String encrypt(String content, String key) throws Exception {
-    Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
-    byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
-    return Base64.getEncoder().encodeToString(bytes);
-  }
+    public static String encrypt(String content, String key) throws Exception {
+        Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
+        byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(bytes);
+    }
 
-  public static String decrypt(String content) throws Exception {
-    return decrypt(content, DEFAULT_KEY);
-  }
+    public static String decrypt(String content) throws Exception {
+        return decrypt(content, DEFAULT_KEY);
+    }
 
-  public static String decrypt(String content, String key) throws Exception {
-    Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
-    byte[] base64 = Base64.getDecoder().decode(content);
-    byte[] decryptBytes = cipher.doFinal(base64);
-    return new String(decryptBytes, StandardCharsets.UTF_8);
-  }
+    public static String decrypt(String content, String key) throws Exception {
+        Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
+        byte[] base64 = Base64.getDecoder().decode(content);
+        byte[] decryptBytes = cipher.doFinal(base64);
+        return new String(decryptBytes, StandardCharsets.UTF_8);
+    }
 
-  private static Cipher getCipher(int mode, String key) throws Exception {
-    SecureRandom random = SecureRandom.getInstance(RNG_ALGORITHM);
-    random.setSeed(key.getBytes(StandardCharsets.UTF_8));
-    KeyGenerator gen = KeyGenerator.getInstance(ALGORITHM);
-    gen.init(KEY_SIZE, random);
-    SecretKey secKey = gen.generateKey();
-    Cipher cipher = Cipher.getInstance(ALGORITHM);
-    cipher.init(mode, secKey);
-    return cipher;
-  }
+    private static Cipher getCipher(int mode, String key) throws Exception {
+        SecureRandom random = SecureRandom.getInstance(RNG_ALGORITHM);
+        random.setSeed(key.getBytes(StandardCharsets.UTF_8));
+        KeyGenerator gen = KeyGenerator.getInstance(ALGORITHM);
+        gen.init(KEY_SIZE, random);
+        SecretKey secKey = gen.generateKey();
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(mode, secKey);
+        return cipher;
+    }
 }

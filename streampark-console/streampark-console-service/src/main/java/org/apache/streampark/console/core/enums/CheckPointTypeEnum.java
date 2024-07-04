@@ -21,24 +21,25 @@ import java.util.Arrays;
 
 /** Describe the type of Check Point */
 public enum CheckPointTypeEnum {
-  /** CHECKPOINT */
-  CHECKPOINT(1),
-  /** SAVEPOINT */
-  SAVEPOINT(2),
 
-  SYNC_SAVEPOINT(3);
+    /** CHECKPOINT */
+    CHECKPOINT(1),
+    /** SAVEPOINT */
+    SAVEPOINT(2),
 
-  private final int value;
+    SYNC_SAVEPOINT(3);
 
-  public int get() {
-    return this.value;
-  }
+    private final int value;
 
-  CheckPointTypeEnum(int value) {
-    this.value = value;
-  }
+    public int get() {
+        return this.value;
+    }
 
-  public static CheckPointTypeEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+    CheckPointTypeEnum(int value) {
+        this.value = value;
+    }
+
+    public static CheckPointTypeEnum of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

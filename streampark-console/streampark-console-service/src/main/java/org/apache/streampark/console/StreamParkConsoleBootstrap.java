@@ -48,10 +48,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class StreamParkConsoleBootstrap {
 
-  public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder()
-        .properties(SpringProperties.get())
-        .sources(StreamParkConsoleBootstrap.class)
-        .run(args);
-  }
+    public static void main(String[] args) throws Exception {
+        new SpringApplicationBuilder()
+                .properties(SpringProperties.get())
+                .sources(StreamParkConsoleBootstrap.class)
+                .run(args);
+    }
 }

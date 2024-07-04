@@ -23,39 +23,39 @@ import javax.annotation.Nullable;
 /** classloader.resolve-order */
 public enum ResolveOrder {
 
-  /** parent-first */
-  PARENT_FIRST("parent-first", 0),
+    /** parent-first */
+    PARENT_FIRST("parent-first", 0),
 
-  /** child-first */
-  CHILD_FIRST("child-first", 1);
+    /** child-first */
+    CHILD_FIRST("child-first", 1);
 
-  private final String name;
+    private final String name;
 
-  private final Integer order;
+    private final Integer order;
 
-  ResolveOrder(@Nonnull String name, @Nonnull Integer order) {
-    this.name = name;
-    this.order = order;
-  }
-
-  /** Try to resolve the given resolve order value into a known {@link ResolveOrder} enum. */
-  @Nullable
-  public static ResolveOrder of(@Nullable Integer value) {
-    for (ResolveOrder order : values()) {
-      if (order.order.equals(value)) {
-        return order;
-      }
+    ResolveOrder(@Nonnull String name, @Nonnull Integer order) {
+        this.name = name;
+        this.order = order;
     }
-    return null;
-  }
 
-  @Nonnull
-  public String getName() {
-    return name;
-  }
+    /** Try to resolve the given resolve order value into a known {@link ResolveOrder} enum. */
+    @Nullable
+    public static ResolveOrder of(@Nullable Integer value) {
+        for (ResolveOrder order : values()) {
+            if (order.order.equals(value)) {
+                return order;
+            }
+        }
+        return null;
+    }
 
-  @Nonnull
-  public Integer getOrder() {
-    return order;
-  }
+    @Nonnull
+    public String getName() {
+        return name;
+    }
+
+    @Nonnull
+    public Integer getOrder() {
+        return order;
+    }
 }

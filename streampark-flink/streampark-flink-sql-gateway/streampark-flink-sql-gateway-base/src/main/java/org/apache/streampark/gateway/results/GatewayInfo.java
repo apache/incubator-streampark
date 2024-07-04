@@ -25,51 +25,51 @@ import java.util.Objects;
 /** Info to describe the {@link SqlGatewayService}. */
 public class GatewayInfo implements Serializable {
 
-  /** Gateway service type. */
-  public final String serviceType;
+    /** Gateway service type. */
+    public final String serviceType;
 
-  /** Gateway service version. */
-  public final String version;
+    /** Gateway service version. */
+    public final String version;
 
-  public GatewayInfo(String serviceType, String version) {
-    this.serviceType = serviceType;
-    this.version = version;
-  }
-
-  public String getServiceType() {
-    return serviceType;
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public GatewayInfo(String serviceType, String version) {
+        this.serviceType = serviceType;
+        this.version = version;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public String getServiceType() {
+        return serviceType;
     }
-    GatewayInfo that = (GatewayInfo) o;
-    return Objects.equals(serviceType, that.serviceType) && Objects.equals(version, that.version);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(serviceType, version);
-  }
+    public String getVersion() {
+        return version;
+    }
 
-  @Override
-  public String toString() {
-    return "GatewayInfo{"
-        + "serviceType='"
-        + serviceType
-        + '\''
-        + ", version='"
-        + version
-        + '\''
-        + '}';
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        GatewayInfo that = (GatewayInfo) o;
+        return Objects.equals(serviceType, that.serviceType) && Objects.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(serviceType, version);
+    }
+
+    @Override
+    public String toString() {
+        return "GatewayInfo{"
+                + "serviceType='"
+                + serviceType
+                + '\''
+                + ", version='"
+                + version
+                + '\''
+                + '}';
+    }
 }

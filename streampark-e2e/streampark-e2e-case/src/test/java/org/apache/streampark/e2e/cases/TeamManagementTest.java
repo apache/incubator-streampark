@@ -35,90 +35,88 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class TeamManagementTest {
-  private static RemoteWebDriver browser;
 
-  private static final String userName = "admin";
+    private static RemoteWebDriver browser;
 
-  private static final String password = "streampark";
+    private static final String userName = "admin";
 
-  private static final String teamName = "default";
+    private static final String password = "streampark";
 
-  private static final String newTeamName = "test_new_team";
+    private static final String teamName = "default";
 
-  private static final String newTeamDescription = "test_new_team_description";
+    private static final String newTeamName = "test_new_team";
 
-  @BeforeAll
-  public static void setup() {
-    new LoginPage(browser)
-        .login(userName, password, teamName)
-        .goToNav(SystemPage.class)
-        .goToTab(TeamManagementPage.class);
-  }
+    private static final String newTeamDescription = "test_new_team_description";
 
-  @Test
-  @Order(10)
-  void testCreateTeam() {
-    final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
-    teamManagementPage.createTeam(newTeamName, newTeamDescription);
+    @BeforeAll
+    public static void setup() {
+        new LoginPage(browser)
+                .login(userName, password, teamName)
+                .goToNav(SystemPage.class)
+                .goToTab(TeamManagementPage.class);
+    }
 
-    Awaitility.await()
-        .untilAsserted(
-            () ->
-                assertThat(teamManagementPage.teamList())
-                    .as("Team list should contain newly-created team")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newTeamName)));
-  }
+    @Test
+    @Order(10)
+    void testCreateTeam() {
+        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
+        teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
-  @Test
-  @Order(20)
-  void testCreateDuplicateTeam() {
-    final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
-    teamManagementPage.createTeam(newTeamName, newTeamDescription);
+        Awaitility.await()
+                .untilAsserted(
+                        () -> assertThat(teamManagementPage.teamList())
+                                .as("Team list should contain newly-created team")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains(newTeamName)));
+    }
 
-    Awaitility.await()
-        .untilAsserted(
-            () ->
-                assertThat(teamManagementPage.errorMessageList())
-                    .as("Team Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("Create team failed.")));
+    @Test
+    @Order(20)
+    void testCreateDuplicateTeam() {
+        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
+        teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
-    teamManagementPage.errorMessageConfirmButton().click();
-    teamManagementPage.createTeamForm().buttonCancel().click();
-  }
+        Awaitility.await()
+                .untilAsserted(
+                        () -> assertThat(teamManagementPage.errorMessageList())
+                                .as("Team Duplicated Error message should be displayed")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains("Create team failed.")));
 
-  @Test
-  @Order(30)
-  void testEditTeam() {
-    final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
-    String editDescription = "edit_" + newTeamDescription;
+        teamManagementPage.errorMessageConfirmButton().click();
+        teamManagementPage.createTeamForm().buttonCancel().click();
+    }
 
-    teamManagementPage.editTeam(newTeamName, editDescription);
+    @Test
+    @Order(30)
+    void testEditTeam() {
+        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
+        String editDescription = "edit_" + newTeamDescription;
 
-    Awaitility.await()
-        .untilAsserted(
-            () ->
-                assertThat(teamManagementPage.teamList())
-                    .as("Team list should contain edited team")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editDescription)));
-  }
+        teamManagementPage.editTeam(newTeamName, editDescription);
 
-  @Test
-  @Order(40)
-  void testDeleteTeam() {
-    final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
+        Awaitility.await()
+                .untilAsserted(
+                        () -> assertThat(teamManagementPage.teamList())
+                                .as("Team list should contain edited team")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains(editDescription)));
+    }
 
-    teamManagementPage.deleteTeam(newTeamName);
+    @Test
+    @Order(40)
+    void testDeleteTeam() {
+        final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
 
-    Awaitility.await()
-        .untilAsserted(
-            () -> {
-              browser.navigate().refresh();
+        teamManagementPage.deleteTeam(newTeamName);
 
-              assertThat(teamManagementPage.teamList())
-                  .noneMatch(it -> it.getText().contains(newTeamName));
-            });
-  }
+        Awaitility.await()
+                .untilAsserted(
+                        () -> {
+                            browser.navigate().refresh();
+
+                            assertThat(teamManagementPage.teamList())
+                                    .noneMatch(it -> it.getText().contains(newTeamName));
+                        });
+    }
 }

@@ -30,20 +30,16 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertHttpCallbackParams implements Serializable {
 
-  @Schema(description = "http callback url")
-  @NotBlank(message = "The url of callback must be not empty")
-  private String url;
+    @Schema(description = "http callback url")
+    @NotBlank(message = "The url of callback must be not empty")
+    private String url;
 
-  @Schema(
-      description = "http method",
-      defaultValue = "POST",
-      example = "POST",
-      allowableValues = {"POST", "GET"})
-  private String method = "POST";
+    @Schema(description = "http method", defaultValue = "POST", example = "POST", allowableValues = {"POST", "GET"})
+    private String method = "POST";
 
-  @Schema(description = "content type header", example = "application/json")
-  private String contentType;
+    @Schema(description = "content type header", example = "application/json")
+    private String contentType;
 
-  @Schema(description = "use freemarker template replace the parameters")
-  private String requestTemplate;
+    @Schema(description = "use freemarker template replace the parameters")
+    private String requestTemplate;
 }

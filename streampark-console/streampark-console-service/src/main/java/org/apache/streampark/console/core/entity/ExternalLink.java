@@ -31,24 +31,25 @@ import java.util.Date;
 @Data
 @TableName("t_external_link")
 public class ExternalLink implements Serializable {
-  @TableId(type = IdType.AUTO)
-  private Long id;
 
-  private String badgeLabel;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  @NotBlank(message = "{required}")
-  private String badgeName;
+    private String badgeLabel;
 
-  @NotBlank(message = "{required}")
-  private String badgeColor;
+    @NotBlank(message = "{required}")
+    private String badgeName;
 
-  @NotBlank(message = "{required}")
-  private String linkUrl;
+    @NotBlank(message = "{required}")
+    private String badgeColor;
 
-  @TableField(exist = false)
-  private String renderedLinkUrl;
+    @NotBlank(message = "{required}")
+    private String linkUrl;
 
-  private Date createTime;
+    @TableField(exist = false)
+    private String renderedLinkUrl;
 
-  private Date modifyTime;
+    private Date createTime;
+
+    private Date modifyTime;
 }

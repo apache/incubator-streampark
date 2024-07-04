@@ -27,49 +27,49 @@ import java.util.List;
 
 public interface TeamService extends IService<Team> {
 
-  /**
-   * Retrieves a page of {@link Team} objects based on the provided parameters.
-   *
-   * @param team The {@link Team} object containing the search criteria.
-   * @param request The {@link RestRequest} object used for pagination and sorting.
-   * @return An {@link IPage} containing the retrieved {@link Team} objects.
-   */
-  IPage<Team> getPage(Team team, RestRequest request);
+    /**
+     * Retrieves a page of {@link Team} objects based on the provided parameters.
+     *
+     * @param team The {@link Team} object containing the search criteria.
+     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @return An {@link IPage} containing the retrieved {@link Team} objects.
+     */
+    IPage<Team> getPage(Team team, RestRequest request);
 
-  /**
-   * Get the Team by team name
-   *
-   * @param teamName team name
-   * @return Team
-   */
-  Team getByName(String teamName);
+    /**
+     * Get the Team by team name
+     *
+     * @param teamName team name
+     * @return Team
+     */
+    Team getByName(String teamName);
 
-  /**
-   * Create a Team instance
-   *
-   * @param team Team
-   */
-  void createTeam(Team team);
+    /**
+     * Create a Team instance
+     *
+     * @param team Team
+     */
+    void createTeam(Team team);
 
-  /**
-   * Remove the Team by team id
-   *
-   * @param teamId team id
-   */
-  void removeById(Long teamId);
+    /**
+     * Remove the Team by team id
+     *
+     * @param teamId team id
+     */
+    void removeById(Long teamId);
 
-  /**
-   * Update Team information carried by the incoming Team
-   *
-   * @param team Team
-   */
-  void updateTeam(Team team);
+    /**
+     * Update Team information carried by the incoming Team
+     *
+     * @param team Team
+     */
+    void updateTeam(Team team);
 
-  /**
-   * List All team by user id
-   *
-   * @param userId user id
-   * @return List of Team
-   */
-  List<Team> listByUserId(Long userId);
+    /**
+     * List All team by user id
+     *
+     * @param userId user id
+     * @return List of Team
+     */
+    List<Team> listByUserId(Long userId);
 }

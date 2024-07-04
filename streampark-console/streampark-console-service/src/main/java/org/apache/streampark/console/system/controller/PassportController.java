@@ -56,84 +56,85 @@ import java.util.Map;
 @RequestMapping("passport")
 public class PassportController {
 
-  @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Autowired private Authenticator authenticator;
+    @Autowired
+    private Authenticator authenticator;
 
-  @Value("${sso.enable:#{false}}")
-  private Boolean ssoEnable;
+    @Value("${sso.enable:#{false}}")
+    private Boolean ssoEnable;
 
-  @Value("${ldap.enable:#{false}}")
-  private Boolean ldapEnable;
+    @Value("${ldap.enable:#{false}}")
+    private Boolean ldapEnable;
 
-  @PostMapping("signtype")
-  public RestResponse type() {
-    List<String> types = new ArrayList<>();
-    types.add(LoginTypeEnum.PASSWORD.name().toLowerCase());
-    if (ssoEnable) {
-      types.add(LoginTypeEnum.SSO.name().toLowerCase());
-    }
-    if (ldapEnable) {
-      types.add(LoginTypeEnum.LDAP.name().toLowerCase());
-    }
-    return RestResponse.success(types);
-  }
-
-  @PostMapping("signin")
-  public RestResponse signin(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password,
-      @NotBlank(message = "{required}") String loginType)
-      throws Exception {
-
-    if (StringUtils.isEmpty(username)) {
-      return RestResponse.success().put("code", 0);
+    @PostMapping("signtype")
+    public RestResponse type() {
+        List<String> types = new ArrayList<>();
+        types.add(LoginTypeEnum.PASSWORD.name().toLowerCase());
+        if (ssoEnable) {
+            types.add(LoginTypeEnum.SSO.name().toLowerCase());
+        }
+        if (ldapEnable) {
+            types.add(LoginTypeEnum.LDAP.name().toLowerCase());
+        }
+        return RestResponse.success(types);
     }
 
-    User user = authenticator.authenticate(username, password, loginType);
+    @PostMapping("signin")
+    public RestResponse signin(
+                               HttpServletRequest request,
+                               HttpServletResponse response,
+                               @NotBlank(message = "{required}") String username,
+                               @NotBlank(message = "{required}") String password,
+                               @NotBlank(message = "{required}") String loginType) throws Exception {
 
-    if (user == null) {
-      return RestResponse.success().put("code", 0);
+        if (StringUtils.isEmpty(username)) {
+            return RestResponse.success().put("code", 0);
+        }
+
+        User user = authenticator.authenticate(username, password, loginType);
+
+        if (user == null) {
+            return RestResponse.success().put("code", 0);
+        }
+
+        if (User.STATUS_LOCK.equals(user.getStatus())) {
+            return RestResponse.success().put("code", 1);
+        }
+
+        // set team
+        userService.fillInTeam(user);
+
+        // no team.
+        if (user.getLastTeamId() == null) {
+            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
+        }
+
+        this.userService.updateLoginTime(username);
+        String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
+
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
+        String ttl = DateUtils.formatFullTime(expireTime);
+
+        // shiro login
+        JWTToken loginToken = new JWTToken(sign, ttl);
+        SecurityUtils.getSubject().login(loginToken);
+
+        // generate UserInfo
+        String token = WebUtils.encryptToken(sign);
+        JWTToken jwtToken = new JWTToken(token, ttl);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
+        user.setId(userId);
+        Map<String, Object> userInfo =
+                userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+
+        return new RestResponse().data(userInfo);
     }
 
-    if (User.STATUS_LOCK.equals(user.getStatus())) {
-      return RestResponse.success().put("code", 1);
+    @PostMapping("signout")
+    public RestResponse signout() {
+        SecurityUtils.getSubject().logout();
+        return new RestResponse();
     }
-
-    // set team
-    userService.fillInTeam(user);
-
-    // no team.
-    if (user.getLastTeamId() == null) {
-      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-    }
-
-    this.userService.updateLoginTime(username);
-    String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
-
-    LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
-    String ttl = DateUtils.formatFullTime(expireTime);
-
-    // shiro login
-    JWTToken loginToken = new JWTToken(sign, ttl);
-    SecurityUtils.getSubject().login(loginToken);
-
-    // generate UserInfo
-    String token = WebUtils.encryptToken(sign);
-    JWTToken jwtToken = new JWTToken(token, ttl);
-    String userId = RandomStringUtils.randomAlphanumeric(20);
-    user.setId(userId);
-    Map<String, Object> userInfo =
-        userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-
-    return new RestResponse().data(userInfo);
-  }
-
-  @PostMapping("signout")
-  public RestResponse signout() {
-    SecurityUtils.getSubject().logout();
-    return new RestResponse();
-  }
 }

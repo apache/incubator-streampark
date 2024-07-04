@@ -40,95 +40,97 @@ import java.util.Map;
 /** org.apache.streampark.console.core.service.UserServiceTest. */
 @Transactional
 class UserServiceTest extends SpringUnitTestBase {
-  @Autowired private UserService userService;
-  @Autowired private ApplicationManageService applicationManageService;
-  @Autowired private ApplicationInfoService applicationInfoService;
-  @Autowired private ResourceService resourceService;
 
-  @Test
-  @SuppressWarnings("unchecked")
-  void testLockUser() throws Exception {
-    User user = new User();
-    user.setUsername("test");
-    user.setNickName("test");
-    user.setPassword("test");
-    user.setUserType(UserTypeEnum.USER);
-    user.setStatus(User.STATUS_VALID);
-    userService.createUser(user);
-    // lock user
-    user.setStatus(User.STATUS_LOCK);
-    Map<String, Object> data =
-        (Map<String, Object>)
-            userService
-                .updateUser(user)
-                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
-    Assertions.assertNotEquals(true, data.get("needTransferResource"));
-    // unlock user
-    user.setStatus(User.STATUS_VALID);
-    Map<String, Object> data1 =
-        (Map<String, Object>)
-            userService
-                .updateUser(user)
-                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
-    Assertions.assertNotEquals(true, data1.get("needTransferResource"));
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ApplicationManageService applicationManageService;
+    @Autowired
+    private ApplicationInfoService applicationInfoService;
+    @Autowired
+    private ResourceService resourceService;
 
-    Resource resource = new Resource();
-    resource.setResourceName("test");
-    resource.setResourceType(ResourceTypeEnum.FLINK_APP);
-    resource.setEngineType(EngineTypeEnum.FLINK);
-    resource.setTeamId(1L);
-    resource.setCreatorId(user.getUserId());
-    resourceService.save(resource);
-    // lock user when has resource
-    user.setStatus(User.STATUS_LOCK);
-    Map<String, Object> data2 =
-        (Map<String, Object>)
-            userService
-                .updateUser(user)
-                .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
-    Assertions.assertEquals(true, data2.get("needTransferResource"));
-  }
+    @Test
+    @SuppressWarnings("unchecked")
+    void testLockUser() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setNickName("test");
+        user.setPassword("test");
+        user.setUserType(UserTypeEnum.USER);
+        user.setStatus(User.STATUS_VALID);
+        userService.createUser(user);
+        // lock user
+        user.setStatus(User.STATUS_LOCK);
+        Map<String, Object> data =
+                (Map<String, Object>) userService
+                        .updateUser(user)
+                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Assertions.assertNotEquals(true, data.get("needTransferResource"));
+        // unlock user
+        user.setStatus(User.STATUS_VALID);
+        Map<String, Object> data1 =
+                (Map<String, Object>) userService
+                        .updateUser(user)
+                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Assertions.assertNotEquals(true, data1.get("needTransferResource"));
 
-  @Test
-  void testTransferResource() {
-    User user = new User();
-    user.setUsername("test");
-    user.setNickName("test");
-    user.setPassword("test");
-    user.setUserType(UserTypeEnum.USER);
-    user.setStatus(User.STATUS_VALID);
-    userService.save(user);
+        Resource resource = new Resource();
+        resource.setResourceName("test");
+        resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+        resource.setEngineType(EngineTypeEnum.FLINK);
+        resource.setTeamId(1L);
+        resource.setCreatorId(user.getUserId());
+        resourceService.save(resource);
+        // lock user when has resource
+        user.setStatus(User.STATUS_LOCK);
+        Map<String, Object> data2 =
+                (Map<String, Object>) userService
+                        .updateUser(user)
+                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Assertions.assertEquals(true, data2.get("needTransferResource"));
+    }
 
-    Resource resource = new Resource();
-    resource.setResourceName("test");
-    resource.setResourceType(ResourceTypeEnum.FLINK_APP);
-    resource.setEngineType(EngineTypeEnum.FLINK);
-    resource.setTeamId(1L);
-    resource.setCreatorId(user.getUserId());
-    resourceService.save(resource);
+    @Test
+    void testTransferResource() {
+        User user = new User();
+        user.setUsername("test");
+        user.setNickName("test");
+        user.setPassword("test");
+        user.setUserType(UserTypeEnum.USER);
+        user.setStatus(User.STATUS_VALID);
+        userService.save(user);
 
-    Application app = new Application();
-    app.setUserId(user.getUserId());
-    app.setTeamId(1L);
-    applicationManageService.save(app);
+        Resource resource = new Resource();
+        resource.setResourceName("test");
+        resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+        resource.setEngineType(EngineTypeEnum.FLINK);
+        resource.setTeamId(1L);
+        resource.setCreatorId(user.getUserId());
+        resourceService.save(resource);
 
-    User targetUser = new User();
-    targetUser.setUsername("test0");
-    targetUser.setNickName("test0");
-    targetUser.setPassword("test0");
-    targetUser.setUserType(UserTypeEnum.USER);
-    targetUser.setStatus(User.STATUS_VALID);
-    userService.save(targetUser);
+        Application app = new Application();
+        app.setUserId(user.getUserId());
+        app.setTeamId(1L);
+        applicationManageService.save(app);
 
-    Assertions.assertTrue(applicationInfoService.existsByUserId(user.getUserId()));
-    Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
+        User targetUser = new User();
+        targetUser.setUsername("test0");
+        targetUser.setNickName("test0");
+        targetUser.setPassword("test0");
+        targetUser.setUserType(UserTypeEnum.USER);
+        targetUser.setStatus(User.STATUS_VALID);
+        userService.save(targetUser);
 
-    userService.transferResource(user.getUserId(), targetUser.getUserId());
+        Assertions.assertTrue(applicationInfoService.existsByUserId(user.getUserId()));
+        Assertions.assertTrue(resourceService.existsByUserId(user.getUserId()));
 
-    Assertions.assertFalse(applicationInfoService.existsByUserId(user.getUserId()));
-    Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
+        userService.transferResource(user.getUserId(), targetUser.getUserId());
 
-    Assertions.assertTrue(applicationInfoService.existsByUserId(targetUser.getUserId()));
-    Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
-  }
+        Assertions.assertFalse(applicationInfoService.existsByUserId(user.getUserId()));
+        Assertions.assertFalse(resourceService.existsByUserId(user.getUserId()));
+
+        Assertions.assertTrue(applicationInfoService.existsByUserId(targetUser.getUserId()));
+        Assertions.assertTrue(resourceService.existsByUserId(targetUser.getUserId()));
+    }
 }

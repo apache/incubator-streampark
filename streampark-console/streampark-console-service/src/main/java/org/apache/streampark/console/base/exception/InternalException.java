@@ -20,11 +20,11 @@ package org.apache.streampark.console.base.exception;
 /** System Internal Exception */
 public class InternalException extends Exception {
 
-  public InternalException(String message) {
-    super(message);
-  }
+    public InternalException(String message) {
+        super(message);
+    }
 
-  public InternalException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public InternalException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

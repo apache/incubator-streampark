@@ -37,25 +37,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** org.apache.streampark.console.core.service.ResourceServiceTest. */
 class ResourceServiceTest extends SpringUnitTestBase {
 
-  @Autowired private ResourceService resourceService;
+    @Autowired
+    private ResourceService resourceService;
 
-  @Test
-  void testUpload(@TempDir Path tempDir) throws Exception {
-    // specify the file path
-    File fileToStoreUploadFile =
-        new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
-    FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
+    @Test
+    void testUpload(@TempDir Path tempDir) throws Exception {
+        // specify the file path
+        File fileToStoreUploadFile =
+                new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
+        FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
 
-    File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
-    FileUtils.createFile(fileToUpload.getAbsolutePath());
-    assertThat(fileToUpload).exists();
-    MultipartFile mulFile =
-        new MockMultipartFile(
-            "test", // fileName (eg: streampark.jar)
-            fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
-            // /tmp/file/streampark.jar)
-            ContentType.APPLICATION_OCTET_STREAM.toString(),
-            new FileInputStream(fileToStoreUploadFile));
-    resourceService.upload(mulFile);
-  }
+        File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
+        FileUtils.createFile(fileToUpload.getAbsolutePath());
+        assertThat(fileToUpload).exists();
+        MultipartFile mulFile =
+                new MockMultipartFile(
+                        "test", // fileName (eg: streampark.jar)
+                        fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
+                        // /tmp/file/streampark.jar)
+                        ContentType.APPLICATION_OCTET_STREAM.toString(),
+                        new FileInputStream(fileToStoreUploadFile));
+        resourceService.upload(mulFile);
+    }
 }

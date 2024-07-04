@@ -23,18 +23,24 @@ import java.util.List;
 
 /** WatchCallbackHandler that handle nothing. */
 public class SilentWatchCallbackHandler<K> implements FlinkKubeClient.WatchCallbackHandler<K> {
-  @Override
-  public void onAdded(List<K> resources) {}
 
-  @Override
-  public void onModified(List<K> resources) {}
+    @Override
+    public void onAdded(List<K> resources) {
+    }
 
-  @Override
-  public void onDeleted(List<K> resources) {}
+    @Override
+    public void onModified(List<K> resources) {
+    }
 
-  @Override
-  public void onError(List<K> resources) {}
+    @Override
+    public void onDeleted(List<K> resources) {
+    }
 
-  @Override
-  public void handleError(Throwable throwable) {}
+    @Override
+    public void onError(List<K> resources) {
+    }
+
+    @Override
+    public void handleError(Throwable throwable) {
+    }
 }

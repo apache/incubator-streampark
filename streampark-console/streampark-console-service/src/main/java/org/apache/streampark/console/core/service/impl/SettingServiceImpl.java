@@ -55,181 +55,182 @@ import java.util.Properties;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-    implements SettingService {
+        implements
+            SettingService {
 
-  private final Setting emptySetting = new Setting();
+    private final Setting emptySetting = new Setting();
 
-  @PostConstruct
-  public void loadSettings() {
-    list().forEach(x -> SETTINGS.put(x.getSettingKey(), x));
-  }
-
-  @Override
-  public Setting get(String key) {
-    LambdaQueryWrapper<Setting> queryWrapper =
-        new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, key);
-    return this.getOne(queryWrapper);
-  }
-
-  @Override
-  public boolean update(Setting setting) {
-    try {
-      String value = StringUtils.trimToNull(setting.getSettingValue());
-      setting.setSettingValue(value);
-
-      Setting entity = new Setting();
-      entity.setSettingValue(setting.getSettingValue());
-      LambdaQueryWrapper<Setting> queryWrapper =
-          new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
-      this.update(entity, queryWrapper);
-
-      getMavenConfig().updateConfig();
-
-      Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
-      optional.ifPresent(x -> x.setSettingValue(value));
-      return true;
-    } catch (Exception e) {
-      return false;
+    @PostConstruct
+    public void loadSettings() {
+        list().forEach(x -> SETTINGS.put(x.getSettingKey(), x));
     }
-  }
 
-  @Override
-  public MavenConfig getMavenConfig() {
-    return MavenConfig.fromSetting();
-  }
-
-  @Override
-  public DockerConfig getDockerConfig() {
-    return DockerConfig.fromSetting();
-  }
-
-  @Override
-  public String getStreamParkAddress() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public String getIngressModeDefault() {
-    return SETTINGS
-        .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
-        .getSettingValue();
-  }
-
-  @Override
-  public ResponseResult checkDocker(DockerConfig dockerConfig) {
-    DockerClientConfig config =
-        DefaultDockerClientConfig.createDefaultConfigBuilder()
-            .withRegistryUrl(dockerConfig.getAddress())
-            .build();
-
-    DockerHttpClient httpClient =
-        new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
-
-    ResponseResult result = new ResponseResult();
-
-    try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
-      AuthConfig authConfig =
-          new AuthConfig()
-              .withUsername(dockerConfig.getUsername())
-              .withPassword(dockerConfig.getPassword())
-              .withRegistryAddress(dockerConfig.getAddress());
-      AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
-      if (response.getStatus().equals("Login Succeeded")) {
-        result.setStatus(200);
-      } else {
-        result.setStatus(500);
-        result.setMsg("docker login failed, status: " + response.getStatus());
-      }
-    } catch (Exception e) {
-      if (e.getMessage().contains("LastErrorException")) {
-        result.setStatus(400);
-      } else if (e.getMessage().contains("Status 401")) {
-        result.setStatus(500);
-        result.setMsg(
-            "Failed to validate Docker registry, unauthorized: incorrect username or password ");
-      } else {
-        result.setStatus(500);
-        result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
-      }
-      log.warn("Failed to validate Docker registry, error:", e);
+    @Override
+    public Setting get(String key) {
+        LambdaQueryWrapper<Setting> queryWrapper =
+                new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, key);
+        return this.getOne(queryWrapper);
     }
-    return result;
-  }
 
-  @Override
-  public boolean updateDocker(DockerConfig dockerConfig) {
-    List<Setting> settings = DockerConfig.toSettings(dockerConfig);
-    for (Setting each : settings) {
-      if (!update(each)) {
-        return false;
-      }
+    @Override
+    public boolean update(Setting setting) {
+        try {
+            String value = StringUtils.trimToNull(setting.getSettingValue());
+            setting.setSettingValue(value);
+
+            Setting entity = new Setting();
+            entity.setSettingValue(setting.getSettingValue());
+            LambdaQueryWrapper<Setting> queryWrapper =
+                    new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
+            this.update(entity, queryWrapper);
+
+            getMavenConfig().updateConfig();
+
+            Optional<Setting> optional = Optional.ofNullable(SETTINGS.get(setting.getSettingKey()));
+            optional.ifPresent(x -> x.setSettingValue(value));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
-    return true;
-  }
 
-  @Override
-  public SenderEmail getSenderEmail() {
-    try {
-      String host = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue();
-      String port = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue();
-      String from = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue();
-      String userName = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue();
-      String password = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue();
-      String ssl = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue();
-
-      SenderEmail senderEmail = new SenderEmail();
-      senderEmail.setHost(host);
-      if (StringUtils.isNotBlank(port)) {
-        senderEmail.setPort(Integer.parseInt(port));
-      }
-      senderEmail.setFrom(from);
-      senderEmail.setUserName(userName);
-      senderEmail.setPassword(password);
-      if (StringUtils.isNotBlank(ssl)) {
-        senderEmail.setSsl(Boolean.parseBoolean(ssl));
-      }
-      return senderEmail;
-    } catch (Exception e) {
-      log.error("Fault Alert Email is not set.");
+    @Override
+    public MavenConfig getMavenConfig() {
+        return MavenConfig.fromSetting();
     }
-    return null;
-  }
 
-  @Override
-  public ResponseResult checkEmail(SenderEmail senderEmail) {
-    ResponseResult result = new ResponseResult();
-    Properties props = new Properties();
-    props.put("mail.smtp.auth", "true");
-    if (senderEmail.isSsl()) {
-      props.put("mail.smtp.starttls.enable", "true");
+    @Override
+    public DockerConfig getDockerConfig() {
+        return DockerConfig.fromSetting();
     }
-    props.put("mail.smtp.host", senderEmail.getHost());
-    props.put("mail.smtp.port", senderEmail.getPort());
 
-    Session session = Session.getInstance(props);
-    try {
-      Transport transport = session.getTransport("smtp");
-      transport.connect(
-          senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
-      transport.close();
-      result.setStatus(200);
-    } catch (MessagingException e) {
-      result.setStatus(500);
-      result.setMsg("connect to target mail server failed: " + e.getMessage());
+    @Override
+    public String getStreamParkAddress() {
+        return SETTINGS
+                .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
+                .getSettingValue();
     }
-    return result;
-  }
 
-  @Override
-  public boolean updateEmail(SenderEmail senderEmail) {
-    List<Setting> settings = SenderEmail.toSettings(senderEmail);
-    for (Setting each : settings) {
-      if (!update(each)) {
-        return false;
-      }
+    @Override
+    public String getIngressModeDefault() {
+        return SETTINGS
+                .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
+                .getSettingValue();
     }
-    return true;
-  }
+
+    @Override
+    public ResponseResult checkDocker(DockerConfig dockerConfig) {
+        DockerClientConfig config =
+                DefaultDockerClientConfig.createDefaultConfigBuilder()
+                        .withRegistryUrl(dockerConfig.getAddress())
+                        .build();
+
+        DockerHttpClient httpClient =
+                new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
+
+        ResponseResult result = new ResponseResult();
+
+        try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
+            AuthConfig authConfig =
+                    new AuthConfig()
+                            .withUsername(dockerConfig.getUsername())
+                            .withPassword(dockerConfig.getPassword())
+                            .withRegistryAddress(dockerConfig.getAddress());
+            AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
+            if (response.getStatus().equals("Login Succeeded")) {
+                result.setStatus(200);
+            } else {
+                result.setStatus(500);
+                result.setMsg("docker login failed, status: " + response.getStatus());
+            }
+        } catch (Exception e) {
+            if (e.getMessage().contains("LastErrorException")) {
+                result.setStatus(400);
+            } else if (e.getMessage().contains("Status 401")) {
+                result.setStatus(500);
+                result.setMsg(
+                        "Failed to validate Docker registry, unauthorized: incorrect username or password ");
+            } else {
+                result.setStatus(500);
+                result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
+            }
+            log.warn("Failed to validate Docker registry, error:", e);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateDocker(DockerConfig dockerConfig) {
+        List<Setting> settings = DockerConfig.toSettings(dockerConfig);
+        for (Setting each : settings) {
+            if (!update(each)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public SenderEmail getSenderEmail() {
+        try {
+            String host = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue();
+            String port = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue();
+            String from = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue();
+            String userName = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue();
+            String password = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue();
+            String ssl = SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue();
+
+            SenderEmail senderEmail = new SenderEmail();
+            senderEmail.setHost(host);
+            if (StringUtils.isNotBlank(port)) {
+                senderEmail.setPort(Integer.parseInt(port));
+            }
+            senderEmail.setFrom(from);
+            senderEmail.setUserName(userName);
+            senderEmail.setPassword(password);
+            if (StringUtils.isNotBlank(ssl)) {
+                senderEmail.setSsl(Boolean.parseBoolean(ssl));
+            }
+            return senderEmail;
+        } catch (Exception e) {
+            log.error("Fault Alert Email is not set.");
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseResult checkEmail(SenderEmail senderEmail) {
+        ResponseResult result = new ResponseResult();
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        if (senderEmail.isSsl()) {
+            props.put("mail.smtp.starttls.enable", "true");
+        }
+        props.put("mail.smtp.host", senderEmail.getHost());
+        props.put("mail.smtp.port", senderEmail.getPort());
+
+        Session session = Session.getInstance(props);
+        try {
+            Transport transport = session.getTransport("smtp");
+            transport.connect(
+                    senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
+            transport.close();
+            result.setStatus(200);
+        } catch (MessagingException e) {
+            result.setStatus(500);
+            result.setMsg("connect to target mail server failed: " + e.getMessage());
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateEmail(SenderEmail senderEmail) {
+        List<Setting> settings = SenderEmail.toSettings(senderEmail);
+        for (Setting each : settings) {
+            if (!update(each)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

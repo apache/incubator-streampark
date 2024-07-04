@@ -37,60 +37,61 @@ import java.util.List;
 @RequestMapping("flink/env")
 public class FlinkEnvController {
 
-  @Autowired private FlinkEnvService flinkEnvService;
+    @Autowired
+    private FlinkEnvService flinkEnvService;
 
-  @PostMapping("list")
-  public RestResponse list() {
-    List<FlinkEnv> flinkEnvList = flinkEnvService.list();
-    return RestResponse.success(flinkEnvList);
-  }
+    @PostMapping("list")
+    public RestResponse list() {
+        List<FlinkEnv> flinkEnvList = flinkEnvService.list();
+        return RestResponse.success(flinkEnvList);
+    }
 
-  @PostMapping("check")
-  public RestResponse check(FlinkEnv version) {
-    FlinkEnvCheckEnum checkResp = flinkEnvService.check(version);
-    return RestResponse.success(checkResp.getCode());
-  }
+    @PostMapping("check")
+    public RestResponse check(FlinkEnv version) {
+        FlinkEnvCheckEnum checkResp = flinkEnvService.check(version);
+        return RestResponse.success(checkResp.getCode());
+    }
 
-  @PostMapping("create")
-  public RestResponse create(FlinkEnv version) throws Exception {
-    flinkEnvService.create(version);
-    return RestResponse.success(true);
-  }
+    @PostMapping("create")
+    public RestResponse create(FlinkEnv version) throws Exception {
+        flinkEnvService.create(version);
+        return RestResponse.success(true);
+    }
 
-  @PostMapping("get")
-  public RestResponse get(Long id) throws Exception {
-    FlinkEnv flinkEnv = flinkEnvService.getById(id);
-    flinkEnv.unzipFlinkConf();
-    return RestResponse.success(flinkEnv);
-  }
+    @PostMapping("get")
+    public RestResponse get(Long id) throws Exception {
+        FlinkEnv flinkEnv = flinkEnvService.getById(id);
+        flinkEnv.unzipFlinkConf();
+        return RestResponse.success(flinkEnv);
+    }
 
-  @PostMapping("sync")
-  public RestResponse sync(Long id) throws Exception {
-    flinkEnvService.syncConf(id);
-    return RestResponse.success();
-  }
+    @PostMapping("sync")
+    public RestResponse sync(Long id) throws Exception {
+        flinkEnvService.syncConf(id);
+        return RestResponse.success();
+    }
 
-  @PostMapping("update")
-  public RestResponse update(FlinkEnv version) {
-    flinkEnvService.update(version);
-    return RestResponse.success(true);
-  }
+    @PostMapping("update")
+    public RestResponse update(FlinkEnv version) {
+        flinkEnvService.update(version);
+        return RestResponse.success(true);
+    }
 
-  @PostMapping("delete")
-  public RestResponse delete(Long id) {
-    flinkEnvService.removeById(id);
-    return RestResponse.success();
-  }
+    @PostMapping("delete")
+    public RestResponse delete(Long id) {
+        flinkEnvService.removeById(id);
+        return RestResponse.success();
+    }
 
-  @PostMapping("validity")
-  public RestResponse validity(FlinkEnv version) {
-    flinkEnvService.validity(version.getId());
-    return RestResponse.success(true);
-  }
+    @PostMapping("validity")
+    public RestResponse validity(FlinkEnv version) {
+        flinkEnvService.validity(version.getId());
+        return RestResponse.success(true);
+    }
 
-  @PostMapping("default")
-  public RestResponse setDefault(Long id) {
-    flinkEnvService.setDefault(id);
-    return RestResponse.success();
-  }
+    @PostMapping("default")
+    public RestResponse setDefault(Long id) {
+        flinkEnvService.setDefault(id);
+        return RestResponse.success();
+    }
 }

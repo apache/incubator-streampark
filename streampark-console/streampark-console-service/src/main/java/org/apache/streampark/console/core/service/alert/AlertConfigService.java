@@ -28,29 +28,29 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /** This interface defines operations related to alarm configuration. */
 public interface AlertConfigService extends IService<AlertConfig> {
 
-  /**
-   * Retrieves a page of {@link AlertConfigParams} objects based on the provided parameters.
-   *
-   * @param userId user id.
-   * @param request The {@link RestRequest} object used for pagination and sorting.
-   * @return An {@link IPage} containing the retrieved {@link AlertConfigParams} objects.
-   */
-  IPage<AlertConfigParams> page(Long userId, RestRequest request);
+    /**
+     * Retrieves a page of {@link AlertConfigParams} objects based on the provided parameters.
+     *
+     * @param userId user id.
+     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @return An {@link IPage} containing the retrieved {@link AlertConfigParams} objects.
+     */
+    IPage<AlertConfigParams> page(Long userId, RestRequest request);
 
-  /**
-   * check whether the relevant alarm configuration exists
-   *
-   * @param alertConfig AlertConfig to be checked
-   * @return Whether exist in database
-   */
-  boolean exist(AlertConfig alertConfig);
+    /**
+     * check whether the relevant alarm configuration exists
+     *
+     * @param alertConfig AlertConfig to be checked
+     * @return Whether exist in database
+     */
+    boolean exist(AlertConfig alertConfig);
 
-  /**
-   * Remove based on the id configured in the alert
-   *
-   * @param id AlertConfig id
-   * @return Whether removed is successful
-   * @throws AlertException
-   */
-  boolean removeById(Long id) throws AlertException;
+    /**
+     * Remove based on the id configured in the alert
+     *
+     * @param id AlertConfig id
+     * @return Whether removed is successful
+     * @throws AlertException
+     */
+    boolean removeById(Long id) throws AlertException;
 }

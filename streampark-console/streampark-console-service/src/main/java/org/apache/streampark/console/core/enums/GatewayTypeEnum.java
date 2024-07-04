@@ -26,28 +26,29 @@ import java.util.Arrays;
 @Getter
 public enum GatewayTypeEnum {
 
-  /** After flink 1.16 (including 1.16) */
-  FLINK_V1(1, "flink-v1"),
+    /** After flink 1.16 (including 1.16) */
+    FLINK_V1(1, "flink-v1"),
 
-  /** After flink 1.17 (including 1.17) */
-  FLINK_V2(2, "flink-v2"),
+    /** After flink 1.17 (including 1.17) */
+    FLINK_V2(2, "flink-v2"),
 
-  /** After kyuubi 1.7.0 (including 1.7.0) */
-  KYUUBI(10, "kyuubi"),
-  ;
-  @EnumValue private final int value;
+    /** After kyuubi 1.7.0 (including 1.7.0) */
+    KYUUBI(10, "kyuubi"),
+    ;
+    @EnumValue
+    private final int value;
 
-  private final String identifier;
+    private final String identifier;
 
-  GatewayTypeEnum(int value, String identifier) {
-    this.value = value;
-    this.identifier = identifier;
-  }
+    GatewayTypeEnum(int value, String identifier) {
+        this.value = value;
+        this.identifier = identifier;
+    }
 
-  public static GatewayTypeEnum of(int value) {
-    return Arrays.stream(values())
-        .filter(x -> x.value == value)
-        .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown GatewayTypeEnum value: " + value));
-  }
+    public static GatewayTypeEnum of(int value) {
+        return Arrays.stream(values())
+                .filter(x -> x.value == value)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown GatewayTypeEnum value: " + value));
+    }
 }

@@ -23,35 +23,35 @@ import java.util.Objects;
 /** {@link OperationHandle} to index the {@code Operation}. */
 public class OperationHandle implements Serializable {
 
-  private final String identifier;
+    private final String identifier;
 
-  public OperationHandle(String identifier) {
-    this.identifier = identifier;
-  }
-
-  public String getIdentifier() {
-    return identifier;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public OperationHandle(String identifier) {
+        this.identifier = identifier;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public String getIdentifier() {
+        return identifier;
     }
-    OperationHandle that = (OperationHandle) o;
-    return Objects.equals(identifier, that.identifier);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(identifier);
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        OperationHandle that = (OperationHandle) o;
+        return Objects.equals(identifier, that.identifier);
+    }
 
-  @Override
-  public String toString() {
-    return "OperationHandle{" + "identifier=" + identifier + '}';
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier);
+    }
+
+    @Override
+    public String toString() {
+        return "OperationHandle{" + "identifier=" + identifier + '}';
+    }
 }

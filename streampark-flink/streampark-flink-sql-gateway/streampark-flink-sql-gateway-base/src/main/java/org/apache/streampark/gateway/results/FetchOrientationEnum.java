@@ -20,9 +20,9 @@ package org.apache.streampark.gateway.results;
 /** Orientation to fetch results. */
 public enum FetchOrientationEnum {
 
-  /** Fetch the next results. */
-  FETCH_NEXT,
+    /** Fetch the next results. */
+    FETCH_NEXT,
 
-  /** Fetch the prior results. */
-  FETCH_PRIOR
+    /** Fetch the prior results. */
+    FETCH_PRIOR
 }

@@ -21,5 +21,5 @@ import java.util.List;
 
 public interface SqlCompleteService {
 
-  List<String> getComplete(String sql);
+    List<String> getComplete(String sql);
 }

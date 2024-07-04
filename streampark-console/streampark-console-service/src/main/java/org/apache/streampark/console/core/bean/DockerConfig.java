@@ -37,56 +37,56 @@ import java.util.List;
 @Slf4j
 public class DockerConfig {
 
-  private String address;
-  private String username;
-  private String password;
-  private String namespace;
+    private String address;
+    private String username;
+    private String password;
+    private String namespace;
 
-  public static DockerConfig fromSetting() {
-    try {
-      DockerConfig dockerConfig = new DockerConfig();
+    public static DockerConfig fromSetting() {
+        try {
+            DockerConfig dockerConfig = new DockerConfig();
 
-      dockerConfig.setAddress(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
-              .getSettingValue());
+            dockerConfig.setAddress(
+                    SettingService.SETTINGS
+                            .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
+                            .getSettingValue());
 
-      dockerConfig.setUsername(
-          SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+            dockerConfig.setUsername(
+                    SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
 
-      dockerConfig.setPassword(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
-              .getSettingValue());
+            dockerConfig.setPassword(
+                    SettingService.SETTINGS
+                            .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
+                            .getSettingValue());
 
-      dockerConfig.setNamespace(
-          SettingService.SETTINGS
-              .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
-              .getSettingValue());
+            dockerConfig.setNamespace(
+                    SettingService.SETTINGS
+                            .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
+                            .getSettingValue());
 
-      return dockerConfig;
-    } catch (Exception e) {
-      log.warn("Failed to create DockerConfig from settings", e);
+            return dockerConfig;
+        } catch (Exception e) {
+            log.warn("Failed to create DockerConfig from settings", e);
+        }
+        return null;
     }
-    return null;
-  }
 
-  public static List<Setting> toSettings(DockerConfig dockerConfig) {
-    Setting address = new Setting();
-    address.setSettingKey(SettingService.KEY_DOCKER_REGISTER_ADDRESS);
-    address.setSettingValue(dockerConfig.getAddress());
+    public static List<Setting> toSettings(DockerConfig dockerConfig) {
+        Setting address = new Setting();
+        address.setSettingKey(SettingService.KEY_DOCKER_REGISTER_ADDRESS);
+        address.setSettingValue(dockerConfig.getAddress());
 
-    Setting username = new Setting();
-    username.setSettingKey(SettingService.KEY_DOCKER_REGISTER_USER);
-    username.setSettingValue(dockerConfig.getUsername());
+        Setting username = new Setting();
+        username.setSettingKey(SettingService.KEY_DOCKER_REGISTER_USER);
+        username.setSettingValue(dockerConfig.getUsername());
 
-    Setting password = new Setting();
-    password.setSettingKey(SettingService.KEY_DOCKER_REGISTER_PASSWORD);
-    password.setSettingValue(dockerConfig.getPassword());
+        Setting password = new Setting();
+        password.setSettingKey(SettingService.KEY_DOCKER_REGISTER_PASSWORD);
+        password.setSettingValue(dockerConfig.getPassword());
 
-    Setting namespace = new Setting();
-    namespace.setSettingKey(SettingService.KEY_DOCKER_REGISTER_NAMESPACE);
-    namespace.setSettingValue(dockerConfig.getNamespace());
-    return Arrays.asList(address, username, password, namespace);
-  }
+        Setting namespace = new Setting();
+        namespace.setSettingKey(SettingService.KEY_DOCKER_REGISTER_NAMESPACE);
+        namespace.setSettingValue(dockerConfig.getNamespace());
+        return Arrays.asList(address, username, password, namespace);
+    }
 }

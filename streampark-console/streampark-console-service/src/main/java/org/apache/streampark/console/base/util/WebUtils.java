@@ -31,96 +31,97 @@ import java.util.stream.IntStream;
 @Slf4j
 public final class WebUtils {
 
-  private static final String TEMP = "temp";
-  private static final String LIB = "lib";
-  private static final String PLUGINS = "plugins";
-  private static final String CLIENT = "client";
-  private static final String CONF = "conf";
+    private static final String TEMP = "temp";
+    private static final String LIB = "lib";
+    private static final String PLUGINS = "plugins";
+    private static final String CLIENT = "client";
+    private static final String CONF = "conf";
 
-  private WebUtils() {}
-
-  /**
-   * token encrypt
-   *
-   * @param token token
-   * @return encrypt token
-   */
-  public static String encryptToken(String token) {
-    try {
-      return EncryptUtils.encrypt(token);
-    } catch (Exception e) {
-      log.info("token encrypt failed: ", e);
-      return null;
+    private WebUtils() {
     }
-  }
 
-  /**
-   * token decrypt
-   *
-   * @param encryptToken encryptToken
-   * @return decrypt token
-   */
-  public static String decryptToken(String encryptToken) {
-    try {
-      return EncryptUtils.decrypt(encryptToken);
-    } catch (Exception e) {
-      log.info("token decrypt failed: ", e);
-      return null;
+    /**
+     * token encrypt
+     *
+     * @param token token
+     * @return encrypt token
+     */
+    public static String encryptToken(String token) {
+        try {
+            return EncryptUtils.encrypt(token);
+        } catch (Exception e) {
+            log.info("token encrypt failed: ", e);
+            return null;
+        }
     }
-  }
 
-  /**
-   * camel to underscore
-   *
-   * @param value value
-   * @return underscore
-   */
-  public static String camelToUnderscore(String value) {
-    if (StringUtils.isBlank(value) || value.contains("_")) {
-      return value;
+    /**
+     * token decrypt
+     *
+     * @param encryptToken encryptToken
+     * @return decrypt token
+     */
+    public static String decryptToken(String encryptToken) {
+        try {
+            return EncryptUtils.decrypt(encryptToken);
+        } catch (Exception e) {
+            log.info("token decrypt failed: ", e);
+            return null;
+        }
     }
-    String[] arr = StringUtils.splitByCharacterTypeCamelCase(value);
-    if (arr.length == 0) {
-      return value;
+
+    /**
+     * camel to underscore
+     *
+     * @param value value
+     * @return underscore
+     */
+    public static String camelToUnderscore(String value) {
+        if (StringUtils.isBlank(value) || value.contains("_")) {
+            return value;
+        }
+        String[] arr = StringUtils.splitByCharacterTypeCamelCase(value);
+        if (arr.length == 0) {
+            return value;
+        }
+        StringBuilder result = new StringBuilder();
+        IntStream.range(0, arr.length)
+                .forEach(
+                        i -> {
+                            if (i != arr.length - 1) {
+                                result.append(arr[i]).append(StringPool.UNDERSCORE);
+                            } else {
+                                result.append(arr[i]);
+                            }
+                        });
+        return StringUtils.lowerCase(result.toString());
     }
-    StringBuilder result = new StringBuilder();
-    IntStream.range(0, arr.length)
-        .forEach(
-            i -> {
-              if (i != arr.length - 1) {
-                result.append(arr[i]).append(StringPool.UNDERSCORE);
-              } else {
-                result.append(arr[i]);
-              }
-            });
-    return StringUtils.lowerCase(result.toString());
-  }
 
-  public static String getAppHome() {
-    return System.getProperty(ConfigKeys.KEY_APP_HOME());
-  }
+    public static String getAppHome() {
+        return System.getProperty(ConfigKeys.KEY_APP_HOME());
+    }
 
-  public static File getAppDir(String dir) {
-    return new File(getAppHome(), dir);
-  }
+    public static File getAppDir(String dir) {
+        return new File(getAppHome(), dir);
+    }
 
-  public static File getAppTempDir() {
-    return getAppDir(TEMP);
-  }
+    public static File getAppTempDir() {
+        return getAppDir(TEMP);
+    }
 
-  public static File getAppLibDir() {
-    return getAppDir(LIB);
-  }
+    public static File getAppLibDir() {
+        return getAppDir(LIB);
+    }
 
-  public static File getAppPluginsDir() {
-    return getAppDir(PLUGINS);
-  }
+    public static File getAppPluginsDir() {
+        return getAppDir(PLUGINS);
+    }
 
-  public static File getAppClientDir() {
-    return getAppDir(CLIENT);
-  }
+    public static File getAppClientDir() {
+        return getAppDir(CLIENT);
+    }
 
-  public static File getAppConfDir() {
-    return getAppDir(CONF);
-  }
+    public static File getAppConfDir() {
+        return getAppDir(CONF);
+    }
 }

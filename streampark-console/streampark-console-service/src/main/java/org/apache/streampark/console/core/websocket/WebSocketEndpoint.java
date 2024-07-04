@@ -40,57 +40,57 @@ import java.util.Map;
 @ServerEndpoint(value = "/websocket/{id}")
 public class WebSocketEndpoint {
 
-  private static final Map<String, Session> SOCKET_SESSIONS = new CopyOnWriteMap<>();
+    private static final Map<String, Session> SOCKET_SESSIONS = new CopyOnWriteMap<>();
 
-  private String id;
+    private String id;
 
-  private Session session;
+    private Session session;
 
-  @OnOpen
-  public void onOpen(Session session, @PathParam("id") String id) {
-    log.debug("Websocket onOpen....");
-    this.id = id;
-    this.session = session;
-    SOCKET_SESSIONS.put(id, session);
-  }
+    @OnOpen
+    public void onOpen(Session session, @PathParam("id") String id) {
+        log.debug("Websocket onOpen....");
+        this.id = id;
+        this.session = session;
+        SOCKET_SESSIONS.put(id, session);
+    }
 
-  @OnClose
-  public void onClose() {
-    if (SOCKET_SESSIONS.containsKey(this.id)) {
-      try (Session remove = SOCKET_SESSIONS.remove(this.id)) {
-        if (remove != null) {
-          log.debug("Websocket onClose id: {}", this.id);
+    @OnClose
+    public void onClose() {
+        if (SOCKET_SESSIONS.containsKey(this.id)) {
+            try (Session remove = SOCKET_SESSIONS.remove(this.id)) {
+                if (remove != null) {
+                    log.debug("Websocket onClose id: {}", this.id);
+                }
+            } catch (IOException e) {
+                log.error("WebSocket onClose error: {}", e.getMessage(), e);
+            }
         }
-      } catch (IOException e) {
-        log.error("WebSocket onClose error: {}", e.getMessage(), e);
-      }
     }
-  }
 
-  @OnError
-  public void onError(Session session, Throwable e) {
-    log.error(e.getMessage(), e);
-  }
-
-  public static void writeMessage(String socketId, String message) {
-    try {
-      Session session = SOCKET_SESSIONS.get(socketId);
-      if (session != null) {
-        session.getBasicRemote().sendText(message);
-      }
-    } catch (IOException e) {
-      log.error(e.getMessage(), e);
+    @OnError
+    public void onError(Session session, Throwable e) {
+        log.error(e.getMessage(), e);
     }
-  }
 
-  public static void pushNotice(Message message) {
-    try {
-      Session session = SOCKET_SESSIONS.get(message.getUserId().toString());
-      if (session != null) {
-        session.getBasicRemote().sendObject(message);
-      }
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
+    public static void writeMessage(String socketId, String message) {
+        try {
+            Session session = SOCKET_SESSIONS.get(socketId);
+            if (session != null) {
+                session.getBasicRemote().sendText(message);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
-  }
+
+    public static void pushNotice(Message message) {
+        try {
+            Session session = SOCKET_SESSIONS.get(message.getUserId().toString());
+            if (session != null) {
+                session.getBasicRemote().sendObject(message);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }

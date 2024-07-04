@@ -26,19 +26,20 @@ import java.util.Arrays;
 @Getter
 public enum UserTypeEnum {
 
-  /** The admin of StreamPark. */
-  ADMIN(1),
+    /** The admin of StreamPark. */
+    ADMIN(1),
 
-  /** The user of StreamPark. */
-  USER(2);
+    /** The user of StreamPark. */
+    USER(2);
 
-  @EnumValue private final int code;
+    @EnumValue
+    private final int code;
 
-  UserTypeEnum(int code) {
-    this.code = code;
-  }
+    UserTypeEnum(int code) {
+        this.code = code;
+    }
 
-  public static UserTypeEnum of(Integer code) {
-    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-  }
+    public static UserTypeEnum of(Integer code) {
+        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+    }
 }

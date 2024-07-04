@@ -58,86 +58,84 @@ import static java.util.Objects.requireNonNull;
 @AutoConfigureTestEntityManager
 @AutoConfigureWebTestClient(timeout = "60000")
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
-@SpringBootTest(
-    classes = StreamParkConsoleBootstrap.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
-    properties = {
-      "server.port=10000",
-      "spring.application.name=Apache StreamPark",
-      "spring.main.banner-mode=false",
-      "spring.aop.proxy-target-class=true",
-      "spring.messages.encoding=utf-8",
-      "spring.main.allow-circular-references=true",
-      "spring.mvc.converters.preferred-json-mapper=jackson",
-      "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
-      "spring.jackson.time-zone=GMT+8",
-      "spring.jackson.deserialization.fail-on-unknown-properties=false",
-      "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
-      "datasource.dialect=h2",
-      "spring.datasource.driver-class-name=org.h2.Driver",
-      "spring.datasource.username=sa",
-      "spring.datasource.password=sa",
-      "spring.datasource.url=jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
-      "spring.sql.init.data-locations=classpath:db/data-h2.sql",
-      "spring.sql.init.continue-on-error=true",
-      "spring.sql.init.username=sa",
-      "spring.sql.init.password=sa",
-      "spring.sql.init.mode=always"
-    })
+@SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
+        "server.port=10000",
+        "spring.application.name=Apache StreamPark",
+        "spring.main.banner-mode=false",
+        "spring.aop.proxy-target-class=true",
+        "spring.messages.encoding=utf-8",
+        "spring.main.allow-circular-references=true",
+        "spring.mvc.converters.preferred-json-mapper=jackson",
+        "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
+        "spring.jackson.time-zone=GMT+8",
+        "spring.jackson.deserialization.fail-on-unknown-properties=false",
+        "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
+        "datasource.dialect=h2",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=sa",
+        "spring.datasource.url=jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+        "spring.sql.init.data-locations=classpath:db/data-h2.sql",
+        "spring.sql.init.continue-on-error=true",
+        "spring.sql.init.username=sa",
+        "spring.sql.init.password=sa",
+        "spring.sql.init.mode=always"
+})
 public abstract class SpringIntegrationTestBase {
-  protected static final Logger LOG = LoggerFactory.getLogger(SpringIntegrationTestBase.class);
 
-  protected static final String RUN_PKG_SCRIPT_HINT =
-      "Please run package script before running the test case.";
+    protected static final Logger LOG = LoggerFactory.getLogger(SpringIntegrationTestBase.class);
 
-  protected static final String DEFAULT_APP_HOME_DIR_NAME = "apache-streampark";
-  protected static final String DEFAULT_LOCAL_WORKSPACE_DIR_NAME = "localWorkspace";
-  protected static final String DEFAULT_FLINK_VERSION = "1.17.1";
-  protected static final FileFilter PKG_NAME_FILTER =
-      file -> file.getName().startsWith(DEFAULT_APP_HOME_DIR_NAME) && file.isDirectory();
-  protected static String defaultFlinkHome = "/tmp/flink-1.17.1";
-  protected static String appHome;
+    protected static final String RUN_PKG_SCRIPT_HINT =
+            "Please run package script before running the test case.";
 
-  @BeforeAll
-  public static void init(@TempDir File tempPath) throws IOException {
+    protected static final String DEFAULT_APP_HOME_DIR_NAME = "apache-streampark";
+    protected static final String DEFAULT_LOCAL_WORKSPACE_DIR_NAME = "localWorkspace";
+    protected static final String DEFAULT_FLINK_VERSION = "1.17.1";
+    protected static final FileFilter PKG_NAME_FILTER =
+            file -> file.getName().startsWith(DEFAULT_APP_HOME_DIR_NAME) && file.isDirectory();
+    protected static String defaultFlinkHome = "/tmp/flink-1.17.1";
+    protected static String appHome;
 
-    LOG.info("Start prepare the real running env.");
-    String tempAbsPath = tempPath.getAbsolutePath();
-    LOG.info("Integration test base tmp dir: {}", tempAbsPath);
+    @BeforeAll
+    public static void init(@TempDir File tempPath) throws IOException {
 
-    FileUtils.copyDirectory(
-        tryFindStreamParkPackagedDirFile(), new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME));
+        LOG.info("Start prepare the real running env.");
+        String tempAbsPath = tempPath.getAbsolutePath();
+        LOG.info("Integration test base tmp dir: {}", tempAbsPath);
 
-    Path localWorkspace =
-        Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
+        FileUtils.copyDirectory(
+                tryFindStreamParkPackagedDirFile(), new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME));
 
-    appHome = new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME).getAbsolutePath();
-    System.setProperty(ConfigKeys.KEY_APP_HOME(), appHome);
-    System.setProperty(
-        CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-        localWorkspace.toAbsolutePath().toString());
+        Path localWorkspace =
+                Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
 
-    LOG.info(
-        "Complete mock EnvInitializer init, app home: {}, {}: {}",
-        appHome,
-        CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-        localWorkspace.toAbsolutePath());
-  }
+        appHome = new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME).getAbsolutePath();
+        System.setProperty(ConfigKeys.KEY_APP_HOME(), appHome);
+        System.setProperty(
+                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+                localWorkspace.toAbsolutePath().toString());
 
-  private static File tryFindStreamParkPackagedDirFile() {
-    String userDir = AssertUtils.notNull(SystemPropertyUtils.get("user.dir"));
-    File pkgTargetDirFile = new File(userDir, "target");
-    AssertUtils.state(
-        pkgTargetDirFile.exists(),
-        String.format(
-            "The target directory of %s doesn't exist. %s", userDir, RUN_PKG_SCRIPT_HINT));
-    Optional<File> availablePkgParentFileOpt =
-        Arrays.stream(requireNonNull(pkgTargetDirFile.listFiles(PKG_NAME_FILTER))).findFirst();
-    final File availablePkgParentFile =
-        availablePkgParentFileOpt.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
-    Optional<File> targetDirFile =
-        Arrays.stream(requireNonNull(availablePkgParentFile.listFiles(PKG_NAME_FILTER)))
-            .findFirst();
-    return targetDirFile.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
-  }
+        LOG.info(
+                "Complete mock EnvInitializer init, app home: {}, {}: {}",
+                appHome,
+                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+                localWorkspace.toAbsolutePath());
+    }
+
+    private static File tryFindStreamParkPackagedDirFile() {
+        String userDir = AssertUtils.notNull(SystemPropertyUtils.get("user.dir"));
+        File pkgTargetDirFile = new File(userDir, "target");
+        AssertUtils.state(
+                pkgTargetDirFile.exists(),
+                String.format(
+                        "The target directory of %s doesn't exist. %s", userDir, RUN_PKG_SCRIPT_HINT));
+        Optional<File> availablePkgParentFileOpt =
+                Arrays.stream(requireNonNull(pkgTargetDirFile.listFiles(PKG_NAME_FILTER))).findFirst();
+        final File availablePkgParentFile =
+                availablePkgParentFileOpt.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
+        Optional<File> targetDirFile =
+                Arrays.stream(requireNonNull(availablePkgParentFile.listFiles(PKG_NAME_FILTER)))
+                        .findFirst();
+        return targetDirFile.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
+    }
 }

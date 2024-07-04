@@ -48,53 +48,54 @@ import java.util.List;
 @RequestMapping("member")
 public class MemberController {
 
-  @Autowired private MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
-  @PostMapping("list")
-  public RestResponse memberList(RestRequest restRequest, Member member) {
-    IPage<Member> userList = memberService.getPage(member, restRequest);
-    return RestResponse.success(userList);
-  }
+    @PostMapping("list")
+    public RestResponse memberList(RestRequest restRequest, Member member) {
+        IPage<Member> userList = memberService.getPage(member, restRequest);
+        return RestResponse.success(userList);
+    }
 
-  @PostMapping("candidateUsers")
-  public RestResponse candidateUsers(Long teamId) {
-    List<User> userList = memberService.listUsersNotInTeam(teamId);
-    return RestResponse.success(userList);
-  }
+    @PostMapping("candidateUsers")
+    public RestResponse candidateUsers(Long teamId) {
+        List<User> userList = memberService.listUsersNotInTeam(teamId);
+        return RestResponse.success(userList);
+    }
 
-  @PostMapping("teams")
-  public RestResponse listTeams(Long userId) {
-    List<Team> teamList = memberService.listTeamsByUserId(userId);
-    return RestResponse.success(teamList);
-  }
+    @PostMapping("teams")
+    public RestResponse listTeams(Long userId) {
+        List<Team> teamList = memberService.listTeamsByUserId(userId);
+        return RestResponse.success(teamList);
+    }
 
-  @PostMapping("check/user")
-  public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
-    Member result = this.memberService.getByTeamIdUserName(teamId, userName);
-    return RestResponse.success(result == null);
-  }
+    @PostMapping("check/user")
+    public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
+        Member result = this.memberService.getByTeamIdUserName(teamId, userName);
+        return RestResponse.success(result == null);
+    }
 
-  @PostMapping("post")
-  @PermissionScope(team = "#member.teamId")
-  @RequiresPermissions("member:add")
-  public RestResponse create(@Valid Member member) {
-    this.memberService.createMember(member);
-    return RestResponse.success();
-  }
+    @PostMapping("post")
+    @PermissionScope(team = "#member.teamId")
+    @RequiresPermissions("member:add")
+    public RestResponse create(@Valid Member member) {
+        this.memberService.createMember(member);
+        return RestResponse.success();
+    }
 
-  @DeleteMapping("delete")
-  @PermissionScope(team = "#member.teamId")
-  @RequiresPermissions("member:delete")
-  public RestResponse delete(Member member) {
-    this.memberService.remove(member.getId());
-    return RestResponse.success();
-  }
+    @DeleteMapping("delete")
+    @PermissionScope(team = "#member.teamId")
+    @RequiresPermissions("member:delete")
+    public RestResponse delete(Member member) {
+        this.memberService.remove(member.getId());
+        return RestResponse.success();
+    }
 
-  @PutMapping("update")
-  @PermissionScope(team = "#member.teamId")
-  @RequiresPermissions("member:update")
-  public RestResponse update(Member member) {
-    this.memberService.updateMember(member);
-    return RestResponse.success();
-  }
+    @PutMapping("update")
+    @PermissionScope(team = "#member.teamId")
+    @RequiresPermissions("member:update")
+    public RestResponse update(Member member) {
+        this.memberService.updateMember(member);
+        return RestResponse.success();
+    }
 }

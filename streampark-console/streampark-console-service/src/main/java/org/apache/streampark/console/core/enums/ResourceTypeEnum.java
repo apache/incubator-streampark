@@ -26,28 +26,29 @@ import java.util.Arrays;
 @Getter
 public enum ResourceTypeEnum {
 
-  /** Flink application */
-  FLINK_APP(0),
+    /** Flink application */
+    FLINK_APP(0),
 
-  /** connector plugin */
-  CONNECTOR(1),
+    /** connector plugin */
+    CONNECTOR(1),
 
-  /** User defined function, including udf/udaf/udtf */
-  UDXF(2),
+    /** User defined function, including udf/udaf/udtf */
+    UDXF(2),
 
-  /** Common resource, like mysql-jdbc */
-  JAR_LIBRARY(3),
+    /** Common resource, like mysql-jdbc */
+    JAR_LIBRARY(3),
 
-  /** Reserved for resource group */
-  GROUP(4);
+    /** Reserved for resource group */
+    GROUP(4);
 
-  @EnumValue private final int code;
+    @EnumValue
+    private final int code;
 
-  ResourceTypeEnum(int code) {
-    this.code = code;
-  }
+    ResourceTypeEnum(int code) {
+        this.code = code;
+    }
 
-  public static ResourceTypeEnum of(Integer code) {
-    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-  }
+    public static ResourceTypeEnum of(Integer code) {
+        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+    }
 }

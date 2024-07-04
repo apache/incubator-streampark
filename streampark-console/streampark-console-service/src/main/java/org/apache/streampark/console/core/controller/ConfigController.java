@@ -44,46 +44,47 @@ import java.util.Map;
 @RequestMapping("flink/conf")
 public class ConfigController {
 
-  @Autowired private ApplicationConfigService applicationConfigService;
+    @Autowired
+    private ApplicationConfigService applicationConfigService;
 
-  @PostMapping("get")
-  public RestResponse get(Long id) {
-    ApplicationConfig config = applicationConfigService.get(id);
-    return RestResponse.success(config);
-  }
+    @PostMapping("get")
+    public RestResponse get(Long id) {
+        ApplicationConfig config = applicationConfigService.get(id);
+        return RestResponse.success(config);
+    }
 
-  @PostMapping("template")
-  public RestResponse template() {
-    String config = applicationConfigService.readTemplate();
-    return RestResponse.success(config);
-  }
+    @PostMapping("template")
+    public RestResponse template() {
+        String config = applicationConfigService.readTemplate();
+        return RestResponse.success(config);
+    }
 
-  @PostMapping("list")
-  public RestResponse list(ApplicationConfig config, RestRequest request) {
-    IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
-    return RestResponse.success(page);
-  }
+    @PostMapping("list")
+    public RestResponse list(ApplicationConfig config, RestRequest request) {
+        IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
+        return RestResponse.success(page);
+    }
 
-  @PostMapping("history")
-  public RestResponse history(Application application) {
-    List<ApplicationConfig> history = applicationConfigService.list(application.getId());
-    return RestResponse.success(history);
-  }
+    @PostMapping("history")
+    public RestResponse history(Application application) {
+        List<ApplicationConfig> history = applicationConfigService.list(application.getId());
+        return RestResponse.success(history);
+    }
 
-  @PostMapping("delete")
-  @RequiresPermissions("conf:delete")
-  public RestResponse delete(Long id) {
-    Boolean deleted = applicationConfigService.removeById(id);
-    return RestResponse.success(deleted);
-  }
+    @PostMapping("delete")
+    @RequiresPermissions("conf:delete")
+    public RestResponse delete(Long id) {
+        Boolean deleted = applicationConfigService.removeById(id);
+        return RestResponse.success(deleted);
+    }
 
-  @PostMapping("sysHadoopConf")
-  @RequiresPermissions("app:create")
-  public RestResponse getSystemHadoopConfig() {
-    Map<String, Map<String, String>> result =
-        ImmutableMap.of(
-            "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
-            "hive", HadoopConfigUtils.readSystemHiveConf());
-    return RestResponse.success(result);
-  }
+    @PostMapping("sysHadoopConf")
+    @RequiresPermissions("app:create")
+    public RestResponse getSystemHadoopConfig() {
+        Map<String, Map<String, String>> result =
+                ImmutableMap.of(
+                        "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
+                        "hive", HadoopConfigUtils.readSystemHiveConf());
+        return RestResponse.success(result);
+    }
 }

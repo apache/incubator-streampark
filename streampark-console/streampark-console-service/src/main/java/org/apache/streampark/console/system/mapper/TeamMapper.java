@@ -29,7 +29,7 @@ import java.util.List;
 
 public interface TeamMapper extends BaseMapper<Team> {
 
-  IPage<Team> selectPage(Page<Team> page, @Param("team") Team team);
+    IPage<Team> selectPage(Page<Team> page, @Param("team") Team team);
 
-  List<Team> selectTeamsByUserId(Long userId);
+    List<Team> selectTeamsByUserId(Long userId);
 }

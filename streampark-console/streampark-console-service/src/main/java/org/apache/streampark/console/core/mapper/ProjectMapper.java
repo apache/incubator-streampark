@@ -29,15 +29,15 @@ import java.util.List;
 
 public interface ProjectMapper extends BaseMapper<Project> {
 
-  void updateBuildState(@Param("id") Long id, @Param("state") Integer buildState);
+    void updateBuildState(@Param("id") Long id, @Param("state") Integer buildState);
 
-  void updateBuildTime(@Param("id") Long id);
+    void updateBuildTime(@Param("id") Long id);
 
-  IPage<Project> selectPage(Page<Project> page, @Param("project") Project project);
+    IPage<Project> selectPage(Page<Project> page, @Param("project") Project project);
 
-  boolean existsByTeamId(@Param("teamId") Long teamId);
+    boolean existsByTeamId(@Param("teamId") Long teamId);
 
-  List<Project> selectProjectsByTeamId(@Param("teamId") Long teamId);
+    List<Project> selectProjectsByTeamId(@Param("teamId") Long teamId);
 
-  Long getBuildingCount();
+    Long getBuildingCount();
 }

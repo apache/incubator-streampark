@@ -19,15 +19,15 @@ package org.apache.streampark.gateway.results;
 
 /** ResultKind defines the types of the result. */
 public enum ResultKindEnum {
-  /**
-   * The statement (e.g. DDL, USE) executes successfully, and the result only contains a simple
-   * "OK".
-   */
-  SUCCESS,
+    /**
+     * The statement (e.g. DDL, USE) executes successfully, and the result only contains a simple
+     * "OK".
+     */
+    SUCCESS,
 
-  /**
-   * The statement (e.g. DML, DQL, SHOW) executes successfully, and the result contains important
-   * content.
-   */
-  SUCCESS_WITH_CONTENT
+    /**
+     * The statement (e.g. DML, DQL, SHOW) executes successfully, and the result contains important
+     * content.
+     */
+    SUCCESS_WITH_CONTENT
 }

@@ -21,7 +21,8 @@ import lombok.Data;
 
 @Data
 public class ResponseResult<T> {
-  private int status;
-  private String msg;
-  private T result;
+
+    private int status;
+    private String msg;
+    private T result;
 }

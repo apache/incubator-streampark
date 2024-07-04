@@ -22,69 +22,71 @@ import java.util.Objects;
 
 /** Condition of result query. */
 public class ResultQueryCondition implements Serializable {
-  public FetchOrientationEnum orientation;
 
-  public long token;
-  public int maxRows;
+    public FetchOrientationEnum orientation;
 
-  public ResultQueryCondition() {}
+    public long token;
+    public int maxRows;
 
-  public ResultQueryCondition(FetchOrientationEnum orientation, long token, int maxRows) {
-    this.orientation = orientation;
-    this.token = token;
-    this.maxRows = maxRows;
-  }
-
-  public FetchOrientationEnum getOrientation() {
-    return orientation;
-  }
-
-  public void setOrientation(FetchOrientationEnum orientation) {
-    this.orientation = orientation;
-  }
-
-  public long getToken() {
-    return token;
-  }
-
-  public void setToken(long token) {
-    this.token = token;
-  }
-
-  public int getMaxRows() {
-    return maxRows;
-  }
-
-  public void setMaxRows(int maxRows) {
-    this.maxRows = maxRows;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public ResultQueryCondition() {
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public ResultQueryCondition(FetchOrientationEnum orientation, long token, int maxRows) {
+        this.orientation = orientation;
+        this.token = token;
+        this.maxRows = maxRows;
     }
-    ResultQueryCondition that = (ResultQueryCondition) o;
-    return token == that.token && maxRows == that.maxRows && orientation == that.orientation;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(orientation, token, maxRows);
-  }
+    public FetchOrientationEnum getOrientation() {
+        return orientation;
+    }
 
-  @Override
-  public String toString() {
-    return "ResultQueryCondition{"
-        + "orientation="
-        + orientation
-        + ", token="
-        + token
-        + ", maxRows="
-        + maxRows
-        + '}';
-  }
+    public void setOrientation(FetchOrientationEnum orientation) {
+        this.orientation = orientation;
+    }
+
+    public long getToken() {
+        return token;
+    }
+
+    public void setToken(long token) {
+        this.token = token;
+    }
+
+    public int getMaxRows() {
+        return maxRows;
+    }
+
+    public void setMaxRows(int maxRows) {
+        this.maxRows = maxRows;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ResultQueryCondition that = (ResultQueryCondition) o;
+        return token == that.token && maxRows == that.maxRows && orientation == that.orientation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orientation, token, maxRows);
+    }
+
+    @Override
+    public String toString() {
+        return "ResultQueryCondition{"
+                + "orientation="
+                + orientation
+                + ", token="
+                + token
+                + ", maxRows="
+                + maxRows
+                + '}';
+    }
 }

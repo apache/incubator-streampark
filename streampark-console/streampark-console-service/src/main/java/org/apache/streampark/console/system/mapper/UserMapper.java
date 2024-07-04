@@ -29,13 +29,13 @@ import java.util.List;
 
 public interface UserMapper extends BaseMapper<User> {
 
-  IPage<User> selectPage(Page page, @Param("user") User user);
+    IPage<User> selectPage(Page page, @Param("user") User user);
 
-  List<User> selectNoTokenUsers();
+    List<User> selectNoTokenUsers();
 
-  List<User> selectUsersByAppOwner(@Param("teamId") Long teamId);
+    List<User> selectUsersByAppOwner(@Param("teamId") Long teamId);
 
-  void clearLastTeamByUserId(@Param("userId") Long userId);
+    void clearLastTeamByUserId(@Param("userId") Long userId);
 
-  void clearLastTeamByTeamId(@Param("teamId") Long teamId);
+    void clearLastTeamByTeamId(@Param("teamId") Long teamId);
 }

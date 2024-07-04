@@ -22,17 +22,17 @@ import com.github.dockerjava.api.model.PullResponseItem;
 
 public class HackPullImageResultCallback extends PullImageResultCallback {
 
-  private final PullImageCallbackListener listener;
+    private final PullImageCallbackListener listener;
 
-  public HackPullImageResultCallback(PullImageCallbackListener listener) {
-    this.listener = listener;
-  }
-
-  @Override
-  public void onNext(PullResponseItem item) {
-    super.onNext(item);
-    if (item.getStatus() != null && item.getId() != null) {
-      listener.watchPullProcess(item);
+    public HackPullImageResultCallback(PullImageCallbackListener listener) {
+        this.listener = listener;
     }
-  }
+
+    @Override
+    public void onNext(PullResponseItem item) {
+        super.onNext(item);
+        if (item.getStatus() != null && item.getId() != null) {
+            listener.watchPullProcess(item);
+        }
+    }
 }

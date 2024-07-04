@@ -41,59 +41,56 @@ import java.util.Map;
 @Component
 public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
-  private static final Logger logger = LoggerFactory.getLogger(UploadFileTypeInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(UploadFileTypeInterceptor.class);
 
-  @Override
-  public boolean preHandle(
-      @Nonnull HttpServletRequest request,
-      @Nonnull HttpServletResponse response,
-      @Nonnull Object handler)
-      throws Exception {
-    if (request instanceof MultipartHttpServletRequest) {
-      MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-      Map<String, MultipartFile> files = multipartRequest.getFileMap();
-      for (String file : files.keySet()) {
-        MultipartFile multipartFile = multipartRequest.getFile(file);
-        ApiAlertException.throwIfNull(
-            multipartFile, "File to upload can't be null. Upload file failed.");
-        InputStream input = multipartFile.getInputStream();
-        boolean isJarOrPyFile = FileUtils.isJarFileType(input) || isPythonFile(input);
-        ApiAlertException.throwIfFalse(
-            isJarOrPyFile,
-            "Illegal file type, Only support standard jar or python files. Upload file failed.");
-      }
+    @Override
+    public boolean preHandle(
+                             @Nonnull HttpServletRequest request,
+                             @Nonnull HttpServletResponse response,
+                             @Nonnull Object handler) throws Exception {
+        if (request instanceof MultipartHttpServletRequest) {
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+            Map<String, MultipartFile> files = multipartRequest.getFileMap();
+            for (String file : files.keySet()) {
+                MultipartFile multipartFile = multipartRequest.getFile(file);
+                ApiAlertException.throwIfNull(
+                        multipartFile, "File to upload can't be null. Upload file failed.");
+                InputStream input = multipartFile.getInputStream();
+                boolean isJarOrPyFile = FileUtils.isJarFileType(input) || isPythonFile(input);
+                ApiAlertException.throwIfFalse(
+                        isJarOrPyFile,
+                        "Illegal file type, Only support standard jar or python files. Upload file failed.");
+            }
+        }
+        return true;
     }
-    return true;
-  }
 
-  @Override
-  public void postHandle(
-      @Nonnull HttpServletRequest request,
-      @Nonnull HttpServletResponse response,
-      @Nonnull Object handler,
-      ModelAndView modelAndView)
-      throws Exception {
-    HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
-  }
-
-  @Override
-  public void afterCompletion(
-      @Nonnull HttpServletRequest request,
-      @Nonnull HttpServletResponse response,
-      @Nonnull Object handler,
-      Exception ex)
-      throws Exception {
-    HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
-  }
-
-  private boolean isPythonFile(InputStream input) {
-    try {
-      Tika tika = new Tika();
-      String mimeType = tika.detect(input);
-      return mimeType.equals("text/x-python");
-    } catch (Exception e) {
-      logger.warn("check upload file type failed.", e);
-      return false;
+    @Override
+    public void postHandle(
+                           @Nonnull HttpServletRequest request,
+                           @Nonnull HttpServletResponse response,
+                           @Nonnull Object handler,
+                           ModelAndView modelAndView) throws Exception {
+        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
     }
-  }
+
+    @Override
+    public void afterCompletion(
+                                @Nonnull HttpServletRequest request,
+                                @Nonnull HttpServletResponse response,
+                                @Nonnull Object handler,
+                                Exception ex) throws Exception {
+        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+    }
+
+    private boolean isPythonFile(InputStream input) {
+        try {
+            Tika tika = new Tika();
+            String mimeType = tika.detect(input);
+            return mimeType.equals("text/x-python");
+        } catch (Exception e) {
+            logger.warn("check upload file type failed.", e);
+            return false;
+        }
+    }
 }

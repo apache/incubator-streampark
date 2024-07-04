@@ -27,12 +27,12 @@ import java.util.Map;
  */
 public interface SqlGatewayServiceFactory extends Factory {
 
-  /** Creates a {@link SqlGatewayService} from the given {@link Context}. */
-  SqlGatewayService createSqlGatewayService(Context context);
+    /** Creates a {@link SqlGatewayService} from the given {@link Context}. */
+    SqlGatewayService createSqlGatewayService(Context context);
 
-  interface Context {
+    interface Context {
 
-    /** Gives read-only access to the configuration of the current session. */
-    Map<String, String> getGateWayServiceOptions();
-  }
+        /** Gives read-only access to the configuration of the current session. */
+        Map<String, String> getGateWayServiceOptions();
+    }
 }

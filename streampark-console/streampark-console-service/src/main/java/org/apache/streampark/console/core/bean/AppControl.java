@@ -24,12 +24,12 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AppControl {
 
-  /** allow to start the application */
-  private boolean allowStart;
+    /** allow to start the application */
+    private boolean allowStart;
 
-  /** allow to stop the application */
-  private boolean allowStop;
+    /** allow to stop the application */
+    private boolean allowStop;
 
-  /** allow to build the application */
-  private boolean allowBuild;
+    /** allow to build the application */
+    private boolean allowBuild;
 }

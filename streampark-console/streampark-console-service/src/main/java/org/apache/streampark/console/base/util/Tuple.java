@@ -31,32 +31,32 @@ package org.apache.streampark.console.base.util;
  */
 public abstract class Tuple implements java.io.Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * Gets the field at the specified position.
-   *
-   * @param pos The position of the field, zero indexed.
-   * @return The field at the specified position.
-   * @throws IndexOutOfBoundsException Thrown, if the position is negative, or equal to, or larger
-   *     than the number of fields.
-   */
-  public abstract <T> T get(int pos);
+    /**
+     * Gets the field at the specified position.
+     *
+     * @param pos The position of the field, zero indexed.
+     * @return The field at the specified position.
+     * @throws IndexOutOfBoundsException Thrown, if the position is negative, or equal to, or larger
+     *     than the number of fields.
+     */
+    public abstract <T> T get(int pos);
 
-  /**
-   * Sets the field at the specified position.
-   *
-   * @param value The value to be assigned to the field at the specified position.
-   * @param pos The position of the field, zero indexed.
-   * @throws IndexOutOfBoundsException Thrown, if the position is negative, or equal to, or larger
-   *     than the number of fields.
-   */
-  public abstract <T> void set(T value, int pos);
+    /**
+     * Sets the field at the specified position.
+     *
+     * @param value The value to be assigned to the field at the specified position.
+     * @param pos The position of the field, zero indexed.
+     * @throws IndexOutOfBoundsException Thrown, if the position is negative, or equal to, or larger
+     *     than the number of fields.
+     */
+    public abstract <T> void set(T value, int pos);
 
-  /**
-   * Shallow tuple copy.
-   *
-   * @return A new Tuple with the same fields as this.
-   */
-  public abstract <T extends Tuple> T copy();
+    /**
+     * Shallow tuple copy.
+     *
+     * @return A new Tuple with the same fields as this.
+     */
+    public abstract <T extends Tuple> T copy();
 }

@@ -29,9 +29,9 @@ import java.util.List;
 
 public interface VariableMapper extends BaseMapper<Variable> {
 
-  IPage<Variable> selectPage(Page<Variable> page, @Param("variable") Variable variable);
+    IPage<Variable> selectPage(Page<Variable> page, @Param("variable") Variable variable);
 
-  List<Variable> selectVarsByTeamId(@Param("teamId") Long teamId, @Param("keyword") String keyword);
+    List<Variable> selectVarsByTeamId(@Param("teamId") Long teamId, @Param("keyword") String keyword);
 
-  boolean existsByTeamId(@Param("teamId") Long teamId);
+    boolean existsByTeamId(@Param("teamId") Long teamId);
 }

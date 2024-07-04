@@ -23,25 +23,25 @@ import lombok.Getter;
 @Getter
 public enum FlinkEnvCheckEnum {
 
-  /* FLINK_HOME path invalid */
-  INVALID_PATH(-1),
+    /* FLINK_HOME path invalid */
+    INVALID_PATH(-1),
 
-  /* this add/update operation ok */
-  OK(0),
+    /* this add/update operation ok */
+    OK(0),
 
-  /* flink name repeated */
-  NAME_REPEATED(1),
+    /* flink name repeated */
+    NAME_REPEATED(1),
 
-  /* FLINK_DIST file not found */
+    /* FLINK_DIST file not found */
 
-  FLINK_DIST_NOT_FOUND(2),
+    FLINK_DIST_NOT_FOUND(2),
 
-  /* defined flink name repeated */
-  FLINK_DIST_REPEATED(3);
+    /* defined flink name repeated */
+    FLINK_DIST_REPEATED(3);
 
-  private final int code;
+    private final int code;
 
-  FlinkEnvCheckEnum(int code) {
-    this.code = code;
-  }
+    FlinkEnvCheckEnum(int code) {
+        this.code = code;
+    }
 }

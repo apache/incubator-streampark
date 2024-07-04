@@ -49,81 +49,83 @@ import java.util.Map;
 @Service
 @Lazy
 public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
-  @Autowired private RestTemplate alertRestTemplate;
 
-  @Autowired private ObjectMapper mapper;
+    @Autowired
+    private RestTemplate alertRestTemplate;
 
-  @Override
-  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate)
-      throws AlertException {
-    AlertHttpCallbackParams alertHttpCallbackParams = alertConfig.getHttpCallbackParams();
+    @Autowired
+    private ObjectMapper mapper;
 
-    String requestTemplate = alertHttpCallbackParams.getRequestTemplate();
-    if (!StringUtils.hasLength(requestTemplate)) {
-      return false;
-    }
-    try {
-      Template template = FreemarkerUtils.loadTemplateString(requestTemplate);
-      String format = FreemarkerUtils.format(template, alertTemplate);
-      Map<String, Object> body =
-          mapper.readValue(format, new TypeReference<Map<String, Object>>() {});
-      sendMessage(alertHttpCallbackParams, body);
-      return true;
-    } catch (AlertException alertException) {
-      throw alertException;
-    } catch (Exception e) {
-      throw new AlertException("Failed send httpCallback alert", e);
-    }
-  }
+    @Override
+    public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
+        AlertHttpCallbackParams alertHttpCallbackParams = alertConfig.getHttpCallbackParams();
 
-  private void sendMessage(AlertHttpCallbackParams params, Map<String, Object> body)
-      throws AlertException {
-    String url = params.getUrl();
-    HttpHeaders headers = getHttpHeaders(params);
-    ResponseEntity<Object> response;
-    try {
-      HttpMethod httpMethod = HttpMethod.POST;
-      String method = params.getMethod();
-      if (!StringUtils.hasLength(method)) {
-        if (HttpMethod.PUT.name().equalsIgnoreCase(method)) {
-          httpMethod = HttpMethod.PUT;
+        String requestTemplate = alertHttpCallbackParams.getRequestTemplate();
+        if (!StringUtils.hasLength(requestTemplate)) {
+            return false;
         }
-      }
-      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-      RequestCallback requestCallback = alertRestTemplate.httpEntityCallback(entity, Object.class);
-      ResponseExtractor<ResponseEntity<Object>> responseExtractor =
-          alertRestTemplate.responseEntityExtractor(Object.class);
-      response = alertRestTemplate.execute(url, httpMethod, requestCallback, responseExtractor);
-    } catch (Exception e) {
-      log.error("Failed to request httpCallback alert,\nurl:{}", url, e);
-      throw new AlertException(
-          String.format("Failed to request httpCallback alert,%nurl:%s", url), e);
+        try {
+            Template template = FreemarkerUtils.loadTemplateString(requestTemplate);
+            String format = FreemarkerUtils.format(template, alertTemplate);
+            Map<String, Object> body =
+                    mapper.readValue(format, new TypeReference<Map<String, Object>>() {
+                    });
+            sendMessage(alertHttpCallbackParams, body);
+            return true;
+        } catch (AlertException alertException) {
+            throw alertException;
+        } catch (Exception e) {
+            throw new AlertException("Failed send httpCallback alert", e);
+        }
     }
 
-    if (response == null) {
-      throw new AlertException(String.format("Failed to request httpCallback alert,%nurl:%s", url));
-    }
-  }
+    private void sendMessage(AlertHttpCallbackParams params, Map<String, Object> body) throws AlertException {
+        String url = params.getUrl();
+        HttpHeaders headers = getHttpHeaders(params);
+        ResponseEntity<Object> response;
+        try {
+            HttpMethod httpMethod = HttpMethod.POST;
+            String method = params.getMethod();
+            if (!StringUtils.hasLength(method)) {
+                if (HttpMethod.PUT.name().equalsIgnoreCase(method)) {
+                    httpMethod = HttpMethod.PUT;
+                }
+            }
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+            RequestCallback requestCallback = alertRestTemplate.httpEntityCallback(entity, Object.class);
+            ResponseExtractor<ResponseEntity<Object>> responseExtractor =
+                    alertRestTemplate.responseEntityExtractor(Object.class);
+            response = alertRestTemplate.execute(url, httpMethod, requestCallback, responseExtractor);
+        } catch (Exception e) {
+            log.error("Failed to request httpCallback alert,\nurl:{}", url, e);
+            throw new AlertException(
+                    String.format("Failed to request httpCallback alert,%nurl:%s", url), e);
+        }
 
-  @Nonnull
-  private HttpHeaders getHttpHeaders(AlertHttpCallbackParams params) {
-    HttpHeaders headers = new HttpHeaders();
-    String contentType = params.getContentType();
-    MediaType mediaType = MediaType.APPLICATION_JSON;
-    if (StringUtils.hasLength(contentType)) {
-      switch (contentType.toLowerCase()) {
-        case MediaType.APPLICATION_FORM_URLENCODED_VALUE:
-          mediaType = MediaType.APPLICATION_FORM_URLENCODED;
-          break;
-        case MediaType.MULTIPART_FORM_DATA_VALUE:
-          mediaType = MediaType.MULTIPART_FORM_DATA;
-          break;
-        case MediaType.APPLICATION_JSON_VALUE:
-        default:
-          break;
-      }
+        if (response == null) {
+            throw new AlertException(String.format("Failed to request httpCallback alert,%nurl:%s", url));
+        }
     }
-    headers.setContentType(mediaType);
-    return headers;
-  }
+
+    @Nonnull
+    private HttpHeaders getHttpHeaders(AlertHttpCallbackParams params) {
+        HttpHeaders headers = new HttpHeaders();
+        String contentType = params.getContentType();
+        MediaType mediaType = MediaType.APPLICATION_JSON;
+        if (StringUtils.hasLength(contentType)) {
+            switch (contentType.toLowerCase()) {
+                case MediaType.APPLICATION_FORM_URLENCODED_VALUE:
+                    mediaType = MediaType.APPLICATION_FORM_URLENCODED;
+                    break;
+                case MediaType.MULTIPART_FORM_DATA_VALUE:
+                    mediaType = MediaType.MULTIPART_FORM_DATA;
+                    break;
+                case MediaType.APPLICATION_JSON_VALUE:
+                default:
+                    break;
+            }
+        }
+        headers.setContentType(mediaType);
+        return headers;
+    }
 }

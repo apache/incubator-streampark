@@ -41,83 +41,82 @@ import java.util.Map;
 @Service
 @Lazy
 public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
-  private final Template template = FreemarkerUtils.loadTemplateFile("alert-weCom.ftl");
 
-  private final RestTemplate alertRestTemplate;
+    private final Template template = FreemarkerUtils.loadTemplateFile("alert-weCom.ftl");
 
-  public WeComAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
-    this.alertRestTemplate = alertRestTemplate;
-  }
+    private final RestTemplate alertRestTemplate;
 
-  @Override
-  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate)
-      throws AlertException {
-    AlertWeComParams weComParams = alertConfig.getWeComParams();
-    try {
-      // format markdown
-      String markdown = FreemarkerUtils.format(template, alertTemplate);
-
-      Map<String, String> content = new HashMap<>();
-      content.put("content", markdown);
-
-      Map<String, Object> body = new HashMap<>();
-      body.put("msgtype", "markdown");
-      body.put("markdown", content);
-
-      sendMessage(weComParams, body);
-      return true;
-    } catch (AlertException alertException) {
-      throw alertException;
-    } catch (Exception e) {
-      throw new AlertException("Failed send weCom alert", e);
-    }
-  }
-
-  private void sendMessage(AlertWeComParams params, Map<String, Object> body)
-      throws AlertException {
-    // get webhook url
-    String url = getWebhook(params);
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-    RobotResponse robotResponse;
-    try {
-      robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
-    } catch (Exception e) {
-      log.error("Failed to request WeCom robot alarm,%nurl:{}", url, e);
-      throw new AlertException(
-          String.format("Failed to request WeCom robot alert,%nurl:%s", url), e);
+    public WeComAlertNotifyServiceImpl(RestTemplate alertRestTemplate) {
+        this.alertRestTemplate = alertRestTemplate;
     }
 
-    if (robotResponse == null) {
-      throw new AlertException(String.format("Failed to request WeCom robot alert,%nurl:%s", url));
-    }
-    if (robotResponse.getErrcode() != 0) {
-      throw new AlertException(
-          String.format(
-              "Failed to request WeCom robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
-              url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
-    }
-  }
+    @Override
+    public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate alertTemplate) throws AlertException {
+        AlertWeComParams weComParams = alertConfig.getWeComParams();
+        try {
+            // format markdown
+            String markdown = FreemarkerUtils.format(template, alertTemplate);
 
-  /**
-   * Gets webhook.
-   *
-   * <p>Reference documentation <a
-   * href="https://developer.work.weixin.qq.com/document/path/91770">Swarm Robot Configuration
-   * Instructions</a>
-   *
-   * @param params {@link AlertWeComParams}
-   * @return the webhook
-   */
-  private String getWebhook(AlertWeComParams params) {
-    String url;
-    url =
-        String.format("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s", params.getToken());
-    if (log.isDebugEnabled()) {
-      log.debug("The alert robot url of WeCom is {}", url);
+            Map<String, String> content = new HashMap<>();
+            content.put("content", markdown);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("msgtype", "markdown");
+            body.put("markdown", content);
+
+            sendMessage(weComParams, body);
+            return true;
+        } catch (AlertException alertException) {
+            throw alertException;
+        } catch (Exception e) {
+            throw new AlertException("Failed send weCom alert", e);
+        }
     }
-    return url;
-  }
+
+    private void sendMessage(AlertWeComParams params, Map<String, Object> body) throws AlertException {
+        // get webhook url
+        String url = getWebhook(params);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        RobotResponse robotResponse;
+        try {
+            robotResponse = alertRestTemplate.postForObject(url, entity, RobotResponse.class);
+        } catch (Exception e) {
+            log.error("Failed to request WeCom robot alarm,%nurl:{}", url, e);
+            throw new AlertException(
+                    String.format("Failed to request WeCom robot alert,%nurl:%s", url), e);
+        }
+
+        if (robotResponse == null) {
+            throw new AlertException(String.format("Failed to request WeCom robot alert,%nurl:%s", url));
+        }
+        if (robotResponse.getErrcode() != 0) {
+            throw new AlertException(
+                    String.format(
+                            "Failed to request WeCom robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
+                            url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
+        }
+    }
+
+    /**
+     * Gets webhook.
+     *
+     * <p>Reference documentation <a
+     * href="https://developer.work.weixin.qq.com/document/path/91770">Swarm Robot Configuration
+     * Instructions</a>
+     *
+     * @param params {@link AlertWeComParams}
+     * @return the webhook
+     */
+    private String getWebhook(AlertWeComParams params) {
+        String url;
+        url =
+                String.format("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s", params.getToken());
+        if (log.isDebugEnabled()) {
+            log.debug("The alert robot url of WeCom is {}", url);
+        }
+        return url;
+    }
 }

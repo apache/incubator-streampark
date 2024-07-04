@@ -22,12 +22,13 @@ import org.apache.flink.table.api.TableConfig;
 
 @FunctionalInterface
 public interface TableEnvConfigFunction {
-  /**
-   * When used to initialize the TableEnvironment, it can be used to implement this function and
-   * customize the parameters to be set...
-   *
-   * @param tableConfig
-   * @param parameterTool
-   */
-  void configuration(TableConfig tableConfig, ParameterTool parameterTool);
+
+    /**
+     * When used to initialize the TableEnvironment, it can be used to implement this function and
+     * customize the parameters to be set...
+     *
+     * @param tableConfig
+     * @param parameterTool
+     */
+    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
 }

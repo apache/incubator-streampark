@@ -35,52 +35,54 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class AccessTokenServiceTest extends SpringUnitTestBase {
 
-  @Autowired private AccessTokenService accessTokenService;
+    @Autowired
+    private AccessTokenService accessTokenService;
 
-  @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Test
-  void testCrudToken() throws Exception {
-    Long mockUserId = 100000L;
-    String expireTime = "9999-01-01 00:00:00";
-    RestResponse restResponse = accessTokenService.create(mockUserId, "");
-    Assertions.assertNotNull(restResponse);
-    Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
+    @Test
+    void testCrudToken() throws Exception {
+        Long mockUserId = 100000L;
+        String expireTime = "9999-01-01 00:00:00";
+        RestResponse restResponse = accessTokenService.create(mockUserId, "");
+        Assertions.assertNotNull(restResponse);
+        Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
 
-    // verify
-    AccessToken accessToken = (AccessToken) restResponse.get(RestResponse.DATA_KEY);
-    LOG.info(accessToken.getToken());
-    JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
-    LOG.info(jwtToken.getToken());
-    String username = JWTUtil.getUserName(jwtToken.getToken());
-    Assertions.assertNotNull(username);
-    Assertions.assertEquals("admin", username);
-    User user = userService.getByUsername(username);
-    Assertions.assertNotNull(user);
-    Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getSalt()));
+        // verify
+        AccessToken accessToken = (AccessToken) restResponse.get(RestResponse.DATA_KEY);
+        LOG.info(accessToken.getToken());
+        JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
+        LOG.info(jwtToken.getToken());
+        String username = JWTUtil.getUserName(jwtToken.getToken());
+        Assertions.assertNotNull(username);
+        Assertions.assertEquals("admin", username);
+        User user = userService.getByUsername(username);
+        Assertions.assertNotNull(user);
+        Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getSalt()));
 
-    // list
-    AccessToken mockToken1 = new AccessToken();
-    mockToken1.setUserId(100000L);
-    IPage<AccessToken> tokens1 = accessTokenService.getPage(mockToken1, new RestRequest());
-    Assertions.assertEquals(1, tokens1.getRecords().size());
-    AccessToken mockToken2 = new AccessToken();
-    mockToken2.setUserId(100001L);
-    IPage<AccessToken> tokens2 = accessTokenService.getPage(mockToken2, new RestRequest());
-    Assertions.assertTrue(tokens2.getRecords().isEmpty());
+        // list
+        AccessToken mockToken1 = new AccessToken();
+        mockToken1.setUserId(100000L);
+        IPage<AccessToken> tokens1 = accessTokenService.getPage(mockToken1, new RestRequest());
+        Assertions.assertEquals(1, tokens1.getRecords().size());
+        AccessToken mockToken2 = new AccessToken();
+        mockToken2.setUserId(100001L);
+        IPage<AccessToken> tokens2 = accessTokenService.getPage(mockToken2, new RestRequest());
+        Assertions.assertTrue(tokens2.getRecords().isEmpty());
 
-    // toggle
-    Long tokenId = accessToken.getId();
-    RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
-    Assertions.assertNotNull(toggleTokenResp);
-    Assertions.assertTrue((Boolean) toggleTokenResp.get(RestResponse.DATA_KEY));
+        // toggle
+        Long tokenId = accessToken.getId();
+        RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
+        Assertions.assertNotNull(toggleTokenResp);
+        Assertions.assertTrue((Boolean) toggleTokenResp.get(RestResponse.DATA_KEY));
 
-    // get
-    AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);
-    Assertions.assertNotNull(afterToggle);
-    Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
+        // get
+        AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);
+        Assertions.assertNotNull(afterToggle);
+        Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
 
-    // delete
-    Assertions.assertTrue(accessTokenService.removeById(tokenId));
-  }
+        // delete
+        Assertions.assertTrue(accessTokenService.removeById(tokenId));
+    }
 }

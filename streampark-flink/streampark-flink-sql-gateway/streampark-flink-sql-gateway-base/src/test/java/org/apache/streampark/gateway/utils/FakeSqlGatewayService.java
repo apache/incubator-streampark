@@ -32,75 +32,76 @@ import org.apache.streampark.gateway.session.SessionHandle;
 /** Mocked implementation of {@link SqlGatewayService}. */
 public class FakeSqlGatewayService implements SqlGatewayService {
 
-  public static final FakeSqlGatewayService INSTANCE = new FakeSqlGatewayService();
+    public static final FakeSqlGatewayService INSTANCE = new FakeSqlGatewayService();
 
-  private FakeSqlGatewayService() {}
+    private FakeSqlGatewayService() {
+    }
 
-  @Override
-  public boolean check(String flinkMajorVersion) {
-    return true;
-  }
+    @Override
+    public boolean check(String flinkMajorVersion) {
+        return true;
+    }
 
-  @Override
-  public GatewayInfo getGatewayInfo() throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public GatewayInfo getGatewayInfo() throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public SessionHandle openSession(SessionEnvironment environment) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public SessionHandle openSession(SessionEnvironment environment) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void heartbeat(SessionHandle sessionHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public void heartbeat(SessionHandle sessionHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void closeSession(SessionHandle sessionHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public void closeSession(SessionHandle sessionHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void cancelOperation(SessionHandle sessionHandle, OperationHandle operationHandle)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public void cancelOperation(SessionHandle sessionHandle,
+                                OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void closeOperation(SessionHandle sessionHandle, OperationHandle operationHandle)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public void closeOperation(SessionHandle sessionHandle,
+                               OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public OperationInfo getOperationInfo(
-      SessionHandle sessionHandle, OperationHandle operationHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public OperationInfo getOperationInfo(
+                                          SessionHandle sessionHandle,
+                                          OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public Column getOperationResultSchema(
-      SessionHandle sessionHandle, OperationHandle operationHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public Column getOperationResultSchema(
+                                           SessionHandle sessionHandle,
+                                           OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public OperationHandle executeStatement(
-      SessionHandle sessionHandle,
-      String statement,
-      long executionTimeoutMs,
-      ExecutionConfiguration executionConfig)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public OperationHandle executeStatement(
+                                            SessionHandle sessionHandle,
+                                            String statement,
+                                            long executionTimeoutMs,
+                                            ExecutionConfiguration executionConfig) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public ResultSet fetchResults(
-      SessionHandle sessionHandle,
-      OperationHandle operationHandle,
-      ResultQueryCondition resultQueryCondition)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public ResultSet fetchResults(
+                                  SessionHandle sessionHandle,
+                                  OperationHandle operationHandle,
+                                  ResultQueryCondition resultQueryCondition) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
 }

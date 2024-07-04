@@ -25,73 +25,73 @@ import java.util.Arrays;
 @Getter
 public enum ChangeTypeEnum {
 
-  /** Represents no change. */
-  NONE(0, "[NONE], nothing to changed"),
+    /** Represents no change. */
+    NONE(0, "[NONE], nothing to changed"),
 
-  /** Represents a change in dependencies. */
-  DEPENDENCY(1, "[DEPENDENCY], Dependency has changed"),
+    /** Represents a change in dependencies. */
+    DEPENDENCY(1, "[DEPENDENCY], Dependency has changed"),
 
-  /** Represents a change in SQL. */
-  SQL(2, "[SQL], Flink Sql is changed"),
+    /** Represents a change in SQL. */
+    SQL(2, "[SQL], Flink Sql is changed"),
 
-  /** Represents a change in both dependencies and SQL. */
-  ALL(3, "[ALL], Dependency and Flink Sql all changed"),
+    /** Represents a change in both dependencies and SQL. */
+    ALL(3, "[ALL], Dependency and Flink Sql all changed"),
 
-  /** Represents a change in team resources. */
-  TEAM_RESOURCE(4, "[TEAM_RESOURCE], Team resource has changed");
+    /** Represents a change in team resources. */
+    TEAM_RESOURCE(4, "[TEAM_RESOURCE], Team resource has changed");
 
-  private final int value;
-  private final String description;
+    private final int value;
+    private final String description;
 
-  /**
-   * Constructor for the enum.
-   *
-   * @param value The integer value of the enum item.
-   * @param description A description of the change type.
-   */
-  ChangeTypeEnum(int value, String description) {
-    this.value = value;
-    this.description = description;
-  }
+    /**
+     * Constructor for the enum.
+     *
+     * @param value The integer value of the enum item.
+     * @param description A description of the change type.
+     */
+    ChangeTypeEnum(int value, String description) {
+        this.value = value;
+        this.description = description;
+    }
 
-  /**
-   * Returns the enum item that matches the given integer value.
-   *
-   * @param value The integer value.
-   * @return The matching enum item, or null if no match is found.
-   */
-  public static ChangeTypeEnum of(Integer value) {
-    return Arrays.stream(values())
-        .filter(changeTypeEnum -> changeTypeEnum.value == value)
-        .findFirst()
-        .orElse(null);
-  }
+    /**
+     * Returns the enum item that matches the given integer value.
+     *
+     * @param value The integer value.
+     * @return The matching enum item, or null if no match is found.
+     */
+    public static ChangeTypeEnum of(Integer value) {
+        return Arrays.stream(values())
+                .filter(changeTypeEnum -> changeTypeEnum.value == value)
+                .findFirst()
+                .orElse(null);
+    }
 
-  /**
-   * Checks if there are any changes.
-   *
-   * @return True if there are any changes, false otherwise.
-   */
-  public boolean hasChanged() {
-    return !(this == NONE);
-  }
+    /**
+     * Checks if there are any changes.
+     *
+     * @return True if there are any changes, false otherwise.
+     */
+    public boolean hasChanged() {
+        return !(this == NONE);
+    }
 
-  /**
-   * Checks if there are any dependency changes.
-   *
-   * @return True if there are dependency changes, false otherwise.
-   */
-  public boolean isDependencyChanged() {
-    return this == ALL || this == DEPENDENCY || this == TEAM_RESOURCE;
-  }
+    /**
+     * Checks if there are any dependency changes.
+     *
+     * @return True if there are dependency changes, false otherwise.
+     */
+    public boolean isDependencyChanged() {
+        return this == ALL || this == DEPENDENCY || this == TEAM_RESOURCE;
+    }
 
-  /**
-   * Returns the description of the change type.
-   *
-   * @return The description of the change type.
-   */
-  @Override
-  public String toString() {
-    return description;
-  }
+    /**
+     * Returns the description of the change type.
+     *
+     * @return The description of the change type.
+     */
+    @Override
+    public String toString() {
+        return description;
+    }
 }

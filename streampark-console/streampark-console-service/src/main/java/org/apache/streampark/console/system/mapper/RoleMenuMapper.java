@@ -21,4 +21,5 @@ import org.apache.streampark.console.system.entity.RoleMenu;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface RoleMenuMapper extends BaseMapper<RoleMenu> {}
+public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
+}

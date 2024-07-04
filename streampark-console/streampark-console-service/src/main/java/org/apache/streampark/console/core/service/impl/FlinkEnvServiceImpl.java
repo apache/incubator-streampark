@@ -40,132 +40,135 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
-    implements FlinkEnvService {
+        implements
+            FlinkEnvService {
 
-  @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired private ApplicationInfoService applicationInfoService;
+    @Autowired
+    private FlinkClusterService flinkClusterService;
+    @Autowired
+    private ApplicationInfoService applicationInfoService;
 
-  /**
-   * two places will be checked: <br>
-   * 1) name repeated <br>
-   * 2) flink-dist repeated <br>
-   */
-  @Override
-  public FlinkEnvCheckEnum check(FlinkEnv version) {
-    // 1) check name
-    LambdaQueryWrapper<FlinkEnv> queryWrapper =
-        new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
-    if (version.getId() != null) {
-      queryWrapper.ne(FlinkEnv::getId, version.getId());
+    /**
+     * two places will be checked: <br>
+     * 1) name repeated <br>
+     * 2) flink-dist repeated <br>
+     */
+    @Override
+    public FlinkEnvCheckEnum check(FlinkEnv version) {
+        // 1) check name
+        LambdaQueryWrapper<FlinkEnv> queryWrapper =
+                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
+        if (version.getId() != null) {
+            queryWrapper.ne(FlinkEnv::getId, version.getId());
+        }
+        if (this.count(queryWrapper) > 0) {
+            return FlinkEnvCheckEnum.NAME_REPEATED;
+        }
+
+        String lib = version.getFlinkHome().concat("/lib");
+        File flinkLib = new File(lib);
+        // 2) flink/lib path exists and is a directory
+        if (!flinkLib.exists() || !flinkLib.isDirectory()) {
+            return FlinkEnvCheckEnum.INVALID_PATH;
+        }
+
+        // 3) check flink-dist
+        File[] files = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
+        if (files == null || files.length == 0) {
+            return FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND;
+        }
+
+        if (files.length > 1) {
+            return FlinkEnvCheckEnum.FLINK_DIST_REPEATED;
+        }
+
+        return FlinkEnvCheckEnum.OK;
     }
-    if (this.count(queryWrapper) > 0) {
-      return FlinkEnvCheckEnum.NAME_REPEATED;
+
+    @Override
+    public boolean create(FlinkEnv version) {
+        long count = this.baseMapper.selectCount(null);
+        version.setIsDefault(count == 0);
+        version.setCreateTime(new Date());
+        version.doSetVersion();
+        version.doSetFlinkConf();
+        return save(version);
     }
 
-    String lib = version.getFlinkHome().concat("/lib");
-    File flinkLib = new File(lib);
-    // 2) flink/lib path exists and is a directory
-    if (!flinkLib.exists() || !flinkLib.isDirectory()) {
-      return FlinkEnvCheckEnum.INVALID_PATH;
+    @Override
+    public void removeById(Long id) {
+        FlinkEnv flinkEnv = getById(id);
+        checkOrElseAlert(flinkEnv);
+        Long count = this.baseMapper.selectCount(null);
+        ApiAlertException.throwIfFalse(
+                !(count > 1 && flinkEnv.getIsDefault()),
+                "The flink home is set as default, please change it first.");
+
+        this.baseMapper.deleteById(id);
     }
 
-    // 3) check flink-dist
-    File[] files = flinkLib.listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
-    if (files == null || files.length == 0) {
-      return FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND;
+    @Override
+    public void update(FlinkEnv version) {
+        FlinkEnv flinkEnv = getById(version.getId());
+        checkOrElseAlert(flinkEnv);
+        flinkEnv.setDescription(version.getDescription());
+        flinkEnv.setFlinkName(version.getFlinkName());
+        if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
+            flinkEnv.setFlinkHome(version.getFlinkHome());
+            flinkEnv.doSetFlinkConf();
+            flinkEnv.doSetVersion();
+        }
+        updateById(flinkEnv);
     }
 
-    if (files.length > 1) {
-      return FlinkEnvCheckEnum.FLINK_DIST_REPEATED;
+    @Override
+    public void setDefault(Long id) {
+        this.baseMapper.setDefault(id);
     }
 
-    return FlinkEnvCheckEnum.OK;
-  }
-
-  @Override
-  public boolean create(FlinkEnv version) {
-    long count = this.baseMapper.selectCount(null);
-    version.setIsDefault(count == 0);
-    version.setCreateTime(new Date());
-    version.doSetVersion();
-    version.doSetFlinkConf();
-    return save(version);
-  }
-
-  @Override
-  public void removeById(Long id) {
-    FlinkEnv flinkEnv = getById(id);
-    checkOrElseAlert(flinkEnv);
-    Long count = this.baseMapper.selectCount(null);
-    ApiAlertException.throwIfFalse(
-        !(count > 1 && flinkEnv.getIsDefault()),
-        "The flink home is set as default, please change it first.");
-
-    this.baseMapper.deleteById(id);
-  }
-
-  @Override
-  public void update(FlinkEnv version) {
-    FlinkEnv flinkEnv = getById(version.getId());
-    checkOrElseAlert(flinkEnv);
-    flinkEnv.setDescription(version.getDescription());
-    flinkEnv.setFlinkName(version.getFlinkName());
-    if (!version.getFlinkHome().equals(flinkEnv.getFlinkHome())) {
-      flinkEnv.setFlinkHome(version.getFlinkHome());
-      flinkEnv.doSetFlinkConf();
-      flinkEnv.doSetVersion();
+    @Override
+    public FlinkEnv getByAppId(Long appId) {
+        return this.baseMapper.selectByAppId(appId);
     }
-    updateById(flinkEnv);
-  }
 
-  @Override
-  public void setDefault(Long id) {
-    this.baseMapper.setDefault(id);
-  }
+    @Override
+    public FlinkEnv getDefault() {
+        return this.baseMapper.selectOne(
+                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true));
+    }
 
-  @Override
-  public FlinkEnv getByAppId(Long appId) {
-    return this.baseMapper.selectByAppId(appId);
-  }
+    @Override
+    public FlinkEnv getByIdOrDefault(Long id) {
+        FlinkEnv flinkEnv = getById(id);
+        return flinkEnv == null ? getDefault() : flinkEnv;
+    }
 
-  @Override
-  public FlinkEnv getDefault() {
-    return this.baseMapper.selectOne(
-        new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true));
-  }
+    @Override
+    public void syncConf(Long id) {
+        FlinkEnv flinkEnv = getById(id);
+        flinkEnv.doSetFlinkConf();
+        updateById(flinkEnv);
+    }
 
-  @Override
-  public FlinkEnv getByIdOrDefault(Long id) {
-    FlinkEnv flinkEnv = getById(id);
-    return flinkEnv == null ? getDefault() : flinkEnv;
-  }
+    @Override
+    public void validity(Long id) {
+        FlinkEnv flinkEnv = getById(id);
+        checkOrElseAlert(flinkEnv);
+    }
 
-  @Override
-  public void syncConf(Long id) {
-    FlinkEnv flinkEnv = getById(id);
-    flinkEnv.doSetFlinkConf();
-    updateById(flinkEnv);
-  }
+    private void checkOrElseAlert(FlinkEnv flinkEnv) {
 
-  @Override
-  public void validity(Long id) {
-    FlinkEnv flinkEnv = getById(id);
-    checkOrElseAlert(flinkEnv);
-  }
+        // 1.check exists
+        ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
 
-  private void checkOrElseAlert(FlinkEnv flinkEnv) {
+        // 2.check if it is being used by any flink cluster
+        ApiAlertException.throwIfTrue(
+                flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
+                "The flink home is still in use by some flink cluster, please check.");
 
-    // 1.check exists
-    ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
-
-    // 2.check if it is being used by any flink cluster
-    ApiAlertException.throwIfTrue(
-        flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
-        "The flink home is still in use by some flink cluster, please check.");
-
-    // 3.check if it is being used by any application
-    ApiAlertException.throwIfTrue(
-        applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
-        "The flink home is still in use by some application, please check.");
-  }
+        // 3.check if it is being used by any application
+        ApiAlertException.throwIfTrue(
+                applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
+                "The flink home is still in use by some application, please check.");
+    }
 }

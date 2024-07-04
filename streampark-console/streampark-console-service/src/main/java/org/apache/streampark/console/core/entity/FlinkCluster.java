@@ -57,147 +57,149 @@ import java.util.concurrent.TimeUnit;
 @TableName("t_flink_cluster")
 public class FlinkCluster implements Serializable {
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String address;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String address;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String jobManagerUrl;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String jobManagerUrl;
 
-  private String clusterId;
+    private String clusterId;
 
-  private String clusterName;
+    private String clusterName;
 
-  private Integer executionMode;
+    private Integer executionMode;
 
-  /** flink version */
-  private Long versionId;
+    /** flink version */
+    private Long versionId;
 
-  private String k8sNamespace;
+    private String k8sNamespace;
 
-  private String serviceAccount;
+    private String serviceAccount;
 
-  private String description;
+    private String description;
 
-  private Long userId;
+    private Long userId;
 
-  private String flinkImage;
+    private String flinkImage;
 
-  private String options;
+    private String options;
 
-  private String yarnQueue;
+    private String yarnQueue;
 
-  private Boolean k8sHadoopIntegration;
+    private Boolean k8sHadoopIntegration;
 
-  private String dynamicProperties;
+    private String dynamicProperties;
 
-  private Integer k8sRestExposedType;
+    private Integer k8sRestExposedType;
 
-  private String k8sConf;
+    private String k8sConf;
 
-  private Integer resolveOrder;
+    private Integer resolveOrder;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String exception;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String exception;
 
-  private Integer clusterState;
+    private Integer clusterState;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date startTime;
+    private Date startTime;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private Date endTime;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Date endTime;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private Long alertId;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Long alertId;
 
-  private transient Integer allJobs = 0;
+    private transient Integer allJobs = 0;
 
-  private transient Integer affectedJobs = 0;
+    private transient Integer affectedJobs = 0;
 
-  @JsonIgnore
-  public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
-    return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
-  }
-
-  public FlinkExecutionMode getFlinkExecutionModeEnum() {
-    return FlinkExecutionMode.of(this.executionMode);
-  }
-
-  public ClusterState getClusterStateEnum() {
-    return ClusterState.of(this.clusterState);
-  }
-
-  @JsonIgnore
-  @SneakyThrows
-  public Map<String, Object> getOptionMap() {
-    if (StringUtils.isBlank(this.options)) {
-      return new HashMap<>();
+    @JsonIgnore
+    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
+        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
     }
-    Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
-    if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
-      optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
-      optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
-    }
-    optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
-    return optionMap;
-  }
 
-  @JsonIgnore
-  public URI getRemoteURI() {
-    try {
-      HttpClientUtils.httpGetRequest(
-          this.address,
-          RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-      return new URI(address);
-    } catch (Exception e) {
-      log.error("FlinkCluster getRemoteURI error", e);
+    public FlinkExecutionMode getFlinkExecutionModeEnum() {
+        return FlinkExecutionMode.of(this.executionMode);
     }
-    return null;
-  }
 
-  @JsonIgnore
-  public Map<String, String> getFlinkConfig() throws JsonProcessingException {
-    String restUrl = this.address + "/jobmanager/config";
-    String json =
-        HttpClientUtils.httpGetRequest(
-            restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
-    if (StringUtils.isBlank(json)) {
-      return new HashMap<>();
+    public ClusterState getClusterStateEnum() {
+        return ClusterState.of(this.clusterState);
     }
-    List<Map<String, String>> confList =
-        JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {});
-    Map<String, String> config = new HashMap<>(0);
-    confList.forEach(k -> config.put(k.get("key"), k.get("value")));
-    return config;
-  }
 
-  @JsonIgnore
-  public Map<String, Object> getProperties() {
-    Map<String, Object> propertyMap = new HashMap<>();
-    Map<String, String> dynamicPropertyMap =
-        PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
-    propertyMap.putAll(this.getOptionMap());
-    propertyMap.putAll(dynamicPropertyMap);
-    ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
-    if (resolveOrder != null) {
-      propertyMap.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+    @JsonIgnore
+    @SneakyThrows
+    public Map<String, Object> getOptionMap() {
+        if (StringUtils.isBlank(this.options)) {
+            return new HashMap<>();
+        }
+        Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
+        if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
+            optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
+            optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
+        }
+        optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
+        return optionMap;
     }
-    return propertyMap;
-  }
 
-  public static class SFunc {
-    public static final SFunction<FlinkCluster, Long> ID = FlinkCluster::getId;
-    public static final SFunction<FlinkCluster, String> ADDRESS = FlinkCluster::getAddress;
-    public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL =
-        FlinkCluster::getJobManagerUrl;
-    public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE =
-        FlinkCluster::getClusterState;
-    public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE =
-        FlinkCluster::getExecutionMode;
-    public static final SFunction<FlinkCluster, String> EXCEPTION = FlinkCluster::getException;
-  }
+    @JsonIgnore
+    public URI getRemoteURI() {
+        try {
+            HttpClientUtils.httpGetRequest(
+                    this.address,
+                    RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+            return new URI(address);
+        } catch (Exception e) {
+            log.error("FlinkCluster getRemoteURI error", e);
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public Map<String, String> getFlinkConfig() throws JsonProcessingException {
+        String restUrl = this.address + "/jobmanager/config";
+        String json =
+                HttpClientUtils.httpGetRequest(
+                        restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+        if (StringUtils.isBlank(json)) {
+            return new HashMap<>();
+        }
+        List<Map<String, String>> confList =
+                JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
+                });
+        Map<String, String> config = new HashMap<>(0);
+        confList.forEach(k -> config.put(k.get("key"), k.get("value")));
+        return config;
+    }
+
+    @JsonIgnore
+    public Map<String, Object> getProperties() {
+        Map<String, Object> propertyMap = new HashMap<>();
+        Map<String, String> dynamicPropertyMap =
+                PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        propertyMap.putAll(this.getOptionMap());
+        propertyMap.putAll(dynamicPropertyMap);
+        ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
+        if (resolveOrder != null) {
+            propertyMap.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
+        }
+        return propertyMap;
+    }
+
+    public static class SFunc {
+
+        public static final SFunction<FlinkCluster, Long> ID = FlinkCluster::getId;
+        public static final SFunction<FlinkCluster, String> ADDRESS = FlinkCluster::getAddress;
+        public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL =
+                FlinkCluster::getJobManagerUrl;
+        public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE =
+                FlinkCluster::getClusterState;
+        public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE =
+                FlinkCluster::getExecutionMode;
+        public static final SFunction<FlinkCluster, String> EXCEPTION = FlinkCluster::getException;
+    }
 }

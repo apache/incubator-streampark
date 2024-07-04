@@ -54,282 +54,284 @@ import java.util.regex.Pattern;
 @Data
 @TableName("t_flink_project")
 public class Project implements Serializable {
-  @TableId(type = IdType.AUTO)
-  private Long id;
 
-  private Long teamId;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  private String name;
+    private Long teamId;
 
-  private String url;
+    private String name;
 
-  /** git branch */
-  private String branches;
+    private String url;
 
-  private Date lastBuild;
+    /** git branch */
+    private String branches;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String userName;
+    private Date lastBuild;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String password;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String userName;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String prvkeyPath;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String password;
 
-  /** No salt value is returned */
-  @JsonIgnore private String salt;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String prvkeyPath;
 
-  /** 1:git 2:svn */
-  private Integer repository;
+    /** No salt value is returned */
+    @JsonIgnore
+    private String salt;
 
-  private String pom;
+    /** 1:git 2:svn */
+    private Integer repository;
 
-  private String buildArgs;
+    private String pom;
 
-  private String description;
-  /**
-   * Build status: -2: Changed, need to rebuild -1: Not built 0: Building 1: Build successful 2:
-   * Build failed
-   */
-  private Integer buildState;
+    private String buildArgs;
 
-  /** 1) flink 2) spark */
-  private Integer type;
+    private String description;
+    /**
+     * Build status: -2: Changed, need to rebuild -1: Not built 0: Building 1: Build successful 2:
+     * Build failed
+     */
+    private Integer buildState;
 
-  private Date createTime;
+    /** 1) flink 2) spark */
+    private Integer type;
 
-  private Date modifyTime;
+    private Date createTime;
 
-  private transient String module;
+    private Date modifyTime;
 
-  private transient String dateFrom;
+    private transient String module;
 
-  private transient String dateTo;
+    private transient String dateFrom;
 
-  /** get project source */
-  @JsonIgnore
-  public File getAppSource() {
-    File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
-    if (!sourcePath.exists()) {
-      sourcePath.mkdirs();
-    } else if (sourcePath.isFile()) {
-      throw new IllegalArgumentException(
-          "[StreamPark] project source base path: "
-              + sourcePath.getAbsolutePath()
-              + " must be directory");
-    }
+    private transient String dateTo;
 
-    String sourceDir = getSourceDirName();
-    File srcFile =
-        new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
-    String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
-    if (srcFile.exists()) {
-      File newFile = new File(newPath);
-      if (!newFile.exists()) {
-        newFile.mkdirs();
-      }
-      // old project path move to new path
-      srcFile.getParentFile().renameTo(newFile);
-    }
-    return new File(newPath, sourceDir);
-  }
-
-  private String getSourceDirName() {
-    String branches = this.getBranches() == null ? "main" : this.getBranches();
-    String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
-    return rootName.concat("-").concat(branches);
-  }
-
-  @JsonIgnore
-  public File getDistHome() {
-    return new File(Workspace.APP_LOCAL_DIST(), id.toString());
-  }
-
-  @JsonIgnore
-  public File getGitRepository() {
-    File home = getAppSource();
-    return new File(home, Constants.DOT_GIT);
-  }
-
-  public void delete() throws IOException {
-    FileUtils.deleteDirectory(getAppSource());
-    FileUtils.deleteDirectory(getDistHome());
-  }
-
-  @JsonIgnore
-  public List<String> getAllBranches() {
-    try {
-      return GitUtils.getBranchList(this);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
-  }
-
-  public GitAuthorizedErrorEnum gitCheck() {
-    try {
-      GitUtils.getBranchList(this);
-      return GitAuthorizedErrorEnum.SUCCESS;
-    } catch (Exception e) {
-      String err = e.getMessage();
-      if (err.contains("not authorized")) {
-        return GitAuthorizedErrorEnum.ERROR;
-      } else if (err.contains("Authentication is required")) {
-        return GitAuthorizedErrorEnum.REQUIRED;
-      }
-      return GitAuthorizedErrorEnum.UNKNOW;
-    }
-  }
-
-  @JsonIgnore
-  public boolean isCloned() {
-    File repository = getGitRepository();
-    return repository.exists();
-  }
-
-  /**
-   * If you check that the project already exists and has been cloned, delete it first, Mainly to
-   * solve: if the latest pulling code in the file deletion, etc., the local will not automatically
-   * delete, may cause unpredictable errors.
-   */
-  public void cleanCloned() throws IOException {
-    if (isCloned()) {
-      this.delete();
-    }
-  }
-
-  @JsonIgnore
-  public String getMavenArgs() {
-    // 1) check build args
-    String buildArg = getMvnBuildArgs();
-    StringBuilder argBuilder = new StringBuilder();
-    if (StringUtils.isNotBlank(buildArg)) {
-      argBuilder.append(buildArg);
-    }
-
-    // 2) mvn setting file
-    String mvnSetting = getMvnSetting();
-    if (StringUtils.isNotBlank(mvnSetting)) {
-      argBuilder.append(" --settings ").append(mvnSetting);
-    }
-
-    // 3) check args
-    String cmd = argBuilder.toString();
-    String illegalArg = getIllegalArgs(cmd);
-    if (illegalArg != null) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Invalid maven argument, illegal args: %s, in your maven args: %s", illegalArg, cmd));
-    }
-
-    String mvn = getMvn();
-    return mvn.concat(" clean package -DskipTests ").concat(cmd);
-  }
-
-  private String getMvn() {
-    boolean windows = Utils.isWindows();
-    String mvn = windows ? "mvn.cmd" : "mvn";
-
-    String mavenHome = System.getenv("M2_HOME");
-    mavenHome = mavenHome == null ? System.getenv("MAVEN_HOME") : mavenHome;
-
-    boolean useWrapper = true;
-    if (mavenHome != null) {
-      mvn = mavenHome + "/bin/" + mvn;
-      try {
-        Process process = Runtime.getRuntime().exec(mvn + " --version");
-        process.waitFor();
-        AssertUtils.required(process.exitValue() == 0);
-        useWrapper = false;
-      } catch (Exception ignored) {
-        log.warn("try using user-installed maven failed, now use maven-wrapper.");
-      }
-    }
-
-    if (useWrapper) {
-      mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
-    }
-    return mvn;
-  }
-
-  private String getMvnBuildArgs() {
-    if (StringUtils.isNotBlank(this.buildArgs)) {
-      String args = getIllegalArgs(this.buildArgs);
-      AssertUtils.required(
-          args == null,
-          String.format(
-              "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
-      return this.buildArgs.trim();
-    }
-    return null;
-  }
-
-  private String getMvnSetting() {
-    String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-    if (StringUtils.isBlank(setting)) {
-      return null;
-    }
-    File file = new File(setting);
-    AssertUtils.required(
-        !file.exists() || !file.isFile(),
-        String.format(
-            "Invalid maven-setting file path \"%s\", the path not exist or is not file", setting));
-    return setting;
-  }
-
-  private String getIllegalArgs(String param) {
-    Pattern pattern = Pattern.compile("(`(.?|\\s)*`)|(\\$\\((.?|\\s)*\\))");
-    Matcher matcher = pattern.matcher(param);
-    if (matcher.find()) {
-      return matcher.group(1) == null ? matcher.group(3) : matcher.group(1);
-    }
-
-    Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
-    String[] argsList = param.split("\\s+");
-    while (iterator.hasNext()) {
-      String chr = iterator.next();
-      for (String arg : argsList) {
-        if (arg.contains(chr)) {
-          return arg;
+    /** get project source */
+    @JsonIgnore
+    public File getAppSource() {
+        File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
+        if (!sourcePath.exists()) {
+            sourcePath.mkdirs();
+        } else if (sourcePath.isFile()) {
+            throw new IllegalArgumentException(
+                    "[StreamPark] project source base path: "
+                            + sourcePath.getAbsolutePath()
+                            + " must be directory");
         }
-      }
+
+        String sourceDir = getSourceDirName();
+        File srcFile =
+                new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
+        String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
+        if (srcFile.exists()) {
+            File newFile = new File(newPath);
+            if (!newFile.exists()) {
+                newFile.mkdirs();
+            }
+            // old project path move to new path
+            srcFile.getParentFile().renameTo(newFile);
+        }
+        return new File(newPath, sourceDir);
     }
-    return null;
-  }
 
-  @JsonIgnore
-  public String getMavenWorkHome() {
-    String buildHome = this.getAppSource().getAbsolutePath();
-    if (StringUtils.isBlank(this.getPom())) {
-      return buildHome;
+    private String getSourceDirName() {
+        String branches = this.getBranches() == null ? "main" : this.getBranches();
+        String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
+        return rootName.concat("-").concat(branches);
     }
-    return new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
-  }
 
-  @JsonIgnore
-  public String getLog4BuildStart() {
-    return String.format(
-        "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
-        getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
-  }
+    @JsonIgnore
+    public File getDistHome() {
+        return new File(Workspace.APP_LOCAL_DIST(), id.toString());
+    }
 
-  @JsonIgnore
-  public String getLog4CloneStart() {
-    return String.format(
-        "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
-        getLogHeader("git clone"), getName(), getBranches(), getAppSource());
-  }
+    @JsonIgnore
+    public File getGitRepository() {
+        File home = getAppSource();
+        return new File(home, Constants.DOT_GIT);
+    }
 
-  @JsonIgnore
-  private String getLogHeader(String header) {
-    return "---------------------------------[ " + header + " ]---------------------------------\n";
-  }
+    public void delete() throws IOException {
+        FileUtils.deleteDirectory(getAppSource());
+        FileUtils.deleteDirectory(getDistHome());
+    }
 
-  public boolean isHttpRepositoryUrl() {
-    return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
-  }
+    @JsonIgnore
+    public List<String> getAllBranches() {
+        try {
+            return GitUtils.getBranchList(this);
+        } catch (Exception e) {
+            throw new ApiDetailException(e);
+        }
+    }
 
-  public boolean isSshRepositoryUrl() {
-    return url != null && url.trim().startsWith("git@");
-  }
+    public GitAuthorizedErrorEnum gitCheck() {
+        try {
+            GitUtils.getBranchList(this);
+            return GitAuthorizedErrorEnum.SUCCESS;
+        } catch (Exception e) {
+            String err = e.getMessage();
+            if (err.contains("not authorized")) {
+                return GitAuthorizedErrorEnum.ERROR;
+            } else if (err.contains("Authentication is required")) {
+                return GitAuthorizedErrorEnum.REQUIRED;
+            }
+            return GitAuthorizedErrorEnum.UNKNOW;
+        }
+    }
+
+    @JsonIgnore
+    public boolean isCloned() {
+        File repository = getGitRepository();
+        return repository.exists();
+    }
+
+    /**
+     * If you check that the project already exists and has been cloned, delete it first, Mainly to
+     * solve: if the latest pulling code in the file deletion, etc., the local will not automatically
+     * delete, may cause unpredictable errors.
+     */
+    public void cleanCloned() throws IOException {
+        if (isCloned()) {
+            this.delete();
+        }
+    }
+
+    @JsonIgnore
+    public String getMavenArgs() {
+        // 1) check build args
+        String buildArg = getMvnBuildArgs();
+        StringBuilder argBuilder = new StringBuilder();
+        if (StringUtils.isNotBlank(buildArg)) {
+            argBuilder.append(buildArg);
+        }
+
+        // 2) mvn setting file
+        String mvnSetting = getMvnSetting();
+        if (StringUtils.isNotBlank(mvnSetting)) {
+            argBuilder.append(" --settings ").append(mvnSetting);
+        }
+
+        // 3) check args
+        String cmd = argBuilder.toString();
+        String illegalArg = getIllegalArgs(cmd);
+        if (illegalArg != null) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Invalid maven argument, illegal args: %s, in your maven args: %s", illegalArg, cmd));
+        }
+
+        String mvn = getMvn();
+        return mvn.concat(" clean package -DskipTests ").concat(cmd);
+    }
+
+    private String getMvn() {
+        boolean windows = Utils.isWindows();
+        String mvn = windows ? "mvn.cmd" : "mvn";
+
+        String mavenHome = System.getenv("M2_HOME");
+        mavenHome = mavenHome == null ? System.getenv("MAVEN_HOME") : mavenHome;
+
+        boolean useWrapper = true;
+        if (mavenHome != null) {
+            mvn = mavenHome + "/bin/" + mvn;
+            try {
+                Process process = Runtime.getRuntime().exec(mvn + " --version");
+                process.waitFor();
+                AssertUtils.required(process.exitValue() == 0);
+                useWrapper = false;
+            } catch (Exception ignored) {
+                log.warn("try using user-installed maven failed, now use maven-wrapper.");
+            }
+        }
+
+        if (useWrapper) {
+            mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
+        }
+        return mvn;
+    }
+
+    private String getMvnBuildArgs() {
+        if (StringUtils.isNotBlank(this.buildArgs)) {
+            String args = getIllegalArgs(this.buildArgs);
+            AssertUtils.required(
+                    args == null,
+                    String.format(
+                            "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
+            return this.buildArgs.trim();
+        }
+        return null;
+    }
+
+    private String getMvnSetting() {
+        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        if (StringUtils.isBlank(setting)) {
+            return null;
+        }
+        File file = new File(setting);
+        AssertUtils.required(
+                !file.exists() || !file.isFile(),
+                String.format(
+                        "Invalid maven-setting file path \"%s\", the path not exist or is not file", setting));
+        return setting;
+    }
+
+    private String getIllegalArgs(String param) {
+        Pattern pattern = Pattern.compile("(`(.?|\\s)*`)|(\\$\\((.?|\\s)*\\))");
+        Matcher matcher = pattern.matcher(param);
+        if (matcher.find()) {
+            return matcher.group(1) == null ? matcher.group(3) : matcher.group(1);
+        }
+
+        Iterator<String> iterator = Arrays.asList(";", "|", "&", ">", "<").iterator();
+        String[] argsList = param.split("\\s+");
+        while (iterator.hasNext()) {
+            String chr = iterator.next();
+            for (String arg : argsList) {
+                if (arg.contains(chr)) {
+                    return arg;
+                }
+            }
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public String getMavenWorkHome() {
+        String buildHome = this.getAppSource().getAbsolutePath();
+        if (StringUtils.isBlank(this.getPom())) {
+            return buildHome;
+        }
+        return new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+    }
+
+    @JsonIgnore
+    public String getLog4BuildStart() {
+        return String.format(
+                "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
+                getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
+    }
+
+    @JsonIgnore
+    public String getLog4CloneStart() {
+        return String.format(
+                "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
+                getLogHeader("git clone"), getName(), getBranches(), getAppSource());
+    }
+
+    @JsonIgnore
+    private String getLogHeader(String header) {
+        return "---------------------------------[ " + header + " ]---------------------------------\n";
+    }
+
+    public boolean isHttpRepositoryUrl() {
+        return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
+    }
+
+    public boolean isSshRepositoryUrl() {
+        return url != null && url.trim().startsWith("git@");
+    }
 }

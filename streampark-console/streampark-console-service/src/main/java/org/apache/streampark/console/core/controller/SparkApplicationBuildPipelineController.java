@@ -41,40 +41,41 @@ import java.util.Optional;
 @RequestMapping("spark/pipe")
 public class SparkApplicationBuildPipelineController {
 
-  @Autowired private SparkAppBuildPipeService appBuildPipeService;
+    @Autowired
+    private SparkAppBuildPipeService appBuildPipeService;
 
-  /**
-   * Release application building pipeline.
-   *
-   * @param appId application id
-   * @param forceBuild forced start pipeline or not
-   * @return Whether the pipeline was successfully started
-   */
-  @PostMapping(value = "build")
-  @RequiresPermissions("app:create")
-  @PermissionScope(app = "#appId")
-  public RestResponse buildApplication(Long appId, boolean forceBuild) {
-    try {
-      boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-      return RestResponse.success(actionResult);
-    } catch (Exception e) {
-      return RestResponse.success(false).message(e.getMessage());
+    /**
+     * Release application building pipeline.
+     *
+     * @param appId application id
+     * @param forceBuild forced start pipeline or not
+     * @return Whether the pipeline was successfully started
+     */
+    @PostMapping(value = "build")
+    @RequiresPermissions("app:create")
+    @PermissionScope(app = "#appId")
+    public RestResponse buildApplication(Long appId, boolean forceBuild) {
+        try {
+            boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
+            return RestResponse.success(actionResult);
+        } catch (Exception e) {
+            return RestResponse.success(false).message(e.getMessage());
+        }
     }
-  }
 
-  /**
-   * Get application building pipeline progress detail.
-   *
-   * @param appId application id
-   * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
-   */
-  @PostMapping("/detail")
-  @RequiresPermissions("app:view")
-  @PermissionScope(app = "#appId")
-  public RestResponse getBuildProgressDetail(Long appId) {
-    Map<String, Object> details = new HashMap<>(0);
-    Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-    details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
-    return RestResponse.success(details);
-  }
+    /**
+     * Get application building pipeline progress detail.
+     *
+     * @param appId application id
+     * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
+     */
+    @PostMapping("/detail")
+    @RequiresPermissions("app:view")
+    @PermissionScope(app = "#appId")
+    public RestResponse getBuildProgressDetail(Long appId) {
+        Map<String, Object> details = new HashMap<>(0);
+        Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
+        details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
+        return RestResponse.success(details);
+    }
 }

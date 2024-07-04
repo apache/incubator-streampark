@@ -44,33 +44,35 @@ import javax.annotation.Nullable;
 @RequestMapping("flink/savepoint")
 public class SavePointController {
 
-  @Autowired private ApplicationManageService applicationManageService;
+    @Autowired
+    private ApplicationManageService applicationManageService;
 
-  @Autowired private SavePointService savePointService;
+    @Autowired
+    private SavePointService savePointService;
 
-  @PostMapping("history")
-  @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
-  public RestResponse history(SavePoint sp, RestRequest request) {
-    IPage<SavePoint> page = savePointService.getPage(sp, request);
-    return RestResponse.success(page);
-  }
+    @PostMapping("history")
+    @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
+    public RestResponse history(SavePoint sp, RestRequest request) {
+        IPage<SavePoint> page = savePointService.getPage(sp, request);
+        return RestResponse.success(page);
+    }
 
-  @PostMapping("delete")
-  @RequiresPermissions("savepoint:delete")
-  @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
-  public RestResponse delete(SavePoint sp) throws InternalException {
-    SavePoint savePoint = savePointService.getById(sp.getId());
-    Application application = applicationManageService.getById(savePoint.getAppId());
-    Boolean deleted = savePointService.remove(sp.getId(), application);
-    return RestResponse.success(deleted);
-  }
+    @PostMapping("delete")
+    @RequiresPermissions("savepoint:delete")
+    @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
+    public RestResponse delete(SavePoint sp) throws InternalException {
+        SavePoint savePoint = savePointService.getById(sp.getId());
+        Application application = applicationManageService.getById(savePoint.getAppId());
+        Boolean deleted = savePointService.remove(sp.getId(), application);
+        return RestResponse.success(deleted);
+    }
 
-  @PostMapping("trigger")
-  @PermissionScope(app = "#savePoint.appId", team = "#savePoint.teamId")
-  @RequiresPermissions("savepoint:trigger")
-  public RestResponse trigger(
-      Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
-    savePointService.trigger(appId, savepointPath, nativeFormat);
-    return RestResponse.success(true);
-  }
+    @PostMapping("trigger")
+    @PermissionScope(app = "#savePoint.appId", team = "#savePoint.teamId")
+    @RequiresPermissions("savepoint:trigger")
+    public RestResponse trigger(
+                                Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
+        savePointService.trigger(appId, savepointPath, nativeFormat);
+        return RestResponse.success(true);
+    }
 }

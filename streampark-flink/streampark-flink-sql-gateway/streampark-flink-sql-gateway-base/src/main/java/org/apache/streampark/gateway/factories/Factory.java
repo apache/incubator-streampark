@@ -23,9 +23,10 @@ import java.util.Set;
 
 /** F */
 public interface Factory {
-  String factoryIdentifier();
 
-  Set<ConfigOption<?>> requiredOptions();
+    String factoryIdentifier();
 
-  Set<ConfigOption<?>> optionalOptions();
+    Set<ConfigOption<?>> requiredOptions();
+
+    Set<ConfigOption<?>> optionalOptions();
 }

@@ -49,86 +49,84 @@ import java.nio.file.Path;
 @ActiveProfiles("test")
 @AutoConfigureTestEntityManager
 @AutoConfigureWebTestClient(timeout = "60000")
-@SpringBootTest(
-    classes = StreamParkConsoleBootstrap.class,
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
-    properties = {
-      "server.port=10000",
-      "spring.application.name=Apache StreamPark",
-      "spring.main.banner-mode=false",
-      "spring.aop.proxy-target-class=true",
-      "spring.messages.encoding=utf-8",
-      "spring.main.allow-circular-references=true",
-      "spring.mvc.converters.preferred-json-mapper=jackson",
-      "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
-      "spring.jackson.time-zone=GMT+8",
-      "spring.jackson.deserialization.fail-on-unknown-properties=false",
-      "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
-      "datasource.dialect=h2",
-      "spring.datasource.driver-class-name=org.h2.Driver",
-      "spring.datasource.username=sa",
-      "spring.datasource.password=sa",
-      "spring.datasource.url=jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
-      "spring.sql.init.data-locations=classpath:db/data-h2.sql",
-      "spring.sql.init.continue-on-error=true",
-      "spring.sql.init.username=sa",
-      "spring.sql.init.password=sa",
-      "spring.sql.init.mode=always"
-    })
+@SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
+        "server.port=10000",
+        "spring.application.name=Apache StreamPark",
+        "spring.main.banner-mode=false",
+        "spring.aop.proxy-target-class=true",
+        "spring.messages.encoding=utf-8",
+        "spring.main.allow-circular-references=true",
+        "spring.mvc.converters.preferred-json-mapper=jackson",
+        "spring.jackson.date-format=yyyy-MM-dd HH:mm:ss",
+        "spring.jackson.time-zone=GMT+8",
+        "spring.jackson.deserialization.fail-on-unknown-properties=false",
+        "spring.mvc.pathmatch.matching-strategy=ant_path_matcher",
+        "datasource.dialect=h2",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=sa",
+        "spring.datasource.url=jdbc:h2:mem:streampark;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+        "spring.sql.init.data-locations=classpath:db/data-h2.sql",
+        "spring.sql.init.continue-on-error=true",
+        "spring.sql.init.username=sa",
+        "spring.sql.init.password=sa",
+        "spring.sql.init.mode=always"
+})
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
 public abstract class SpringUnitTestBase {
 
-  protected static final Logger LOG = LoggerFactory.getLogger(SpringUnitTestBase.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(SpringUnitTestBase.class);
 
-  @BeforeAll
-  public static void init(@TempDir File tempPath) throws IOException {
-    // Skip the EnvInitializer#run method by flag in System.properties.
-    LOG.info("Start mock EnvInitializer init.");
-    String mockedHome = tempPath.getAbsolutePath();
-    Path localWorkspace =
-        Files.createDirectories(new File(mockedHome + "/localWorkspace").toPath());
+    @BeforeAll
+    public static void init(@TempDir File tempPath) throws IOException {
+        // Skip the EnvInitializer#run method by flag in System.properties.
+        LOG.info("Start mock EnvInitializer init.");
+        String mockedHome = tempPath.getAbsolutePath();
+        Path localWorkspace =
+                Files.createDirectories(new File(mockedHome + "/localWorkspace").toPath());
 
-    System.setProperty(ConfigKeys.KEY_APP_HOME(), mockedHome);
-    System.setProperty(
-        CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-        localWorkspace.toAbsolutePath().toString());
+        System.setProperty(ConfigKeys.KEY_APP_HOME(), mockedHome);
+        System.setProperty(
+                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+                localWorkspace.toAbsolutePath().toString());
 
-    Files.createDirectories(new File(mockedHome + "/temp").toPath());
+        Files.createDirectories(new File(mockedHome + "/temp").toPath());
 
-    LOG.info(
-        "Complete mock EnvInitializer init, app home: {}, {}: {}",
-        tempPath.getAbsolutePath(),
-        CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-        localWorkspace.toAbsolutePath());
-  }
+        LOG.info(
+                "Complete mock EnvInitializer init, app home: {}, {}: {}",
+                tempPath.getAbsolutePath(),
+                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+                localWorkspace.toAbsolutePath());
+    }
 
-  // Help methods.
+    // Help methods.
 
-  protected FlinkCluster mockYarnSessionFlinkCluster(
-      String name, String yarnQueue, Long versionId) {
-    FlinkCluster cluster = new FlinkCluster();
-    cluster.setClusterName(name);
-    cluster.setYarnQueue(yarnQueue);
-    cluster.setVersionId(versionId);
-    cluster.setExecutionMode(FlinkExecutionMode.YARN_SESSION.getMode());
-    return cluster;
-  }
+    protected FlinkCluster mockYarnSessionFlinkCluster(
+                                                       String name, String yarnQueue, Long versionId) {
+        FlinkCluster cluster = new FlinkCluster();
+        cluster.setClusterName(name);
+        cluster.setYarnQueue(yarnQueue);
+        cluster.setVersionId(versionId);
+        cluster.setExecutionMode(FlinkExecutionMode.YARN_SESSION.getMode());
+        return cluster;
+    }
 
-  protected Application mockYarnModeJobApp(
-      Long teamId, String name, String yarnQueue, FlinkExecutionMode executionModeEnum) {
-    Application application = new Application();
-    application.setYarnQueue(yarnQueue);
-    application.setTeamId(teamId);
-    application.setJobName(name);
-    application.setExecutionMode(executionModeEnum.getMode());
-    application.doSetHotParams();
-    return application;
-  }
+    protected Application mockYarnModeJobApp(
+                                             Long teamId, String name, String yarnQueue,
+                                             FlinkExecutionMode executionModeEnum) {
+        Application application = new Application();
+        application.setYarnQueue(yarnQueue);
+        application.setTeamId(teamId);
+        application.setJobName(name);
+        application.setExecutionMode(executionModeEnum.getMode());
+        application.doSetHotParams();
+        return application;
+    }
 
-  protected YarnQueue mockYarnQueue(Long teamId, String queueLabel) {
-    YarnQueue yarnQueue = new YarnQueue();
-    yarnQueue.setTeamId(teamId);
-    yarnQueue.setQueueLabel(queueLabel);
-    return yarnQueue;
-  }
+    protected YarnQueue mockYarnQueue(Long teamId, String queueLabel) {
+        YarnQueue yarnQueue = new YarnQueue();
+        yarnQueue.setTeamId(teamId);
+        yarnQueue.setQueueLabel(queueLabel);
+        return yarnQueue;
+    }
 }

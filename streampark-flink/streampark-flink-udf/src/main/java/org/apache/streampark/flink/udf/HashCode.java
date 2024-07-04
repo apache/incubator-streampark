@@ -21,18 +21,19 @@ import org.apache.flink.table.functions.ScalarFunction;
 
 public class HashCode extends ScalarFunction {
 
-  private Integer factor = 12;
+    private Integer factor = 12;
 
-  public HashCode() {}
-
-  public HashCode(Integer factor) {
-    this.factor = factor;
-  }
-
-  public Integer eval(String s) {
-    if (s == null) {
-      return 0;
+    public HashCode() {
     }
-    return s.hashCode() * factor;
-  }
+
+    public HashCode(Integer factor) {
+        this.factor = factor;
+    }
+
+    public Integer eval(String s) {
+        if (s == null) {
+            return 0;
+        }
+        return s.hashCode() * factor;
+    }
 }

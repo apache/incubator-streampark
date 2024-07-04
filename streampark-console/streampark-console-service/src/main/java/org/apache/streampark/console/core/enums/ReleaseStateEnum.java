@@ -22,40 +22,40 @@ import java.util.Arrays;
 /** Release Status */
 public enum ReleaseStateEnum {
 
-  /** release failed */
-  FAILED(-1),
-  /** release done */
-  DONE(0),
+    /** release failed */
+    FAILED(-1),
+    /** release done */
+    DONE(0),
 
-  /** need release after modify task */
-  NEED_RELEASE(1),
+    /** need release after modify task */
+    NEED_RELEASE(1),
 
-  /** releasing */
-  RELEASING(2),
+    /** releasing */
+    RELEASING(2),
 
-  /** release complete, need restart */
-  NEED_RESTART(3),
+    /** release complete, need restart */
+    NEED_RESTART(3),
 
-  /** need rollback */
-  NEED_ROLLBACK(4),
+    /** need rollback */
+    NEED_ROLLBACK(4),
 
-  /** project has changed, need to check the jar whether to be re-selected */
-  NEED_CHECK(5),
+    /** project has changed, need to check the jar whether to be re-selected */
+    NEED_CHECK(5),
 
-  /** revoked */
-  REVOKED(10);
+    /** revoked */
+    REVOKED(10);
 
-  private final int value;
+    private final int value;
 
-  ReleaseStateEnum(int value) {
-    this.value = value;
-  }
+    ReleaseStateEnum(int value) {
+        this.value = value;
+    }
 
-  public int get() {
-    return this.value;
-  }
+    public int get() {
+        return this.value;
+    }
 
-  public static ReleaseStateEnum of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-  }
+    public static ReleaseStateEnum of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }

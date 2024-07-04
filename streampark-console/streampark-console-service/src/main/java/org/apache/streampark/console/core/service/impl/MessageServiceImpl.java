@@ -38,22 +38,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
-    implements MessageService {
+        implements
+            MessageService {
 
-  @Override
-  public void push(Message message) {
-    save(message);
-    WebSocketEndpoint.pushNotice(message);
-  }
+    @Override
+    public void push(Message message) {
+        save(message);
+        WebSocketEndpoint.pushNotice(message);
+    }
 
-  @Override
-  public IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request) {
-    Page<Message> page = MybatisPager.getPage(request);
-    LambdaQueryWrapper<Message> queryWrapper =
-        new LambdaQueryWrapper<Message>()
-            .eq(Message::getIsRead, false)
-            .orderByDesc(Message::getCreateTime)
-            .eq(Message::getType, noticeTypeEnum);
-    return this.baseMapper.selectPage(page, queryWrapper);
-  }
+    @Override
+    public IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request) {
+        Page<Message> page = MybatisPager.getPage(request);
+        LambdaQueryWrapper<Message> queryWrapper =
+                new LambdaQueryWrapper<Message>()
+                        .eq(Message::getIsRead, false)
+                        .orderByDesc(Message::getCreateTime)
+                        .eq(Message::getType, noticeTypeEnum);
+        return this.baseMapper.selectPage(page, queryWrapper);
+    }
 }

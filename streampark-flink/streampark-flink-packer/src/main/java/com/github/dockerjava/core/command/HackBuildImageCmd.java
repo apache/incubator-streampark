@@ -26,19 +26,19 @@ import java.io.InputStream;
 /** Listenable BuildImageCmdImpl */
 public class HackBuildImageCmd extends BuildImageCmdImpl {
 
-  public HackBuildImageCmd(Exec exec) {
-    super(exec);
-  }
+    public HackBuildImageCmd(Exec exec) {
+        super(exec);
+    }
 
-  public HackBuildImageCmd(Exec exec, File dockerFileOrFolder) {
-    super(exec, dockerFileOrFolder);
-  }
+    public HackBuildImageCmd(Exec exec, File dockerFileOrFolder) {
+        super(exec, dockerFileOrFolder);
+    }
 
-  public HackBuildImageCmd(Exec exec, InputStream tarInputStream) {
-    super(exec, tarInputStream);
-  }
+    public HackBuildImageCmd(Exec exec, InputStream tarInputStream) {
+        super(exec, tarInputStream);
+    }
 
-  public HackBuildImageResultCallback start(BuildImageCallbackListener listener) {
-    return exec(new HackBuildImageResultCallback(listener));
-  }
+    public HackBuildImageResultCallback start(BuildImageCallbackListener listener) {
+        return exec(new HackBuildImageResultCallback(listener));
+    }
 }

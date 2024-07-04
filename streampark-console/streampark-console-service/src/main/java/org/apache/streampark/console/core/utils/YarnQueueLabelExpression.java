@@ -35,83 +35,83 @@ import java.util.regex.Pattern;
 /** Util class for parsing and checking Yarn queue & Label */
 public class YarnQueueLabelExpression {
 
-  private static final String AT = "@";
+    private static final String AT = "@";
 
-  private static final String REGEX = "[a-zA-Z0-9_\\-]+";
+    private static final String REGEX = "[a-zA-Z0-9_\\-]+";
 
-  @VisibleForTesting
-  public static final String ERR_FORMAT_HINTS =
-      "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
+    @VisibleForTesting
+    public static final String ERR_FORMAT_HINTS =
+            "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
 
-  private static final Pattern QUEUE_LABEL_PATTERN =
-      Pattern.compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
+    private static final Pattern QUEUE_LABEL_PATTERN =
+            Pattern.compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
 
-  private static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
+    private static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
 
-  private final String queue;
-  private @Nullable final String labelExpression;
+    private final String queue;
+    private @Nullable final String labelExpression;
 
-  private YarnQueueLabelExpression(String queue, String labelExpression) {
-    this.labelExpression = StringUtils.isBlank(labelExpression) ? null : labelExpression;
-    this.queue = queue;
-  }
-
-  public Optional<String> getLabelExpression() {
-    return Optional.ofNullable(labelExpression);
-  }
-
-  public @Nonnull String getQueue() {
-    return queue;
-  }
-
-  @Override
-  public String toString() {
-    return StringUtils.isBlank(labelExpression)
-        ? queue
-        : String.format(QUEUE_LABEL_FORMAT, queue, labelExpression);
-  }
-
-  public static boolean isValid(String queueLabel, boolean ignoreEmpty) {
-    if (StringUtils.isBlank(queueLabel)) {
-      return ignoreEmpty;
+    private YarnQueueLabelExpression(String queue, String labelExpression) {
+        this.labelExpression = StringUtils.isBlank(labelExpression) ? null : labelExpression;
+        this.queue = queue;
     }
-    return QUEUE_LABEL_PATTERN.matcher(queueLabel).matches();
-  }
 
-  // Visible for test.
-  public static boolean isValid(String queueLabel) {
-    return isValid(queueLabel, false);
-  }
-
-  // Visible for test.
-  public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
-    ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_FORMAT_HINTS);
-    String[] strs = queueLabelExpr.split(AT);
-    if (strs.length == 2) {
-      return new YarnQueueLabelExpression(strs[0], strs[1]);
+    public Optional<String> getLabelExpression() {
+        return Optional.ofNullable(labelExpression);
     }
-    return new YarnQueueLabelExpression(strs[0], null);
-  }
 
-  public static YarnQueueLabelExpression of(
-      @Nonnull String queue, @Nullable String labelExpression) {
-    YarnQueueLabelExpression queueLabelExpression =
-        new YarnQueueLabelExpression(queue, labelExpression);
-    ApiAlertException.throwIfFalse(
-        isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
-    return queueLabelExpression;
-  }
-
-  public static Map<String, String> getQueueLabelMap(String queueLabelExp) {
-    if (StringUtils.isBlank(queueLabelExp)) {
-      return new HashMap<>();
+    public @Nonnull String getQueue() {
+        return queue;
     }
-    YarnQueueLabelExpression yarnQueueLabelExpression = of(queueLabelExp);
-    Map<String, String> queueLabelMap = new HashMap<>(2);
-    yarnQueueLabelExpression
-        .getLabelExpression()
-        .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
-    queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
-    return queueLabelMap;
-  }
+
+    @Override
+    public String toString() {
+        return StringUtils.isBlank(labelExpression)
+                ? queue
+                : String.format(QUEUE_LABEL_FORMAT, queue, labelExpression);
+    }
+
+    public static boolean isValid(String queueLabel, boolean ignoreEmpty) {
+        if (StringUtils.isBlank(queueLabel)) {
+            return ignoreEmpty;
+        }
+        return QUEUE_LABEL_PATTERN.matcher(queueLabel).matches();
+    }
+
+    // Visible for test.
+    public static boolean isValid(String queueLabel) {
+        return isValid(queueLabel, false);
+    }
+
+    // Visible for test.
+    public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
+        ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_FORMAT_HINTS);
+        String[] strs = queueLabelExpr.split(AT);
+        if (strs.length == 2) {
+            return new YarnQueueLabelExpression(strs[0], strs[1]);
+        }
+        return new YarnQueueLabelExpression(strs[0], null);
+    }
+
+    public static YarnQueueLabelExpression of(
+                                              @Nonnull String queue, @Nullable String labelExpression) {
+        YarnQueueLabelExpression queueLabelExpression =
+                new YarnQueueLabelExpression(queue, labelExpression);
+        ApiAlertException.throwIfFalse(
+                isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
+        return queueLabelExpression;
+    }
+
+    public static Map<String, String> getQueueLabelMap(String queueLabelExp) {
+        if (StringUtils.isBlank(queueLabelExp)) {
+            return new HashMap<>();
+        }
+        YarnQueueLabelExpression yarnQueueLabelExpression = of(queueLabelExp);
+        Map<String, String> queueLabelMap = new HashMap<>(2);
+        yarnQueueLabelExpression
+                .getLabelExpression()
+                .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
+        queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
+        return queueLabelMap;
+    }
 }

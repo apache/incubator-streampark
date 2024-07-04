@@ -18,12 +18,13 @@
 package org.apache.streampark.console.core.enums;
 
 public enum StopFromEnum {
-  /** None */
-  NONE,
-  /** StreamPark */
-  STREAMPARK;
 
-  public boolean isNone() {
-    return this.equals(NONE);
-  }
+    /** None */
+    NONE,
+    /** StreamPark */
+    STREAMPARK;
+
+    public boolean isNone() {
+        return this.equals(NONE);
+    }
 }

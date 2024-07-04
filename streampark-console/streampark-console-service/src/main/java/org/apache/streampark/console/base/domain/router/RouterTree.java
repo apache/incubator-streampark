@@ -30,62 +30,63 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterTree<T> {
 
-  private String id;
+    private String id;
 
-  private String key;
+    private String key;
 
-  private String icon;
+    private String icon;
 
-  private String title;
+    private String title;
 
-  private String value;
+    private String value;
 
-  private String text;
+    private String text;
 
-  private String permission;
+    private String permission;
 
-  private String type;
+    private String type;
 
-  private boolean display;
+    private boolean display;
 
-  private Double order;
+    private Double order;
 
-  private String path;
+    private String path;
 
-  private String component;
+    private String component;
 
-  private List<RouterTree<T>> children;
+    private List<RouterTree<T>> children;
 
-  private String parentId;
+    private String parentId;
 
-  private boolean hasParent = false;
+    private boolean hasParent = false;
 
-  private boolean hasChildren = false;
+    private boolean hasChildren = false;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  public void initChildren() {
-    this.children = new ArrayList<>();
-  }
+    public void initChildren() {
+        this.children = new ArrayList<>();
+    }
 
-  public RouterTree() {}
+    public RouterTree() {
+    }
 
-  public RouterTree(Menu menu) {
-    this.setId(menu.getMenuId().toString());
-    this.setKey(this.getId());
-    this.setParentId(menu.getParentId().toString());
-    this.setText(menu.getMenuName());
-    this.setTitle(menu.getMenuName());
-    this.setIcon(menu.getIcon());
-    this.setComponent(menu.getComponent());
-    this.setCreateTime(menu.getCreateTime());
-    this.setModifyTime(menu.getModifyTime());
-    this.setPath(menu.getPath());
-    this.setOrder(menu.getOrderNum());
-    this.setPermission(menu.getPerms());
-    this.setType(menu.getType());
-    this.setDisplay(menu.isDisplay());
-  }
+    public RouterTree(Menu menu) {
+        this.setId(menu.getMenuId().toString());
+        this.setKey(this.getId());
+        this.setParentId(menu.getParentId().toString());
+        this.setText(menu.getMenuName());
+        this.setTitle(menu.getMenuName());
+        this.setIcon(menu.getIcon());
+        this.setComponent(menu.getComponent());
+        this.setCreateTime(menu.getCreateTime());
+        this.setModifyTime(menu.getModifyTime());
+        this.setPath(menu.getPath());
+        this.setOrder(menu.getOrderNum());
+        this.setPermission(menu.getPerms());
+        this.setType(menu.getType());
+        this.setDisplay(menu.isDisplay());
+    }
 }

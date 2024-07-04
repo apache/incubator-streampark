@@ -30,23 +30,23 @@ import java.util.List;
 
 public interface MemberMapper extends BaseMapper<Member> {
 
-  /**
-   * delete role by user id
-   *
-   * @param userId user id
-   * @return boolean
-   */
-  boolean deleteByUserId(@Param("userId") Long userId);
+    /**
+     * delete role by user id
+     *
+     * @param userId user id
+     * @return boolean
+     */
+    boolean deleteByUserId(@Param("userId") Long userId);
 
-  /**
-   * delete user by role id
-   *
-   * @param roleId role id
-   * @return boolean
-   */
-  boolean deleteByRoleId(@Param("roleId") Long roleId);
+    /**
+     * delete user by role id
+     *
+     * @param roleId role id
+     * @return boolean
+     */
+    boolean deleteByRoleId(@Param("roleId") Long roleId);
 
-  IPage<Member> selectPage(Page<Member> page, @Param("member") Member member);
+    IPage<Member> selectPage(Page<Member> page, @Param("member") Member member);
 
-  List<User> selectUsersNotInTeam(@Param("teamId") Long teamId);
+    List<User> selectUsersNotInTeam(@Param("teamId") Long teamId);
 }

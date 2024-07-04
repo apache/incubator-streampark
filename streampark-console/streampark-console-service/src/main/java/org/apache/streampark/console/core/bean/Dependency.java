@@ -38,59 +38,60 @@ import java.util.stream.Collectors;
 
 @Getter
 public class Dependency {
-  private List<MavenPom> pom = Collections.emptyList();
-  private List<String> jar = Collections.emptyList();
 
-  @SneakyThrows
-  public static Dependency toDependency(String dependency) {
-    if (Utils.isNotEmpty(dependency)) {
-      return JacksonUtils.read(dependency, new TypeReference<Dependency>() {});
-    }
-    return new Dependency();
-  }
+    private List<MavenPom> pom = Collections.emptyList();
+    private List<String> jar = Collections.emptyList();
 
-  public boolean isEmpty() {
-    return pom.isEmpty() && jar.isEmpty();
-  }
-
-  public boolean equals(Dependency other) {
-    if (other == null) {
-      return false;
-    }
-    if (this.isEmpty() && other.isEmpty()) {
-      return true;
+    @SneakyThrows
+    public static Dependency toDependency(String dependency) {
+        if (Utils.isNotEmpty(dependency)) {
+            return JacksonUtils.read(dependency, new TypeReference<Dependency>() {
+            });
+        }
+        return new Dependency();
     }
 
-    if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size()) {
-      return false;
+    public boolean isEmpty() {
+        return pom.isEmpty() && jar.isEmpty();
     }
-    File localJar = WebUtils.getAppTempDir();
-    File localUploads = new File(Workspace.local().APP_UPLOADS());
-    Set<String> otherJars = new HashSet<>(other.jar);
-    for (String jarName : jar) {
-      if (!otherJars.contains(jarName)
-          || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
-        return false;
-      }
+
+    public boolean equals(Dependency other) {
+        if (other == null) {
+            return false;
+        }
+        if (this.isEmpty() && other.isEmpty()) {
+            return true;
+        }
+
+        if (this.pom.size() != other.pom.size() || this.jar.size() != other.jar.size()) {
+            return false;
+        }
+        File localJar = WebUtils.getAppTempDir();
+        File localUploads = new File(Workspace.local().APP_UPLOADS());
+        Set<String> otherJars = new HashSet<>(other.jar);
+        for (String jarName : jar) {
+            if (!otherJars.contains(jarName)
+                    || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+                return false;
+            }
+        }
+        return new HashSet<>(pom).containsAll(other.pom);
     }
-    return new HashSet<>(pom).containsAll(other.pom);
-  }
 
-  public DependencyInfo toJarPackDeps() {
-    List<Artifact> mvnArts = toArtifact();
-    List<String> extJars =
-        this.jar.stream()
-            .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-            .collect(Collectors.toList());
-    return new DependencyInfo(mvnArts, extJars);
-  }
+    public DependencyInfo toJarPackDeps() {
+        List<Artifact> mvnArts = toArtifact();
+        List<String> extJars =
+                this.jar.stream()
+                        .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                        .collect(Collectors.toList());
+        return new DependencyInfo(mvnArts, extJars);
+    }
 
-  public List<Artifact> toArtifact() {
-    return this.pom.stream()
-        .map(
-            pom ->
-                new Artifact(
-                    pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), pom.getClassifier()))
-        .collect(Collectors.toList());
-  }
+    public List<Artifact> toArtifact() {
+        return this.pom.stream()
+                .map(
+                        pom -> new Artifact(
+                                pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), pom.getClassifier()))
+                .collect(Collectors.toList());
+    }
 }

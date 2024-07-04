@@ -29,13 +29,13 @@ import java.io.Serializable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterMeta implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  private Boolean closeable;
+    private Boolean closeable;
 
-  private Boolean hidden;
+    private Boolean hidden;
 
-  private Boolean keepAlive;
+    private Boolean keepAlive;
 
-  private String icon;
+    private String icon;
 }

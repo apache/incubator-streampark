@@ -37,68 +37,68 @@ import java.util.Date;
 @TableName("t_user")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  /** user status */
-  public static final String STATUS_VALID = "1";
+    private static final long serialVersionUID = 1L;
+    /** user status */
+    public static final String STATUS_VALID = "1";
 
-  public static final String STATUS_LOCK = "0";
+    public static final String STATUS_LOCK = "0";
 
-  public static final String SEX_MALE = "0";
+    public static final String SEX_MALE = "0";
 
-  public static final String SEX_FEMALE = "1";
+    public static final String SEX_FEMALE = "1";
 
-  public static final String SEX_UNKNOWN = "2";
+    public static final String SEX_UNKNOWN = "2";
 
-  public static final Integer DEFAULT_PASSWORD_LENGTH = 8;
+    public static final Integer DEFAULT_PASSWORD_LENGTH = 8;
 
-  @TableId(type = IdType.AUTO)
-  private Long userId;
+    @TableId(type = IdType.AUTO)
+    private Long userId;
 
-  @Size(min = 4, max = 20, message = "{range}")
-  private String username;
+    @Size(min = 4, max = 20, message = "{range}")
+    private String username;
 
-  private String password;
+    private String password;
 
-  @Size(max = 50, message = "{noMoreThan}")
-  @Email(message = "{email}")
-  private String email;
+    @Size(max = 50, message = "{noMoreThan}")
+    @Email(message = "{email}")
+    private String email;
 
-  private UserTypeEnum userType;
+    private UserTypeEnum userType;
 
-  private LoginTypeEnum loginType;
+    private LoginTypeEnum loginType;
 
-  @NotBlank(message = "{required}")
-  private String status;
+    @NotBlank(message = "{required}")
+    private String status;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private Date lastLoginTime;
+    private Date lastLoginTime;
 
-  @NotBlank(message = "{required}")
-  private String sex;
+    @NotBlank(message = "{required}")
+    private String sex;
 
-  @Size(max = 100, message = "{noMoreThan}")
-  private String description;
+    @Size(max = 100, message = "{noMoreThan}")
+    private String description;
 
-  private transient String oldPassword;
+    private transient String oldPassword;
 
-  private transient String createTimeFrom;
-  private transient String createTimeTo;
+    private transient String createTimeFrom;
+    private transient String createTimeTo;
 
-  private transient String id;
+    private transient String id;
 
-  private String salt;
+    private String salt;
 
-  private String nickName;
+    private String nickName;
 
-  /** The last set teamId */
-  private Long lastTeamId;
+    /** The last set teamId */
+    private Long lastTeamId;
 
-  public void dataMasking() {
-    String dataMask = Constant.DEFAULT_DATAMASK_STRING;
-    this.setPassword(dataMask);
-    this.setSalt(dataMask);
-  }
+    public void dataMasking() {
+        String dataMask = Constant.DEFAULT_DATAMASK_STRING;
+        this.setPassword(dataMask);
+        this.setSalt(dataMask);
+    }
 }

@@ -30,38 +30,38 @@ import java.util.List;
 @Setter
 public class SenderEmail {
 
-  private String host;
-  private Integer port;
-  private String from;
-  private String userName;
-  private String password;
-  private boolean ssl;
+    private String host;
+    private Integer port;
+    private String from;
+    private String userName;
+    private String password;
+    private boolean ssl;
 
-  public static List<Setting> toSettings(SenderEmail senderEmail) {
-    Setting smtpHost = new Setting();
-    smtpHost.setSettingKey(SettingService.KEY_ALERT_EMAIL_HOST);
-    smtpHost.setSettingValue(senderEmail.getHost());
+    public static List<Setting> toSettings(SenderEmail senderEmail) {
+        Setting smtpHost = new Setting();
+        smtpHost.setSettingKey(SettingService.KEY_ALERT_EMAIL_HOST);
+        smtpHost.setSettingValue(senderEmail.getHost());
 
-    Setting smtpPort = new Setting();
-    smtpPort.setSettingKey(SettingService.KEY_ALERT_EMAIL_PORT);
-    smtpPort.setSettingValue(senderEmail.getPort().toString());
+        Setting smtpPort = new Setting();
+        smtpPort.setSettingKey(SettingService.KEY_ALERT_EMAIL_PORT);
+        smtpPort.setSettingValue(senderEmail.getPort().toString());
 
-    Setting smtpFrom = new Setting();
-    smtpFrom.setSettingKey(SettingService.KEY_ALERT_EMAIL_FROM);
-    smtpFrom.setSettingValue(senderEmail.getFrom());
+        Setting smtpFrom = new Setting();
+        smtpFrom.setSettingKey(SettingService.KEY_ALERT_EMAIL_FROM);
+        smtpFrom.setSettingValue(senderEmail.getFrom());
 
-    Setting smtpUserName = new Setting();
-    smtpUserName.setSettingKey(SettingService.KEY_ALERT_EMAIL_USERNAME);
-    smtpUserName.setSettingValue(senderEmail.getUserName());
+        Setting smtpUserName = new Setting();
+        smtpUserName.setSettingKey(SettingService.KEY_ALERT_EMAIL_USERNAME);
+        smtpUserName.setSettingValue(senderEmail.getUserName());
 
-    Setting smtpPassword = new Setting();
-    smtpPassword.setSettingKey(SettingService.KEY_ALERT_EMAIL_PASSWORD);
-    smtpPassword.setSettingValue(senderEmail.getPassword());
+        Setting smtpPassword = new Setting();
+        smtpPassword.setSettingKey(SettingService.KEY_ALERT_EMAIL_PASSWORD);
+        smtpPassword.setSettingValue(senderEmail.getPassword());
 
-    Setting smtpSsl = new Setting();
-    smtpSsl.setSettingKey(SettingService.KEY_ALERT_EMAIL_SSL);
-    smtpSsl.setSettingValue(senderEmail.isSsl() + "");
+        Setting smtpSsl = new Setting();
+        smtpSsl.setSettingKey(SettingService.KEY_ALERT_EMAIL_SSL);
+        smtpSsl.setSettingValue(senderEmail.isSsl() + "");
 
-    return Arrays.asList(smtpHost, smtpPort, smtpFrom, smtpUserName, smtpPassword, smtpSsl);
-  }
+        return Arrays.asList(smtpHost, smtpPort, smtpFrom, smtpUserName, smtpPassword, smtpSsl);
+    }
 }

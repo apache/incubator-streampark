@@ -25,15 +25,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AlertTypeEnumTest {
-  @Test
-  void testDecode() {
-    List<AlertTypeEnum> notifyTypes = AlertTypeEnum.decode(5);
-    assertThat(notifyTypes).containsExactly(AlertTypeEnum.EMAIL, AlertTypeEnum.WE_COM);
-  }
 
-  @Test
-  void testEncode() {
-    int level = AlertTypeEnum.encode(Arrays.asList(AlertTypeEnum.DING_TALK, AlertTypeEnum.EMAIL));
-    assertThat(level).isEqualTo(3);
-  }
+    @Test
+    void testDecode() {
+        List<AlertTypeEnum> notifyTypes = AlertTypeEnum.decode(5);
+        assertThat(notifyTypes).containsExactly(AlertTypeEnum.EMAIL, AlertTypeEnum.WE_COM);
+    }
+
+    @Test
+    void testEncode() {
+        int level = AlertTypeEnum.encode(Arrays.asList(AlertTypeEnum.DING_TALK, AlertTypeEnum.EMAIL));
+        assertThat(level).isEqualTo(3);
+    }
 }

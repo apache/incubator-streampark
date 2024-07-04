@@ -47,80 +47,82 @@ import java.util.List;
 @RequestMapping("variable")
 public class VariableController {
 
-  @Autowired private VariableService variableService;
+    @Autowired
+    private VariableService variableService;
 
-  /**
-   * Get variable list by page.
-   *
-   * @param restRequest
-   * @param variable
-   * @return
-   */
-  @PostMapping("page")
-  @RequiresPermissions("variable:view")
-  public RestResponse page(RestRequest restRequest, Variable variable) {
-    IPage<Variable> page = variableService.getPage(variable, restRequest);
-    for (Variable v : page.getRecords()) {
-      v.dataMasking();
+    /**
+     * Get variable list by page.
+     *
+     * @param restRequest
+     * @param variable
+     * @return
+     */
+    @PostMapping("page")
+    @RequiresPermissions("variable:view")
+    public RestResponse page(RestRequest restRequest, Variable variable) {
+        IPage<Variable> page = variableService.getPage(variable, restRequest);
+        for (Variable v : page.getRecords()) {
+            v.dataMasking();
+        }
+        return RestResponse.success(page);
     }
-    return RestResponse.success(page);
-  }
 
-  /**
-   * Get variables through team and search keywords.
-   *
-   * @param teamId
-   * @param keyword Fuzzy search keywords through variable code or description, Nullable.
-   * @return
-   */
-  @PostMapping("list")
-  public RestResponse variableList(@RequestParam Long teamId, String keyword) {
-    List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
-    for (Variable v : variableList) {
-      v.dataMasking();
+    /**
+     * Get variables through team and search keywords.
+     *
+     * @param teamId
+     * @param keyword Fuzzy search keywords through variable code or description, Nullable.
+     * @return
+     */
+    @PostMapping("list")
+    public RestResponse variableList(@RequestParam Long teamId, String keyword) {
+        List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
+        for (Variable v : variableList) {
+            v.dataMasking();
+        }
+        return RestResponse.success(variableList);
     }
-    return RestResponse.success(variableList);
-  }
 
-  @PostMapping("dependApps")
-  @RequiresPermissions("variable:depend_apps")
-  public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-    IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
-    return RestResponse.success(dependApps);
-  }
+    @PostMapping("dependApps")
+    @RequiresPermissions("variable:depend_apps")
+    public RestResponse dependApps(RestRequest restRequest, Variable variable) {
+        IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
+        return RestResponse.success(dependApps);
+    }
 
-  @PostMapping("post")
-  @RequiresPermissions("variable:add")
-  public RestResponse addVariable(@Valid Variable variable) {
-    this.variableService.createVariable(variable);
-    return RestResponse.success();
-  }
+    @PostMapping("post")
+    @RequiresPermissions("variable:add")
+    public RestResponse addVariable(@Valid Variable variable) {
+        this.variableService.createVariable(variable);
+        return RestResponse.success();
+    }
 
-  @PutMapping("update")
-  @RequiresPermissions("variable:update")
-  public RestResponse updateVariable(@Valid Variable variable) {
-    variableService.updateVariable(variable);
-    return RestResponse.success();
-  }
+    @PutMapping("update")
+    @RequiresPermissions("variable:update")
+    public RestResponse updateVariable(@Valid Variable variable) {
+        variableService.updateVariable(variable);
+        return RestResponse.success();
+    }
 
-  @PostMapping("showOriginal")
-  @RequiresPermissions("variable:show_original")
-  public RestResponse showOriginal(@RequestParam Long id) {
-    Variable v = this.variableService.getById(id);
-    return RestResponse.success(v);
-  }
+    @PostMapping("showOriginal")
+    @RequiresPermissions("variable:show_original")
+    public RestResponse showOriginal(@RequestParam Long id) {
+        Variable v = this.variableService.getById(id);
+        return RestResponse.success(v);
+    }
 
-  @DeleteMapping("delete")
-  @RequiresPermissions("variable:delete")
-  public RestResponse deleteVariable(@Valid Variable variable) {
-    this.variableService.remove(variable);
-    return RestResponse.success();
-  }
+    @DeleteMapping("delete")
+    @RequiresPermissions("variable:delete")
+    public RestResponse deleteVariable(@Valid Variable variable) {
+        this.variableService.remove(variable);
+        return RestResponse.success();
+    }
 
-  @PostMapping("check/code")
-  public RestResponse checkVariableCode(
-      @RequestParam Long teamId, @NotBlank(message = "{required}") String variableCode) {
-    boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
-    return RestResponse.success(result);
-  }
+    @PostMapping("check/code")
+    public RestResponse checkVariableCode(
+                                          @RequestParam Long teamId,
+                                          @NotBlank(message = "{required}") String variableCode) {
+        boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
+        return RestResponse.success(result);
+    }
 }

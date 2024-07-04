@@ -51,68 +51,68 @@ import java.util.TimeZone;
 @RequestMapping("/flink/alert")
 public class AlertController {
 
-  private final AlertConfigService alertConfigService;
+    private final AlertConfigService alertConfigService;
 
-  private final AlertService alertService;
+    private final AlertService alertService;
 
-  @PostMapping(value = "/add")
-  public RestResponse createAlertConfig(@RequestBody AlertConfigParams params) {
-    boolean save = alertConfigService.save(AlertConfig.of(params));
-    return RestResponse.success(save);
-  }
+    @PostMapping(value = "/add")
+    public RestResponse createAlertConfig(@RequestBody AlertConfigParams params) {
+        boolean save = alertConfigService.save(AlertConfig.of(params));
+        return RestResponse.success(save);
+    }
 
-  @PostMapping(value = "/exists")
-  public RestResponse verifyAlertConfig(@RequestBody AlertConfigParams params) {
-    boolean exist = alertConfigService.exist(AlertConfig.of(params));
-    return RestResponse.success(exist);
-  }
+    @PostMapping(value = "/exists")
+    public RestResponse verifyAlertConfig(@RequestBody AlertConfigParams params) {
+        boolean exist = alertConfigService.exist(AlertConfig.of(params));
+        return RestResponse.success(exist);
+    }
 
-  @PostMapping(value = "/update")
-  public RestResponse updateAlertConfig(@RequestBody AlertConfigParams params) {
-    boolean update = alertConfigService.updateById(AlertConfig.of(params));
-    return RestResponse.success(update);
-  }
+    @PostMapping(value = "/update")
+    public RestResponse updateAlertConfig(@RequestBody AlertConfigParams params) {
+        boolean update = alertConfigService.updateById(AlertConfig.of(params));
+        return RestResponse.success(update);
+    }
 
-  @PostMapping("/get")
-  public RestResponse getAlertConfig(@RequestBody AlertConfigParams params) {
-    AlertConfig alertConfig = alertConfigService.getById(params.getId());
-    return RestResponse.success(AlertConfigParams.of(alertConfig));
-  }
+    @PostMapping("/get")
+    public RestResponse getAlertConfig(@RequestBody AlertConfigParams params) {
+        AlertConfig alertConfig = alertConfigService.getById(params.getId());
+        return RestResponse.success(AlertConfigParams.of(alertConfig));
+    }
 
-  @PostMapping(value = "/list")
-  public RestResponse alertConfigsPaginationList(
-      @RequestBody AlertConfigParams params, RestRequest request) {
-    IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
-    return RestResponse.success(page);
-  }
+    @PostMapping(value = "/list")
+    public RestResponse alertConfigsPaginationList(
+                                                   @RequestBody AlertConfigParams params, RestRequest request) {
+        IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
+        return RestResponse.success(page);
+    }
 
-  @PostMapping(value = "/listWithOutPage")
-  public RestResponse alertConfigsList() {
-    List<AlertConfig> page = alertConfigService.list();
-    return RestResponse.success(page);
-  }
+    @PostMapping(value = "/listWithOutPage")
+    public RestResponse alertConfigsList() {
+        List<AlertConfig> page = alertConfigService.list();
+        return RestResponse.success(page);
+    }
 
-  @DeleteMapping("/delete")
-  public RestResponse deleteAlertConfig(
-      @RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
-    boolean result = alertConfigService.removeById(id);
-    return RestResponse.success(result);
-  }
+    @DeleteMapping("/delete")
+    public RestResponse deleteAlertConfig(
+                                          @RequestParam("id") @NotNull(message = "config id must be not null") Long id) {
+        boolean result = alertConfigService.removeById(id);
+        return RestResponse.success(result);
+    }
 
-  @PostMapping("/send")
-  public RestResponse sendAlert(Long id) throws AlertException {
-    AlertTemplate alertTemplate = new AlertTemplate();
-    alertTemplate.setTitle("Notify: StreamPark alert job for test");
-    alertTemplate.setJobName("StreamPark alert job for test");
-    alertTemplate.setSubject("StreamPark Alert: Test");
-    alertTemplate.setStatus("TEST");
-    alertTemplate.setType(1);
-    alertTemplate.setRestart(false);
-    Date date = new Date();
-    alertTemplate.setStartTime(
-        DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-    alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
-    alertTemplate.setDuration("");
-    return RestResponse.success(alertService.alert(id, alertTemplate));
-  }
+    @PostMapping("/send")
+    public RestResponse sendAlert(Long id) throws AlertException {
+        AlertTemplate alertTemplate = new AlertTemplate();
+        alertTemplate.setTitle("Notify: StreamPark alert job for test");
+        alertTemplate.setJobName("StreamPark alert job for test");
+        alertTemplate.setSubject("StreamPark Alert: Test");
+        alertTemplate.setStatus("TEST");
+        alertTemplate.setType(1);
+        alertTemplate.setRestart(false);
+        Date date = new Date();
+        alertTemplate.setStartTime(
+                DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+        alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+        alertTemplate.setDuration("");
+        return RestResponse.success(alertService.alert(id, alertTemplate));
+    }
 }

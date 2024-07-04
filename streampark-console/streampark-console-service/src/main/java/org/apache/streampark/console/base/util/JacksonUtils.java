@@ -31,29 +31,29 @@ import java.text.SimpleDateFormat;
 /** Serialization utils */
 public final class JacksonUtils {
 
-  private JacksonUtils() {}
+    private JacksonUtils() {
+    }
 
-  private static final ObjectMapper MAPPER;
+    private static final ObjectMapper MAPPER;
 
-  static {
-    MAPPER = new ObjectMapper();
-    MAPPER.registerModule(new DefaultScalaModule());
-    MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    MAPPER.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat()));
-  }
+    static {
+        MAPPER = new ObjectMapper();
+        MAPPER.registerModule(new DefaultScalaModule());
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        MAPPER.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat()));
+    }
 
-  public static <T> T read(String json, Class<T> clazz) throws JsonProcessingException {
-    return MAPPER.readValue(json, clazz);
-  }
+    public static <T> T read(String json, Class<T> clazz) throws JsonProcessingException {
+        return MAPPER.readValue(json, clazz);
+    }
 
-  public static <T> T read(String json, TypeReference<T> typeReference)
-      throws JsonProcessingException {
-    return MAPPER.readValue(json, typeReference);
-  }
+    public static <T> T read(String json, TypeReference<T> typeReference) throws JsonProcessingException {
+        return MAPPER.readValue(json, typeReference);
+    }
 
-  public static String write(Object object) throws JsonProcessingException {
-    return MAPPER.writeValueAsString(object);
-  }
+    public static String write(Object object) throws JsonProcessingException {
+        return MAPPER.writeValueAsString(object);
+    }
 }
