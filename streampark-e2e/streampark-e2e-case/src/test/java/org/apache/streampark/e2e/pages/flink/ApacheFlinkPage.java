@@ -34,42 +34,38 @@ import java.time.Duration;
 
 @Getter
 public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Applications')]//..")
-  private WebElement menuApplications;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Flink Home')]//..")
-  private WebElement menuFlinkHome;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Applications')]//..")
+    private WebElement menuApplications;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Clusters')]//..")
-  private WebElement menuClusters;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Flink Home')]//..")
+    private WebElement menuFlinkHome;
 
-  public ApacheFlinkPage(RemoteWebDriver driver) {
-    super(driver);
-  }
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Clusters')]//..")
+    private WebElement menuClusters;
 
-  public <T extends ApacheFlinkPage.Tab> T goToTab(Class<T> tab) {
-    if (tab == ApplicationsPage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuApplications));
-      menuApplications.click();
-      return tab.cast(new ApplicationsPage(driver));
+    public ApacheFlinkPage(RemoteWebDriver driver) {
+        super(driver);
     }
 
-    if (tab == FlinkHomePage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
-      menuFlinkHome.click();
-      return tab.cast(new FlinkHomePage(driver));
+    public <T extends ApacheFlinkPage.Tab> T goToTab(Class<T> tab) {
+        if (tab == ApplicationsPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuApplications));
+            menuApplications.click();
+            return tab.cast(new ApplicationsPage(driver));
+        }
+
+        if (tab == FlinkHomePage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
+            menuFlinkHome.click();
+            return tab.cast(new FlinkHomePage(driver));
+        }
+
+        throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
     }
 
-    throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
-  }
-
-  public interface Tab {}
+    public interface Tab {
+    }
 }

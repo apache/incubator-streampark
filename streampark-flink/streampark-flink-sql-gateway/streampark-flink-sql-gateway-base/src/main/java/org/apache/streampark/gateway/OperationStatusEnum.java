@@ -24,62 +24,63 @@ import java.util.Set;
 
 /** Status to describe the {@code Operation}. */
 public enum OperationStatusEnum {
-  /** The operation is newly created. */
-  INITIALIZED(false),
 
-  /** Prepare the resources for the operation. */
-  PENDING(false),
+    /** The operation is newly created. */
+    INITIALIZED(false),
 
-  /** The operation is running. */
-  RUNNING(false),
+    /** Prepare the resources for the operation. */
+    PENDING(false),
 
-  /** All the work is finished and ready for the client to fetch the results. */
-  FINISHED(true),
+    /** The operation is running. */
+    RUNNING(false),
 
-  /** Operation has been cancelled. */
-  CANCELED(true),
+    /** All the work is finished and ready for the client to fetch the results. */
+    FINISHED(true),
 
-  /** Operation has been closed and all related resources are collected. */
-  CLOSED(true),
+    /** Operation has been cancelled. */
+    CANCELED(true),
 
-  /** Some error happens. */
-  ERROR(true),
+    /** Operation has been closed and all related resources are collected. */
+    CLOSED(true),
 
-  /** The execution of the operation timeout. */
-  TIMEOUT(true);
+    /** Some error happens. */
+    ERROR(true),
 
-  private final boolean isTerminalStatus;
+    /** The execution of the operation timeout. */
+    TIMEOUT(true);
 
-  OperationStatusEnum(boolean isTerminalStatus) {
-    this.isTerminalStatus = isTerminalStatus;
-  }
+    private final boolean isTerminalStatus;
 
-  public static boolean isValidStatusTransition(
-      OperationStatusEnum fromStatus, OperationStatusEnum toStatus) {
-    return toOperationStatusSet(fromStatus).contains(toStatus);
-  }
-
-  public boolean isTerminalStatus() {
-    return isTerminalStatus;
-  }
-
-  private static Set<OperationStatusEnum> toOperationStatusSet(OperationStatusEnum fromStatus) {
-    switch (fromStatus) {
-      case INITIALIZED:
-        return new HashSet<>(Arrays.asList(PENDING, CANCELED, CLOSED, TIMEOUT, ERROR));
-      case PENDING:
-        return new HashSet<>(Arrays.asList(RUNNING, CANCELED, CLOSED, TIMEOUT, ERROR));
-      case RUNNING:
-        return new HashSet<>(Arrays.asList(FINISHED, CANCELED, CLOSED, TIMEOUT, ERROR));
-      case FINISHED:
-      case CANCELED:
-      case TIMEOUT:
-      case ERROR:
-        return Collections.singleton(CLOSED);
-      case CLOSED:
-        return Collections.emptySet();
-      default:
-        throw new IllegalArgumentException("Unknown from status: " + fromStatus);
+    OperationStatusEnum(boolean isTerminalStatus) {
+        this.isTerminalStatus = isTerminalStatus;
     }
-  }
+
+    public static boolean isValidStatusTransition(
+                                                  OperationStatusEnum fromStatus, OperationStatusEnum toStatus) {
+        return toOperationStatusSet(fromStatus).contains(toStatus);
+    }
+
+    public boolean isTerminalStatus() {
+        return isTerminalStatus;
+    }
+
+    private static Set<OperationStatusEnum> toOperationStatusSet(OperationStatusEnum fromStatus) {
+        switch (fromStatus) {
+            case INITIALIZED:
+                return new HashSet<>(Arrays.asList(PENDING, CANCELED, CLOSED, TIMEOUT, ERROR));
+            case PENDING:
+                return new HashSet<>(Arrays.asList(RUNNING, CANCELED, CLOSED, TIMEOUT, ERROR));
+            case RUNNING:
+                return new HashSet<>(Arrays.asList(FINISHED, CANCELED, CLOSED, TIMEOUT, ERROR));
+            case FINISHED:
+            case CANCELED:
+            case TIMEOUT:
+            case ERROR:
+                return Collections.singleton(CLOSED);
+            case CLOSED:
+                return Collections.emptySet();
+            default:
+                throw new IllegalArgumentException("Unknown from status: " + fromStatus);
+        }
+    }
 }

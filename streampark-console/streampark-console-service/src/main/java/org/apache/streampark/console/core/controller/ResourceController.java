@@ -46,50 +46,51 @@ import java.util.List;
 @RequestMapping("resource")
 public class ResourceController {
 
-  @Autowired private ResourceService resourceService;
+    @Autowired
+    private ResourceService resourceService;
 
-  @PostMapping("add")
-  @RequiresPermissions("resource:add")
-  public RestResponse addResource(@Valid Resource resource) throws Exception {
-    this.resourceService.addResource(resource);
-    return RestResponse.success();
-  }
+    @PostMapping("add")
+    @RequiresPermissions("resource:add")
+    public RestResponse addResource(@Valid Resource resource) throws Exception {
+        this.resourceService.addResource(resource);
+        return RestResponse.success();
+    }
 
-  @PostMapping("check")
-  public RestResponse checkResource(@Valid Resource resource) throws Exception {
-    return this.resourceService.checkResource(resource);
-  }
+    @PostMapping("check")
+    public RestResponse checkResource(@Valid Resource resource) throws Exception {
+        return this.resourceService.checkResource(resource);
+    }
 
-  @PostMapping("page")
-  public RestResponse page(RestRequest restRequest, Resource resource) {
-    IPage<Resource> page = resourceService.getPage(resource, restRequest);
-    return RestResponse.success(page);
-  }
+    @PostMapping("page")
+    public RestResponse page(RestRequest restRequest, Resource resource) {
+        IPage<Resource> page = resourceService.getPage(resource, restRequest);
+        return RestResponse.success(page);
+    }
 
-  @PutMapping("update")
-  @RequiresPermissions("resource:update")
-  public RestResponse updateResource(@Valid Resource resource) {
-    resourceService.updateResource(resource);
-    return RestResponse.success();
-  }
+    @PutMapping("update")
+    @RequiresPermissions("resource:update")
+    public RestResponse updateResource(@Valid Resource resource) {
+        resourceService.updateResource(resource);
+        return RestResponse.success();
+    }
 
-  @DeleteMapping("delete")
-  @RequiresPermissions("resource:delete")
-  public RestResponse deleteResource(@Valid Resource resource) {
-    this.resourceService.remove(resource.getId());
-    return RestResponse.success();
-  }
+    @DeleteMapping("delete")
+    @RequiresPermissions("resource:delete")
+    public RestResponse deleteResource(@Valid Resource resource) {
+        this.resourceService.remove(resource.getId());
+        return RestResponse.success();
+    }
 
-  @PostMapping("list")
-  public RestResponse listResource(@RequestParam Long teamId) {
-    List<Resource> resourceList = resourceService.listByTeamId(teamId);
-    return RestResponse.success(resourceList);
-  }
+    @PostMapping("list")
+    public RestResponse listResource(@RequestParam Long teamId) {
+        List<Resource> resourceList = resourceService.listByTeamId(teamId);
+        return RestResponse.success(resourceList);
+    }
 
-  @PostMapping("upload")
-  @RequiresPermissions("resource:add")
-  public RestResponse upload(MultipartFile file) throws Exception {
-    String uploadPath = resourceService.upload(file);
-    return RestResponse.success(uploadPath);
-  }
+    @PostMapping("upload")
+    @RequiresPermissions("resource:add")
+    public RestResponse upload(MultipartFile file) throws Exception {
+        String uploadPath = resourceService.upload(file);
+        return RestResponse.success(uploadPath);
+    }
 }

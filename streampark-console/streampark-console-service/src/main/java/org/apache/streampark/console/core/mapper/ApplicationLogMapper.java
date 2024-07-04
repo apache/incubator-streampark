@@ -21,4 +21,5 @@ import org.apache.streampark.console.core.entity.ApplicationLog;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {}
+public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
+}

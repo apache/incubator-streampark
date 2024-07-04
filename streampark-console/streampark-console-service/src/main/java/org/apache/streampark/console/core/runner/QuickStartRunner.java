@@ -45,57 +45,62 @@ import java.util.Map;
 @Component
 public class QuickStartRunner implements ApplicationRunner {
 
-  @Autowired private FlinkEnvService flinkEnvService;
+    @Autowired
+    private FlinkEnvService flinkEnvService;
 
-  @Autowired private FlinkClusterService flinkClusterService;
+    @Autowired
+    private FlinkClusterService flinkClusterService;
 
-  @Autowired private FlinkSqlService flinkSqlService;
+    @Autowired
+    private FlinkSqlService flinkSqlService;
 
-  @Autowired private ApplicationManageService applicationManageService;
+    @Autowired
+    private ApplicationManageService applicationManageService;
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
+    @Autowired
+    private AppBuildPipeService appBuildPipeService;
 
-  private static Long defaultId = 100000L;
+    private static Long defaultId = 100000L;
 
-  @Override
-  public void run(ApplicationArguments args) throws Exception {
-    Map<String, HashMap<String, String>> map =
-        PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        Map<String, HashMap<String, String>> map =
+                PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
 
-    Map<String, String> quickstart = map.get("quickstart");
+        Map<String, String> quickstart = map.get("quickstart");
 
-    if (quickstart != null && quickstart.size() == 3) {
-      // 1) create flinkEnv
-      FlinkEnv flinkEnv = new FlinkEnv();
-      flinkEnv.setFlinkName(quickstart.get("flink_name"));
-      flinkEnv.setFlinkHome(quickstart.get("flink_home"));
-      flinkEnvService.create(flinkEnv);
+        if (quickstart != null && quickstart.size() == 3) {
+            // 1) create flinkEnv
+            FlinkEnv flinkEnv = new FlinkEnv();
+            flinkEnv.setFlinkName(quickstart.get("flink_name"));
+            flinkEnv.setFlinkHome(quickstart.get("flink_home"));
+            flinkEnvService.create(flinkEnv);
 
-      // 2) create flinkCluster
-      FlinkCluster flinkCluster = new FlinkCluster();
-      flinkCluster.setClusterName("quickstart");
-      flinkCluster.setVersionId(flinkEnv.getId());
-      flinkCluster.setClusterState(ClusterState.RUNNING.getState());
-      flinkCluster.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
-      flinkCluster.setAddress("http://localhost:" + quickstart.get("flink_port"));
-      flinkClusterService.create(flinkCluster, defaultId);
+            // 2) create flinkCluster
+            FlinkCluster flinkCluster = new FlinkCluster();
+            flinkCluster.setClusterName("quickstart");
+            flinkCluster.setVersionId(flinkEnv.getId());
+            flinkCluster.setClusterState(ClusterState.RUNNING.getState());
+            flinkCluster.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+            flinkCluster.setAddress("http://localhost:" + quickstart.get("flink_port"));
+            flinkClusterService.create(flinkCluster, defaultId);
 
-      // 3) set flink version and cluster
-      Application app = new Application();
-      app.setId(defaultId);
-      Application application = applicationManageService.getApp(app.getId());
-      application.setFlinkClusterId(flinkCluster.getId());
-      application.setVersionId(flinkEnv.getId());
-      application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+            // 3) set flink version and cluster
+            Application app = new Application();
+            app.setId(defaultId);
+            Application application = applicationManageService.getApp(app.getId());
+            application.setFlinkClusterId(flinkCluster.getId());
+            application.setVersionId(flinkEnv.getId());
+            application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
 
-      FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
-      application.setFlinkSql(flinkSql.getSql());
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
+            application.setFlinkSql(flinkSql.getSql());
 
-      boolean success = applicationManageService.update(application);
-      if (success) {
-        // 4) build application
-        appBuildPipeService.buildApplication(defaultId, false);
-      }
+            boolean success = applicationManageService.update(application);
+            if (success) {
+                // 4) build application
+                appBuildPipeService.buildApplication(defaultId, false);
+            }
+        }
     }
-  }
 }

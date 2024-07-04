@@ -23,25 +23,25 @@ import javax.annotation.Nullable;
 /** Flink consistency semantics */
 public enum Semantic {
 
-  /**
-   * Ensure that the counting results obtained after a fault are consistent with the correct values.
-   */
-  EXACTLY_ONCE,
+    /**
+     * Ensure that the counting results obtained after a fault are consistent with the correct values.
+     */
+    EXACTLY_ONCE,
 
-  /** The program may calculate more after a malfunction, but it will never calculate less. */
-  AT_LEAST_ONCE,
+    /** The program may calculate more after a malfunction, but it will never calculate less. */
+    AT_LEAST_ONCE,
 
-  /** After the fault occurs, the counting results may be lost. */
-  NONE;
+    /** After the fault occurs, the counting results may be lost. */
+    NONE;
 
-  /** Try to resolve the given semantic name into a known {@link Semantic}. */
-  @Nullable
-  public static Semantic of(@Nonnull String name) {
-    for (Semantic semantic : Semantic.values()) {
-      if (name.equals(semantic.name())) {
-        return semantic;
-      }
+    /** Try to resolve the given semantic name into a known {@link Semantic}. */
+    @Nullable
+    public static Semantic of(@Nonnull String name) {
+        for (Semantic semantic : Semantic.values()) {
+            if (name.equals(semantic.name())) {
+                return semantic;
+            }
+        }
+        return null;
     }
-    return null;
-  }
 }

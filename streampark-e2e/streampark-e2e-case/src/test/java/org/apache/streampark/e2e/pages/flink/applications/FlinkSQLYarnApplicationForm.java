@@ -34,38 +34,37 @@ import java.util.List;
 
 @Getter
 public final class FlinkSQLYarnApplicationForm {
-  private WebDriver driver;
 
-  @FindBy(
-      xpath =
-          "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
-  private WebElement buttonFlinkVersionDropdown;
+    private WebDriver driver;
 
-  @FindBys({
-    @FindBy(css = "[codefield=versionId]"),
-    @FindBy(className = "ant-select-item-option-content")
-  })
-  private List<WebElement> selectFlinkVersion;
+    @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
+    private WebElement buttonFlinkVersionDropdown;
 
-  public FlinkSQLYarnApplicationForm(WebDriver driver) {
-    this.driver = driver;
+    @FindBys({
+            @FindBy(css = "[codefield=versionId]"),
+            @FindBy(className = "ant-select-item-option-content")
+    })
+    private List<WebElement> selectFlinkVersion;
 
-    PageFactory.initElements(driver, this);
-  }
+    public FlinkSQLYarnApplicationForm(WebDriver driver) {
+        this.driver = driver;
 
-  @SneakyThrows
-  public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
-    buttonFlinkVersionDropdown.click();
-    new WebDriverWait(driver, Duration.ofSeconds(10))
-        .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
-    selectFlinkVersion.stream()
-        .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
-        .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
-        .click();
+        PageFactory.initElements(driver, this);
+    }
 
-    new FlinkSQLEditor(driver).content(flinkSql);
+    @SneakyThrows
+    public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
+        buttonFlinkVersionDropdown.click();
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
+        selectFlinkVersion.stream()
+                .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
+                .click();
 
-    return this;
-  }
+        new FlinkSQLEditor(driver).content(flinkSql);
+
+        return this;
+    }
 }

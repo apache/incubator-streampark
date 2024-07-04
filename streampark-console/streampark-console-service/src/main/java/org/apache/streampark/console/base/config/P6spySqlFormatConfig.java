@@ -28,22 +28,22 @@ import java.time.LocalDateTime;
 /** Specifies the log output format of SQL statements in the console */
 public class P6spySqlFormatConfig implements MessageFormattingStrategy {
 
-  @Override
-  public String formatMessage(
-      int connectionId,
-      String now,
-      long elapsed,
-      String category,
-      String prepared,
-      String sql,
-      String url) {
+    @Override
+    public String formatMessage(
+                                int connectionId,
+                                String now,
+                                long elapsed,
+                                String category,
+                                String prepared,
+                                String sql,
+                                String url) {
 
-    return StringUtils.isBlank(sql)
-        ? ""
-        : String.format(
-            "%s  | consume %d ms | SQL statement：%n %s;",
-            DateUtils.formatFullTime(LocalDateTime.now()),
-            elapsed,
-            sql.replaceAll("\\s+", StringUtils.SPACE));
-  }
+        return StringUtils.isBlank(sql)
+                ? ""
+                : String.format(
+                        "%s  | consume %d ms | SQL statement：%n %s;",
+                        DateUtils.formatFullTime(LocalDateTime.now()),
+                        elapsed,
+                        sql.replaceAll("\\s+", StringUtils.SPACE));
+    }
 }

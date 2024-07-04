@@ -21,4 +21,5 @@ import org.apache.streampark.console.core.entity.FlinkGateWay;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface FlinkGateWayMapper extends BaseMapper<FlinkGateWay> {}
+public interface FlinkGateWayMapper extends BaseMapper<FlinkGateWay> {
+}

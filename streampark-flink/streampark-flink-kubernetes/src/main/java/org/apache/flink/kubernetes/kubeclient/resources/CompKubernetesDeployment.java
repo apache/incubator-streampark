@@ -20,7 +20,8 @@ package org.apache.flink.kubernetes.kubeclient.resources;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 
 public class CompKubernetesDeployment extends KubernetesResource<Deployment> {
-  public CompKubernetesDeployment(Deployment internalResource) {
-    super(internalResource);
-  }
+
+    public CompKubernetesDeployment(Deployment internalResource) {
+        super(internalResource);
+    }
 }

@@ -28,32 +28,32 @@ import java.util.Set;
 @Data
 public class AlertProbeMsg {
 
-  private Set<Long> alertId;
+    private Set<Long> alertId;
 
-  private String user;
+    private String user;
 
-  private Integer probeJobs = 0;
+    private Integer probeJobs = 0;
 
-  private Integer failedJobs = 0;
+    private Integer failedJobs = 0;
 
-  private Integer lostJobs = 0;
+    private Integer lostJobs = 0;
 
-  private Integer cancelledJobs = 0;
+    private Integer cancelledJobs = 0;
 
-  public void compute(FlinkAppStateEnum state) {
-    this.probeJobs++;
-    switch (state) {
-      case LOST:
-        this.lostJobs++;
-        break;
-      case FAILED:
-        failedJobs++;
-        break;
-      case CANCELED:
-        cancelledJobs++;
-        break;
-      default:
-        break;
+    public void compute(FlinkAppStateEnum state) {
+        this.probeJobs++;
+        switch (state) {
+            case LOST:
+                this.lostJobs++;
+                break;
+            case FAILED:
+                failedJobs++;
+                break;
+            case CANCELED:
+                cancelledJobs++;
+                break;
+            default:
+                break;
+        }
     }
-  }
 }

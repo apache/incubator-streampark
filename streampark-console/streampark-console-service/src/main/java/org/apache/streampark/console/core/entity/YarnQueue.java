@@ -32,23 +32,23 @@ import java.util.Date;
 @TableName("t_yarn_queue")
 public class YarnQueue implements Serializable {
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  @TableField(fill = FieldFill.INSERT, updateStrategy = FieldStrategy.NEVER)
-  private Long teamId;
+    @TableField(fill = FieldFill.INSERT, updateStrategy = FieldStrategy.NEVER)
+    private Long teamId;
 
-  /** yarn queue and label in format {queue} or {queue@label1} or {queue@label1,label2}. */
-  private String queueLabel;
+    /** yarn queue and label in format {queue} or {queue@label1} or {queue@label1,label2}. */
+    private String queueLabel;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String description;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String description;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private transient String createTimeFrom;
+    private transient String createTimeFrom;
 
-  private transient String createTimeTo;
+    private transient String createTimeTo;
 }

@@ -24,39 +24,40 @@ import java.util.Random;
 
 public final class ShaHashUtils {
 
-  public static final int DEFAULT_SALT_LENGTH = 26;
+    public static final int DEFAULT_SALT_LENGTH = 26;
 
-  private ShaHashUtils() {}
-
-  /**
-   * encrypt user password
-   *
-   * @param salt
-   * @param password
-   * @return
-   */
-  public static String encrypt(String salt, String password) {
-    return new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
-  }
-
-  public static String getRandomSalt() {
-    return getRandomSalt(DEFAULT_SALT_LENGTH);
-  }
-
-  /**
-   * get random salt
-   *
-   * @param length
-   * @return
-   */
-  public static String getRandomSalt(int length) {
-    String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-    Random random = new Random();
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < length; i++) {
-      int number = random.nextInt(base.length());
-      builder.append(base.charAt(number));
+    private ShaHashUtils() {
     }
-    return builder.toString();
-  }
+
+    /**
+     * encrypt user password
+     *
+     * @param salt
+     * @param password
+     * @return
+     */
+    public static String encrypt(String salt, String password) {
+        return new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
+    }
+
+    public static String getRandomSalt() {
+        return getRandomSalt(DEFAULT_SALT_LENGTH);
+    }
+
+    /**
+     * get random salt
+     *
+     * @param length
+     * @return
+     */
+    public static String getRandomSalt(int length) {
+        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(base.length());
+            builder.append(base.charAt(number));
+        }
+        return builder.toString();
+    }
 }

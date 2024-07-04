@@ -21,29 +21,29 @@ import org.apache.flink.table.functions.ScalarFunction;
 
 public class FetchMillisecond extends ScalarFunction {
 
-  /**
-   * Get current milliseconds.
-   *
-   * @return Current milliseconds on the system.
-   */
-  public Long eval() {
-    return System.currentTimeMillis();
-  }
+    /**
+     * Get current milliseconds.
+     *
+     * @return Current milliseconds on the system.
+     */
+    public Long eval() {
+        return System.currentTimeMillis();
+    }
 
-  /**
-   * Whether is a determined value.<br>
-   * return true: It represents that the function will be executed once at the stage of flink
-   * planner, then it will send the executed result back to <code>runtime</code>, it's a determined
-   * value.<br>
-   * return false: It represents that the function will be executed when the engine processed a row
-   * in the running stage. It's not a determined value.<br>
-   * Note: The function will return <code>true</code> by default, so the function need not be
-   * overwrite in general.
-   *
-   * @return <code>true</code> if it's a determined value else <code>false</code>.
-   */
-  @Override
-  public boolean isDeterministic() {
-    return false;
-  }
+    /**
+     * Whether is a determined value.<br>
+     * return true: It represents that the function will be executed once at the stage of flink
+     * planner, then it will send the executed result back to <code>runtime</code>, it's a determined
+     * value.<br>
+     * return false: It represents that the function will be executed when the engine processed a row
+     * in the running stage. It's not a determined value.<br>
+     * Note: The function will return <code>true</code> by default, so the function need not be
+     * overwrite in general.
+     *
+     * @return <code>true</code> if it's a determined value else <code>false</code>.
+     */
+    @Override
+    public boolean isDeterministic() {
+        return false;
+    }
 }

@@ -47,78 +47,80 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, AccessToken>
-    implements AccessTokenService {
+        implements
+            AccessTokenService {
 
-  @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Override
-  public RestResponse create(Long userId, String description) {
-    User user = userService.getById(userId);
-    if (user == null) {
-      return RestResponse.success().put("code", 0).message("user not available");
-    }
-    String token =
-        WebUtils.encryptToken(
-            JWTUtil.sign(
-                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
-    JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
+    @Override
+    public RestResponse create(Long userId, String description) {
+        User user = userService.getById(userId);
+        if (user == null) {
+            return RestResponse.success().put("code", 0).message("user not available");
+        }
+        String token =
+                WebUtils.encryptToken(
+                        JWTUtil.sign(
+                                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
+        JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
 
-    AccessToken accessToken = new AccessToken();
-    accessToken.setToken(jwtToken.getToken());
-    accessToken.setUserId(user.getUserId());
-    accessToken.setDescription(description);
+        AccessToken accessToken = new AccessToken();
+        accessToken.setToken(jwtToken.getToken());
+        accessToken.setUserId(user.getUserId());
+        accessToken.setDescription(description);
 
-    Date date = new Date();
-    accessToken.setCreateTime(date);
-    accessToken.setModifyTime(date);
-    accessToken.setStatus(AccessToken.STATUS_ENABLE);
+        Date date = new Date();
+        accessToken.setCreateTime(date);
+        accessToken.setModifyTime(date);
+        accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
-    this.save(accessToken);
-    return RestResponse.success().data(accessToken);
-  }
-
-  @Override
-  public IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request) {
-    Page<AccessToken> page = MybatisPager.getPage(request);
-    this.baseMapper.selectPage(page, tokenParam);
-    List<AccessToken> records = page.getRecords();
-    page.setRecords(records);
-    return page;
-  }
-
-  @Override
-  public boolean checkTokenEffective(Long userId, String token) {
-    AccessToken res = baseMapper.selectByUserToken(userId, token);
-    return res != null && AccessToken.STATUS_ENABLE.equals(res.getFinalStatus());
-  }
-
-  @Override
-  public RestResponse toggleToken(Long tokenId) {
-    AccessToken tokenInfo = baseMapper.selectById(tokenId);
-    if (tokenInfo == null) {
-      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
+        this.save(accessToken);
+        return RestResponse.success().data(accessToken);
     }
 
-    if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-      return RestResponse.fail(
-          ResponseCode.CODE_FAIL_ALERT,
-          "user status is locked, could not operate this accessToken!");
+    @Override
+    public IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request) {
+        Page<AccessToken> page = MybatisPager.getPage(request);
+        this.baseMapper.selectPage(page, tokenParam);
+        List<AccessToken> records = page.getRecords();
+        page.setRecords(records);
+        return page;
     }
 
-    Integer status =
-        tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
-            ? AccessToken.STATUS_DISABLE
-            : AccessToken.STATUS_ENABLE;
+    @Override
+    public boolean checkTokenEffective(Long userId, String token) {
+        AccessToken res = baseMapper.selectByUserToken(userId, token);
+        return res != null && AccessToken.STATUS_ENABLE.equals(res.getFinalStatus());
+    }
 
-    AccessToken updateObj = new AccessToken();
-    updateObj.setStatus(status);
-    updateObj.setId(tokenId);
-    updateObj.setModifyTime(new Date());
-    return RestResponse.success(this.updateById(updateObj));
-  }
+    @Override
+    public RestResponse toggleToken(Long tokenId) {
+        AccessToken tokenInfo = baseMapper.selectById(tokenId);
+        if (tokenInfo == null) {
+            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
+        }
 
-  @Override
-  public AccessToken getByUserId(Long userId) {
-    return baseMapper.selectByUserId(userId);
-  }
+        if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
+            return RestResponse.fail(
+                    ResponseCode.CODE_FAIL_ALERT,
+                    "user status is locked, could not operate this accessToken!");
+        }
+
+        Integer status =
+                tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
+                        ? AccessToken.STATUS_DISABLE
+                        : AccessToken.STATUS_ENABLE;
+
+        AccessToken updateObj = new AccessToken();
+        updateObj.setStatus(status);
+        updateObj.setId(tokenId);
+        updateObj.setModifyTime(new Date());
+        return RestResponse.success(this.updateById(updateObj));
+    }
+
+    @Override
+    public AccessToken getByUserId(Long userId) {
+        return baseMapper.selectByUserId(userId);
+    }
 }

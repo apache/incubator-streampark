@@ -27,42 +27,43 @@ import java.util.Objects;
 /** Information of the {@code Operation}. */
 public class OperationInfo implements Serializable {
 
-  private final OperationStatusEnum status;
-  @Nullable private final Exception exception;
+    private final OperationStatusEnum status;
+    @Nullable
+    private final Exception exception;
 
-  public OperationInfo(OperationStatusEnum status, @Nullable Exception exception) {
-    this.status = status;
-    this.exception = exception;
-  }
-
-  public OperationStatusEnum getStatus() {
-    return status;
-  }
-
-  @Nullable
-  public Exception getException() {
-    return exception;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public OperationInfo(OperationStatusEnum status, @Nullable Exception exception) {
+        this.status = status;
+        this.exception = exception;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public OperationStatusEnum getStatus() {
+        return status;
     }
-    OperationInfo that = (OperationInfo) o;
-    return status == that.status && Objects.equals(exception, that.exception);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(status, exception);
-  }
+    @Nullable
+    public Exception getException() {
+        return exception;
+    }
 
-  @Override
-  public String toString() {
-    return "OperationInfo{" + "status=" + status + ", exception=" + exception + '}';
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        OperationInfo that = (OperationInfo) o;
+        return status == that.status && Objects.equals(exception, that.exception);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(status, exception);
+    }
+
+    @Override
+    public String toString() {
+        return "OperationInfo{" + "status=" + status + ", exception=" + exception + '}';
+    }
 }

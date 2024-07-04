@@ -41,123 +41,126 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
-    implements SparkEnvService {
+        implements
+            SparkEnvService {
 
-  @Autowired private FlinkClusterService flinkClusterService;
-  @Autowired private ApplicationInfoService applicationInfoService;
+    @Autowired
+    private FlinkClusterService flinkClusterService;
+    @Autowired
+    private ApplicationInfoService applicationInfoService;
 
-  /**
-   * two places will be checked: <br>
-   * 1) name repeated <br>
-   * 2) spark jars repeated <br>
-   */
-  @Override
-  public FlinkEnvCheckEnum check(SparkEnv version) {
-    // 1) check name
-    LambdaQueryWrapper<SparkEnv> queryWrapper =
-        new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName, version.getSparkName());
-    if (version.getId() != null) {
-      queryWrapper.ne(SparkEnv::getId, version.getId());
+    /**
+     * two places will be checked: <br>
+     * 1) name repeated <br>
+     * 2) spark jars repeated <br>
+     */
+    @Override
+    public FlinkEnvCheckEnum check(SparkEnv version) {
+        // 1) check name
+        LambdaQueryWrapper<SparkEnv> queryWrapper =
+                new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName, version.getSparkName());
+        if (version.getId() != null) {
+            queryWrapper.ne(SparkEnv::getId, version.getId());
+        }
+        if (this.count(queryWrapper) > 0) {
+            return FlinkEnvCheckEnum.NAME_REPEATED;
+        }
+
+        String lib = version.getSparkHome().concat("/jars");
+        File sparkLib = new File(lib);
+        // 2) spark/jars path exists and is a directory
+        if (!sparkLib.exists() || !sparkLib.isDirectory()) {
+            return FlinkEnvCheckEnum.INVALID_PATH;
+        }
+
+        return FlinkEnvCheckEnum.OK;
     }
-    if (this.count(queryWrapper) > 0) {
-      return FlinkEnvCheckEnum.NAME_REPEATED;
+
+    @Override
+    public boolean create(SparkEnv version) throws Exception {
+        long count = this.baseMapper.selectCount(null);
+        version.setIsDefault(count == 0);
+        version.setCreateTime(new Date());
+        version.doSetSparkConf();
+        version.doSetVersion();
+        return save(version);
     }
 
-    String lib = version.getSparkHome().concat("/jars");
-    File sparkLib = new File(lib);
-    // 2) spark/jars path exists and is a directory
-    if (!sparkLib.exists() || !sparkLib.isDirectory()) {
-      return FlinkEnvCheckEnum.INVALID_PATH;
+    @Override
+    public void removeById(Long id) {
+        SparkEnv sparkEnv = getById(id);
+        checkOrElseAlert(sparkEnv);
+        Long count = this.baseMapper.selectCount(null);
+        ApiAlertException.throwIfFalse(
+                !(count > 1 && sparkEnv.getIsDefault()),
+                "The spark home is set as default, please change it first.");
+
+        this.baseMapper.deleteById(id);
     }
 
-    return FlinkEnvCheckEnum.OK;
-  }
-
-  @Override
-  public boolean create(SparkEnv version) throws Exception {
-    long count = this.baseMapper.selectCount(null);
-    version.setIsDefault(count == 0);
-    version.setCreateTime(new Date());
-    version.doSetSparkConf();
-    version.doSetVersion();
-    return save(version);
-  }
-
-  @Override
-  public void removeById(Long id) {
-    SparkEnv sparkEnv = getById(id);
-    checkOrElseAlert(sparkEnv);
-    Long count = this.baseMapper.selectCount(null);
-    ApiAlertException.throwIfFalse(
-        !(count > 1 && sparkEnv.getIsDefault()),
-        "The spark home is set as default, please change it first.");
-
-    this.baseMapper.deleteById(id);
-  }
-
-  @Override
-  public void update(SparkEnv version) throws IOException {
-    SparkEnv sparkEnv = getById(version.getId());
-    checkOrElseAlert(sparkEnv);
-    sparkEnv.setDescription(version.getDescription());
-    sparkEnv.setSparkName(version.getSparkName());
-    if (!version.getSparkHome().equals(sparkEnv.getSparkHome())) {
-      sparkEnv.setSparkHome(version.getSparkHome());
-      sparkEnv.doSetSparkConf();
-      sparkEnv.doSetVersion();
+    @Override
+    public void update(SparkEnv version) throws IOException {
+        SparkEnv sparkEnv = getById(version.getId());
+        checkOrElseAlert(sparkEnv);
+        sparkEnv.setDescription(version.getDescription());
+        sparkEnv.setSparkName(version.getSparkName());
+        if (!version.getSparkHome().equals(sparkEnv.getSparkHome())) {
+            sparkEnv.setSparkHome(version.getSparkHome());
+            sparkEnv.doSetSparkConf();
+            sparkEnv.doSetVersion();
+        }
+        updateById(sparkEnv);
     }
-    updateById(sparkEnv);
-  }
 
-  @Override
-  public void setDefault(Long id) {
-    this.baseMapper.setDefault(id);
-  }
+    @Override
+    public void setDefault(Long id) {
+        this.baseMapper.setDefault(id);
+    }
 
-  @Override
-  public SparkEnv getByAppId(Long appId) {
-    return this.baseMapper.selectByAppId(appId);
-  }
+    @Override
+    public SparkEnv getByAppId(Long appId) {
+        return this.baseMapper.selectByAppId(appId);
+    }
 
-  @Override
-  public SparkEnv getDefault() {
-    return this.baseMapper.selectOne(
-        new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getIsDefault, true));
-  }
+    @Override
+    public SparkEnv getDefault() {
+        return this.baseMapper.selectOne(
+                new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getIsDefault, true));
+    }
 
-  @Override
-  public SparkEnv getByIdOrDefault(Long id) {
-    SparkEnv sparkEnv = getById(id);
-    return sparkEnv == null ? getDefault() : sparkEnv;
-  }
+    @Override
+    public SparkEnv getByIdOrDefault(Long id) {
+        SparkEnv sparkEnv = getById(id);
+        return sparkEnv == null ? getDefault() : sparkEnv;
+    }
 
-  @Override
-  public void syncConf(Long id) {
-    SparkEnv sparkEnv = getById(id);
-    sparkEnv.doSetSparkConf();
-    updateById(sparkEnv);
-  }
+    @Override
+    public void syncConf(Long id) {
+        SparkEnv sparkEnv = getById(id);
+        sparkEnv.doSetSparkConf();
+        updateById(sparkEnv);
+    }
 
-  @Override
-  public void validity(Long id) {
-    SparkEnv sparkEnv = getById(id);
-    checkOrElseAlert(sparkEnv);
-  }
+    @Override
+    public void validity(Long id) {
+        SparkEnv sparkEnv = getById(id);
+        checkOrElseAlert(sparkEnv);
+    }
 
-  private void checkOrElseAlert(SparkEnv sparkEnv) {
+    private void checkOrElseAlert(SparkEnv sparkEnv) {
 
-    // 1.check exists
-    ApiAlertException.throwIfNull(sparkEnv, "The spark home does not exist, please check.");
+        // 1.check exists
+        ApiAlertException.throwIfNull(sparkEnv, "The spark home does not exist, please check.");
 
-    // todo : To be developed
-    // 2.check if it is being used by any spark cluster
-    //    ApiAlertException.throwIfTrue(
-    //        flinkClusterService.existsByFlinkEnvId(sparkEnv.getId()),
-    //        "The spark home is still in use by some spark cluster, please check.");
-    //
-    //    // 3.check if it is being used by any application
-    //    ApiAlertException.throwIfTrue(
-    //        applicationInfoService.existsBySparkEnvId(sparkEnv.getId()),
-    //        "The spark home is still in use by some application, please check.");
-  }
+        // todo : To be developed
+        // 2.check if it is being used by any spark cluster
+        // ApiAlertException.throwIfTrue(
+        // flinkClusterService.existsByFlinkEnvId(sparkEnv.getId()),
+        // "The spark home is still in use by some spark cluster, please check.");
+        //
+        // // 3.check if it is being used by any application
+        // ApiAlertException.throwIfTrue(
+        // applicationInfoService.existsBySparkEnvId(sparkEnv.getId()),
+        // "The spark home is still in use by some application, please check.");
+    }
 }

@@ -29,34 +29,35 @@ import java.util.List;
 
 public interface SparkApplicationMapper extends BaseMapper<SparkApplication> {
 
-  IPage<SparkApplication> selectPage(
-      Page<SparkApplication> page, @Param("app") SparkApplication application);
+    IPage<SparkApplication> selectPage(
+                                       Page<SparkApplication> page, @Param("app") SparkApplication application);
 
-  SparkApplication selectApp(@Param("id") Long id);
+    SparkApplication selectApp(@Param("id") Long id);
 
-  List<SparkApplication> selectAppsByTeamId(@Param("teamId") Long teamId);
+    List<SparkApplication> selectAppsByTeamId(@Param("teamId") Long teamId);
 
-  void persistMetrics(@Param("app") SparkApplication application);
+    void persistMetrics(@Param("app") SparkApplication application);
 
-  boolean mapping(@Param("app") SparkApplication appParam);
+    boolean mapping(@Param("app") SparkApplication appParam);
 
-  List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);
+    List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);
 
-  List<String> selectRecentK8sClusterIds(
-      @Param("executionMode") Integer executionMode, @Param("limitSize") Integer limit);
+    List<String> selectRecentK8sClusterIds(
+                                           @Param("executionMode") Integer executionMode,
+                                           @Param("limitSize") Integer limit);
 
-  List<String> selectRecentK8sPodTemplates(@Param("limitSize") Integer limit);
+    List<String> selectRecentK8sPodTemplates(@Param("limitSize") Integer limit);
 
-  List<String> selectRecentK8sJmPodTemplates(@Param("limitSize") Integer limit);
+    List<String> selectRecentK8sJmPodTemplates(@Param("limitSize") Integer limit);
 
-  List<String> selectRecentK8sTmPodTemplates(@Param("limitSize") Integer limit);
+    List<String> selectRecentK8sTmPodTemplates(@Param("limitSize") Integer limit);
 
-  void resetOptionState();
+    void resetOptionState();
 
-  List<SparkApplication> selectAppsByProjectId(@Param("projectId") Long id);
+    List<SparkApplication> selectAppsByProjectId(@Param("projectId") Long id);
 
-  boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
+    boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 
-  Integer countAffectedByClusterId(
-      @Param("clusterId") Long clusterId, @Param("dbType") String dbType);
+    Integer countAffectedByClusterId(
+                                     @Param("clusterId") Long clusterId, @Param("dbType") String dbType);
 }

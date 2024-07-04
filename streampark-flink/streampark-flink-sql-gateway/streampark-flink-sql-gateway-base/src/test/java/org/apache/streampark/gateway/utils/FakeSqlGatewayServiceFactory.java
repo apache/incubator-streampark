@@ -28,44 +28,44 @@ import java.util.Set;
 /** Factory for {@link SqlGatewayService}. */
 public class FakeSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
-  public static final ConfigOption<String> HOST =
-      ConfigOption.key("host")
-          .stringType()
-          .noDefaultValue()
-          .withDescription("The host of the Fake SQL gateway service.");
+    public static final ConfigOption<String> HOST =
+            ConfigOption.key("host")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("The host of the Fake SQL gateway service.");
 
-  public static final ConfigOption<Integer> PORT =
-      ConfigOption.key("port")
-          .intType()
-          .noDefaultValue()
-          .withDescription("The port of the Fake SQL gateway service.");
+    public static final ConfigOption<Integer> PORT =
+            ConfigOption.key("port")
+                    .intType()
+                    .noDefaultValue()
+                    .withDescription("The port of the Fake SQL gateway service.");
 
-  public static final ConfigOption<Integer> DESCRIPTION =
-      ConfigOption.key("description")
-          .intType()
-          .defaultValue(8080)
-          .withDescription("The Fake SQL gateway service.");
+    public static final ConfigOption<Integer> DESCRIPTION =
+            ConfigOption.key("description")
+                    .intType()
+                    .defaultValue(8080)
+                    .withDescription("The Fake SQL gateway service.");
 
-  @Override
-  public String factoryIdentifier() {
-    return "fake";
-  }
+    @Override
+    public String factoryIdentifier() {
+        return "fake";
+    }
 
-  @Override
-  public Set<ConfigOption<?>> requiredOptions() {
-    Set<ConfigOption<?>> options = new HashSet<>();
-    options.add(HOST);
-    options.add(PORT);
-    return options;
-  }
+    @Override
+    public Set<ConfigOption<?>> requiredOptions() {
+        Set<ConfigOption<?>> options = new HashSet<>();
+        options.add(HOST);
+        options.add(PORT);
+        return options;
+    }
 
-  @Override
-  public Set<ConfigOption<?>> optionalOptions() {
-    return Collections.singleton(DESCRIPTION);
-  }
+    @Override
+    public Set<ConfigOption<?>> optionalOptions() {
+        return Collections.singleton(DESCRIPTION);
+    }
 
-  @Override
-  public SqlGatewayService createSqlGatewayService(Context context) {
-    return FakeSqlGatewayService.INSTANCE;
-  }
+    @Override
+    public SqlGatewayService createSqlGatewayService(Context context) {
+        return FakeSqlGatewayService.INSTANCE;
+    }
 }

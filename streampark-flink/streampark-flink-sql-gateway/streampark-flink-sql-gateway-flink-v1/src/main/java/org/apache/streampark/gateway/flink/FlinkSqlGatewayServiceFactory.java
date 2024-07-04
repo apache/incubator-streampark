@@ -29,35 +29,35 @@ import java.util.Set;
 /** Flink sql gateway's Factory for {@link SqlGatewayService}. */
 public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
-  @Override
-  public String factoryIdentifier() {
-    return "flink-v1";
-  }
+    @Override
+    public String factoryIdentifier() {
+        return "flink-v1";
+    }
 
-  @Override
-  public Set<ConfigOption<?>> requiredOptions() {
-    Set<ConfigOption<?>> options = new HashSet<>();
-    options.add(BASE_URI);
-    return options;
-  }
+    @Override
+    public Set<ConfigOption<?>> requiredOptions() {
+        Set<ConfigOption<?>> options = new HashSet<>();
+        options.add(BASE_URI);
+        return options;
+    }
 
-  @Override
-  public Set<ConfigOption<?>> optionalOptions() {
-    return Collections.emptySet();
-  }
+    @Override
+    public Set<ConfigOption<?>> optionalOptions() {
+        return Collections.emptySet();
+    }
 
-  @Override
-  public SqlGatewayService createSqlGatewayService(Context context) {
-    SqlGatewayServiceFactoryUtils.EndpointFactoryHelper helper =
-        SqlGatewayServiceFactoryUtils.createEndpointFactoryHelper(this, context);
-    helper.validate();
-    String baseUri = context.getGateWayServiceOptions().get(BASE_URI.getKey());
-    return new FlinkSqlGatewayImpl(baseUri);
-  }
+    @Override
+    public SqlGatewayService createSqlGatewayService(Context context) {
+        SqlGatewayServiceFactoryUtils.EndpointFactoryHelper helper =
+                SqlGatewayServiceFactoryUtils.createEndpointFactoryHelper(this, context);
+        helper.validate();
+        String baseUri = context.getGateWayServiceOptions().get(BASE_URI.getKey());
+        return new FlinkSqlGatewayImpl(baseUri);
+    }
 
-  public static final ConfigOption<String> BASE_URI =
-      ConfigOption.key("base-uri")
-          .stringType()
-          .noDefaultValue()
-          .withDescription("The base uri of the flink cluster.");
+    public static final ConfigOption<String> BASE_URI =
+            ConfigOption.key("base-uri")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("The base uri of the flink cluster.");
 }

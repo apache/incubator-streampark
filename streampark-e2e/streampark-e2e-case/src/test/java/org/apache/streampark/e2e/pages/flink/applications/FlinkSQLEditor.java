@@ -32,27 +32,26 @@ import java.time.Duration;
 
 @Getter
 public final class FlinkSQLEditor {
-  @FindBy(
-      xpath =
-          "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line')]")
-  private WebElement flinkSqlEditor;
 
-  private WebDriver driver;
+    @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line')]")
+    private WebElement flinkSqlEditor;
 
-  public FlinkSQLEditor(WebDriver driver) {
-    PageFactory.initElements(driver, this);
-    this.driver = driver;
-  }
+    private WebDriver driver;
 
-  public FlinkSQLEditor content(String content) {
-    new WebDriverWait(this.driver, Duration.ofSeconds(20))
-        .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
+    public FlinkSQLEditor(WebDriver driver) {
+        PageFactory.initElements(driver, this);
+        this.driver = driver;
+    }
 
-    flinkSqlEditor.click();
+    public FlinkSQLEditor content(String content) {
+        new WebDriverWait(this.driver, Duration.ofSeconds(20))
+                .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
 
-    Actions actions = new Actions(this.driver);
-    actions.moveToElement(flinkSqlEditor).sendKeys(content).perform();
+        flinkSqlEditor.click();
 
-    return this;
-  }
+        Actions actions = new Actions(this.driver);
+        actions.moveToElement(flinkSqlEditor).sendKeys(content).perform();
+
+        return this;
+    }
 }

@@ -48,50 +48,52 @@ import java.util.stream.Collectors;
 @RequestMapping("role")
 public class RoleController {
 
-  @Autowired private RoleService roleService;
-  @Autowired private RoleMenuService roleMenuService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private RoleMenuService roleMenuService;
 
-  @PostMapping("list")
-  @RequiresPermissions("role:view")
-  public RestResponse roleList(RestRequest restRequest, Role role) {
-    IPage<Role> roleList = roleService.getPage(role, restRequest);
-    return RestResponse.success(roleList);
-  }
+    @PostMapping("list")
+    @RequiresPermissions("role:view")
+    public RestResponse roleList(RestRequest restRequest, Role role) {
+        IPage<Role> roleList = roleService.getPage(role, restRequest);
+        return RestResponse.success(roleList);
+    }
 
-  @PostMapping("check/name")
-  public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
-    Role result = this.roleService.getByName(roleName);
-    return RestResponse.success(result == null);
-  }
+    @PostMapping("check/name")
+    public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
+        Role result = this.roleService.getByName(roleName);
+        return RestResponse.success(result == null);
+    }
 
-  @PostMapping("menu")
-  public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
-    List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(roleId);
-    List<String> menuIdList =
-        roleMenuList.stream()
-            .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
-            .collect(Collectors.toList());
-    return RestResponse.success(menuIdList);
-  }
+    @PostMapping("menu")
+    public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
+        List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(roleId);
+        List<String> menuIdList =
+                roleMenuList.stream()
+                        .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
+                        .collect(Collectors.toList());
+        return RestResponse.success(menuIdList);
+    }
 
-  @PostMapping("post")
-  @RequiresPermissions("role:add")
-  public RestResponse addRole(@Valid Role role) {
-    this.roleService.createRole(role);
-    return RestResponse.success();
-  }
+    @PostMapping("post")
+    @RequiresPermissions("role:add")
+    public RestResponse addRole(@Valid Role role) {
+        this.roleService.createRole(role);
+        return RestResponse.success();
+    }
 
-  @DeleteMapping("delete")
-  @RequiresPermissions("role:delete")
-  public RestResponse deleteRole(Long roleId) {
-    this.roleService.removeById(roleId);
-    return RestResponse.success();
-  }
+    @DeleteMapping("delete")
+    @RequiresPermissions("role:delete")
+    public RestResponse deleteRole(Long roleId) {
+        this.roleService.removeById(roleId);
+        return RestResponse.success();
+    }
 
-  @PutMapping("update")
-  @RequiresPermissions("role:update")
-  public RestResponse updateRole(Role role) throws Exception {
-    this.roleService.updateRole(role);
-    return RestResponse.success();
-  }
+    @PutMapping("update")
+    @RequiresPermissions("role:update")
+    public RestResponse updateRole(Role role) throws Exception {
+        this.roleService.updateRole(role);
+        return RestResponse.success();
+    }
 }

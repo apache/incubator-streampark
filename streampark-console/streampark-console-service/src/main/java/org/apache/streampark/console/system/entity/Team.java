@@ -31,21 +31,21 @@ import java.util.Date;
 @TableName("t_team")
 public class Team implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  @Size(min = 4, max = 20, message = "{range}")
-  private String teamName;
+    @Size(min = 4, max = 20, message = "{range}")
+    private String teamName;
 
-  private String description;
+    private String description;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private transient String createTimeFrom;
+    private transient String createTimeFrom;
 
-  private transient String createTimeTo;
+    private transient String createTimeTo;
 }

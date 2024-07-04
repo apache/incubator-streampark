@@ -22,42 +22,43 @@ import java.util.Objects;
 
 /** Information of the table or view. */
 public class TableInfo implements Serializable {
-  private final ObjectIdentifier identifier;
-  private final TableKindEnum tableKindEnum;
 
-  public TableInfo(ObjectIdentifier identifier, TableKindEnum tableKindEnum) {
-    this.identifier = identifier;
-    this.tableKindEnum = tableKindEnum;
-  }
+    private final ObjectIdentifier identifier;
+    private final TableKindEnum tableKindEnum;
 
-  public ObjectIdentifier getIdentifier() {
-    return identifier;
-  }
-
-  public TableKindEnum getTableKind() {
-    return tableKindEnum;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public TableInfo(ObjectIdentifier identifier, TableKindEnum tableKindEnum) {
+        this.identifier = identifier;
+        this.tableKindEnum = tableKindEnum;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public ObjectIdentifier getIdentifier() {
+        return identifier;
     }
-    TableInfo tableInfo = (TableInfo) o;
-    return Objects.equals(identifier, tableInfo.identifier)
-        && tableKindEnum == tableInfo.tableKindEnum;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(identifier, tableKindEnum);
-  }
+    public TableKindEnum getTableKind() {
+        return tableKindEnum;
+    }
 
-  @Override
-  public String toString() {
-    return "TableInfo{" + "identifier=" + identifier + ", tableKind=" + tableKindEnum + '}';
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TableInfo tableInfo = (TableInfo) o;
+        return Objects.equals(identifier, tableInfo.identifier)
+                && tableKindEnum == tableInfo.tableKindEnum;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier, tableKindEnum);
+    }
+
+    @Override
+    public String toString() {
+        return "TableInfo{" + "identifier=" + identifier + ", tableKind=" + tableKindEnum + '}';
+    }
 }

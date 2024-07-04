@@ -21,14 +21,15 @@ import lombok.Getter;
 
 @Getter
 public enum EffectiveTypeEnum {
-  /** config */
-  CONFIG(1),
-  /** FLINKSQL */
-  FLINKSQL(2);
 
-  private final int type;
+    /** config */
+    CONFIG(1),
+    /** FLINKSQL */
+    FLINKSQL(2);
 
-  EffectiveTypeEnum(int value) {
-    this.type = value;
-  }
+    private final int type;
+
+    EffectiveTypeEnum(int value) {
+        this.type = value;
+    }
 }

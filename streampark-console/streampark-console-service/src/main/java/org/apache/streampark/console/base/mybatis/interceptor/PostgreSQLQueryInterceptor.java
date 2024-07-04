@@ -36,44 +36,40 @@ import java.util.Properties;
  * the SQL syntax here.
  */
 @Intercepts({
-  @Signature(
-      type = Executor.class,
-      method = "query",
-      args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
-  @Signature(
-      type = Executor.class,
-      method = "query",
-      args = {
-        MappedStatement.class,
-        Object.class,
-        RowBounds.class,
-        ResultHandler.class,
-        CacheKey.class,
-        BoundSql.class
-      })
+        @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
+                RowBounds.class, ResultHandler.class}),
+        @Signature(type = Executor.class, method = "query", args = {
+                MappedStatement.class,
+                Object.class,
+                RowBounds.class,
+                ResultHandler.class,
+                CacheKey.class,
+                BoundSql.class
+        })
 })
 public class PostgreSQLQueryInterceptor implements Interceptor {
 
-  @Override
-  public Object intercept(final Invocation invocation) throws Throwable {
-    Object[] args = invocation.getArgs();
-    MappedStatement ms = (MappedStatement) args[0];
-    Object parameter = args[1];
-    RowBounds rowBounds = (RowBounds) args[2];
-    ResultHandler<?> resultHandler = (ResultHandler<?>) args[3];
-    Executor executor = (Executor) invocation.getTarget();
-    boolean fourLen = args.length == 4;
-    BoundSql boundSql = fourLen ? ms.getBoundSql(parameter) : (BoundSql) args[5];
-    CacheKey cacheKey =
-        fourLen ? executor.createCacheKey(ms, parameter, rowBounds, boundSql) : (CacheKey) args[4];
-    return executor.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
-  }
+    @Override
+    public Object intercept(final Invocation invocation) throws Throwable {
+        Object[] args = invocation.getArgs();
+        MappedStatement ms = (MappedStatement) args[0];
+        Object parameter = args[1];
+        RowBounds rowBounds = (RowBounds) args[2];
+        ResultHandler<?> resultHandler = (ResultHandler<?>) args[3];
+        Executor executor = (Executor) invocation.getTarget();
+        boolean fourLen = args.length == 4;
+        BoundSql boundSql = fourLen ? ms.getBoundSql(parameter) : (BoundSql) args[5];
+        CacheKey cacheKey =
+                fourLen ? executor.createCacheKey(ms, parameter, rowBounds, boundSql) : (CacheKey) args[4];
+        return executor.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+    }
 
-  @Override
-  public Object plugin(final Object target) {
-    return Plugin.wrap(target, this);
-  }
+    @Override
+    public Object plugin(final Object target) {
+        return Plugin.wrap(target, this);
+    }
 
-  @Override
-  public void setProperties(final Properties properties) {}
+    @Override
+    public void setProperties(final Properties properties) {
+    }
 }

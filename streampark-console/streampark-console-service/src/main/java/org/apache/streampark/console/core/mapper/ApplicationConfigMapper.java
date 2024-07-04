@@ -27,12 +27,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
-  Integer selectLastVersion(@Param("appId") Long appId);
+    Integer selectLastVersion(@Param("appId") Long appId);
 
-  ApplicationConfig selectEffective(@Param("appId") Long appId);
+    ApplicationConfig selectEffective(@Param("appId") Long appId);
 
-  ApplicationConfig selectLatest(@Param("appId") Long appId);
+    ApplicationConfig selectLatest(@Param("appId") Long appId);
 
-  IPage<ApplicationConfig> selectPageByAppId(
-      Page<ApplicationConfig> page, @Param("appId") Long appId);
+    IPage<ApplicationConfig> selectPageByAppId(
+                                               Page<ApplicationConfig> page, @Param("appId") Long appId);
 }

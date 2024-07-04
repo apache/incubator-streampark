@@ -20,5 +20,5 @@ package org.apache.streampark.console.base.domain;
 /** Interface document constants */
 public class ApiDocConstant {
 
-  public static final String OPENAPI_TAG = "OpenAPI";
+    public static final String OPENAPI_TAG = "OpenAPI";
 }

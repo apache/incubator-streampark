@@ -22,12 +22,12 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 /** The AlertService interface represents a service for sending alert. */
 public interface AlertService {
 
-  /**
-   * Sends an alert based on the given alert configuration ID and alert template.
-   *
-   * @param alertConfigId the ID of the alert configuration
-   * @param alertTemplate the alert template to use for generating the alert content
-   * @return true if the alert is sent successfully, false otherwise
-   */
-  boolean alert(Long alertConfigId, AlertTemplate alertTemplate);
+    /**
+     * Sends an alert based on the given alert configuration ID and alert template.
+     *
+     * @param alertConfigId the ID of the alert configuration
+     * @param alertTemplate the alert template to use for generating the alert content
+     * @return true if the alert is sent successfully, false otherwise
+     */
+    boolean alert(Long alertConfigId, AlertTemplate alertTemplate);
 }

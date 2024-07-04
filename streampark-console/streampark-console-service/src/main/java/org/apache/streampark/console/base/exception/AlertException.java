@@ -20,15 +20,16 @@ package org.apache.streampark.console.base.exception;
 import org.apache.streampark.common.util.ExceptionUtils;
 
 public class AlertException extends ApiAlertException {
-  public AlertException(String message) {
-    super(message);
-  }
 
-  public AlertException(Throwable cause) {
-    super(ExceptionUtils.stringifyException(cause));
-  }
+    public AlertException(String message) {
+        super(message);
+    }
 
-  public AlertException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public AlertException(Throwable cause) {
+        super(ExceptionUtils.stringifyException(cause));
+    }
+
+    public AlertException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -22,23 +22,23 @@ import java.util.Arrays;
 /** Provides how to deal with problems when encountering them */
 public enum FailoverStrategyEnum {
 
-  /** send alert */
-  ALERT(1),
+    /** send alert */
+    ALERT(1),
 
-  /** restart app */
-  RESTART(2);
+    /** restart app */
+    RESTART(2);
 
-  private final int value;
+    private final int value;
 
-  FailoverStrategyEnum(int value) {
-    this.value = value;
-  }
+    FailoverStrategyEnum(int value) {
+        this.value = value;
+    }
 
-  public int get() {
-    return this.value;
-  }
+    public int get() {
+        return this.value;
+    }
 
-  public static FailoverStrategyEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+    public static FailoverStrategyEnum of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

@@ -34,101 +34,101 @@ import java.util.Objects;
 /** Mocked implementation of {@link SqlGatewayService}. */
 public class MockedSqlGatewayService implements SqlGatewayService {
 
-  public final String host;
-  public final int port;
+    public final String host;
+    public final int port;
 
-  public final String description;
+    public final String description;
 
-  public MockedSqlGatewayService(String host, int port, String description) {
-    this.host = host;
-    this.port = port;
-    this.description = description;
-  }
-
-  @Override
-  public boolean check(String flinkMajorVersion) {
-    return !Objects.equals(flinkMajorVersion, "1.11");
-  }
-
-  @Override
-  public GatewayInfo getGatewayInfo() throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public SessionHandle openSession(SessionEnvironment environment) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void heartbeat(SessionHandle sessionHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void closeSession(SessionHandle sessionHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void cancelOperation(SessionHandle sessionHandle, OperationHandle operationHandle)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void closeOperation(SessionHandle sessionHandle, OperationHandle operationHandle)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public OperationInfo getOperationInfo(
-      SessionHandle sessionHandle, OperationHandle operationHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Column getOperationResultSchema(
-      SessionHandle sessionHandle, OperationHandle operationHandle) throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public OperationHandle executeStatement(
-      SessionHandle sessionHandle,
-      String statement,
-      long executionTimeoutMs,
-      ExecutionConfiguration executionConfig)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ResultSet fetchResults(
-      SessionHandle sessionHandle,
-      OperationHandle operationHandle,
-      ResultQueryCondition resultQueryCondition)
-      throws SqlGatewayException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public MockedSqlGatewayService(String host, int port, String description) {
+        this.host = host;
+        this.port = port;
+        this.description = description;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    MockedSqlGatewayService that = (MockedSqlGatewayService) o;
-    return port == that.port
-        && Objects.equals(host, that.host)
-        && Objects.equals(description, that.description);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(host, port, description);
-  }
+    @Override
+    public boolean check(String flinkMajorVersion) {
+        return !Objects.equals(flinkMajorVersion, "1.11");
+    }
+
+    @Override
+    public GatewayInfo getGatewayInfo() throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SessionHandle openSession(SessionEnvironment environment) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void heartbeat(SessionHandle sessionHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void closeSession(SessionHandle sessionHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void cancelOperation(SessionHandle sessionHandle,
+                                OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void closeOperation(SessionHandle sessionHandle,
+                               OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public OperationInfo getOperationInfo(
+                                          SessionHandle sessionHandle,
+                                          OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Column getOperationResultSchema(
+                                           SessionHandle sessionHandle,
+                                           OperationHandle operationHandle) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public OperationHandle executeStatement(
+                                            SessionHandle sessionHandle,
+                                            String statement,
+                                            long executionTimeoutMs,
+                                            ExecutionConfiguration executionConfig) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ResultSet fetchResults(
+                                  SessionHandle sessionHandle,
+                                  OperationHandle operationHandle,
+                                  ResultQueryCondition resultQueryCondition) throws SqlGatewayException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MockedSqlGatewayService that = (MockedSqlGatewayService) o;
+        return port == that.port
+                && Objects.equals(host, that.host)
+                && Objects.equals(description, that.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(host, port, description);
+    }
 }

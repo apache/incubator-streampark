@@ -32,22 +32,22 @@ import java.io.Serializable;
 @Slf4j
 public class Setting implements Serializable {
 
-  private Integer orderNum;
+    private Integer orderNum;
 
-  private String settingName;
+    private String settingName;
 
-  @TableId(type = IdType.INPUT)
-  private String settingKey;
+    @TableId(type = IdType.INPUT)
+    private String settingKey;
 
-  @TableField(updateStrategy = FieldStrategy.IGNORED)
-  private String settingValue;
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String settingValue;
 
-  private Integer type;
+    private Integer type;
 
-  private String description;
-  private transient boolean editable = false;
-  private transient boolean submitting = false;
+    private String description;
+    private transient boolean editable = false;
+    private transient boolean submitting = false;
 
-  private transient String flinkHome;
-  private transient String flinkConf;
+    private transient String flinkHome;
+    private transient String flinkConf;
 }

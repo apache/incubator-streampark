@@ -24,5 +24,6 @@ import org.apache.ibatis.annotations.Param;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface AlertConfigMapper extends BaseMapper<AlertConfig> {
-  AlertConfig selectAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
+
+    AlertConfig selectAlertConfByName(@Param("alertConfig") AlertConfig alertConfig);
 }

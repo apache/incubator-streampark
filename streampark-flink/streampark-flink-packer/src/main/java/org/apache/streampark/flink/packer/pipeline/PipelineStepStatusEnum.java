@@ -38,35 +38,36 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStepStatusEnum {
-  unknown(0),
-  waiting(1),
-  running(2),
-  success(3),
-  failure(4),
-  skipped(5);
 
-  private final Integer code;
+    unknown(0),
+    waiting(1),
+    running(2),
+    success(3),
+    failure(4),
+    skipped(5);
 
-  PipelineStepStatusEnum(Integer code) {
-    this.code = code;
-  }
+    private final Integer code;
 
-  @JsonCreator
-  public static PipelineStepStatusEnum of(Integer code) {
-    for (PipelineStepStatusEnum status : PipelineStepStatusEnum.values()) {
-      if (status.getCode().equals(code)) {
-        return status;
-      }
+    PipelineStepStatusEnum(Integer code) {
+        this.code = code;
     }
-    return unknown;
-  }
 
-  @JsonValue
-  public Integer getCode() {
-    return code;
-  }
+    @JsonCreator
+    public static PipelineStepStatusEnum of(Integer code) {
+        for (PipelineStepStatusEnum status : PipelineStepStatusEnum.values()) {
+            if (status.getCode().equals(code)) {
+                return status;
+            }
+        }
+        return unknown;
+    }
 
-  public boolean isUnknown() {
-    return this == unknown;
-  }
+    @JsonValue
+    public Integer getCode() {
+        return code;
+    }
+
+    public boolean isUnknown() {
+        return this == unknown;
+    }
 }

@@ -30,87 +30,88 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Disabled("'ese test cases can't be runnable due to external service is not available.")
 class SettingServiceTest extends SpringUnitTestBase {
 
-  @Autowired SettingService settingService;
+    @Autowired
+    SettingService settingService;
 
-  @Test
-  void testUpdateDockerConfigTest() {
-    DockerConfig dockerConfig = new DockerConfig();
-    dockerConfig.setUsername("test-username-setting-value");
-    dockerConfig.setPassword("test-password-setting-value");
-    dockerConfig.setNamespace("test-namespace-setting-value");
-    dockerConfig.setAddress("test-address-setting-value");
+    @Test
+    void testUpdateDockerConfigTest() {
+        DockerConfig dockerConfig = new DockerConfig();
+        dockerConfig.setUsername("test-username-setting-value");
+        dockerConfig.setPassword("test-password-setting-value");
+        dockerConfig.setNamespace("test-namespace-setting-value");
+        dockerConfig.setAddress("test-address-setting-value");
 
-    settingService.updateDocker(dockerConfig);
+        settingService.updateDocker(dockerConfig);
 
-    Assertions.assertEquals(
-        "test-address-setting-value",
-        settingService.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getSettingValue());
-    Assertions.assertEquals(
-        "test-username-setting-value",
-        settingService.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
-    Assertions.assertEquals(
-        "test-password-setting-value",
-        settingService.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getSettingValue());
-    Assertions.assertEquals(
-        "test-namespace-setting-value",
-        settingService.get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE).getSettingValue());
-  }
+        Assertions.assertEquals(
+                "test-address-setting-value",
+                settingService.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getSettingValue());
+        Assertions.assertEquals(
+                "test-username-setting-value",
+                settingService.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+        Assertions.assertEquals(
+                "test-password-setting-value",
+                settingService.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getSettingValue());
+        Assertions.assertEquals(
+                "test-namespace-setting-value",
+                settingService.get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE).getSettingValue());
+    }
 
-  @Test
-  void testUpdateAlertEmailConfigTest() {
-    SenderEmail senderEmail = new SenderEmail();
-    senderEmail.setHost("test-host-setting-value");
-    senderEmail.setUserName("test-username-setting-value");
-    senderEmail.setPassword("test-password-setting-value");
-    senderEmail.setFrom("test-from-setting-value");
-    senderEmail.setSsl(true);
-    senderEmail.setPort(456);
+    @Test
+    void testUpdateAlertEmailConfigTest() {
+        SenderEmail senderEmail = new SenderEmail();
+        senderEmail.setHost("test-host-setting-value");
+        senderEmail.setUserName("test-username-setting-value");
+        senderEmail.setPassword("test-password-setting-value");
+        senderEmail.setFrom("test-from-setting-value");
+        senderEmail.setSsl(true);
+        senderEmail.setPort(456);
 
-    settingService.updateEmail(senderEmail);
+        settingService.updateEmail(senderEmail);
 
-    Assertions.assertEquals(
-        "test-host-setting-value",
-        settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
-    Assertions.assertEquals(
-        "test-from-setting-value",
-        settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
-    Assertions.assertEquals(
-        "test-username-setting-value",
-        settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
-    Assertions.assertEquals(
-        "test-password-setting-value",
-        settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
-    Assertions.assertEquals(
-        "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
-    Assertions.assertEquals(
-        "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
-  }
+        Assertions.assertEquals(
+                "test-host-setting-value",
+                settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
+        Assertions.assertEquals(
+                "test-from-setting-value",
+                settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
+        Assertions.assertEquals(
+                "test-username-setting-value",
+                settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
+        Assertions.assertEquals(
+                "test-password-setting-value",
+                settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+        Assertions.assertEquals(
+                "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
+        Assertions.assertEquals(
+                "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
+    }
 
-  @Test
-  void checkEmailTest() {
-    SenderEmail senderEmail = new SenderEmail();
-    senderEmail.setHost("smtp.163.com");
-    senderEmail.setUserName("XXXXXXXX@163.com");
-    senderEmail.setPassword("XXXXXXXX");
-    senderEmail.setFrom("XXXXXXXX@163.com");
-    senderEmail.setSsl(false);
-    senderEmail.setPort(25);
-    ResponseResult result = settingService.checkEmail(senderEmail);
-    Assertions.assertEquals(result.getStatus(), 200);
-  }
+    @Test
+    void checkEmailTest() {
+        SenderEmail senderEmail = new SenderEmail();
+        senderEmail.setHost("smtp.163.com");
+        senderEmail.setUserName("XXXXXXXX@163.com");
+        senderEmail.setPassword("XXXXXXXX");
+        senderEmail.setFrom("XXXXXXXX@163.com");
+        senderEmail.setSsl(false);
+        senderEmail.setPort(25);
+        ResponseResult result = settingService.checkEmail(senderEmail);
+        Assertions.assertEquals(result.getStatus(), 200);
+    }
 
-  @Test
-  void checkDockerTest() {
-    String username = "XXXXXXXX ";
-    String password = "XXXXXXXX";
+    @Test
+    void checkDockerTest() {
+        String username = "XXXXXXXX ";
+        String password = "XXXXXXXX";
 
-    DockerConfig dockerConfig = new DockerConfig();
-    dockerConfig.setAddress("registry.cn-hangzhou.aliyuncs.com");
-    dockerConfig.setUsername(username);
-    dockerConfig.setPassword(password);
-    dockerConfig.setNamespace("streampark");
+        DockerConfig dockerConfig = new DockerConfig();
+        dockerConfig.setAddress("registry.cn-hangzhou.aliyuncs.com");
+        dockerConfig.setUsername(username);
+        dockerConfig.setPassword(password);
+        dockerConfig.setNamespace("streampark");
 
-    ResponseResult result = settingService.checkDocker(dockerConfig);
-    Assertions.assertEquals(result.getStatus(), 200);
-  }
+        ResponseResult result = settingService.checkDocker(dockerConfig);
+        Assertions.assertEquals(result.getStatus(), 200);
+    }
 }

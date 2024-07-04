@@ -19,10 +19,10 @@ package com.github.dockerjava.api.listener;
 
 public interface BuildImageCallbackListener {
 
-  /**
-   * Watch build step message and error message.
-   *
-   * @param buildStepMsg build step msg from docker rest api.
-   */
-  void watchBuildStep(String buildStepMsg);
+    /**
+     * Watch build step message and error message.
+     *
+     * @param buildStepMsg build step msg from docker rest api.
+     */
+    void watchBuildStep(String buildStepMsg);
 }

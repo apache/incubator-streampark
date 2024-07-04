@@ -32,43 +32,43 @@ import java.util.Date;
 @TableName("t_menu")
 public class Menu implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  public static final String TYPE_MENU = "0";
+    public static final String TYPE_MENU = "0";
 
-  public static final String TYPE_BUTTON = "1";
+    public static final String TYPE_BUTTON = "1";
 
-  @TableId(type = IdType.AUTO)
-  private Long menuId;
+    @TableId(type = IdType.AUTO)
+    private Long menuId;
 
-  private Long parentId;
+    private Long parentId;
 
-  @NotBlank(message = "{required}")
-  @Size(max = 20, message = "{noMoreThan}")
-  private String menuName;
+    @NotBlank(message = "{required}")
+    @Size(max = 20, message = "{noMoreThan}")
+    private String menuName;
 
-  @Size(max = 50, message = "{noMoreThan}")
-  private String path;
+    @Size(max = 50, message = "{noMoreThan}")
+    private String path;
 
-  @Size(max = 100, message = "{noMoreThan}")
-  private String component;
+    @Size(max = 100, message = "{noMoreThan}")
+    private String component;
 
-  @Size(max = 50, message = "{noMoreThan}")
-  private String perms;
+    @Size(max = 50, message = "{noMoreThan}")
+    private String perms;
 
-  private String icon;
+    private String icon;
 
-  @NotBlank(message = "{required}")
-  private String type;
+    @NotBlank(message = "{required}")
+    private String type;
 
-  private Double orderNum;
+    private Double orderNum;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private boolean display;
+    private boolean display;
 
-  private transient String createTimeFrom;
-  private transient String createTimeTo;
+    private transient String createTimeFrom;
+    private transient String createTimeTo;
 }

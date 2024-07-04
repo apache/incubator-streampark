@@ -23,8 +23,9 @@ import java.util.Map;
 
 @Data
 public class FlinkConnector {
-  private String className;
-  private String factoryIdentifier;
-  Map<String, String> requiredOptions;
-  Map<String, String> optionalOptions;
+
+    private String className;
+    private String factoryIdentifier;
+    Map<String, String> requiredOptions;
+    Map<String, String> optionalOptions;
 }

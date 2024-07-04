@@ -27,9 +27,9 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class IndexController {
 
-  @Hidden
-  @GetMapping("/")
-  public ModelAndView index() {
-    return new ModelAndView("/index.html");
-  }
+    @Hidden
+    @GetMapping("/")
+    public ModelAndView index() {
+        return new ModelAndView("/index.html");
+    }
 }

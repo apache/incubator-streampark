@@ -32,23 +32,23 @@ import java.util.Date;
 @TableName("t_role")
 public class Role implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @TableId(type = IdType.AUTO)
-  private Long roleId;
+    @TableId(type = IdType.AUTO)
+    private Long roleId;
 
-  @NotBlank(message = "{required}")
-  @Size(max = 10, message = "{noMoreThan}")
-  private String roleName;
+    @NotBlank(message = "{required}")
+    @Size(max = 10, message = "{noMoreThan}")
+    private String roleName;
 
-  @Size(max = 255, message = "{noMoreThan}")
-  private String description;
+    @Size(max = 255, message = "{noMoreThan}")
+    private String description;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private transient String createTimeFrom;
-  private transient String createTimeTo;
-  private transient String menuId;
+    private transient String createTimeFrom;
+    private transient String createTimeTo;
+    private transient String menuId;
 }

@@ -21,6 +21,6 @@ import com.github.dockerjava.api.model.PullResponseItem;
 
 public interface PullImageCallbackListener {
 
-  /** Watch pull image process information form docker rest api. */
-  void watchPullProcess(PullResponseItem processDetail);
+    /** Watch pull image process information form docker rest api. */
+    void watchPullProcess(PullResponseItem processDetail);
 }

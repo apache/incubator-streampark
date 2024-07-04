@@ -25,41 +25,41 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface RoleService extends IService<Role> {
 
-  /**
-   * Retrieves a page of {@link Role} objects based on the provided parameters.
-   *
-   * @param role The {@link Role} object containing the search criteria.
-   * @param request The {@link RestRequest} object used for pagination and sorting.
-   * @return An {@link IPage} containing the retrieved {@link Role} objects.
-   */
-  IPage<Role> getPage(Role role, RestRequest request);
+    /**
+     * Retrieves a page of {@link Role} objects based on the provided parameters.
+     *
+     * @param role The {@link Role} object containing the search criteria.
+     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @return An {@link IPage} containing the retrieved {@link Role} objects.
+     */
+    IPage<Role> getPage(Role role, RestRequest request);
 
-  /**
-   * Get the Role by role name
-   *
-   * @param roleName role name
-   * @return Role
-   */
-  Role getByName(String roleName);
+    /**
+     * Get the Role by role name
+     *
+     * @param roleName role name
+     * @return Role
+     */
+    Role getByName(String roleName);
 
-  /**
-   * Create role instance
-   *
-   * @param role Role
-   */
-  void createRole(Role role);
+    /**
+     * Create role instance
+     *
+     * @param role Role
+     */
+    void createRole(Role role);
 
-  /**
-   * Remove Role by role id
-   *
-   * @param roleId role id
-   */
-  void removeById(Long roleId);
+    /**
+     * Remove Role by role id
+     *
+     * @param roleId role id
+     */
+    void removeById(Long roleId);
 
-  /**
-   * Update Role with incoming information
-   *
-   * @param role Role
-   */
-  void updateRole(Role role);
+    /**
+     * Update Role with incoming information
+     *
+     * @param role Role
+     */
+    void updateRole(Role role);
 }

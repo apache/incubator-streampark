@@ -24,64 +24,64 @@ import java.util.Objects;
 
 public final class ObjectIdentifier implements Serializable {
 
-  static final String UNKNOWN = "<UNKNOWN>";
+    static final String UNKNOWN = "<UNKNOWN>";
 
-  private final @Nullable String catalogName;
-  private final @Nullable String databaseName;
-  private final String objectName;
+    private final @Nullable String catalogName;
+    private final @Nullable String databaseName;
+    private final String objectName;
 
-  public ObjectIdentifier(
-      @Nullable String catalogName, @Nullable String databaseName, String objectName) {
-    this.catalogName = catalogName;
-    this.databaseName = databaseName;
-    this.objectName = objectName;
-  }
-
-  @Nullable
-  public String getCatalogName() {
-    return catalogName;
-  }
-
-  @Nullable
-  public String getDatabaseName() {
-    return databaseName;
-  }
-
-  public String getObjectName() {
-    return objectName;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public ObjectIdentifier(
+                            @Nullable String catalogName, @Nullable String databaseName, String objectName) {
+        this.catalogName = catalogName;
+        this.databaseName = databaseName;
+        this.objectName = objectName;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @Nullable
+    public String getCatalogName() {
+        return catalogName;
     }
-    ObjectIdentifier that = (ObjectIdentifier) o;
-    return Objects.equals(catalogName, that.catalogName)
-        && Objects.equals(databaseName, that.databaseName)
-        && Objects.equals(objectName, that.objectName);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(catalogName, databaseName, objectName);
-  }
+    @Nullable
+    public String getDatabaseName() {
+        return databaseName;
+    }
 
-  @Override
-  public String toString() {
-    return "ObjectIdentifier{"
-        + "catalogName='"
-        + catalogName
-        + '\''
-        + ", databaseName='"
-        + databaseName
-        + '\''
-        + ", objectName='"
-        + objectName
-        + '\''
-        + '}';
-  }
+    public String getObjectName() {
+        return objectName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ObjectIdentifier that = (ObjectIdentifier) o;
+        return Objects.equals(catalogName, that.catalogName)
+                && Objects.equals(databaseName, that.databaseName)
+                && Objects.equals(objectName, that.objectName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(catalogName, databaseName, objectName);
+    }
+
+    @Override
+    public String toString() {
+        return "ObjectIdentifier{"
+                + "catalogName='"
+                + catalogName
+                + '\''
+                + ", databaseName='"
+                + databaseName
+                + '\''
+                + ", objectName='"
+                + objectName
+                + '\''
+                + '}';
+    }
 }

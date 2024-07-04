@@ -32,18 +32,18 @@ import java.util.Date;
 @Slf4j
 public class Effective {
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  private Long appId;
-  /**
-   * 1) config <br>
-   * 2) flink Sql<br>
-   */
-  private Integer targetType;
+    private Long appId;
+    /**
+     * 1) config <br>
+     * 2) flink Sql<br>
+     */
+    private Integer targetType;
 
-  private Long targetId;
-  private Date createTime;
+    private Long targetId;
+    private Date createTime;
 
-  private transient EffectiveTypeEnum effectiveType;
+    private transient EffectiveTypeEnum effectiveType;
 }

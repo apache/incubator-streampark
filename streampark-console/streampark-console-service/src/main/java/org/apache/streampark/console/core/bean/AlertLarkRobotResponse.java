@@ -24,16 +24,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class AlertLarkRobotResponse {
-  @JsonProperty("Extra")
-  private Object extra;
 
-  @JsonProperty("StatusCode")
-  private Integer statusCode;
+    @JsonProperty("Extra")
+    private Object extra;
 
-  @JsonProperty("StatusMessage")
-  private String statusMessage;
+    @JsonProperty("StatusCode")
+    private Integer statusCode;
 
-  private Integer code;
-  private String msg;
-  private Object data;
+    @JsonProperty("StatusMessage")
+    private String statusMessage;
+
+    private Integer code;
+    private String msg;
+    private Object data;
 }

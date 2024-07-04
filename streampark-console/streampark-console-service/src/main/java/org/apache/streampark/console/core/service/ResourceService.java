@@ -30,68 +30,68 @@ import java.util.List;
 
 public interface ResourceService extends IService<Resource> {
 
-  /**
-   * list resource
-   *
-   * @param resource resource
-   * @param restRequest queryRequest
-   * @return IPage
-   */
-  IPage<Resource> getPage(Resource resource, RestRequest restRequest);
+    /**
+     * list resource
+     *
+     * @param resource resource
+     * @param restRequest queryRequest
+     * @return IPage
+     */
+    IPage<Resource> getPage(Resource resource, RestRequest restRequest);
 
-  /**
-   * check resource exists by user id
-   *
-   * @param userId user id
-   * @return true if exists
-   */
-  boolean existsByUserId(Long userId);
+    /**
+     * check resource exists by user id
+     *
+     * @param userId user id
+     * @return true if exists
+     */
+    boolean existsByUserId(Long userId);
 
-  /**
-   * add resource
-   *
-   * @param resource resource
-   */
-  void addResource(Resource resource) throws Exception;
+    /**
+     * add resource
+     *
+     * @param resource resource
+     */
+    void addResource(Resource resource) throws Exception;
 
-  /**
-   * @param teamId team id
-   * @param name resource name
-   * @return the found resource
-   */
-  Resource findByResourceName(Long teamId, String name);
+    /**
+     * @param teamId team id
+     * @param name resource name
+     * @return the found resource
+     */
+    Resource findByResourceName(Long teamId, String name);
 
-  /**
-   * update resource
-   *
-   * @param resource the updated resource
-   */
-  void updateResource(Resource resource);
+    /**
+     * update resource
+     *
+     * @param resource the updated resource
+     */
+    void updateResource(Resource resource);
 
-  /**
-   * delete resource
-   *
-   * @param id
-   */
-  void remove(Long id);
+    /**
+     * delete resource
+     *
+     * @param id
+     */
+    void remove(Long id);
 
-  /**
-   * Get resource through team id.
-   *
-   * @param teamId
-   * @return team resources
-   */
-  List<Resource> listByTeamId(Long teamId);
+    /**
+     * Get resource through team id.
+     *
+     * @param teamId
+     * @return team resources
+     */
+    List<Resource> listByTeamId(Long teamId);
 
-  /**
-   * change resource owner
-   *
-   * @param userId original user id
-   * @param targetUserId target user id
-   */
-  void changeOwnership(Long userId, Long targetUserId);
+    /**
+     * change resource owner
+     *
+     * @param userId original user id
+     * @param targetUserId target user id
+     */
+    void changeOwnership(Long userId, Long targetUserId);
 
-  String upload(MultipartFile file) throws IOException;
+    String upload(MultipartFile file) throws IOException;
 
-  RestResponse checkResource(Resource resource) throws Exception;
+    RestResponse checkResource(Resource resource) throws Exception;
 }

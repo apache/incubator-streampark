@@ -34,48 +34,48 @@ import java.util.Objects;
  */
 public class ApiAlertException extends AbstractApiException {
 
-  public ApiAlertException(String message) {
-    super(message, ResponseCode.CODE_FAIL_ALERT);
-  }
-
-  public ApiAlertException(Throwable cause) {
-    super(cause, ResponseCode.CODE_FAIL_ALERT);
-  }
-
-  public ApiAlertException(String message, Throwable cause) {
-    super(message, cause, ResponseCode.CODE_FAIL_ALERT);
-  }
-
-  public static void throwIfNull(Object object, String errorMsgFmt, Object... args) {
-    if (Objects.isNull(object)) {
-      if (args == null || args.length < 1) {
-        throw new ApiAlertException(errorMsgFmt);
-      }
-      throw new ApiAlertException(String.format(errorMsgFmt, args));
+    public ApiAlertException(String message) {
+        super(message, ResponseCode.CODE_FAIL_ALERT);
     }
-  }
 
-  public static void throwIfNotNull(Object object, String errorMsgFmt, Object... args) {
-    if (!Objects.isNull(object)) {
-      if (args == null || args.length < 1) {
-        throw new ApiAlertException(errorMsgFmt);
-      }
-      throw new ApiAlertException(String.format(errorMsgFmt, args));
+    public ApiAlertException(Throwable cause) {
+        super(cause, ResponseCode.CODE_FAIL_ALERT);
     }
-  }
 
-  public static void throwIfFalse(boolean expression, String errorMessage) {
-    if (!expression) {
-      throw new ApiAlertException(errorMessage);
+    public ApiAlertException(String message, Throwable cause) {
+        super(message, cause, ResponseCode.CODE_FAIL_ALERT);
     }
-  }
 
-  public static void throwIfTrue(boolean expression, String errorMsgFmt, Object... args) {
-    if (expression) {
-      if (args == null || args.length < 1) {
-        throw new ApiAlertException(errorMsgFmt);
-      }
-      throw new ApiAlertException(String.format(errorMsgFmt, args));
+    public static void throwIfNull(Object object, String errorMsgFmt, Object... args) {
+        if (Objects.isNull(object)) {
+            if (args == null || args.length < 1) {
+                throw new ApiAlertException(errorMsgFmt);
+            }
+            throw new ApiAlertException(String.format(errorMsgFmt, args));
+        }
     }
-  }
+
+    public static void throwIfNotNull(Object object, String errorMsgFmt, Object... args) {
+        if (!Objects.isNull(object)) {
+            if (args == null || args.length < 1) {
+                throw new ApiAlertException(errorMsgFmt);
+            }
+            throw new ApiAlertException(String.format(errorMsgFmt, args));
+        }
+    }
+
+    public static void throwIfFalse(boolean expression, String errorMessage) {
+        if (!expression) {
+            throw new ApiAlertException(errorMessage);
+        }
+    }
+
+    public static void throwIfTrue(boolean expression, String errorMsgFmt, Object... args) {
+        if (expression) {
+            if (args == null || args.length < 1) {
+                throw new ApiAlertException(errorMsgFmt);
+            }
+            throw new ApiAlertException(String.format(errorMsgFmt, args));
+        }
+    }
 }

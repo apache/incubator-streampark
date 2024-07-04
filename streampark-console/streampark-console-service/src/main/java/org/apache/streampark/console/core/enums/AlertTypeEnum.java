@@ -38,73 +38,74 @@ import java.util.Map;
 @Getter
 public enum AlertTypeEnum {
 
-  /** Email */
-  EMAIL(1, EmailAlertNotifyServiceImpl.class),
+    /** Email */
+    EMAIL(1, EmailAlertNotifyServiceImpl.class),
 
-  /** Ding talk */
-  DING_TALK(2, DingTalkAlertNotifyServiceImpl.class),
+    /** Ding talk */
+    DING_TALK(2, DingTalkAlertNotifyServiceImpl.class),
 
-  /** WeChat work */
-  WE_COM(4, WeComAlertNotifyServiceImpl.class),
+    /** WeChat work */
+    WE_COM(4, WeComAlertNotifyServiceImpl.class),
 
-  /** Http callback */
-  HTTP_CALLBACK(8, HttpCallbackAlertNotifyServiceImpl.class),
+    /** Http callback */
+    HTTP_CALLBACK(8, HttpCallbackAlertNotifyServiceImpl.class),
 
-  /** Lark */
-  LARK(16, LarkAlertNotifyServiceImpl.class);
+    /** Lark */
+    LARK(16, LarkAlertNotifyServiceImpl.class);
 
-  /** The empty level */
-  private static final Integer EMPTY_LEVEL = 0;
+    /** The empty level */
+    private static final Integer EMPTY_LEVEL = 0;
 
-  /** Get the alert type by the code */
-  @JsonValue private final Integer code;
+    /** Get the alert type by the code */
+    @JsonValue
+    private final Integer code;
 
-  /** Holds the reference to a Class object. */
-  private final Class<? extends AlertNotifyService> clazz;
+    /** Holds the reference to a Class object. */
+    private final Class<? extends AlertNotifyService> clazz;
 
-  /** A cache map used to quickly get the alert type from an integer code */
-  private static final Map<Integer, AlertTypeEnum> CACHE_MAP = createCacheMap();
+    /** A cache map used to quickly get the alert type from an integer code */
+    private static final Map<Integer, AlertTypeEnum> CACHE_MAP = createCacheMap();
 
-  private static Map<Integer, AlertTypeEnum> createCacheMap() {
-    Map<Integer, AlertTypeEnum> cacheMap = new HashMap<>();
-    for (AlertTypeEnum notifyType : AlertTypeEnum.values()) {
-      cacheMap.put(notifyType.code, notifyType);
-    }
-    return Collections.unmodifiableMap(cacheMap);
-  }
-
-  AlertTypeEnum(Integer code, Class<? extends AlertNotifyService> clazz) {
-    this.code = code;
-    this.clazz = clazz;
-  }
-
-  public static List<AlertTypeEnum> decode(Integer level) {
-    if (level == null) {
-      level = EMPTY_LEVEL;
+    private static Map<Integer, AlertTypeEnum> createCacheMap() {
+        Map<Integer, AlertTypeEnum> cacheMap = new HashMap<>();
+        for (AlertTypeEnum notifyType : AlertTypeEnum.values()) {
+            cacheMap.put(notifyType.code, notifyType);
+        }
+        return Collections.unmodifiableMap(cacheMap);
     }
 
-    List<AlertTypeEnum> result = new ArrayList<>(AlertTypeEnum.values().length);
-    while (level != 0) {
-      int code = level & -level;
-      result.add(getByCode(code));
-      level ^= code;
-    }
-    return result;
-  }
-
-  public static int encode(List<AlertTypeEnum> alertTypeEnums) {
-    if (CollectionUtils.isEmpty(alertTypeEnums)) {
-      return EMPTY_LEVEL;
+    AlertTypeEnum(Integer code, Class<? extends AlertNotifyService> clazz) {
+        this.code = code;
+        this.clazz = clazz;
     }
 
-    int result = 0;
-    for (AlertTypeEnum alertTypeEnum : alertTypeEnums) {
-      result |= alertTypeEnum.code;
-    }
-    return result;
-  }
+    public static List<AlertTypeEnum> decode(Integer level) {
+        if (level == null) {
+            level = EMPTY_LEVEL;
+        }
 
-  private static AlertTypeEnum getByCode(Integer code) {
-    return CACHE_MAP.get(code);
-  }
+        List<AlertTypeEnum> result = new ArrayList<>(AlertTypeEnum.values().length);
+        while (level != 0) {
+            int code = level & -level;
+            result.add(getByCode(code));
+            level ^= code;
+        }
+        return result;
+    }
+
+    public static int encode(List<AlertTypeEnum> alertTypeEnums) {
+        if (CollectionUtils.isEmpty(alertTypeEnums)) {
+            return EMPTY_LEVEL;
+        }
+
+        int result = 0;
+        for (AlertTypeEnum alertTypeEnum : alertTypeEnums) {
+            result |= alertTypeEnum.code;
+        }
+        return result;
+    }
+
+    private static AlertTypeEnum getByCode(Integer code) {
+        return CACHE_MAP.get(code);
+    }
 }

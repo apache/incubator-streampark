@@ -24,11 +24,11 @@ import com.github.dockerjava.api.model.AuthConfig;
 /** Listenable PushImageCmdImpl */
 public class HackPushImageCmd extends PushImageCmdImpl {
 
-  public HackPushImageCmd(Exec exec, AuthConfig authConfig, String name) {
-    super(exec, authConfig, name);
-  }
+    public HackPushImageCmd(Exec exec, AuthConfig authConfig, String name) {
+        super(exec, authConfig, name);
+    }
 
-  public HackPushImageResultCallback start(PushImageCallbackListener listener) {
-    return exec(new HackPushImageResultCallback(listener));
-  }
+    public HackPushImageResultCallback start(PushImageCallbackListener listener) {
+        return exec(new HackPushImageResultCallback(listener));
+    }
 }

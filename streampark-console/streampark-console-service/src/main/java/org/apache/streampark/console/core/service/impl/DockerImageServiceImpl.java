@@ -22,9 +22,9 @@ import org.apache.streampark.flink.packer.docker.DockerImageExist;
 
 public class DockerImageServiceImpl implements DockerImageService {
 
-  @Override
-  public Boolean isDockerImageExist(String imageName) {
-    DockerImageExist dockerImageExist = new DockerImageExist();
-    return dockerImageExist.doesDockerImageExist(imageName);
-  }
+    @Override
+    public Boolean isDockerImageExist(String imageName) {
+        DockerImageExist dockerImageExist = new DockerImageExist();
+        return dockerImageExist.doesDockerImageExist(imageName);
+    }
 }

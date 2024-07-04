@@ -28,12 +28,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class PackerResourceGCTask {
 
-  @Value("${streampark.packer-gc.max-resource-expired-hours:120}")
-  public Integer maxResourceIntervalHours;
+    @Value("${streampark.packer-gc.max-resource-expired-hours:120}")
+    public Integer maxResourceIntervalHours;
 
-  @Scheduled(cron = "${streampark.packer-gc.exec-cron:0 0 0/6 * * ?}")
-  public void collectGarbage() {
-    log.info("[streampark-packer] Starting Packer Resource GC Task.");
-    PackerResourceGC.startGc(maxResourceIntervalHours);
-  }
+    @Scheduled(cron = "${streampark.packer-gc.exec-cron:0 0 0/6 * * ?}")
+    public void collectGarbage() {
+        log.info("[streampark-packer] Starting Packer Resource GC Task.");
+        PackerResourceGC.startGc(maxResourceIntervalHours);
+    }
 }

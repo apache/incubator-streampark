@@ -21,4 +21,5 @@ import org.apache.streampark.console.core.entity.Message;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface MessageMapper extends BaseMapper<Message> {}
+public interface MessageMapper extends BaseMapper<Message> {
+}

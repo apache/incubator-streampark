@@ -57,214 +57,220 @@ import java.util.Map;
 @RequestMapping("spark/app")
 public class SparkApplicationController {
 
-  @Autowired private SparkApplicationManageService applicationManageService;
+    @Autowired
+    private SparkApplicationManageService applicationManageService;
 
-  @Autowired private SparkApplicationActionService applicationActionService;
+    @Autowired
+    private SparkApplicationActionService applicationActionService;
 
-  @Autowired private SparkApplicationInfoService applicationInfoService;
+    @Autowired
+    private SparkApplicationInfoService applicationInfoService;
 
-  @Autowired private ApplicationBackUpService backUpService;
+    @Autowired
+    private ApplicationBackUpService backUpService;
 
-  @Autowired private ApplicationLogService applicationLogService;
+    @Autowired
+    private ApplicationLogService applicationLogService;
 
-  @Autowired private ResourceService resourceService;
+    @Autowired
+    private ResourceService resourceService;
 
-  @PostMapping("get")
-  @RequiresPermissions("app:detail")
-  public RestResponse get(SparkApplication app) {
-    SparkApplication application = applicationManageService.getApp(app.getId());
-    return RestResponse.success(application);
-  }
-
-  @PostMapping("create")
-  @RequiresPermissions("app:create")
-  public RestResponse create(SparkApplication app) throws IOException {
-    boolean saved = applicationManageService.create(app);
-    return RestResponse.success(saved);
-  }
-
-  @PostMapping(value = "copy")
-  @RequiresPermissions("app:copy")
-  public RestResponse copy(SparkApplication app) throws IOException {
-    applicationManageService.copy(app);
-    return RestResponse.success();
-  }
-
-  @AppUpdated
-  @PostMapping("update")
-  @RequiresPermissions("app:update")
-  public RestResponse update(SparkApplication app) {
-    applicationManageService.update(app);
-    return RestResponse.success(true);
-  }
-
-  @PostMapping("dashboard")
-  public RestResponse dashboard(Long teamId) {
-    Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
-    return RestResponse.success(dashboardMap);
-  }
-
-  @PostMapping("list")
-  @RequiresPermissions("app:view")
-  public RestResponse list(SparkApplication app, RestRequest request) {
-    IPage<SparkApplication> applicationList = applicationManageService.page(app, request);
-    return RestResponse.success(applicationList);
-  }
-
-  @AppUpdated
-  @PostMapping("mapping")
-  @RequiresPermissions("app:mapping")
-  public RestResponse mapping(SparkApplication app) {
-    boolean flag = applicationManageService.mapping(app);
-    return RestResponse.success(flag);
-  }
-
-  @AppUpdated
-  @PostMapping("revoke")
-  @RequiresPermissions("app:release")
-  public RestResponse revoke(SparkApplication app) {
-    applicationActionService.revoke(app.getId());
-    return RestResponse.success();
-  }
-
-  @PostMapping(value = "check_start")
-  @RequiresPermissions("app:start")
-  public RestResponse checkStart(SparkApplication app) {
-    AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
-    return RestResponse.success(stateEnum.get());
-  }
-
-  @PostMapping(value = "start")
-  @RequiresPermissions("app:start")
-  public RestResponse start(SparkApplication app) {
-    try {
-      applicationActionService.start(app, false);
-      return RestResponse.success(true);
-    } catch (Exception e) {
-      return RestResponse.success(false).message(e.getMessage());
+    @PostMapping("get")
+    @RequiresPermissions("app:detail")
+    public RestResponse get(SparkApplication app) {
+        SparkApplication application = applicationManageService.getApp(app.getId());
+        return RestResponse.success(application);
     }
-  }
 
-  @PostMapping(value = "cancel")
-  @RequiresPermissions("app:cancel")
-  public RestResponse cancel(SparkApplication app) throws Exception {
-    applicationActionService.cancel(app);
-    return RestResponse.success();
-  }
-
-  @AppUpdated
-  @PostMapping("clean")
-  @RequiresPermissions("app:clean")
-  public RestResponse clean(SparkApplication app) {
-    applicationManageService.clean(app);
-    return RestResponse.success(true);
-  }
-
-  @PostMapping("forcedStop")
-  @RequiresPermissions("app:cancel")
-  public RestResponse forcedStop(SparkApplication app) {
-    applicationActionService.forcedStop(app.getId());
-    return RestResponse.success();
-  }
-
-  @PostMapping("yarn")
-  public RestResponse yarn() {
-    return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
-  }
-
-  @PostMapping("name")
-  public RestResponse yarnName(SparkApplication app) {
-    String yarnName = applicationInfoService.getYarnName(app.getConfig());
-    return RestResponse.success(yarnName);
-  }
-
-  @PostMapping("checkName")
-  public RestResponse checkName(SparkApplication app) {
-    AppExistsStateEnum exists = applicationInfoService.checkExists(app);
-    return RestResponse.success(exists.get());
-  }
-
-  @PostMapping("readConf")
-  public RestResponse readConf(SparkApplication app) throws IOException {
-    String config = applicationInfoService.readConf(app.getConfig());
-    return RestResponse.success(config);
-  }
-
-  @PostMapping("main")
-  public RestResponse getMain(SparkApplication application) {
-    String mainClass = applicationInfoService.getMain(application);
-    return RestResponse.success(mainClass);
-  }
-
-  @PostMapping("backups")
-  public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
-    IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
-    return RestResponse.success(backups);
-  }
-
-  @PostMapping("optionlog")
-  public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
-    IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
-    return RestResponse.success(applicationList);
-  }
-
-  @PostMapping("deleteOperationLog")
-  @RequiresPermissions("app:delete")
-  public RestResponse deleteOperationLog(Long id) {
-    Boolean deleted = applicationLogService.removeById(id);
-    return RestResponse.success(deleted);
-  }
-
-  @PostMapping("delete")
-  @RequiresPermissions("app:delete")
-  public RestResponse delete(SparkApplication app) throws InternalException {
-    Boolean deleted = applicationManageService.remove(app.getId());
-    return RestResponse.success(deleted);
-  }
-
-  @PostMapping("deletebak")
-  public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
-    Boolean deleted = backUpService.removeById(backUp.getId());
-    return RestResponse.success(deleted);
-  }
-
-  @PostMapping("checkjar")
-  public RestResponse checkjar(String jar) {
-    File file = new File(jar);
-    try {
-      Utils.requireCheckJarFile(file.toURI().toURL());
-      return RestResponse.success(true);
-    } catch (IOException e) {
-      return RestResponse.success(file).message(e.getLocalizedMessage());
+    @PostMapping("create")
+    @RequiresPermissions("app:create")
+    public RestResponse create(SparkApplication app) throws IOException {
+        boolean saved = applicationManageService.create(app);
+        return RestResponse.success(saved);
     }
-  }
 
-  @PostMapping("upload")
-  @RequiresPermissions("app:create")
-  public RestResponse upload(MultipartFile file) throws Exception {
-    String uploadPath = resourceService.upload(file);
-    return RestResponse.success(uploadPath);
-  }
+    @PostMapping(value = "copy")
+    @RequiresPermissions("app:copy")
+    public RestResponse copy(SparkApplication app) throws IOException {
+        applicationManageService.copy(app);
+        return RestResponse.success();
+    }
 
-  @PostMapping("verifySchema")
-  public RestResponse verifySchema(String path) {
-    final URI uri = URI.create(path);
-    final String scheme = uri.getScheme();
-    final String pathPart = uri.getPath();
-    RestResponse restResponse = RestResponse.success(true);
-    String error = null;
-    if (scheme == null) {
-      error =
-          "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
-    } else if (pathPart == null) {
-      error =
-          "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-    } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-      error = "Cannot use the root directory for checkpoints.";
+    @AppUpdated
+    @PostMapping("update")
+    @RequiresPermissions("app:update")
+    public RestResponse update(SparkApplication app) {
+        applicationManageService.update(app);
+        return RestResponse.success(true);
     }
-    if (error != null) {
-      restResponse = RestResponse.success(false).message(error);
+
+    @PostMapping("dashboard")
+    public RestResponse dashboard(Long teamId) {
+        Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
+        return RestResponse.success(dashboardMap);
     }
-    return restResponse;
-  }
+
+    @PostMapping("list")
+    @RequiresPermissions("app:view")
+    public RestResponse list(SparkApplication app, RestRequest request) {
+        IPage<SparkApplication> applicationList = applicationManageService.page(app, request);
+        return RestResponse.success(applicationList);
+    }
+
+    @AppUpdated
+    @PostMapping("mapping")
+    @RequiresPermissions("app:mapping")
+    public RestResponse mapping(SparkApplication app) {
+        boolean flag = applicationManageService.mapping(app);
+        return RestResponse.success(flag);
+    }
+
+    @AppUpdated
+    @PostMapping("revoke")
+    @RequiresPermissions("app:release")
+    public RestResponse revoke(SparkApplication app) {
+        applicationActionService.revoke(app.getId());
+        return RestResponse.success();
+    }
+
+    @PostMapping(value = "check_start")
+    @RequiresPermissions("app:start")
+    public RestResponse checkStart(SparkApplication app) {
+        AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
+        return RestResponse.success(stateEnum.get());
+    }
+
+    @PostMapping(value = "start")
+    @RequiresPermissions("app:start")
+    public RestResponse start(SparkApplication app) {
+        try {
+            applicationActionService.start(app, false);
+            return RestResponse.success(true);
+        } catch (Exception e) {
+            return RestResponse.success(false).message(e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "cancel")
+    @RequiresPermissions("app:cancel")
+    public RestResponse cancel(SparkApplication app) throws Exception {
+        applicationActionService.cancel(app);
+        return RestResponse.success();
+    }
+
+    @AppUpdated
+    @PostMapping("clean")
+    @RequiresPermissions("app:clean")
+    public RestResponse clean(SparkApplication app) {
+        applicationManageService.clean(app);
+        return RestResponse.success(true);
+    }
+
+    @PostMapping("forcedStop")
+    @RequiresPermissions("app:cancel")
+    public RestResponse forcedStop(SparkApplication app) {
+        applicationActionService.forcedStop(app.getId());
+        return RestResponse.success();
+    }
+
+    @PostMapping("yarn")
+    public RestResponse yarn() {
+        return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
+    }
+
+    @PostMapping("name")
+    public RestResponse yarnName(SparkApplication app) {
+        String yarnName = applicationInfoService.getYarnName(app.getConfig());
+        return RestResponse.success(yarnName);
+    }
+
+    @PostMapping("checkName")
+    public RestResponse checkName(SparkApplication app) {
+        AppExistsStateEnum exists = applicationInfoService.checkExists(app);
+        return RestResponse.success(exists.get());
+    }
+
+    @PostMapping("readConf")
+    public RestResponse readConf(SparkApplication app) throws IOException {
+        String config = applicationInfoService.readConf(app.getConfig());
+        return RestResponse.success(config);
+    }
+
+    @PostMapping("main")
+    public RestResponse getMain(SparkApplication application) {
+        String mainClass = applicationInfoService.getMain(application);
+        return RestResponse.success(mainClass);
+    }
+
+    @PostMapping("backups")
+    public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
+        IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
+        return RestResponse.success(backups);
+    }
+
+    @PostMapping("optionlog")
+    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
+        IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
+        return RestResponse.success(applicationList);
+    }
+
+    @PostMapping("deleteOperationLog")
+    @RequiresPermissions("app:delete")
+    public RestResponse deleteOperationLog(Long id) {
+        Boolean deleted = applicationLogService.removeById(id);
+        return RestResponse.success(deleted);
+    }
+
+    @PostMapping("delete")
+    @RequiresPermissions("app:delete")
+    public RestResponse delete(SparkApplication app) throws InternalException {
+        Boolean deleted = applicationManageService.remove(app.getId());
+        return RestResponse.success(deleted);
+    }
+
+    @PostMapping("deletebak")
+    public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
+        Boolean deleted = backUpService.removeById(backUp.getId());
+        return RestResponse.success(deleted);
+    }
+
+    @PostMapping("checkjar")
+    public RestResponse checkjar(String jar) {
+        File file = new File(jar);
+        try {
+            Utils.requireCheckJarFile(file.toURI().toURL());
+            return RestResponse.success(true);
+        } catch (IOException e) {
+            return RestResponse.success(file).message(e.getLocalizedMessage());
+        }
+    }
+
+    @PostMapping("upload")
+    @RequiresPermissions("app:create")
+    public RestResponse upload(MultipartFile file) throws Exception {
+        String uploadPath = resourceService.upload(file);
+        return RestResponse.success(uploadPath);
+    }
+
+    @PostMapping("verifySchema")
+    public RestResponse verifySchema(String path) {
+        final URI uri = URI.create(path);
+        final String scheme = uri.getScheme();
+        final String pathPart = uri.getPath();
+        RestResponse restResponse = RestResponse.success(true);
+        String error = null;
+        if (scheme == null) {
+            error =
+                    "The scheme (hdfs://, file://, etc) is null. Please specify the file system scheme explicitly in the URI.";
+        } else if (pathPart == null) {
+            error =
+                    "The path to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+        } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
+            error = "Cannot use the root directory for checkpoints.";
+        }
+        if (error != null) {
+            restResponse = RestResponse.success(false).message(error);
+        }
+        return restResponse;
+    }
 }

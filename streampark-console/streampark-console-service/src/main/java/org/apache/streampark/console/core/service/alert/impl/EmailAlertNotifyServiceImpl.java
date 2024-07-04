@@ -41,49 +41,47 @@ import java.util.Optional;
 @Lazy
 public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
 
-  private final Template template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
+    private final Template template = FreemarkerUtils.loadTemplateFile("alert-email.ftl");
 
-  @Override
-  public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template)
-      throws AlertException {
-    EmailConfig emailConfig =
-        Optional.ofNullable(EmailConfig.fromSetting())
-            .orElseThrow(() -> new AlertException("Please configure the email sender first"));
-    String contacts =
-        alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
-    if (!StringUtils.hasLength(contacts)) {
-      throw new AlertException("Please configure a valid contacts");
+    @Override
+    public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException {
+        EmailConfig emailConfig =
+                Optional.ofNullable(EmailConfig.fromSetting())
+                        .orElseThrow(() -> new AlertException("Please configure the email sender first"));
+        String contacts =
+                alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
+        if (!StringUtils.hasLength(contacts)) {
+            throw new AlertException("Please configure a valid contacts");
+        }
+        String[] emails = contacts.split(",");
+        return sendEmail(emailConfig, template, emails);
     }
-    String[] emails = contacts.split(",");
-    return sendEmail(emailConfig, template, emails);
-  }
 
-  private boolean sendEmail(EmailConfig emailConfig, AlertTemplate mail, String... mails)
-      throws AlertException {
-    try {
-      Map<String, AlertTemplate> out = new HashMap<>(16);
-      out.put("mail", mail);
-      String html = FreemarkerUtils.format(template, out);
+    private boolean sendEmail(EmailConfig emailConfig, AlertTemplate mail, String... mails) throws AlertException {
+        try {
+            Map<String, AlertTemplate> out = new HashMap<>(16);
+            out.put("mail", mail);
+            String html = FreemarkerUtils.format(template, out);
 
-      HtmlEmail htmlEmail = new HtmlEmail();
-      htmlEmail.setCharset("UTF-8");
-      htmlEmail.setHostName(emailConfig.getSmtpHost());
-      htmlEmail.setAuthentication(emailConfig.getUserName(), emailConfig.getPassword());
-      htmlEmail.setFrom(emailConfig.getFrom());
-      if (emailConfig.isSsl()) {
-        htmlEmail.setSSLCheckServerIdentity(true);
-        htmlEmail.setSSLOnConnect(true);
-        htmlEmail.setSslSmtpPort(emailConfig.getSmtpPort().toString());
-      } else {
-        htmlEmail.setSmtpPort(emailConfig.getSmtpPort());
-      }
-      htmlEmail.setSubject(mail.getSubject());
-      htmlEmail.setHtmlMsg(html);
-      htmlEmail.addTo(mails);
-      htmlEmail.send();
-      return true;
-    } catch (Exception e) {
-      throw new AlertException("Failed send email alert", e);
+            HtmlEmail htmlEmail = new HtmlEmail();
+            htmlEmail.setCharset("UTF-8");
+            htmlEmail.setHostName(emailConfig.getSmtpHost());
+            htmlEmail.setAuthentication(emailConfig.getUserName(), emailConfig.getPassword());
+            htmlEmail.setFrom(emailConfig.getFrom());
+            if (emailConfig.isSsl()) {
+                htmlEmail.setSSLCheckServerIdentity(true);
+                htmlEmail.setSSLOnConnect(true);
+                htmlEmail.setSslSmtpPort(emailConfig.getSmtpPort().toString());
+            } else {
+                htmlEmail.setSmtpPort(emailConfig.getSmtpPort());
+            }
+            htmlEmail.setSubject(mail.getSubject());
+            htmlEmail.setHtmlMsg(html);
+            htmlEmail.addTo(mails);
+            htmlEmail.send();
+            return true;
+        } catch (Exception e) {
+            throw new AlertException("Failed send email alert", e);
+        }
     }
-  }
 }

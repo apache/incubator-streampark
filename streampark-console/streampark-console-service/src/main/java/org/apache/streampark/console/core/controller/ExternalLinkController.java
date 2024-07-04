@@ -44,42 +44,43 @@ import java.util.List;
 @RequestMapping("/flink/externalLink")
 public class ExternalLinkController {
 
-  @Autowired private ExternalLinkService externalLinkService;
+    @Autowired
+    private ExternalLinkService externalLinkService;
 
-  @PostMapping("/list")
-  @RequiresPermissions("externalLink:view")
-  public RestResponse list() {
-    List<ExternalLink> externalLink = externalLinkService.list();
-    return RestResponse.success(externalLink);
-  }
+    @PostMapping("/list")
+    @RequiresPermissions("externalLink:view")
+    public RestResponse list() {
+        List<ExternalLink> externalLink = externalLinkService.list();
+        return RestResponse.success(externalLink);
+    }
 
-  @PostMapping("/render")
-  public RestResponse render(
-      @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
-    List<ExternalLink> renderedExternalLink = externalLinkService.render(appId);
-    return RestResponse.success(renderedExternalLink);
-  }
+    @PostMapping("/render")
+    public RestResponse render(
+                               @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
+        List<ExternalLink> renderedExternalLink = externalLinkService.render(appId);
+        return RestResponse.success(renderedExternalLink);
+    }
 
-  @PostMapping("/create")
-  @RequiresPermissions("externalLink:create")
-  public RestResponse create(@Valid ExternalLink externalLink) {
-    externalLinkService.create(externalLink);
-    return RestResponse.success();
-  }
+    @PostMapping("/create")
+    @RequiresPermissions("externalLink:create")
+    public RestResponse create(@Valid ExternalLink externalLink) {
+        externalLinkService.create(externalLink);
+        return RestResponse.success();
+    }
 
-  @PostMapping("/update")
-  @RequiresPermissions("externalLink:update")
-  public RestResponse update(@Valid ExternalLink externalLink) {
-    AssertUtils.notNull(externalLink.getId(), "The link id cannot be null");
-    externalLinkService.update(externalLink);
-    return RestResponse.success();
-  }
+    @PostMapping("/update")
+    @RequiresPermissions("externalLink:update")
+    public RestResponse update(@Valid ExternalLink externalLink) {
+        AssertUtils.notNull(externalLink.getId(), "The link id cannot be null");
+        externalLinkService.update(externalLink);
+        return RestResponse.success();
+    }
 
-  @DeleteMapping("/delete")
-  @RequiresPermissions("externalLink:delete")
-  public RestResponse delete(
-      @NotNull(message = "The link id cannot be null") @RequestParam("id") Long id) {
-    externalLinkService.removeById(id);
-    return RestResponse.success();
-  }
+    @DeleteMapping("/delete")
+    @RequiresPermissions("externalLink:delete")
+    public RestResponse delete(
+                               @NotNull(message = "The link id cannot be null") @RequestParam("id") Long id) {
+        externalLinkService.removeById(id);
+        return RestResponse.success();
+    }
 }

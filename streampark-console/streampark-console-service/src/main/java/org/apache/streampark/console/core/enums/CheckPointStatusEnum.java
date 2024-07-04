@@ -21,25 +21,26 @@ import java.util.Arrays;
 
 /** Describe the status of Check Point */
 public enum CheckPointStatusEnum {
-  /** IN_PROGRESS */
-  IN_PROGRESS(1),
-  /** COMPLETED */
-  COMPLETED(2),
 
-  /** FAILED */
-  FAILED(3);
+    /** IN_PROGRESS */
+    IN_PROGRESS(1),
+    /** COMPLETED */
+    COMPLETED(2),
 
-  private final int value;
+    /** FAILED */
+    FAILED(3);
 
-  public int get() {
-    return this.value;
-  }
+    private final int value;
 
-  CheckPointStatusEnum(int value) {
-    this.value = value;
-  }
+    public int get() {
+        return this.value;
+    }
 
-  public static CheckPointStatusEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+    CheckPointStatusEnum(int value) {
+        this.value = value;
+    }
+
+    public static CheckPointStatusEnum of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

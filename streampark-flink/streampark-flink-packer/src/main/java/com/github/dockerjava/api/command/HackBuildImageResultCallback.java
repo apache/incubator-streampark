@@ -22,22 +22,22 @@ import com.github.dockerjava.api.model.BuildResponseItem;
 
 public class HackBuildImageResultCallback extends BuildImageResultCallback {
 
-  private final BuildImageCallbackListener listener;
+    private final BuildImageCallbackListener listener;
 
-  private static final String STEP_PREFIX = "Step";
+    private static final String STEP_PREFIX = "Step";
 
-  public HackBuildImageResultCallback(BuildImageCallbackListener listener) {
-    this.listener = listener;
-  }
-
-  @Override
-  public void onNext(BuildResponseItem item) {
-    super.onNext(item);
-    String stream = item.getStream();
-    if (item.isErrorIndicated()) {
-      listener.watchBuildStep(item.getErrorDetail().getMessage());
-    } else if (stream != null && stream.startsWith(STEP_PREFIX)) {
-      listener.watchBuildStep(stream);
+    public HackBuildImageResultCallback(BuildImageCallbackListener listener) {
+        this.listener = listener;
     }
-  }
+
+    @Override
+    public void onNext(BuildResponseItem item) {
+        super.onNext(item);
+        String stream = item.getStream();
+        if (item.isErrorIndicated()) {
+            listener.watchBuildStep(item.getErrorDetail().getMessage());
+        } else if (stream != null && stream.startsWith(STEP_PREFIX)) {
+            listener.watchBuildStep(stream);
+        }
+    }
 }

@@ -27,20 +27,20 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /** Message push service */
 public interface MessageService extends IService<Message> {
 
-  /**
-   * push message to user
-   *
-   * @param message Message
-   */
-  void push(Message message);
+    /**
+     * push message to user
+     *
+     * @param message Message
+     */
+    void push(Message message);
 
-  /**
-   * Retrieves a page of {@link Message} objects based on the provided parameters.
-   *
-   * @param noticeTypeEnum request request The {@link NoticeTypeEnum} object used for pagination and
-   *     sorting.
-   * @param request request request The {@link RestRequest} object used for pagination and sorting.
-   * @return An {@link IPage} containing the retrieved {@link Message} objects.
-   */
-  IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request);
+    /**
+     * Retrieves a page of {@link Message} objects based on the provided parameters.
+     *
+     * @param noticeTypeEnum request request The {@link NoticeTypeEnum} object used for pagination and
+     *     sorting.
+     * @param request request request The {@link RestRequest} object used for pagination and sorting.
+     * @return An {@link IPage} containing the retrieved {@link Message} objects.
+     */
+    IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request);
 }

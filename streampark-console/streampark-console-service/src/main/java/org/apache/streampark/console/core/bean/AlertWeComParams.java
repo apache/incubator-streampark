@@ -30,7 +30,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertWeComParams implements Serializable {
 
-  @Schema(name = "token", description = "we-com token")
-  @NotBlank(message = "The access token of WeCom must be not empty")
-  private String token;
+    @Schema(name = "token", description = "we-com token")
+    @NotBlank(message = "The access token of WeCom must be not empty")
+    private String token;
 }

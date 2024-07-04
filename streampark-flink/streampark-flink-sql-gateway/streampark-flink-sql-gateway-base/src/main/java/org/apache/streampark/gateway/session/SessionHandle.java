@@ -22,35 +22,35 @@ import java.util.Objects;
 /** Session Handle that used to identify the Session. */
 public class SessionHandle {
 
-  private final String identifier;
+    private final String identifier;
 
-  public SessionHandle(String identifier) {
-    this.identifier = identifier;
-  }
-
-  public String getIdentifier() {
-    return identifier;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public SessionHandle(String identifier) {
+        this.identifier = identifier;
     }
-    if (!(o instanceof SessionHandle)) {
-      return false;
+
+    public String getIdentifier() {
+        return identifier;
     }
-    SessionHandle that = (SessionHandle) o;
-    return Objects.equals(identifier, that.identifier);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(identifier);
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SessionHandle)) {
+            return false;
+        }
+        SessionHandle that = (SessionHandle) o;
+        return Objects.equals(identifier, that.identifier);
+    }
 
-  @Override
-  public String toString() {
-    return identifier;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(identifier);
+    }
+
+    @Override
+    public String toString() {
+        return identifier;
+    }
 }

@@ -29,24 +29,24 @@ import java.util.List;
 @Slf4j
 class ProjectTest {
 
-  private final Project project = new Project();
+    private final Project project = new Project();
 
-  @BeforeEach
-  void before() {
-    project.setUrl("https://github.com/apache/incubator-streampark.git");
-  }
+    @BeforeEach
+    void before() {
+        project.setUrl("https://github.com/apache/incubator-streampark.git");
+    }
 
-  @Disabled("This test case can't be runnable due to external service is not available.")
-  @Test
-  void testGitBranches() {
-    List<String> branches = project.getAllBranches();
-    branches.forEach(System.out::println);
-  }
+    @Disabled("This test case can't be runnable due to external service is not available.")
+    @Test
+    void testGitBranches() {
+        List<String> branches = project.getAllBranches();
+        branches.forEach(System.out::println);
+    }
 
-  @Disabled("This test case can't be runnable due to external service is not available.")
-  @Test
-  void testGitCheckAuth() {
-    GitAuthorizedErrorEnum error = project.gitCheck();
-    log.error("{}", error);
-  }
+    @Disabled("This test case can't be runnable due to external service is not available.")
+    @Test
+    void testGitCheckAuth() {
+        GitAuthorizedErrorEnum error = project.gitCheck();
+        log.error("{}", error);
+    }
 }

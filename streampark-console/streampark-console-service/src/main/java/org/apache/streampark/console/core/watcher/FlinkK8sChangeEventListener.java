@@ -63,127 +63,133 @@ import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.
 @Component
 public class FlinkK8sChangeEventListener {
 
-  @Lazy @Autowired private ApplicationManageService applicationManageService;
+    @Lazy
+    @Autowired
+    private ApplicationManageService applicationManageService;
 
-  @Lazy @Autowired private AlertService alertService;
+    @Lazy
+    @Autowired
+    private AlertService alertService;
 
-  @Lazy @Autowired private FlinkCheckpointProcessor checkpointProcessor;
+    @Lazy
+    @Autowired
+    private FlinkCheckpointProcessor checkpointProcessor;
 
-  @Qualifier("streamparkNotifyExecutor")
-  @Autowired
-  private Executor executor;
+    @Qualifier("streamparkNotifyExecutor")
+    @Autowired
+    private Executor executor;
 
-  /**
-   * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update
-   * org.apache.streampark.console.core.entity.Application records.
-   */
-  @SuppressWarnings("UnstableApiUsage")
-  @AllowConcurrentEvents
-  @Subscribe
-  public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
-    JobStatusCV jobStatus = event.jobStatus();
-    TrackId trackId = event.trackId();
-    // get pre application record
-    Application app = applicationManageService.getById(trackId.appId());
-    if (app == null) {
-      return;
-    }
-    // update application record
-    setByJobStatusCV(app, jobStatus);
-    applicationManageService.persistMetrics(app);
+    /**
+     * Catch FlinkJobStatusChangeEvent then storage it persistently to db. Actually update
+     * org.apache.streampark.console.core.entity.Application records.
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    @AllowConcurrentEvents
+    @Subscribe
+    public void subscribeJobStatusChange(FlinkJobStatusChangeEvent event) {
+        JobStatusCV jobStatus = event.jobStatus();
+        TrackId trackId = event.trackId();
+        // get pre application record
+        Application app = applicationManageService.getById(trackId.appId());
+        if (app == null) {
+            return;
+        }
+        // update application record
+        setByJobStatusCV(app, jobStatus);
+        applicationManageService.persistMetrics(app);
 
-    // email alerts when necessary
-    FlinkAppStateEnum state = app.getStateEnum();
-    if (FlinkAppStateEnum.FAILED == state
-        || FlinkAppStateEnum.LOST == state
-        || FlinkAppStateEnum.RESTARTING == state
-        || FlinkAppStateEnum.FINISHED == state) {
-      executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
-    }
-  }
-
-  /**
-   * Catch FlinkClusterMetricChangeEvent then storage it persistently to db. Actually update
-   * org.apache.streampark.console.core.entity.Application records.
-   */
-  @SuppressWarnings("UnstableApiUsage")
-  @AllowConcurrentEvents
-  @Subscribe
-  public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
-    TrackId trackId = event.trackId();
-    FlinkExecutionMode mode = FlinkK8sExecuteMode.toFlinkExecutionMode(trackId.executeMode());
-    // discard session mode change
-    if (FlinkExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
-      return;
+        // email alerts when necessary
+        FlinkAppStateEnum state = app.getStateEnum();
+        if (FlinkAppStateEnum.FAILED == state
+                || FlinkAppStateEnum.LOST == state
+                || FlinkAppStateEnum.RESTARTING == state
+                || FlinkAppStateEnum.FINISHED == state) {
+            executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
+        }
     }
 
-    Application app = applicationManageService.getById(trackId.appId());
-    if (app == null) {
-      return;
+    /**
+     * Catch FlinkClusterMetricChangeEvent then storage it persistently to db. Actually update
+     * org.apache.streampark.console.core.entity.Application records.
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    @AllowConcurrentEvents
+    @Subscribe
+    public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
+        TrackId trackId = event.trackId();
+        FlinkExecutionMode mode = FlinkK8sExecuteMode.toFlinkExecutionMode(trackId.executeMode());
+        // discard session mode change
+        if (FlinkExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
+            return;
+        }
+
+        Application app = applicationManageService.getById(trackId.appId());
+        if (app == null) {
+            return;
+        }
+
+        FlinkMetricCV metrics = event.metrics();
+        app.setJmMemory(metrics.totalJmMemory());
+        app.setTmMemory(metrics.totalTmMemory());
+        app.setTotalTM(metrics.totalTm());
+        app.setTotalSlot(metrics.totalSlot());
+        app.setAvailableSlot(metrics.availableSlot());
+
+        applicationManageService.persistMetrics(app);
     }
 
-    FlinkMetricCV metrics = event.metrics();
-    app.setJmMemory(metrics.totalJmMemory());
-    app.setTmMemory(metrics.totalTmMemory());
-    app.setTotalTM(metrics.totalTm());
-    app.setTotalSlot(metrics.totalSlot());
-    app.setAvailableSlot(metrics.availableSlot());
+    @SuppressWarnings("UnstableApiUsage")
+    @AllowConcurrentEvents
+    @Subscribe
+    public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
+        CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
+        completed.setId(event.checkpoint().id());
+        completed.setCheckpointType(event.checkpoint().checkpointType());
+        completed.setExternalPath(event.checkpoint().externalPath());
+        completed.setIsSavepoint(event.checkpoint().isSavepoint());
+        completed.setStatus(event.checkpoint().status());
+        completed.setTriggerTimestamp(event.checkpoint().triggerTimestamp());
 
-    applicationManageService.persistMetrics(app);
-  }
+        CheckPoints.Latest latest = new CheckPoints.Latest();
+        latest.setCompleted(completed);
+        CheckPoints checkPoint = new CheckPoints();
+        checkPoint.setLatest(latest);
 
-  @SuppressWarnings("UnstableApiUsage")
-  @AllowConcurrentEvents
-  @Subscribe
-  public void subscribeCheckpointChange(FlinkJobCheckpointChangeEvent event) {
-    CheckPoints.CheckPoint completed = new CheckPoints.CheckPoint();
-    completed.setId(event.checkpoint().id());
-    completed.setCheckpointType(event.checkpoint().checkpointType());
-    completed.setExternalPath(event.checkpoint().externalPath());
-    completed.setIsSavepoint(event.checkpoint().isSavepoint());
-    completed.setStatus(event.checkpoint().status());
-    completed.setTriggerTimestamp(event.checkpoint().triggerTimestamp());
-
-    CheckPoints.Latest latest = new CheckPoints.Latest();
-    latest.setCompleted(completed);
-    CheckPoints checkPoint = new CheckPoints();
-    checkPoint.setLatest(latest);
-
-    checkpointProcessor.process(
-        applicationManageService.getById(event.trackId().appId()), checkPoint);
-  }
-
-  private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
-    // infer the final flink job state
-    Enumeration.Value state =
-        FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
-
-    // corrective start-time / end-time / duration
-    long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
-    long startTime = Math.max(jobStatus.jobStartTime(), preStartTime);
-    long preEndTime = app.getEndTime() != null ? app.getEndTime().getTime() : 0;
-    long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
-    long duration = jobStatus.duration();
-
-    if (FlinkJobState.isEndState(state)) {
-      if (endTime < startTime) {
-        endTime = System.currentTimeMillis();
-      }
-      if (duration <= 0) {
-        duration = endTime - startTime;
-      }
+        checkpointProcessor.process(
+                applicationManageService.getById(event.trackId().appId()), checkPoint);
     }
 
-    app.setState(fromK8sFlinkJobState(state).getValue());
-    app.setJobId(jobStatus.jobId());
-    app.setTotalTask(jobStatus.taskTotal());
+    private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
+        // infer the final flink job state
+        Enumeration.Value state =
+                FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
+                        jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
-    app.setStartTime(new Date(startTime > 0 ? startTime : 0));
-    app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
-    app.setDuration(duration > 0 ? duration : 0);
-    // when a flink job status change event can be received, it means
-    // that the operation command sent by streampark has been completed.
-    app.setOptionState(OptionStateEnum.NONE.getValue());
-  }
+        // corrective start-time / end-time / duration
+        long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
+        long startTime = Math.max(jobStatus.jobStartTime(), preStartTime);
+        long preEndTime = app.getEndTime() != null ? app.getEndTime().getTime() : 0;
+        long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
+        long duration = jobStatus.duration();
+
+        if (FlinkJobState.isEndState(state)) {
+            if (endTime < startTime) {
+                endTime = System.currentTimeMillis();
+            }
+            if (duration <= 0) {
+                duration = endTime - startTime;
+            }
+        }
+
+        app.setState(fromK8sFlinkJobState(state).getValue());
+        app.setJobId(jobStatus.jobId());
+        app.setTotalTask(jobStatus.taskTotal());
+
+        app.setStartTime(new Date(startTime > 0 ? startTime : 0));
+        app.setEndTime(endTime > 0 && endTime >= startTime ? new Date(endTime) : null);
+        app.setDuration(duration > 0 ? duration : 0);
+        // when a flink job status change event can be received, it means
+        // that the operation command sent by streampark has been completed.
+        app.setOptionState(OptionStateEnum.NONE.getValue());
+    }
 }

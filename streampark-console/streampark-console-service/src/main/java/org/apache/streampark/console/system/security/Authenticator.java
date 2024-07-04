@@ -20,12 +20,13 @@ package org.apache.streampark.console.system.security;
 import org.apache.streampark.console.system.entity.User;
 
 public interface Authenticator {
-  /**
-   * Verifying legality via username and password
-   *
-   * @param username username
-   * @param password user password
-   * @return result object
-   */
-  User authenticate(String username, String password, String loginType) throws Exception;
+
+    /**
+     * Verifying legality via username and password
+     *
+     * @param username username
+     * @param password user password
+     * @return result object
+     */
+    User authenticate(String username, String password, String loginType) throws Exception;
 }

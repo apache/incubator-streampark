@@ -27,15 +27,15 @@ import java.util.List;
 
 public interface MenuMapper extends BaseMapper<Menu> {
 
-  List<String> selectPermissions(@Param("userId") Long userId, @Param("teamId") Long teamId);
+    List<String> selectPermissions(@Param("userId") Long userId, @Param("teamId") Long teamId);
 
-  List<Menu> selectMenus(@Param("userId") Long userId, @Param("teamId") Long teamId);
+    List<Menu> selectMenus(@Param("userId") Long userId, @Param("teamId") Long teamId);
 
-  /**
-   * Find the user ID associated with the current menu or button
-   *
-   * @param menuId menuId
-   * @return user id list
-   */
-  List<String> selectUserIdsByMenuId(String menuId);
+    /**
+     * Find the user ID associated with the current menu or button
+     *
+     * @param menuId menuId
+     * @return user id list
+     */
+    List<String> selectUserIdsByMenuId(String menuId);
 }

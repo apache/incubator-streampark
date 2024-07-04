@@ -31,22 +31,22 @@ import java.util.TimeZone;
 
 class JWTTest extends SpringUnitTestBase {
 
-  @Test
-  void testExpireTime() {
-    String userName = "black";
-    String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
-    String token =
-        JWTUtil.sign(
-            10000L,
-            userName,
-            "streampark",
-            AuthenticationType.SIGN,
-            DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+    @Test
+    void testExpireTime() {
+        String userName = "black";
+        String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
+        String token =
+                JWTUtil.sign(
+                        10000L,
+                        userName,
+                        "streampark",
+                        AuthenticationType.SIGN,
+                        DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 
-    assert token != null;
-    Date expiresAt = JWT.decode(token).getExpiresAt();
-    String decodeExpireTime =
-        DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
-    Assertions.assertEquals(expireTime, decodeExpireTime);
-  }
+        assert token != null;
+        Date expiresAt = JWT.decode(token).getExpiresAt();
+        String decodeExpireTime =
+                DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
+        Assertions.assertEquals(expireTime, decodeExpireTime);
+    }
 }

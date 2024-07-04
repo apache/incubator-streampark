@@ -25,55 +25,55 @@ import java.util.Objects;
 /** Flink state restore mode enum. */
 public enum FlinkRestoreMode {
 
-  /**
-   * In this mode Flink claims ownership of the snapshot and essentially treats it like a
-   * checkpoint: its controls the lifecycle and might delete it if it is not needed for recovery
-   * anymore. Hence, it is not safe to manually delete the snapshot or to start two jobs from the
-   * same snapshot. Flink keeps around a configured number of checkpoints.
-   */
-  CLAIM(1),
+    /**
+     * In this mode Flink claims ownership of the snapshot and essentially treats it like a
+     * checkpoint: its controls the lifecycle and might delete it if it is not needed for recovery
+     * anymore. Hence, it is not safe to manually delete the snapshot or to start two jobs from the
+     * same snapshot. Flink keeps around a configured number of checkpoints.
+     */
+    CLAIM(1),
 
-  /**
-   * In the NO_CLAIM mode Flink will not assume ownership of the snapshot. It will leave the files
-   * in user’s control and never delete any of the files. In this mode you can start multiple jobs
-   * from the same snapshot.
-   */
-  NO_CLAIM(2),
+    /**
+     * In the NO_CLAIM mode Flink will not assume ownership of the snapshot. It will leave the files
+     * in user’s control and never delete any of the files. In this mode you can start multiple jobs
+     * from the same snapshot.
+     */
+    NO_CLAIM(2),
 
-  /**
-   * The legacy mode is how Flink worked until 1.15. In this mode Flink will never delete the
-   * initial checkpoint. At the same time, it is not clear if a user can ever delete it as well.
-   */
-  LEGACY(3);
+    /**
+     * The legacy mode is how Flink worked until 1.15. In this mode Flink will never delete the
+     * initial checkpoint. At the same time, it is not clear if a user can ever delete it as well.
+     */
+    LEGACY(3);
 
-  public static final String RESTORE_MODE = "execution.savepoint-restore-mode";
-  public static final int SINCE_FLINK_VERSION = 15;
+    public static final String RESTORE_MODE = "execution.savepoint-restore-mode";
+    public static final int SINCE_FLINK_VERSION = 15;
 
-  private final int mode;
+    private final int mode;
 
-  public int get() {
-    return this.mode;
-  }
-
-  FlinkRestoreMode(int mode) {
-    this.mode = mode;
-  }
-
-  @Nonnull
-  public String getName() {
-    return this.toString();
-  }
-
-  /**
-   * Try to resolve the given flink restore mode value into a known {@link FlinkRestoreMode} enum.
-   */
-  @Nullable
-  public static FlinkRestoreMode of(@Nullable Integer value) {
-    for (FlinkRestoreMode flinkRestoreModeEnum : values()) {
-      if (Objects.equals(flinkRestoreModeEnum.mode, value)) {
-        return flinkRestoreModeEnum;
-      }
+    public int get() {
+        return this.mode;
     }
-    return null;
-  }
+
+    FlinkRestoreMode(int mode) {
+        this.mode = mode;
+    }
+
+    @Nonnull
+    public String getName() {
+        return this.toString();
+    }
+
+    /**
+     * Try to resolve the given flink restore mode value into a known {@link FlinkRestoreMode} enum.
+     */
+    @Nullable
+    public static FlinkRestoreMode of(@Nullable Integer value) {
+        for (FlinkRestoreMode flinkRestoreModeEnum : values()) {
+            if (Objects.equals(flinkRestoreModeEnum.mode, value)) {
+                return flinkRestoreModeEnum;
+            }
+        }
+        return null;
+    }
 }

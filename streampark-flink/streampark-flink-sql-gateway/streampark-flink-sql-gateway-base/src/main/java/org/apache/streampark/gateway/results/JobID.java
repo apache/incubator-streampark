@@ -21,39 +21,40 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class JobID implements Serializable {
-  private String jobID;
 
-  public String getJobID() {
-    return jobID;
-  }
+    private String jobID;
 
-  public void setJobID(String jobID) {
-    this.jobID = jobID;
-  }
-
-  public JobID(String jobID) {
-    this.jobID = jobID;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public String getJobID() {
+        return jobID;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public void setJobID(String jobID) {
+        this.jobID = jobID;
     }
-    JobID jobID1 = (JobID) o;
-    return Objects.equals(jobID, jobID1.jobID);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(jobID);
-  }
+    public JobID(String jobID) {
+        this.jobID = jobID;
+    }
 
-  @Override
-  public String toString() {
-    return "JobID{" + "jobID='" + jobID + '\'' + '}';
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        JobID jobID1 = (JobID) o;
+        return Objects.equals(jobID, jobID1.jobID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(jobID);
+    }
+
+    @Override
+    public String toString() {
+        return "JobID{" + "jobID='" + jobID + '\'' + '}';
+    }
 }

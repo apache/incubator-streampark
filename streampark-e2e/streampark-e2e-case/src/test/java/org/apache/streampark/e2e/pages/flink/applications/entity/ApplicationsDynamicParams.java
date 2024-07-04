@@ -23,5 +23,6 @@ import lombok.Data;
 
 @Data
 public class ApplicationsDynamicParams {
-  private String flinkSQL;
+
+    private String flinkSQL;
 }

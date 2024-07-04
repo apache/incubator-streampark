@@ -30,7 +30,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertEmailParams implements Serializable {
 
-  @Schema(example = "xxx@xxx.com", description = "email address")
-  @NotBlank(message = "The address of email must be not empty")
-  private String contacts;
+    @Schema(example = "xxx@xxx.com", description = "email address")
+    @NotBlank(message = "The address of email must be not empty")
+    private String contacts;
 }

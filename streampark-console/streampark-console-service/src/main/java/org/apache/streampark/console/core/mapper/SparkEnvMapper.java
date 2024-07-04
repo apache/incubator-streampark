@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface SparkEnvMapper extends BaseMapper<SparkEnv> {
 
-  SparkEnv selectByAppId(@Param("appId") Long appId);
+    SparkEnv selectByAppId(@Param("appId") Long appId);
 
-  void setDefault(@Param("id") Long id);
+    void setDefault(@Param("id") Long id);
 }

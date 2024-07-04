@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 
 class EncryptUtilsTest {
 
-  @Test
-  void testEncrypt() throws Exception {
-    String value = "apache streampark";
-    String encrypt = EncryptUtils.encrypt(value, Constant.STREAM_PARK);
-    String decrypt = EncryptUtils.decrypt(encrypt, Constant.STREAM_PARK);
-    Assertions.assertEquals(value, decrypt);
-  }
+    @Test
+    void testEncrypt() throws Exception {
+        String value = "apache streampark";
+        String encrypt = EncryptUtils.encrypt(value, Constant.STREAM_PARK);
+        String decrypt = EncryptUtils.decrypt(encrypt, Constant.STREAM_PARK);
+        Assertions.assertEquals(value, decrypt);
+    }
 }

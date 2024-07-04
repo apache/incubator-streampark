@@ -28,12 +28,12 @@ import java.io.Serializable;
 @Data
 public class RoleMenu implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  private Long roleId;
+    private Long roleId;
 
-  private Long menuId;
+    private Long menuId;
 }

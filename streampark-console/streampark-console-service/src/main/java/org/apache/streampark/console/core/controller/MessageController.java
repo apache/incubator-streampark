@@ -37,17 +37,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("message")
 public class MessageController {
 
-  @Autowired private MessageService messageService;
+    @Autowired
+    private MessageService messageService;
 
-  @PostMapping("notice")
-  public RestResponse notice(Integer type, RestRequest request) {
-    NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
-    IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, request);
-    return RestResponse.success(pages);
-  }
+    @PostMapping("notice")
+    public RestResponse notice(Integer type, RestRequest request) {
+        NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
+        IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, request);
+        return RestResponse.success(pages);
+    }
 
-  @PostMapping("delnotice")
-  public RestResponse delNotice(Long id) {
-    return RestResponse.success(messageService.removeById(id));
-  }
+    @PostMapping("delnotice")
+    public RestResponse delNotice(Long id) {
+        return RestResponse.success(messageService.removeById(id));
+    }
 }

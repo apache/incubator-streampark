@@ -19,4 +19,5 @@ package org.apache.streampark.gateway.results;
 
 import java.io.Serializable;
 
-public class FunctionInfo implements Serializable {}
+public class FunctionInfo implements Serializable {
+}

@@ -44,75 +44,76 @@ import java.util.List;
 @RequestMapping("setting")
 public class SettingController {
 
-  @Autowired private SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
-  @PostMapping("all")
-  @RequiresPermissions("setting:view")
-  public RestResponse all() {
-    LambdaQueryWrapper<Setting> query =
-        new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
-    List<Setting> setting = settingService.list(query);
-    return RestResponse.success(setting);
-  }
+    @PostMapping("all")
+    @RequiresPermissions("setting:view")
+    public RestResponse all() {
+        LambdaQueryWrapper<Setting> query =
+                new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
+        List<Setting> setting = settingService.list(query);
+        return RestResponse.success(setting);
+    }
 
-  @PostMapping("get")
-  public RestResponse get(String key) {
-    Setting setting = settingService.get(key);
-    return RestResponse.success(setting);
-  }
+    @PostMapping("get")
+    public RestResponse get(String key) {
+        Setting setting = settingService.get(key);
+        return RestResponse.success(setting);
+    }
 
-  @PostMapping("update")
-  @RequiresPermissions("setting:update")
-  public RestResponse update(Setting setting) {
-    boolean updated = settingService.update(setting);
-    return RestResponse.success(updated);
-  }
+    @PostMapping("update")
+    @RequiresPermissions("setting:update")
+    public RestResponse update(Setting setting) {
+        boolean updated = settingService.update(setting);
+        return RestResponse.success(updated);
+    }
 
-  @PostMapping("docker")
-  @RequiresPermissions("setting:view")
-  public RestResponse docker() {
-    DockerConfig dockerConfig = DockerConfig.fromSetting();
-    return RestResponse.success(dockerConfig);
-  }
+    @PostMapping("docker")
+    @RequiresPermissions("setting:view")
+    public RestResponse docker() {
+        DockerConfig dockerConfig = DockerConfig.fromSetting();
+        return RestResponse.success(dockerConfig);
+    }
 
-  @PostMapping("check/docker")
-  @RequiresPermissions("setting:view")
-  public RestResponse checkDocker(DockerConfig dockerConfig) {
-    ResponseResult result = settingService.checkDocker(dockerConfig);
-    return RestResponse.success(result);
-  }
+    @PostMapping("check/docker")
+    @RequiresPermissions("setting:view")
+    public RestResponse checkDocker(DockerConfig dockerConfig) {
+        ResponseResult result = settingService.checkDocker(dockerConfig);
+        return RestResponse.success(result);
+    }
 
-  @PostMapping("update/docker")
-  @RequiresPermissions("setting:update")
-  public RestResponse updateDocker(DockerConfig dockerConfig) {
-    boolean updated = settingService.updateDocker(dockerConfig);
-    return RestResponse.success(updated);
-  }
+    @PostMapping("update/docker")
+    @RequiresPermissions("setting:update")
+    public RestResponse updateDocker(DockerConfig dockerConfig) {
+        boolean updated = settingService.updateDocker(dockerConfig);
+        return RestResponse.success(updated);
+    }
 
-  @PostMapping("email")
-  @RequiresPermissions("setting:view")
-  public RestResponse email() {
-    SenderEmail senderEmail = settingService.getSenderEmail();
-    return RestResponse.success(senderEmail);
-  }
+    @PostMapping("email")
+    @RequiresPermissions("setting:view")
+    public RestResponse email() {
+        SenderEmail senderEmail = settingService.getSenderEmail();
+        return RestResponse.success(senderEmail);
+    }
 
-  @PostMapping("check/email")
-  @RequiresPermissions("setting:view")
-  public RestResponse checkEmail(SenderEmail senderEmail) {
-    ResponseResult result = settingService.checkEmail(senderEmail);
-    return RestResponse.success(result);
-  }
+    @PostMapping("check/email")
+    @RequiresPermissions("setting:view")
+    public RestResponse checkEmail(SenderEmail senderEmail) {
+        ResponseResult result = settingService.checkEmail(senderEmail);
+        return RestResponse.success(result);
+    }
 
-  @PostMapping("update/email")
-  @RequiresPermissions("setting:update")
-  public RestResponse updateEmail(SenderEmail senderEmail) {
-    boolean updated = settingService.updateEmail(senderEmail);
-    return RestResponse.success(updated);
-  }
+    @PostMapping("update/email")
+    @RequiresPermissions("setting:update")
+    public RestResponse updateEmail(SenderEmail senderEmail) {
+        boolean updated = settingService.updateEmail(senderEmail);
+        return RestResponse.success(updated);
+    }
 
-  @PostMapping("check/hadoop")
-  public RestResponse checkHadoop() throws IOException {
-    HadoopUtils.hdfs().getStatus();
-    return RestResponse.success(true);
-  }
+    @PostMapping("check/hadoop")
+    public RestResponse checkHadoop() throws IOException {
+        HadoopUtils.hdfs().getStatus();
+        return RestResponse.success(true);
+    }
 }
