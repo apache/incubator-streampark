@@ -536,7 +536,7 @@
                             **/crd/**.yaml
                         </resourceExcludes>
                         <excludes>
-                            **/*.java
+                            **/*.java,
                             **/*.scala
                         </excludes>
                     </configuration>
