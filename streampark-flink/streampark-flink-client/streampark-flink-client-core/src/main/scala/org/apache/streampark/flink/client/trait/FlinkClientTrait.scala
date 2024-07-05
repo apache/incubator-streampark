@@ -144,9 +144,7 @@ trait FlinkClientTrait extends Logger {
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
       .safeSet(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.jobId)
 
-    if (
-      !submitRequest.properties.containsKey(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())
-    ) {
+    if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
       val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
         submitRequest.flinkVersion.flinkHome)
       // state.checkpoints.num-retained
@@ -160,9 +158,10 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
-      val enableRestoreModeState = submitRequest.flinkVersion.checkVersion(
-        FlinkRestoreMode.SINCE_FLINK_VERSION) && submitRequest.restoreMode != null
-      if (enableRestoreModeState) {
+      val enableRestoreMode =
+        submitRequest.restoreMode != null && submitRequest.flinkVersion.checkVersion(
+          FlinkRestoreMode.SINCE_FLINK_VERSION)
+      if (enableRestoreMode) {
         flinkConfig.setString(FlinkRestoreMode.RESTORE_MODE, submitRequest.restoreMode.getName);
       }
     }
@@ -358,7 +357,7 @@ trait FlinkClientTrait extends Logger {
   }
 
   private[client] def getParallelism(submitRequest: SubmitRequest): Integer = {
-    if (submitRequest.properties.containsKey(KEY_FLINK_PARALLELISM())) {
+    if (submitRequest.hasProp(KEY_FLINK_PARALLELISM())) {
       Integer.valueOf(submitRequest.properties.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
       getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
