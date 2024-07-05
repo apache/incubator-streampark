@@ -105,6 +105,8 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: RoleManagementTest
+            class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: UserManagementTest
             class: org.apache.streampark.e2e.cases.UserManagementTest
           - name: TeamManagementTest
