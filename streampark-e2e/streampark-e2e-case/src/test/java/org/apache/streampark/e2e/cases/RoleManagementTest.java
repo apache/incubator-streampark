@@ -60,7 +60,7 @@ public class RoleManagementTest {
 
     @Test
     @Order(10)
-    void testCreateUser() {
+    void testCreateRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
         roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
 
@@ -96,14 +96,13 @@ public class RoleManagementTest {
         String newEditMenuName = "System";
         roleManagementPage.editRole(newRoleName, newEditDescription, newEditMenuName);
 
-        // TODO: there is no description filed value actual exist
-        // Awaitility.await()
-        // .untilAsserted(
-        // () ->
-        // assertThat(roleManagementPage.roleList())
-        // .as("Role list should contain newly-created role")
-        // .extracting(WebElement::getText)
-        // .anyMatch(it -> it.contains(newEditDescription)));
+         Awaitility.await()
+         .untilAsserted(
+         () ->
+         assertThat(roleManagementPage.roleList())
+         .as("Role list should contain edited role")
+         .extracting(WebElement::getText)
+         .anyMatch(it -> it.contains(newEditDescription)));
     }
 
     @Test
