@@ -20,9 +20,9 @@ package org.apache.streampark.flink.client.`trait`
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.{ApplicationType, FlinkDevelopmentMode, FlinkExecutionMode, FlinkRestoreMode}
+import org.apache.streampark.common.enums._
 import org.apache.streampark.common.fs.FsOperator
-import org.apache.streampark.common.util.{AssertUtils, DeflaterUtils, ExceptionUtils, Logger, PropertiesUtils, SystemPropertyUtils, Utils}
+import org.apache.streampark.common.util._
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.FlinkClusterClient
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -80,10 +80,42 @@ trait FlinkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
+    // prepare flink config
+    val flinkConfig = prepareConfig(submitRequest)
+
+    // set JVMOptions..
+    setJvmOptions(submitRequest, flinkConfig)
+
+    setConfig(submitRequest, flinkConfig)
+
+    Try(doSubmit(submitRequest, flinkConfig)) match {
+      case Success(resp) => resp
+      case Failure(e) =>
+        logError(
+          s"flink job ${submitRequest.appName} start failed, " +
+            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"detail: ${ExceptionUtils.stringifyException(e)}")
+        throw e
+    }
+  }
+
+  private[this] def prepareConfig(submitRequest: SubmitRequest): Configuration = {
+
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
 
     submitRequest.developmentMode match {
       case FlinkDevelopmentMode.PYFLINK =>
+        val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
+        AssertUtils.required(FsOperator.lfs.exists(pythonVenv), s"$pythonVenv File does not exist")
+
+        flinkConfig
+          // python.archives
+          .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
+          // python.client.executable
+          .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+          // python.executable
+          .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+
         val flinkOptPath: String = System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)
         if (StringUtils.isBlank(flinkOptPath)) {
           logWarn(s"Get environment variable ${ConfigConstants.ENV_FLINK_OPT_DIR} fail")
@@ -123,7 +155,7 @@ trait FlinkClientTrait extends Logger {
     }
 
     // set savepoint parameter
-    if (submitRequest.savePoint != null) {
+    if (StringUtils.isNotBlank(submitRequest.savePoint)) {
       flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
@@ -135,20 +167,7 @@ trait FlinkClientTrait extends Logger {
       }
     }
 
-    // set JVMOptions..
-    setJvmOptions(submitRequest, flinkConfig)
-
-    setConfig(submitRequest, flinkConfig)
-
-    Try(doSubmit(submitRequest, flinkConfig)) match {
-      case Success(resp) => resp
-      case Failure(e) =>
-        logError(
-          s"flink job ${submitRequest.appName} start failed, " +
-            s"executionMode: ${submitRequest.executionMode.getName}, " +
-            s"detail: ${ExceptionUtils.stringifyException(e)}")
-        throw e
-    }
+    flinkConfig
   }
 
   private[this] def setJvmOptions(
@@ -276,27 +295,15 @@ trait FlinkClientTrait extends Logger {
 
       submitRequest.developmentMode match {
         case FlinkDevelopmentMode.PYFLINK =>
-          val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
-
-          AssertUtils.required(
-            FsOperator.lfs.exists(pythonVenv),
-            s"$pythonVenv File does not exist")
-          flinkConfig
-            // python.archives
-            .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
-            // python.client.executable
-            .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
-            // python.executable
-            .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
           if (submitRequest.libs.nonEmpty) {
             // BUG: https://github.com/apache/incubator-streampark/issues/3761
             // builder.setUserClassPaths(Lists.newArrayList(submitRequest.libs: _*))
           }
         case _ =>
           builder
-            // BUG: https://github.com/apache/incubator-streampark/issues/3761
-            // .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths: _*))
             .setJarFile(jarFile)
+        // BUG: https://github.com/apache/incubator-streampark/issues/3761
+        // .setUserClassPaths(Lists.newArrayList(submitRequest.classPaths: _*))
       }
       builder
     }
@@ -308,6 +315,7 @@ trait FlinkClientTrait extends Logger {
       getParallelism(submitRequest),
       null,
       false)
+
     packageProgram -> jobGraph
   }
 
@@ -344,9 +352,9 @@ trait FlinkClientTrait extends Logger {
   private[this] def getCustomCommandLines(flinkHome: String): JavaList[CustomCommandLine] = {
     val flinkDefaultConfiguration: Configuration = getFlinkDefaultConfiguration(flinkHome)
     // 1. find the configuration directory
-    val configurationDirectory = s"$flinkHome/conf"
+    val confDir = s"$flinkHome/conf"
     // 2. load the custom command lines
-    loadCustomCommandLines(flinkDefaultConfiguration, configurationDirectory)
+    loadCustomCommandLines(flinkDefaultConfiguration, confDir)
   }
 
   private[client] def getParallelism(submitRequest: SubmitRequest): Integer = {
@@ -367,23 +375,20 @@ trait FlinkClientTrait extends Logger {
     val cliArgs = {
       val optionMap = new mutable.HashMap[String, Any]()
       submitRequest.appOption
-        .filter {
+        .foreach {
           opt =>
             val verify = commandLineOptions.hasOption(opt._1)
             if (!verify) {
               logWarn(s"param:${opt._1} is error,skip it.")
-            }
-            verify
-        }
-        .foreach {
-          opt =>
-            val option = commandLineOptions.getOption(opt._1.trim).getOpt
-            Try(opt._2.toBoolean).getOrElse(opt._2) match {
-              case b if b.isInstanceOf[Boolean] =>
-                if (b.asInstanceOf[Boolean]) {
-                  optionMap += s"-$option" -> true
-                }
-              case v => optionMap += s"-$option" -> v
+            } else {
+              val option = commandLineOptions.getOption(opt._1.trim).getOpt
+              Try(opt._2.toBoolean).getOrElse(opt._2) match {
+                case b if b.isInstanceOf[Boolean] =>
+                  if (b.asInstanceOf[Boolean]) {
+                    optionMap += s"-$option" -> true
+                  }
+                case v => optionMap += s"-$option" -> v
+              }
             }
         }
 
