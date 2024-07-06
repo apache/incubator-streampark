@@ -20,6 +20,8 @@ import org.apache.streampark.common.util.Utils.close
 
 import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 
+import scala.language.implicitConversions
+
 object ImplicitsUtils {
 
   implicit class AutoCloseImplicits[T <: AutoCloseable](autoCloseable: T) {

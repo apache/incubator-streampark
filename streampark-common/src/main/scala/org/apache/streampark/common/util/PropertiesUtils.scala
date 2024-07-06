@@ -23,7 +23,7 @@ import org.yaml.snakeyaml.Yaml
 import javax.annotation.Nonnull
 
 import java.io._
-import java.util.{HashMap => JavaMap, LinkedHashMap => JavaLinkedMap, Properties, Scanner}
+import java.util.{HashMap => JavaMap, LinkedHashMap => LinkedMap, Properties, Scanner}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
@@ -58,13 +58,13 @@ object PropertiesUtils extends Logger {
       prefix: String = "",
       proper: MutableMap[String, String] = MutableMap[String, String]()): Map[String, String] = {
     v match {
-      case map: JavaLinkedMap[String, Any] =>
+      case map: LinkedMap[_, _] =>
         map
           .flatMap(
             x => {
               prefix match {
-                case "" => eachYamlItem(x._1, x._2, k, proper)
-                case other => eachYamlItem(x._1, x._2, s"$other.$k", proper)
+                case "" => eachYamlItem(x._1.toString, x._2, k, proper)
+                case other => eachYamlItem(x._1.toString, x._2, s"$other.$k", proper)
               }
             })
           .toMap

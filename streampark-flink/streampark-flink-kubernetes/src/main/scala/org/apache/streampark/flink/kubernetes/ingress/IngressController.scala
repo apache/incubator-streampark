@@ -23,8 +23,6 @@ import org.apache.streampark.common.util.Logger
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
-import scala.language.postfixOps
-
 object IngressController extends Logger {
 
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r

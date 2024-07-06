@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{CompiledPlan, PlanReference, Table, TableDescriptor, TableEnvironment}
+import org.apache.flink.table.api._
 import org.apache.flink.table.module.ModuleEntry
 
 class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)

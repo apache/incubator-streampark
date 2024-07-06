@@ -26,8 +26,6 @@ import org.apache.hadoop.mapreduce.task.ReduceContextImpl
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
 import org.apache.hadoop.util.Progress
 
-import java.io.IOException
-
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
   private def defaultMultipleOutputsMaker[K, V](

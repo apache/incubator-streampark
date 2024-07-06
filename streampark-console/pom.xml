@@ -26,8 +26,8 @@
     </parent>
 
     <artifactId>streampark-console</artifactId>
-    <name>StreamPark : Console Parent</name>
     <packaging>pom</packaging>
+    <name>StreamPark : Console Parent</name>
 
     <modules>
         <module>streampark-console-service</module>

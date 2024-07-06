@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test
 import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Paths}
 
-import scala.language.implicitConversions
-
 object LfsOperatorTest {
 
   def withTempDir(block: String => Unit): Unit = {

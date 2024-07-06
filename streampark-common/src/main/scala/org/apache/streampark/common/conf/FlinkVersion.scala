@@ -133,7 +133,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   }
 
   // StreamPark flink shims version, like "streampark-flink-shims_flink-1.13"
-  lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
+  private lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
 
   override def toString: String =
     s"""

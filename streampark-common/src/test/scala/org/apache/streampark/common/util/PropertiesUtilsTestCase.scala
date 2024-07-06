@@ -18,8 +18,6 @@ package org.apache.streampark.common.util
 
 import org.junit.jupiter.api.{Assertions, Test}
 
-import scala.language.postfixOps
-
 class PropertiesUtilsTestCase {
 
   @Test def testExtractProgramArgs(): Unit = {

@@ -20,7 +20,7 @@ package org.apache.streampark.flink.kubernetes.model
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-import java.lang.{Boolean => JavaBool, Long => JavaLong}
+import java.lang.{Long => JavaLong}
 import java.util.Properties
 
 import scala.util.Try

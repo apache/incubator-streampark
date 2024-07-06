@@ -20,9 +20,9 @@ package org.apache.streampark.spark.client.proxy
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
 import java.util
-import java.util.function.Consumer
 import java.util.regex.Pattern
 
+import scala.language.existentials
 import scala.util.Try
 
 /**
@@ -33,24 +33,10 @@ import scala.util.Try
  * we don't override that.
  */
 
-class ChildFirstClassLoader(
-    urls: Array[URL],
-    parent: ClassLoader,
-    sparkResourcePattern: Pattern,
-    classLoadingExceptionHandler: Consumer[Throwable])
+class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePattern: Pattern)
   extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
-
-  def this(urls: Array[URL], parent: ClassLoader, sparkResourcePattern: Pattern) {
-    this(
-      urls,
-      parent,
-      sparkResourcePattern,
-      new Consumer[Throwable] {
-        override def accept(t: Throwable): Unit = {}
-      })
-  }
 
   private val SPARK_PATTERN =
     Pattern.compile("spark-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
@@ -72,12 +58,24 @@ class ChildFirstClassLoader(
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
-    try {
-      this.synchronized(this.loadClassWithoutExceptionHandling(name, resolve))
-    } catch {
-      case e: Throwable =>
-        classLoadingExceptionHandler.accept(e)
-        throw e
+    this.synchronized {
+      // First, check if the class has already been loaded
+      val clazz = super.findLoadedClass(name) match {
+        case null =>
+          // check whether the class should go parent-first
+          for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
+            if (name.startsWith(parentFirstPattern)) {
+              super.loadClass(name, resolve)
+            }
+          }
+          Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
+        case c: Class[_] =>
+          if (resolve) {
+            resolveClass(c)
+          }
+          c
+      }
+      clazz
     }
   }
 
@@ -89,13 +87,13 @@ class ChildFirstClassLoader(
     super.getResource(name)
   }
 
-  private def filterSparkShimsResource(urlClassLoaderResource: URL): URL = {
+  private def filterShimsResource(urlClassLoaderResource: URL): URL = {
     if (urlClassLoaderResource != null && JAR_PROTOCOL == urlClassLoaderResource.getProtocol) {
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
-      if (
-        SPARK_PATTERN.matcher(filename).matches && !sparkResourcePattern.matcher(filename).matches
-      ) {
+      val matchState =
+        SPARK_PATTERN.matcher(filename).matches && !resourcePattern.matcher(filename).matches
+      if (matchState) {
         return null
       }
     }
@@ -104,7 +102,7 @@ class ChildFirstClassLoader(
 
   private def addResources(result: util.List[URL], resources: util.Enumeration[URL]) = {
     while (resources.hasMoreElements) {
-      val urlClassLoaderResource = filterSparkShimsResource(resources.nextElement)
+      val urlClassLoaderResource = filterShimsResource(resources.nextElement)
       if (urlClassLoaderResource != null) {
         result.add(urlClassLoaderResource)
       }
@@ -127,26 +125,6 @@ class ChildFirstClassLoader(
       override def hasMoreElements: Boolean = iter.hasNext
 
       override def nextElement: URL = iter.next
-    }
-  }
-
-  @throws[ClassNotFoundException]
-  private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
-    // First, check if the class has already been loaded
-    super.findLoadedClass(name) match {
-      case null =>
-        // check whether the class should go parent-first
-        for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-          if (name.startsWith(parentFirstPattern)) {
-            return super.loadClass(name, resolve)
-          }
-        }
-        Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
-      case c =>
-        if (resolve) {
-          resolveClass(c)
-        }
-        c
     }
   }
 

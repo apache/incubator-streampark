@@ -188,7 +188,6 @@
 
         <!-- springboot end -->
 
-
         <!-- shiro-spring -->
         <dependency>
             <groupId>org.apache.shiro</groupId>
@@ -196,8 +195,8 @@
             <version>${shiro.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>commons-beanutils</artifactId>
                     <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -236,7 +235,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
 
         <!-- mybatis-plus -->
         <dependency>
@@ -421,8 +419,8 @@
             <version>${knife4j-openapi3.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>springdoc-openapi-webflux-core</artifactId>
                     <groupId>org.springdoc</groupId>
+                    <artifactId>springdoc-openapi-webflux-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -475,8 +473,6 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -642,22 +638,25 @@
                     <scala>
                         <scalafmt>
                             <version>${spotless.scalafmt.version}</version>
-                            <file>${maven.multiModuleProjectDirectory}/style/.scalafmt-fp.conf</file>
+                            <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
                         </scalafmt>
                     </scala>
                 </configuration>
                 <executions>
                     <execution>
                         <id>spotless-check</id>
-                        <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
+                        <phase>validate</phase>
                     </execution>
                 </executions>
             </plugin>
 
         </plugins>
+
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
     </build>
 
     <profiles>
@@ -750,9 +749,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <copy file="${project.build.directory}/apache-streampark-${project.version}-incubating-bin.tar.gz"
-                                              overwrite="true"
-                                              tofile="${project.basedir}/../../dist/apache-streampark-${project.version}-incubating-bin.tar.gz"/>
+                                        <copy file="${project.build.directory}/apache-streampark-${project.version}-incubating-bin.tar.gz" overwrite="true" tofile="${project.basedir}/../../dist/apache-streampark-${project.version}-incubating-bin.tar.gz"></copy>
                                     </target>
                                 </configuration>
                             </execution>

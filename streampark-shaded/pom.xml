@@ -26,8 +26,8 @@
 
     <artifactId>streampark-shaded</artifactId>
     <version>1.0.0</version>
-    <name>StreamPark : Shaded Parent</name>
     <packaging>pom</packaging>
+    <name>StreamPark : Shaded Parent</name>
 
     <modules>
         <module>streampark-shaded-slf4j</module>

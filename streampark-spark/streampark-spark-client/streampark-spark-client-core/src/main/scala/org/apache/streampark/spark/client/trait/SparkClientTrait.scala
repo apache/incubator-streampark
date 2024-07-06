@@ -21,7 +21,6 @@ import org.apache.streampark.common.util._
 import org.apache.streampark.spark.client.bean._
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 
 trait SparkClientTrait extends Logger {
 

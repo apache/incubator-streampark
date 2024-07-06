@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.util.{AssertUtils, ExceptionUtils, Utils}
+import org.apache.streampark.common.util.{AssertUtils, ExceptionUtils}
 import org.apache.streampark.common.util.ImplicitsUtils._
 import org.apache.streampark.flink.client.bean._
 

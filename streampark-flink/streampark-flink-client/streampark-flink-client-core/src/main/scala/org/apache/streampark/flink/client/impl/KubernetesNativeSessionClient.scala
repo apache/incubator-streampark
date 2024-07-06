@@ -39,7 +39,6 @@ import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientF
 import java.io.File
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 
 /** Kubernetes native session mode submit. */
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {

@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>streampark-shaded-jackson</artifactId>
-    <name>StreamPark : Shaded Jackson </name>
+    <name>StreamPark : Shaded Jackson</name>
 
     <dependencies>
         <dependency>
@@ -48,10 +48,10 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
                             <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>

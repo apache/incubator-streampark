@@ -20,9 +20,9 @@ package org.apache.streampark.flink.proxy
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
 import java.util
-import java.util.function.Consumer
 import java.util.regex.Pattern
 
+import scala.language.existentials
 import scala.util.Try
 
 /**
@@ -33,24 +33,10 @@ import scala.util.Try
  * we don't override that.
  */
 
-class ChildFirstClassLoader(
-    urls: Array[URL],
-    parent: ClassLoader,
-    flinkResourcePattern: Pattern,
-    classLoadingExceptionHandler: Consumer[Throwable])
+class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern)
   extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
-
-  def this(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern) {
-    this(
-      urls,
-      parent,
-      flinkResourcePattern,
-      new Consumer[Throwable] {
-        override def accept(t: Throwable): Unit = {}
-      })
-  }
 
   private val FLINK_PATTERN =
     Pattern.compile("flink-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
@@ -72,12 +58,24 @@ class ChildFirstClassLoader(
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
-    try {
-      this.synchronized(this.loadClassWithoutExceptionHandling(name, resolve))
-    } catch {
-      case e: Throwable =>
-        classLoadingExceptionHandler.accept(e)
-        throw e
+    this.synchronized {
+      // First, check if the class has already been loaded
+      val clazz = super.findLoadedClass(name) match {
+        case null =>
+          // check whether the class should go parent-first
+          for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
+            if (name.startsWith(parentFirstPattern)) {
+              super.loadClass(name, resolve)
+            }
+          }
+          Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
+        case c: Class[_] =>
+          if (resolve) {
+            resolveClass(c)
+          }
+          c
+      }
+      clazz
     }
   }
 
@@ -135,26 +133,6 @@ class ChildFirstClassLoader(
       override def hasMoreElements: Boolean = iter.hasNext
 
       override def nextElement: URL = iter.next
-    }
-  }
-
-  @throws[ClassNotFoundException]
-  private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
-    // First, check if the class has already been loaded
-    super.findLoadedClass(name) match {
-      case null =>
-        // check whether the class should go parent-first
-        for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-          if (name.startsWith(parentFirstPattern)) {
-            return super.loadClass(name, resolve)
-          }
-        }
-        Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
-      case c =>
-        if (resolve) {
-          resolveClass(c)
-        }
-        c
     }
   }
 

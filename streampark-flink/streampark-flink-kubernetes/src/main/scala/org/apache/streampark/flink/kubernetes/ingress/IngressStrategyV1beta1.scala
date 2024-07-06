@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.ClusterClient
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 class IngressStrategyV1beta1 extends IngressStrategy {
