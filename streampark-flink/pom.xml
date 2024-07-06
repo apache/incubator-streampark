@@ -25,8 +25,8 @@
     </parent>
 
     <artifactId>streampark-flink</artifactId>
-    <name>StreamPark : Flink Parent</name>
     <packaging>pom</packaging>
+    <name>StreamPark : Flink Parent</name>
 
     <modules>
         <module>streampark-flink-shims</module>

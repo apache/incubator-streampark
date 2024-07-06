@@ -142,7 +142,7 @@ class DependencyUtilsTest {
             Scanner scanner = new Scanner(new InputStreamReader(inputStream));
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine().trim();
-                if (line.length() > 0 && !line.startsWith("#")) {
+                if (!line.isEmpty() && !line.startsWith("#")) {
                     factories.add(line);
                 }
             }

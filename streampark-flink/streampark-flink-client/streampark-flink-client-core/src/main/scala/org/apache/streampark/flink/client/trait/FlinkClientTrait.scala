@@ -47,7 +47,6 @@ import java.util.{Collections, List => JavaList, Map => JavaMap}
 import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 trait FlinkClientTrait extends Logger {
@@ -253,7 +252,7 @@ trait FlinkClientTrait extends Logger {
           case Success(r) => r
           case Failure(e1) =>
             throw new RuntimeException(
-              s"""\n
+              s"""
                  |[flink-submit] Both JobGraph submit plan and Rest API submit plan all failed!
                  |JobGraph Submit plan failed detail:
                  |------------------------------------------------------------------

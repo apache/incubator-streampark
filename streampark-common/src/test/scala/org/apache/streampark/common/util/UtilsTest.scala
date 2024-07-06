@@ -17,10 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.junit.jupiter.api.{Assertions, Test}
-import org.junit.jupiter.api.Assertions.{assertDoesNotThrow, assertEquals, assertFalse, assertThrows, assertTrue}
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers._
 
 import java.io.IOException
 import java.net.URL

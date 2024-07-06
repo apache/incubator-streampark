@@ -250,7 +250,7 @@ fi
 
 BASH_UTIL="org.apache.streampark.console.base.util.BashJavaUtils"
 APP_MAIN="org.apache.streampark.console.StreamParkConsoleBootstrap"
-SERVER_PORT=$($_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG")
+SERVER_PORT=$($JAVACMD -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG")
 JVM_OPTS_FILE=${APP_HOME}/bin/jvm_opts.sh
 
 JVM_ARGS=""
@@ -266,7 +266,6 @@ fi
 JVM_OPTS=${JVM_OPTS:-"${JVM_ARGS}"}
 JVM_OPTS="$JVM_OPTS -XX:HeapDumpPath=${APP_HOME}/logs/dump.hprof"
 JVM_OPTS="$JVM_OPTS -Xloggc:${APP_HOME}/logs/gc.log"
-DEBUG_OPTS=""
 
 # ----- Execute The Requested Command -----------------------------------------
 
@@ -312,7 +311,7 @@ get_pid() {
   else
      # shellcheck disable=SC2006
       # shellcheck disable=SC2155
-      local used=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --check_port "$SERVER_PORT"`
+      local used=`$JAVACMD -cp "$APP_LIB/*" $BASH_UTIL --check_port "$SERVER_PORT"`
       if [[ "${used}"x == "used"x ]]; then
         # shellcheck disable=SC2006
         local PID=`jps -l | grep "$APP_MAIN" | awk '{print $1}'`
@@ -343,16 +342,12 @@ start() {
   if [[ ${have_tty} -eq 1 ]]; then
     echo_w "Using APP_BASE:   $APP_BASE"
     echo_w "Using APP_HOME:   $APP_HOME"
-    if [[ "$1" = "debug" ]] ; then
-      echo_w "Using JAVA_HOME:   $JAVA_HOME"
-    else
-      echo_w "Using JRE_HOME:   $JRE_HOME"
-    fi
     echo_w "Using APP_PID:   $APP_PID"
+    echo_w "Using JAVA_HOME:   $JAVA_HOME"
   fi
 
    # shellcheck disable=SC2006
-   local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "streampark.workspace.local" "$CONFIG"`
+   local workspace=`$JAVACMD -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "streampark.workspace.local" "$CONFIG"`
    if [[ ! -d $workspace ]]; then
      echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in $CONFIG"
      echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
@@ -395,11 +390,11 @@ start() {
   # shellcheck disable=SC2034
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
+  local JAVA_OPTS="$JVM_OPTS"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
-  eval $NOHUP $_RUNJAVA $JAVA_OPTS \
+  eval $NOHUP $JAVACMD $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
@@ -426,12 +421,8 @@ start_docker() {
   if [[ ${have_tty} -eq 1 ]]; then
     echo_w "Using APP_BASE:   $APP_BASE"
     echo_w "Using APP_HOME:   $APP_HOME"
-    if [[ "$1" = "debug" ]] ; then
-      echo_w "Using JAVA_HOME:   $JAVA_HOME"
-    else
-      echo_w "Using JRE_HOME:   $JRE_HOME"
-    fi
     echo_w "Using APP_PID:   $APP_PID"
+    echo_w "Using JAVA_HOME:   $JAVA_HOME"
   fi
 
   if [[ "${HADOOP_HOME}"x == ""x ]]; then
@@ -461,31 +452,17 @@ start_docker() {
     APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
   fi
 
-  JVM_OPTS="${JVM_OPTS} -XX:-UseContainerSupport"
-
-  local JAVA_OPTS="$JVM_OPTS $DEBUG_OPTS"
+  JAVA_OPTS="${JVM_OPTS} -XX:-UseContainerSupport"
 
   echo_g "JAVA_OPTS:  ${JAVA_OPTS}"
 
-  $_RUNJAVA $JAVA_OPTS \
+  $JAVACMD $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
     -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
     $APP_MAIN
 
-}
-
-debug() {
-  # shellcheck disable=SC2236
-  if [[ ! -n "$DEBUG_PORT" ]]; then
-    echo_r "If start with debug mode,Please fill in the debug port like: bash streampark.sh debug 10002 "
-  else
-    DEBUG_OPTS="""
-    -Xdebug  -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$DEBUG_PORT
-    """
-    start
-  fi
 }
 
 # shellcheck disable=SC2120
@@ -559,10 +536,6 @@ restart() {
 
 main() {
   case "$1" in
-    "debug")
-        DEBUG_PORT=$2
-        debug
-        ;;
     "start")
         shift
         start "$@"
@@ -592,7 +565,6 @@ main() {
         echo_w "  stop                      Stop StreamPark, wait up to 3 seconds and then use kill -KILL if still running"
         echo_w "  start_docker              start in docker or k8s mode"
         echo_w "  status                    StreamPark status"
-        echo_w "  debug                     StreamPark start with debug mode,start debug mode, like: bash streampark.sh debug 10002"
         echo_w "  restart \$conf            restart StreamPark with application config."
         exit 0
         ;;

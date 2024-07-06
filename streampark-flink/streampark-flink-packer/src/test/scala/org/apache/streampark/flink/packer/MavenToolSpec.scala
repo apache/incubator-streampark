@@ -27,7 +27,6 @@ import java.io.File
 import java.util.jar.JarFile
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 
 class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 

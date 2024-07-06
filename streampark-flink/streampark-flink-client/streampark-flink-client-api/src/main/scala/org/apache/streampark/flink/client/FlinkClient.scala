@@ -24,7 +24,6 @@ import org.apache.streampark.flink.proxy.FlinkShimsProxy
 
 import java.security.Permission
 
-import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
 
 object FlinkClient extends Logger {

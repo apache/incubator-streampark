@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.Logger
 import org.apache.streampark.spark.client.bean._
 import org.apache.streampark.spark.client.proxy.SparkShimsProxy
 
-import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
 
 object SparkClient extends Logger {

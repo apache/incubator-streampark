@@ -42,7 +42,7 @@ jobs:
           java-version: 8
           distribution: 'adopt'
       - name: Run OWASP Dependency Check
-        run: ./mvnw -B clean install dependency-check:check -DskipDependencyCheck==false -Dspotless.skip=true
+        run: ./mvnw -B clean install dependency-check:check -Dowasp.skip=false -Dspotless.skip=true -Drat.skip=true
       - name: Upload report
         uses: actions/upload-artifact@v4
         if: ${{ cancelled() || failure() }}

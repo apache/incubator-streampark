@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.LfsOperator
 import org.apache.streampark.common.util.ThreadUtils
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
@@ -36,7 +35,6 @@ import java.io.File
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 /** Building pipeline for flink kubernetes-native application mode */
 class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
@@ -90,14 +88,10 @@ class FlinkK8sApplicationBuildPipeline(request: FlinkK8sApplicationBuildRequest)
     val (shadedJar, extJarLibs) =
       execStep(3) {
         val shadedJarOutputPath = request.getShadedJarPath(buildWorkspace)
-        val extJarLibs = request.developmentMode match {
-          case FlinkDevelopmentMode.FLINK_SQL => request.dependencyInfo.extJarLibs
-          case FlinkDevelopmentMode.CUSTOM_CODE => Set[String]()
-        }
         val shadedJar =
           MavenTool.buildFatJar(request.mainClass, request.providedLibs, shadedJarOutputPath)
         logInfo(s"Output shaded flink job jar: ${shadedJar.getAbsolutePath}")
-        shadedJar -> extJarLibs
+        shadedJar -> request.dependencyInfo.extJarLibs
       }.getOrElse(throw getError.exception)
 
     // Step-4: generate and Export flink image dockerfiles

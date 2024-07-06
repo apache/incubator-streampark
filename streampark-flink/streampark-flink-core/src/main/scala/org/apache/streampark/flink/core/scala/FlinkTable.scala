@@ -25,8 +25,6 @@ import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.TableConfig
 
-import scala.language.implicitConversions
-
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _

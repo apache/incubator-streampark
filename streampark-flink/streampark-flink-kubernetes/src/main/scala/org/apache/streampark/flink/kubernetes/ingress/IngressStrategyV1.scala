@@ -24,7 +24,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 class IngressStrategyV1 extends IngressStrategy {
