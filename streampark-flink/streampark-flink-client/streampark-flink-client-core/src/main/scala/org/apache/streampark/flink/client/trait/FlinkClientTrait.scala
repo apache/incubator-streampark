@@ -179,7 +179,7 @@ trait FlinkClientTrait extends Logger {
         .filter(_._1.startsWith("env."))
         .foreach(
           x => {
-            logInfo(s"env opts :  ${x._1} :${x._2}")
+            logInfo(s"env opts:  ${x._1}: ${x._2}")
             flinkConfig.setString(x._1, x._2.toString)
           })
     }
