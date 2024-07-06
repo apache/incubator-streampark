@@ -21,6 +21,7 @@
 package org.apache.streampark.e2e.pages.common;
 
 import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
+import org.apache.streampark.e2e.pages.resource.ResourcePage;
 import org.apache.streampark.e2e.pages.system.SystemPage;
 
 import lombok.Getter;
@@ -77,6 +78,17 @@ public class NavBarPage {
                 systemTab.click();
             }
             return nav.cast(new SystemPage(driver));
+        }
+
+        if (nav == ResourcePage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(resourcesTab));
+            String tabOpenStateXpath =
+                    "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Resource')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
+            if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
+                resourcesTab.click();
+            }
+            return nav.cast(new ResourcePage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown nav bar");
