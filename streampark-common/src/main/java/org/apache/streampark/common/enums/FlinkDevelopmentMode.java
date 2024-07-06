@@ -34,6 +34,7 @@ public enum FlinkDevelopmentMode {
 
     /** Py flink Mode */
     PYFLINK("Python Flink", 3);
+
     private final String name;
 
     private final Integer mode;
