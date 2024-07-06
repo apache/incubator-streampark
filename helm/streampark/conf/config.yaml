@@ -1,0 +1,99 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+logging:
+    level:
+        root: info
+
+server:
+    port: 10000
+    session:
+        # The user's login session has a validity period. If it exceeds this time, the user will be automatically logout
+        # unit: s|m|h|d, s: second, m:minute, h:hour, d: day
+        ttl: 2h # unit[s|m|h|d], e.g: 24h, 2d....
+    undertow: # see: https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java
+        buffer-size: 1024
+        direct-buffers: true
+        threads:
+            io: 16
+            worker: 256
+
+# system database, default h2, mysql|pgsql|h2
+datasource:
+    dialect: h2  #h2, mysql, pgsql
+    # if datasource.dialect is mysql or pgsql, you need to configure the following connection information
+    # mysql/postgresql connect user
+    username:
+    # mysql/postgresql connect password
+    password:
+    # mysql/postgresql connect jdbcURL
+    # mysql example: datasource.url: jdbc:mysql://localhost:3306/streampark?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+    # postgresql example: jdbc:postgresql://localhost:5432/streampark?stringtype=unspecified
+    url:
+
+streampark:
+    workspace:
+        # Local workspace, storage directory of clone projects and compiled projects,Do not set under $APP_HOME. Set it to a directory outside of $APP_HOME.
+        local: /tmp/streampark
+        # The root hdfs path of the jars, Same as yarn.provided.lib.dirs for flink on yarn-application and Same as --jars for spark on yarn
+        remote: hdfs:///streampark/
+    proxy:
+        # lark proxy address, default https://open.feishu.cn
+        lark-url:
+        # hadoop yarn proxy path, e.g: knox process address https://streampark.com:8443/proxy/yarn
+        yarn-url:
+    yarn:
+        # flink on yarn or spark on yarn, monitoring job status from yarn, it is necessary to set hadoop.http.authentication.type
+        http-auth: 'simple'  # default simple, or kerberos
+    # flink on yarn or spark on yarn, HADOOP_USER_NAME
+    hadoop-user-name: hdfs
+    project:
+        # Number of projects allowed to be running at the same time , If there is no limit, -1 can be configured
+        max-build: 16
+
+# flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
+security:
+    kerberos:
+        login:
+            debug: false
+            enable: false
+            keytab:
+            krb5:
+            principal:
+        ttl: 2h # unit [s|m|h|d]
+
+# sign streampark with ldap.
+ldap:
+    base-dn: dc=streampark,dc=com  # Login Account
+    enable: false  # ldap enabled'
+    username: cn=Manager,dc=streampark,dc=com
+    password: streampark
+    urls: ldap://99.99.99.99:389 #AD server IP, default port 389
+    user:
+        email-attribute: mail
+        identity-attribute: uid
+
+sso:
+    enable: false
+    callbackUrl: http://localhost:10000/callback
+    # Put all parameters under `properties`
+    # Check supported sso config parameters for different authentication clients from the below link
+    # https://github.com/pac4j/pac4j/blob/master/documentation/docs/config-module.md
+    properties:
+        principalNameAttribute:
+        # Optional, change by authentication client
+        # Please replace and fill in your client config below when enabled SSO

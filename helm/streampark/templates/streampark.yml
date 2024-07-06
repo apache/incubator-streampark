@@ -94,22 +94,10 @@ spec:
           configMap:
             name: streampark-console-config
             items:
-              - key: application.yml
-                path: application.yml
-              - key: application-h2.yml
-                path: application-h2.yml
-              - key: application-mysql.yml
-                path: application-mysql.yml
-              - key: application-pgsql.yml
-                path: application-pgsql.yml
+              - key: config.yaml
+                path: config.yaml
               - key: logback-spring.xml
                 path: logback-spring.xml
-              - key: kerberos.yml
-                path: kerberos.yml
-              - key: spy.properties
-                path: spy.properties
-              - key: ValidationMessages.properties
-                path: ValidationMessages.properties
 
 
 

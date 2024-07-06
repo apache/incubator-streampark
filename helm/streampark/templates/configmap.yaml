@@ -25,58 +25,16 @@ metadata:
 data:
   application.yml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/application.yml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/config.yaml"  | nindent 4 -}}
 {{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "application.yml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "application.yml" | nindent 4 -}}
-{{- end }}
-  application-h2.yml: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/application-h2.yml"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "application-h2.yml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "application-h2.yml" | nindent 4 -}}
-{{- end }}
-  application-mysql.yml: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/application-mysql.yml"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "application-mysql.yml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "application-mysql.yml" | nindent 4 -}}
-{{- end }}
-  application-pgsql.yml: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/application-pgsql.yml"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "application-pgsql.yml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "application-pgsql.yml" | nindent 4 -}}
+{{- if index (.Values.streamParkDefaultConfiguration) "config.yaml" }}
+    {{- index (.Values.streamParkDefaultConfiguration) "config.yaml" | nindent 4 -}}
 {{- end }}
   logback-spring.xml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/logback-spring.xml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/logback-spring.xml"  | nindent 4 -}}
 {{- end }}
 {{- if index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
-{{- end }}
-  kerberos.yml: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/kerberos.yml"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "kerberos.yml" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "kerberos.yml" | nindent 4 -}}
-{{- end }}
-  spy.properties: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/spy.properties"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "spy.properties" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "spy.properties" | nindent 4 -}}
-{{- end }}
-  ValidationMessages.properties: |+
-{{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/ValidationMessages.properties"  | nindent 4 -}}
-{{- end }}
-{{- if index (.Values.streamParkDefaultConfiguration) "ValidationMessages.properties" }}
-    {{- index (.Values.streamParkDefaultConfiguration) "ValidationMessages.properties" | nindent 4 -}}
 {{- end }}
 {{- end }}
