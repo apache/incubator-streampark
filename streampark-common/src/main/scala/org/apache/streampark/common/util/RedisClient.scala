@@ -18,7 +18,6 @@
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.Constant
-import org.apache.streampark.common.conf.ConfigKeys
 
 import redis.clients.jedis._
 import redis.clients.jedis.exceptions.JedisConnectionException

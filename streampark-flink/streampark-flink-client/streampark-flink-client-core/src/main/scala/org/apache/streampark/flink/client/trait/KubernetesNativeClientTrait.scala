@@ -33,8 +33,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 
 import javax.annotation.Nonnull
 
-import scala.language.postfixOps
-
 /** kubernetes native mode submit */
 trait KubernetesNativeClientTrait extends FlinkClientTrait {
 

@@ -18,12 +18,12 @@
 package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Table, TableDescriptor, TableEnvironment, TableResult}
+import org.apache.flink.table.api._
 import org.apache.flink.table.catalog.CatalogDescriptor
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.resource.ResourceUri
 
-import java.util.{List => JList}
+import java.util.{List => JavaList}
 
 class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
   extends FlinkTableTrait(parameter, tableEnv) {
@@ -63,14 +63,14 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
   override def createFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createFunction(path, className, resourceUris)
 
   /** @since 1.17 */
   override def createFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri],
+      resourceUris: JavaList[ResourceUri],
       ignoreIfExists: Boolean): Unit =
     tableEnv.createFunction(path, className, resourceUris, ignoreIfExists)
 
@@ -78,14 +78,14 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
   override def createTemporaryFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createTemporaryFunction(path, className, resourceUris)
 
   /** @since 1.17 */
   override def createTemporarySystemFunction(
       name: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createTemporarySystemFunction(name, className, resourceUris)
 
   /** @since 1.17 */

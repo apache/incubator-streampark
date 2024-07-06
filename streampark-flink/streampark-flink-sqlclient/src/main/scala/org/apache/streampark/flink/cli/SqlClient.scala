@@ -28,7 +28,6 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ExecutionOptions
 
 import scala.collection.mutable.ArrayBuffer
-import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
 
 object SqlClient extends App {

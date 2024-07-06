@@ -31,6 +31,7 @@ trait Source extends Logger with Serializable {
 
   @(transient @getter)
   val ssc: StreamingContext
+
   @(transient @getter)
   lazy val sparkConf: SparkConf = ssc.sparkContext.getConf
 
@@ -40,7 +41,7 @@ trait Source extends Logger with Serializable {
     case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) =>
       Some(k.substring(prefix.length) -> v)
     case _ => None
-  } toMap
+  }.toMap
 
   type SourceType
 

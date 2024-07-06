@@ -44,7 +44,7 @@ object ExceptionUtils {
       stm.toString
     } catch {
       case e: Exception => s"${e.getClass.getName} (error while printing stack trace)";
-      case _ => null
+      case _: Throwable => null
     } finally {
       Utils.close(writer, stm)
     }

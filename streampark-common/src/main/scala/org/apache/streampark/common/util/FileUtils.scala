@@ -273,14 +273,13 @@ object FileUtils {
    * @return
    *   The content of the file.
    */
-  def tailOf(path: String, offset: Int, limit: Int): String = try {
+  def tailOf(path: String, offset: Int, limit: Int): String = {
     val file = new File(path)
     if (file.exists && file.isFile) {
       Files
         .lines(Paths.get(path))
         .autoClose(stream => stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n")))
-    }
-    null
+    } else null
   }
 
   @throws[IOException]
