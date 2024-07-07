@@ -77,8 +77,7 @@ public class SpringProperties {
             springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
           } catch (ClassNotFoundException e1) {
             throw new ExceptionInInitializerError(
-                ""
-                    + "The datasource.dialect is MySQL, but the classes \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" not found. "
+                "The datasource.dialect is MySQL, but the classes \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" not found. "
                     + "Please ensure that the MySQL Connector/J is located under $streampark/lib.\n"
                     + "Note: The MySQL Connector/J is not compatible with the Apache 2.0 license. You need to download it and place it into $streampark/lib.");
           }
