@@ -17,50 +17,16 @@
 
 package org.apache.streampark.console.core.metrics.spark;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
-
-import scala.collection.Map;
 
 @Data
-public class Job implements Serializable {
-  @JsonProperty("jobId")
-  private Long id;
+public class SparkExecutor implements Serializable {
 
-  private String name;
+  private Long memoryUsed;
 
-  private String submissionTime;
+  private Long maxMemory;
 
-  private String completionTime;
-
-  private List<Long> stageIds;
-
-  private String status;
-
-  private Integer numTasks;
-
-  private Integer numActiveTasks;
-
-  private Integer numCompletedTasks;
-
-  private Integer numSkippedTasks;
-
-  private Integer numFailedTasks;
-
-  private Integer numKilledTasks;
-
-  private Integer numCompletedIndices;
-
-  private Integer numActiveStages;
-
-  private Integer numCompletedStages;
-
-  private Integer numSkippedStages;
-
-  private Integer numFailedStages;
-
-  private Map<String, Object> killedTasksSummary;
+  private Long totalCores;
 }

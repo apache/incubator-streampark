@@ -35,15 +35,16 @@ import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.runner.EnvInitializer;
 import org.apache.streampark.console.core.service.FlinkClusterService;
-import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.core.conf.ParameterCli;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
@@ -93,8 +94,6 @@ public class SparkApplicationInfoServiceImpl
   private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
   @Autowired private SparkEnvService sparkEnvService;
-
-  @Autowired private SavePointService savePointService;
 
   @Autowired private EnvInitializer envInitializer;
 
@@ -213,14 +212,13 @@ public class SparkApplicationInfoServiceImpl
 
   @Override
   public boolean checkAlter(SparkApplication appParam) {
-    //    Long appId = appParam.getId();
-    //    if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
-    //      return false;
-    //    }
-    //    long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
-    //    long appUserId = appParam.getUserId();
-    //    return cancelUserId != -1 && cancelUserId != appUserId;
-    return true;
+    Long appId = appParam.getId();
+    if (SparkAppStateEnum.KILLED != appParam.getStateEnum()) {
+      return false;
+    }
+    long cancelUserId = SparkAppHttpWatcher.getCanceledJobUserId(appId);
+    long appUserId = appParam.getUserId();
+    return cancelUserId != -1 && cancelUserId != appUserId;
   }
 
   @Override

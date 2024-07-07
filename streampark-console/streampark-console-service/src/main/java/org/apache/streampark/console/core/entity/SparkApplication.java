@@ -290,7 +290,7 @@ public class SparkApplication implements Serializable {
   }
 
   /**
-   * Determine if a FlinkAppState requires tracking.
+   * Determine if a SparkAppState requires tracking.
    *
    * @return 1: need to be tracked | 0: no need to be tracked.
    */
@@ -299,8 +299,8 @@ public class SparkApplication implements Serializable {
       case ADDED:
       case FINISHED:
       case FAILED:
+      case KILLED:
       case TERMINATED:
-      case POS_TERMINATED:
         return false;
       default:
         return true;
@@ -321,7 +321,6 @@ public class SparkApplication implements Serializable {
       case TERMINATED:
       case SUCCEEDED:
       case KILLED:
-      case POS_TERMINATED:
         return true;
       default:
         return false;

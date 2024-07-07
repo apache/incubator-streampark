@@ -18,15 +18,17 @@
 package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
+
 import org.apache.commons.collections.MapUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
-import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 
-import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
+import java.util.concurrent.{CountDownLatch, Executors, ExecutorService}
+
 import scala.util.control.Breaks.break
 
 /** yarn application mode submit */
