@@ -96,13 +96,12 @@ public class RoleManagementTest {
         String newEditMenuName = "System";
         roleManagementPage.editRole(newRoleName, newEditDescription, newEditMenuName);
 
-         Awaitility.await()
-         .untilAsserted(
-         () ->
-         assertThat(roleManagementPage.roleList())
-         .as("Role list should contain edited role")
-         .extracting(WebElement::getText)
-         .anyMatch(it -> it.contains(newEditDescription)));
+        Awaitility.await()
+                .untilAsserted(
+                        () -> assertThat(roleManagementPage.roleList())
+                                .as("Role list should contain edited role")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains(newEditDescription)));
     }
 
     @Test
