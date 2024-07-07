@@ -95,7 +95,7 @@
               ? [{ required: true, validator: handleRoleCheck, trigger: 'blur' }]
               : [],
           },
-          { label: t('common.description'), field: 'remark', component: 'InputTextArea' },
+          { label: t('common.description'), field: 'description', component: 'InputTextArea' },
           {
             label: t('system.role.form.menuId'),
             field: 'menuId',
@@ -146,7 +146,7 @@
             setFieldsValue({
               roleName: data.record.roleName,
               roleId: data.record.roleId,
-              remark: data.record.remark,
+              description: data.record.description,
               menuId: [...result],
             });
           });
