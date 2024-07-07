@@ -40,9 +40,9 @@ public class SpringProperties {
     File oldConfig = getOldConfig();
     if (oldConfig != null) {
       log.warn(
-          "in the \"conf\" directory, found the \"application.yml\" file. The \"application.yml\" file is deprecated. "
-              + "For compatibility, this \"application.yml\" file will be used preferentially. The latest configuration file is \"config.yaml\". "
-              + "It is recommended to use \"config.yaml\". Note: \"application.yml\" will be completely deprecated in version 2.2.0. ");
+          "In the \"conf\" directory, found the \"application.yml\" file. Please be aware that the \"application.yml\" file is now deprecated. "
+              + "For compatibility reasons, this \"application.yml\" file will still be used as the preference. However, the latest configuration file is now \"config.yaml\", "
+              + "and it is recommended to use \"config.yaml\" instead. \nNOTE: the \"application.yml\" file will be completely deprecated in version 2.2.0.");
       SystemPropertyUtils.set("spring.config.location", oldConfig.getAbsolutePath());
       return new Properties();
     } else {
@@ -77,8 +77,10 @@ public class SpringProperties {
             springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
           } catch (ClassNotFoundException e1) {
             throw new ExceptionInInitializerError(
-                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
-                    + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
+                ""
+                    + "The datasource.dialect is MySQL, but the classes \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" not found. "
+                    + "Please ensure that the MySQL Connector/J is located under $streampark/lib.\n"
+                    + "Note: The MySQL Connector/J is not compatible with the Apache 2.0 license. You need to download it and place it into $streampark/lib.");
           }
         }
         break;
@@ -147,7 +149,7 @@ public class SpringProperties {
     if (StringUtils.isBlank(appHome)) {
       throw new ExceptionInInitializerError(
           String.format(
-              "[StreamPark] The system initialization check failed. If started local for development and debugging,"
+              "[StreamPark] The system initialization check has failed. If you started locally for development and debugging,"
                   + " please ensure the -D%s parameter is clearly specified,"
                   + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
               ConfigConst.KEY_APP_HOME()));
