@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 public class RobotResponse {
 
-  private Integer errcode;
+    private Integer errcode;
 
-  private String errmsg;
+    private String errmsg;
 }

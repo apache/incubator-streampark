@@ -21,6 +21,7 @@
 package org.apache.streampark.e2e.pages.common;
 
 import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
+import org.apache.streampark.e2e.pages.resource.ResourcePage;
 import org.apache.streampark.e2e.pages.system.SystemPage;
 
 import lombok.Getter;
@@ -36,58 +37,63 @@ import java.time.Duration;
 
 @Getter
 public class NavBarPage {
-  protected final RemoteWebDriver driver;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]")
-  private WebElement apacheFlinkTab;
+    protected final RemoteWebDriver driver;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Resources')]")
-  private WebElement resourcesTab;
+    @FindBy(xpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]")
+    private WebElement apacheFlinkTab;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Settings')]")
-  private WebElement settingsTab;
+    @FindBy(xpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Resources')]")
+    private WebElement resourcesTab;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]")
-  private WebElement systemTab;
+    @FindBy(xpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Settings')]")
+    private WebElement settingsTab;
 
-  public NavBarPage(RemoteWebDriver driver) {
-    this.driver = driver;
-    PageFactory.initElements(driver, this);
-  }
+    @FindBy(xpath = "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]")
+    private WebElement systemTab;
 
-  public <T extends NavBarItem> T goToNav(Class<T> nav) {
-    if (nav == ApacheFlinkPage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(apacheFlinkTab));
-      String tabOpenStateXpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
-      if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
-        apacheFlinkTab.click();
-      }
-      return nav.cast(new ApacheFlinkPage(driver));
+    public NavBarPage(RemoteWebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
 
-    if (nav == SystemPage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(systemTab));
-      String tabOpenStateXpath =
-          "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
-      if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
-        systemTab.click();
-      }
-      return nav.cast(new SystemPage(driver));
+    public <T extends NavBarItem> T goToNav(Class<T> nav) {
+        if (nav == ApacheFlinkPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(apacheFlinkTab));
+            String tabOpenStateXpath =
+                    "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Apache Flink')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
+            if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
+                apacheFlinkTab.click();
+            }
+            return nav.cast(new ApacheFlinkPage(driver));
+        }
+
+        if (nav == SystemPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(systemTab));
+            String tabOpenStateXpath =
+                    "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'System')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
+            if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
+                systemTab.click();
+            }
+            return nav.cast(new SystemPage(driver));
+        }
+
+        if (nav == ResourcePage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(resourcesTab));
+            String tabOpenStateXpath =
+                    "//span[contains(@class, 'ml-2') and contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Resource')]/../parent::li[contains(@class, 'streampark-menu-opened')]";
+            if (driver.findElements(By.xpath(tabOpenStateXpath)).isEmpty()) {
+                resourcesTab.click();
+            }
+            return nav.cast(new ResourcePage(driver));
+        }
+
+        throw new UnsupportedOperationException("Unknown nav bar");
     }
 
-    throw new UnsupportedOperationException("Unknown nav bar");
-  }
-
-  public interface NavBarItem {}
+    public interface NavBarItem {
+    }
 }

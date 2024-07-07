@@ -19,7 +19,7 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Schema, Table, TableDescriptor, TableResult}
+import org.apache.flink.table.api._
 import org.apache.flink.table.api.bridge.scala.{StreamStatementSet, StreamTableEnvironment}
 import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.module.ModuleEntry
@@ -27,7 +27,7 @@ import org.apache.flink.table.resource.ResourceUri
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
 
-import java.util.{List => JList}
+import java.util.{List => JavaList}
 
 class StreamTableContext(
     override val parameter: ParameterTool,
@@ -121,14 +121,14 @@ class StreamTableContext(
   override def createFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createFunction(path, className, resourceUris)
 
   /** @since 1.17 */
   override def createFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri],
+      resourceUris: JavaList[ResourceUri],
       ignoreIfExists: Boolean): Unit =
     tableEnv.createFunction(path, className, resourceUris, ignoreIfExists)
 
@@ -136,14 +136,14 @@ class StreamTableContext(
   override def createTemporaryFunction(
       path: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createTemporaryFunction(path, className, resourceUris)
 
   /** @since 1.17 */
   override def createTemporarySystemFunction(
       name: String,
       className: String,
-      resourceUris: JList[ResourceUri]): Unit =
+      resourceUris: JavaList[ResourceUri]): Unit =
     tableEnv.createTemporarySystemFunction(name, className, resourceUris)
 
   /** @since 1.17 */

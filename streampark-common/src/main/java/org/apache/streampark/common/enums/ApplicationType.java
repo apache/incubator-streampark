@@ -22,48 +22,48 @@ import javax.annotation.Nonnull;
 /** Application type enum. */
 public enum ApplicationType {
 
-  /** Unknown type replace null */
-  UNKNOWN(-1, "unknown"),
+    /** Unknown type replace null */
+    UNKNOWN(-1, "unknown"),
 
-  /** StreamPark Flink */
-  STREAMPARK_FLINK(1, "StreamPark Flink"),
+    /** StreamPark Flink */
+    STREAMPARK_FLINK(1, "StreamPark Flink"),
 
-  /** Apache Flink */
-  APACHE_FLINK(2, "Apache Flink"),
+    /** Apache Flink */
+    APACHE_FLINK(2, "Apache Flink"),
 
-  /** StreamPark Spark */
-  STREAMPARK_SPARK(3, "StreamPark Spark"),
+    /** StreamPark Spark */
+    STREAMPARK_SPARK(3, "StreamPark Spark"),
 
-  /** Apache Spark */
-  APACHE_SPARK(4, "Apache Spark");
+    /** Apache Spark */
+    APACHE_SPARK(4, "Apache Spark");
 
-  private final int type;
-  private final String name;
+    private final int type;
+    private final String name;
 
-  ApplicationType(int type, @Nonnull String name) {
-    this.type = type;
-    this.name = name;
-  }
-
-  /** Get the type value of the enum. */
-  public int getType() {
-    return type;
-  }
-
-  /** Get the name of application type. */
-  @Nonnull
-  public String getName() {
-    return name;
-  }
-
-  /** Try to resolve the given application type value into a known {@link ApplicationType} enum. */
-  @Nonnull
-  public static ApplicationType of(int type) {
-    for (ApplicationType appType : ApplicationType.values()) {
-      if (appType.getType() == type) {
-        return appType;
-      }
+    ApplicationType(int type, @Nonnull String name) {
+        this.type = type;
+        this.name = name;
     }
-    return ApplicationType.UNKNOWN;
-  }
+
+    /** Get the type value of the enum. */
+    public int getType() {
+        return type;
+    }
+
+    /** Get the name of application type. */
+    @Nonnull
+    public String getName() {
+        return name;
+    }
+
+    /** Try to resolve the given application type value into a known {@link ApplicationType} enum. */
+    @Nonnull
+    public static ApplicationType of(int type) {
+        for (ApplicationType appType : ApplicationType.values()) {
+            if (appType.getType() == type) {
+                return appType;
+            }
+        }
+        return ApplicationType.UNKNOWN;
+    }
 }

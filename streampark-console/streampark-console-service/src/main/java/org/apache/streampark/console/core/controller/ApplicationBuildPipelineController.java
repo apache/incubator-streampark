@@ -44,36 +44,37 @@ import java.util.Optional;
 @RequestMapping("flink/pipe")
 public class ApplicationBuildPipelineController {
 
-  @Autowired private AppBuildPipeService appBuildPipeService;
+    @Autowired
+    private AppBuildPipeService appBuildPipeService;
 
-  @PermissionScope(app = "#appId")
-  @PostMapping(value = "build")
-  @RequiresPermissions("app:create")
-  public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
-    boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-    return RestResponse.success(actionResult);
-  }
-
-  /**
-   * Get application building pipeline progress detail.
-   *
-   * @param appId application id
-   * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
-   */
-  @PostMapping("/detail")
-  @PermissionScope(app = "#appId")
-  @RequiresPermissions("app:view")
-  public RestResponse getBuildProgressDetail(Long appId) {
-    Map<String, Object> details = new HashMap<>(0);
-    Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-    details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
-
-    if (pipeline.isPresent()
-        && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
-      DockerResolvedSnapshot dockerProgress =
-          appBuildPipeService.getDockerProgressDetailSnapshot(appId);
-      details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
+    @PermissionScope(app = "#appId")
+    @PostMapping(value = "build")
+    @RequiresPermissions("app:create")
+    public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
+        boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
+        return RestResponse.success(actionResult);
     }
-    return RestResponse.success(details);
-  }
+
+    /**
+     * Get application building pipeline progress detail.
+     *
+     * @param appId application id
+     * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
+     */
+    @PostMapping("/detail")
+    @PermissionScope(app = "#appId")
+    @RequiresPermissions("app:view")
+    public RestResponse getBuildProgressDetail(Long appId) {
+        Map<String, Object> details = new HashMap<>(0);
+        Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
+        details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
+
+        if (pipeline.isPresent()
+                && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+            DockerResolvedSnapshot dockerProgress =
+                    appBuildPipeService.getDockerProgressDetailSnapshot(appId);
+            details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
+        }
+        return RestResponse.success(details);
+    }
 }

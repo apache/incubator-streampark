@@ -21,24 +21,25 @@ import java.util.Arrays;
 
 /** Git connection method */
 public enum GitCredentialEnum {
-  HTTPS(1),
-  SSH(2);
 
-  private final int value;
+    HTTPS(1),
+    SSH(2);
 
-  GitCredentialEnum(int value) {
-    this.value = value;
-  }
+    private final int value;
 
-  public static GitCredentialEnum of(Integer value) {
-    return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
-  }
+    GitCredentialEnum(int value) {
+        this.value = value;
+    }
 
-  public static boolean isSSH(Integer gitCredential) {
-    return GitCredentialEnum.SSH == GitCredentialEnum.of(gitCredential);
-  }
+    public static GitCredentialEnum of(Integer value) {
+        return Arrays.stream(values()).filter(x -> x.value == value).findFirst().orElse(null);
+    }
 
-  public Integer getValue() {
-    return this.value;
-  }
+    public static boolean isSSH(Integer gitCredential) {
+        return GitCredentialEnum.SSH == GitCredentialEnum.of(gitCredential);
+    }
+
+    public Integer getValue() {
+        return this.value;
+    }
 }

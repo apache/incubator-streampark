@@ -27,13 +27,13 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
  */
 public interface AlertNotifyService {
 
-  /**
-   * Performs an alert with the given alert configuration parameters and alert template.
-   *
-   * @param alertConfig alert configuration parameters.
-   * @param template alert template to use.
-   * @return true if the alert was successfully triggered, false otherwise.
-   * @throws AlertException if an error occurs while performing the alert.
-   */
-  boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException;
+    /**
+     * Performs an alert with the given alert configuration parameters and alert template.
+     *
+     * @param alertConfig alert configuration parameters.
+     * @param template alert template to use.
+     * @return true if the alert was successfully triggered, false otherwise.
+     * @throws AlertException if an error occurs while performing the alert.
+     */
+    boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException;
 }

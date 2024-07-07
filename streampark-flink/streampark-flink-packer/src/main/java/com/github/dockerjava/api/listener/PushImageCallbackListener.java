@@ -21,6 +21,6 @@ import com.github.dockerjava.api.model.PushResponseItem;
 
 public interface PushImageCallbackListener {
 
-  /** Watch push image process information form docker rest api. */
-  void watchPushProcess(PushResponseItem processDetail);
+    /** Watch push image process information form docker rest api. */
+    void watchPushProcess(PushResponseItem processDetail);
 }

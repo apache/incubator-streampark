@@ -24,27 +24,27 @@ import org.apache.streampark.console.system.entity.User;
 /** Base Service */
 public interface CommonService {
 
-  /**
-   * Get the information of the currently login user
-   *
-   * @return Current user information
-   */
-  User getCurrentUser();
+    /**
+     * Get the information of the currently login user
+     *
+     * @return Current user information
+     */
+    User getCurrentUser();
 
-  /**
-   * Get the user id of the currently login user
-   *
-   * @return Current user id
-   */
-  Long getUserId();
+    /**
+     * Get the user id of the currently login user
+     *
+     * @return Current user id
+     */
+    Long getUserId();
 
-  /**
-   * Get SQL client Jar by flink environment
-   *
-   * @param flinkEnv The FlinkEnv Contains relevant information
-   * @return Jar
-   */
-  String getSqlClientJar(FlinkEnv flinkEnv);
+    /**
+     * Get SQL client Jar by flink environment
+     *
+     * @param flinkEnv The FlinkEnv Contains relevant information
+     * @return Jar
+     */
+    String getSqlClientJar(FlinkEnv flinkEnv);
 
-  String getSqlClientJar(SparkEnv flinkEnv);
+    String getSqlClientJar(SparkEnv flinkEnv);
 }

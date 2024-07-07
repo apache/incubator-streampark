@@ -32,20 +32,20 @@ import org.apache.streampark.console.base.domain.ResponseCode;
  */
 public class ApiDetailException extends AbstractApiException {
 
-  public ApiDetailException(String message) {
-    super(message, ResponseCode.CODE_FAIL_DETAIL);
-  }
+    public ApiDetailException(String message) {
+        super(message, ResponseCode.CODE_FAIL_DETAIL);
+    }
 
-  public ApiDetailException(Throwable cause) {
-    super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
-  }
+    public ApiDetailException(Throwable cause) {
+        super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
+    }
 
-  public ApiDetailException(String message, Throwable cause) {
-    super(message + ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
-  }
+    public ApiDetailException(String message, Throwable cause) {
+        super(message + ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
+    }
 
-  @Override
-  public String getMessage() {
-    return "Detail exception: \n" + super.getMessage();
-  }
+    @Override
+    public String getMessage() {
+        return "Detail exception: \n" + super.getMessage();
+    }
 }

@@ -26,19 +26,20 @@ import java.util.Arrays;
 @Getter
 public enum EngineTypeEnum {
 
-  /** Apache Flink: activated by default */
-  FLINK(0),
+    /** Apache Flink: activated by default */
+    FLINK(0),
 
-  /** Apache Spark */
-  SPARK(1);
+    /** Apache Spark */
+    SPARK(1);
 
-  @EnumValue private final int code;
+    @EnumValue
+    private final int code;
 
-  EngineTypeEnum(int code) {
-    this.code = code;
-  }
+    EngineTypeEnum(int code) {
+        this.code = code;
+    }
 
-  public static EngineTypeEnum of(Integer code) {
-    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-  }
+    public static EngineTypeEnum of(Integer code) {
+        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+    }
 }

@@ -24,19 +24,19 @@ import java.util.Arrays;
 @Getter
 public enum ResourceFromEnum {
 
-  /** cicd(build from cvs) */
-  CICD(1),
+    /** cicd(build from cvs) */
+    CICD(1),
 
-  /** upload local jar */
-  UPLOAD(2);
+    /** upload local jar */
+    UPLOAD(2);
 
-  private final Integer value;
+    private final Integer value;
 
-  ResourceFromEnum(Integer value) {
-    this.value = value;
-  }
+    ResourceFromEnum(Integer value) {
+        this.value = value;
+    }
 
-  public static ResourceFromEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
-  }
+    public static ResourceFromEnum of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
+    }
 }

@@ -19,17 +19,18 @@ package org.apache.streampark.gateway.exception;
 
 /** General exception for SQL gateway related errors. */
 public class ValidationException extends RuntimeException {
-  private static final long serialVersionUID = 1L;
 
-  public ValidationException(String message) {
-    super(message);
-  }
+    private static final long serialVersionUID = 1L;
 
-  public ValidationException(String message, Throwable e) {
-    super(message, e);
-  }
+    public ValidationException(String message) {
+        super(message);
+    }
 
-  public ValidationException(Throwable e) {
-    super(e);
-  }
+    public ValidationException(String message, Throwable e) {
+        super(message, e);
+    }
+
+    public ValidationException(Throwable e) {
+        super(e);
+    }
 }

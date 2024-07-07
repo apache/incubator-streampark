@@ -21,17 +21,18 @@ import java.util.Objects;
 
 public final class ObjectUtils {
 
-  private ObjectUtils() {}
-
-  public static boolean trimEquals(Object o1, Object o2) {
-    boolean equals = Objects.deepEquals(o1, o2);
-    if (!equals && o1 instanceof String && o2 instanceof String) {
-      return o1.toString().trim().equals(o2.toString().trim());
+    private ObjectUtils() {
     }
-    return equals;
-  }
 
-  public static boolean trimNoEquals(Object o1, Object o2) {
-    return !trimEquals(o1, o2);
-  }
+    public static boolean trimEquals(Object o1, Object o2) {
+        boolean equals = Objects.deepEquals(o1, o2);
+        if (!equals && o1 instanceof String && o2 instanceof String) {
+            return o1.toString().trim().equals(o2.toString().trim());
+        }
+        return equals;
+    }
+
+    public static boolean trimNoEquals(Object o1, Object o2) {
+        return !trimEquals(o1, o2);
+    }
 }

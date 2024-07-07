@@ -30,24 +30,24 @@ import java.util.Date;
 @Slf4j
 public class SavePoint {
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  private Long appId;
+    private Long appId;
 
-  private Long chkId;
+    private Long chkId;
 
-  private Boolean latest;
+    private Boolean latest;
 
-  /**
-   * 1) checkPoint <br>
-   * 2) savePoint
-   */
-  private Integer type;
+    /**
+     * 1) checkPoint <br>
+     * 2) savePoint
+     */
+    private Integer type;
 
-  private String path;
+    private String path;
 
-  private Date triggerTime;
+    private Date triggerTime;
 
-  private Date createTime;
+    private Date createTime;
 }

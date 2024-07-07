@@ -25,62 +25,62 @@ import java.util.Objects;
 /** Column information. */
 public class Column implements Serializable {
 
-  private final String name;
+    private final String name;
 
-  private final String type;
+    private final String type;
 
-  private final @Nullable String comment;
+    private final @Nullable String comment;
 
-  public Column(String name, String type, String comment) {
-    this.name = name;
-    this.type = type;
-    this.comment = comment;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  @Nullable
-  public String getComment() {
-    return comment;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public Column(String name, String type, String comment) {
+        this.name = name;
+        this.type = type;
+        this.comment = comment;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public String getName() {
+        return name;
     }
-    Column column = (Column) o;
-    return Objects.equals(name, column.name)
-        && Objects.equals(type, column.type)
-        && Objects.equals(comment, column.comment);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, type, comment);
-  }
+    public String getType() {
+        return type;
+    }
 
-  @Override
-  public String toString() {
-    return "Column{"
-        + "name='"
-        + name
-        + '\''
-        + ", type='"
-        + type
-        + '\''
-        + ", comment='"
-        + comment
-        + '\''
-        + '}';
-  }
+    @Nullable
+    public String getComment() {
+        return comment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Column column = (Column) o;
+        return Objects.equals(name, column.name)
+                && Objects.equals(type, column.type)
+                && Objects.equals(comment, column.comment);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, comment);
+    }
+
+    @Override
+    public String toString() {
+        return "Column{"
+                + "name='"
+                + name
+                + '\''
+                + ", type='"
+                + type
+                + '\''
+                + ", comment='"
+                + comment
+                + '\''
+                + '}';
+    }
 }

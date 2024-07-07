@@ -20,34 +20,34 @@ package org.apache.streampark.console.core.enums;
 /** Git authentication results */
 public enum GitAuthorizedErrorEnum {
 
-  /** Success. */
-  SUCCESS(0),
+    /** Success. */
+    SUCCESS(0),
 
-  /** Need required, user password is null. */
-  REQUIRED(1),
+    /** Need required, user password is null. */
+    REQUIRED(1),
 
-  /** User password error. */
-  ERROR(2),
+    /** User password error. */
+    ERROR(2),
 
-  /** Unknown error. */
-  UNKNOW(3);
+    /** Unknown error. */
+    UNKNOW(3);
 
-  private final int value;
+    private final int value;
 
-  GitAuthorizedErrorEnum(int value) {
-    this.value = value;
-  }
-
-  public static GitAuthorizedErrorEnum of(Integer state) {
-    for (GitAuthorizedErrorEnum error : values()) {
-      if (error.value == state) {
-        return error;
-      }
+    GitAuthorizedErrorEnum(int value) {
+        this.value = value;
     }
-    return null;
-  }
 
-  public int getType() {
-    return value;
-  }
+    public static GitAuthorizedErrorEnum of(Integer state) {
+        for (GitAuthorizedErrorEnum error : values()) {
+            if (error.value == state) {
+                return error;
+            }
+        }
+        return null;
+    }
+
+    public int getType() {
+        return value;
+    }
 }

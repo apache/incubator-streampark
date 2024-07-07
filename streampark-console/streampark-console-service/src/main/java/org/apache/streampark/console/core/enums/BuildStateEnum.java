@@ -22,31 +22,31 @@ import java.util.Arrays;
 /** Describe the construction status of Project */
 public enum BuildStateEnum {
 
-  /** has changed, need rebuild */
-  NEED_REBUILD(-2),
-  /** has cancelled, not build */
-  NOT_BUILD(-1),
+    /** has changed, need rebuild */
+    NEED_REBUILD(-2),
+    /** has cancelled, not build */
+    NOT_BUILD(-1),
 
-  /** building */
-  BUILDING(0),
+    /** building */
+    BUILDING(0),
 
-  /** build successful */
-  SUCCESSFUL(1),
+    /** build successful */
+    SUCCESSFUL(1),
 
-  /** build failed */
-  FAILED(2);
+    /** build failed */
+    FAILED(2);
 
-  private final int value;
+    private final int value;
 
-  BuildStateEnum(int value) {
-    this.value = value;
-  }
+    BuildStateEnum(int value) {
+        this.value = value;
+    }
 
-  public int get() {
-    return this.value;
-  }
+    public int get() {
+        return this.value;
+    }
 
-  public static BuildStateEnum of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-  }
+    public static BuildStateEnum of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }

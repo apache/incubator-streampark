@@ -35,66 +35,66 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 
-  private static final String TOKEN = "Authorization";
+    private static final String TOKEN = "Authorization";
 
-  @Override
-  protected boolean isAccessAllowed(
-      ServletRequest request, ServletResponse response, Object mappedValue)
-      throws UnauthorizedException {
-    if (isLoginAttempt(request, response)) {
-      return executeLogin(request, response);
-    }
-    return false;
-  }
-
-  @Override
-  protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
-    HttpServletRequest req = (HttpServletRequest) request;
-    String token = req.getHeader(TOKEN);
-    return token != null;
-  }
-
-  @Override
-  protected boolean executeLogin(ServletRequest request, ServletResponse response) {
-    HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-    String token = httpServletRequest.getHeader(TOKEN);
-    AuthenticationType type = JWTUtil.getAuthType(WebUtils.decryptToken(token));
-    if (type == null) {
-      return false;
-    }
-    if (type == AuthenticationType.OPENAPI) {
-      JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
-      try {
-        getSubject(request, response).login(jwtToken);
-        return true;
-      } catch (Exception e) {
+    @Override
+    protected boolean isAccessAllowed(
+                                      ServletRequest request, ServletResponse response,
+                                      Object mappedValue) throws UnauthorizedException {
+        if (isLoginAttempt(request, response)) {
+            return executeLogin(request, response);
+        }
         return false;
-      }
     }
-    return true;
-  }
 
-  /** cross-domain support */
-  @Override
-  protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-    HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-    HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-    httpServletResponse.setHeader(
-        "Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
-    httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
-    httpServletResponse.setHeader(
-        "Access-Control-Allow-Headers",
-        httpServletRequest.getHeader("Access-Control-Request-Headers"));
-    if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
-      httpServletResponse.setStatus(HttpStatus.OK.value());
-      return false;
+    @Override
+    protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
+        HttpServletRequest req = (HttpServletRequest) request;
+        String token = req.getHeader(TOKEN);
+        return token != null;
     }
-    boolean preHandleResult = super.preHandle(request, response);
-    int httpStatus = httpServletResponse.getStatus();
-    // avoid the browser to automatically pop up the authentication box when http status=401
-    if (!preHandleResult && httpStatus == 401) {
-      httpServletResponse.setHeader("WWW-Authenticate", null);
+
+    @Override
+    protected boolean executeLogin(ServletRequest request, ServletResponse response) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        String token = httpServletRequest.getHeader(TOKEN);
+        AuthenticationType type = JWTUtil.getAuthType(WebUtils.decryptToken(token));
+        if (type == null) {
+            return false;
+        }
+        if (type == AuthenticationType.OPENAPI) {
+            JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
+            try {
+                getSubject(request, response).login(jwtToken);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
     }
-    return preHandleResult;
-  }
+
+    /** cross-domain support */
+    @Override
+    protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+        httpServletResponse.setHeader(
+                "Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
+        httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
+        httpServletResponse.setHeader(
+                "Access-Control-Allow-Headers",
+                httpServletRequest.getHeader("Access-Control-Request-Headers"));
+        if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
+            httpServletResponse.setStatus(HttpStatus.OK.value());
+            return false;
+        }
+        boolean preHandleResult = super.preHandle(request, response);
+        int httpStatus = httpServletResponse.getStatus();
+        // avoid the browser to automatically pop up the authentication box when http status=401
+        if (!preHandleResult && httpStatus == 401) {
+            httpServletResponse.setHeader("WWW-Authenticate", null);
+        }
+        return preHandleResult;
+    }
 }

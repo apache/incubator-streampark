@@ -63,91 +63,99 @@ import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.
 @Configuration
 public class FlinkK8sWatcherWrapper {
 
-  @Lazy @Autowired private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
+    @Lazy
+    @Autowired
+    private FlinkK8sChangeEventListener flinkK8sChangeEventListener;
 
-  @Lazy @Autowired private ApplicationManageService applicationManageService;
+    @Lazy
+    @Autowired
+    private ApplicationManageService applicationManageService;
 
-  @Lazy @Autowired private FlinkClusterService flinkClusterService;
+    @Lazy
+    @Autowired
+    private FlinkClusterService flinkClusterService;
 
-  @Lazy @Autowired private FlinkEnvService flinkEnvService;
+    @Lazy
+    @Autowired
+    private FlinkEnvService flinkEnvService;
 
-  /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
-  @Bean(destroyMethod = "close")
-  public FlinkK8sWatcher registerFlinkK8sWatcher() {
-    // lazy start tracking monitor
-    FlinkK8sWatcher flinkK8sWatcher =
-        FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
-    initFlinkK8sWatcher(flinkK8sWatcher);
+    /** Register FlinkTrackMonitor bean for tracking flink job on kubernetes. */
+    @Bean(destroyMethod = "close")
+    public FlinkK8sWatcher registerFlinkK8sWatcher() {
+        // lazy start tracking monitor
+        FlinkK8sWatcher flinkK8sWatcher =
+                FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+        initFlinkK8sWatcher(flinkK8sWatcher);
 
-    /* Dev scaffold: watch flink k8s tracking cache,
-       see org.apache.streampark.flink.kubernetes.helper.KubernetesWatcherHelper for items.
-       Example:
-           KubernetesWatcherHelper.watchTrackIdsCache(flinkK8sWatcher);
-           KubernetesWatcherHelper.watchJobStatusCache(flinkK8sWatcher);
-           KubernetesWatcherHelper.watchAggClusterMetricsCache(flinkK8sWatcher);
-           KubernetesWatcherHelper.watchClusterMetricsCache(flinkK8sWatcher);
-    */
-    return flinkK8sWatcher;
-  }
-
-  private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
-    // register change event listener
-    trackMonitor.registerListener(flinkK8sChangeEventListener);
-    // recovery tracking list
-    List<TrackId> k8sApp = getK8sWatchingApps();
-    k8sApp.forEach(trackMonitor::doWatching);
-  }
-
-  /** get flink-k8s job tracking application from db. */
-  private List<TrackId> getK8sWatchingApps() {
-    // query k8s execution mode application from db
-    final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-    queryWrapper
-        .eq(Application::getTracking, 1)
-        .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
-
-    List<Application> k8sApplication = applicationManageService.list(queryWrapper);
-    if (CollectionUtils.isEmpty(k8sApplication)) {
-      return Lists.newArrayList();
+        /*
+         * Dev scaffold: watch flink k8s tracking cache, see
+         * org.apache.streampark.flink.kubernetes.helper.KubernetesWatcherHelper for items. Example:
+         * KubernetesWatcherHelper.watchTrackIdsCache(flinkK8sWatcher);
+         * KubernetesWatcherHelper.watchJobStatusCache(flinkK8sWatcher);
+         * KubernetesWatcherHelper.watchAggClusterMetricsCache(flinkK8sWatcher);
+         * KubernetesWatcherHelper.watchClusterMetricsCache(flinkK8sWatcher);
+         */
+        return flinkK8sWatcher;
     }
-    // filter out the application that should be tracking
-    return k8sApplication.stream()
-        .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
-        .map(this::toTrackId)
-        .collect(Collectors.toList());
-  }
 
-  public TrackId toTrackId(Application app) {
-    FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
-    Properties properties = flinkEnv.getFlinkConfig();
+    private void initFlinkK8sWatcher(@Nonnull FlinkK8sWatcher trackMonitor) {
+        // register change event listener
+        trackMonitor.registerListener(flinkK8sChangeEventListener);
+        // recovery tracking list
+        List<TrackId> k8sApp = getK8sWatchingApps();
+        k8sApp.forEach(trackMonitor::doWatching);
+    }
 
-    Map<String, String> dynamicProperties =
-        PropertiesUtils.extractDynamicPropertiesAsJava(app.getDynamicProperties());
-    String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
-    if (archiveDir != null) {
-      properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
+    /** get flink-k8s job tracking application from db. */
+    private List<TrackId> getK8sWatchingApps() {
+        // query k8s execution mode application from db
+        final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(Application::getTracking, 1)
+                .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
+
+        List<Application> k8sApplication = applicationManageService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(k8sApplication)) {
+            return Lists.newArrayList();
+        }
+        // filter out the application that should be tracking
+        return k8sApplication.stream()
+                .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
+                .map(this::toTrackId)
+                .collect(Collectors.toList());
     }
-    if (FlinkExecutionMode.isKubernetesApplicationMode(app.getExecutionMode())) {
-      return TrackId.onApplication(
-          app.getK8sNamespace(),
-          app.getJobName(),
-          app.getId(),
-          app.getJobId(),
-          app.getTeamId().toString(),
-          properties);
-    } else if (FlinkExecutionMode.isKubernetesSessionMode(app.getExecutionMode())) {
-      FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
-      String namespace = flinkCluster.getK8sNamespace();
-      String clusterId = flinkCluster.getClusterId();
-      return TrackId.onSession(
-          namespace,
-          clusterId,
-          app.getId(),
-          app.getJobId(),
-          app.getTeamId().toString(),
-          properties);
-    } else {
-      throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
+
+    public TrackId toTrackId(Application app) {
+        FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
+        Properties properties = flinkEnv.getFlinkConfig();
+
+        Map<String, String> dynamicProperties =
+                PropertiesUtils.extractDynamicPropertiesAsJava(app.getDynamicProperties());
+        String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
+        if (archiveDir != null) {
+            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
+        }
+        if (FlinkExecutionMode.isKubernetesApplicationMode(app.getExecutionMode())) {
+            return TrackId.onApplication(
+                    app.getK8sNamespace(),
+                    app.getJobName(),
+                    app.getId(),
+                    app.getJobId(),
+                    app.getTeamId().toString(),
+                    properties);
+        } else if (FlinkExecutionMode.isKubernetesSessionMode(app.getExecutionMode())) {
+            FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
+            String namespace = flinkCluster.getK8sNamespace();
+            String clusterId = flinkCluster.getClusterId();
+            return TrackId.onSession(
+                    namespace,
+                    clusterId,
+                    app.getId(),
+                    app.getJobId(),
+                    app.getTeamId().toString(),
+                    properties);
+        } else {
+            throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
+        }
     }
-  }
 }

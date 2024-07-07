@@ -19,11 +19,11 @@ package org.apache.streampark.console.core.service;
 
 public interface DockerImageService {
 
-  /**
-   * Check the validity of the Docker image
-   *
-   * @param imageName
-   * @return
-   */
-  Boolean isDockerImageExist(String imageName);
+    /**
+     * Check the validity of the Docker image
+     *
+     * @param imageName
+     * @return
+     */
+    Boolean isDockerImageExist(String imageName);
 }

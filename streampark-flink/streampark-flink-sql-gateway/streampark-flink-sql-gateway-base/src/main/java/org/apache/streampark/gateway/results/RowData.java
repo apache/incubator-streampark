@@ -23,42 +23,43 @@ import java.util.Objects;
 
 /** Row data. */
 public class RowData implements Serializable {
-  private final String rowKind;
 
-  private final List<Object> fields;
+    private final String rowKind;
 
-  public RowData(String rowKind, List<Object> fields) {
-    this.rowKind = rowKind;
-    this.fields = fields;
-  }
+    private final List<Object> fields;
 
-  public String getRowKind() {
-    return rowKind;
-  }
-
-  public List<Object> getFields() {
-    return fields;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public RowData(String rowKind, List<Object> fields) {
+        this.rowKind = rowKind;
+        this.fields = fields;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public String getRowKind() {
+        return rowKind;
     }
-    RowData rowData = (RowData) o;
-    return Objects.equals(rowKind, rowData.rowKind) && Objects.equals(fields, rowData.fields);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(rowKind, fields);
-  }
+    public List<Object> getFields() {
+        return fields;
+    }
 
-  @Override
-  public String toString() {
-    return "RowData{" + "rowKind='" + rowKind + '\'' + ", fields=" + fields + '}';
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RowData rowData = (RowData) o;
+        return Objects.equals(rowKind, rowData.rowKind) && Objects.equals(fields, rowData.fields);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rowKind, fields);
+    }
+
+    @Override
+    public String toString() {
+        return "RowData{" + "rowKind='" + rowKind + '\'' + ", fields=" + fields + '}';
+    }
 }

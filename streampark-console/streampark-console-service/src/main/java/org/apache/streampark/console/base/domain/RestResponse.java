@@ -25,52 +25,52 @@ import java.util.HashMap;
 
 public class RestResponse extends HashMap<String, Object> {
 
-  public static final String STATUS_SUCCESS = "success";
-  public static final String STATUS_FAIL = "error";
-  public static final String STATUS_KEY = "status";
-  public static final String CODE_KEY = "code";
-  public static final String MESSAGE_KEY = "message";
-  public static final String DATA_KEY = "data";
+    public static final String STATUS_SUCCESS = "success";
+    public static final String STATUS_FAIL = "error";
+    public static final String STATUS_KEY = "status";
+    public static final String CODE_KEY = "code";
+    public static final String MESSAGE_KEY = "message";
+    public static final String DATA_KEY = "data";
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  public static RestResponse success(Object data) {
-    RestResponse resp = success();
-    resp.put(DATA_KEY, data);
-    return resp;
-  }
+    public static RestResponse success(Object data) {
+        RestResponse resp = success();
+        resp.put(DATA_KEY, data);
+        return resp;
+    }
 
-  public static RestResponse success() {
-    RestResponse resp = new RestResponse();
-    resp.put(STATUS_KEY, STATUS_SUCCESS);
-    resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
-    return resp;
-  }
+    public static RestResponse success() {
+        RestResponse resp = new RestResponse();
+        resp.put(STATUS_KEY, STATUS_SUCCESS);
+        resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
+        return resp;
+    }
 
-  public static RestResponse fail(Long code, String format, Object... args) {
-    String message = MessageFormatter.arrayFormat(format, args).getMessage();
-    RestResponse resp = new RestResponse();
-    resp.put(STATUS_KEY, STATUS_FAIL);
-    resp.put(MESSAGE_KEY, message);
-    resp.put(CODE_KEY, code);
-    resp.put(DATA_KEY, null);
-    return resp;
-  }
+    public static RestResponse fail(Long code, String format, Object... args) {
+        String message = MessageFormatter.arrayFormat(format, args).getMessage();
+        RestResponse resp = new RestResponse();
+        resp.put(STATUS_KEY, STATUS_FAIL);
+        resp.put(MESSAGE_KEY, message);
+        resp.put(CODE_KEY, code);
+        resp.put(DATA_KEY, null);
+        return resp;
+    }
 
-  public RestResponse message(String message) {
-    this.put(MESSAGE_KEY, message);
-    return this;
-  }
+    public RestResponse message(String message) {
+        this.put(MESSAGE_KEY, message);
+        return this;
+    }
 
-  public RestResponse data(Object data) {
-    this.put(DATA_KEY, data);
-    return this;
-  }
+    public RestResponse data(Object data) {
+        this.put(DATA_KEY, data);
+        return this;
+    }
 
-  @NotNull
-  @Override
-  public RestResponse put(String key, Object value) {
-    super.put(key, value);
-    return this;
-  }
+    @NotNull
+    @Override
+    public RestResponse put(String key, Object value) {
+        super.put(key, value);
+        return this;
+    }
 }

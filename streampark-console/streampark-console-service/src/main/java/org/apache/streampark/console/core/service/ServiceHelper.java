@@ -47,102 +47,102 @@ import java.util.stream.Stream;
 @Service
 public class ServiceHelper {
 
-  @Autowired private SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
-  @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  private String flinkSqlClientJar = null;
+    private String flinkSqlClientJar = null;
 
-  private String sparkSqlClientJar = null;
+    private String sparkSqlClientJar = null;
 
-  public User getLoginUser() {
-    String token = (String) SecurityUtils.getSubject().getPrincipal();
-    Long userId = JWTUtil.getUserId(token);
-    if (userId == null) {
-      throw new AuthenticationException("Unauthorized");
-    }
-    return userService.getById(userId);
-  }
-
-  public Long getUserId() {
-    User user = getLoginUser();
-    if (user != null) {
-      return user.getUserId();
-    }
-    return null;
-  }
-
-  public String getFlinkSqlClientJar(FlinkEnv flinkEnv) {
-    if (flinkSqlClientJar == null) {
-      File localClient = WebUtils.getAppClientDir();
-      ApiAlertException.throwIfFalse(
-          localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
-
-      String regex =
-          String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
-
-      List<String> jars =
-          Arrays.stream(Objects.requireNonNull(localClient.list()))
-              .filter(x -> x.matches(regex))
-              .collect(Collectors.toList());
-
-      ApiAlertException.throwIfTrue(
-          jars.isEmpty(),
-          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
-
-      ApiAlertException.throwIfTrue(
-          jars.size() > 1,
-          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
-      flinkSqlClientJar = jars.get(0);
-    }
-    return flinkSqlClientJar;
-  }
-
-  public String getSparkSqlClientJar(SparkEnv sparkEnv) {
-    if (sparkSqlClientJar == null) {
-      File localClient = WebUtils.getAppClientDir();
-      ApiAlertException.throwIfFalse(
-          localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
-      List<String> jars =
-          Arrays.stream(Objects.requireNonNull(localClient.list()))
-              .filter(
-                  x ->
-                      x.matches(
-                          "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion() + "-.*\\.jar"))
-              .collect(Collectors.toList());
-
-      ApiAlertException.throwIfTrue(
-          jars.isEmpty(),
-          "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
-
-      ApiAlertException.throwIfTrue(
-          jars.size() > 1,
-          "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
-
-      sparkSqlClientJar = jars.get(0);
-    }
-    return sparkSqlClientJar;
-  }
-
-  public String rollViewLog(String path, int offset, int limit) {
-    try {
-      File file = new File(path);
-      if (file.exists() && file.isFile()) {
-        try (Stream<String> stream = Files.lines(Paths.get(path))) {
-          return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
+    public User getLoginUser() {
+        String token = (String) SecurityUtils.getSubject().getPrincipal();
+        Long userId = JWTUtil.getUserId(token);
+        if (userId == null) {
+            throw new AuthenticationException("Unauthorized");
         }
-      }
-      return null;
-    } catch (Exception e) {
-      throw new ApiDetailException("roll view log error: " + e);
+        return userService.getById(userId);
     }
-  }
 
-  public void configureIngress(String clusterId, String namespace)
-      throws KubernetesClientException {
-    String domainName = settingService.getIngressModeDefault();
-    if (StringUtils.isNotBlank(domainName)) {
-      IngressController.configureIngress(domainName, clusterId, namespace);
+    public Long getUserId() {
+        User user = getLoginUser();
+        if (user != null) {
+            return user.getUserId();
+        }
+        return null;
     }
-  }
+
+    public String getFlinkSqlClientJar(FlinkEnv flinkEnv) {
+        if (flinkSqlClientJar == null) {
+            File localClient = WebUtils.getAppClientDir();
+            ApiAlertException.throwIfFalse(
+                    localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
+
+            String regex =
+                    String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
+
+            List<String> jars =
+                    Arrays.stream(Objects.requireNonNull(localClient.list()))
+                            .filter(x -> x.matches(regex))
+                            .collect(Collectors.toList());
+
+            ApiAlertException.throwIfTrue(
+                    jars.isEmpty(),
+                    "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+
+            ApiAlertException.throwIfTrue(
+                    jars.size() > 1,
+                    "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+            flinkSqlClientJar = jars.get(0);
+        }
+        return flinkSqlClientJar;
+    }
+
+    public String getSparkSqlClientJar(SparkEnv sparkEnv) {
+        if (sparkSqlClientJar == null) {
+            File localClient = WebUtils.getAppClientDir();
+            ApiAlertException.throwIfFalse(
+                    localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
+            List<String> jars =
+                    Arrays.stream(Objects.requireNonNull(localClient.list()))
+                            .filter(
+                                    x -> x.matches(
+                                            "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion() + "-.*\\.jar"))
+                            .collect(Collectors.toList());
+
+            ApiAlertException.throwIfTrue(
+                    jars.isEmpty(),
+                    "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+
+            ApiAlertException.throwIfTrue(
+                    jars.size() > 1,
+                    "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+
+            sparkSqlClientJar = jars.get(0);
+        }
+        return sparkSqlClientJar;
+    }
+
+    public String rollViewLog(String path, int offset, int limit) {
+        try {
+            File file = new File(path);
+            if (file.exists() && file.isFile()) {
+                try (Stream<String> stream = Files.lines(Paths.get(path))) {
+                    return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            throw new ApiDetailException("roll view log error: " + e);
+        }
+    }
+
+    public void configureIngress(String clusterId, String namespace) throws KubernetesClientException {
+        String domainName = settingService.getIngressModeDefault();
+        if (StringUtils.isNotBlank(domainName)) {
+            IngressController.configureIngress(domainName, clusterId, namespace);
+        }
+    }
 }

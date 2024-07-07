@@ -29,26 +29,26 @@ import java.util.Date;
 @Data
 public class Member implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  private Long teamId;
+    private Long teamId;
 
-  private Long userId;
+    private Long userId;
 
-  private Long roleId;
+    private Long roleId;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private transient String userName;
+    private transient String userName;
 
-  private transient String roleName;
+    private transient String roleName;
 
-  private transient String createTimeFrom;
+    private transient String createTimeFrom;
 
-  private transient String createTimeTo;
+    private transient String createTimeTo;
 }

@@ -25,34 +25,34 @@ import javax.annotation.Nullable;
 /** Storage type enum. */
 public enum StorageType {
 
-  /** hdfs */
-  HDFS("hdfs"),
+    /** hdfs */
+    HDFS("hdfs"),
 
-  /** local File system */
-  LFS("lfs");
+    /** local File system */
+    LFS("lfs");
 
-  private final String type;
+    private final String type;
 
-  StorageType(@Nonnull String type) {
-    this.type = type;
-  }
-
-  @Nonnull
-  public String getType() {
-    return type;
-  }
-
-  /** Try to resolve the given storage type identifier into a known {@link StorageType}. */
-  @Nonnull
-  public static StorageType of(@Nullable String identifier) {
-    if (StringUtils.isBlank(identifier)) {
-      return LFS;
+    StorageType(@Nonnull String type) {
+        this.type = type;
     }
-    for (StorageType type : values()) {
-      if (type.type.equals(identifier)) {
+
+    @Nonnull
+    public String getType() {
         return type;
-      }
     }
-    return LFS;
-  }
+
+    /** Try to resolve the given storage type identifier into a known {@link StorageType}. */
+    @Nonnull
+    public static StorageType of(@Nullable String identifier) {
+        if (StringUtils.isBlank(identifier)) {
+            return LFS;
+        }
+        for (StorageType type : values()) {
+            if (type.type.equals(identifier)) {
+                return type;
+            }
+        }
+        return LFS;
+    }
 }

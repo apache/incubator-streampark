@@ -35,70 +35,67 @@ import java.io.Serializable;
 @Slf4j
 public class AlertConfigParams implements Serializable {
 
-  @Schema(example = "1")
-  private Long id;
+    @Schema(example = "1")
+    private Long id;
 
-  @Schema(example = "100000")
-  private Long userId;
+    @Schema(example = "100000")
+    private Long userId;
 
-  @Schema(example = "test-alert")
-  private String alertName;
+    @Schema(example = "test-alert")
+    private String alertName;
 
-  @Schema(
-      example = "1",
-      description =
-          "base type, email 1, dink-talk 2, we-com 4, http callback 8, lark 16, also choose a combination, e.g. 3 means email + dink-talk")
-  private Integer alertType;
+    @Schema(example = "1", description = "base type, email 1, dink-talk 2, we-com 4, http callback 8, lark 16, also choose a combination, e.g. 3 means email + dink-talk")
+    private Integer alertType;
 
-  @Schema(description = "email alert parameters")
-  private AlertEmailParams emailParams;
+    @Schema(description = "email alert parameters")
+    private AlertEmailParams emailParams;
 
-  @Schema(description = "ding-talk alert parameters")
-  private AlertDingTalkParams dingTalkParams;
+    @Schema(description = "ding-talk alert parameters")
+    private AlertDingTalkParams dingTalkParams;
 
-  @Schema(description = "we-com alert parameters")
-  private AlertWeComParams weComParams;
+    @Schema(description = "we-com alert parameters")
+    private AlertWeComParams weComParams;
 
-  @Schema(description = "http callback alert parameters")
-  private AlertHttpCallbackParams httpCallbackParams;
+    @Schema(description = "http callback alert parameters")
+    private AlertHttpCallbackParams httpCallbackParams;
 
-  @Schema(description = "lark alert parameters")
-  private AlertLarkParams larkParams;
+    @Schema(description = "lark alert parameters")
+    private AlertLarkParams larkParams;
 
-  public static AlertConfigParams of(AlertConfig config) {
-    if (config == null) {
-      return null;
+    public static AlertConfigParams of(AlertConfig config) {
+        if (config == null) {
+            return null;
+        }
+        AlertConfigParams params = new AlertConfigParams();
+        BeanUtils.copyProperties(
+                config,
+                params,
+                "emailParams",
+                "dingTalkParams",
+                "weComParams",
+                "httpCallbackParams",
+                "larkParams");
+        try {
+            if (StringUtils.isNotBlank(config.getEmailParams())) {
+                params.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
+            }
+            if (StringUtils.isNotBlank(config.getDingTalkParams())) {
+                params.setDingTalkParams(
+                        JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
+            }
+            if (StringUtils.isNotBlank(config.getWeComParams())) {
+                params.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
+            }
+            if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
+                params.setHttpCallbackParams(
+                        JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
+            }
+            if (StringUtils.isNotBlank(config.getLarkParams())) {
+                params.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Json read failed", e);
+        }
+        return params;
     }
-    AlertConfigParams params = new AlertConfigParams();
-    BeanUtils.copyProperties(
-        config,
-        params,
-        "emailParams",
-        "dingTalkParams",
-        "weComParams",
-        "httpCallbackParams",
-        "larkParams");
-    try {
-      if (StringUtils.isNotBlank(config.getEmailParams())) {
-        params.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
-      }
-      if (StringUtils.isNotBlank(config.getDingTalkParams())) {
-        params.setDingTalkParams(
-            JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
-      }
-      if (StringUtils.isNotBlank(config.getWeComParams())) {
-        params.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
-      }
-      if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
-        params.setHttpCallbackParams(
-            JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
-      }
-      if (StringUtils.isNotBlank(config.getLarkParams())) {
-        params.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));
-      }
-    } catch (JsonProcessingException e) {
-      log.error("Json read failed", e);
-    }
-    return params;
-  }
 }

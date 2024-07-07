@@ -37,72 +37,72 @@ import java.util.Date;
 @TableName("t_resource")
 public class Resource implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  // resourceName unique
-  private String resourceName;
+    // resourceName unique
+    private String resourceName;
 
-  // resource path
-  private String resourcePath;
+    // resource path
+    private String resourcePath;
 
-  private String resource;
+    private String resource;
 
-  @Size(max = 100, message = "{noMoreThan}")
-  private String description;
+    @Size(max = 100, message = "{noMoreThan}")
+    private String description;
 
-  /** user id of creator */
-  private Long creatorId;
+    /** user id of creator */
+    private Long creatorId;
 
-  private ResourceTypeEnum resourceType;
+    private ResourceTypeEnum resourceType;
 
-  private EngineTypeEnum engineType;
+    private EngineTypeEnum engineType;
 
-  // for flink app
-  private String mainClass;
+    // for flink app
+    private String mainClass;
 
-  // for flink connector
-  private String connectorRequiredOptions;
+    // for flink connector
+    private String connectorRequiredOptions;
 
-  // for flink connector
-  private String connectorOptionalOptions;
+    // for flink connector
+    private String connectorOptionalOptions;
 
-  /** user name of creator */
-  private transient String creatorName;
+    /** user name of creator */
+    private transient String creatorName;
 
-  @NotNull(message = "{required}")
-  private Long teamId;
+    @NotNull(message = "{required}")
+    private Long teamId;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 
-  private transient String connector;
+    private transient String connector;
 
-  public void setResourcePath(String resourcePath) {
-    if (StringUtils.isBlank(resourcePath)) {
-      throw new IllegalArgumentException("resource path cannot be null.");
+    public void setResourcePath(String resourcePath) {
+        if (StringUtils.isBlank(resourcePath)) {
+            throw new IllegalArgumentException("resource path cannot be null.");
+        }
+        String[] namePath = resourcePath.split(":");
+        if (namePath.length != 2) {
+            throw new IllegalArgumentException("resource path invalid, format: $name:$path");
+        }
+        this.resourcePath = resourcePath;
     }
-    String[] namePath = resourcePath.split(":");
-    if (namePath.length != 2) {
-      throw new IllegalArgumentException("resource path invalid, format: $name:$path");
-    }
-    this.resourcePath = resourcePath;
-  }
 
-  public String getFileName() {
-    if (StringUtils.isBlank(this.resourcePath)) {
-      return null;
+    public String getFileName() {
+        if (StringUtils.isBlank(this.resourcePath)) {
+            return null;
+        }
+        return resourcePath.split(":")[0];
     }
-    return resourcePath.split(":")[0];
-  }
 
-  public String getFilePath() {
-    if (StringUtils.isBlank(this.resourcePath)) {
-      return null;
+    public String getFilePath() {
+        if (StringUtils.isBlank(this.resourcePath)) {
+            return null;
+        }
+        return resourcePath.split(":")[1];
     }
-    return resourcePath.split(":")[1];
-  }
 }

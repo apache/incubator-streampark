@@ -32,20 +32,20 @@ import java.util.Date;
 @TableName("t_flink_gateway")
 public class FlinkGateWay {
 
-  @TableId(type = IdType.AUTO)
-  private Long id;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-  @NotBlank(message = "{required}")
-  private String gatewayName;
+    @NotBlank(message = "{required}")
+    private String gatewayName;
 
-  private String description;
+    private String description;
 
-  private GatewayTypeEnum gatewayType;
+    private GatewayTypeEnum gatewayType;
 
-  @NotBlank(message = "{required}")
-  private String address;
+    @NotBlank(message = "{required}")
+    private String address;
 
-  private Date createTime;
+    private Date createTime;
 
-  private Date modifyTime;
+    private Date modifyTime;
 }

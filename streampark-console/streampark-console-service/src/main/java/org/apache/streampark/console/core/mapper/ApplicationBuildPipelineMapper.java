@@ -21,4 +21,5 @@ import org.apache.streampark.console.core.entity.AppBuildPipeline;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {}
+public interface ApplicationBuildPipelineMapper extends BaseMapper<AppBuildPipeline> {
+}

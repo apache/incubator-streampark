@@ -27,20 +27,21 @@ import java.util.Collections;
 
 public class FlinkSqlGateway {
 
-  private FlinkSqlGateway() {}
+    private FlinkSqlGateway() {
+    }
 
-  public static DefaultApi sqlGatewayApi(String basePath) {
-    ApiClient client = new ApiClient();
-    client.setBasePath(basePath);
-    return new DefaultApi(client);
-  }
+    public static DefaultApi sqlGatewayApi(String basePath) {
+        ApiClient client = new ApiClient();
+        client.setBasePath(basePath);
+        return new DefaultApi(client);
+    }
 
-  public static void main(String[] args) throws ApiException {
-    DefaultApi api = new DefaultApi(new ApiClient());
-    OpenSessionResponseBody openSessionResponseBody =
-        api.openSession(
-            new OpenSessionRequestBody()
-                .sessionName("example")
-                .properties(Collections.singletonMap("foo", "bar")));
-  }
+    public static void main(String[] args) throws ApiException {
+        DefaultApi api = new DefaultApi(new ApiClient());
+        OpenSessionResponseBody openSessionResponseBody =
+                api.openSession(
+                        new OpenSessionRequestBody()
+                                .sessionName("example")
+                                .properties(Collections.singletonMap("foo", "bar")));
+    }
 }

@@ -24,18 +24,19 @@ import java.util.Arrays;
 /** Operation type */
 @Getter
 public enum OperationEnum {
-  RELEASE(0),
-  START(1),
-  SAVEPOINT(2),
-  CANCEL(3);
 
-  private final int value;
+    RELEASE(0),
+    START(1),
+    SAVEPOINT(2),
+    CANCEL(3);
 
-  OperationEnum(int value) {
-    this.value = value;
-  }
+    private final int value;
 
-  public static OperationEnum of(Integer option) {
-    return Arrays.stream(values()).filter((x) -> x.value == option).findFirst().orElse(null);
-  }
+    OperationEnum(int value) {
+        this.value = value;
+    }
+
+    public static OperationEnum of(Integer option) {
+        return Arrays.stream(values()).filter((x) -> x.value == option).findFirst().orElse(null);
+    }
 }

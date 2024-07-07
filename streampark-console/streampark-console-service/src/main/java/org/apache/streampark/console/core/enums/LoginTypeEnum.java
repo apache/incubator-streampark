@@ -27,29 +27,30 @@ import java.util.Objects;
 @Getter
 public enum LoginTypeEnum {
 
-  /** sign in with password */
-  PASSWORD(0),
+    /** sign in with password */
+    PASSWORD(0),
 
-  /** sign in with ldap */
-  LDAP(1),
+    /** sign in with ldap */
+    LDAP(1),
 
-  /** sign in with SSO */
-  SSO(2);
+    /** sign in with SSO */
+    SSO(2);
 
-  @EnumValue private final int code;
+    @EnumValue
+    private final int code;
 
-  LoginTypeEnum(int code) {
-    this.code = code;
-  }
+    LoginTypeEnum(int code) {
+        this.code = code;
+    }
 
-  public static LoginTypeEnum of(Integer code) {
-    return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-  }
+    public static LoginTypeEnum of(Integer code) {
+        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
+    }
 
-  public static LoginTypeEnum of(String loginType) {
-    return Arrays.stream(values())
-        .filter((x) -> Objects.equals(x.toString(), loginType))
-        .findFirst()
-        .orElse(null);
-  }
+    public static LoginTypeEnum of(String loginType) {
+        return Arrays.stream(values())
+                .filter((x) -> Objects.equals(x.toString(), loginType))
+                .findFirst()
+                .orElse(null);
+    }
 }

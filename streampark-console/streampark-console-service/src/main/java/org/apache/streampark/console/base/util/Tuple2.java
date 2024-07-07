@@ -43,121 +43,122 @@ import java.util.Objects;
  */
 public class Tuple2<T0, T1> extends Tuple {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  /** Field 0 of the tuple. */
-  public T0 t1;
-  /** Field 1 of the tuple. */
-  public T1 t2;
+    /** Field 0 of the tuple. */
+    public T0 t1;
+    /** Field 1 of the tuple. */
+    public T1 t2;
 
-  /** Creates a new tuple where all fields are null. */
-  public Tuple2() {}
-
-  /**
-   * Creates a new tuple and assigns the given values to the tuple's fields.
-   *
-   * @param t0 The value for field 0
-   * @param t1 The value for field 1
-   */
-  public Tuple2(T0 t0, T1 t1) {
-    this.t1 = t0;
-    this.t2 = t1;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> T get(int pos) {
-    switch (pos) {
-      case 0:
-        return (T) this.t1;
-      case 1:
-        return (T) this.t2;
-      default:
-        throw new IndexOutOfBoundsException(String.valueOf(pos));
+    /** Creates a new tuple where all fields are null. */
+    public Tuple2() {
     }
-  }
 
-  @SuppressWarnings("unchecked")
-  public <T> void set(T value, int pos) {
-    switch (pos) {
-      case 0:
-        this.t1 = (T0) value;
-        break;
-      case 1:
-        this.t2 = (T1) value;
-        break;
-      default:
-        throw new IndexOutOfBoundsException(String.valueOf(pos));
+    /**
+     * Creates a new tuple and assigns the given values to the tuple's fields.
+     *
+     * @param t0 The value for field 0
+     * @param t1 The value for field 1
+     */
+    public Tuple2(T0 t0, T1 t1) {
+        this.t1 = t0;
+        this.t2 = t1;
     }
-  }
 
-  /**
-   * Sets new values to all fields of the tuple.
-   *
-   * @param f0 The value for field 0
-   * @param f1 The value for field 1
-   */
-  public void set(T0 f0, T1 f1) {
-    this.t1 = f0;
-    this.t2 = f1;
-  }
-
-  /**
-   * Returns a shallow copy of the tuple with swapped values.
-   *
-   * @return shallow copy of the tuple with swapped values
-   */
-  public Tuple2<T1, T0> swap() {
-    return new Tuple2<T1, T0>(t2, t1);
-  }
-
-  /**
-   * Deep equality for tuples by calling equals() on the tuple members.
-   *
-   * @param o the object checked for equality
-   * @return true if this is equal to o.
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T get(int pos) {
+        switch (pos) {
+            case 0:
+                return (T) this.t1;
+            case 1:
+                return (T) this.t2;
+            default:
+                throw new IndexOutOfBoundsException(String.valueOf(pos));
+        }
     }
-    if (!(o instanceof Tuple2)) {
-      return false;
+
+    @SuppressWarnings("unchecked")
+    public <T> void set(T value, int pos) {
+        switch (pos) {
+            case 0:
+                this.t1 = (T0) value;
+                break;
+            case 1:
+                this.t2 = (T1) value;
+                break;
+            default:
+                throw new IndexOutOfBoundsException(String.valueOf(pos));
+        }
     }
-    @SuppressWarnings("rawtypes")
-    Tuple2 tuple = (Tuple2) o;
-    if (!Objects.equals(t1, tuple.t1)) {
-      return false;
+
+    /**
+     * Sets new values to all fields of the tuple.
+     *
+     * @param f0 The value for field 0
+     * @param f1 The value for field 1
+     */
+    public void set(T0 f0, T1 f1) {
+        this.t1 = f0;
+        this.t2 = f1;
     }
-    return Objects.equals(t2, tuple.t2);
-  }
 
-  @Override
-  public int hashCode() {
-    int result = t1 != null ? t1.hashCode() : 0;
-    result = 31 * result + (t2 != null ? t2.hashCode() : 0);
-    return result;
-  }
+    /**
+     * Returns a shallow copy of the tuple with swapped values.
+     *
+     * @return shallow copy of the tuple with swapped values
+     */
+    public Tuple2<T1, T0> swap() {
+        return new Tuple2<T1, T0>(t2, t1);
+    }
 
-  /**
-   * Shallow tuple copy.
-   *
-   * @return A new Tuple with the same fields as this.
-   */
-  @Override
-  @SuppressWarnings("unchecked")
-  public Tuple2<T0, T1> copy() {
-    return new Tuple2<>(this.t1, this.t2);
-  }
+    /**
+     * Deep equality for tuples by calling equals() on the tuple members.
+     *
+     * @param o the object checked for equality
+     * @return true if this is equal to o.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Tuple2)) {
+            return false;
+        }
+        @SuppressWarnings("rawtypes")
+        Tuple2 tuple = (Tuple2) o;
+        if (!Objects.equals(t1, tuple.t1)) {
+            return false;
+        }
+        return Objects.equals(t2, tuple.t2);
+    }
 
-  /**
-   * Creates a new tuple and assigns the given values to the tuple's fields. This is more convenient
-   * than using the constructor, because the compiler can infer the generic type arguments
-   * implicitly. For example: {@code Tuple3.of(n, x, s)} instead of {@code new Tuple3<Integer,
-   * Double, String>(n, x, s)}
-   */
-  public static <T0, T1> Tuple2<T0, T1> of(T0 f0, T1 f1) {
-    return new Tuple2<>(f0, f1);
-  }
+    @Override
+    public int hashCode() {
+        int result = t1 != null ? t1.hashCode() : 0;
+        result = 31 * result + (t2 != null ? t2.hashCode() : 0);
+        return result;
+    }
+
+    /**
+     * Shallow tuple copy.
+     *
+     * @return A new Tuple with the same fields as this.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Tuple2<T0, T1> copy() {
+        return new Tuple2<>(this.t1, this.t2);
+    }
+
+    /**
+     * Creates a new tuple and assigns the given values to the tuple's fields. This is more convenient
+     * than using the constructor, because the compiler can infer the generic type arguments
+     * implicitly. For example: {@code Tuple3.of(n, x, s)} instead of {@code new Tuple3<Integer,
+     * Double, String>(n, x, s)}
+     */
+    public static <T0, T1> Tuple2<T0, T1> of(T0 f0, T1 f1) {
+        return new Tuple2<>(f0, f1);
+    }
 }

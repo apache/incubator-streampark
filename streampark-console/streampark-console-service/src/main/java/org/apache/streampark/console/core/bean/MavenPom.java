@@ -25,34 +25,35 @@ import java.util.Objects;
 
 @Data
 public class MavenPom {
-  private String groupId;
-  private String artifactId;
-  private String version;
-  private String classifier;
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    private String groupId;
+    private String artifactId;
+    private String version;
+    private String classifier;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return this.toString().equals(o.toString());
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupId, artifactId, version, classifier);
     }
-    return this.toString().equals(o.toString());
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(groupId, artifactId, version, classifier);
-  }
-
-  @Override
-  public String toString() {
-    return String.format(
-        "%s:%s:%s%s",
-        groupId,
-        artifactId,
-        version,
-        StringUtils.isBlank(classifier) ? "" : ":".concat(classifier));
-  }
+    @Override
+    public String toString() {
+        return String.format(
+                "%s:%s:%s%s",
+                groupId,
+                artifactId,
+                version,
+                StringUtils.isBlank(classifier) ? "" : ":".concat(classifier));
+    }
 }

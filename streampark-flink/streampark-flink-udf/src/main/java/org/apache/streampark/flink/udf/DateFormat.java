@@ -23,17 +23,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateFormat extends ScalarFunction {
-  private final SimpleDateFormat simpleDateFormat;
 
-  public DateFormat() {
-    this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-  }
+    private final SimpleDateFormat simpleDateFormat;
 
-  public DateFormat(String format) {
-    this.simpleDateFormat = new SimpleDateFormat(format);
-  }
+    public DateFormat() {
+        this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    }
 
-  public String eval(Long time) {
-    return simpleDateFormat.format(new Date(time));
-  }
+    public DateFormat(String format) {
+        this.simpleDateFormat = new SimpleDateFormat(format);
+    }
+
+    public String eval(Long time) {
+        return simpleDateFormat.format(new Date(time));
+    }
 }

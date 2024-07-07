@@ -42,86 +42,86 @@ import java.util.Properties;
 @Slf4j
 public class LdapService {
 
-  @Value("${ldap.enable:#{false}}")
-  private Boolean enable;
+    @Value("${ldap.enable:#{false}}")
+    private Boolean enable;
 
-  @Value("${ldap.urls:#{null}}")
-  private String ldapUrls;
+    @Value("${ldap.urls:#{null}}")
+    private String ldapUrls;
 
-  @Value("${ldap.base-dn:#{null}}")
-  private String ldapBaseDn;
+    @Value("${ldap.base-dn:#{null}}")
+    private String ldapBaseDn;
 
-  @Value("${ldap.username:#{null}}")
-  private String ldapSecurityPrincipal;
+    @Value("${ldap.username:#{null}}")
+    private String ldapSecurityPrincipal;
 
-  @Value("${ldap.password:#{null}}")
-  private String ldapPrincipalPassword;
+    @Value("${ldap.password:#{null}}")
+    private String ldapPrincipalPassword;
 
-  @Value("${ldap.user.identity-attribute:#{null}}")
-  private String ldapUserIdentifyingAttribute;
+    @Value("${ldap.user.identity-attribute:#{null}}")
+    private String ldapUserIdentifyingAttribute;
 
-  @Value("${ldap.user.email-attribute:#{null}}")
-  private String ldapEmailAttribute;
+    @Value("${ldap.user.email-attribute:#{null}}")
+    private String ldapEmailAttribute;
 
-  private Properties ldapEnv = null;
+    private Properties ldapEnv = null;
 
-  /**
-   * login by userId and return user email
-   *
-   * @param userId user identity id
-   * @param userPwd user login password
-   * @return boolean ldapLoginStatus
-   */
-  public boolean ldapLogin(String userId, String userPwd) {
-    ApiAlertException.throwIfFalse(
-        enable, "ldap is not enabled, Please check the configuration: ldap.enable");
-    renderLdapEnv();
-    try {
-      NamingEnumeration<SearchResult> results = getSearchResults(userId);
-      if (!results.hasMore()) {
-        return false;
-      }
-      SearchResult result = results.next();
-      NamingEnumeration<? extends Attribute> attrs = result.getAttributes().getAll();
-      while (attrs.hasMore()) {
-        ldapEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
-        ldapEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
+    /**
+     * login by userId and return user email
+     *
+     * @param userId user identity id
+     * @param userPwd user login password
+     * @return boolean ldapLoginStatus
+     */
+    public boolean ldapLogin(String userId, String userPwd) {
+        ApiAlertException.throwIfFalse(
+                enable, "ldap is not enabled, Please check the configuration: ldap.enable");
+        renderLdapEnv();
         try {
-          new InitialDirContext(ldapEnv);
-        } catch (Exception e) {
-          log.warn("invalid ldap credentials or ldap search error", e);
-          return false;
+            NamingEnumeration<SearchResult> results = getSearchResults(userId);
+            if (!results.hasMore()) {
+                return false;
+            }
+            SearchResult result = results.next();
+            NamingEnumeration<? extends Attribute> attrs = result.getAttributes().getAll();
+            while (attrs.hasMore()) {
+                ldapEnv.put(Context.SECURITY_PRINCIPAL, result.getNameInNamespace());
+                ldapEnv.put(Context.SECURITY_CREDENTIALS, userPwd);
+                try {
+                    new InitialDirContext(ldapEnv);
+                } catch (Exception e) {
+                    log.warn("invalid ldap credentials or ldap search error", e);
+                    return false;
+                }
+                Attribute attr = attrs.next();
+                if (attr.getID().equals(ldapUserIdentifyingAttribute)) {
+                    return true;
+                }
+            }
+        } catch (NamingException e) {
+            log.error("ldap search error", e);
         }
-        Attribute attr = attrs.next();
-        if (attr.getID().equals(ldapUserIdentifyingAttribute)) {
-          return true;
-        }
-      }
-    } catch (NamingException e) {
-      log.error("ldap search error", e);
-    }
-    return false;
-  }
-
-  private NamingEnumeration<SearchResult> getSearchResults(String userId) throws NamingException {
-    LdapContext ctx = new InitialLdapContext(ldapEnv, null);
-    SearchControls sc = new SearchControls();
-    sc.setReturningAttributes(new String[] {ldapUserIdentifyingAttribute});
-    sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-    EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
-    NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
-    return results;
-  }
-
-  private void renderLdapEnv() {
-    if (ldapEnv == null) {
-      ldapEnv = new Properties();
-      ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-      ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
-      ldapEnv.put(Context.PROVIDER_URL, ldapUrls);
+        return false;
     }
 
-    ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
-    ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
-  }
+    private NamingEnumeration<SearchResult> getSearchResults(String userId) throws NamingException {
+        LdapContext ctx = new InitialLdapContext(ldapEnv, null);
+        SearchControls sc = new SearchControls();
+        sc.setReturningAttributes(new String[]{ldapUserIdentifyingAttribute});
+        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        EqualsFilter filter = new EqualsFilter(ldapUserIdentifyingAttribute, userId);
+        NamingEnumeration<SearchResult> results = ctx.search(ldapBaseDn, filter.toString(), sc);
+        return results;
+    }
+
+    private void renderLdapEnv() {
+        if (ldapEnv == null) {
+            ldapEnv = new Properties();
+            ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");
+            ldapEnv.put(Context.PROVIDER_URL, ldapUrls);
+        }
+
+        ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapSecurityPrincipal);
+        ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPrincipalPassword);
+    }
 }

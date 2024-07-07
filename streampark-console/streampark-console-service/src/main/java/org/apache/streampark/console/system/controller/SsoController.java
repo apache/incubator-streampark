@@ -45,50 +45,53 @@ import java.util.List;
 @Controller
 @RequestMapping("sso")
 public class SsoController {
-  @Autowired private UserService userService;
 
-  @Autowired private Authenticator authenticator;
+    @Autowired
+    private UserService userService;
 
-  @Value("${sso.properties.principalNameAttribute:#{null}}")
-  private String principalNameAttribute;
+    @Autowired
+    private Authenticator authenticator;
 
-  @Value("${sso.enable:#{false}}")
-  private Boolean ssoEnable;
+    @Value("${sso.properties.principalNameAttribute:#{null}}")
+    private String principalNameAttribute;
 
-  @GetMapping("signin")
-  public ModelAndView signin() throws Exception {
-    // Redirect to home page with identity
-    String url = "/#/?from=sso";
-    return new ModelAndView("redirect:" + url);
-  }
+    @Value("${sso.enable:#{false}}")
+    private Boolean ssoEnable;
 
-  @GetMapping("token")
-  @ResponseBody
-  public RestResponse token() throws Exception {
-
-    // Check SSO enable status
-    ApiAlertException.throwIfTrue(
-        !ssoEnable,
-        "Single Sign On (SSO) is not available, please contact the administrator to enable");
-
-    Subject subject = SecurityUtils.getSubject();
-    PrincipalCollection principals = subject.getPrincipals();
-    Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
-
-    List<CommonProfile> profiles = null;
-
-    if (principal != null) {
-      profiles = principal.getProfiles();
+    @GetMapping("signin")
+    public ModelAndView signin() throws Exception {
+        // Redirect to home page with identity
+        String url = "/#/?from=sso";
+        return new ModelAndView("redirect:" + url);
     }
 
-    principal = new Pac4jPrincipal(profiles, principalNameAttribute);
+    @GetMapping("token")
+    @ResponseBody
+    public RestResponse token() throws Exception {
 
-    // Check Principal name
-    ApiAlertException.throwIfNull(
-        principal.getName(), "Please configure the correct Principal Name Attribute");
+        // Check SSO enable status
+        ApiAlertException.throwIfTrue(
+                !ssoEnable,
+                "Single Sign On (SSO) is not available, please contact the administrator to enable");
 
-    User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+        Subject subject = SecurityUtils.getSubject();
+        PrincipalCollection principals = subject.getPrincipals();
+        Pac4jPrincipal principal = principals.oneByType(Pac4jPrincipal.class);
 
-    return userService.getLoginUserInfo(user);
-  }
+        List<CommonProfile> profiles = null;
+
+        if (principal != null) {
+            profiles = principal.getProfiles();
+        }
+
+        principal = new Pac4jPrincipal(profiles, principalNameAttribute);
+
+        // Check Principal name
+        ApiAlertException.throwIfNull(
+                principal.getName(), "Please configure the correct Principal Name Attribute");
+
+        User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+
+        return userService.getLoginUserInfo(user);
+    }
 }

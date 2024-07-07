@@ -27,40 +27,41 @@ import scala.collection.Map;
 
 @Data
 public class Job implements Serializable {
-  @JsonProperty("jobId")
-  private Long id;
 
-  private String name;
+    @JsonProperty("jobId")
+    private Long id;
 
-  private String submissionTime;
+    private String name;
 
-  private String completionTime;
+    private String submissionTime;
 
-  private List<Long> stageIds;
+    private String completionTime;
 
-  private String status;
+    private List<Long> stageIds;
 
-  private Integer numTasks;
+    private String status;
 
-  private Integer numActiveTasks;
+    private Integer numTasks;
 
-  private Integer numCompletedTasks;
+    private Integer numActiveTasks;
 
-  private Integer numSkippedTasks;
+    private Integer numCompletedTasks;
 
-  private Integer numFailedTasks;
+    private Integer numSkippedTasks;
 
-  private Integer numKilledTasks;
+    private Integer numFailedTasks;
 
-  private Integer numCompletedIndices;
+    private Integer numKilledTasks;
 
-  private Integer numActiveStages;
+    private Integer numCompletedIndices;
 
-  private Integer numCompletedStages;
+    private Integer numActiveStages;
 
-  private Integer numSkippedStages;
+    private Integer numCompletedStages;
 
-  private Integer numFailedStages;
+    private Integer numSkippedStages;
 
-  private Map<String, Object> killedTasksSummary;
+    private Integer numFailedStages;
+
+    private Map<String, Object> killedTasksSummary;
 }

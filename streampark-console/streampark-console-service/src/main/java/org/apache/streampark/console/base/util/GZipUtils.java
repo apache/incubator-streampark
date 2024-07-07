@@ -33,76 +33,79 @@ import java.util.zip.GZIPInputStream;
 @Slf4j
 public final class GZipUtils {
 
-  private GZipUtils() {}
+    private GZipUtils() {
+    }
 
-  /**
-   * @param tarZipSource source dir
-   * @param targetDir target dir
-   */
-  public static void deCompress(String tarZipSource, String targetDir) {
-    File unFile = null;
-    // tar compress format
-    ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
-    try (FileInputStream inputStream = new FileInputStream(tarZipSource);
-        BufferedInputStream bufInput = new BufferedInputStream(inputStream);
-        GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
-        ArchiveInputStream archiveInput =
-            archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
+    /**
+     * @param tarZipSource source dir
+     * @param targetDir target dir
+     */
+    public static void deCompress(String tarZipSource, String targetDir) {
+        File unFile = null;
+        // tar compress format
+        ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
+        try (
+                FileInputStream inputStream = new FileInputStream(tarZipSource);
+                BufferedInputStream bufInput = new BufferedInputStream(inputStream);
+                GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
+                ArchiveInputStream archiveInput =
+                        archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
 
-      TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
+            TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
 
-      while (entry != null) {
-        String entryName = entry.getName();
+            while (entry != null) {
+                String entryName = entry.getName();
 
-        if (entry.isDirectory()) {
-          createDir(targetDir, entryName, 1);
-          if (unFile == null) {
-            unFile = new File(targetDir + entryName.replaceAll("/.*$", ""));
-          }
-        } else if (entry.isFile()) {
-          String fullFileName = createDir(targetDir, entryName, 2);
-          try (FileOutputStream outputStream = new FileOutputStream(fullFileName);
-              BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream)) {
-            int b = -1;
-            while ((b = archiveInput.read()) != -1) {
-              bufOutput.write(b);
+                if (entry.isDirectory()) {
+                    createDir(targetDir, entryName, 1);
+                    if (unFile == null) {
+                        unFile = new File(targetDir + entryName.replaceAll("/.*$", ""));
+                    }
+                } else if (entry.isFile()) {
+                    String fullFileName = createDir(targetDir, entryName, 2);
+                    try (
+                            FileOutputStream outputStream = new FileOutputStream(fullFileName);
+                            BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream)) {
+                        int b = -1;
+                        while ((b = archiveInput.read()) != -1) {
+                            bufOutput.write(b);
+                        }
+                    }
+                }
+                entry = (TarArchiveEntry) archiveInput.getNextEntry();
             }
-          }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-        entry = (TarArchiveEntry) archiveInput.getNextEntry();
-      }
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
     }
-  }
 
-  /**
-   * @param baseDir baseDir
-   * @param entry archive entry
-   * @param type type: 1, dir; 2, file
-   * @return
-   */
-  private static String createDir(String baseDir, String entry, int type) {
-    String[] items = entry.split("/");
-    String fullFilePath = baseDir;
-    for (int i = 0; i < items.length; i++) {
-      String item = items[i];
-      fullFilePath = fullFilePath + File.separator + item;
-      if (type == 2) {
-        if (i != items.length - 1) {
-          File tmpFile = new File(fullFilePath);
-          if (!tmpFile.exists()) {
-            tmpFile.mkdir();
-          }
+    /**
+     * @param baseDir baseDir
+     * @param entry archive entry
+     * @param type type: 1, dir; 2, file
+     * @return
+     */
+    private static String createDir(String baseDir, String entry, int type) {
+        String[] items = entry.split("/");
+        String fullFilePath = baseDir;
+        for (int i = 0; i < items.length; i++) {
+            String item = items[i];
+            fullFilePath = fullFilePath + File.separator + item;
+            if (type == 2) {
+                if (i != items.length - 1) {
+                    File tmpFile = new File(fullFilePath);
+                    if (!tmpFile.exists()) {
+                        tmpFile.mkdir();
+                    }
+                }
+            } else {
+                File tmpFile = new File(fullFilePath);
+                if (!tmpFile.exists()) {
+                    tmpFile.mkdir();
+                }
+            }
         }
-      } else {
-        File tmpFile = new File(fullFilePath);
-        if (!tmpFile.exists()) {
-          tmpFile.mkdir();
-        }
-      }
+        File fullFile = new File(fullFilePath);
+        return fullFile.getAbsolutePath();
     }
-    File fullFile = new File(fullFilePath);
-    return fullFile.getAbsolutePath();
-  }
 }

@@ -29,24 +29,25 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor
 final class TestDescription implements org.testcontainers.lifecycle.TestDescription {
-  private static final String UNKNOWN_NAME = "unknown";
 
-  private final ExtensionContext context;
+    private static final String UNKNOWN_NAME = "unknown";
 
-  @Override
-  public String getTestId() {
-    return context.getUniqueId();
-  }
+    private final ExtensionContext context;
 
-  @Override
-  public String getFilesystemFriendlyName() {
-    final String contextId = context.getUniqueId();
-    try {
-      return (contextId == null || contextId.trim().isEmpty())
-          ? UNKNOWN_NAME
-          : URLEncoder.encode(contextId, UTF_8.toString());
-    } catch (UnsupportedEncodingException e) {
-      return UNKNOWN_NAME;
+    @Override
+    public String getTestId() {
+        return context.getUniqueId();
     }
-  }
+
+    @Override
+    public String getFilesystemFriendlyName() {
+        final String contextId = context.getUniqueId();
+        try {
+            return (contextId == null || contextId.trim().isEmpty())
+                    ? UNKNOWN_NAME
+                    : URLEncoder.encode(contextId, UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            return UNKNOWN_NAME;
+        }
+    }
 }

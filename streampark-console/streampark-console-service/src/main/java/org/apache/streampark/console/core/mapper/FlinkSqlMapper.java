@@ -27,9 +27,9 @@ import java.util.List;
 
 public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
 
-  FlinkSql getEffective(@Param("appId") Long appId);
+    FlinkSql getEffective(@Param("appId") Long appId);
 
-  Integer getLatestVersion(@Param("appId") Long appId);
+    Integer getLatestVersion(@Param("appId") Long appId);
 
-  List<FlinkSql> selectSqlsByTeamId(@Param("teamId") Long teamId);
+    List<FlinkSql> selectSqlsByTeamId(@Param("teamId") Long teamId);
 }

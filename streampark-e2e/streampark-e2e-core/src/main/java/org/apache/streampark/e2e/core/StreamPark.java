@@ -37,5 +37,6 @@ import java.lang.annotation.Target;
 @TestMethodOrder(OrderAnnotation.class)
 @ExtendWith(StreamParkExtension.class)
 public @interface StreamPark {
-  String[] composeFiles();
+
+    String[] composeFiles();
 }

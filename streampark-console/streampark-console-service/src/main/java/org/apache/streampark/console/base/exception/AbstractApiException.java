@@ -29,20 +29,20 @@ import lombok.Getter;
 @Getter
 public abstract class AbstractApiException extends RuntimeException {
 
-  private final long responseCode;
+    private final long responseCode;
 
-  protected AbstractApiException(String message, long responseCode) {
-    super(message);
-    this.responseCode = responseCode;
-  }
+    protected AbstractApiException(String message, long responseCode) {
+        super(message);
+        this.responseCode = responseCode;
+    }
 
-  protected AbstractApiException(Throwable cause, long responseCode) {
-    super(cause);
-    this.responseCode = responseCode;
-  }
+    protected AbstractApiException(Throwable cause, long responseCode) {
+        super(cause);
+        this.responseCode = responseCode;
+    }
 
-  protected AbstractApiException(String message, Throwable cause, long responseCode) {
-    super(message, cause);
-    this.responseCode = responseCode;
-  }
+    protected AbstractApiException(String message, Throwable cause, long responseCode) {
+        super(message, cause);
+        this.responseCode = responseCode;
+    }
 }

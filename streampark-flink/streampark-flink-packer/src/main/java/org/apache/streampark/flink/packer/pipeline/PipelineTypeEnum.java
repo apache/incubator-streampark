@@ -26,122 +26,122 @@ import java.util.Map;
 /** Building pipeline type. */
 public enum PipelineTypeEnum {
 
-  /** unknown type */
-  UNKNOWN(0, "", ImmutableMap.of(), null),
+    /** unknown type */
+    UNKNOWN(0, "", ImmutableMap.of(), null),
 
-  /** flink native kubernetes session mode */
-  FLINK_NATIVE_K8S_SESSION(
-      1,
-      "flink native kubernetes session mode task building pipeline",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Create building workspace")
-          .put(2, "Build shaded flink app jar")
-          .build(),
-      ShadedBuildResponse.class),
+    /** flink native kubernetes session mode */
+    FLINK_NATIVE_K8S_SESSION(
+            1,
+            "flink native kubernetes session mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Build shaded flink app jar")
+                    .build(),
+            ShadedBuildResponse.class),
 
-  /** flink native kubernetes application mode */
-  FLINK_NATIVE_K8S_APPLICATION(
-      2,
-      "flink native kubernetes application mode task building pipeline",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Create building workspace")
-          .put(2, "Export kubernetes pod template")
-          .put(3, "Build shaded flink app jar")
-          .put(4, "Export flink app dockerfile")
-          .put(5, "Pull flink app base docker image")
-          .put(6, "Build flink app docker image")
-          .put(7, "Push flink app docker image")
-          .build(),
-      DockerImageBuildResponse.class),
-  FLINK_STANDALONE(
-      3,
-      "flink standalone session mode task building pipeline",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Create building workspace")
-          .put(2, "Build shaded flink app jar")
-          .build(),
-      ShadedBuildResponse.class),
+    /** flink native kubernetes application mode */
+    FLINK_NATIVE_K8S_APPLICATION(
+            2,
+            "flink native kubernetes application mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Export kubernetes pod template")
+                    .put(3, "Build shaded flink app jar")
+                    .put(4, "Export flink app dockerfile")
+                    .put(5, "Pull flink app base docker image")
+                    .put(6, "Build flink app docker image")
+                    .put(7, "Push flink app docker image")
+                    .build(),
+            DockerImageBuildResponse.class),
+    FLINK_STANDALONE(
+            3,
+            "flink standalone session mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Build shaded flink app jar")
+                    .build(),
+            ShadedBuildResponse.class),
 
-  FLINK_YARN_APPLICATION(
-      4,
-      "flink yarn application mode task building pipeline",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Prepare hadoop yarn environment and building workspace")
-          .put(2, "Resolve maven dependencies")
-          .put(3, "upload jar to yarn.provided.lib.dirs")
-          .build(),
-      SimpleBuildResponse.class),
+    FLINK_YARN_APPLICATION(
+            4,
+            "flink yarn application mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Prepare hadoop yarn environment and building workspace")
+                    .put(2, "Resolve maven dependencies")
+                    .put(3, "upload jar to yarn.provided.lib.dirs")
+                    .build(),
+            SimpleBuildResponse.class),
 
-  FLINK_K8S_APPLICATION_V2(
-      5,
-      "flink kubernetes application mode task building pipeline v2",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Create building workspace")
-          .put(2, "Build shaded flink app jar")
-          .build(),
-      K8sAppModeBuildResponse.class),
+    FLINK_K8S_APPLICATION_V2(
+            5,
+            "flink kubernetes application mode task building pipeline v2",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Create building workspace")
+                    .put(2, "Build shaded flink app jar")
+                    .build(),
+            K8sAppModeBuildResponse.class),
 
-  SPARK_YARN_APPLICATION(
-      6,
-      "spark yarn application mode task building pipeline",
-      ImmutableMap.<Integer, String>builder()
-          .put(1, "Prepare hadoop yarn environment and building workspace")
-          .put(2, "Resolve maven dependencies")
-          .put(3, "upload jar to yarn.provided.lib.dirs")
-          .build(),
-      SimpleBuildResponse.class);
+    SPARK_YARN_APPLICATION(
+            6,
+            "spark yarn application mode task building pipeline",
+            ImmutableMap.<Integer, String>builder()
+                    .put(1, "Prepare hadoop yarn environment and building workspace")
+                    .put(2, "Resolve maven dependencies")
+                    .put(3, "upload jar to yarn.provided.lib.dirs")
+                    .build(),
+            SimpleBuildResponse.class);
 
-  private final Integer code;
-  /** short description of pipeline type. */
-  private final String desc;
-  /** building steps of pipeline, element => [sorted seq -> step desc]. */
-  private final Map<Integer, String> steps;
-  /** type of result */
-  private final Class<? extends BuildResult> resultType;
+    private final Integer code;
+    /** short description of pipeline type. */
+    private final String desc;
+    /** building steps of pipeline, element => [sorted seq -> step desc]. */
+    private final Map<Integer, String> steps;
+    /** type of result */
+    private final Class<? extends BuildResult> resultType;
 
-  PipelineTypeEnum(
-      Integer code,
-      String desc,
-      Map<Integer, String> steps,
-      Class<? extends BuildResult> resultType) {
-    this.code = code;
-    this.desc = desc;
-    this.steps = steps;
-    this.resultType = resultType;
-  }
-
-  @JsonCreator
-  public static PipelineTypeEnum of(Integer code) {
-    for (PipelineTypeEnum type : PipelineTypeEnum.values()) {
-      if (type.getCode().equals(code)) {
-        return type;
-      }
+    PipelineTypeEnum(
+                     Integer code,
+                     String desc,
+                     Map<Integer, String> steps,
+                     Class<? extends BuildResult> resultType) {
+        this.code = code;
+        this.desc = desc;
+        this.steps = steps;
+        this.resultType = resultType;
     }
-    return UNKNOWN;
-  }
 
-  public static PipelineTypeEnum ofName(String name) {
-    return PipelineTypeEnum.valueOf(name);
-  }
+    @JsonCreator
+    public static PipelineTypeEnum of(Integer code) {
+        for (PipelineTypeEnum type : PipelineTypeEnum.values()) {
+            if (type.getCode().equals(code)) {
+                return type;
+            }
+        }
+        return UNKNOWN;
+    }
 
-  @JsonValue
-  public Integer getCode() {
-    return code;
-  }
+    public static PipelineTypeEnum ofName(String name) {
+        return PipelineTypeEnum.valueOf(name);
+    }
 
-  public String getDesc() {
-    return desc;
-  }
+    @JsonValue
+    public Integer getCode() {
+        return code;
+    }
 
-  public Map<Integer, String> getSteps() {
-    return steps;
-  }
+    public String getDesc() {
+        return desc;
+    }
 
-  public Class<? extends BuildResult> getResultType() {
-    return resultType;
-  }
+    public Map<Integer, String> getSteps() {
+        return steps;
+    }
 
-  public boolean isUnknown() {
-    return this == UNKNOWN;
-  }
+    public Class<? extends BuildResult> getResultType() {
+        return resultType;
+    }
+
+    public boolean isUnknown() {
+        return this == UNKNOWN;
+    }
 }

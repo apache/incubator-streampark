@@ -43,38 +43,39 @@ import javax.validation.constraints.NotBlank;
 @RequestMapping("team")
 public class TeamController {
 
-  @Autowired private TeamService teamService;
+    @Autowired
+    private TeamService teamService;
 
-  @PostMapping("list")
-  public RestResponse teamList(RestRequest restRequest, Team team) {
-    IPage<Team> teamList = teamService.getPage(team, restRequest);
-    return RestResponse.success(teamList);
-  }
+    @PostMapping("list")
+    public RestResponse teamList(RestRequest restRequest, Team team) {
+        IPage<Team> teamList = teamService.getPage(team, restRequest);
+        return RestResponse.success(teamList);
+    }
 
-  @PostMapping("check/name")
-  public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
-    Team result = this.teamService.getByName(teamName);
-    return RestResponse.success(result == null);
-  }
+    @PostMapping("check/name")
+    public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
+        Team result = this.teamService.getByName(teamName);
+        return RestResponse.success(result == null);
+    }
 
-  @PostMapping("post")
-  @RequiresPermissions("team:add")
-  public RestResponse addTeam(@Valid Team team) {
-    this.teamService.createTeam(team);
-    return RestResponse.success();
-  }
+    @PostMapping("post")
+    @RequiresPermissions("team:add")
+    public RestResponse addTeam(@Valid Team team) {
+        this.teamService.createTeam(team);
+        return RestResponse.success();
+    }
 
-  @DeleteMapping("delete")
-  @RequiresPermissions("team:delete")
-  public RestResponse deleteTeam(Team team) {
-    this.teamService.removeById(team.getId());
-    return RestResponse.success();
-  }
+    @DeleteMapping("delete")
+    @RequiresPermissions("team:delete")
+    public RestResponse deleteTeam(Team team) {
+        this.teamService.removeById(team.getId());
+        return RestResponse.success();
+    }
 
-  @PutMapping("update")
-  @RequiresPermissions("team:update")
-  public RestResponse updateTeam(Team team) {
-    this.teamService.updateTeam(team);
-    return RestResponse.success();
-  }
+    @PutMapping("update")
+    @RequiresPermissions("team:update")
+    public RestResponse updateTeam(Team team) {
+        this.teamService.updateTeam(team);
+        return RestResponse.success();
+    }
 }

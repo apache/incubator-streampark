@@ -24,9 +24,9 @@ import java.io.Serializable;
 @Data
 public class SparkExecutor implements Serializable {
 
-  private Long memoryUsed;
+    private Long memoryUsed;
 
-  private Long maxMemory;
+    private Long maxMemory;
 
-  private Long totalCores;
+    private Long totalCores;
 }

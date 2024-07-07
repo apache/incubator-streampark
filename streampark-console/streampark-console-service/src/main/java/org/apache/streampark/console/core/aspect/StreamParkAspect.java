@@ -53,116 +53,122 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class StreamParkAspect {
 
-  @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
-  @Autowired private ServiceHelper serviceHelper;
-  @Autowired private MemberService memberService;
-  @Autowired private ApplicationManageService applicationManageService;
+    @Autowired
+    private FlinkAppHttpWatcher flinkAppHttpWatcher;
+    @Autowired
+    private ServiceHelper serviceHelper;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private ApplicationManageService applicationManageService;
 
-  @Pointcut(
-      "execution(public"
-          + " org.apache.streampark.console.base.domain.RestResponse"
-          + " org.apache.streampark.console.*.controller.*.*(..))")
-  public void openAPI() {}
-
-  @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-  @Around(value = "openAPI()")
-  public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
-    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    log.debug("restResponse aspect, method:{}", methodSignature.getName());
-    Boolean isApi =
-        (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
-    if (isApi != null && isApi) {
-      OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
-      if (openAPI == null) {
-        throw new ApiAlertException("current api unsupported!");
-      }
+    @Pointcut("execution(public"
+            + " org.apache.streampark.console.base.domain.RestResponse"
+            + " org.apache.streampark.console.*.controller.*.*(..))")
+    public void openAPI() {
     }
-    return (RestResponse) joinPoint.proceed();
-  }
 
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
-  public void appUpdated() {}
-
-  @Around("appUpdated()")
-  public Object appUpdated(ProceedingJoinPoint joinPoint) throws Throwable {
-    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    log.debug("appUpdated aspect, method:{}", methodSignature.getName());
-    Object target = joinPoint.proceed();
-    flinkAppHttpWatcher.init();
-    return target;
-  }
-
-  @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
-  public void permissionAction() {}
-
-  @Around("permissionAction()")
-  public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
-    MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    PermissionScope permissionScope =
-        methodSignature.getMethod().getAnnotation(PermissionScope.class);
-
-    User currentUser = serviceHelper.getLoginUser();
-    ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
-
-    boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
-
-    if (!isAdmin) {
-      // 1) check userId
-      Long userId = getId(joinPoint, methodSignature, permissionScope.user());
-      ApiAlertException.throwIfTrue(
-          userId != null && !currentUser.getUserId().equals(userId),
-          "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
-
-      // 2) check team
-      Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
-      if (teamId != null) {
-        Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
-        ApiAlertException.throwIfTrue(
-            member == null,
-            "Permission denied, only members of this team can access this permission");
-      }
-
-      // 3) check app
-      Long appId = getId(joinPoint, methodSignature, permissionScope.app());
-      if (appId != null) {
-        Application app = applicationManageService.getById(appId);
-        ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
-        if (!currentUser.getUserId().equals(app.getUserId())) {
-          Member member =
-              memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
-          ApiAlertException.throwIfTrue(
-              member == null,
-              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+    @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
+    @Around(value = "openAPI()")
+    public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        log.debug("restResponse aspect, method:{}", methodSignature.getName());
+        Boolean isApi =
+                (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
+        if (isApi != null && isApi) {
+            OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
+            if (openAPI == null) {
+                throw new ApiAlertException("current api unsupported!");
+            }
         }
-      }
+        return (RestResponse) joinPoint.proceed();
     }
 
-    return (RestResponse) joinPoint.proceed();
-  }
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
+    public void appUpdated() {
+    }
 
-  private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {
-    if (StringUtils.isEmpty(expr)) {
-      return null;
+    @Around("appUpdated()")
+    public Object appUpdated(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        log.debug("appUpdated aspect, method:{}", methodSignature.getName());
+        Object target = joinPoint.proceed();
+        flinkAppHttpWatcher.init();
+        return target;
     }
-    SpelExpressionParser parser = new SpelExpressionParser();
-    Expression expression = parser.parseExpression(expr);
-    EvaluationContext context = new StandardEvaluationContext();
-    Object[] args = joinPoint.getArgs();
-    DefaultParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
-    String[] parameterNames = discoverer.getParameterNames(methodSignature.getMethod());
-    for (int i = 0; i < parameterNames.length; i++) {
-      context.setVariable(parameterNames[i], args[i]);
-    }
-    Object value = expression.getValue(context);
 
-    if (value == null || StringUtils.isBlank(value.toString())) {
-      return null;
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
+    public void permissionAction() {
     }
-    try {
-      return Long.parseLong(value.toString());
-    } catch (NumberFormatException e) {
-      throw new ApiAlertException(
-          "Wrong use of annotation on method " + methodSignature.getName(), e);
+
+    @Around("permissionAction()")
+    public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        PermissionScope permissionScope =
+                methodSignature.getMethod().getAnnotation(PermissionScope.class);
+
+        User currentUser = serviceHelper.getLoginUser();
+        ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
+
+        boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
+
+        if (!isAdmin) {
+            // 1) check userId
+            Long userId = getId(joinPoint, methodSignature, permissionScope.user());
+            ApiAlertException.throwIfTrue(
+                    userId != null && !currentUser.getUserId().equals(userId),
+                    "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
+
+            // 2) check team
+            Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
+            if (teamId != null) {
+                Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
+                ApiAlertException.throwIfTrue(
+                        member == null,
+                        "Permission denied, only members of this team can access this permission");
+            }
+
+            // 3) check app
+            Long appId = getId(joinPoint, methodSignature, permissionScope.app());
+            if (appId != null) {
+                Application app = applicationManageService.getById(appId);
+                ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+                if (!currentUser.getUserId().equals(app.getUserId())) {
+                    Member member =
+                            memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
+                    ApiAlertException.throwIfTrue(
+                            member == null,
+                            "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+                }
+            }
+        }
+
+        return (RestResponse) joinPoint.proceed();
     }
-  }
+
+    private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {
+        if (StringUtils.isEmpty(expr)) {
+            return null;
+        }
+        SpelExpressionParser parser = new SpelExpressionParser();
+        Expression expression = parser.parseExpression(expr);
+        EvaluationContext context = new StandardEvaluationContext();
+        Object[] args = joinPoint.getArgs();
+        DefaultParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
+        String[] parameterNames = discoverer.getParameterNames(methodSignature.getMethod());
+        for (int i = 0; i < parameterNames.length; i++) {
+            context.setVariable(parameterNames[i], args[i]);
+        }
+        Object value = expression.getValue(context);
+
+        if (value == null || StringUtils.isBlank(value.toString())) {
+            return null;
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            throw new ApiAlertException(
+                    "Wrong use of annotation on method " + methodSignature.getName(), e);
+        }
+    }
 }

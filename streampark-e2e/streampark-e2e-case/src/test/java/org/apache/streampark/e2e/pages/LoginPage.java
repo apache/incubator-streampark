@@ -38,70 +38,72 @@ import java.util.List;
 @Getter
 @Slf4j
 public final class LoginPage extends NavBarPage {
-  @FindBy(id = "form_item_account")
-  private WebElement inputUsername;
 
-  @FindBy(id = "form_item_password")
-  private WebElement inputPassword;
+    @FindBy(id = "form_item_account")
+    private WebElement inputUsername;
 
-  @FindBy(xpath = "//button[contains(@classnames, 'login-button')]")
-  private WebElement buttonLogin;
+    @FindBy(id = "form_item_password")
+    private WebElement inputPassword;
 
-  private final TeamForm teamForm = new TeamForm();
+    @FindBy(xpath = "//button[contains(@classnames, 'login-button')]")
+    private WebElement buttonLogin;
 
-  public LoginPage(RemoteWebDriver driver) {
-    super(driver);
-  }
+    private final TeamForm teamForm = new TeamForm();
 
-  @SneakyThrows
-  public NavBarPage login(String username, String password, String teamName) {
-    new WebDriverWait(driver, Duration.ofSeconds(10))
-        .until(ExpectedConditions.elementToBeClickable(buttonLogin));
-
-    inputUsername().sendKeys(username);
-    inputPassword().sendKeys(password);
-    buttonLogin().click();
-
-    try {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
-
-      teamForm.btnSelectTeamDropdown.click();
-      teamForm.selectTeam.stream()
-          .filter(it -> it.getText().contains(teamName))
-          .findFirst()
-          .orElseThrow(
-              () -> new RuntimeException(String.format("No %s in team dropdown list", teamName)))
-          .click();
-      teamForm.buttonSubmit.click();
-    } catch (Exception e) {
-      log.warn("No team selection required:", e);
+    public LoginPage(RemoteWebDriver driver) {
+        super(driver);
     }
 
-    new WebDriverWait(driver, Duration.ofSeconds(30))
-        .until(ExpectedConditions.urlContains("/flink/app"));
-    return new NavBarPage(driver);
-  }
+    @SneakyThrows
+    public NavBarPage login(String username, String password, String teamName) {
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(buttonLogin));
 
-  @Getter
-  public class TeamForm {
-    TeamForm() {
-      PageFactory.initElements(driver, this);
+        inputUsername().sendKeys(username);
+        inputPassword().sendKeys(password);
+        buttonLogin().click();
+
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
+
+            teamForm.btnSelectTeamDropdown.click();
+            teamForm.selectTeam.stream()
+                    .filter(it -> it.getText().contains(teamName))
+                    .findFirst()
+                    .orElseThrow(
+                            () -> new RuntimeException(String.format("No %s in team dropdown list", teamName)))
+                    .click();
+            teamForm.buttonSubmit.click();
+        } catch (Exception e) {
+            log.warn("No team selection required:", e);
+        }
+
+        new WebDriverWait(driver, Duration.ofSeconds(30))
+                .until(ExpectedConditions.urlContains("/flink/app"));
+        return new NavBarPage(driver);
     }
 
-    @FindBys({
-      @FindBy(css = "[popupClassName=team-select-popup]"),
-      @FindBy(className = "ant-select-item-option-content")
-    })
-    private List<WebElement> selectTeam;
+    @Getter
+    public class TeamForm {
 
-    @FindBy(css = "[popupClassName=team-select-popup] > .ant-select-selector")
-    private WebElement btnSelectTeamDropdown;
+        TeamForm() {
+            PageFactory.initElements(driver, this);
+        }
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
-    private WebElement buttonSubmit;
+        @FindBys({
+                @FindBy(css = "[popupClassName=team-select-popup]"),
+                @FindBy(className = "ant-select-item-option-content")
+        })
+        private List<WebElement> selectTeam;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-    private WebElement buttonCancel;
-  }
+        @FindBy(css = "[popupClassName=team-select-popup] > .ant-select-selector")
+        private WebElement btnSelectTeamDropdown;
+
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
+        private WebElement buttonSubmit;
+
+        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        private WebElement buttonCancel;
+    }
 }

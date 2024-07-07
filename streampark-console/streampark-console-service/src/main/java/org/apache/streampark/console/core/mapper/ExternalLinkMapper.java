@@ -21,4 +21,5 @@ import org.apache.streampark.console.core.entity.ExternalLink;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface ExternalLinkMapper extends BaseMapper<ExternalLink> {}
+public interface ExternalLinkMapper extends BaseMapper<ExternalLink> {
+}

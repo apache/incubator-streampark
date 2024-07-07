@@ -29,32 +29,32 @@ import java.util.List;
  */
 public interface ExternalLinkService extends IService<ExternalLink> {
 
-  /**
-   * Create a ExternalLink
-   *
-   * @param externalLink The ExternalLink to be create.
-   */
-  void create(ExternalLink externalLink);
+    /**
+     * Create a ExternalLink
+     *
+     * @param externalLink The ExternalLink to be create.
+     */
+    void create(ExternalLink externalLink);
 
-  /**
-   * remove ExternalLink by link id
-   *
-   * @param linkId The ID of the object to delete.
-   */
-  void removeById(Long linkId);
+    /**
+     * remove ExternalLink by link id
+     *
+     * @param linkId The ID of the object to delete.
+     */
+    void removeById(Long linkId);
 
-  /**
-   * update ExternalLink information
-   *
-   * @param externalLink The ExternalLink to be update
-   */
-  void update(ExternalLink externalLink);
+    /**
+     * update ExternalLink information
+     *
+     * @param externalLink The ExternalLink to be update
+     */
+    void update(ExternalLink externalLink);
 
-  /**
-   * Displays the display that is relevant to the query criteriaExternalLink
-   *
-   * @param appId The ID of the object to render.
-   * @return list of ExternalLink
-   */
-  List<ExternalLink> render(Long appId);
+    /**
+     * Displays the display that is relevant to the query criteriaExternalLink
+     *
+     * @param appId The ID of the object to render.
+     * @return list of ExternalLink
+     */
+    List<ExternalLink> render(Long appId);
 }

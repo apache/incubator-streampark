@@ -28,43 +28,43 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ApplicationActionService extends IService<Application> {
 
-  /**
-   * Starts the specified application.
-   *
-   * @param appParam The application to start.
-   * @param auto True if the application should start automatically, False otherwise.
-   * @throws Exception If an error occurs while starting the application.
-   */
-  void start(Application appParam, boolean auto) throws Exception;
+    /**
+     * Starts the specified application.
+     *
+     * @param appParam The application to start.
+     * @param auto True if the application should start automatically, False otherwise.
+     * @throws Exception If an error occurs while starting the application.
+     */
+    void start(Application appParam, boolean auto) throws Exception;
 
-  /**
-   * Restarts the given application.
-   *
-   * @param appParam The application to restart.
-   * @throws Exception If an error occurs while restarting the application.
-   */
-  void restart(Application appParam) throws Exception;
+    /**
+     * Restarts the given application.
+     *
+     * @param appParam The application to restart.
+     * @throws Exception If an error occurs while restarting the application.
+     */
+    void restart(Application appParam) throws Exception;
 
-  /**
-   * Revokes access for the given application.
-   *
-   * @param appId The application's id for which access needs to be revoked.
-   * @throws ApplicationException if an error occurs while revoking access.
-   */
-  void revoke(Long appId) throws ApplicationException;
+    /**
+     * Revokes access for the given application.
+     *
+     * @param appId The application's id for which access needs to be revoked.
+     * @throws ApplicationException if an error occurs while revoking access.
+     */
+    void revoke(Long appId) throws ApplicationException;
 
-  /**
-   * Cancels the given application. Throws an exception if cancellation fails.
-   *
-   * @param appParam the application to be canceled
-   * @throws Exception if cancellation fails
-   */
-  void cancel(Application appParam) throws Exception;
+    /**
+     * Cancels the given application. Throws an exception if cancellation fails.
+     *
+     * @param appParam the application to be canceled
+     * @throws Exception if cancellation fails
+     */
+    void cancel(Application appParam) throws Exception;
 
-  /**
-   * Forces the given application to stop.
-   *
-   * @param id the application's id which need to be stopped
-   */
-  void abort(Long id);
+    /**
+     * Forces the given application to stop.
+     *
+     * @param id the application's id which need to be stopped
+     */
+    void abort(Long id);
 }

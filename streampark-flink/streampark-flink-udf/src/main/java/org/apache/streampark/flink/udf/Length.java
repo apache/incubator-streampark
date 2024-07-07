@@ -20,10 +20,11 @@ package org.apache.streampark.flink.udf;
 import org.apache.flink.table.functions.ScalarFunction;
 
 public class Length extends ScalarFunction {
-  public Integer eval(String str) {
-    if (str == null) {
-      return 0;
+
+    public Integer eval(String str) {
+        if (str == null) {
+            return 0;
+        }
+        return str.length();
     }
-    return str.length();
-  }
 }

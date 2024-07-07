@@ -27,7 +27,6 @@ import java.util
 import java.util.concurrent.ConcurrentHashMap
 
 import scala.collection.convert.ImplicitConversions._
-import scala.language.postfixOps
 
 /**
  * Thread-safe configuration storage containers. All configurations will be automatically
@@ -73,7 +72,7 @@ object InternalConfigHolder extends Logger {
           case v if v != null => v.cast[T](conf.classType)
           case _ => conf.defaultValue.asInstanceOf[T]
         }
-      case v: T => v
+      case v => v.asInstanceOf[T]
     }
   }
 
@@ -106,7 +105,7 @@ object InternalConfigHolder extends Logger {
             }
           case conf: InternalOption => conf.defaultValue.asInstanceOf[T]
         }
-      case v: T => v
+      case v => v.asInstanceOf[T]
     }
   }
 

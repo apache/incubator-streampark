@@ -20,22 +20,22 @@ package org.apache.streampark.console.core.enums;
 /** Used to authenticate access rights */
 public enum AccessTokenStateEnum {
 
-  /** not added token */
-  NULL(0),
+    /** not added token */
+    NULL(0),
 
-  /** invalid token */
-  INVALID(1),
+    /** invalid token */
+    INVALID(1),
 
-  /** effect token */
-  OK(2);
+    /** effect token */
+    OK(2);
 
-  private final int value;
+    private final int value;
 
-  AccessTokenStateEnum(int value) {
-    this.value = value;
-  }
+    AccessTokenStateEnum(int value) {
+        this.value = value;
+    }
 
-  public int get() {
-    return this.value;
-  }
+    public int get() {
+        return this.value;
+    }
 }

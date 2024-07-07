@@ -25,40 +25,41 @@ import com.github.dockerjava.transport.DockerHttpClient;
 /** Enhancement of DockerClient to provide custom api with a hacked way. */
 public class HackDockerClient extends DockerClientImpl {
 
-  private final DockerClientConfig dockerClientConfig;
+    private final DockerClientConfig dockerClientConfig;
 
-  public HackDockerClient(DockerClientConfig dockerClientConfig) {
-    super(dockerClientConfig);
-    this.dockerClientConfig = dockerClientConfig;
-  }
+    public HackDockerClient(DockerClientConfig dockerClientConfig) {
+        super(dockerClientConfig);
+        this.dockerClientConfig = dockerClientConfig;
+    }
 
-  public static HackDockerClient getInstance(
-      DockerClientConfig dockerClientConfig, DockerHttpClient dockerHttpClient) {
-    HackDockerClient client = new HackDockerClient(dockerClientConfig);
-    client.dockerCmdExecFactory =
-        new DefaultDockerCmdExecFactory(dockerHttpClient, dockerClientConfig.getObjectMapper());
-    ((DockerClientConfigAware) client.dockerCmdExecFactory).init(dockerClientConfig);
-    return client;
-  }
+    public static HackDockerClient getInstance(
+                                               DockerClientConfig dockerClientConfig,
+                                               DockerHttpClient dockerHttpClient) {
+        HackDockerClient client = new HackDockerClient(dockerClientConfig);
+        client.dockerCmdExecFactory =
+                new DefaultDockerCmdExecFactory(dockerHttpClient, dockerClientConfig.getObjectMapper());
+        ((DockerClientConfigAware) client.dockerCmdExecFactory).init(dockerClientConfig);
+        return client;
+    }
 
-  @Override
-  public HackBuildImageCmd buildImageCmd() {
-    return new HackBuildImageCmd(dockerCmdExecFactory.createBuildImageCmdExec());
-  }
+    @Override
+    public HackBuildImageCmd buildImageCmd() {
+        return new HackBuildImageCmd(dockerCmdExecFactory.createBuildImageCmdExec());
+    }
 
-  @Override
-  public HackPullImageCmd pullImageCmd(String repository) {
-    return new HackPullImageCmd(
-        dockerCmdExecFactory.createPullImageCmdExec(),
-        dockerClientConfig.effectiveAuthConfig(repository),
-        repository);
-  }
+    @Override
+    public HackPullImageCmd pullImageCmd(String repository) {
+        return new HackPullImageCmd(
+                dockerCmdExecFactory.createPullImageCmdExec(),
+                dockerClientConfig.effectiveAuthConfig(repository),
+                repository);
+    }
 
-  @Override
-  public HackPushImageCmd pushImageCmd(String name) {
-    return new HackPushImageCmd(
-        dockerCmdExecFactory.createPushImageCmdExec(),
-        dockerClientConfig.effectiveAuthConfig(name),
-        name);
-  }
+    @Override
+    public HackPushImageCmd pushImageCmd(String name) {
+        return new HackPushImageCmd(
+                dockerCmdExecFactory.createPushImageCmdExec(),
+                dockerClientConfig.effectiveAuthConfig(name),
+                name);
+    }
 }

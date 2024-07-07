@@ -25,26 +25,26 @@ import java.util.Arrays;
 @Getter
 public enum OptionStateEnum {
 
-  /** Application which is currently action: none. */
-  NONE(0),
-  /** Application which is currently action: releasing. */
-  RELEASING(1),
-  /** Application which is currently action: cancelling. */
-  CANCELLING(2),
+    /** Application which is currently action: none. */
+    NONE(0),
+    /** Application which is currently action: releasing. */
+    RELEASING(1),
+    /** Application which is currently action: cancelling. */
+    CANCELLING(2),
 
-  /** Application which is currently action: starting. */
-  STARTING(3),
+    /** Application which is currently action: starting. */
+    STARTING(3),
 
-  /** Application which is currently action: savepointing. */
-  SAVEPOINTING(4);
+    /** Application which is currently action: savepointing. */
+    SAVEPOINTING(4);
 
-  private final int value;
+    private final int value;
 
-  OptionStateEnum(int value) {
-    this.value = value;
-  }
+    OptionStateEnum(int value) {
+        this.value = value;
+    }
 
-  public static OptionStateEnum of(Integer state) {
-    return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-  }
+    public static OptionStateEnum of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }

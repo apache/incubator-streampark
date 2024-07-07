@@ -19,7 +19,7 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.{CompiledPlan, PlanReference, Schema, Table, TableDescriptor, TableResult}
+import org.apache.flink.table.api.{CompiledPlan, PlanReference, Schema, Table, TableDescriptor}
 import org.apache.flink.table.api.bridge.scala.{StreamStatementSet, StreamTableEnvironment}
 import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.module.ModuleEntry

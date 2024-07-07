@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.watcher
 
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.{ChangeEventBus, FlinkK8sWatchController, JobStatusWatcherConfig, KubernetesRetriever}
+import org.apache.streampark.flink.kubernetes._
 import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
@@ -45,7 +45,7 @@ import java.util.concurrent.{ScheduledFuture, TimeUnit}
 import scala.collection.convert.ImplicitConversions._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 /**

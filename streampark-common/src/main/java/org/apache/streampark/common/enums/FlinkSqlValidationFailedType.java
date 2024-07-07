@@ -22,42 +22,42 @@ import javax.annotation.Nullable;
 /** Flink SQL validation failed type enum. */
 public enum FlinkSqlValidationFailedType {
 
-  /** Basic test failed (such as null, etc.) */
-  VERIFY_FAILED(1),
+    /** Basic test failed (such as null, etc.) */
+    VERIFY_FAILED(1),
 
-  /** syntax error */
-  SYNTAX_ERROR(2),
+    /** syntax error */
+    SYNTAX_ERROR(2),
 
-  /** unsupported dialect */
-  UNSUPPORTED_DIALECT(3),
+    /** unsupported dialect */
+    UNSUPPORTED_DIALECT(3),
 
-  /** unsupported sql command */
-  UNSUPPORTED_SQL(4),
+    /** unsupported sql command */
+    UNSUPPORTED_SQL(4),
 
-  /** Not at the end of ";" */
-  ENDS_WITH(5);
+    /** Not at the end of ";" */
+    ENDS_WITH(5);
 
-  private final int failedType;
+    private final int failedType;
 
-  FlinkSqlValidationFailedType(int failedType) {
-    this.failedType = failedType;
-  }
-
-  /**
-   * Try to resolve the given flink SQL validation failed type value into a known {@link
-   * FlinkSqlValidationFailedType} enum.
-   */
-  @Nullable
-  public static FlinkSqlValidationFailedType of(Integer value) {
-    for (FlinkSqlValidationFailedType type : values()) {
-      if (type.failedType == value) {
-        return type;
-      }
+    FlinkSqlValidationFailedType(int failedType) {
+        this.failedType = failedType;
     }
-    return null;
-  }
 
-  public int getFailedType() {
-    return failedType;
-  }
+    /**
+     * Try to resolve the given flink SQL validation failed type value into a known {@link
+     * FlinkSqlValidationFailedType} enum.
+     */
+    @Nullable
+    public static FlinkSqlValidationFailedType of(Integer value) {
+        for (FlinkSqlValidationFailedType type : values()) {
+            if (type.failedType == value) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public int getFailedType() {
+        return failedType;
+    }
 }

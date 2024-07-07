@@ -19,4 +19,5 @@ package org.apache.streampark.gateway;
 
 import java.io.Serializable;
 
-public class ExecutionConfiguration implements Serializable {}
+public class ExecutionConfiguration implements Serializable {
+}

@@ -33,139 +33,139 @@ import java.util.Set;
 
 public interface UserService extends IService<User> {
 
-  /**
-   * find user by name
-   *
-   * @param username username
-   * @return user
-   */
-  User getByUsername(String username);
+    /**
+     * find user by name
+     *
+     * @param username username
+     * @return user
+     */
+    User getByUsername(String username);
 
-  /**
-   * find uer detail, contains basic info, role, department
-   *
-   * @param user user
-   * @param restRequest queryRequest
-   * @return IPage
-   */
-  IPage<User> getPage(User user, RestRequest restRequest);
+    /**
+     * find uer detail, contains basic info, role, department
+     *
+     * @param user user
+     * @param restRequest queryRequest
+     * @return IPage
+     */
+    IPage<User> getPage(User user, RestRequest restRequest);
 
-  /**
-   * update login time
-   *
-   * @param username username
-   */
-  void updateLoginTime(String username) throws Exception;
+    /**
+     * update login time
+     *
+     * @param username username
+     */
+    void updateLoginTime(String username) throws Exception;
 
-  /**
-   * create user
-   *
-   * @param user user
-   */
-  void createUser(User user) throws Exception;
+    /**
+     * create user
+     *
+     * @param user user
+     */
+    void createUser(User user) throws Exception;
 
-  /**
-   * update user
-   *
-   * @param user user
-   * @return
-   */
-  RestResponse updateUser(User user) throws Exception;
+    /**
+     * update user
+     *
+     * @param user user
+     * @return
+     */
+    RestResponse updateUser(User user) throws Exception;
 
-  /**
-   * update password
-   *
-   * @param user
-   * @throws Exception
-   */
-  void updatePassword(User user) throws Exception;
+    /**
+     * update password
+     *
+     * @param user
+     * @throws Exception
+     */
+    void updatePassword(User user) throws Exception;
 
-  /**
-   * reset password
-   *
-   * @param username user name
-   */
-  String resetPassword(String username) throws Exception;
+    /**
+     * reset password
+     *
+     * @param username user name
+     */
+    String resetPassword(String username) throws Exception;
 
-  /**
-   * Get the permissions of current userId.
-   *
-   * @param userId the user Id
-   * @param teamId team id. If it's null, will find permissions from all teams.
-   * @return permissions
-   */
-  Set<String> listPermissions(Long userId, @Nullable Long teamId);
+    /**
+     * Get the permissions of current userId.
+     *
+     * @param userId the user Id
+     * @param teamId team id. If it's null, will find permissions from all teams.
+     * @return permissions
+     */
+    Set<String> listPermissions(Long userId, @Nullable Long teamId);
 
-  /**
-   * List all users without tokens
-   *
-   * @return List of User
-   */
-  List<User> listNoTokenUser();
+    /**
+     * List all users without tokens
+     *
+     * @return List of User
+     */
+    List<User> listNoTokenUser();
 
-  /**
-   * Populate the LastTeam field in User
-   *
-   * @param teamId team id
-   * @param userId user id
-   */
-  void setLastTeam(Long teamId, Long userId);
+    /**
+     * Populate the LastTeam field in User
+     *
+     * @param teamId team id
+     * @param userId user id
+     */
+    void setLastTeam(Long teamId, Long userId);
 
-  /**
-   * Clean the LastTeam field in User
-   *
-   * @param userId user id
-   * @param teamId team id
-   */
-  void clearLastTeam(Long userId, Long teamId);
+    /**
+     * Clean the LastTeam field in User
+     *
+     * @param userId user id
+     * @param teamId team id
+     */
+    void clearLastTeam(Long userId, Long teamId);
 
-  /**
-   * Clean the LastTeam field in User
-   *
-   * @param teamId team id
-   */
-  void clearLastTeam(Long teamId);
+    /**
+     * Clean the LastTeam field in User
+     *
+     * @param teamId team id
+     */
+    void clearLastTeam(Long teamId);
 
-  /**
-   * Populate team information for users
-   *
-   * @param user User
-   */
-  void fillInTeam(User user);
+    /**
+     * Populate team information for users
+     *
+     * @param user User
+     */
+    void fillInTeam(User user);
 
-  /**
-   * List all Users by team id
-   *
-   * @param teamId team id
-   * @return List of user
-   */
-  List<User> listByTeamId(Long teamId);
+    /**
+     * List all Users by team id
+     *
+     * @param teamId team id
+     * @return List of user
+     */
+    List<User> listByTeamId(Long teamId);
 
-  /**
-   * Generate user information for the front end
-   *
-   * @param user User
-   * @param teamId team id
-   * @param token JWTToken
-   * @return
-   */
-  Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
+    /**
+     * Generate user information for the front end
+     *
+     * @param user User
+     * @param teamId team id
+     * @param token JWTToken
+     * @return
+     */
+    Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
 
-  /**
-   * transfer user resources to specified users
-   *
-   * @param userId The user ID sending the resource
-   * @param targetUserId The user ID receiving the resource
-   */
-  void transferResource(Long userId, Long targetUserId);
+    /**
+     * transfer user resources to specified users
+     *
+     * @param userId The user ID sending the resource
+     * @param targetUserId The user ID receiving the resource
+     */
+    void transferResource(Long userId, Long targetUserId);
 
-  /**
-   * Get login user information
-   *
-   * @param user User
-   * @return RestResponse
-   */
-  RestResponse getLoginUserInfo(User user);
+    /**
+     * Get login user information
+     *
+     * @param user User
+     * @return RestResponse
+     */
+    RestResponse getLoginUserInfo(User user);
 
-  void deleteUser(Long userId);
+    void deleteUser(Long userId);
 }

@@ -26,9 +26,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PermissionScope {
 
-  String user() default "";
+    String user() default "";
 
-  String team() default "";
+    String team() default "";
 
-  String app() default "";
+    String app() default "";
 }

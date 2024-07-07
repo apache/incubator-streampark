@@ -31,43 +31,43 @@ import java.util.Optional;
 /** Applications can be built asynchronously, can manage pipeline and get info */
 public interface SparkAppBuildPipeService extends IService<AppBuildPipeline> {
 
-  /**
-   * Build application. This is an async call method.
-   *
-   * @param appId application id
-   * @param forceBuild forced start pipeline or not
-   * @return Whether the pipeline was successfully started
-   */
-  boolean buildApplication(@Nonnull Long appId, boolean forceBuild) throws Exception;
+    /**
+     * Build application. This is an async call method.
+     *
+     * @param appId application id
+     * @param forceBuild forced start pipeline or not
+     * @return Whether the pipeline was successfully started
+     */
+    boolean buildApplication(@Nonnull Long appId, boolean forceBuild) throws Exception;
 
-  /**
-   * Get current build pipeline instance of specified application
-   *
-   * @param appId application id
-   * @return ApplicationBuildPipeline instance
-   */
-  Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
+    /**
+     * Get current build pipeline instance of specified application
+     *
+     * @param appId application id
+     * @return ApplicationBuildPipeline instance
+     */
+    Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
 
-  /**
-   * Whether the application can currently start a new building progress
-   *
-   * @param appId application id
-   * @return Whether construction can be started at this time
-   */
-  boolean allowToBuildNow(@Nonnull Long appId);
+    /**
+     * Whether the application can currently start a new building progress
+     *
+     * @param appId application id
+     * @return Whether construction can be started at this time
+     */
+    boolean allowToBuildNow(@Nonnull Long appId);
 
-  /**
-   * List pipeline status on application id list
-   *
-   * @param appIds list of application ids
-   * @return Map structure, key is application id, value is for the pipeline state
-   */
-  Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds);
+    /**
+     * List pipeline status on application id list
+     *
+     * @param appIds list of application ids
+     * @return Map structure, key is application id, value is for the pipeline state
+     */
+    Map<Long, PipelineStatusEnum> listAppIdPipelineStatusMap(List<Long> appIds);
 
-  /**
-   * Delete appBuildPipeline By application id
-   *
-   * @param appId
-   */
-  void removeByAppId(Long appId);
+    /**
+     * Delete appBuildPipeline By application id
+     *
+     * @param appId
+     */
+    void removeByAppId(Long appId);
 }

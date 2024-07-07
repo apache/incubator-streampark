@@ -27,111 +27,111 @@ import org.apache.streampark.gateway.session.SessionHandle;
 
 public interface SqlWorkBenchService {
 
-  /**
-   * Open a session for a flink cluster
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param flinkClusterId flink cluster id
-   * @return session handle
-   */
-  SessionHandle openSession(Long flinkGatewayId, Long flinkClusterId);
+    /**
+     * Open a session for a flink cluster
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param flinkClusterId flink cluster id
+     * @return session handle
+     */
+    SessionHandle openSession(Long flinkGatewayId, Long flinkClusterId);
 
-  /**
-   * Close a session
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   */
-  void closeSession(Long flinkGatewayId, String sessionHandleUUIDStr);
+    /**
+     * Close a session
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     */
+    void closeSession(Long flinkGatewayId, String sessionHandleUUIDStr);
 
-  /**
-   * Get the gateway info
-   *
-   * @param flinkGatewayId flink gateway id
-   * @return gateway info
-   */
-  GatewayInfo getGatewayInfo(Long flinkGatewayId);
+    /**
+     * Get the gateway info
+     *
+     * @param flinkGatewayId flink gateway id
+     * @return gateway info
+     */
+    GatewayInfo getGatewayInfo(Long flinkGatewayId);
 
-  /**
-   * Get the session info
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param operationId operation id
-   */
-  void cancelOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
+    /**
+     * Get the session info
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param operationId operation id
+     */
+    void cancelOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
-  /**
-   * Close the operation
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param operationId operation id
-   */
-  void closeOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
+    /**
+     * Close the operation
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param operationId operation id
+     */
+    void closeOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
-  /**
-   * Get operation info
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param operationId operation id
-   * @return operation info
-   */
-  OperationInfo getOperationInfo(
-      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
+    /**
+     * Get operation info
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param operationId operation id
+     * @return operation info
+     */
+    OperationInfo getOperationInfo(
+                                   Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
-  /**
-   * Get operation result schema
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param operationId operation id
-   * @return operation result schema
-   */
-  Column getOperationResultSchema(
-      Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
+    /**
+     * Get operation result schema
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param operationId operation id
+     * @return operation result schema
+     */
+    Column getOperationResultSchema(
+                                    Long flinkGatewayId, String sessionHandleUUIDStr, String operationId);
 
-  /**
-   * Execute statement
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param statement statement
-   * @return operation handle
-   */
-  OperationHandle executeStatement(
-      Long flinkGatewayId, String sessionHandleUUIDStr, String statement);
+    /**
+     * Execute statement
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param statement statement
+     * @return operation handle
+     */
+    OperationHandle executeStatement(
+                                     Long flinkGatewayId, String sessionHandleUUIDStr, String statement);
 
-  /**
-   * Fetch results
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandleUUIDStr session handle uuid string
-   * @param operationId operation id
-   * @param resultQueryCondition result query condition
-   * @return result set
-   */
-  ResultSet fetchResults(
-      Long flinkGatewayId,
-      String sessionHandleUUIDStr,
-      String operationId,
-      ResultQueryCondition resultQueryCondition);
+    /**
+     * Fetch results
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandleUUIDStr session handle uuid string
+     * @param operationId operation id
+     * @param resultQueryCondition result query condition
+     * @return result set
+     */
+    ResultSet fetchResults(
+                           Long flinkGatewayId,
+                           String sessionHandleUUIDStr,
+                           String operationId,
+                           ResultQueryCondition resultQueryCondition);
 
-  /**
-   * Send heartbeat
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param sessionHandle session handle
-   */
-  void heartbeat(Long flinkGatewayId, String sessionHandle);
+    /**
+     * Send heartbeat
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param sessionHandle session handle
+     */
+    void heartbeat(Long flinkGatewayId, String sessionHandle);
 
-  /**
-   * check flink cluster version is supported
-   *
-   * @param flinkGatewayId flink gateway id
-   * @param flinkClusterId flink cluster id
-   * @return true if supported
-   */
-  boolean check(Long flinkGatewayId, Long flinkClusterId);
+    /**
+     * check flink cluster version is supported
+     *
+     * @param flinkGatewayId flink gateway id
+     * @param flinkClusterId flink cluster id
+     * @return true if supported
+     */
+    boolean check(Long flinkGatewayId, Long flinkClusterId);
 }

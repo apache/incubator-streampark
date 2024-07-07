@@ -31,108 +31,108 @@ import java.util.concurrent.ConcurrentHashMap;
 /** System setting service */
 public interface SettingService extends IService<Setting> {
 
-  Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
+    Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
 
-  // docker
-  String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
-  String KEY_DOCKER_REGISTER_USER = "docker.register.user";
-  String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
-  String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
+    // docker
+    String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
+    String KEY_DOCKER_REGISTER_USER = "docker.register.user";
+    String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+    String KEY_DOCKER_REGISTER_NAMESPACE = "docker.register.namespace";
 
-  // alert.
-  String KEY_ALERT_EMAIL_HOST = "alert.email.host";
-  String KEY_ALERT_EMAIL_PORT = "alert.email.port";
-  String KEY_ALERT_EMAIL_FROM = "alert.email.from";
-  String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
-  String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
-  String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
+    // alert.
+    String KEY_ALERT_EMAIL_HOST = "alert.email.host";
+    String KEY_ALERT_EMAIL_PORT = "alert.email.port";
+    String KEY_ALERT_EMAIL_FROM = "alert.email.from";
+    String KEY_ALERT_EMAIL_USERNAME = "alert.email.userName";
+    String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
+    String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
 
-  String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
+    String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
-  String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
+    String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
-  /**
-   * Retrieves the value of the setting associated with the specified key.
-   *
-   * @param key the key of the setting to retrieve
-   * @return the value of the setting if found, null otherwise
-   */
-  Setting get(String key);
+    /**
+     * Retrieves the value of the setting associated with the specified key.
+     *
+     * @param key the key of the setting to retrieve
+     * @return the value of the setting if found, null otherwise
+     */
+    Setting get(String key);
 
-  /**
-   * Updates the specified Setting.
-   *
-   * @param setting the Setting object to update
-   * @return true if the update is successful, false otherwise
-   */
-  boolean update(Setting setting);
+    /**
+     * Updates the specified Setting.
+     *
+     * @param setting the Setting object to update
+     * @return true if the update is successful, false otherwise
+     */
+    boolean update(Setting setting);
 
-  /**
-   * Retrieves the Maven configuration settings.
-   *
-   * @return The MavenConfig object containing the Maven configuration settings.
-   */
-  MavenConfig getMavenConfig();
+    /**
+     * Retrieves the Maven configuration settings.
+     *
+     * @return The MavenConfig object containing the Maven configuration settings.
+     */
+    MavenConfig getMavenConfig();
 
-  /**
-   * Retrieves the Docker configuration settings.
-   *
-   * @return The DockerConfig object representing the configuration for Docker.
-   */
-  DockerConfig getDockerConfig();
+    /**
+     * Retrieves the Docker configuration settings.
+     *
+     * @return The DockerConfig object representing the configuration for Docker.
+     */
+    DockerConfig getDockerConfig();
 
-  /**
-   * Retrieves the StreamPark address.
-   *
-   * @return a String representing the StreamPark address.
-   */
-  String getStreamParkAddress();
+    /**
+     * Retrieves the StreamPark address.
+     *
+     * @return a String representing the StreamPark address.
+     */
+    String getStreamParkAddress();
 
-  /**
-   * Retrieves the default ingress mode.
-   *
-   * @return The default ingress mode.
-   */
-  String getIngressModeDefault();
+    /**
+     * Retrieves the default ingress mode.
+     *
+     * @return The default ingress mode.
+     */
+    String getIngressModeDefault();
 
-  /**
-   * Before updating the Docker settings, verify that the parameters are filled in correctly, We
-   * check whether it is correct or not by concatenating the given registration URL.
-   *
-   * @param dockerConfig Docker config to be checked
-   * @return Server response value
-   */
-  ResponseResult checkDocker(DockerConfig dockerConfig);
+    /**
+     * Before updating the Docker settings, verify that the parameters are filled in correctly, We
+     * check whether it is correct or not by concatenating the given registration URL.
+     *
+     * @param dockerConfig Docker config to be checked
+     * @return Server response value
+     */
+    ResponseResult checkDocker(DockerConfig dockerConfig);
 
-  /**
-   * update docker config
-   *
-   * @param dockerConfig Docker config needs to be updated
-   * @return Whether the update operation was successful
-   */
-  boolean updateDocker(DockerConfig dockerConfig);
+    /**
+     * update docker config
+     *
+     * @param dockerConfig Docker config needs to be updated
+     * @return Whether the update operation was successful
+     */
+    boolean updateDocker(DockerConfig dockerConfig);
 
-  /**
-   * Retrieves the senderEmail
-   *
-   * @return
-   */
-  SenderEmail getSenderEmail();
+    /**
+     * Retrieves the senderEmail
+     *
+     * @return
+     */
+    SenderEmail getSenderEmail();
 
-  /**
-   * Before updating the email settings, verify that the parameters are filled in correctly, We
-   * check whether it is correct or not by concatenating the given host.
-   *
-   * @param senderEmail email config to be checked
-   * @return Server response value
-   */
-  ResponseResult checkEmail(SenderEmail senderEmail);
+    /**
+     * Before updating the email settings, verify that the parameters are filled in correctly, We
+     * check whether it is correct or not by concatenating the given host.
+     *
+     * @param senderEmail email config to be checked
+     * @return Server response value
+     */
+    ResponseResult checkEmail(SenderEmail senderEmail);
 
-  /**
-   * update docker config
-   *
-   * @param senderEmail email config needs to be updated
-   * @return Whether the update operation was successful
-   */
-  boolean updateEmail(SenderEmail senderEmail);
+    /**
+     * update docker config
+     *
+     * @param senderEmail email config needs to be updated
+     * @return Whether the update operation was successful
+     */
+    boolean updateEmail(SenderEmail senderEmail);
 }

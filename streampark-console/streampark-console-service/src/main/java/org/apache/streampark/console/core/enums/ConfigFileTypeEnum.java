@@ -24,23 +24,24 @@ import java.util.Arrays;
 /** configFile Type enum */
 @Getter
 public enum ConfigFileTypeEnum {
-  YAML(1, "yaml"),
 
-  PROPERTIES(2, "prop"),
+    YAML(1, "yaml"),
 
-  HOCON(3, "conf"),
+    PROPERTIES(2, "prop"),
 
-  UNKNOWN(0, null);
+    HOCON(3, "conf"),
 
-  private final int value;
-  private final String typeName;
+    UNKNOWN(0, null);
 
-  ConfigFileTypeEnum(int value, String name) {
-    this.value = value;
-    this.typeName = name;
-  }
+    private final int value;
+    private final String typeName;
 
-  public static ConfigFileTypeEnum of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
-  }
+    ConfigFileTypeEnum(int value, String name) {
+        this.value = value;
+        this.typeName = name;
+    }
+
+    public static ConfigFileTypeEnum of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

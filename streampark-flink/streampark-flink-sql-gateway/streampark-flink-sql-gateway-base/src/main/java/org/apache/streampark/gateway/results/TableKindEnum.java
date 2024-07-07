@@ -18,6 +18,6 @@
 package org.apache.streampark.gateway.results;
 
 public enum TableKindEnum {
-  TABLE,
-  VIEW
+    TABLE,
+    VIEW
 }

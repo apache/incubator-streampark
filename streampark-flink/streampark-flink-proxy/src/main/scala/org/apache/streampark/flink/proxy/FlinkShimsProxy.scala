@@ -19,7 +19,7 @@ package org.apache.streampark.flink.proxy
 
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{ConfigKeys, FlinkVersion}
-import org.apache.streampark.common.util.{ClassLoaderUtils, Logger, Utils}
+import org.apache.streampark.common.util.{ClassLoaderUtils, Logger}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
@@ -40,10 +40,8 @@ object FlinkShimsProxy extends Logger {
       "(streampark-shaded-jackson-)(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
-  private[this] def getFlinkShimsResourcePattern(flinkLargeVersion: String) =
-    Pattern.compile(
-      s"flink-(.*)-$flinkLargeVersion(.*).jar",
-      Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+  private[this] def getFlinkShimsResourcePattern(majorVersion: String) =
+    Pattern.compile(s"flink-(.*)-$majorVersion(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] lazy val FLINK_SHIMS_PREFIX = "streampark-flink-shims_flink"
 

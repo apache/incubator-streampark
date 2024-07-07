@@ -38,43 +38,44 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("flink/yarnQueue")
 public class YarnQueueController {
 
-  @Autowired private YarnQueueService yarnQueueService;
+    @Autowired
+    private YarnQueueService yarnQueueService;
 
-  /**
-   * * List the queues in the specified team by the paging & optional search hint message.
-   *
-   * @param restRequest page request information.
-   * @param yarnQueue optional fields used to search.
-   * @return RestResponse with IPage<{@link YarnQueue}> object.
-   */
-  @PostMapping("list")
-  public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
-    IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
-    return RestResponse.success(queuePage);
-  }
+    /**
+     * * List the queues in the specified team by the paging & optional search hint message.
+     *
+     * @param restRequest page request information.
+     * @param yarnQueue optional fields used to search.
+     * @return RestResponse with IPage<{@link YarnQueue}> object.
+     */
+    @PostMapping("list")
+    public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
+        IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
+        return RestResponse.success(queuePage);
+    }
 
-  @PostMapping("check")
-  public RestResponse check(YarnQueue yarnQueue) {
-    return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
-  }
+    @PostMapping("check")
+    public RestResponse check(YarnQueue yarnQueue) {
+        return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
+    }
 
-  @PostMapping("create")
-  @RequiresPermissions("yarnQueue:create")
-  public RestResponse create(YarnQueue yarnQueue) {
-    return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
-  }
+    @PostMapping("create")
+    @RequiresPermissions("yarnQueue:create")
+    public RestResponse create(YarnQueue yarnQueue) {
+        return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
+    }
 
-  @PostMapping("update")
-  @RequiresPermissions("yarnQueue:update")
-  public RestResponse update(YarnQueue yarnQueue) {
-    yarnQueueService.updateYarnQueue(yarnQueue);
-    return RestResponse.success();
-  }
+    @PostMapping("update")
+    @RequiresPermissions("yarnQueue:update")
+    public RestResponse update(YarnQueue yarnQueue) {
+        yarnQueueService.updateYarnQueue(yarnQueue);
+        return RestResponse.success();
+    }
 
-  @PostMapping("delete")
-  @RequiresPermissions("yarnQueue:delete")
-  public RestResponse delete(YarnQueue yarnQueue) {
-    yarnQueueService.remove(yarnQueue);
-    return RestResponse.success();
-  }
+    @PostMapping("delete")
+    @RequiresPermissions("yarnQueue:delete")
+    public RestResponse delete(YarnQueue yarnQueue) {
+        yarnQueueService.remove(yarnQueue);
+        return RestResponse.success();
+    }
 }

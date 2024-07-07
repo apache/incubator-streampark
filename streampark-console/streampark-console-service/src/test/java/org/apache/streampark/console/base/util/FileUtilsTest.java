@@ -33,79 +33,79 @@ import java.util.Random;
 /** Test for {@link FileUtils} */
 class FileUtilsTest {
 
-  @Test
-  void testReadEndOfFile(@TempDir Path tempDir) throws IOException {
-    Path filePath = tempDir.resolve("tmp_file");
-    File file = filePath.toFile();
-    FileOutputStream outputStream = new FileOutputStream(file);
-    Random random = new Random();
-    int fileSize = 1000000;
-    byte[] fileBytes = new byte[fileSize];
-    random.nextBytes(fileBytes);
-    outputStream.write(fileBytes);
-    outputStream.flush();
-    outputStream.close();
+    @Test
+    void testReadEndOfFile(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        Random random = new Random();
+        int fileSize = 1000000;
+        byte[] fileBytes = new byte[fileSize];
+        random.nextBytes(fileBytes);
+        outputStream.write(fileBytes);
+        outputStream.flush();
+        outputStream.close();
 
-    // The read size is larger than the file size
-    byte[] readBytes = FileUtils.readEndOfFile(file, fileSize + 1);
-    Assertions.assertArrayEquals(fileBytes, readBytes);
+        // The read size is larger than the file size
+        byte[] readBytes = FileUtils.readEndOfFile(file, fileSize + 1);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
-    // The read size is equals the file size
-    readBytes = FileUtils.readEndOfFile(file, fileSize);
-    Assertions.assertArrayEquals(fileBytes, readBytes);
+        // The read size is equals the file size
+        readBytes = FileUtils.readEndOfFile(file, fileSize);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
 
-    // The read size is less than the file size
-    int readSize = 50000;
-    readBytes = FileUtils.readEndOfFile(file, readSize);
-    byte[] expectedBytes = new byte[readSize];
-    System.arraycopy(fileBytes, fileSize - readSize, expectedBytes, 0, expectedBytes.length);
-    Assertions.assertArrayEquals(expectedBytes, readBytes);
-  }
-
-  @Test
-  void testReadEndOfFileWithChinese(@TempDir Path tempDir) throws IOException {
-    Path filePath = tempDir.resolve("tmp_file");
-    File file = filePath.toFile();
-    PrintWriter writer = new PrintWriter(file);
-    String logWithChinese = "Hello world! 你好啊，hello xxxx";
-    writer.write(logWithChinese);
-    writer.close();
-
-    byte[] bytes = FileUtils.readEndOfFile(file, 1000000);
-    String readString = new String(bytes);
-    Assertions.assertEquals(logWithChinese, readString);
-  }
-
-  @Test
-  void testReadFileFromOffset(@TempDir Path tempDir) throws IOException {
-    Path filePath = tempDir.resolve("tmp_file");
-    File file = filePath.toFile();
-    FileOutputStream outputStream = new FileOutputStream(file);
-    Random random = new Random();
-    int fileSize = 1000000;
-    byte[] fileBytes = new byte[fileSize];
-    random.nextBytes(fileBytes);
-    outputStream.write(fileBytes);
-    outputStream.flush();
-    outputStream.close();
-
-    // The read size is larger than the file size
-    byte[] readBytes = FileUtils.readFileFromOffset(file, 0, fileSize + 1);
-    Assertions.assertArrayEquals(fileBytes, readBytes);
-
-    // The read size is equals the file size
-    readBytes = FileUtils.readFileFromOffset(file, 0, fileSize);
-    Assertions.assertArrayEquals(fileBytes, readBytes);
-
-    // The read size is less than the file size
-    int readSize = 3456;
-    readBytes = new byte[fileSize];
-    byte[] tmpReadBytes;
-    for (int i = 0; i < fileSize; i += tmpReadBytes.length) {
-      tmpReadBytes = FileUtils.readFileFromOffset(file, i, readSize);
-      Assertions.assertTrue(tmpReadBytes.length <= readSize);
-      System.arraycopy(tmpReadBytes, 0, readBytes, i, tmpReadBytes.length);
+        // The read size is less than the file size
+        int readSize = 50000;
+        readBytes = FileUtils.readEndOfFile(file, readSize);
+        byte[] expectedBytes = new byte[readSize];
+        System.arraycopy(fileBytes, fileSize - readSize, expectedBytes, 0, expectedBytes.length);
+        Assertions.assertArrayEquals(expectedBytes, readBytes);
     }
-    Assertions.assertArrayEquals(fileBytes, readBytes);
-  }
+
+    @Test
+    void testReadEndOfFileWithChinese(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
+        PrintWriter writer = new PrintWriter(file);
+        String logWithChinese = "Hello world! 你好啊，hello xxxx";
+        writer.write(logWithChinese);
+        writer.close();
+
+        byte[] bytes = FileUtils.readEndOfFile(file, 1000000);
+        String readString = new String(bytes);
+        Assertions.assertEquals(logWithChinese, readString);
+    }
+
+    @Test
+    void testReadFileFromOffset(@TempDir Path tempDir) throws IOException {
+        Path filePath = tempDir.resolve("tmp_file");
+        File file = filePath.toFile();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        Random random = new Random();
+        int fileSize = 1000000;
+        byte[] fileBytes = new byte[fileSize];
+        random.nextBytes(fileBytes);
+        outputStream.write(fileBytes);
+        outputStream.flush();
+        outputStream.close();
+
+        // The read size is larger than the file size
+        byte[] readBytes = FileUtils.readFileFromOffset(file, 0, fileSize + 1);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
+
+        // The read size is equals the file size
+        readBytes = FileUtils.readFileFromOffset(file, 0, fileSize);
+        Assertions.assertArrayEquals(fileBytes, readBytes);
+
+        // The read size is less than the file size
+        int readSize = 3456;
+        readBytes = new byte[fileSize];
+        byte[] tmpReadBytes;
+        for (int i = 0; i < fileSize; i += tmpReadBytes.length) {
+            tmpReadBytes = FileUtils.readFileFromOffset(file, i, readSize);
+            Assertions.assertTrue(tmpReadBytes.length <= readSize);
+            System.arraycopy(tmpReadBytes, 0, readBytes, i, tmpReadBytes.length);
+        }
+        Assertions.assertArrayEquals(fileBytes, readBytes);
+    }
 }

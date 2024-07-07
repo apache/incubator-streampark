@@ -41,21 +41,23 @@ import java.util.Map;
 @RequestMapping("/menu")
 public class MenuController {
 
-  @Autowired private MenuService menuService;
+    @Autowired
+    private MenuService menuService;
 
-  @Autowired private ServiceHelper serviceHelper;
+    @Autowired
+    private ServiceHelper serviceHelper;
 
-  @PostMapping("router")
-  public RestResponse getUserRouters(Long teamId) {
-    // TODO The teamId is required, get routers should be called after choose teamId.
-    List<VueRouter<Menu>> routers = this.menuService.listRouters(serviceHelper.getUserId(), teamId);
-    return RestResponse.success(routers);
-  }
+    @PostMapping("router")
+    public RestResponse getUserRouters(Long teamId) {
+        // TODO The teamId is required, get routers should be called after choose teamId.
+        List<VueRouter<Menu>> routers = this.menuService.listRouters(serviceHelper.getUserId(), teamId);
+        return RestResponse.success(routers);
+    }
 
-  @PostMapping("list")
-  @RequiresPermissions("menu:view")
-  public RestResponse menuList(Menu menu) {
-    Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
-    return RestResponse.success(menuMap);
-  }
+    @PostMapping("list")
+    @RequiresPermissions("menu:view")
+    public RestResponse menuList(Menu menu) {
+        Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
+        return RestResponse.success(menuMap);
+    }
 }

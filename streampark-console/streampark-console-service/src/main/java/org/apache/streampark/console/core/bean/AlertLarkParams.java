@@ -30,20 +30,16 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertLarkParams implements Serializable {
 
-  @Schema(description = "lark access token")
-  @NotBlank(message = "The access token of Lark must be not empty")
-  private String token;
+    @Schema(description = "lark access token")
+    @NotBlank(message = "The access token of Lark must be not empty")
+    private String token;
 
-  @Schema(description = "is @all", example = "false", implementation = boolean.class)
-  private Boolean isAtAll = false;
+    @Schema(description = "is @all", example = "false", implementation = boolean.class)
+    private Boolean isAtAll = false;
 
-  @Schema(
-      description = "is lark robot secret enabled",
-      example = "false",
-      defaultValue = "false",
-      implementation = boolean.class)
-  private Boolean secretEnable = false;
+    @Schema(description = "is lark robot secret enabled", example = "false", defaultValue = "false", implementation = boolean.class)
+    private Boolean secretEnable = false;
 
-  @Schema(description = "lark robot webhook secret token")
-  private String secretToken;
+    @Schema(description = "lark robot webhook secret token")
+    private String secretToken;
 }

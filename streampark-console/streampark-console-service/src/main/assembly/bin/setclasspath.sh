@@ -22,43 +22,85 @@
 #  are valid and consistent with the selected start-up options.
 # -----------------------------------------------------------------------------
 
-# Make sure prerequisite environment variables are set
-if [ -z "$JAVA_HOME" ] && [ -z "$JRE_HOME" ]; then
-  # shellcheck disable=SC2154
-  if $darwin; then
-    # Bugzilla 54390
-    if [ -x '/usr/libexec/java_home' ] ; then
-      # shellcheck disable=SC2155
-      export JAVA_HOME=$(/usr/libexec/java_home)
-    # Bugzilla 37284 (reviewed).
-    elif [ -d "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home" ]; then
-      export JAVA_HOME="/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home"
-    fi
-  else
-    JAVA_PATH=$(which java 2>/dev/null)
-    if [ "x$JAVA_PATH" != "x" ]; then
-      JAVA_PATH=$(dirname "$JAVA_PATH" 2>/dev/null)
-      JRE_HOME=$(dirname "$JAVA_PATH" 2>/dev/null)
-    fi
-    if [ "x$JRE_HOME" = "x" ]; then
-      # XXX: Should we try other locations?
-      if [ -x /usr/bin/java ]; then
-        JRE_HOME=/usr
+# OS specific support.  $var _must_ be set to either true or false.
+cygwin=false;
+darwin=false;
+mingw=false
+case "$(uname)" in
+  CYGWIN*) cygwin=true ;;
+  MINGW*) mingw=true;;
+  Darwin*) darwin=true
+    # Use /usr/libexec/java_home if available, otherwise fall back to /Library/Java/Home
+    # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
+    if [ -z "$JAVA_HOME" ]; then
+      if [ -x "/usr/libexec/java_home" ]; then
+        JAVA_HOME="$(/usr/libexec/java_home)"; export JAVA_HOME
+      else
+        JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
       fi
     fi
-  fi
-  if [ -z "$JAVA_HOME" ] && [ -z "$JRE_HOME" ]; then
-    echo "Neither the JAVA_HOME nor the JRE_HOME environment variable is defined"
-    echo "At least one of these environment variable is needed to run this program"
-    exit 1
+    ;;
+esac
+
+if [ -z "$JAVA_HOME" ] ; then
+  if [ -r /etc/gentoo-release ] ; then
+    JAVA_HOME=$(java-config --jre-home)
   fi
 fi
 
-if [ -z "$JRE_HOME" ]; then
-  JRE_HOME="$JAVA_HOME"
+# For Cygwin, ensure paths are in UNIX format before anything is touched
+if $cygwin ; then
+  [ -n "$JAVA_HOME" ] &&
+    JAVA_HOME=$(cygpath --unix "$JAVA_HOME")
+  [ -n "$CLASSPATH" ] &&
+    CLASSPATH=$(cygpath --path --unix "$CLASSPATH")
 fi
 
-# Set standard commands for invoking Java, if not already set.
-if [ -z "$_RUNJAVA" ]; then
-  _RUNJAVA="$JRE_HOME"/bin/java
+# For Mingw, ensure paths are in UNIX format before anything is touched
+if $mingw ; then
+  [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] &&
+    JAVA_HOME="$(cd "$JAVA_HOME" || (echo "cannot cd into $JAVA_HOME."; exit 1); pwd)"
+fi
+
+if [ -z "$JAVA_HOME" ]; then
+  javaExecutable="$(which javac)"
+  if [ -n "$javaExecutable" ] && ! [ "$(expr "\"$javaExecutable\"" : '\([^ ]*\)')" = "no" ]; then
+    # readlink(1) is not available as standard on Solaris 10.
+    readLink=$(which readlink)
+    if [ ! "$(expr "$readLink" : '\([^ ]*\)')" = "no" ]; then
+      if $darwin ; then
+        javaHome="$(dirname "\"$javaExecutable\"")"
+        javaExecutable="$(cd "\"$javaHome\"" && pwd -P)/javac"
+      else
+        javaExecutable="$(readlink -f "\"$javaExecutable\"")"
+      fi
+      javaHome="$(dirname "\"$javaExecutable\"")"
+      javaHome=$(expr "$javaHome" : '\(.*\)/bin')
+      JAVA_HOME="$javaHome"
+      export JAVA_HOME
+    fi
+  fi
+fi
+
+if [ -z "$JAVACMD" ] ; then
+  if [ -n "$JAVA_HOME"  ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+      # IBM's JDK on AIX uses strange locations for the executables
+      JAVACMD="$JAVA_HOME/jre/sh/java"
+    else
+      JAVACMD="$JAVA_HOME/bin/java"
+    fi
+  else
+    JAVACMD="$(\unset -f command 2>/dev/null; \command -v java)"
+  fi
+fi
+
+if [ ! -x "$JAVACMD" ] ; then
+  echo "Error: JAVA_HOME is not defined correctly." >&2
+  echo "  We cannot execute $JAVACMD" >&2
+  exit 1
+fi
+
+if [ -z "$JAVA_HOME" ] ; then
+  echo "Warning: JAVA_HOME environment variable is not set."
 fi

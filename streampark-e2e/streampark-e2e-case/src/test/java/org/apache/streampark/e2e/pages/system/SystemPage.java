@@ -33,52 +33,58 @@ import java.time.Duration;
 
 @Getter
 public final class SystemPage extends NavBarPage implements NavBarItem {
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'User Management')]//..")
-  private WebElement menuUserManagement;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Token Management')]//..")
-  private WebElement menuTokenManagement;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'User Management')]//..")
+    private WebElement menuUserManagement;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Role Management')]//..")
-  private WebElement menuRoleManagement;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Token Management')]//..")
+    private WebElement menuTokenManagement;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Team Management')]//..")
-  private WebElement menuTeamManagement;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Role Management')]//..")
+    private WebElement menuRoleManagement;
 
-  @FindBy(
-      xpath =
-          "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Member Management')]//..")
-  private WebElement menuMemberManagement;
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Team Management')]//..")
+    private WebElement menuTeamManagement;
 
-  public SystemPage(RemoteWebDriver driver) {
-    super(driver);
-  }
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Member Management')]//..")
+    private WebElement menuMemberManagement;
 
-  public <T extends SystemPage.Tab> T goToTab(Class<T> tab) {
-    if (tab == UserManagementPage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
-      menuUserManagement.click();
-      return tab.cast(new UserManagementPage(driver));
+    public SystemPage(RemoteWebDriver driver) {
+        super(driver);
     }
 
-    if (tab == TeamManagementPage.class) {
-      new WebDriverWait(driver, Duration.ofSeconds(10))
-          .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
-      menuTeamManagement.click();
-      return tab.cast(new TeamManagementPage(driver));
+    public <T extends SystemPage.Tab> T goToTab(Class<T> tab) {
+        if (tab == UserManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
+            menuUserManagement.click();
+            return tab.cast(new UserManagementPage(driver));
+        }
+
+        if (tab == TeamManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
+            menuTeamManagement.click();
+            return tab.cast(new TeamManagementPage(driver));
+        }
+
+        if (tab == RoleManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuRoleManagement));
+            menuRoleManagement.click();
+            return tab.cast(new RoleManagementPage(driver));
+        }
+
+        if (tab == MemberManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
+            menuMemberManagement.click();
+            return tab.cast(new MemberManagementPage(driver));
+        }
+
+        throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
     }
 
-    throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
-  }
-
-  public interface Tab {}
+    public interface Tab {
+    }
 }

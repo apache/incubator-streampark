@@ -54,110 +54,110 @@ import java.util.Map;
 @RequestMapping("user")
 public class UserController {
 
-  @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Autowired private TeamService teamService;
+    @Autowired
+    private TeamService teamService;
 
-  @Autowired private ServiceHelper serviceHelper;
+    @Autowired
+    private ServiceHelper serviceHelper;
 
-  @PostMapping("list")
-  @RequiresPermissions(
-      value = {"user:view", "app:view"},
-      logical = Logical.OR)
-  public RestResponse userList(RestRequest restRequest, User user) {
-    IPage<User> userList = userService.getPage(user, restRequest);
-    return RestResponse.success(userList);
-  }
-
-  @PostMapping("post")
-  @RequiresPermissions("user:add")
-  public RestResponse addUser(@Valid User user) throws Exception {
-    user.setLoginType(LoginTypeEnum.PASSWORD);
-    this.userService.createUser(user);
-    return RestResponse.success();
-  }
-
-  @PutMapping("update")
-  @PermissionScope(user = "#user.id")
-  @RequiresPermissions("user:update")
-  public RestResponse updateUser(@Valid User user) throws Exception {
-    return this.userService.updateUser(user);
-  }
-
-  @PutMapping("transferResource")
-  @RequiresPermissions("user:update")
-  public RestResponse transferResource(Long userId, Long targetUserId) {
-    this.userService.transferResource(userId, targetUserId);
-    return RestResponse.success();
-  }
-
-  @DeleteMapping("delete")
-  @PermissionScope(user = "#userId")
-  @RequiresPermissions("user:delete")
-  public RestResponse deleteUser(Long userId) throws Exception {
-    this.userService.deleteUser(userId);
-    return RestResponse.success();
-  }
-
-  @PostMapping("getNoTokenUser")
-  public RestResponse getNoTokenUser() {
-    List<User> userList = this.userService.listNoTokenUser();
-    return RestResponse.success(userList);
-  }
-
-  @PostMapping("check/name")
-  public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
-    boolean result = this.userService.getByUsername(username) == null;
-    return RestResponse.success(result);
-  }
-
-  @PutMapping("password")
-  @PermissionScope(user = "#user.id")
-  public RestResponse updatePassword(User user) throws Exception {
-    userService.updatePassword(user);
-    return RestResponse.success();
-  }
-
-  @PutMapping("password/reset")
-  @RequiresPermissions("user:reset")
-  public RestResponse resetPassword(@NotBlank(message = "{required}") String username)
-      throws Exception {
-    String newPass = this.userService.resetPassword(username);
-    return RestResponse.success(newPass);
-  }
-
-  @PostMapping("initTeam")
-  public RestResponse initTeam(Long teamId, Long userId) {
-    Team team = teamService.getById(teamId);
-    if (team == null) {
-      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
+    @PostMapping("list")
+    @RequiresPermissions(value = {"user:view", "app:view"}, logical = Logical.OR)
+    public RestResponse userList(RestRequest restRequest, User user) {
+        IPage<User> userList = userService.getPage(user, restRequest);
+        return RestResponse.success(userList);
     }
-    userService.setLastTeam(teamId, userId);
-    return RestResponse.success();
-  }
 
-  @PostMapping("setTeam")
-  public RestResponse setTeam(Long teamId) {
-    Team team = teamService.getById(teamId);
-    if (team == null) {
-      return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
+    @PostMapping("post")
+    @RequiresPermissions("user:add")
+    public RestResponse addUser(@Valid User user) throws Exception {
+        user.setLoginType(LoginTypeEnum.PASSWORD);
+        this.userService.createUser(user);
+        return RestResponse.success();
     }
-    User user = serviceHelper.getLoginUser();
-    ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
-    // 1) set the latest team
-    userService.setLastTeam(teamId, user.getUserId());
 
-    // 2) get latest userInfo
-    user.dataMasking();
+    @PutMapping("update")
+    @PermissionScope(user = "#user.id")
+    @RequiresPermissions("user:update")
+    public RestResponse updateUser(@Valid User user) throws Exception {
+        return this.userService.updateUser(user);
+    }
 
-    Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
-    return new RestResponse().data(infoMap);
-  }
+    @PutMapping("transferResource")
+    @RequiresPermissions("user:update")
+    public RestResponse transferResource(Long userId, Long targetUserId) {
+        this.userService.transferResource(userId, targetUserId);
+        return RestResponse.success();
+    }
 
-  @PostMapping("appOwners")
-  public RestResponse appOwners(Long teamId) {
-    List<User> userList = userService.listByTeamId(teamId);
-    userList.forEach(User::dataMasking);
-    return RestResponse.success(userList);
-  }
+    @DeleteMapping("delete")
+    @PermissionScope(user = "#userId")
+    @RequiresPermissions("user:delete")
+    public RestResponse deleteUser(Long userId) throws Exception {
+        this.userService.deleteUser(userId);
+        return RestResponse.success();
+    }
+
+    @PostMapping("getNoTokenUser")
+    public RestResponse getNoTokenUser() {
+        List<User> userList = this.userService.listNoTokenUser();
+        return RestResponse.success(userList);
+    }
+
+    @PostMapping("check/name")
+    public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
+        boolean result = this.userService.getByUsername(username) == null;
+        return RestResponse.success(result);
+    }
+
+    @PutMapping("password")
+    @PermissionScope(user = "#user.id")
+    public RestResponse updatePassword(User user) throws Exception {
+        userService.updatePassword(user);
+        return RestResponse.success();
+    }
+
+    @PutMapping("password/reset")
+    @RequiresPermissions("user:reset")
+    public RestResponse resetPassword(@NotBlank(message = "{required}") String username) throws Exception {
+        String newPass = this.userService.resetPassword(username);
+        return RestResponse.success(newPass);
+    }
+
+    @PostMapping("initTeam")
+    public RestResponse initTeam(Long teamId, Long userId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
+        }
+        userService.setLastTeam(teamId, userId);
+        return RestResponse.success();
+    }
+
+    @PostMapping("setTeam")
+    public RestResponse setTeam(Long teamId) {
+        Team team = teamService.getById(teamId);
+        if (team == null) {
+            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
+        }
+        User user = serviceHelper.getLoginUser();
+        ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
+        // 1) set the latest team
+        userService.setLastTeam(teamId, user.getUserId());
+
+        // 2) get latest userInfo
+        user.dataMasking();
+
+        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
+        return new RestResponse().data(infoMap);
+    }
+
+    @PostMapping("appOwners")
+    public RestResponse appOwners(Long teamId) {
+        List<User> userList = userService.listByTeamId(teamId);
+        userList.forEach(User::dataMasking);
+        return RestResponse.success(userList);
+    }
 }
