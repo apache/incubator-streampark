@@ -594,6 +594,9 @@
                             <eclipse>
                                 <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/spotless_streampark_formatter.xml</file>
                             </eclipse>
+                            <licenseHeader>
+                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/copyright.txt</file>
+                            </licenseHeader>
                             <importOrder>
                                 <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
                             </importOrder>
@@ -626,6 +629,9 @@
                                 <version>${spotless.scalafmt.version}</version>
                                 <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
                             </scalafmt>
+                            <licenseHeader>
+                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/copyright.txt</file>
+                            </licenseHeader>
                         </scala>
                         <pom>
                             <includes>

@@ -1,22 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.apache.streampark.e2e.cases.resource;
 
 import org.apache.streampark.e2e.core.StreamPark;
@@ -30,7 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
-;import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class VariableManagementTest {
@@ -54,9 +53,9 @@ public class VariableManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
-            .goToNav(ResourcePage.class)
-            .goToTab(VariableManagementPage.class);
+                .login(userName, password, teamName)
+                .goToNav(ResourcePage.class)
+                .goToTab(VariableManagementPage.class);
     }
 
     @Test
@@ -66,11 +65,11 @@ public class VariableManagementTest {
         variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
-                    .as("Variable list should contain newly-created variable")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(variableCode)));
+                .untilAsserted(
+                        () -> assertThat(variableManagementPage.variableList())
+                                .as("Variable list should contain newly-created variable")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains(variableCode)));
     }
 
     @Test
@@ -80,11 +79,11 @@ public class VariableManagementTest {
         variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variableManagementPage.errorMessageList())
-                    .as("Variable Code Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("The variable code already exists.")));
+                .untilAsserted(
+                        () -> assertThat(variableManagementPage.errorMessageList())
+                                .as("Variable Code Duplicated Error message should be displayed")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains("The variable code already exists.")));
 
         variableManagementPage.errorMessageConfirmButton().click();
         variableManagementPage.createVariableForm().buttonCancel().click();
@@ -99,12 +98,12 @@ public class VariableManagementTest {
 
         variableManagementPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
         Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
-                    .as("Variable list should contain edited variable")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(editVariableValue))
-                    .anyMatch(it -> it.contains(editDescription)));
+                .untilAsserted(
+                        () -> assertThat(variableManagementPage.variableList())
+                                .as("Variable list should contain edited variable")
+                                .extracting(WebElement::getText)
+                                .anyMatch(it -> it.contains(editVariableValue))
+                                .anyMatch(it -> it.contains(editDescription)));
     }
 
     @Test
@@ -115,10 +114,9 @@ public class VariableManagementTest {
         variableManagementPage.deleteVariable(variableCode);
 
         Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
-                    .extracting(WebElement::getText)
-                    .noneMatch(it -> it.contains(variableCode))
-            );
+                .untilAsserted(
+                        () -> assertThat(variableManagementPage.variableList())
+                                .extracting(WebElement::getText)
+                                .noneMatch(it -> it.contains(variableCode)));
     }
 }
