@@ -139,7 +139,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         @FindBy(xpath = "//div[@class='scrollbar__view']//*[@id='form_item_roleName']")
         private WebElement inputRoleName;
 
-        @FindBy(id = "form_item_remark")
+        @FindBy(id = "form_item_description")
         private WebElement inputDescription;
 
         @FindBys({

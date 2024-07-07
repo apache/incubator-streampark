@@ -17,7 +17,7 @@
 export interface RoleParam {
   roleId?: number;
   roleName: string;
-  remark: string;
+  description: string;
   menuId: string[];
 }
 
@@ -25,7 +25,7 @@ export interface RoleListRecord {
   roleId: string;
   roleName: string;
   roleCode?: any;
-  remark: string;
+  description: string;
   createTime: string;
   modifyTime: string;
   sortField?: any;
