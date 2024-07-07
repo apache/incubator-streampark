@@ -32,12 +32,14 @@ package object docker {
 
   def watchDockerPullProcess(func: PullResponseItem => Unit): PullImageCallbackListener =
     new PullImageCallbackListener {
-      override def watchPullProcess(processDetail: PullResponseItem): Unit = func(processDetail)
+      override def watchPullProcess(processDetail: PullResponseItem): Unit =
+        func(processDetail)
     }
 
   def watchDockerPushProcess(func: PushResponseItem => Unit): PushImageCallbackListener =
     new PushImageCallbackListener {
-      override def watchPushProcess(processDetail: PushResponseItem): Unit = func(processDetail)
+      override def watchPushProcess(processDetail: PushResponseItem): Unit =
+        func(processDetail)
     }
 
   def usingDockerClient[R](process: DockerClient => R)(handleException: Throwable => R): R = {

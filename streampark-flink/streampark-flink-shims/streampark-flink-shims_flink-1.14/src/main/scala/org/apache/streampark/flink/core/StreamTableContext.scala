@@ -48,7 +48,8 @@ class StreamTableContext(
     this(args._1, args._2, args._3)
 
   /** for Java */
-  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
+  def this(args: StreamTableEnvConfig) =
+    this(FlinkTableInitializer.initialize(args))
 
   override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table =
     tableEnv.fromDataStream[T](dataStream, schema)
@@ -68,7 +69,8 @@ class StreamTableContext(
   override def createTemporaryView[T](
       path: String,
       dataStream: DataStream[T],
-      schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
+      schema: Schema): Unit =
+    tableEnv.createTemporaryView[T](path, dataStream, schema)
 
   override def toDataStream(table: Table): DataStream[Row] = {
     isConvertedToDataStream = true
@@ -103,9 +105,11 @@ class StreamTableContext(
     tableEnv.toChangelogStream(table, targetSchema, changelogMode)
   }
 
-  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
+  override def useModules(strings: String*): Unit =
+    tableEnv.useModules(strings: _*)
 
-  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+  override def listFullModules(): Array[ModuleEntry] =
+    tableEnv.listFullModules()
 
   /**
    * flink 1.14, need to implement
@@ -127,23 +131,26 @@ class StreamTableContext(
   def $getStreamGraph(clearTransformations: Boolean): StreamGraph =
     this.streamEnv.getStreamGraph(clearTransformations)
 
-  override def createStatementSet(): StreamStatementSet = tableEnv.createStatementSet()
+  override def createStatementSet(): StreamStatementSet =
+    tableEnv.createStatementSet()
 
-  @Deprecated def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @deprecated def fromTableSource(source: TableSource[_]): Table =
+    tableEnv.fromTableSource(source)
 
-  @Deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
+  @deprecated def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @Deprecated def insertInto(targetPath: String, table: Table): Unit =
+  @deprecated def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @Deprecated def explain(table: Table): String = tableEnv.explain(table)
+  @deprecated def explain(table: Table): String = tableEnv.explain(table)
 
-  @Deprecated def explain(table: Table, extended: Boolean): String =
+  @deprecated def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @Deprecated def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @deprecated def explain(extended: Boolean): String =
+    tableEnv.explain(extended)
 
-  @Deprecated def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @deprecated def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 
 }

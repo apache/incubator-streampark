@@ -126,7 +126,8 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
     contextSelectorBinder.getContextSelector.getLoggerContext
   }
 
-  override def getLoggerFactoryClassStr: String = contextSelectorBinder.getClass.getName
+  override def getLoggerFactoryClassStr: String =
+    contextSelectorBinder.getClass.getName
 
   private class ContextInitializer(loggerContext: LoggerContext)
     extends LogBackContextInitializer(loggerContext) {
@@ -147,13 +148,13 @@ private[this] object LoggerFactory extends LoggerFactoryBinder {
 
         val input = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8))
         configurator.doConfigure(input)
-      } else
+      } else {
         throw {
           new LogbackException(
             "Unexpected filename extension of file [" + url.toString + "]. Should be .xml")
         }
+      }
     }
-
   }
 
 }

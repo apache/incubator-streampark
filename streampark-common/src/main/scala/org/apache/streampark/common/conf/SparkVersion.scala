@@ -101,8 +101,7 @@ class SparkVersion(val sparkHome: String) extends java.io.Serializable with Logg
             sparkVersion.set(matcher.group(2))
           }
         }
-      }
-    )
+      })
     logInfo(buffer.toString())
     if (!success.get()) {
       throw new IllegalStateException(s"[StreamPark] parse spark version failed. $buffer")

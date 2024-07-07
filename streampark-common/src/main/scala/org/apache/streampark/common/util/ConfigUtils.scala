@@ -27,8 +27,7 @@ import scala.util.Try
 
 object ConfigUtils {
 
-  def getConf(parameter: JavaMap[String, String], prefix: String = "", addfix: String = "")(implicit
-      alias: String = ""): Properties = {
+  def getConf(parameter: JavaMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.filter(_._2.nonEmpty).foreach { case (k, v) => prop.put(addfix + k, v) }
@@ -48,8 +47,9 @@ object ConfigUtils {
     val prefix = KAFKA_SINK_PREFIX + alias
     val param: ScalaMap[String, String] =
       filterParam(parameter, if (prefix.endsWith(".")) prefix else s"$prefix.")
-    if (param.isEmpty) throw new IllegalArgumentException(s"$topic init error...")
-    else {
+    if (param.isEmpty) {
+      throw new IllegalArgumentException(s"$topic init error...")
+    } else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
@@ -61,8 +61,11 @@ object ConfigUtils {
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(
-        x => x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic))
+      val hasTopic = !kafkaProperty.toMap.exists(x =>
+        x._1 == KEY_KAFKA_TOPIC && x._2
+          .split(",|\\s+")
+          .toSet
+          .contains(_topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
@@ -86,7 +89,8 @@ object ConfigUtils {
     val driver = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_DRIVER", null)
     val url = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_URL", null)
     val user = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_USER", null)
-    val password = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_PASSWORD", null)
+    val password =
+      parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null =>

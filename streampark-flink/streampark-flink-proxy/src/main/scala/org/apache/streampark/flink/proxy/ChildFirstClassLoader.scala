@@ -53,8 +53,7 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
-    "org.apache.hadoop"
-  )
+    "org.apache.hadoop")
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
@@ -100,7 +99,9 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
       val matchState =
-        FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches
+        FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern
+          .matcher(filename)
+          .matches
       if (matchState) {
         return null
       }

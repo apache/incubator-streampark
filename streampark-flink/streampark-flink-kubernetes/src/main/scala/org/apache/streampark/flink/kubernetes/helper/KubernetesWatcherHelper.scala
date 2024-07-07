@@ -27,9 +27,10 @@ import scala.language.implicitConversions
 /** Debug helper for FlinkTrackMonitor, only for streampark development, debugging scenarios. */
 object KubernetesWatcherHelper extends Logger {
 
-  implicit private def funcToTimerTask(fun: () => Unit): TimerTask = new TimerTask() {
-    def run(): Unit = fun()
-  }
+  implicit private def funcToTimerTask(fun: () => Unit): TimerTask =
+    new TimerTask() {
+      def run(): Unit = fun()
+    }
 
   // scalastyle:off println
   // print job status cache size info
@@ -60,8 +61,7 @@ object KubernetesWatcherHelper extends Logger {
           s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().size} | " +
           s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.flinkMetrics.asMap().mkString(",")}"),
       0,
-      1500
-    )
+      1500)
 
   // print job cache detail
   def watchJobStatusCache(implicit k8sWatcher: FlinkK8sWatcher): Unit =
@@ -72,8 +72,7 @@ object KubernetesWatcherHelper extends Logger {
             s"count=${k8sWatcher.getAllJobStatus.size} | " +
             s" ${k8sWatcher.getAllJobStatus.mkString(", ")}"),
       0,
-      1500
-    )
+      1500)
 
   // print trackId cache detail
   def watchTrackIdsCache(implicit k8sWatcher: FlinkK8sWatcher): Unit = {
@@ -100,11 +99,12 @@ object KubernetesWatcherHelper extends Logger {
     new Timer().scheduleAtFixedRate(
       () =>
         logInfo(s"[flink-k8s][k8s-event]-${System.currentTimeMillis} => " +
-          s"count=${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().size} | " +
-          s"${k8sWatcher.asInstanceOf[DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().mkString(",")}"),
+          s"count=${k8sWatcher.asInstanceOf[
+              DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().size} | " +
+          s"${k8sWatcher.asInstanceOf[
+              DefaultFlinkK8sWatcher].watchController.k8sDeploymentEvents.asMap().mkString(",")}"),
       0,
-      1500
-    )
+      1500)
   }
 
 }

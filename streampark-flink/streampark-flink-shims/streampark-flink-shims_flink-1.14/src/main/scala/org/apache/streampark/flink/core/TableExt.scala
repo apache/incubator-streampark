@@ -26,7 +26,8 @@ object TableExt {
 
   class Table(val table: FlinkTable) {
 
-    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+    def ->(field: String, fields: String*): FlinkTable =
+      table.as(field, fields: _*)
   }
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
@@ -43,16 +44,12 @@ object TableExt {
       super.toRetractStream
     }
 
-    def toAppendStream[T](implicit
-        typeInfo: TypeInformation[T],
-        context: StreamTableContext): DataStream[T] = {
+    def toAppendStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[T] = {
       context.isConvertedToDataStream = true
       super.toAppendStream
     }
 
-    def toRetractStream[T](implicit
-        typeInfo: TypeInformation[T],
-        context: StreamTableContext): DataStream[(Boolean, T)] = {
+    def toRetractStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[(Boolean, T)] = {
       context.isConvertedToDataStream = true
       super.toRetractStream
     }

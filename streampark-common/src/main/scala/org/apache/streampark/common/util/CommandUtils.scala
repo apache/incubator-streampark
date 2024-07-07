@@ -58,7 +58,8 @@ object CommandUtils extends Logger {
 
       // 1) init
       lazy val process = {
-        val interpreters = if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
+        val interpreters =
+          if (Utils.isWindows) List("cmd", "/k") else List("/bin/bash")
         val builder = new ProcessBuilder(interpreters).redirectErrorStream(true)
         if (directory != null) {
           builder.directory(new File(directory))

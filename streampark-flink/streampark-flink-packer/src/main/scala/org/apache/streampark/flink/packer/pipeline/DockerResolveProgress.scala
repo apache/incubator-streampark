@@ -38,8 +38,8 @@ class DockerPullProgress(
   // noinspection DuplicatedCode
   def update(pullRsp: PullResponseItem): Unit = {
     val nonPullUpdateState =
-      pullRsp == null || StringUtils.isBlank(pullRsp.getId) || StringUtils.isBlank(
-        pullRsp.getStatus)
+      pullRsp == null || StringUtils.isBlank(pullRsp.getId) || StringUtils
+        .isBlank(pullRsp.getStatus)
     if (nonPullUpdateState) {
       return
     }
@@ -59,7 +59,8 @@ class DockerPullProgress(
     }
   }
 
-  def snapshot: DockerPullSnapshot = DockerPullSnapshot.of(layers.values.toSeq, error, lastTime)
+  def snapshot: DockerPullSnapshot =
+    DockerPullSnapshot.of(layers.values.toSeq, error, lastTime)
 }
 
 class DockerBuildProgress(val steps: ArrayBuffer[String], var lastTime: Long) {
@@ -80,8 +81,8 @@ class DockerPushProgress(
   // noinspection DuplicatedCode
   def update(pushRsp: PushResponseItem): Unit = {
     val nonPushUpdateState =
-      pushRsp == null || StringUtils.isBlank(pushRsp.getId) || StringUtils.isBlank(
-        pushRsp.getStatus)
+      pushRsp == null || StringUtils.isBlank(pushRsp.getId) || StringUtils
+        .isBlank(pushRsp.getStatus)
     if (nonPushUpdateState) {
       return
     }
@@ -101,7 +102,8 @@ class DockerPushProgress(
     }
   }
 
-  def snapshot: DockerPushSnapshot = DockerPushSnapshot.of(layers.values.toSeq, error, lastTime)
+  def snapshot: DockerPushSnapshot =
+    DockerPushSnapshot.of(layers.values.toSeq, error, lastTime)
 }
 
 object DockerPullProgress {
@@ -132,8 +134,10 @@ case class DockerLayerProgress(layerId: String, status: String, current: Long, t
   def percent: Double = Utils.calPercent(current, total)
 
   def currentMb: Double =
-    if (current == 0) 0 else "%.2f".format(current.toDouble / (1024 * 1024)).toDouble
+    if (current == 0) 0
+    else "%.2f".format(current.toDouble / (1024 * 1024)).toDouble
 
   def totalMb: Double =
-    if (total == 0) 0 else "%.2f".format(total.toDouble / (1024 * 1024)).toDouble
+    if (total == 0) 0
+    else "%.2f".format(total.toDouble / (1024 * 1024)).toDouble
 }

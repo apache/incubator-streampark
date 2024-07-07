@@ -39,7 +39,7 @@ class PropertiesUtilsTestCase {
         "--sink-conf sink.label-prefix=label" +
         "--table-conf replication_num=1"
     val programArgs = PropertiesUtils.extractArguments(args)
-    println(programArgs)
+    Assertions.assertTrue(programArgs.contains("username=root"))
   }
 
   @Test def testDynamicProperties(): Unit = {

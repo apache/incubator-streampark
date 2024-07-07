@@ -66,8 +66,7 @@ object SqlCommandParser extends Logger {
                     lineStart = segment.start,
                     lineEnd = segment.end,
                     exception = s"unsupported sql",
-                    sql = segment.sql
-                  ))
+                    sql = segment.sql))
               } else {
                 throw new UnsupportedOperationException(s"unsupported sql: ${segment.sql}")
               }
@@ -102,8 +101,8 @@ object SqlCommandParser extends Logger {
       }
       sqlCommand
         .converter(groups)
-        .map(
-          x => SqlCommandCall(sqlSegment.start, sqlSegment.end, sqlCommand, x, sqlSegment.sql.trim))
+        .map(x =>
+          SqlCommandCall(sqlSegment.start, sqlSegment.end, sqlCommand, x, sqlSegment.sql.trim))
     }
   }
 
@@ -124,7 +123,8 @@ sealed abstract class SqlCommand(
   def matches(input: String): Boolean = {
     if (StringUtils.isBlank(regex)) false
     else {
-      val pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+      val pattern =
+        Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
       matcher = pattern.matcher(input)
       matcher.matches()
     }
@@ -136,13 +136,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   def get(stmt: String): SqlCommand = {
     var cmd: SqlCommand = null
     breakable {
-      this.values.foreach(
-        x => {
-          if (x.matches(stmt)) {
-            cmd = x
-            break()
-          }
-        })
+      this.values.foreach(x => {
+        if (x.matches(stmt)) {
+          cmd = x
+          break()
+        }
+      })
     }
     cmd
   }
@@ -210,7 +209,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   /** <strong>DROP DATABASE [IF EXISTS] [catalog_name.]db_name [ (RESTRICT | CASCADE) ]</strong> */
   case object DROP_DATABASE extends SqlCommand("drop database", "(DROP\\s+DATABASE\\s+.+)")
 
-  /** <strong>DROP [TEMPORARY] VIEW  [IF EXISTS] [catalog_name.][db_name.]view_name</strong> */
+  /** <strong>DROP [TEMPORARY] VIEW [IF EXISTS] [catalog_name.][db_name.]view_name</strong> */
   case object DROP_VIEW extends SqlCommand("drop view", "(DROP\\s+(TEMPORARY\\s+|)VIEW\\s+.+)")
 
   /**
@@ -355,7 +354,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object UPDATE extends SqlCommand("update", "(UPDATE\\s+.+)")
 
-  private[this] def cleanUp(sql: String): String = sql.trim.replaceAll("^(['\"])|(['\"])$", "")
+  private[this] def cleanUp(sql: String): String =
+    sql.trim.replaceAll("^(['\"])|(['\"])$", "")
 
 }
 
@@ -417,7 +417,8 @@ object SqlSplitter {
       while (scanner.hasNextLine) {
         lineNumber += 1
         val line = scanner.nextLine().trim
-        val nonEmpty = StringUtils.isNotBlank(line) && !line.startsWith(PARAM_PREFIX)
+        val nonEmpty =
+          StringUtils.isNotBlank(line) && !line.startsWith(PARAM_PREFIX)
         if (line.startsWith("/*")) {
           startComment = true
           hasComment = true
@@ -435,7 +436,8 @@ object SqlSplitter {
 
     @tailrec
     def findStartLine(num: Int): Int =
-      if (num >= lineDescriptor.size || lineDescriptor(num)) num else findStartLine(num + 1)
+      if (num >= lineDescriptor.size || lineDescriptor(num)) num
+      else findStartLine(num + 1)
 
     def markLineNumber(): Unit = {
       val line = lineNum + 1
@@ -467,10 +469,8 @@ object SqlSplitter {
         }
 
         // end of multiple line comment
-        if (
-          multiLineComment && (idx - 1) >= 0 && sql.charAt(idx - 1) == '/'
-          && (idx - 2) >= 0 && sql.charAt(idx - 2) == '*'
-        ) {
+        if (multiLineComment && (idx - 1) >= 0 && sql.charAt(idx - 1) == '/'
+          && (idx - 2) >= 0 && sql.charAt(idx - 2) == '*') {
           multiLineComment = false
         }
 
@@ -493,22 +493,16 @@ object SqlSplitter {
         }
 
         // single line comment or multiple line comment start mark
-        if (
-          !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIndex
-        ) {
+        if (!singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment && idx < lastIndex) {
           if (isSingleLineComment(sql.charAt(idx), sql.charAt(idx + 1))) {
             singleLineComment = true
-          } else if (
-            sql.charAt(idx) == '/' && sql.length > (idx + 2)
-            && sql.charAt(idx + 1) == '*' && sql.charAt(idx + 2) != '+'
-          ) {
+          } else if (sql.charAt(idx) == '/' && sql.length > (idx + 2)
+            && sql.charAt(idx + 1) == '*' && sql.charAt(idx + 2) != '+') {
             multiLineComment = true
           }
         }
 
-        if (
-          ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment
-        ) {
+        if (ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment && !singleLineComment) {
           markLineNumber()
           // meet the end of semicolon
           if (query.toString.trim.nonEmpty) {
@@ -558,11 +552,10 @@ object SqlSplitter {
     }
 
     val set = new ListBuffer[SqlSegment]
-    refinedQueries.foreach(
-      x => {
-        val line = lineNumMap(x._1)
-        set += SqlSegment(line._1, line._2, x._2)
-      })
+    refinedQueries.foreach(x => {
+      val line = lineNumMap(x._1)
+      set += SqlSegment(line._1, line._2, x._2)
+    })
     set.toList.sortWith((a, b) => a.start < b.start)
   }
 
@@ -582,7 +575,8 @@ object SqlSplitter {
     builder.toString
   }
 
-  private[this] def isSingleLineComment(text: String) = text.trim.startsWith(PARAM_PREFIX)
+  private[this] def isSingleLineComment(text: String) =
+    text.trim.startsWith(PARAM_PREFIX)
 
   private[this] def isMultipleLineComment(text: String) =
     text.trim.startsWith("/*") && text.trim.endsWith("*/")

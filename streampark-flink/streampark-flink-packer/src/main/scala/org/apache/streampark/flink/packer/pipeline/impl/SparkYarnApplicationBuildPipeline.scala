@@ -35,7 +35,8 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
   extends BuildPipeline {
 
   /** the type of pipeline */
-  override def pipeType: PipelineTypeEnum = PipelineTypeEnum.SPARK_YARN_APPLICATION
+  override def pipeType: PipelineTypeEnum =
+    PipelineTypeEnum.SPARK_YARN_APPLICATION
 
   override def offerBuildParam: SparkYarnApplicationBuildRequest = request
 
@@ -59,18 +60,18 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
       execStep(2) {
         request.developmentMode match {
           case FlinkDevelopmentMode.FLINK_SQL =>
-            val mavenArts = MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
+            val mavenArts =
+              MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
             mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
           case _ => List[String]()
         }
       }.getOrElse(throw getError.exception)
 
     execStep(3) {
-      mavenJars.foreach(
-        jar => {
-          uploadJarToHdfsOrLfs(FsOperator.lfs, jar, request.localWorkspace)
-          uploadJarToHdfsOrLfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
-        })
+      mavenJars.foreach(jar => {
+        uploadJarToHdfsOrLfs(FsOperator.lfs, jar, request.localWorkspace)
+        uploadJarToHdfsOrLfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
+      })
     }.getOrElse(throw getError.exception)
 
     SimpleBuildResponse()
@@ -91,14 +92,14 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
         case FsOperator.lfs =>
           fsOperator.copy(originFile.getAbsolutePath, target)
         case FsOperator.hdfs =>
-          val uploadFile = s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
+          val uploadFile =
+            s"${Workspace.remote.APP_UPLOADS}/${originFile.getName}"
           if (fsOperator.exists(uploadFile)) {
-            new FileInputStream(originFile).autoClose(
-              inputStream => {
-                if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
-                  fsOperator.upload(originFile.getAbsolutePath, uploadFile)
-                }
-              })
+            new FileInputStream(originFile).autoClose(inputStream => {
+              if (DigestUtils.md5Hex(inputStream) != fsOperator.fileMd5(uploadFile)) {
+                fsOperator.upload(originFile.getAbsolutePath, uploadFile)
+              }
+            })
           } else {
             fsOperator.upload(originFile.getAbsolutePath, uploadFile)
           }
@@ -107,7 +108,8 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
       }
     } else {
       fsOperator match {
-        case FsOperator.hdfs => fsOperator.upload(originFile.getAbsolutePath, target)
+        case FsOperator.hdfs =>
+          fsOperator.upload(originFile.getAbsolutePath, target)
         case _ =>
       }
     }

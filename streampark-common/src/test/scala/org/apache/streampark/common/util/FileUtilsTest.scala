@@ -25,7 +25,7 @@ import java.io._
 class FileUtilsTest extends AnyFunSuite {
 
   test("isJarFileType should return true for a valid jar file") {
-    val jarFileContent = Array[Byte](0x50, 0x4b, 0x03, 0x04)
+    val jarFileContent = Array[Byte](0x50, 0x4B, 0x03, 0x04)
     val jarInputStream = new ByteArrayInputStream(jarFileContent)
     assert(FileUtils.isJarFileType(jarInputStream))
   }

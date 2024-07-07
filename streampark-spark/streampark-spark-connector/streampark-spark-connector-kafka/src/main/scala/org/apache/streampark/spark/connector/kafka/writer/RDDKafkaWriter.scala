@@ -40,10 +40,10 @@ class RDDKafkaWriter[T: ClassTag](@(transient @param) rdd: RDD[T]) extends Kafka
   override def writeToKafka[K, V](
       producerConfig: Properties,
       serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
-    rdd.foreachPartition(
-      events => {
-        val producer: KafkaProducer[K, V] = KafkaWriter.getProducer(producerConfig)
-        events.map(serializerFunc).foreach(producer.send)
-      })
+    rdd.foreachPartition(events => {
+      val producer: KafkaProducer[K, V] =
+        KafkaWriter.getProducer(producerConfig)
+      events.map(serializerFunc).foreach(producer.send)
+    })
   }
 }

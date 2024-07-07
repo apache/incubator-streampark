@@ -52,9 +52,12 @@ object ImplicitsUtils {
         case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
         case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
         case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaShort] => JavaShort.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaFloat] =>
+          JavaFloat.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaDouble] =>
+          JavaDouble.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaShort] =>
+          JavaShort.valueOf(v).asInstanceOf[T]
         case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
         case _ =>
           throw new IllegalArgumentException(s"Unsupported type: $classType")

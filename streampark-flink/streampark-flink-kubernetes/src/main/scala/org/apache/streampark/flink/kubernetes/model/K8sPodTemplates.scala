@@ -33,14 +33,18 @@ case class K8sPodTemplates(
 
   def isEmpty: Boolean = !nonEmpty
 
-  override def hashCode(): Int = Utils.hashCode(podTemplate, jmPodTemplate, tmPodTemplate)
+  override def hashCode(): Int =
+    Utils.hashCode(podTemplate, jmPodTemplate, tmPodTemplate)
 
   override def equals(obj: Any): Boolean = {
     obj match {
       case that: K8sPodTemplates =>
-        Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim).getOrElse("") &&
-        Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim).getOrElse("") &&
-        Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim).getOrElse("")
+        Try(podTemplate.trim).getOrElse("") == Try(that.podTemplate.trim)
+          .getOrElse("") &&
+        Try(jmPodTemplate.trim).getOrElse("") == Try(that.jmPodTemplate.trim)
+          .getOrElse("") &&
+        Try(tmPodTemplate.trim).getOrElse("") == Try(that.tmPodTemplate.trim)
+          .getOrElse("")
       case _ => false
     }
   }

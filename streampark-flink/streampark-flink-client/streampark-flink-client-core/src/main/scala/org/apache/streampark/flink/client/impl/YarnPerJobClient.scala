@@ -65,7 +65,9 @@ object YarnPerJobClient extends YarnClientTrait {
 
     val clusterDescriptor = {
       val clusterDescriptor =
-        clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
+        clientFactory
+          .createClusterDescriptor(flinkConfig)
+          .asInstanceOf[YarnClusterDescriptor]
       val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
       clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
@@ -74,14 +76,16 @@ object YarnPerJobClient extends YarnClientTrait {
 
     var packagedProgram: PackagedProgram = null
     val clusterClient = {
-      val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+      val clusterSpecification =
+        clientFactory.getClusterSpecification(flinkConfig)
       logInfo(s"""
                  |------------------------<<specification>>-------------------------
                  |$clusterSpecification
                  |------------------------------------------------------------------
                  |""".stripMargin)
 
-      val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+      val programJobGraph =
+        super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
       packagedProgram = programJobGraph._1
       val jobGraph = programJobGraph._2
 
@@ -117,7 +121,8 @@ object YarnPerJobClient extends YarnClientTrait {
       flinkConfig: Configuration): CancelResponse = {
     val response = super.doCancel(cancelRequest, flinkConfig)
     val clusterClientFactory = new YarnClusterClientFactory
-    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfig)
+    val clusterDescriptor =
+      clusterClientFactory.createClusterDescriptor(flinkConfig)
     clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response
   }

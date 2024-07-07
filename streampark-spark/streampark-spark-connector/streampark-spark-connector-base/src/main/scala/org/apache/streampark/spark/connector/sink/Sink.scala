@@ -52,7 +52,8 @@ trait Sink[T] extends Serializable with Logger {
       replacement: String = ""): Properties = {
     val p = new Properties()
     val map = param ++ overrides
-    val filtered = if (prefix.isEmpty) map else map.filter(_._1.startsWith(prefix))
+    val filtered =
+      if (prefix.isEmpty) map else map.filter(_._1.startsWith(prefix))
     filtered.foreach(x => p.put(x._1.replace(prefix, replacement), x._2))
     p
   }

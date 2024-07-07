@@ -79,8 +79,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
             flinkVersion.set(matcher.group(1))
           }
         }
-      }
-    )
+      })
     logInfo(buffer.toString())
     if (!success.get()) {
       throw new IllegalStateException(s"[StreamPark] parse flink version failed. $buffer")

@@ -38,7 +38,8 @@ case class ErrorResult(pass: Boolean = false) extends BuildResult {}
 @JsonIgnoreProperties(ignoreUnknown = true)
 case class SimpleBuildResponse(workspacePath: String = null, pass: Boolean = true)
   extends FlinkBuildResult {
-  override def toString: String = s"{ workspacePath: $workspacePath, pass: $pass }"
+  override def toString: String =
+    s"{ workspacePath: $workspacePath, pass: $pass }"
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -73,8 +74,7 @@ case class K8sAppModeBuildResponse(
     flinkBaseImage: String,
     mainJarPath: String,
     extraLibJarPaths: Set[String],
-    pass: Boolean = false
-) extends FlinkBuildResult {
+    pass: Boolean = false) extends FlinkBuildResult {
   override def toString: String =
     s"{ workspacePath: $workspacePath, " +
       s"flinkBaseImage: $flinkBaseImage, " +

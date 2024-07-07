@@ -43,9 +43,11 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
     this(FlinkTableInitializer.initialize(args))
   }
 
-  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
+  override def useModules(strings: String*): Unit =
+    tableEnv.useModules(strings: _*)
 
-  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+  override def listFullModules(): Array[ModuleEntry] =
+    tableEnv.listFullModules()
 
   /**
    * flink 1.14, need to implement
@@ -63,29 +65,32 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
 
   def from(descriptor: TableDescriptor): Table = tableEnv.from(descriptor)
 
-  @Deprecated override def execute(jobName: String): JobExecutionResult = {
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
     Utils.printLogo(s"FlinkTable $jobName Starting...")
     null
   }
 
-  @Deprecated override def fromTableSource(source: TableSource[_]): Table =
+  @deprecated override def fromTableSource(source: TableSource[_]): Table =
     tableEnv.fromTableSource(source)
 
-  @Deprecated override def insertInto(
+  @deprecated override def insertInto(
       table: Table,
       sinkPath: String,
       sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @Deprecated override def insertInto(targetPath: String, table: Table): Unit =
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @deprecated override def explain(table: Table): String =
+    tableEnv.explain(table)
 
-  @Deprecated override def explain(table: Table, extended: Boolean): String =
+  @deprecated override def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @deprecated override def explain(extended: Boolean): String =
+    tableEnv.explain(extended)
 
-  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @deprecated override def sqlUpdate(stmt: String): Unit =
+    tableEnv.sqlUpdate(stmt)
 }

@@ -31,7 +31,8 @@ import scala.language.implicitConversions
 
 trait FlinkStreamTable extends Logger {
 
-  implicit final def tableExt(table: Table): TableExt.Table = new TableExt.Table(table)
+  implicit final def tableExt(table: Table): TableExt.Table =
+    new TableExt.Table(table)
 
   implicit final def tableConversions(table: Table): TableExt.TableConversions =
     new TableExt.TableConversions(table)

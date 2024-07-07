@@ -57,22 +57,19 @@ object CommonConfig {
     key = "streampark.docker.http-client.max-connections",
     defaultValue = 100,
     classType = classOf[JavaInt],
-    description = "instantiating max connections for DockerHttpClient"
-  )
+    description = "instantiating max connections for DockerHttpClient")
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: InternalOption = InternalOption(
     key = "streampark.docker.http-client.connection-timeout-sec",
     defaultValue = 100L,
     classType = classOf[JavaLong],
-    description = "instantiating connection timeout for DockerHttpClient"
-  )
+    description = "instantiating connection timeout for DockerHttpClient")
 
   val DOCKER_RESPONSE_TIMEOUT_SEC: InternalOption = InternalOption(
     key = "streampark.docker.http-client.response-timeout-sec",
     defaultValue = 120L,
     classType = classOf[JavaLong],
-    description = "instantiating connection timeout for DockerHttpClient"
-  )
+    description = "instantiating connection timeout for DockerHttpClient")
 
   val MAVEN_SETTINGS_PATH: InternalOption = InternalOption(
     key = "streampark.maven.settings",
@@ -84,8 +81,7 @@ object CommonConfig {
     key = "streampark.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",
     classType = classOf[String],
-    description = "maven repository used for built-in compilation"
-  )
+    description = "maven repository used for built-in compilation")
 
   val MAVEN_AUTH_USER: InternalOption = InternalOption(
     key = "streampark.maven.auth.user",
@@ -115,7 +111,6 @@ object CommonConfig {
     key = "spring.profiles.active",
     defaultValue = "h2",
     classType = classOf[String],
-    description = "Use the database type"
-  )
+    description = "Use the database type")
 
 }

@@ -44,12 +44,11 @@ class MavenArtifactSpec extends AnyWordSpec with Matchers {
         art.version mustBe "1.13.0"
       }
       "with illegal coords" in {
-        illegalArtifactCoordsCases.foreach(
-          coord => {
-            assertThrows[IllegalArgumentException] {
-              Artifact.of(coord)
-            }
-          })
+        illegalArtifactCoordsCases.foreach(coord => {
+          assertThrows[IllegalArgumentException] {
+            Artifact.of(coord)
+          }
+        })
       }
     }
   }

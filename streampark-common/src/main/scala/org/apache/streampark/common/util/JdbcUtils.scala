@@ -39,11 +39,11 @@ object JdbcUtils {
   private val lockMap: mutable.Map[String, ReentrantLock] =
     new ConcurrentHashMap[String, ReentrantLock]
 
-  private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
+  private[this] val dataSourceHolder =
+    new ConcurrentHashMap[String, HikariDataSource]
 
   /** Wrap all the fields of a query row of data into a List[Map] */
-  def select(sql: String, func: ResultSet => Unit = null)(implicit
-      jdbcConfig: Properties): List[Map[String, _]] = {
+  def select(sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty
     else {
       val conn = getConnection(jdbcConfig)
@@ -81,7 +81,8 @@ object JdbcUtils {
   def count(sql: String)(implicit jdbcConfig: Properties): Long = unique(
     sql).head._2.toString.toLong
 
-  def count(conn: Connection, sql: String): Long = unique(conn, sql).head._2.toString.toLong
+  def count(conn: Connection, sql: String): Long =
+    unique(conn, sql).head._2.toString.toLong
 
   def batch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
@@ -95,17 +96,16 @@ object JdbcUtils {
           var index: Int = 0
           val batchSize = 1000
           sql
-            .map(
-              x => {
-                prepStat.addBatch(x)
-                index += 1
-                if (index > 0 && index % batchSize == 0) {
-                  val count = prepStat.executeBatch().sum
-                  conn.commit()
-                  prepStat.clearBatch()
-                  count
-                } else 0
-              })
+            .map(x => {
+              prepStat.addBatch(x)
+              index += 1
+              if (index > 0 && index % batchSize == 0) {
+                val count = prepStat.executeBatch().sum
+                conn.commit()
+                prepStat.clearBatch()
+                count
+              } else 0
+            })
             .sum + prepStat.executeBatch().sum
         } catch {
           case ex: Exception =>
@@ -205,25 +205,32 @@ object JdbcUtils {
     val lock = lockMap.getOrElseUpdate(alias, new ReentrantLock())
     try {
       lock.lock()
-      val ds: HikariDataSource = Try(Option(dataSourceHolder(alias))).getOrElse(None) match {
-        case None =>
-          val jdbcConfig = new HikariConfig()
-          prop
-            .filter(x => x._1 != KEY_ALIAS && x._1 != KEY_SEMANTIC)
-            .foreach(
-              x => {
-                Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+      val ds: HikariDataSource =
+        Try(Option(dataSourceHolder(alias))).getOrElse(None) match {
+          case None =>
+            val jdbcConfig = new HikariConfig()
+            prop
+              .filter(x => x._1 != KEY_ALIAS && x._1 != KEY_SEMANTIC)
+              .foreach(x => {
+                Try(Option(jdbcConfig.getClass.getDeclaredField(x._1)))
+                  .getOrElse(None) match {
                   case Some(field) =>
                     field.setAccessible(true)
                     field.getType.getSimpleName match {
-                      case "String" => field.set(jdbcConfig, x._2.asInstanceOf[Object])
-                      case "int" => field.set(jdbcConfig, x._2.toInt.asInstanceOf[Object])
-                      case "long" => field.set(jdbcConfig, x._2.toLong.asInstanceOf[Object])
-                      case "boolean" => field.set(jdbcConfig, x._2.toBoolean.asInstanceOf[Object])
+                      case "String" =>
+                        field.set(jdbcConfig, x._2.asInstanceOf[Object])
+                      case "int" =>
+                        field.set(jdbcConfig, x._2.toInt.asInstanceOf[Object])
+                      case "long" =>
+                        field
+                          .set(jdbcConfig, x._2.toLong.asInstanceOf[Object])
+                      case "boolean" =>
+                        field.set(jdbcConfig, x._2.toBoolean.asInstanceOf[Object])
                       case _ =>
                     }
                   case None =>
-                    val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+                    val setMethod =
+                      s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
                     val method = Try(
                       jdbcConfig.getClass.getMethods
                         .filter(_.getName == setMethod)
@@ -233,7 +240,8 @@ object JdbcUtils {
                       case m if m != null =>
                         m.setAccessible(true)
                         m.getParameterTypes.head.getSimpleName match {
-                          case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)
+                          case "String" =>
+                            m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)
                           case "int" =>
                             m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]): _*)
                           case "long" =>
@@ -248,11 +256,11 @@ object JdbcUtils {
                     }
                 }
               })
-          val ds = new HikariDataSource(jdbcConfig)
-          dataSourceHolder += alias -> ds
-          ds
-        case Some(x) => x
-      }
+            val ds = new HikariDataSource(jdbcConfig)
+            dataSourceHolder += alias -> ds
+            ds
+          case Some(x) => x
+        }
       ds.getConnection()
     } finally {
       lock.unlock()

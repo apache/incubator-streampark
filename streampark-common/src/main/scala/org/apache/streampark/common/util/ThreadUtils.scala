@@ -23,9 +23,13 @@ import java.util.concurrent.{ExecutorService, ThreadFactory, TimeUnit}
 object ThreadUtils {
 
   def threadFactory(threadName: String, isDaemon: Boolean): ThreadFactory =
-    new ThreadFactoryBuilder().setNameFormat(threadName + "-%d").setDaemon(isDaemon).build
+    new ThreadFactoryBuilder()
+      .setNameFormat(threadName + "-%d")
+      .setDaemon(isDaemon)
+      .build
 
-  def threadFactory(threadName: String): ThreadFactory = threadFactory(threadName, isDaemon = true)
+  def threadFactory(threadName: String): ThreadFactory =
+    threadFactory(threadName, isDaemon = true)
 
   @throws[InterruptedException]
   def shutdownExecutorService(executorService: ExecutorService): Unit = {

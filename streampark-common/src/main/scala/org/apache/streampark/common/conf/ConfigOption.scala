@@ -44,7 +44,8 @@ case class ConfigOption[T](
     description: String = "",
     handle: String => T = null)(implicit prefix: String = "", prop: Properties) {
 
-  private[this] lazy val fullKey = if (prefix != null && prefix.nonEmpty) s"$prefix.$key" else key
+  private[this] lazy val fullKey =
+    if (prefix != null && prefix.nonEmpty) s"$prefix.$key" else key
 
   def get(): T = handle match {
     case null =>

@@ -42,7 +42,8 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
   lazy val jobStatuses: JobStatusCache = JobStatusCache.build()
 
   // cache for tracking kubernetes events with Deployment kind
-  lazy val k8sDeploymentEvents: K8sDeploymentEventCache = K8sDeploymentEventCache.build()
+  lazy val k8sDeploymentEvents: K8sDeploymentEventCache =
+    K8sDeploymentEventCache.build()
 
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
   lazy val flinkMetrics: MetricCache = MetricCache.build()
@@ -85,7 +86,8 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
       case k if k.isEmpty => empty
       case k =>
         flinkMetrics.getAll(
-          for (elem <- k if elem.groupId == groupId) yield ClusterKey.of(elem)) match {
+          for (elem <- k if elem.groupId == groupId)
+            yield ClusterKey.of(elem)) match {
           case m if m.isEmpty => empty
           case m => m.values.fold(empty)((x, y) => x + y)
         }
@@ -110,7 +112,9 @@ class FlinkK8sWatchController extends Logger with AutoCloseable {
 
 }
 
-//----cache----
+/**
+ * cache ======
+ */
 case class CacheKey(key: java.lang.Long) extends Serializable {
   override def hashCode(): Int = Utils.hashCode(key)
 
@@ -124,7 +128,8 @@ case class CacheKey(key: java.lang.Long) extends Serializable {
 
 class TrackIdCache {
 
-  private[this] lazy val cache: Cache[CacheKey, TrackId] = Caffeine.newBuilder.build()
+  private[this] lazy val cache: Cache[CacheKey, TrackId] =
+    Caffeine.newBuilder.build()
 
   def update(k: TrackId): Unit = {
     val key = CacheKey(k.appId)
@@ -211,7 +216,8 @@ class K8sDeploymentEventCache {
 
   def cleanUp(): Unit = cache.cleanUp()
 
-  val cache: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
+  val cache: Cache[K8sEventKey, K8sDeploymentEventCV] =
+    Caffeine.newBuilder.build()
 
 }
 
@@ -222,13 +228,15 @@ object K8sDeploymentEventCache {
 
 class MetricCache {
 
-  private[this] lazy val cache: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build()
+  private[this] lazy val cache: Cache[ClusterKey, FlinkMetricCV] =
+    Caffeine.newBuilder().build()
 
   def put(k: ClusterKey, v: FlinkMetricCV): Unit = cache.put(k, v)
 
   def asMap(): Map[ClusterKey, FlinkMetricCV] = cache.asMap().toMap
 
-  def getAll(k: Set[ClusterKey]): Map[ClusterKey, FlinkMetricCV] = cache.getAllPresent(k).toMap
+  def getAll(k: Set[ClusterKey]): Map[ClusterKey, FlinkMetricCV] =
+    cache.getAllPresent(k).toMap
 
   def get(key: ClusterKey): FlinkMetricCV = cache.getIfPresent(key)
 

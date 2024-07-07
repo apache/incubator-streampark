@@ -72,13 +72,12 @@ object ParameterCli {
             val buffer = new StringBuffer()
             Try {
               val line = parser.parse(flinkOptions, option, false)
-              line.getOptions.foreach(
-                x => {
-                  buffer.append(s" -${x.getOpt}")
-                  if (x.hasArg) {
-                    buffer.append(s" ${x.getValue()}")
-                  }
-                })
+              line.getOptions.foreach(x => {
+                buffer.append(s" -${x.getOpt}")
+                if (x.hasArg) {
+                  buffer.append(s" ${x.getValue()}")
+                }
+              })
             } match {
               case Failure(exception) => exception.printStackTrace()
               case _ =>
@@ -104,7 +103,9 @@ object ParameterCli {
               }
             buffer.toString.trim
           case "--name" =>
-            map.getOrElse(propertyPrefix.concat(ConfigKeys.KEY_FLINK_APP_NAME), "").trim match {
+            map
+              .getOrElse(propertyPrefix.concat(ConfigKeys.KEY_FLINK_APP_NAME), "")
+              .trim match {
               case appName if appName.nonEmpty => appName
               case _ => ""
             }
@@ -126,21 +127,21 @@ object ParameterCli {
     map
       .filter(_._1.startsWith(optionPrefix))
       .filter(_._2.nonEmpty)
-      .filter(
-        x => {
-          val key = x._1.drop(optionPrefix.length)
-          // verify parameters is valid
-          flinkOptions.hasOption(key)
-        })
-      .foreach(
-        x => {
-          Try(x._2.toBoolean).getOrElse(x._2) match {
-            case b if b.isInstanceOf[Boolean] =>
-              if (b.asInstanceOf[Boolean])
-                optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
-            case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
-          }
-        })
+      .filter(x => {
+        val key = x._1.drop(optionPrefix.length)
+        // verify parameters is valid
+        flinkOptions.hasOption(key)
+      })
+      .foreach(x => {
+        Try(x._2.toBoolean).getOrElse(x._2) match {
+          case b if b.isInstanceOf[Boolean] =>
+            if (b.asInstanceOf[Boolean]) {
+              optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
+            }
+          case v =>
+            optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
+        }
+      })
     // parameters from the command line, which have a higher priority than the configuration file,
     // if they exist, will be overwritten
     args match {
@@ -148,27 +149,25 @@ object ParameterCli {
       case array =>
         Try {
           val line = parser.parse(flinkOptions, array, false)
-          line.getOptions.foreach(
-            x => {
-              if (x.hasArg) {
-                optionMap += s"-${x.getLongOpt}".trim -> x.getValue()
-              } else {
-                optionMap += s"-${x.getLongOpt}".trim -> true
-              }
-            })
+          line.getOptions.foreach(x => {
+            if (x.hasArg) {
+              optionMap += s"-${x.getLongOpt}".trim -> x.getValue()
+            } else {
+              optionMap += s"-${x.getLongOpt}".trim -> true
+            }
+          })
         } match {
           case Failure(e) => e.printStackTrace()
           case _ =>
         }
     }
     val array = new ArrayBuffer[String]
-    optionMap.foreach(
-      x => {
-        array += x._1
-        if (x._2.isInstanceOf[String]) {
-          array += x._2.toString
-        }
-      })
+    optionMap.foreach(x => {
+      array += x._1
+      if (x._2.isInstanceOf[String]) {
+        array += x._2.toString
+      }
+    })
     array.toArray
   }
 

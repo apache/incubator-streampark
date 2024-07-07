@@ -74,7 +74,9 @@ object RemoteClient extends FlinkClientTrait {
                  |------------------------------------------------------------------
                  |""".stripMargin)
       standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
-      client = standAloneDescriptor._2.retrieve(standAloneDescriptor._1).getClusterClient
+      client = standAloneDescriptor._2
+        .retrieve(standAloneDescriptor._1)
+        .getClusterClient
       actFunc(JobID.fromHexString(request.jobId), client)
     } catch {
       case e: Exception =>
@@ -117,7 +119,8 @@ object RemoteClient extends FlinkClientTrait {
       FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
     logInfo(
       s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-    val resp = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    val resp =
+      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     closeSubmit(submitRequest, client, clusterDescriptor)
     resp
   }
@@ -132,14 +135,17 @@ object RemoteClient extends FlinkClientTrait {
     val standAloneDescriptor = getStandAloneClusterDescriptor(flinkConfig)
     val clusterDescriptor = standAloneDescriptor._2
     // build JobGraph
-    val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+    val packageProgramJobGraph =
+      super.getJobGraph(flinkConfig, submitRequest, jarFile)
     val packageProgram = packageProgramJobGraph._1
     val jobGraph = packageProgramJobGraph._2
-    val client = clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
+    val client =
+      clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
     val jobId = client.submitJob(jobGraph).get().toString
     logInfo(
       s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
-    val result = SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    val result =
+      SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     closeSubmit(submitRequest, packageProgram, client, clusterDescriptor)
     result
   }
@@ -153,9 +159,12 @@ object RemoteClient extends FlinkClientTrait {
       flinkConfig: Configuration): (StandaloneClusterId, StandaloneClusterDescriptor) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
-    val standaloneClusterId: StandaloneClusterId = clientFactory.getClusterId(flinkConfig)
+    val standaloneClusterId: StandaloneClusterId =
+      clientFactory.getClusterId(flinkConfig)
     val standaloneClusterDescriptor =
-      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[StandaloneClusterDescriptor]
+      clientFactory
+        .createClusterDescriptor(flinkConfig)
+        .asInstanceOf[StandaloneClusterDescriptor]
     (standaloneClusterId, standaloneClusterDescriptor)
   }
 

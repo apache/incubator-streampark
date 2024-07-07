@@ -30,7 +30,8 @@ class ParameterTestCase {
       "testApp123",
       "--flink.deployment.option.parallelism",
       "5")
-    val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args))
+    val param =
+      ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(args))
 
     Assertions.assertEquals(
       "hdfs://nameservice1/streampark/flink/flink-1.11.1",

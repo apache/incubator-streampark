@@ -50,8 +50,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.clusterId),
-      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
-    )
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig
+          .get(DeploymentOptions.TARGET)}")
     super.trySubmit(submitRequest, flinkConfig, submitRequest.userJarFile)(
       jobGraphSubmit,
       restApiSubmit)
@@ -75,7 +75,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
         throw new Exception(
           s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
     // submit job via rest api
-    val jobId = FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
+    val jobId =
+      FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
     SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
   }
 
@@ -87,7 +88,8 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       jarFile: File): SubmitResponse = {
     val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
     // build JobGraph
-    val packageProgramJobGraph = super.getJobGraph(flinkConfig, submitRequest, jarFile)
+    val packageProgramJobGraph =
+      super.getJobGraph(flinkConfig, submitRequest, jarFile)
     val packageProgram = packageProgramJobGraph._1
     val jobGraph = packageProgramJobGraph._2
     // retrieve client and submit JobGraph
@@ -146,8 +148,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       if (kubeService.isPresent) {
         client = clusterDescriptor.retrieve(deployRequest.clusterId).getClusterClient
       } else {
-        client =
-          clusterDescriptor.deploySessionCluster(kubernetesClusterDescriptor._2).getClusterClient
+        client = clusterDescriptor
+          .deploySessionCluster(kubernetesClusterDescriptor._2)
+          .getClusterClient
       }
       DeployResponse(address = client.getWebInterfaceURL, clusterId = client.getClusterId)
     } catch {
@@ -164,9 +167,10 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
       val kubeClientWrapper = new FlinkKubernetesClient(kubeClient)
 
-      val stopAndCleanupState = shutDownRequest.clusterId != null && kubeClientWrapper
-        .getService(shutDownRequest.clusterId)
-        .isPresent
+      val stopAndCleanupState =
+        shutDownRequest.clusterId != null && kubeClientWrapper
+          .getService(shutDownRequest.clusterId)
+          .isPresent
       if (stopAndCleanupState) {
         kubeClient.stopAndCleanupCluster(shutDownRequest.clusterId)
         ShutDownResponse(shutDownRequest.clusterId)

@@ -167,15 +167,19 @@ object DateUtils {
 
     val builder = new mutable.StringBuilder
     if (days > 0) builder.append(days + " days ")
-    if (hours > 0 || minutes > 0 || seconds > 0) builder.append(hours + " hours ")
+    if (hours > 0 || minutes > 0 || seconds > 0) {
+      builder.append(hours + " hours ")
+    }
     if (minutes > 0 || seconds > 0) builder.append(minutes + " minutes ")
     if (seconds > 0) builder.append(seconds + " seconds ")
     builder.toString
   }
 
   def toSecondDuration(time1: Date, time2: Date = new Date()): Long = {
-    val startDateTime = LocalDateTime.ofInstant(time1.toInstant, ZoneId.systemDefault());
-    val endDateTime = LocalDateTime.ofInstant(time2.toInstant, ZoneId.systemDefault());
+    val startDateTime =
+      LocalDateTime.ofInstant(time1.toInstant, ZoneId.systemDefault());
+    val endDateTime =
+      LocalDateTime.ofInstant(time2.toInstant, ZoneId.systemDefault());
     val duration = Duration.between(startDateTime, endDateTime)
     duration.toMillis / 1000
   }

@@ -53,8 +53,7 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePatte
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
-    "org.apache.hadoop"
-  )
+    "org.apache.hadoop")
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
@@ -92,7 +91,9 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePatte
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
       val matchState =
-        SPARK_PATTERN.matcher(filename).matches && !resourcePattern.matcher(filename).matches
+        SPARK_PATTERN.matcher(filename).matches && !resourcePattern
+          .matcher(filename)
+          .matches
       if (matchState) {
         return null
       }

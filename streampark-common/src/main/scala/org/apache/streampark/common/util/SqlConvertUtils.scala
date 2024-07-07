@@ -99,7 +99,8 @@ object SqlConvertUtils extends Logger {
 
     val LENGTH_REGEXP = "(.*?)\\s*\\([^\\\\)|^\\n]+,$".r
 
-    val COMMENT_REGEXP = Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE)
+    val COMMENT_REGEXP =
+      Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE)
 
     @tailrec def commentJoin(
         map: util.Map[Integer, String],
@@ -149,24 +150,23 @@ object SqlConvertUtils extends Logger {
     }
     val sqlBuffer = new StringBuffer(sql.substring(0, sql.indexOf("(")))
     var skipNo: Int = -1
-    map.foreach(
-      a => {
-        if (a._1 > skipNo) {
-          val length = lengthJoin(map, a._1, a._2)
-          if (length._1 > a._1) {
-            sqlBuffer.append(length._2).append("\n")
-            skipNo = length._1
+    map.foreach(a => {
+      if (a._1 > skipNo) {
+        val length = lengthJoin(map, a._1, a._2)
+        if (length._1 > a._1) {
+          sqlBuffer.append(length._2).append("\n")
+          skipNo = length._1
+        } else {
+          val comment = commentJoin(map, a._1, a._2)
+          if (comment._1 > a._1) {
+            sqlBuffer.append(comment._2).append("\n")
+            skipNo = comment._1
           } else {
-            val comment = commentJoin(map, a._1, a._2)
-            if (comment._1 > a._1) {
-              sqlBuffer.append(comment._2).append("\n")
-              skipNo = comment._1
-            } else {
-              sqlBuffer.append(a._2).append("\n")
-            }
+            sqlBuffer.append(a._2).append("\n")
           }
         }
-      })
+      }
+    })
     scanner.close()
     sqlBuffer.toString.trim.concat(sql.substring(sql.lastIndexOf(")") + 1))
 
@@ -247,8 +247,7 @@ object SqlConvertUtils extends Logger {
         case _ => null
       }
     },
-    postfix
-  )
+    postfix)
 
   def mysqlToClickhouse(sql: String, postfix: String): String =
     convertSql(sql, toClickhouseDataType, postfix = postfix)

@@ -32,8 +32,7 @@ object FlinkClientEntrypoint {
     YARN_SESSION -> YarnSessionClient,
     YARN_PER_JOB -> YarnPerJobClient,
     KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
-    KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient
-  )
+    KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient)
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     clients.get(submitRequest.executionMode) match {
@@ -65,7 +64,8 @@ object FlinkClientEntrypoint {
   def deploy(deployRequest: DeployRequest): DeployResponse = {
     deployRequest.executionMode match {
       case YARN_SESSION => YarnSessionClient.deploy(deployRequest)
-      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.deploy(deployRequest)
+      case KUBERNETES_NATIVE_SESSION =>
+        KubernetesNativeSessionClient.deploy(deployRequest)
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${deployRequest.executionMode} deploy cluster ")
@@ -75,7 +75,8 @@ object FlinkClientEntrypoint {
   def shutdown(shutDownRequest: ShutDownRequest): ShutDownResponse = {
     shutDownRequest.executionMode match {
       case YARN_SESSION => YarnSessionClient.shutdown(shutDownRequest)
-      case KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionClient.shutdown(shutDownRequest)
+      case KUBERNETES_NATIVE_SESSION =>
+        KubernetesNativeSessionClient.shutdown(shutDownRequest)
       case _ =>
         throw new UnsupportedOperationException(
           s"Unsupported ${shutDownRequest.executionMode} shutdown cluster ")

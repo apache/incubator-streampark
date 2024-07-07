@@ -45,37 +45,43 @@ class StreamTableContext(
     this(args._1, args._2, args._3)
 
   /** for Java */
-  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
+  def this(args: StreamTableEnvConfig) =
+    this(FlinkTableInitializer.initialize(args))
 
-  @Deprecated override def connect(
+  @deprecated override def connect(
       connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor =
     tableEnv.connect(connectorDescriptor)
 
-  def $getStreamGraph(jobName: String): StreamGraph = this.streamEnv.getStreamGraph(jobName)
+  def $getStreamGraph(jobName: String): StreamGraph =
+    this.streamEnv.getStreamGraph(jobName)
 
   def $getStreamGraph(jobName: String, clearTransformations: Boolean): StreamGraph =
     this.streamEnv.getStreamGraph(jobName, clearTransformations)
 
-  override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
+  override def createStatementSet(): StatementSet =
+    tableEnv.createStatementSet()
 
-  @Deprecated override def fromTableSource(source: TableSource[_]): Table =
+  @deprecated override def fromTableSource(source: TableSource[_]): Table =
     tableEnv.fromTableSource(source)
 
-  @Deprecated override def insertInto(
+  @deprecated override def insertInto(
       table: Table,
       sinkPath: String,
       sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @Deprecated override def insertInto(targetPath: String, table: Table): Unit =
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @deprecated override def explain(table: Table): String =
+    tableEnv.explain(table)
 
-  @Deprecated override def explain(table: Table, extended: Boolean): String =
+  @deprecated override def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @deprecated override def explain(extended: Boolean): String =
+    tableEnv.explain(extended)
 
-  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @deprecated override def sqlUpdate(stmt: String): Unit =
+    tableEnv.sqlUpdate(stmt)
 }

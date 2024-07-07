@@ -60,13 +60,13 @@ object PropertiesUtils extends Logger {
     v match {
       case map: LinkedMap[_, _] =>
         map
-          .flatMap(
-            x => {
-              prefix match {
-                case "" => eachYamlItem(x._1.toString, x._2, k, proper)
-                case other => eachYamlItem(x._1.toString, x._2, s"$other.$k", proper)
-              }
-            })
+          .flatMap(x => {
+            prefix match {
+              case "" => eachYamlItem(x._1.toString, x._2, k, proper)
+              case other =>
+                eachYamlItem(x._1.toString, x._2, s"$other.$k", proper)
+            }
+          })
           .toMap
       case text =>
         if (text != null) {
@@ -280,15 +280,14 @@ object PropertiesUtils extends Logger {
       val simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "")
       simple.split("\\s?-D") match {
         case d if Utils.isNotEmpty(d) =>
-          d.foreach(
-            x => {
-              if (x.nonEmpty) {
-                val p = PROPERTY_PATTERN.matcher(x.trim)
-                if (p.matches) {
-                  map += p.group(1).trim -> p.group(2).trim
-                }
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = PROPERTY_PATTERN.matcher(x.trim)
+              if (p.matches) {
+                map += p.group(1).trim -> p.group(2).trim
               }
-            })
+            }
+          })
         case _ =>
       }
       val matcher = MULTI_PROPERTY_PATTERN.matcher(properties)
@@ -296,7 +295,8 @@ object PropertiesUtils extends Logger {
         val opts = matcher.group()
         val index = opts.indexOf("=")
         val key = opts.substring(2, index).trim
-        val value = opts.substring(index + 1).trim.replaceAll("(^[\"|']|[\"|']$)", "")
+        val value =
+          opts.substring(index + 1).trim.replaceAll("(^[\"|']|[\"|']$)", "")
         map += key -> value
       }
       map.toMap

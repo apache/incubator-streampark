@@ -32,13 +32,16 @@ object HostsUtils {
    * reverse order by the length of the hostname.
    */
   def getSortSystemHosts: ListMap[String, String] = {
-    val ipMap = HostsFileParser.parse.inet4Entries.map(e => e._1 -> e._2.getHostAddress)
+    val ipMap =
+      HostsFileParser.parse.inet4Entries.map(e => e._1 -> e._2.getHostAddress)
     ListMap(ipMap.toSeq.sortWith(_._1.length > _._1.length): _*)
   }
 
   /** Get hosts info from system, entry of return Map [hostname -> ipv4]. Scala api. */
   def getSystemHosts(excludeLocalHost: Boolean = false): Map[String, String] = {
-    var map = HostsFileParser.parse.inet4Entries.map(e => e._1 -> e._2.getHostAddress).toMap
+    var map = HostsFileParser.parse.inet4Entries
+      .map(e => e._1 -> e._2.getHostAddress)
+      .toMap
     if (excludeLocalHost) {
       val localHostName = InetAddress.getLocalHost.getHostName
       map = map
@@ -50,7 +53,7 @@ object HostsUtils {
   }
 
   /** Get hosts info from system, entry of return Map [hostname -> ipv4]. Java api. */
-  def getSystemHostsAsJava(excludeLocalHost: Boolean): JavaMap[String, String] = getSystemHosts(
-    excludeLocalHost)
+  def getSystemHostsAsJava(excludeLocalHost: Boolean): JavaMap[String, String] =
+    getSystemHosts(excludeLocalHost)
 
 }

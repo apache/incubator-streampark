@@ -76,8 +76,9 @@ trait FlinkWatcher extends AutoCloseable {
   def doWatch(): Unit
 
   /** Runnable streamline syntax */
-  implicit protected def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
-    def run(): Unit = fun()
-  }
+  implicit protected def funcToRunnable(fun: () => Unit): Runnable =
+    new Runnable() {
+      def run(): Unit = fun()
+    }
 
 }

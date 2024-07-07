@@ -84,27 +84,26 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
       )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[FlinkMetricCV]]] =
-      trackIds.map(
-        id => {
-          val future = Future(collectMetrics(id))
-          future.onComplete(_.getOrElse(None) match {
-            case Some(metric) =>
-              val clusterKey = id.toClusterKey
-              // update current flink cluster metrics on cache
-              watchController.flinkMetrics.put(clusterKey, metric)
-              val isMetricChanged = {
-                val preMetric = watchController.flinkMetrics.get(clusterKey)
-                preMetric == null || !preMetric.equalsPayload(metric)
-              }
-              if (isMetricChanged) {
-                eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
-              }
-            case _ =>
-          })
-          future
+      trackIds.map(id => {
+        val future = Future(collectMetrics(id))
+        future.onComplete(_.getOrElse(None) match {
+          case Some(metric) =>
+            val clusterKey = id.toClusterKey
+            // update current flink cluster metrics on cache
+            watchController.flinkMetrics.put(clusterKey, metric)
+            val isMetricChanged = {
+              val preMetric = watchController.flinkMetrics.get(clusterKey)
+              preMetric == null || !preMetric.equalsPayload(metric)
+            }
+            if (isMetricChanged) {
+              eventBus.postAsync(FlinkClusterMetricChangeEvent(id, metric))
+            }
+          case _ =>
         })
+        future
+      })
     // blocking until all future are completed or timeout is reached
-    Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
+    Try(Await.result(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
       _ =>
         logError(
           s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
@@ -124,7 +123,10 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
     // get flink rest api
     val clusterKey: ClusterKey = ClusterKey.of(id)
     val flinkJmRestUrl =
-      watchController.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
+      watchController
+        .getClusterRestUrl(clusterKey)
+        .filter(_.nonEmpty)
+        .getOrElse(return None)
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = FlinkRestOverview
@@ -167,8 +169,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.default
         finishedJob = flinkOverview.jobsFinished,
         cancelledJob = flinkOverview.jobsCancelled,
         failedJob = flinkOverview.jobsFailed,
-        pollAckTime = ackTime
-      )
+        pollAckTime = ackTime)
     }
     Some(flinkMetricCV)
   }
@@ -195,15 +196,14 @@ object FlinkRestOverview {
     Try(parse(json)) match {
       case Success(ok) =>
         val overview = FlinkRestOverview(
-          (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
-          (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
-          (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
-          (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
-          (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
-          (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
-          (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
-          (ok \ "flink-version").extractOpt[String].orNull
-        )
+          (ok \ "taskmanagers").extract[Integer],
+          (ok \ "slots-total").extract[Integer],
+          (ok \ "slots-available").extract[Integer],
+          (ok \ "jobs-running").extract[Integer],
+          (ok \ "jobs-finished").extract[Integer],
+          (ok \ "jobs-cancelled").extract[Integer],
+          (ok \ "jobs-failed").extract[Integer],
+          (ok \ "flink-version").extract[String])
         Some(overview)
       case Failure(_) => None
     }
@@ -224,12 +224,11 @@ private[kubernetes] object FlinkRestJmConfigItem {
       case Success(ok) =>
         ok match {
           case JArray(arr) =>
-            arr.map(
-              x => {
-                FlinkRestJmConfigItem(
-                  (x \ "key").extractOpt[String].orNull,
-                  (x \ "value").extractOpt[String].orNull)
-              })
+            arr.map(x => {
+              FlinkRestJmConfigItem(
+                (x \ "key").extract[String],
+                (x \ "value").extract[String])
+            })
           case _ => null
         }
       case Failure(_) => null

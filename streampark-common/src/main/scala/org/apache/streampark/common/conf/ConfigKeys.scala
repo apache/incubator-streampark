@@ -65,13 +65,17 @@ object ConfigKeys {
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
   /** about config flink */
-  def KEY_APP_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}conf"
+  def KEY_APP_CONF(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}conf"
 
-  def KEY_FLINK_CONF(prefix: String = null): String = s"${Option(prefix).getOrElse("")}flink.conf"
+  def KEY_FLINK_CONF(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}flink.conf"
 
-  def KEY_APP_NAME(prefix: String = null): String = s"${Option(prefix).getOrElse("")}app.name"
+  def KEY_APP_NAME(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}app.name"
 
-  def KEY_FLINK_SQL(prefix: String = null): String = s"${Option(prefix).getOrElse("")}sql"
+  def KEY_FLINK_SQL(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}sql"
 
   def KEY_FLINK_PARALLELISM(prefix: String = null): String =
     s"${Option(prefix).getOrElse("")}parallelism.default"

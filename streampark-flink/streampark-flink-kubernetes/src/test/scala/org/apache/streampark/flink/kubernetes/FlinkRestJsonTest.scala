@@ -129,10 +129,9 @@ class FlinkRestJsonTest {
 
     FlinkRestJmConfigItem
       .as(json)
-      .foreach(
-        x => {
-          println(s"${x.key}: ${x.value}")
-        })
+      .foreach(x => {
+        println(s"${x.key}: ${x.value}")
+      })
 
   }
 
@@ -269,7 +268,8 @@ class FlinkRestJsonTest {
     implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
     val state = Try {
-      val archivePath = new Path("src/test/resources/d933fa6c785f0db6dccc6cc05dd43bab.json")
+      val archivePath =
+        new Path("src/test/resources/d933fa6c785f0db6dccc6cc05dd43bab.json")
       val jobId = "d933fa6c785f0db6dccc6cc05dd43bab"
       val archivedJson = FsJobArchivist.getArchivedJsons(archivePath)
       var state: String = "FAILED"
@@ -279,7 +279,7 @@ class FlinkRestJsonTest {
             if (a.getPath == s"/jobs/$jobId/exceptions") {
               Try(parse(a.getJson)) match {
                 case Success(ok) =>
-                  val log = (ok \ "root-exception").extractOpt[String].orNull
+                  val log = (ok \ "root-exception").extract[String]
                   if (log != null) {
                     val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
                     val file = new File(path)
@@ -294,13 +294,12 @@ class FlinkRestJsonTest {
                   ok \ "jobs" match {
                     case JNothing | JNull =>
                     case JArray(arr) =>
-                      arr.foreach(
-                        x => {
-                          val jid = (x \ "jid").extractOpt[String].orNull
-                          if (jid == jobId) {
-                            state = (x \ "state").extractOpt[String].orNull
-                          }
-                        })
+                      arr.foreach(x => {
+                        val jid = (x \ "jid").extract[String]
+                        if (jid == jobId) {
+                          state = (x \ "state").extract[String]
+                        }
+                      })
                     case _ =>
                   }
                 case Failure(_) =>

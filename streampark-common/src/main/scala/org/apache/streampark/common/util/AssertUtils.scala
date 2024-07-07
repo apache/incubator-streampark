@@ -265,7 +265,8 @@ object AssertUtils {
     }
   }
 
-  private[this] def getHasLength(@Nullable str: String): Boolean = str != null && str.nonEmpty
+  private[this] def getHasLength(@Nullable str: String): Boolean =
+    str != null && str.nonEmpty
 
   private[this] def getHasText(@Nullable str: String): Boolean = {
     str != null && str.nonEmpty && containsText(str)

@@ -54,8 +54,7 @@ private[flink] object FlinkTableInitializer {
   def initialize(
       args: Array[String],
       configStream: (StreamExecutionEnvironment, ParameterTool) => Unit,
-      configTable: (TableConfig, ParameterTool) => Unit)
-      : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+      configTable: (TableConfig, ParameterTool) => Unit): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
 
     val flinkInitializer = new FlinkTableInitializer(args, ApiType.SCALA)
     flinkInitializer.streamEnvConfFunc = configStream
@@ -66,8 +65,7 @@ private[flink] object FlinkTableInitializer {
       flinkInitializer.streamTableEnv)
   }
 
-  def initialize(args: StreamTableEnvConfig)
-      : (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initialize(args: StreamTableEnvConfig): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     val flinkInitializer = new FlinkTableInitializer(args.args, ApiType.JAVA)
     flinkInitializer.javaStreamEnvConfFunc = args.streamConfig
     flinkInitializer.javaTableEnvConfFunc = args.tableConfig
@@ -90,7 +88,8 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
       .getOrElse(PlannerType.BLINK) match {
       case PlannerType.BLINK =>
         val useBlinkPlanner =
-          Try(builder.getClass.getDeclaredMethod("useBlinkPlanner")).getOrElse(null)
+          Try(builder.getClass.getDeclaredMethod("useBlinkPlanner"))
+            .getOrElse(null)
         if (useBlinkPlanner == null) {
           logWarn("useBlinkPlanner deprecated")
         } else {
@@ -162,7 +161,8 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
     if (javaStreamEnvConfFunc != null) {
       javaStreamEnvConfFunc.configuration(streamEnv.getJavaEnv, parameter)
     }
-    val streamTableEnv = StreamTableEnvironment.create(streamEnv, setting).setAppName
+    val streamTableEnv =
+      StreamTableEnvironment.create(streamEnv, setting).setAppName
     apiType match {
       case ApiType.JAVA if javaTableEnvConfFunc != null =>
         javaTableEnvConfFunc.configuration(streamTableEnv.getConfig, parameter)
@@ -181,23 +181,25 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
       argsMap.get(KEY_APP_CONF(), null) match {
         case null | "" =>
           logWarn("Usage:can't find config,you can set \"--conf $path \" in main arguments")
-          val parameter = ParameterTool.fromSystemProperties().mergeWith(argsMap)
+          val parameter =
+            ParameterTool.fromSystemProperties().mergeWith(argsMap)
           FlinkConfiguration(parameter, new Configuration(), new Configuration())
         case file =>
           val configMap = parseConfig(file)
           // set sql..
           val sqlConf = mutable.Map[String, String]()
-          configMap.foreach(
-            x => {
-              if (x._1.startsWith(KEY_SQL_PREFIX)) {
-                sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
-              }
-            })
+          configMap.foreach(x => {
+            if (x._1.startsWith(KEY_SQL_PREFIX)) {
+              sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
+            }
+          })
 
           // config priority: explicitly specified priority > project profiles > system profiles
-          val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+          val properConf =
+            extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
           val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
-          val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
+          val tableConf =
+            extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
 
           val tableConfig = Configuration.fromMap(tableConf)
           val envConfig = Configuration.fromMap(properConf)

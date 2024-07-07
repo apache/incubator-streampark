@@ -61,10 +61,9 @@ trait Spark extends Logger {
     // 1) system.properties
     val sysProps = sparkConf.getAllWithPrefix("spark.config.system.properties")
     if (sysProps != null) {
-      sysProps.foreach(
-        x => {
-          System.getProperties.setProperty(x._1.drop(1), x._2)
-        })
+      sysProps.foreach(x => {
+        System.getProperties.setProperty(x._1.drop(1), x._2)
+      })
     }
 
     val builder = SparkSession.builder().config(sparkConf)
@@ -78,10 +77,9 @@ trait Spark extends Logger {
     // 2) hive
     val sparkSql = sparkConf.getAllWithPrefix("spark.config.spark.sql")
     if (sparkSql != null) {
-      sparkSql.foreach(
-        x => {
-          sparkSession.sparkContext.getConf.set(x._1.drop(1), x._2)
-        })
+      sparkSql.foreach(x => {
+        sparkSession.sparkContext.getConf.set(x._1.drop(1), x._2)
+      })
     }
 
     ready()
@@ -100,23 +98,22 @@ trait Spark extends Logger {
 
     SqlCommandParser
       .parseSQL(sparkSqls)
-      .foreach(
-        x => {
-          val args = if (x.operands.isEmpty) null else x.operands.head
-          val command = x.command.name
-          x.command match {
-            case _ =>
-              try {
-                lock.lock()
-                val dataFrame: DataFrame = handle(x.originSql)
-                logInfo(s"$command:$args")
-              } finally {
-                if (lock.isHeldByCurrentThread) {
-                  lock.unlock()
-                }
+      .foreach(x => {
+        val args = if (x.operands.isEmpty) null else x.operands.head
+        val command = x.command.name
+        x.command match {
+          case _ =>
+            try {
+              lock.lock()
+              val dataFrame: DataFrame = handle(x.originSql)
+              logInfo(s"$command:$args")
+            } finally {
+              if (lock.isHeldByCurrentThread) {
+                lock.unlock()
               }
-          }
-        })
+            }
+        }
+      })
 
 //    handle(sparkSqls)
     start()

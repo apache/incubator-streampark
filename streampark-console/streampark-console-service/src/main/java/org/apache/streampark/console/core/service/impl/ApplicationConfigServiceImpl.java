@@ -112,8 +112,7 @@ public class ApplicationConfigServiceImpl
         }
     }
 
-    private void updateForNonFlinkSqlJob(
-                                         Application appParam, Boolean latest, ApplicationConfig latestConfig) {
+    private void updateForNonFlinkSqlJob(Application appParam, Boolean latest, ApplicationConfig latestConfig) {
         // may be re-selected a config file (without config id), or may be based on an original edit
         // (with config Id).
         Long configId = appParam.getConfigId();
