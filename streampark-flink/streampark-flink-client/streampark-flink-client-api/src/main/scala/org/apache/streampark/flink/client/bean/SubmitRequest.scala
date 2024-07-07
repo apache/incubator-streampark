@@ -98,6 +98,10 @@ case class SubmitRequest(
     }
   }
 
+  def hasProp(key: String): Boolean = properties.containsKey(key)
+
+  def getProp(key: String): Any = properties.get(key)
+
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) {
       return Map.empty[String, String]

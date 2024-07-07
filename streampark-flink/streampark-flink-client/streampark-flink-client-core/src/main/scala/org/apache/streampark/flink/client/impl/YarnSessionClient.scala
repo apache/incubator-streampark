@@ -30,7 +30,6 @@ import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.{ApplicationId, FinalApplicationStatus}
-import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
@@ -102,42 +101,28 @@ object YarnSessionClient extends YarnClientTrait {
                |""".stripMargin)
   }
 
+  @throws[Exception]
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    var clusterDescriptor: YarnClusterDescriptor = null
-    var packageProgram: PackagedProgram = null
-    var client: ClusterClient[ApplicationId] = null
-    try {
-      val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
-      clusterDescriptor = yarnClusterDescriptor._2
-      val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
-      val packageProgramJobGraph =
-        super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
-      packageProgram = packageProgramJobGraph._1
-      val jobGraph = packageProgramJobGraph._2
+    val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
+    val clusterDescriptor = yarnClusterDescriptor._2
+    val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
+    val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+    val packageProgram = programJobGraph._1
+    val jobGraph = programJobGraph._2
+    val client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
+    val jobId = client.submitJob(jobGraph).get().toString
+    val jobManagerUrl = client.getWebInterfaceURL
 
-      client = clusterDescriptor.retrieve(yarnClusterId).getClusterClient
-      val jobId = client.submitJob(jobGraph).get().toString
-      val jobManagerUrl = client.getWebInterfaceURL
-
-      logInfo(s"""
-                 |-------------------------<<applicationId>>------------------------
-                 |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
-                 |__________________________________________________________________
-                 |""".stripMargin)
-      SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        e.printStackTrace()
-        throw e
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packageProgram)
-      }
-      Utils.close(client, clusterDescriptor)
-    }
+    logInfo(s"""
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: jobId: $jobId , applicationId: ${yarnClusterId.toString}
+               |__________________________________________________________________
+               |""".stripMargin)
+    val resp = SubmitResponse(yarnClusterId.toString, flinkConfig.toMap, jobId, jobManagerUrl)
+    closeSubmit(submitRequest, packageProgram, client, clusterDescriptor)
+    resp
   }
 
   override def doCancel(

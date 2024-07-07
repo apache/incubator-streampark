@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.util.FlinkUtils
@@ -63,8 +62,6 @@ object YarnPerJobClient extends YarnClientTrait {
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory =
       clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    var packagedProgram: PackagedProgram = null
-    var clusterClient: ClusterClient[ApplicationId] = null
 
     val clusterDescriptor = {
       val clusterDescriptor =
@@ -75,49 +72,44 @@ object YarnPerJobClient extends YarnClientTrait {
       clusterDescriptor
     }
 
-    try {
-      clusterClient = {
-        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-        logInfo(s"""
-                   |------------------------<<specification>>-------------------------
-                   |$clusterSpecification
-                   |------------------------------------------------------------------
-                   |""".stripMargin)
-
-        val packageProgramJobGraph =
-          super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
-        packagedProgram = packageProgramJobGraph._1
-        val jobGraph = packageProgramJobGraph._2
-
-        logInfo(s"""
-                   |-------------------------<<applicationId>>------------------------
-                   |jobGraph getJobID: ${jobGraph.getJobID.toString}
-                   |__________________________________________________________________
-                   |""".stripMargin)
-        deployInternal(
-          clusterDescriptor,
-          clusterSpecification,
-          submitRequest.effectiveAppName,
-          classOf[YarnJobClusterEntrypoint].getName,
-          jobGraph,
-          true).getClusterClient
-
-      }
-      val applicationId = clusterClient.getClusterId
-      val jobManagerUrl = clusterClient.getWebInterfaceURL
+    var packagedProgram: PackagedProgram = null
+    val clusterClient = {
+      val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
       logInfo(s"""
-                 |-------------------------<<applicationId>>------------------------
-                 |Flink Job Started: applicationId: $applicationId
-                 |__________________________________________________________________
+                 |------------------------<<specification>>-------------------------
+                 |$clusterSpecification
+                 |------------------------------------------------------------------
                  |""".stripMargin)
 
-      SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
-    } finally {
-      if (submitRequest.safePackageProgram) {
-        Utils.close(packagedProgram)
-      }
-      Utils.close(clusterClient, clusterDescriptor)
+      val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+      packagedProgram = programJobGraph._1
+      val jobGraph = programJobGraph._2
+
+      logInfo(s"""
+                 |-------------------------<<applicationId>>------------------------
+                 |jobGraph getJobID: ${jobGraph.getJobID.toString}
+                 |__________________________________________________________________
+                 |""".stripMargin)
+      deployInternal(
+        clusterDescriptor,
+        clusterSpecification,
+        submitRequest.effectiveAppName,
+        classOf[YarnJobClusterEntrypoint].getName,
+        jobGraph,
+        true).getClusterClient
     }
+    val applicationId = clusterClient.getClusterId
+    val jobManagerUrl = clusterClient.getWebInterfaceURL
+    logInfo(s"""
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: applicationId: $applicationId
+               |__________________________________________________________________
+               |""".stripMargin)
+
+    val resp =
+      SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
+    closeSubmit(submitRequest, packagedProgram, clusterClient, clusterDescriptor)
+    resp
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {
