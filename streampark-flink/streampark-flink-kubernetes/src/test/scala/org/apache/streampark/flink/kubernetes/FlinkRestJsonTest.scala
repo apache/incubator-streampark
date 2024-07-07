@@ -279,7 +279,7 @@ class FlinkRestJsonTest {
             if (a.getPath == s"/jobs/$jobId/exceptions") {
               Try(parse(a.getJson)) match {
                 case Success(ok) =>
-                  val log = (ok \ "root-exception").extract[String]
+                  val log = (ok \ "root-exception").extractOpt[String].orNull
                   if (log != null) {
                     val path = KubernetesDeploymentHelper.getJobErrorLog(jobId)
                     val file = new File(path)
@@ -295,9 +295,9 @@ class FlinkRestJsonTest {
                     case JNothing | JNull =>
                     case JArray(arr) =>
                       arr.foreach(x => {
-                        val jid = (x \ "jid").extract[String]
+                        val jid = (x \ "jid").extractOpt[String].orNull
                         if (jid == jobId) {
-                          state = (x \ "state").extract[String]
+                          state = (x \ "state").extractOpt[String].orNull
                         }
                       })
                     case _ =>

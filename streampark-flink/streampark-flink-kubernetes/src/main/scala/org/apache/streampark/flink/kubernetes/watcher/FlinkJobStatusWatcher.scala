@@ -460,25 +460,25 @@ private[kubernetes] object JobDetails {
               .map(x => {
                 val task = x \ "tasks"
                 JobDetail(
-                  (x \ "jid").extract[String],
-                  (x \ "name").extract[String],
-                  (x \ "state").extract[String],
-                  (x \ "start-time").extract[Long],
-                  (x \ "end-time").extract[Long],
-                  (x \ "duration").extract[Long],
-                  (x \ "last-modification").extract[Long],
+                  (x \ "jid").extractOpt[String].orNull,
+                  (x \ "name").extractOpt[String].orNull,
+                  (x \ "state").extractOpt[String].orNull,
+                  (x \ "start-time").extractOpt[Long].getOrElse(0),
+                  (x \ "end-time").extractOpt[Long].getOrElse(0),
+                  (x \ "duration").extractOpt[Long].getOrElse(0),
+                  (x \ "last-modification").extractOpt[Long].getOrElse(0),
                   JobTask(
-                    (task \ "total").extract[Int],
-                    (task \ "created").extract[Int],
-                    (task \ "scheduled").extract[Int],
-                    (task \ "deploying").extract[Int],
-                    (task \ "running").extract[Int],
-                    (task \ "finished").extract[Int],
-                    (task \ "canceling").extract[Int],
-                    (task \ "canceled").extract[Int],
-                    (task \ "failed").extract[Int],
-                    (task \ "reconciling").extract[Int],
-                    (task \ "initializing").extract[Int]))
+                    (task \ "total").extractOpt[Int].getOrElse(0),
+                    (task \ "created").extractOpt[Int].getOrElse(0),
+                    (task \ "scheduled").extractOpt[Int].getOrElse(0),
+                    (task \ "deploying").extractOpt[Int].getOrElse(0),
+                    (task \ "running").extractOpt[Int].getOrElse(0),
+                    (task \ "finished").extractOpt[Int].getOrElse(0),
+                    (task \ "canceling").extractOpt[Int].getOrElse(0),
+                    (task \ "canceled").extractOpt[Int].getOrElse(0),
+                    (task \ "failed").extractOpt[Int].getOrElse(0),
+                    (task \ "reconciling").extractOpt[Int].getOrElse(0),
+                    (task \ "initializing").extractOpt[Int].getOrElse(0)))
               })
               .toArray
             Some(JobDetails(details))
@@ -514,7 +514,7 @@ private[kubernetes] object FlinkHistoryArchives extends Logger {
               if (a.getPath == s"/jobs/${trackId.jobId}/exceptions") {
                 Try(parse(a.getJson)) match {
                   case Success(ok) =>
-                    val log = (ok \ "root-exception").extract[String]
+                    val log = (ok \ "root-exception").extractOpt[String].orNull
                     if (log != null) {
                       val path =
                         KubernetesDeploymentHelper.getJobErrorLog(trackId.jobId)
@@ -531,9 +531,9 @@ private[kubernetes] object FlinkHistoryArchives extends Logger {
                       case JNothing | JNull =>
                       case JArray(arr) =>
                         arr.foreach(x => {
-                          val jid = (x \ "jid").extract[String]
+                          val jid = (x \ "jid").extractOpt[String].orNull
                           if (jid == trackId.jobId) {
-                            return (x \ "state").extract[String]
+                            return (x \ "state").extractOpt[String].orNull
                           }
                         })
                       case _ =>

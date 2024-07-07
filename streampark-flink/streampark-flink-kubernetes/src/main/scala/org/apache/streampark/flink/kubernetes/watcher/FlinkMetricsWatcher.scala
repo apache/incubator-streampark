@@ -196,14 +196,14 @@ object FlinkRestOverview {
     Try(parse(json)) match {
       case Success(ok) =>
         val overview = FlinkRestOverview(
-          (ok \ "taskmanagers").extract[Integer],
-          (ok \ "slots-total").extract[Integer],
-          (ok \ "slots-available").extract[Integer],
-          (ok \ "jobs-running").extract[Integer],
-          (ok \ "jobs-finished").extract[Integer],
-          (ok \ "jobs-cancelled").extract[Integer],
-          (ok \ "jobs-failed").extract[Integer],
-          (ok \ "flink-version").extract[String])
+          (ok \ "taskmanagers").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-total").extractOpt[Integer].getOrElse(0),
+          (ok \ "slots-available").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-running").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-finished").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-cancelled").extractOpt[Integer].getOrElse(0),
+          (ok \ "jobs-failed").extractOpt[Integer].getOrElse(0),
+          (ok \ "flink-version").extractOpt[String].orNull)
         Some(overview)
       case Failure(_) => None
     }
@@ -226,8 +226,8 @@ private[kubernetes] object FlinkRestJmConfigItem {
           case JArray(arr) =>
             arr.map(x => {
               FlinkRestJmConfigItem(
-                (x \ "key").extract[String],
-                (x \ "value").extract[String])
+                (x \ "key").extractOpt[String].orNull,
+                (x \ "value").extractOpt[String].orNull)
             })
           case _ => null
         }

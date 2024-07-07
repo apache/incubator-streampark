@@ -76,8 +76,8 @@ object FlinkSessionSubmitHelper extends Logger {
     val jarUploadResponse = Try(parse(uploadResult)) match {
       case Success(ok) =>
         JarUploadResponse(
-          (ok \ "filename").extract[String],
-          (ok \ "status").extract[String])
+          (ok \ "filename").extractOpt[String].orNull,
+          (ok \ "status").extractOpt[String].orNull)
       case Failure(_) => null
     }
 
@@ -96,7 +96,7 @@ object FlinkSessionSubmitHelper extends Logger {
       .asString(StandardCharsets.UTF_8)
 
     Try(parse(resp)) match {
-      case Success(ok) => (ok \ "jobid").extract[String]
+      case Success(ok) => (ok \ "jobid").extractOpt[String].orNull
       case Failure(_) => null
     }
   }

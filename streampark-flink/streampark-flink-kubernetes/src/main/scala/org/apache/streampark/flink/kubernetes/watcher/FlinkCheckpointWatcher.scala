@@ -162,13 +162,12 @@ object Checkpoint {
           case JNull | JNothing => None
           case _ =>
             val cp = Checkpoint(
-              id = (completed \ "id").extract[Long],
-              status = (completed \ "status").extract[String],
-              externalPath = (completed \ "external_path").extract[String],
-              isSavepoint = (completed \ "is_savepoint")
-                .extract[Boolean],
-              checkpointType = (completed \ "checkpoint_type").extract[String],
-              triggerTimestamp = (completed \ "trigger_timestamp").extract[Long])
+              id = (completed \ "id").extractOpt[Long].getOrElse(0L),
+              status = (completed \ "status").extractOpt[String].orNull,
+              externalPath = (completed \ "external_path").extractOpt[String].orNull,
+              isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
+              checkpointType = (completed \ "checkpoint_type").extractOpt[String].orNull,
+              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L))
             Some(cp)
         }
       case Failure(_) => None
