@@ -361,8 +361,8 @@ start() {
    # shellcheck disable=SC2006
    local workspace=`$_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "streampark.workspace.local" "$CONFIG"`
    if [[ ! -d $workspace ]]; then
-     echo_r "ERROR: streampark.workspace.local: \"$workspace\" is invalid path, Please reconfigure in $CONFIG"
-     echo_r "NOTE: \"streampark.workspace.local\" Do not set under APP_HOME($APP_HOME). Set it to a secure directory outside of APP_HOME.  "
+     echo_r "ERROR: streampark.workspace.local: \"$workspace\" is an invalid path, please reconfigure in $CONFIG"
+     echo_r "NOTE: \"streampark.workspace.local\" should not be set under APP_HOME($APP_HOME) directory. Set it to a secure directory outside of APP_HOME."
      exit 1;
    fi
 
@@ -372,7 +372,7 @@ start() {
   fi
 
   if [[ "${HADOOP_HOME}"x == ""x ]]; then
-    echo_y "WARN: HADOOP_HOME is undefined on your system env,please check it."
+    echo_y "WARN: HADOOP_HOME is undefined on your system env."
   else
     echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
   fi

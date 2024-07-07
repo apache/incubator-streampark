@@ -59,33 +59,23 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
-    var clusterDescriptor: KubernetesClusterDescriptor = null
-    var clusterClient: ClusterClient[String] = null
+    val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+    val clusterDescriptor = descriptor
+    val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
+    val clusterClient = clusterDescriptor
+      .deployApplicationCluster(clusterSpecification, applicationConfig)
+      .getClusterClient
 
-    try {
-      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
-      clusterDescriptor = descriptor
-      val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-      clusterClient = clusterDescriptor
-        .deployApplicationCluster(clusterSpecification, applicationConfig)
-        .getClusterClient
+    val clusterId = clusterClient.getClusterId
+    val result = SubmitResponse(
+      clusterId,
+      flinkConfig.toMap,
+      submitRequest.jobId,
+      clusterClient.getWebInterfaceURL)
+    logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
 
-      val clusterId = clusterClient.getClusterId
-      val result = SubmitResponse(
-        clusterId,
-        flinkConfig.toMap,
-        submitRequest.jobId,
-        clusterClient.getWebInterfaceURL)
-      logInfo(
-        s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
-      result
-    } catch {
-      case e: Exception =>
-        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
-        throw e
-    } finally {
-      Utils.close(clusterDescriptor, clusterClient)
-    }
+    closeSubmit(submitRequest, clusterDescriptor, clusterClient)
+    result
   }
 
   override def doCancel(cancelRequest: CancelRequest, flinkConf: Configuration): CancelResponse = {

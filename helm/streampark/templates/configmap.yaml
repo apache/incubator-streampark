@@ -25,14 +25,14 @@ metadata:
 data:
   config.yaml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/config.yaml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/config.yaml"  | nindent 4 -}}
 {{- end }}
 {{- if index (.Values.streamParkDefaultConfiguration) "config.yaml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "config.yaml" | nindent 4 -}}
 {{- end }}
   logback-spring.xml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/streampark-console-config/logback-spring.xml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/logback-spring.xml"  | nindent 4 -}}
 {{- end }}
 {{- if index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}

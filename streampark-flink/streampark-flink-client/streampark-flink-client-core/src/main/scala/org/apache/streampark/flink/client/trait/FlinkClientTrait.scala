@@ -78,7 +78,25 @@ trait FlinkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
+    val flinkConfig = prepareConfig(submitRequest)
+
+    setConfig(submitRequest, flinkConfig)
+
+    Try(doSubmit(submitRequest, flinkConfig)) match {
+      case Success(resp) => resp
+      case Failure(e) =>
+        logError(
+          s"flink job ${submitRequest.appName} start failed, " +
+            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"detail: ${Utils.stringifyException(e)}")
+        throw e
+    }
+  }
+
+  private[this] def prepareConfig(submitRequest: SubmitRequest): Configuration = {
+
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
+
     if (submitRequest.userJarFile != null) {
       val uri = PackagedProgramUtils.resolveURI(submitRequest.userJarFile.getAbsolutePath)
       val programOptions = ProgramOptions.create(commandLine)
@@ -88,7 +106,7 @@ trait FlinkClientTrait extends Logger {
       executionParameters.applyToConfiguration(flinkConfig)
     }
 
-    // set common parameter
+    // 1) set common parameter
     flinkConfig
       .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
       .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
@@ -97,9 +115,7 @@ trait FlinkClientTrait extends Logger {
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
       .safeSet(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.jobId)
 
-    if (
-      !submitRequest.properties.containsKey(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())
-    ) {
+    if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
       val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
         submitRequest.flinkVersion.flinkHome)
       // state.checkpoints.num-retained
@@ -107,44 +123,36 @@ trait FlinkClientTrait extends Logger {
       flinkConfig.safeSet(retainedOption, flinkDefaultConfiguration.get(retainedOption))
     }
 
-    // set savepoint parameter
-    if (submitRequest.savePoint != null) {
+    // 2) set savepoint parameter
+    if (StringUtils.isNotBlank(submitRequest.savePoint)) {
       flinkConfig.safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       flinkConfig.setBoolean(
         SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE,
         submitRequest.allowNonRestoredState)
     }
 
-    // set JVMOptions..
-    setJvmOptions(submitRequest, flinkConfig)
-
-    setConfig(submitRequest, flinkConfig)
-
-    doSubmit(submitRequest, flinkConfig)
-
-  }
-
-  private[this] def setJvmOptions(
-      submitRequest: SubmitRequest,
-      flinkConfig: Configuration): Unit = {
+    // 4) set env.xx.opts parameter
     if (MapUtils.isNotEmpty(submitRequest.properties)) {
-      submitRequest.properties.foreach(
-        x => {
-          val k = x._1.trim
-          val v = x._2.toString
-          if (k == CoreOptions.FLINK_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_JM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_JM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_HS_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_HS_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_TM_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_TM_JVM_OPTIONS, v)
-          } else if (k == CoreOptions.FLINK_CLI_JVM_OPTIONS.key()) {
-            flinkConfig.set(CoreOptions.FLINK_CLI_JVM_OPTIONS, v)
-          }
-        })
+      // file.encoding...
+      if (submitRequest.hasProp(CoreOptions.FLINK_JVM_OPTIONS.key())) {
+        val jvmOpt = submitRequest.getProp(CoreOptions.FLINK_JVM_OPTIONS.key()).toString
+        if (!jvmOpt.contains("-Dfile.encoding=")) {
+          // set default file.encoding
+          val opt = s"-Dfile.encoding=UTF-8 $jvmOpt"
+          submitRequest.properties.put(CoreOptions.FLINK_JVM_OPTIONS.key(), opt)
+        }
+      }
+
+      submitRequest.properties
+        .filter(_._1.startsWith("env."))
+        .foreach(
+          x => {
+            logInfo(s"env opts:  ${x._1}: ${x._2}")
+            flinkConfig.setString(x._1, x._2.toString)
+          })
     }
+
+    flinkConfig
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
@@ -522,6 +530,19 @@ trait FlinkClientTrait extends Logger {
     val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
     val clientWrapper = new FlinkClusterClient(client)
     clientWrapper.triggerSavepoint(jobID, savepointPath).get()
+  }
+
+  def closeSubmit(submitRequest: SubmitRequest, close: AutoCloseable*): Unit = {
+    close.foreach(
+      x => {
+        if (x.isInstanceOf[PackagedProgram]) {
+          if (submitRequest.safePackageProgram) {
+            Utils.close(x)
+          }
+        } else {
+          Utils.close(x)
+        }
+      })
   }
 
 }

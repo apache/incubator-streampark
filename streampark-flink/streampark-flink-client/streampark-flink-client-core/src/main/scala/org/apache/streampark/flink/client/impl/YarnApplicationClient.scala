@@ -103,34 +103,31 @@ object YarnApplicationClient extends YarnClientTrait {
         val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
         val clientFactory =
           clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+
+        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+        logInfo(s"""
+                   |------------------------<<specification>>-------------------------
+                   |$clusterSpecification
+                   |------------------------------------------------------------------
+                   |""".stripMargin)
+
+        val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-        var clusterClient: ClusterClient[ApplicationId] = null
-        try {
-          val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-          logInfo(s"""
-                     |------------------------<<specification>>-------------------------
-                     |$clusterSpecification
-                     |------------------------------------------------------------------
-                     |""".stripMargin)
+        val clusterClient = clusterDescriptor
+          .deployApplicationCluster(clusterSpecification, applicationConfiguration)
+          .getClusterClient
+        val applicationId = clusterClient.getClusterId
+        val jobManagerUrl = clusterClient.getWebInterfaceURL
+        logInfo(s"""
+                   |-------------------------<<applicationId>>------------------------
+                   |Flink Job Started: applicationId: $applicationId
+                   |__________________________________________________________________
+                   |""".stripMargin)
 
-          val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
-          var applicationId: ApplicationId = null
-          var jobManagerUrl: String = null
-          clusterClient = clusterDescriptor
-            .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-            .getClusterClient
-          applicationId = clusterClient.getClusterId
-          jobManagerUrl = clusterClient.getWebInterfaceURL
-          logInfo(s"""
-                     |-------------------------<<applicationId>>------------------------
-                     |Flink Job Started: applicationId: $applicationId
-                     |__________________________________________________________________
-                     |""".stripMargin)
-
+        val resp =
           SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
-        } finally {
-          Utils.close(clusterDescriptor, clusterClient)
-        }
+        closeSubmit(submitRequest, clusterDescriptor, clusterClient)
+        resp
       }
     })
   }
