@@ -50,8 +50,7 @@ public class SettingController {
     @PostMapping("all")
     @RequiresPermissions("setting:view")
     public RestResponse all() {
-        LambdaQueryWrapper<Setting> query =
-                new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
+        LambdaQueryWrapper<Setting> query = new LambdaQueryWrapper<Setting>().orderByAsc(Setting::getOrderNum);
         List<Setting> setting = settingService.list(query);
         return RestResponse.success(setting);
     }

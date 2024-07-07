@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.util.Utils.isEmpty
@@ -265,7 +266,8 @@ object AssertUtils {
     }
   }
 
-  private[this] def getHasLength(@Nullable str: String): Boolean = str != null && str.nonEmpty
+  private[this] def getHasLength(@Nullable str: String): Boolean =
+    str != null && str.nonEmpty
 
   private[this] def getHasText(@Nullable str: String): Boolean = {
     str != null && str.nonEmpty && containsText(str)

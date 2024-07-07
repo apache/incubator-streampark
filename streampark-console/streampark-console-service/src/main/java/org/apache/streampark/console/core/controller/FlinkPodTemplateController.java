@@ -45,10 +45,9 @@ public class FlinkPodTemplateController {
     public RestResponse getHosts() {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
-        List<String> friendlyHosts =
-                hostMap.entrySet().stream()
-                        .map(e -> e.getKey() + ":" + e.getValue())
-                        .collect(Collectors.toList());
+        List<String> friendlyHosts = hostMap.entrySet().stream()
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .collect(Collectors.toList());
         return RestResponse.success(friendlyHosts);
     }
 
@@ -81,10 +80,9 @@ public class FlinkPodTemplateController {
     @PostMapping("extractHostAlias")
     public RestResponse extractHostAlias(String podTemplate) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
-        List<String> friendlyHosts =
-                hosts.entrySet().stream()
-                        .map(e -> e.getKey() + ":" + e.getValue())
-                        .collect(Collectors.toList());
+        List<String> friendlyHosts = hosts.entrySet().stream()
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .collect(Collectors.toList());
         return RestResponse.success(friendlyHosts);
     }
 

@@ -80,13 +80,11 @@ public class ServiceHelper {
             ApiAlertException.throwIfFalse(
                     localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
 
-            String regex =
-                    String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
+            String regex = String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
 
-            List<String> jars =
-                    Arrays.stream(Objects.requireNonNull(localClient.list()))
-                            .filter(x -> x.matches(regex))
-                            .collect(Collectors.toList());
+            List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
+                    .filter(x -> x.matches(regex))
+                    .collect(Collectors.toList());
 
             ApiAlertException.throwIfTrue(
                     jars.isEmpty(),
@@ -105,12 +103,11 @@ public class ServiceHelper {
             File localClient = WebUtils.getAppClientDir();
             ApiAlertException.throwIfFalse(
                     localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
-            List<String> jars =
-                    Arrays.stream(Objects.requireNonNull(localClient.list()))
-                            .filter(
-                                    x -> x.matches(
-                                            "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion() + "-.*\\.jar"))
-                            .collect(Collectors.toList());
+            List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
+                    .filter(
+                            x -> x.matches(
+                                    "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion() + "-.*\\.jar"))
+                    .collect(Collectors.toList());
 
             ApiAlertException.throwIfTrue(
                     jars.isEmpty(),

@@ -76,14 +76,17 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
           implicit session =>
             val where = topics.size match {
               case 1 => s""" `topic` = "${topics.head}"  """
-              case _ => s""" `topic` in (${topics.mkString("\"", "\",\"", "\"")}) """
+              case _ =>
+                s""" `topic` in (${topics.mkString("\"", "\",\"", "\"")}) """
             }
             val sql =
               s"select `topic`,`partition`,`offset` from $table where `groupId`=? and $where"
             SQL(sql)
               .bind(groupId)
               .map {
-                result => new TopicPartition(result.string(1), result.int(2)) -> result.long(3)
+                result =>
+                  new TopicPartition(result.string(1), result.int(2)) -> result
+                    .long(3)
               }
               .list
               .apply()
@@ -105,7 +108,9 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
           case (tp, offset) =>
             val sql =
               s"insert into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?) on duplicate key update `offset`= values(`offset`) "
-            val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update()
+            val updated = SQL(sql)
+              .bind(tp.topic(), groupId, tp.partition(), offset)
+              .update()
             if (updated == 0) {
               throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
             }
@@ -123,11 +128,10 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   override def delete(groupId: String, topics: Set[String]): Unit = {
     DB.autoCommit {
       implicit session =>
-        topics.foreach(
-          topic => {
-            val sql = "delete from $table where topic=? and groupId=?"
-            SQL(sql).bind(topic, groupId).update()
-          })
+        topics.foreach(topic => {
+          val sql = "delete from $table where topic=? and groupId=?"
+          SQL(sql).bind(topic, groupId).update()
+        })
     }
     logInfo(s"storeType:MySQL,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }

@@ -53,8 +53,8 @@ public class ShiroService {
             throw new RuntimeException("Fail to get ShiroFilter from shiroFilterFactoryBean!");
         }
         securityManager = (DefaultWebSecurityManager) shiroFilter.getSecurityManager();
-        PathMatchingFilterChainResolver filterChainResolver =
-                (PathMatchingFilterChainResolver) shiroFilter.getFilterChainResolver();
+        PathMatchingFilterChainResolver filterChainResolver = (PathMatchingFilterChainResolver) shiroFilter
+                .getFilterChainResolver();
         filterChainManager = (DefaultFilterChainManager) filterChainResolver.getFilterChainManager();
     }
 

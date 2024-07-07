@@ -59,8 +59,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         implements
             VariableService {
 
-    private static final Pattern PLACEHOLDER_PATTERN =
-            Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
 
     private static final String PLACEHOLDER_START = "${";
 
@@ -147,10 +146,9 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
     @Override
     public Variable findByVariableCode(Long teamId, String variableCode) {
-        LambdaQueryWrapper<Variable> queryWrapper =
-                new LambdaQueryWrapper<Variable>()
-                        .eq(Variable::getVariableCode, variableCode)
-                        .eq(Variable::getTeamId, teamId);
+        LambdaQueryWrapper<Variable> queryWrapper = new LambdaQueryWrapper<Variable>()
+                .eq(Variable::getVariableCode, variableCode)
+                .eq(Variable::getTeamId, teamId);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -193,9 +191,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         if (CollectionUtils.isEmpty(variables)) {
             return mixed;
         }
-        Map<String, String> variableMap =
-                variables.stream()
-                        .collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
+        Map<String, String> variableMap = variables.stream()
+                .collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
         String restore = mixed;
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(restore);
         while (matcher.find()) {
@@ -216,9 +213,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     private List<Application> getDependApplicationsByCode(Variable variable) {
         List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationManageService.listByTeamId(variable.getTeamId());
-        Map<Long, Application> applicationMap =
-                applications.stream()
-                        .collect(Collectors.toMap(Application::getId, application -> application));
+        Map<Long, Application> applicationMap = applications.stream()
+                .collect(Collectors.toMap(Application::getId, application -> application));
 
         // Get applications that depend on this variable in application args
         for (Application app : applications) {

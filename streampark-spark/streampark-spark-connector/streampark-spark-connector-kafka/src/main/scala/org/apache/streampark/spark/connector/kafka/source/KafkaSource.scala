@@ -47,7 +47,8 @@ class KafkaSource[K: ClassTag, V: ClassTag](
   override val prefix: String = "spark.source.kafka.consume."
 
   // partition nums
-  lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
+  lazy val repartition: Int =
+    sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
   // kafka consume topic
   private lazy val topicSet: Set[String] =
@@ -77,13 +78,13 @@ class KafkaSource[K: ClassTag, V: ClassTag](
 
   /** Get DStream */
   override def getDStream[R: ClassTag](recordHandler: ConsumerRecord[K, V] => R): DStream[R] = {
-    val stream = kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
+    val stream =
+      kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
     stream
-      .transform(
-        (rdd, time) => {
-          offsetRanges.put(time.milliseconds, rdd.asInstanceOf[HasOffsetRanges].offsetRanges)
-          rdd
-        })
+      .transform((rdd, time) => {
+        offsetRanges.put(time.milliseconds, rdd.asInstanceOf[HasOffsetRanges].offsetRanges)
+        rdd
+      })
       .map(recordHandler)
   }
 

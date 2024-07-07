@@ -52,8 +52,7 @@ public class GitUtils {
     }
 
     public static Git clone(Project project) throws GitAPIException {
-        CloneCommand cloneCommand =
-                Git.cloneRepository().setURI(project.getUrl()).setDirectory(project.getAppSource());
+        CloneCommand cloneCommand = Git.cloneRepository().setURI(project.getUrl()).setDirectory(project.getAppSource());
 
         if (StringUtils.isNotBlank(project.getBranches())) {
             cloneCommand.setBranch(Constants.R_HEADS + project.getBranches());
@@ -86,12 +85,11 @@ public class GitUtils {
         if (project.isHttpRepositoryUrl()) {
             if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
                 try {
-                    String decrypt =
-                            StringUtils.isNotBlank(project.getSalt())
-                                    ? EncryptUtils.decrypt(project.getPassword(), project.getSalt())
-                                    : project.getPassword();
-                    UsernamePasswordCredentialsProvider credentialsProvider =
-                            new UsernamePasswordCredentialsProvider(project.getUserName(), decrypt);
+                    String decrypt = StringUtils.isNotBlank(project.getSalt())
+                            ? EncryptUtils.decrypt(project.getPassword(), project.getSalt())
+                            : project.getPassword();
+                    UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
+                            project.getUserName(), decrypt);
                     transportCommand.setCredentialsProvider(credentialsProvider);
                 } catch (Exception e) {
                     throw new IllegalStateException(

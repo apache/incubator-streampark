@@ -58,7 +58,10 @@ case class PipelineSnapshot(
   }
 
   def stepStatusTimestampAsJava: JavaMap[Integer, JavaLong] = {
-    stepStatus.toSeq.map(e => Integer.valueOf(e._1) -> JavaLong.valueOf(e._2._2)).toMap.asJava
+    stepStatus.toSeq
+      .map(e => Integer.valueOf(e._1) -> JavaLong.valueOf(e._2._2))
+      .toMap
+      .asJava
   }
 
 }

@@ -143,10 +143,9 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
                                           OperationHandle operationHandle) throws SqlGatewayException {
 
         try {
-            OperationStatusResponseBody operationStatus =
-                    defaultApi.getOperationStatus(
-                            UUID.fromString(sessionHandle.getIdentifier()),
-                            UUID.fromString(operationHandle.getIdentifier()));
+            OperationStatusResponseBody operationStatus = defaultApi.getOperationStatus(
+                    UUID.fromString(sessionHandle.getIdentifier()),
+                    UUID.fromString(operationHandle.getIdentifier()));
             return new OperationInfo(OperationStatusEnum.valueOf(operationStatus.getStatus()), null);
         } catch (ApiException e) {
             throw new SqlGatewayException("Flink native SqlGateWay closeOperation failed!", e);
@@ -193,11 +192,10 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
 
             List<RowData> data = new ArrayList<>();
             List<Column> columns = new ArrayList<>();
-            FetchResultsResponseBody fetchResultsResponseBody =
-                    defaultApi.fetchResults(
-                            UUID.fromString(sessionHandle.getIdentifier()),
-                            UUID.fromString(operationHandle.getIdentifier()),
-                            resultQueryCondition.getToken());
+            FetchResultsResponseBody fetchResultsResponseBody = defaultApi.fetchResults(
+                    UUID.fromString(sessionHandle.getIdentifier()),
+                    UUID.fromString(operationHandle.getIdentifier()),
+                    resultQueryCondition.getToken());
             String resultTypeStr = fetchResultsResponseBody.getResultType();
             Long nextToken = null;
             if (fetchResultsResponseBody.getNextResultUri() != null) {
@@ -205,8 +203,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
                 nextToken = Long.valueOf(nextResultUri.substring(nextResultUri.lastIndexOf("/") + 1));
             }
 
-            org.apache.streampark.gateway.flink.client.dto.ResultSet results =
-                    fetchResultsResponseBody.getResults();
+            org.apache.streampark.gateway.flink.client.dto.ResultSet results = fetchResultsResponseBody.getResults();
 
             List<ResultSetColumnsInner> resultsColumns = results.getColumns();
             List<ResultSetDataInner> resultsData = results.getData();
@@ -218,10 +215,9 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
 
             resultsData.forEach(row -> data.add(new RowData(row.getKind().getValue(), row.getFields())));
 
-            ResultKindEnum resultKindEnum =
-                    columns.size() == 1 && columns.get(0).getName().equals("result")
-                            ? ResultKindEnum.SUCCESS
-                            : ResultKindEnum.SUCCESS_WITH_CONTENT;
+            ResultKindEnum resultKindEnum = columns.size() == 1 && columns.get(0).getName().equals("result")
+                    ? ResultKindEnum.SUCCESS
+                    : ResultKindEnum.SUCCESS_WITH_CONTENT;
 
             return new ResultSet(
                     ResultSet.ResultType.valueOf(resultTypeStr),

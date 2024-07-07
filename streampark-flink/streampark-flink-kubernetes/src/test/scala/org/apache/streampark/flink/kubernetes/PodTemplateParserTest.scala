@@ -106,8 +106,7 @@ class PodTemplateParserTest {
             |  - name: savepoint-pvc
             |    persistentVolumeClaim:
             |      claimName: flink-savepoint
-            |""".stripMargin
-    )
+            |""".stripMargin)
     for (expect <- podTemplateExpect) {
       val res = PodTemplateParser.completeInitPodTemplate(expect._1)
       assertEquals(expect._2.trim, res.trim)
@@ -155,8 +154,7 @@ class PodTemplateParserTest {
             "hdp01" -> "192.168.3.114",
             "hdp03.assad.site" -> "192.168.3.116",
             "hdp02.assad.site" -> "192.168.3.115",
-            "hdp02" -> "192.168.3.115"
-          ),
+            "hdp02" -> "192.168.3.115"),
       """apiVersion: v1
         |kind: Pod
         |metadata:
@@ -206,17 +204,15 @@ class PodTemplateParserTest {
         |  name: pod-template
         |spec: 2333
         |""".stripMargin
-        -> Map()
-    )
+        -> Map())
 
     for (expect <- expected) {
       val hostsMap = PodTemplateParser.extractHostAliasMap(expect._1)
       val map = expect._2
       assertEquals(hostsMap.size(), map.size)
-      hostsMap.foreach(
-        c => {
-          assertEquals(c._2, map.get(c._1))
-        })
+      hostsMap.foreach(c => {
+        assertEquals(c._2, map.get(c._1))
+      })
     }
   }
 

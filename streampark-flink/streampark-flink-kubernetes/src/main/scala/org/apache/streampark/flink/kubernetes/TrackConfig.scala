@@ -66,12 +66,10 @@ object FlinkTrackConfig {
     JobStatusWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.jobStatusTrackTaskTimeoutSec),
       InternalConfigHolder.get(K8sFlinkConfig.jobStatueTrackTaskIntervalSec),
-      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)
-    ),
+      InternalConfigHolder.get(K8sFlinkConfig.silentStateJobKeepTrackingSec)),
     MetricWatcherConfig(
       InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskTimeoutSec),
-      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec))
-  )
+      InternalConfigHolder.get(K8sFlinkConfig.metricTrackTaskIntervalSec)))
 
 }
 

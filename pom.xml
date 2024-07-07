@@ -133,7 +133,7 @@
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
         <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
         <maven-silencer-plugin.version>1.7.13</maven-silencer-plugin.version>
-        <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
+        <spotless.scalafmt.version>3.7.5</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
         <owasp-dependency-check-maven.version>9.2.0</owasp-dependency-check-maven.version>
@@ -510,8 +510,8 @@
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${maven-checkstyle-plugin.version}</version>
                     <configuration>
-                        <suppressionsLocation>/tools/checkstyle/suppressions.xml</suppressionsLocation>
-                        <configLocation>/tools/checkstyle/checkstyle.xml</configLocation>
+                        <suppressionsLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/suppressions.xml</suppressionsLocation>
+                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/checkstyle.xml</configLocation>
                         <inputEncoding>UTF-8</inputEncoding>
                         <outputEncoding>UTF-8</outputEncoding>
                         <consoleOutput>true</consoleOutput>
@@ -564,7 +564,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>/tools/checkstyle/scalastyle-config.xml</configLocation>
+                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/scalastyle-config.xml</configLocation>
                         <outputFile>${project.build.directory}/scalastyle-output.xml</outputFile>
                         <outputEncoding>UTF-8</outputEncoding>
                         <skip>${maven.scalastyle.skip}</skip>
@@ -594,6 +594,9 @@
                             <eclipse>
                                 <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/spotless_streampark_formatter.xml</file>
                             </eclipse>
+                            <licenseHeader>
+                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/copyright.txt</file>
+                            </licenseHeader>
                             <importOrder>
                                 <order>org.apache.streampark,org.apache.streampark.shaded,org.apache,,javax,java,scala,\#</order>
                             </importOrder>
@@ -626,6 +629,9 @@
                                 <version>${spotless.scalafmt.version}</version>
                                 <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
                             </scalafmt>
+                            <licenseHeader>
+                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/copyright.txt</file>
+                            </licenseHeader>
                         </scala>
                         <pom>
                             <includes>
@@ -914,6 +920,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
             </plugin>
 
             <plugin>

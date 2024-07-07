@@ -110,7 +110,8 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
         stepsStatus(seq) = PipelineStepStatusEnum.failure -> System.currentTimeMillis
         pipeStatus = PipelineStatusEnum.failure
         error = PipeError.of(cause.getMessage, cause)
-        logInfo(s"Building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps.get(seq)}")
+        logInfo(s"Building pipeline step[$seq/$allSteps] failure => ${pipeType.getSteps
+            .get(seq)}")
         watcher.onStepStateChange(snapshot)
         None
     }
@@ -155,7 +156,8 @@ trait BuildPipeline extends BuildPipelineProcess with BuildPipelineExpose with L
 
   override def getError: PipeError = error.copy()
 
-  override def getStepsStatus: Map[Int, (PipelineStepStatusEnum, Long)] = stepsStatus.toMap
+  override def getStepsStatus: Map[Int, (PipelineStepStatusEnum, Long)] =
+    stepsStatus.toMap
 
   override def getCurStep: Int = curStep
 

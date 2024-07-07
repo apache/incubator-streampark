@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.util.ImplicitsUtils.AutoCloseImplicits
@@ -93,7 +94,8 @@ object Utils extends Logger {
   def isWindows: Boolean = OS.indexOf("windows") >= 0
 
   /** if any blank strings exist */
-  def isAnyBank(items: String*): Boolean = items == null || items.exists(StringUtils.isBlank)
+  def isAnyBank(items: String*): Boolean =
+    items == null || items.exists(StringUtils.isBlank)
 
   /**
    * calculate the percentage of num1 / num2, the result range from 0 to 100, with one small digit
@@ -114,20 +116,19 @@ object Utils extends Logger {
   }
 
   def close(closeable: AutoCloseable*)(implicit func: Throwable => Unit = null): Unit = {
-    closeable.foreach(
-      c => {
-        try {
-          if (c != null) {
-            c match {
-              case flushable: Flushable => flushable.flush()
-              case _ =>
-            }
-            c.close()
+    closeable.foreach(c => {
+      try {
+        if (c != null) {
+          c match {
+            case flushable: Flushable => flushable.flush()
+            case _ =>
           }
-        } catch {
-          case e: Throwable if func != null => func(e)
+          c.close()
         }
-      })
+      } catch {
+        case e: Throwable if func != null => func(e)
+      }
+    })
   }
 
   @tailrec
@@ -145,7 +146,7 @@ object Utils extends Logger {
     }
   }
 
-  def checkHttpURL(urlString: String) = {
+  def checkHttpURL(urlString: String): Boolean = {
     Try {
       val url = new URL(urlString)
       val connection = url.openConnection.asInstanceOf[HttpURLConnection]

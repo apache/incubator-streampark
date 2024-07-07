@@ -31,10 +31,13 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
   implicit private[this] def endpoint(implicit params: Map[String, String]): RedisEndpoint = {
     val host = params.getOrElse("redis.hosts", Protocol.DEFAULT_HOST)
-    val port = params.getOrElse("redis.port", Protocol.DEFAULT_PORT.toString).toInt
+    val port =
+      params.getOrElse("redis.port", Protocol.DEFAULT_PORT.toString).toInt
     val auth = Try(params("redis.auth")).getOrElse(null)
-    val dbNum = params.getOrElse("redis.db", Protocol.DEFAULT_DATABASE.toString).toInt
-    val timeout = params.getOrElse("redis.timeout", Protocol.DEFAULT_TIMEOUT.toString).toInt
+    val dbNum =
+      params.getOrElse("redis.db", Protocol.DEFAULT_DATABASE.toString).toInt
+    val timeout =
+      params.getOrElse("redis.timeout", Protocol.DEFAULT_TIMEOUT.toString).toInt
     RedisEndpoint(host, port, auth, dbNum, timeout)
   }
 
@@ -42,22 +45,21 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
     val offsetMap = RedisUtils.doRedis {
       redis =>
-        topics.flatMap(
-          topic => {
-            redis.hgetAll(key(groupId, topic)).map {
-              case (partition, offset) =>
-                // if offset invalid, please use earliest offset to instead of
-                val tp = new TopicPartition(topic, partition.toInt)
-                val finalOffset = earliestOffsets.get(tp) match {
-                  case Some(left) if left > offset.toLong =>
-                    logWarn(
-                      s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
-                    left
-                  case _ => offset.toLong
-                }
-                tp -> finalOffset
-            }
-          })
+        topics.flatMap(topic => {
+          redis.hgetAll(key(groupId, topic)).map {
+            case (partition, offset) =>
+              // if offset invalid, please use earliest offset to instead of
+              val tp = new TopicPartition(topic, partition.toInt)
+              val finalOffset = earliestOffsets.get(tp) match {
+                case Some(left) if left > offset.toLong =>
+                  logWarn(
+                    s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
+                  left
+                case _ => offset.toLong
+              }
+              tp -> finalOffset
+          }
+        })
     }
 
     val offsetMaps = reset.toLowerCase() match {

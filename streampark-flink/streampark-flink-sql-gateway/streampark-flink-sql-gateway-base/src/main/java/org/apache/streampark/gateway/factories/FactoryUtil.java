@@ -33,21 +33,20 @@ public class FactoryUtil {
 
     private static final String DEFAULT_IDENTIFIER = Constant.DEFAULT;
     private static final Logger LOG = LoggerFactory.getLogger(FactoryUtil.class);
-    public static final ConfigOption<String> SQL_GATEWAY_SERVICE_TYPE =
-            ConfigOption.key("streampark.sql-gateway.service")
-                    .stringType()
-                    .noDefaultValue()
-                    .withDescription("The service to execute the request.");
+    public static final ConfigOption<String> SQL_GATEWAY_SERVICE_TYPE = ConfigOption
+            .key("streampark.sql-gateway.service")
+            .stringType()
+            .noDefaultValue()
+            .withDescription("The service to execute the request.");
 
     public static <T extends Factory> T discoverFactory(
                                                         ClassLoader classLoader, Class<T> factoryClass,
                                                         String factoryIdentifier) {
         final List<Factory> factories = discoverFactories(classLoader);
 
-        final List<Factory> foundFactories =
-                factories.stream()
-                        .filter(f -> factoryClass.isAssignableFrom(f.getClass()))
-                        .collect(Collectors.toList());
+        final List<Factory> foundFactories = factories.stream()
+                .filter(f -> factoryClass.isAssignableFrom(f.getClass()))
+                .collect(Collectors.toList());
 
         if (foundFactories.isEmpty()) {
             throw new ValidationException(
@@ -56,10 +55,9 @@ public class FactoryUtil {
                             factoryClass.getName()));
         }
 
-        final List<Factory> matchingFactories =
-                foundFactories.stream()
-                        .filter(f -> f.factoryIdentifier().equals(factoryIdentifier))
-                        .collect(Collectors.toList());
+        final List<Factory> matchingFactories = foundFactories.stream()
+                .filter(f -> f.factoryIdentifier().equals(factoryIdentifier))
+                .collect(Collectors.toList());
 
         if (matchingFactories.isEmpty()) {
             throw new ValidationException(

@@ -32,7 +32,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   extends FlinkK8sWatcher {
 
   // cache pool for storage tracking result
-  implicit val watchController: FlinkK8sWatchController = new FlinkK8sWatchController()
+  implicit val watchController: FlinkK8sWatchController =
+    new FlinkK8sWatchController()
 
   // eventBus for change event
   implicit lazy val eventBus: ChangeEventBus = {
@@ -50,7 +51,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   private[this] val allWatchers =
     Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher, checkpointWatcher)
 
-  override def registerListener(listener: AnyRef): Unit = eventBus.registerListener(listener)
+  override def registerListener(listener: AnyRef): Unit =
+    eventBus.registerListener(listener)
 
   override def start(): Unit = allWatchers.foreach(_.start())
 
@@ -73,7 +75,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
     watchController.canceling.set(trackId)
   }
 
-  override def isInWatching(trackId: TrackId): Boolean = watchController.isInWatching(trackId)
+  override def isInWatching(trackId: TrackId): Boolean =
+    watchController.isInWatching(trackId)
 
   override def getJobStatus(trackId: TrackId): Option[JobStatusCV] = Option(
     watchController.jobStatuses.get(trackId))
@@ -81,7 +84,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   override def getJobStatus(trackIds: Set[TrackId]): Map[CacheKey, JobStatusCV] =
     watchController.jobStatuses.getAsMap(trackIds)
 
-  override def getAllJobStatus: Map[CacheKey, JobStatusCV] = watchController.jobStatuses.asMap()
+  override def getAllJobStatus: Map[CacheKey, JobStatusCV] =
+    watchController.jobStatuses.asMap()
 
   override def getAccGroupMetrics(groupId: String): FlinkMetricCV =
     watchController.collectAccGroupMetric(groupId)
@@ -89,7 +93,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
   override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(
     watchController.flinkMetrics.get(clusterKey))
 
-  override def getAllWatchingIds: Set[TrackId] = watchController.getAllWatchingIds()
+  override def getAllWatchingIds: Set[TrackId] =
+    watchController.getAllWatchingIds()
 
   override def checkIsInRemoteCluster(trackId: TrackId): Boolean = {
     if (!trackId.isLegal) false;
@@ -98,9 +103,13 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
         state != FlinkJobState.LOST || state != FlinkJobState.SILENT
       trackId.executeMode match {
         case SESSION =>
-          jobStatusWatcher.touchSessionJob(trackId).exists(e => nonLost(e.jobState))
+          jobStatusWatcher
+            .touchSessionJob(trackId)
+            .exists(e => nonLost(e.jobState))
         case APPLICATION =>
-          jobStatusWatcher.touchApplicationJob(trackId).exists(e => nonLost(e.jobState))
+          jobStatusWatcher
+            .touchApplicationJob(trackId)
+            .exists(e => nonLost(e.jobState))
         case _ => false
       }
     }
@@ -136,7 +145,8 @@ class DefaultFlinkK8sWatcher(conf: FlinkTrackConfig = FlinkTrackConfig.defaultCo
           // discard current event when the job state is consistent
           case (preCache, event) if preCache.jobState == event.jobState => true
           // discard current event when current event is too late
-          case (preCache, event) if event.pollTime <= preCache.pollAckTime => true
+          case (preCache, event) if event.pollTime <= preCache.pollAckTime =>
+            true
           case _ => false
         }
         if (!shouldIgnore) {

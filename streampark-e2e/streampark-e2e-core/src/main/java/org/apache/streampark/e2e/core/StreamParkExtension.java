@@ -1,20 +1,18 @@
 /*
- * Licensed to Apache Software Foundation (ASF) under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Apache Software Foundation (ASF) licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.apache.streampark.e2e.core;
@@ -127,9 +125,8 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
         compose = createDockerCompose(context);
         compose.start();
 
-        address =
-                HostAndPort.fromParts(
-                        "host.testcontainers.internal", compose.getServicePort(serviceName, DOCKER_PORT));
+        address = HostAndPort.fromParts(
+                "host.testcontainers.internal", compose.getServicePort(serviceName, DOCKER_PORT));
         rootPath = "/";
     }
 
@@ -137,29 +134,26 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
         DockerImageName imageName;
 
         if (M1_CHIP_FLAG) {
-            imageName =
-                    DockerImageName.parse("seleniarm/standalone-chromium:124.0-chromedriver-124.0")
-                            .asCompatibleSubstituteFor("selenium/standalone-chrome");
+            imageName = DockerImageName.parse("seleniarm/standalone-chromium:124.0-chromedriver-124.0")
+                    .asCompatibleSubstituteFor("selenium/standalone-chrome");
 
-            browser =
-                    new BrowserWebDriverContainer<>(imageName)
-                            .withCapabilities(new ChromeOptions())
-                            .withCreateContainerCmdModifier(cmd -> cmd.withUser("root"))
-                            .withFileSystemBind(
-                                    Constants.HOST_CHROME_DOWNLOAD_PATH.toFile().getAbsolutePath(),
-                                    Constants.SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH)
-                            .withRecordingMode(RECORD_ALL, record.toFile(), MP4)
-                            .withStartupTimeout(Duration.ofSeconds(300));
+            browser = new BrowserWebDriverContainer<>(imageName)
+                    .withCapabilities(new ChromeOptions())
+                    .withCreateContainerCmdModifier(cmd -> cmd.withUser("root"))
+                    .withFileSystemBind(
+                            Constants.HOST_CHROME_DOWNLOAD_PATH.toFile().getAbsolutePath(),
+                            Constants.SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH)
+                    .withRecordingMode(RECORD_ALL, record.toFile(), MP4)
+                    .withStartupTimeout(Duration.ofSeconds(300));
         } else {
-            browser =
-                    new BrowserWebDriverContainer<>()
-                            .withCapabilities(new ChromeOptions())
-                            .withCreateContainerCmdModifier(cmd -> cmd.withUser("root"))
-                            .withFileSystemBind(
-                                    Constants.HOST_CHROME_DOWNLOAD_PATH.toFile().getAbsolutePath(),
-                                    Constants.SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH)
-                            .withRecordingMode(RECORD_ALL, record.toFile(), MP4)
-                            .withStartupTimeout(Duration.ofSeconds(300));
+            browser = new BrowserWebDriverContainer<>()
+                    .withCapabilities(new ChromeOptions())
+                    .withCreateContainerCmdModifier(cmd -> cmd.withUser("root"))
+                    .withFileSystemBind(
+                            Constants.HOST_CHROME_DOWNLOAD_PATH.toFile().getAbsolutePath(),
+                            Constants.SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH)
+                    .withRecordingMode(RECORD_ALL, record.toFile(), MP4)
+                    .withStartupTimeout(Duration.ofSeconds(300));
         }
     }
 
@@ -205,26 +199,24 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
     private ComposeContainer createDockerCompose(ExtensionContext context) {
         final Class<?> clazz = context.getRequiredTestClass();
         final StreamPark annotation = clazz.getAnnotation(StreamPark.class);
-        final List<File> files =
-                Stream.of(annotation.composeFiles())
-                        .map(it -> StreamPark.class.getClassLoader().getResource(it))
-                        .filter(Objects::nonNull)
-                        .map(URL::getPath)
-                        .map(File::new)
-                        .collect(Collectors.toList());
+        final List<File> files = Stream.of(annotation.composeFiles())
+                .map(it -> StreamPark.class.getClassLoader().getResource(it))
+                .filter(Objects::nonNull)
+                .map(URL::getPath)
+                .map(File::new)
+                .collect(Collectors.toList());
 
-        ComposeContainer compose =
-                new ComposeContainer(files)
-                        .withPull(true)
-                        .withTailChildContainers(true)
-                        .withLocalCompose(true)
-                        .withExposedService(
-                                serviceName,
-                                DOCKER_PORT,
-                                Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(300)))
-                        .withLogConsumer(serviceName, outputFrame -> log.info(outputFrame.getUtf8String()))
-                        .waitingFor(
-                                serviceName, Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(300)));
+        ComposeContainer compose = new ComposeContainer(files)
+                .withPull(true)
+                .withTailChildContainers(true)
+                .withLocalCompose(true)
+                .withExposedService(
+                        serviceName,
+                        DOCKER_PORT,
+                        Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(300)))
+                .withLogConsumer(serviceName, outputFrame -> log.info(outputFrame.getUtf8String()))
+                .waitingFor(
+                        serviceName, Wait.forHealthcheck().withStartupTimeout(Duration.ofSeconds(300)));
 
         return compose;
     }

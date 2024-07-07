@@ -26,7 +26,8 @@ import org.apache.flink.types.Row
 object TableExt {
 
   class Table(val table: FlinkTable) {
-    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+    def ->(field: String, fields: String*): FlinkTable =
+      table.as(field, fields: _*)
   }
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {

@@ -43,16 +43,15 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
     public IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request) {
         request.setSortField("option_time");
         Page<ApplicationLog> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<ApplicationLog> queryWrapper =
-                new LambdaQueryWrapper<ApplicationLog>()
-                        .eq(ApplicationLog::getAppId, applicationLog.getAppId());
+        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
+                .eq(ApplicationLog::getAppId, applicationLog.getAppId());
         return this.page(page, queryWrapper);
     }
 
     @Override
     public void removeByAppId(Long appId) {
-        LambdaQueryWrapper<ApplicationLog> queryWrapper =
-                new LambdaQueryWrapper<ApplicationLog>().eq(ApplicationLog::getAppId, appId);
+        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
+                .eq(ApplicationLog::getAppId, appId);
         this.remove(queryWrapper);
     }
 }

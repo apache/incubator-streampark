@@ -67,8 +67,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public Setting get(String key) {
-        LambdaQueryWrapper<Setting> queryWrapper =
-                new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, key);
+        LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, key);
         return this.getOne(queryWrapper);
     }
 
@@ -80,8 +79,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
             Setting entity = new Setting();
             entity.setSettingValue(setting.getSettingValue());
-            LambdaQueryWrapper<Setting> queryWrapper =
-                    new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey, setting.getSettingKey());
+            LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey,
+                    setting.getSettingKey());
             this.update(entity, queryWrapper);
 
             getMavenConfig().updateConfig();
@@ -120,22 +119,19 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public ResponseResult checkDocker(DockerConfig dockerConfig) {
-        DockerClientConfig config =
-                DefaultDockerClientConfig.createDefaultConfigBuilder()
-                        .withRegistryUrl(dockerConfig.getAddress())
-                        .build();
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+                .withRegistryUrl(dockerConfig.getAddress())
+                .build();
 
-        DockerHttpClient httpClient =
-                new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
 
         ResponseResult result = new ResponseResult();
 
         try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
-            AuthConfig authConfig =
-                    new AuthConfig()
-                            .withUsername(dockerConfig.getUsername())
-                            .withPassword(dockerConfig.getPassword())
-                            .withRegistryAddress(dockerConfig.getAddress());
+            AuthConfig authConfig = new AuthConfig()
+                    .withUsername(dockerConfig.getUsername())
+                    .withPassword(dockerConfig.getPassword())
+                    .withRegistryAddress(dockerConfig.getAddress());
             AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
             if (response.getStatus().equals("Login Succeeded")) {
                 result.setStatus(200);

@@ -59,11 +59,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<String> listPermissions(Long userId, Long teamId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("The userId [%s] not found", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("The userId [%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
             return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
@@ -73,15 +72,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> listMenus(Long userId, Long teamId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("The userId:[%s] not found", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("The userId:[%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
-            LambdaQueryWrapper<Menu> queryWrapper =
-                    new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
+            LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0")
+                    .orderByAsc(Menu::getOrderNum);
             return this.list(queryWrapper);
         }
         return this.baseMapper.selectMenus(userId, teamId);

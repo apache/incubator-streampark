@@ -40,7 +40,8 @@ object InternalConfigHolder extends Logger {
   private val confData = new ConcurrentHashMap[String, Any](initialCapacity)
 
   /** configuration key options storage (key -> ConfigOption) */
-  private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
+  private val confOptions =
+    new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
   /** Initialize the ConfigHub. */
   Seq(CommonConfig, K8sFlinkConfig)
@@ -160,10 +161,9 @@ object InternalConfigHolder extends Logger {
     logInfo(s"""Registered configs:
                |ConfigHub collected configs: ${configKeys.size}
                |  ${configKeys
-                .map(
-                  key =>
-                    s"$key = ${if (key.contains("password")) Constant.DEFAULT_DATAMASK_STRING
-                      else get(key)}")
+                .map(key =>
+                  s"$key = ${if (key.contains("password")) Constant.DEFAULT_DATAMASK_STRING
+                    else get(key)}")
                 .mkString("\n  ")}""".stripMargin)
   }
 

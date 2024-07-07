@@ -162,15 +162,13 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     public Map<String, String> getFlinkConfig() throws JsonProcessingException {
         String restUrl = this.address + "/jobmanager/config";
-        String json =
-                HttpClientUtils.httpGetRequest(
-                        restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+        String json = HttpClientUtils.httpGetRequest(
+                restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
         if (StringUtils.isBlank(json)) {
             return new HashMap<>();
         }
-        List<Map<String, String>> confList =
-                JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
-                });
+        List<Map<String, String>> confList = JacksonUtils.read(json, new TypeReference<List<Map<String, String>>>() {
+        });
         Map<String, String> config = new HashMap<>(0);
         confList.forEach(k -> config.put(k.get("key"), k.get("value")));
         return config;
@@ -179,8 +177,8 @@ public class FlinkCluster implements Serializable {
     @JsonIgnore
     public Map<String, Object> getProperties() {
         Map<String, Object> propertyMap = new HashMap<>();
-        Map<String, String> dynamicPropertyMap =
-                PropertiesUtils.extractDynamicPropertiesAsJava(this.getDynamicProperties());
+        Map<String, String> dynamicPropertyMap = PropertiesUtils
+                .extractDynamicPropertiesAsJava(this.getDynamicProperties());
         propertyMap.putAll(this.getOptionMap());
         propertyMap.putAll(dynamicPropertyMap);
         ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());
@@ -194,12 +192,9 @@ public class FlinkCluster implements Serializable {
 
         public static final SFunction<FlinkCluster, Long> ID = FlinkCluster::getId;
         public static final SFunction<FlinkCluster, String> ADDRESS = FlinkCluster::getAddress;
-        public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL =
-                FlinkCluster::getJobManagerUrl;
-        public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE =
-                FlinkCluster::getClusterState;
-        public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE =
-                FlinkCluster::getExecutionMode;
+        public static final SFunction<FlinkCluster, String> JOB_MANAGER_URL = FlinkCluster::getJobManagerUrl;
+        public static final SFunction<FlinkCluster, Integer> CLUSTER_STATE = FlinkCluster::getClusterState;
+        public static final SFunction<FlinkCluster, Integer> EXECUTION_MODE = FlinkCluster::getExecutionMode;
         public static final SFunction<FlinkCluster, String> EXCEPTION = FlinkCluster::getException;
     }
 }

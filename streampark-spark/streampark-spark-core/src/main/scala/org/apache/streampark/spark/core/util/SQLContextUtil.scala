@@ -28,7 +28,11 @@ object SQLContextUtil {
 
   def getSqlContext(@transient sparkContext: SparkContext): SQLContext = {
     if (instance == null) {
-      instance = SparkSession.builder().config(sparkContext.getConf).getOrCreate().sqlContext
+      instance = SparkSession
+        .builder()
+        .config(sparkContext.getConf)
+        .getOrCreate()
+        .sqlContext
     }
     instance
   }

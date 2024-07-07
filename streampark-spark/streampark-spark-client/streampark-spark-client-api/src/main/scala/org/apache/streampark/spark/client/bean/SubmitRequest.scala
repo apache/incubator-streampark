@@ -56,16 +56,19 @@ case class SubmitRequest(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case FlinkDevelopmentMode.FLINK_SQL =>
+      Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
   lazy val effectiveAppName: String =
-    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
+    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME)
+    else this.appName
 
   lazy val libs: List[URL] = {
     val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
-    Try(new File(path).listFiles().map(_.toURI.toURL).toList).getOrElse(List.empty[URL])
+    Try(new File(path).listFiles().map(_.toURI.toURL).toList)
+      .getOrElse(List.empty[URL])
   }
 
   lazy val classPaths: List[URL] = sparkVersion.sparkLibs ++ libs
@@ -156,8 +159,7 @@ case class SubmitRequest(
       sparkLib = s"$sparkHdfsHome/jars",
       sparkPlugins = s"$sparkHdfsHome/plugins",
       appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
-    )
+      appPlugins = workspace.APP_PLUGINS)
   }
 
   @throws[Exception]

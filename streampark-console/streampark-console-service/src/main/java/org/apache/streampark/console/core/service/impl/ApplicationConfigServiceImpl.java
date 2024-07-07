@@ -112,8 +112,7 @@ public class ApplicationConfigServiceImpl
         }
     }
 
-    private void updateForNonFlinkSqlJob(
-                                         Application appParam, Boolean latest, ApplicationConfig latestConfig) {
+    private void updateForNonFlinkSqlJob(Application appParam, Boolean latest, ApplicationConfig latestConfig) {
         // may be re-selected a config file (without config id), or may be based on an original edit
         // (with config Id).
         Long configId = appParam.getConfigId();
@@ -218,18 +217,16 @@ public class ApplicationConfigServiceImpl
     public IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request) {
         request.setSortField("version");
         Page<ApplicationConfig> page = MybatisPager.getPage(request);
-        IPage<ApplicationConfig> configList =
-                this.baseMapper.selectPageByAppId(page, config.getAppId());
+        IPage<ApplicationConfig> configList = this.baseMapper.selectPageByAppId(page, config.getAppId());
         fillEffectiveField(config.getAppId(), configList.getRecords());
         return configList;
     }
 
     @Override
     public List<ApplicationConfig> list(Long appId) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper =
-                new LambdaQueryWrapper<ApplicationConfig>()
-                        .eq(ApplicationConfig::getAppId, appId)
-                        .orderByDesc(ApplicationConfig::getVersion);
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+                .eq(ApplicationConfig::getAppId, appId)
+                .orderByDesc(ApplicationConfig::getVersion);
 
         List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
         fillEffectiveField(appId, configList);

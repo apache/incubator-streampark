@@ -37,14 +37,17 @@ object FlinkUtils {
   }
 
   def getFlinkDistJar(flinkHome: String): String = {
-    new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist.*\\.jar")) match {
+    new File(s"$flinkHome/lib")
+      .list()
+      .filter(_.matches("flink-dist.*\\.jar")) match {
       case Array() =>
         throw new IllegalArgumentException(
           s"[StreamPark] can no found flink-dist jar in $flinkHome/lib")
       case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
       case more =>
         throw new IllegalArgumentException(
-          s"[StreamPark] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+          s"[StreamPark] found multiple flink-dist jar in $flinkHome/lib,[${more
+              .mkString(",")}]")
     }
   }
 

@@ -24,7 +24,8 @@ import org.apache.streampark.flink.packer.pipeline._
 /** Building pipeline for flink kubernetes-native session mode */
 class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends BuildPipeline {
 
-  override def pipeType: PipelineTypeEnum = PipelineTypeEnum.FLINK_NATIVE_K8S_SESSION
+  override def pipeType: PipelineTypeEnum =
+    PipelineTypeEnum.FLINK_NATIVE_K8S_SESSION
 
   override def offerBuildParam: FlinkK8sSessionBuildRequest = request
 
@@ -36,7 +37,8 @@ class FlinkK8sSessionBuildPipeline(request: FlinkK8sSessionBuildRequest) extends
     // the sub workspace path like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/
     val buildWorkspace =
       execStep(1) {
-        val buildWorkspace = s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
+        val buildWorkspace =
+          s"${request.workspace}/${request.clusterId}@${request.k8sNamespace}"
         LfsOperator.mkCleanDirs(buildWorkspace)
         logInfo(s"Recreate building workspace: $buildWorkspace")
         buildWorkspace

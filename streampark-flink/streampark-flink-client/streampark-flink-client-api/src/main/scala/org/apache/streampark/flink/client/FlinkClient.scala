@@ -87,12 +87,12 @@ object FlinkClient extends Logger {
         val method = submitClass.getDeclaredMethod(requestBody._2, requestClass)
         method.setAccessible(true)
         val obj = method.invoke(null, FlinkShimsProxy.getObject(classLoader, request))
-        if (obj == null) null.asInstanceOf[T]
-        else {
+        if (obj == null) {
+          null.asInstanceOf[T]
+        } else {
           FlinkShimsProxy.getObject[T](this.getClass.getClassLoader, obj)
         }
-      }
-    )
+      })
   }
 
 }

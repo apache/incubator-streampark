@@ -162,14 +162,14 @@ public class AppBuildPipeServiceImpl
     @Autowired
     private ExecutorService executorService;
 
-    private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+    private static final Cache<Long, DockerPullSnapshot> DOCKER_PULL_PG_SNAPSHOTS = Caffeine.newBuilder()
+            .expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private static final Cache<Long, DockerBuildSnapshot> DOCKER_BUILD_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+    private static final Cache<Long, DockerBuildSnapshot> DOCKER_BUILD_PG_SNAPSHOTS = Caffeine.newBuilder()
+            .expireAfterWrite(30, TimeUnit.DAYS).build();
 
-    private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS =
-            Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.DAYS).build();
+    private static final Cache<Long, DockerPushSnapshot> DOCKER_PUSH_PG_SNAPSHOTS = Caffeine.newBuilder()
+            .expireAfterWrite(30, TimeUnit.DAYS).build();
 
     /**
      * Build application. This is an async call method.
@@ -222,8 +222,8 @@ public class AppBuildPipeServiceImpl
 
                     @Override
                     public void onStart(PipelineSnapshot snapshot) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId());
                         saveEntity(buildPipeline);
 
                         app.setRelease(ReleaseStateEnum.RELEASING.get());
@@ -246,15 +246,14 @@ public class AppBuildPipeServiceImpl
                             fsOperator.delete(appHome);
                             if (app.isUploadJob()) {
                                 String uploadJar = appUploads.concat("/").concat(app.getJar());
-                                File localJar =
-                                        new File(
-                                                String.format(
-                                                        "%s/%d/%s",
-                                                        Workspace.local().APP_UPLOADS(), app.getTeamId(),
-                                                        app.getJar()));
+                                File localJar = new File(
+                                        String.format(
+                                                "%s/%d/%s",
+                                                Workspace.local().APP_UPLOADS(), app.getTeamId(),
+                                                app.getJar()));
                                 if (!localJar.exists()) {
-                                    Resource resource =
-                                            resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                                    Resource resource = resourceService.findByResourceName(app.getTeamId(),
+                                            app.getJar());
                                     if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                                         localJar = new File(resource.getFilePath());
                                         uploadJar = appUploads.concat("/").concat(localJar.getName());
@@ -301,17 +300,16 @@ public class AppBuildPipeServiceImpl
 
                     @Override
                     public void onStepStateChange(PipelineSnapshot snapshot) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId());
                         saveEntity(buildPipeline);
                     }
 
                     @Override
                     public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot)
-                                        .setAppId(app.getId())
-                                        .setBuildResult(result);
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId())
+                                .setBuildResult(result);
                         saveEntity(buildPipeline);
                         if (result.pass()) {
                             // running job ...
@@ -346,13 +344,12 @@ public class AppBuildPipeServiceImpl
                             app.setBuild(false);
 
                         } else {
-                            Message message =
-                                    new Message(
-                                            serviceHelper.getUserId(),
-                                            app.getId(),
-                                            app.getJobName().concat(" release failed"),
-                                            ExceptionUtils.stringifyException(snapshot.error().exception()),
-                                            NoticeTypeEnum.EXCEPTION);
+                            Message message = new Message(
+                                    serviceHelper.getUserId(),
+                                    app.getId(),
+                                    app.getJobName().concat(" release failed"),
+                                    ExceptionUtils.stringifyException(snapshot.error().exception()),
+                                    NoticeTypeEnum.EXCEPTION);
                             messageService.push(message);
                             app.setRelease(ReleaseStateEnum.FAILED.get());
                             app.setOptionState(OptionStateEnum.NONE.getValue());
@@ -373,8 +370,7 @@ public class AppBuildPipeServiceImpl
             registerDockerProgressWatcher(pipeline, app);
         }
         // save pipeline instance snapshot to db before release it.
-        AppBuildPipeline buildPipeline =
-                AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
+        AppBuildPipeline buildPipeline = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         boolean saved = saveEntity(buildPipeline);
         DOCKER_PULL_PG_SNAPSHOTS.invalidate(app.getId());
         DOCKER_BUILD_PG_SNAPSHOTS.invalidate(app.getId());
@@ -466,27 +462,26 @@ public class AppBuildPipeServiceImpl
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
-                FlinkYarnApplicationBuildRequest yarnAppRequest =
-                        buildFlinkYarnApplicationBuildRequest(app, mainClass, localWorkspace, yarnProvidedPath);
+                FlinkYarnApplicationBuildRequest yarnAppRequest = buildFlinkYarnApplicationBuildRequest(app, mainClass,
+                        localWorkspace, yarnProvidedPath);
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return FlinkYarnApplicationBuildPipeline.of(yarnAppRequest);
             case YARN_PER_JOB:
             case YARN_SESSION:
             case REMOTE:
-                FlinkRemotePerJobBuildRequest buildRequest =
-                        buildFlinkRemotePerJobBuildRequest(app, mainClass, flinkUserJar, flinkEnv);
+                FlinkRemotePerJobBuildRequest buildRequest = buildFlinkRemotePerJobBuildRequest(app, mainClass,
+                        flinkUserJar, flinkEnv);
                 log.info("Submit params to building pipeline : {}", buildRequest);
                 return FlinkRemoteBuildPipeline.of(buildRequest);
             case KUBERNETES_NATIVE_SESSION:
-                FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
-                        buildFlinkK8sSessionBuildRequest(app, mainClass, flinkUserJar, flinkEnv);
+                FlinkK8sSessionBuildRequest k8sSessionBuildRequest = buildFlinkK8sSessionBuildRequest(app, mainClass,
+                        flinkUserJar, flinkEnv);
                 log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
                 return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
             case KUBERNETES_NATIVE_APPLICATION:
                 DockerConfig dockerConfig = settingService.getDockerConfig();
-                FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
-                        buildFlinkK8sApplicationBuildRequest(
-                                app, mainClass, flinkUserJar, flinkEnv, dockerConfig);
+                FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = buildFlinkK8sApplicationBuildRequest(
+                        app, mainClass, flinkUserJar, flinkEnv, dockerConfig);
                 log.info("Submit params to building pipeline : {}", k8sApplicationBuildRequest);
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
             default:
@@ -517,27 +512,26 @@ public class AppBuildPipeServiceImpl
                                                                                  String flinkUserJar,
                                                                                  FlinkEnv flinkEnv,
                                                                                  DockerConfig dockerConfig) {
-        FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
-                new FlinkK8sApplicationBuildRequest(
-                        app.getJobName(),
-                        app.getLocalAppHome(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getFlinkExecutionMode(),
-                        app.getDevelopmentMode(),
-                        flinkEnv.getFlinkVersion(),
-                        getMergedDependencyInfo(app),
-                        app.getJobName(),
-                        app.getK8sNamespace(),
-                        app.getFlinkImage(),
-                        app.getK8sPodTemplates(),
-                        app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
-                        DockerConf.of(
-                                dockerConfig.getAddress(),
-                                dockerConfig.getNamespace(),
-                                dockerConfig.getUsername(),
-                                dockerConfig.getPassword()),
-                        app.getIngressTemplate());
+        FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest = new FlinkK8sApplicationBuildRequest(
+                app.getJobName(),
+                app.getLocalAppHome(),
+                mainClass,
+                flinkUserJar,
+                app.getFlinkExecutionMode(),
+                app.getDevelopmentMode(),
+                flinkEnv.getFlinkVersion(),
+                getMergedDependencyInfo(app),
+                app.getJobName(),
+                app.getK8sNamespace(),
+                app.getFlinkImage(),
+                app.getK8sPodTemplates(),
+                app.getK8sHadoopIntegration() != null ? app.getK8sHadoopIntegration() : false,
+                DockerConf.of(
+                        dockerConfig.getAddress(),
+                        dockerConfig.getNamespace(),
+                        dockerConfig.getUsername(),
+                        dockerConfig.getPassword()),
+                app.getIngressTemplate());
         return k8sApplicationBuildRequest;
     }
 
@@ -545,18 +539,17 @@ public class AppBuildPipeServiceImpl
     private FlinkK8sSessionBuildRequest buildFlinkK8sSessionBuildRequest(
                                                                          @Nonnull Application app, String mainClass,
                                                                          String flinkUserJar, FlinkEnv flinkEnv) {
-        FlinkK8sSessionBuildRequest k8sSessionBuildRequest =
-                new FlinkK8sSessionBuildRequest(
-                        app.getJobName(),
-                        app.getLocalAppHome(),
-                        mainClass,
-                        flinkUserJar,
-                        app.getFlinkExecutionMode(),
-                        app.getDevelopmentMode(),
-                        flinkEnv.getFlinkVersion(),
-                        getMergedDependencyInfo(app),
-                        app.getClusterId(),
-                        app.getK8sNamespace());
+        FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
+                app.getJobName(),
+                app.getLocalAppHome(),
+                mainClass,
+                flinkUserJar,
+                app.getFlinkExecutionMode(),
+                app.getDevelopmentMode(),
+                flinkEnv.getFlinkVersion(),
+                getMergedDependencyInfo(app),
+                app.getClusterId(),
+                app.getK8sNamespace());
         return k8sSessionBuildRequest;
     }
 
@@ -631,8 +624,8 @@ public class AppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return new HashMap<>();
         }
-        LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
-                new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
+        LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
+                .in(AppBuildPipeline::getAppId, appIds);
 
         List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
         if (CollectionUtils.isEmpty(appBuildPipelines)) {
@@ -709,8 +702,8 @@ public class AppBuildPipeServiceImpl
                                     mergeDependency(application, mvnArtifacts, jarLibs, resource);
                                 } else {
                                     try {
-                                        String[] groupElements =
-                                                JacksonUtils.read(resource.getResource(), String[].class);
+                                        String[] groupElements = JacksonUtils.read(resource.getResource(),
+                                                String[].class);
                                         Arrays.stream(groupElements)
                                                 .forEach(
                                                         resourceIdInGroup -> mergeDependency(

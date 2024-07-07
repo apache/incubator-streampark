@@ -200,8 +200,7 @@ public class SparkApplicationManageServiceImpl
                     .getFsOperator()
                     .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path =
-                    Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -220,11 +219,10 @@ public class SparkApplicationManageServiceImpl
         if (ArrayUtils.isNotEmpty(appParam.getStateArray())
                 && Arrays.stream(appParam.getStateArray())
                         .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-            Integer[] newArray =
-                    ArrayUtils.insert(
-                            appParam.getStateArray().length,
-                            appParam.getStateArray(),
-                            FlinkAppStateEnum.POS_TERMINATED.getValue());
+            Integer[] newArray = ArrayUtils.insert(
+                    appParam.getStateArray().length,
+                    appParam.getStateArray(),
+                    FlinkAppStateEnum.POS_TERMINATED.getValue());
             appParam.setStateArray(newArray);
         }
         this.baseMapper.selectPage(page, appParam);
@@ -232,43 +230,39 @@ public class SparkApplicationManageServiceImpl
         long now = System.currentTimeMillis();
 
         List<Long> appIds = records.stream().map(SparkApplication::getId).collect(Collectors.toList());
-        Map<Long, PipelineStatusEnum> pipeStates =
-                appBuildPipeService.listAppIdPipelineStatusMap(appIds);
+        Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
 
-        List<SparkApplication> newRecords =
-                records.stream()
-                        .peek(
-                                record -> {
-                                    if (pipeStates.containsKey(record.getId())) {
-                                        record.setBuildStatus(pipeStates.get(record.getId()).getCode());
-                                    }
+        List<SparkApplication> newRecords = records.stream()
+                .peek(
+                        record -> {
+                            if (pipeStates.containsKey(record.getId())) {
+                                record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                            }
 
-                                    AppControl appControl =
-                                            new AppControl()
-                                                    .setAllowBuild(
-                                                            record.getBuildStatus() == null
-                                                                    || !PipelineStatusEnum.running
-                                                                            .getCode()
-                                                                            .equals(record.getBuildStatus()))
-                                                    .setAllowStart(
-                                                            !record.shouldTracking()
-                                                                    && PipelineStatusEnum.success
-                                                                            .getCode()
-                                                                            .equals(record.getBuildStatus()))
-                                                    .setAllowStop(record.isRunning());
-                                    record.setAppControl(appControl);
-                                })
-                        .collect(Collectors.toList());
+                            AppControl appControl = new AppControl()
+                                    .setAllowBuild(
+                                            record.getBuildStatus() == null
+                                                    || !PipelineStatusEnum.running
+                                                            .getCode()
+                                                            .equals(record.getBuildStatus()))
+                                    .setAllowStart(
+                                            !record.shouldTracking()
+                                                    && PipelineStatusEnum.success
+                                                            .getCode()
+                                                            .equals(record.getBuildStatus()))
+                                    .setAllowStop(record.isRunning());
+                            record.setAppControl(appControl);
+                        })
+                .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
     }
 
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
-        LambdaUpdateWrapper<SparkApplication> updateWrapper =
-                new LambdaUpdateWrapper<SparkApplication>()
-                        .eq(SparkApplication::getUserId, userId)
-                        .set(SparkApplication::getUserId, targetUserId);
+        LambdaUpdateWrapper<SparkApplication> updateWrapper = new LambdaUpdateWrapper<SparkApplication>()
+                .eq(SparkApplication::getUserId, userId)
+                .set(SparkApplication::getUserId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -292,12 +286,10 @@ public class SparkApplicationManageServiceImpl
 
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
-            String jarPath =
-                    String.format(
-                            "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+            String jarPath = String.format(
+                    "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
-                Resource resource =
-                        resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
+                Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                     jarPath = resource.getFilePath();
                 }
@@ -545,8 +537,7 @@ public class SparkApplicationManageServiceImpl
             // if has been changed
             if (changeTypeEnum.hasChanged()) {
                 // check if there is a candidate version for the newly added record
-                FlinkSql newFlinkSql =
-                        flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
                 // If the candidate version of the new record exists, it will be deleted directly,
                 // and only one candidate version will be retained. If the new candidate version is not
                 // effective,
@@ -556,8 +547,7 @@ public class SparkApplicationManageServiceImpl
                     // delete all records about candidates
                     flinkSqlService.removeById(newFlinkSql.getId());
                 }
-                FlinkSql historyFlinkSql =
-                        flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
+                FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
                 // remove candidate flags that already exist but are set as candidates
                 if (historyFlinkSql != null) {
                     flinkSqlService.cleanCandidate(historyFlinkSql.getId());
@@ -667,8 +657,7 @@ public class SparkApplicationManageServiceImpl
             flinkSql.setToApplication(application);
         } else {
             if (application.isCICDJob()) {
-                String path =
-                        this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+                String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }
         }

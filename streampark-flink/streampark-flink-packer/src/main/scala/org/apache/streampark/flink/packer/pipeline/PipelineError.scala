@@ -35,7 +35,8 @@ case class PipeError(
     @Nullable exception: Throwable,
     @Nullable exceptionStack: String) {
 
-  def nonEmpty: Boolean = Option(summary).exists(_.nonEmpty) || exception != null
+  def nonEmpty: Boolean =
+    Option(summary).exists(_.nonEmpty) || exception != null
 
   def isEmpty: Boolean = !nonEmpty
 }

@@ -43,13 +43,14 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     // require parameters
     require(
       StringUtils.isNotBlank(submitRequest.clusterId),
-      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig.get(DeploymentOptions.TARGET)}"
-    )
+      s"[flink-submit] submit flink job failed, clusterId is null, mode=${flinkConfig
+          .get(DeploymentOptions.TARGET)}")
 
     // check the last building result
     submitRequest.checkBuildResult()
 
-    val buildResult = submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
+    val buildResult =
+      submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
 
     // add flink pipeline.jars configuration
     flinkConfig.safeSet(
@@ -60,9 +61,11 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
     flinkConfig.safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag)
 
     // retrieve k8s cluster and submit flink job on application mode
-    val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+    val (descriptor, clusterSpecification) =
+      getK8sClusterDescriptorAndSpecification(flinkConfig)
     val clusterDescriptor = descriptor
-    val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
+    val applicationConfig =
+      ApplicationConfiguration.fromConfiguration(flinkConfig)
     val clusterClient = clusterDescriptor
       .deployApplicationCluster(clusterSpecification, applicationConfig)
       .getClusterClient
@@ -90,8 +93,7 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
         val resp = super.cancelJob(cancelRequest, jobId, client)
         client.shutDownCluster()
         CancelResponse(resp)
-      }
-    )
+      })
   }
 
   override def doTriggerSavepoint(
