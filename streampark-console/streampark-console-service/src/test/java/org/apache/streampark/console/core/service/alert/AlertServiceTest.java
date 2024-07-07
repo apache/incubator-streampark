@@ -187,8 +187,7 @@ class AlertServiceTest {
             log.info(html);
             writer.close();
 
-            String subject =
-                    String.format("StreamPark Alert: %s %s", application.getJobName(), appState.name());
+            String subject = String.format("StreamPark Alert: %s %s", application.getJobName(), appState.name());
             sendEmail(subject, html, "****@domain.com");
         } catch (Exception e) {
             log.error("Failed to send email alert", e);

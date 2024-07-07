@@ -126,8 +126,7 @@ public class PassportController {
         JWTToken jwtToken = new JWTToken(token, ttl);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo =
-                userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
 
         return new RestResponse().data(userInfo);
     }

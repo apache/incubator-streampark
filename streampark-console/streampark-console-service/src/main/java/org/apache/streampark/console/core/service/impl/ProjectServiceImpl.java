@@ -101,8 +101,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper =
-                new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
+                project.getName());
         long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
 
@@ -199,8 +199,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean removeById(Long id) {
         Project project = getById(id);
         AssertUtils.notNull(project);
-        LambdaQueryWrapper<Application> queryWrapper =
-                new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+                .eq(Application::getProjectId, id);
         long count = applicationManageService.count(queryWrapper);
         if (count > 0) {
             return false;
@@ -241,34 +241,31 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         this.baseMapper.updateBuildState(project.getId(), BuildStateEnum.BUILDING.get());
         String logPath = getBuildLogPath(id);
-        ProjectBuildTask projectBuildTask =
-                new ProjectBuildTask(
-                        logPath,
-                        project,
-                        buildStateEnum -> {
-                            baseMapper.updateBuildState(id, buildStateEnum.get());
-                            if (buildStateEnum == BuildStateEnum.SUCCESSFUL) {
-                                baseMapper.updateBuildTime(id);
-                            }
-                            flinkAppHttpWatcher.init();
-                        },
-                        fileLogger -> {
-                            List<Application> applications =
-                                    this.applicationManageService.listByProjectId(project.getId());
-                            applications.forEach(
-                                    (app) -> {
-                                        fileLogger.info(
-                                                "update deploy by project: {}, appName:{}",
-                                                project.getName(),
-                                                app.getJobName());
-                                        app.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
-                                        app.setBuild(true);
-                                        this.applicationManageService.updateRelease(app);
-                                    });
-                            flinkAppHttpWatcher.init();
-                        });
-        CompletableFuture<Void> buildTask =
-                CompletableFuture.runAsync(projectBuildTask, executorService);
+        ProjectBuildTask projectBuildTask = new ProjectBuildTask(
+                logPath,
+                project,
+                buildStateEnum -> {
+                    baseMapper.updateBuildState(id, buildStateEnum.get());
+                    if (buildStateEnum == BuildStateEnum.SUCCESSFUL) {
+                        baseMapper.updateBuildTime(id);
+                    }
+                    flinkAppHttpWatcher.init();
+                },
+                fileLogger -> {
+                    List<Application> applications = this.applicationManageService.listByProjectId(project.getId());
+                    applications.forEach(
+                            (app) -> {
+                                fileLogger.info(
+                                        "update deploy by project: {}, appName:{}",
+                                        project.getName(),
+                                        app.getJobName());
+                                app.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
+                                app.setBuild(true);
+                                this.applicationManageService.updateRelease(app);
+                            });
+                    flinkAppHttpWatcher.init();
+                });
+        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(projectBuildTask, executorService);
         // TODO May need to define parameters to set the build timeout in the future.
         CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
@@ -304,10 +301,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public String getAppConfPath(Long id, String module) {
         Project project = getById(id);
         File appHome = project.getDistHome();
-        Optional<File> fileOptional =
-                Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                        .filter((x) -> x.getName().equals(module))
-                        .findFirst();
+        Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
+                .filter((x) -> x.getName().equals(module))
+                .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -387,8 +383,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public RestResponse getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
-            String errorMsg =
-                    String.format("Build log file(fileName=%s) not found, please build first.", logFile);
+            String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
             return RestResponse.success().data(errorMsg);
         }
@@ -401,8 +396,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             startOffset = 0L;
         }
         try {
-            long maxSize =
-                    MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
                 fileContent = FileUtils.readEndOfFile(logFile, maxSize);
             } else {
@@ -415,8 +409,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     .put("offset", endOffset)
                     .put("readFinished", readFinished);
         } catch (IOException e) {
-            String error =
-                    String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
+            String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
             return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
         }

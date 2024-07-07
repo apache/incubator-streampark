@@ -152,10 +152,9 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         String url;
         if (params.getSecretEnable()) {
             Long timestamp = System.currentTimeMillis();
-            url =
-                    String.format(
-                            "%s?access_token=%s&timestamp=%d&sign=%s",
-                            urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+            url = String.format(
+                    "%s?access_token=%s&timestamp=%d&sign=%s",
+                    urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
         } else {
             url = String.format("%s?access_token=%s", urlPrefix, params.getToken());
         }

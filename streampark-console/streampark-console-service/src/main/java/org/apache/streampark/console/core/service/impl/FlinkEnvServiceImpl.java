@@ -56,8 +56,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     @Override
     public FlinkEnvCheckEnum check(FlinkEnv version) {
         // 1) check name
-        LambdaQueryWrapper<FlinkEnv> queryWrapper =
-                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
+        LambdaQueryWrapper<FlinkEnv> queryWrapper = new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName,
+                version.getFlinkName());
         if (version.getId() != null) {
             queryWrapper.ne(FlinkEnv::getId, version.getId());
         }

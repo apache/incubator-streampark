@@ -56,11 +56,10 @@ public class ApplicationsFlink118OnYarnWithFlinkSQLTest {
 
     @BeforeAll
     public static void setup() {
-        FlinkHomePage flinkHomePage =
-                new LoginPage(browser)
-                        .login(userName, password, teamName)
-                        .goToNav(ApacheFlinkPage.class)
-                        .goToTab(FlinkHomePage.class);
+        FlinkHomePage flinkHomePage = new LoginPage(browser)
+                .login(userName, password, teamName)
+                .goToNav(ApacheFlinkPage.class)
+                .goToTab(FlinkHomePage.class);
 
         flinkHomePage.createFlinkHome(flinkName, flinkHome, "");
 

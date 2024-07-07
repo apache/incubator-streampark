@@ -298,11 +298,10 @@ public class AppBuildPipeline {
             Map<Integer, Long> stepTs = pipe.getStepStatusTimestamp();
             List<Step> steps = new ArrayList<>(stepDesc.size());
             for (int i = 1; i <= pipe.getPipeType().getSteps().size(); i++) {
-                Step step =
-                        new Step()
-                                .setSeq(i)
-                                .setDesc(stepDesc.getOrDefault(i, "unknown step"))
-                                .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
+                Step step = new Step()
+                        .setSeq(i)
+                        .setDesc(stepDesc.getOrDefault(i, "unknown step"))
+                        .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
                 Long st = stepTs.get(i);
                 if (st != null) {
                     step.setTs(new Date(st));

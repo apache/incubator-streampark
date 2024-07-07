@@ -130,11 +130,9 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
                 String k8sNamespace = flinkCluster.getK8sNamespace();
                 String restAddress;
                 try (
-                        ClusterClient<?> clusterClient =
-                                (ClusterClient<?>) KubernetesRetriever.newFinkClusterClient(
-                                        clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionModeEnum))) {
-                    restAddress =
-                            IngressController.getIngressUrlAddress(k8sNamespace, clusterId, clusterClient);
+                        ClusterClient<?> clusterClient = (ClusterClient<?>) KubernetesRetriever.newFinkClusterClient(
+                                clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionModeEnum))) {
+                    restAddress = IngressController.getIngressUrlAddress(k8sNamespace, clusterId, clusterClient);
                 } catch (Exception e) {
                     throw new IllegalArgumentException("get k8s rest address error", e);
                 }

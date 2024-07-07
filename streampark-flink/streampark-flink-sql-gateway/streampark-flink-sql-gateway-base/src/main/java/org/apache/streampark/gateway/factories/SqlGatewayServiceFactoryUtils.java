@@ -41,20 +41,19 @@ public class SqlGatewayServiceFactoryUtils {
      */
     public static List<SqlGatewayService> createSqlGatewayService(Map<String, String> configuration) {
 
-        String identifiersStr =
-                Optional.ofNullable(configuration.get(SQL_GATEWAY_SERVICE_TYPE.getKey()))
-                        .map(
-                                idStr -> {
-                                    if (idStr.trim().isEmpty()) {
-                                        return null;
-                                    }
-                                    return idStr.trim();
-                                })
-                        .orElseThrow(
-                                () -> new ValidationException(
-                                        String.format(
-                                                "Service options do not contain an option key '%s' for discovering an service.",
-                                                SQL_GATEWAY_SERVICE_TYPE.getKey())));
+        String identifiersStr = Optional.ofNullable(configuration.get(SQL_GATEWAY_SERVICE_TYPE.getKey()))
+                .map(
+                        idStr -> {
+                            if (idStr.trim().isEmpty()) {
+                                return null;
+                            }
+                            return idStr.trim();
+                        })
+                .orElseThrow(
+                        () -> new ValidationException(
+                                String.format(
+                                        "Service options do not contain an option key '%s' for discovering an service.",
+                                        SQL_GATEWAY_SERVICE_TYPE.getKey())));
 
         List<String> identifiers = Arrays.asList(identifiersStr.split(Constant.SEMICOLON));
 
@@ -68,11 +67,10 @@ public class SqlGatewayServiceFactoryUtils {
 
         List<SqlGatewayService> services = new ArrayList<>();
         for (String identifier : identifiers) {
-            final SqlGatewayServiceFactory factory =
-                    FactoryUtil.discoverFactory(
-                            Thread.currentThread().getContextClassLoader(),
-                            SqlGatewayServiceFactory.class,
-                            identifier);
+            final SqlGatewayServiceFactory factory = FactoryUtil.discoverFactory(
+                    Thread.currentThread().getContextClassLoader(),
+                    SqlGatewayServiceFactory.class,
+                    identifier);
 
             services.add(
                     factory.createSqlGatewayService(new DefaultServiceFactoryContext(configuration)));
@@ -104,12 +102,11 @@ public class SqlGatewayServiceFactoryUtils {
         public static void validateFactoryOptions(
                                                   Set<ConfigOption<?>> requiredOptions, Map<String, String> options) {
 
-            final List<String> missingRequiredOptions =
-                    requiredOptions.stream()
-                            .map(ConfigOption::getKey)
-                            .filter(key -> options.get(key) == null)
-                            .sorted()
-                            .collect(Collectors.toList());
+            final List<String> missingRequiredOptions = requiredOptions.stream()
+                    .map(ConfigOption::getKey)
+                    .filter(key -> options.get(key) == null)
+                    .sorted()
+                    .collect(Collectors.toList());
 
             if (!missingRequiredOptions.isEmpty()) {
                 throw new ValidationException(

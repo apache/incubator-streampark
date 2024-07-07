@@ -39,12 +39,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStepStatusEnum {
 
-    unknown(0),
-    waiting(1),
-    running(2),
-    success(3),
-    failure(4),
-    skipped(5);
+    unknown(0), waiting(1), running(2), success(3), failure(4), skipped(5);
 
     private final Integer code;
 

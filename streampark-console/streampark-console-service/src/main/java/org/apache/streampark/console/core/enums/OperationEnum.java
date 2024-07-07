@@ -25,10 +25,7 @@ import java.util.Arrays;
 @Getter
 public enum OperationEnum {
 
-    RELEASE(0),
-    START(1),
-    SAVEPOINT(2),
-    CANCEL(3);
+    RELEASE(0), START(1), SAVEPOINT(2), CANCEL(3);
 
     private final int value;
 

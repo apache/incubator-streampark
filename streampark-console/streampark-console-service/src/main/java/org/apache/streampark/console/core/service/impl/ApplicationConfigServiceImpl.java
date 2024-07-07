@@ -217,18 +217,16 @@ public class ApplicationConfigServiceImpl
     public IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request) {
         request.setSortField("version");
         Page<ApplicationConfig> page = MybatisPager.getPage(request);
-        IPage<ApplicationConfig> configList =
-                this.baseMapper.selectPageByAppId(page, config.getAppId());
+        IPage<ApplicationConfig> configList = this.baseMapper.selectPageByAppId(page, config.getAppId());
         fillEffectiveField(config.getAppId(), configList.getRecords());
         return configList;
     }
 
     @Override
     public List<ApplicationConfig> list(Long appId) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper =
-                new LambdaQueryWrapper<ApplicationConfig>()
-                        .eq(ApplicationConfig::getAppId, appId)
-                        .orderByDesc(ApplicationConfig::getVersion);
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+                .eq(ApplicationConfig::getAppId, appId)
+                .orderByDesc(ApplicationConfig::getVersion);
 
         List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
         fillEffectiveField(appId, configList);

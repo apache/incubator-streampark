@@ -86,11 +86,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void removeById(Long roleId) {
-        Role role =
-                Optional.ofNullable(this.getById(roleId))
-                        .orElseThrow(
-                                () -> new ApiAlertException(
-                                        String.format("Role id [%s] not found. Delete role failed.", roleId)));
+        Role role = Optional.ofNullable(this.getById(roleId))
+                .orElseThrow(
+                        () -> new ApiAlertException(
+                                String.format("Role id [%s] not found. Delete role failed.", roleId)));
         List<Long> userIdsByRoleId = memberService.listUserIdsByRoleId(roleId);
         ApiAlertException.throwIfFalse(
                 CollectionUtils.isEmpty(userIdsByRoleId),
@@ -105,8 +104,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public void updateRole(Role role) {
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
-        LambdaQueryWrapper<RoleMenu> queryWrapper =
-                new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId());
+        LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId,
+                role.getRoleId());
         roleMenuMapper.delete(queryWrapper);
 
         String menuId = role.getMenuId();

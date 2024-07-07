@@ -114,22 +114,20 @@ public class AccessTokenController {
                         "Authorization", accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
 
         if ("/flink/app/start".equalsIgnoreCase(path)) {
-            resultCURL =
-                    curlBuilder
-                            .addFormData("allowNonRestored", "false")
-                            .addFormData("savePoint", "")
-                            .addFormData("savePointed", "false")
-                            .addFormData("id", appId)
-                            .build();
+            resultCURL = curlBuilder
+                    .addFormData("allowNonRestored", "false")
+                    .addFormData("savePoint", "")
+                    .addFormData("savePointed", "false")
+                    .addFormData("id", appId)
+                    .build();
         } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
-            resultCURL =
-                    curlBuilder
-                            .addFormData("id", appId)
-                            .addFormData("savePointed", "false")
-                            .addFormData("drain", "false")
-                            .addFormData("nativeFormat", "false")
-                            .addFormData("savePoint", "")
-                            .build();
+            resultCURL = curlBuilder
+                    .addFormData("id", appId)
+                    .addFormData("savePointed", "false")
+                    .addFormData("drain", "false")
+                    .addFormData("nativeFormat", "false")
+                    .addFormData("savePoint", "")
+                    .build();
         }
         return RestResponse.success(resultCURL);
     }

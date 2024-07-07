@@ -66,8 +66,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     @Autowired
     private FlinkEnvService flinkEnvService;
 
-    private static final String FLINKSQL_VALIDATOR_CLASS =
-            "org.apache.streampark.flink.core.FlinkSqlValidator";
+    private static final String FLINKSQL_VALIDATOR_CLASS = "org.apache.streampark.flink.core.FlinkSqlValidator";
 
     @Override
     public FlinkSql getEffective(Long appId, boolean decode) {
@@ -82,10 +81,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public FlinkSql getLatestFlinkSql(Long appId, boolean decode) {
         Page<FlinkSql> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-                new LambdaQueryWrapper<FlinkSql>()
-                        .eq(FlinkSql::getAppId, appId)
-                        .orderByDesc(FlinkSql::getVersion);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+                .eq(FlinkSql::getAppId, appId)
+                .orderByDesc(FlinkSql::getVersion);
 
         Page<FlinkSql> flinkSqlPage = baseMapper.selectPage(page, queryWrapper);
         return Optional.ofNullable(flinkSqlPage.getRecords())
@@ -126,10 +124,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
     @Override
     public List<FlinkSql> listFlinkSqlHistory(Long appId) {
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-                new LambdaQueryWrapper<FlinkSql>()
-                        .eq(FlinkSql::getAppId, appId)
-                        .orderByDesc(FlinkSql::getVersion);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>()
+                .eq(FlinkSql::getAppId, appId)
+                .orderByDesc(FlinkSql::getVersion);
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(queryWrapper);
         FlinkSql effective = getEffective(appId, false);
@@ -144,8 +141,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
     @Override
     public FlinkSql getCandidate(Long appId, CandidateTypeEnum candidateTypeEnum) {
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-                new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
         if (candidateTypeEnum == null) {
             queryWrapper.gt(FlinkSql::getCandidate, CandidateTypeEnum.NONE.get());
         } else {
@@ -169,8 +165,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
 
     @Override
     public void removeByAppId(Long appId) {
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-                new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
         baseMapper.delete(queryWrapper);
     }
 
@@ -223,8 +218,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     public IPage<FlinkSql> getPage(Long appId, RestRequest request) {
         request.setSortField("version");
         Page<FlinkSql> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<FlinkSql> queryWrapper =
-                new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
+        LambdaQueryWrapper<FlinkSql> queryWrapper = new LambdaQueryWrapper<FlinkSql>().eq(FlinkSql::getAppId, appId);
         IPage<FlinkSql> sqlList = this.baseMapper.selectPage(page, queryWrapper);
         FlinkSql effectiveSql = baseMapper.getEffective(appId);
         if (effectiveSql != null) {

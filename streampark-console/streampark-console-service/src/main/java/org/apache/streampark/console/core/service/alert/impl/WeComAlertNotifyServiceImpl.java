@@ -112,8 +112,7 @@ public class WeComAlertNotifyServiceImpl implements AlertNotifyService {
      */
     private String getWebhook(AlertWeComParams params) {
         String url;
-        url =
-                String.format("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s", params.getToken());
+        url = String.format("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s", params.getToken());
         if (log.isDebugEnabled()) {
             log.debug("The alert robot url of WeCom is {}", url);
         }

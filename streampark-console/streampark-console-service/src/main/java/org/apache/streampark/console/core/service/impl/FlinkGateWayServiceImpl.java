@@ -75,13 +75,11 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
     public GatewayTypeEnum getGatewayVersion(String address) {
         String restUrl = address + "/api_versions";
         try {
-            String result =
-                    HttpClientUtils.httpGetRequest(
-                            restUrl,
-                            RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+            String result = HttpClientUtils.httpGetRequest(
+                    restUrl,
+                    RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
             if (result != null) {
-                String versionStr =
-                        JacksonUtils.read(result, GetApiVersionResponseBody.class).getVersions().get(0);
+                String versionStr = JacksonUtils.read(result, GetApiVersionResponseBody.class).getVersions().get(0);
                 return "V1".equals(versionStr) ? GatewayTypeEnum.FLINK_V1 : GatewayTypeEnum.FLINK_V2;
             }
         } catch (Exception e) {

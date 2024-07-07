@@ -67,14 +67,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     public ApplicationsPage deleteApplication(String applicationName) {
         waitForPageLoading();
 
-        WebElement extraButton =
-                applicationsList().stream()
-                        .filter(it -> it.getText().contains(applicationName))
-                        .flatMap(
-                                it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/..")).stream())
-                        .filter(WebElement::isDisplayed)
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("No extra button in applications list"));
+        WebElement extraButton = applicationsList().stream()
+                .filter(it -> it.getText().contains(applicationName))
+                .flatMap(
+                        it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/..")).stream())
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No extra button in applications list"));
         Actions actions = new Actions(this.driver);
         actions.moveToElement(extraButton).perform();
         deleteButton.click();

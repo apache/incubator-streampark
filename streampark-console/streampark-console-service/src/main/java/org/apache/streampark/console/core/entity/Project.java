@@ -123,8 +123,7 @@ public class Project implements Serializable {
         }
 
         String sourceDir = getSourceDirName();
-        File srcFile =
-                new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
+        File srcFile = new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
         String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
         if (srcFile.exists()) {
             File newFile = new File(newPath);

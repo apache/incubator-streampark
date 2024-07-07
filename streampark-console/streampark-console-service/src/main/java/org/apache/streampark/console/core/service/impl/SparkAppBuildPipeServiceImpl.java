@@ -195,8 +195,8 @@ public class SparkAppBuildPipeServiceImpl
 
                     @Override
                     public void onStart(PipelineSnapshot snapshot) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId());
                         saveEntity(buildPipeline);
 
                         app.setRelease(ReleaseStateEnum.RELEASING.get());
@@ -219,15 +219,14 @@ public class SparkAppBuildPipeServiceImpl
                             fsOperator.delete(appHome);
                             if (app.isUploadJob()) {
                                 String uploadJar = appUploads.concat("/").concat(app.getJar());
-                                File localJar =
-                                        new File(
-                                                String.format(
-                                                        "%s/%d/%s",
-                                                        Workspace.local().APP_UPLOADS(), app.getTeamId(),
-                                                        app.getJar()));
+                                File localJar = new File(
+                                        String.format(
+                                                "%s/%d/%s",
+                                                Workspace.local().APP_UPLOADS(), app.getTeamId(),
+                                                app.getJar()));
                                 if (!localJar.exists()) {
-                                    Resource resource =
-                                            resourceService.findByResourceName(app.getTeamId(), app.getJar());
+                                    Resource resource = resourceService.findByResourceName(app.getTeamId(),
+                                            app.getJar());
                                     if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                                         localJar = new File(resource.getFilePath());
                                         uploadJar = appUploads.concat("/").concat(localJar.getName());
@@ -274,17 +273,16 @@ public class SparkAppBuildPipeServiceImpl
 
                     @Override
                     public void onStepStateChange(PipelineSnapshot snapshot) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot).setAppId(app.getId());
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId());
                         saveEntity(buildPipeline);
                     }
 
                     @Override
                     public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                        AppBuildPipeline buildPipeline =
-                                AppBuildPipeline.fromPipeSnapshot(snapshot)
-                                        .setAppId(app.getId())
-                                        .setBuildResult(result);
+                        AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                                .setAppId(app.getId())
+                                .setBuildResult(result);
                         saveEntity(buildPipeline);
                         if (result.pass()) {
                             // running job ...
@@ -311,13 +309,12 @@ public class SparkAppBuildPipeServiceImpl
                             app.setBuild(false);
 
                         } else {
-                            Message message =
-                                    new Message(
-                                            serviceHelper.getUserId(),
-                                            app.getId(),
-                                            app.getJobName().concat(" release failed"),
-                                            ExceptionUtils.stringifyException(snapshot.error().exception()),
-                                            NoticeTypeEnum.EXCEPTION);
+                            Message message = new Message(
+                                    serviceHelper.getUserId(),
+                                    app.getId(),
+                                    app.getJobName().concat(" release failed"),
+                                    ExceptionUtils.stringifyException(snapshot.error().exception()),
+                                    NoticeTypeEnum.EXCEPTION);
                             messageService.push(message);
                             app.setRelease(ReleaseStateEnum.FAILED.get());
                             app.setOptionState(OptionStateEnum.NONE.getValue());
@@ -334,8 +331,7 @@ public class SparkAppBuildPipeServiceImpl
                     }
                 });
         // save pipeline instance snapshot to db before release it.
-        AppBuildPipeline buildPipeline =
-                AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
+        AppBuildPipeline buildPipeline = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         boolean saved = saveEntity(buildPipeline);
         // async release pipeline
         executorService.submit((Runnable) pipeline::launch);
@@ -392,14 +388,13 @@ public class SparkAppBuildPipeServiceImpl
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
-                SparkYarnApplicationBuildRequest yarnAppRequest =
-                        new SparkYarnApplicationBuildRequest(
-                                app.getJobName(),
-                                mainClass,
-                                localWorkspace,
-                                yarnProvidedPath,
-                                app.getDevelopmentMode(),
-                                getMergedDependencyInfo(app));
+                SparkYarnApplicationBuildRequest yarnAppRequest = new SparkYarnApplicationBuildRequest(
+                        app.getJobName(),
+                        mainClass,
+                        localWorkspace,
+                        yarnProvidedPath,
+                        app.getDevelopmentMode(),
+                        getMergedDependencyInfo(app));
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
                 return SparkYarnApplicationBuildPipeline.of(yarnAppRequest);
             default:
@@ -454,8 +449,8 @@ public class SparkAppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return new HashMap<>();
         }
-        LambdaQueryWrapper<AppBuildPipeline> queryWrapper =
-                new LambdaQueryWrapper<AppBuildPipeline>().in(AppBuildPipeline::getAppId, appIds);
+        LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
+                .in(AppBuildPipeline::getAppId, appIds);
 
         List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
         if (CollectionUtils.isEmpty(appBuildPipelines)) {
@@ -532,8 +527,8 @@ public class SparkAppBuildPipeServiceImpl
                                     mergeDependency(application, mvnArtifacts, jarLibs, resource);
                                 } else {
                                     try {
-                                        String[] groupElements =
-                                                JacksonUtils.read(resource.getResource(), String[].class);
+                                        String[] groupElements = JacksonUtils.read(resource.getResource(),
+                                                String[].class);
                                         Arrays.stream(groupElements)
                                                 .forEach(
                                                         resourceIdInGroup -> mergeDependency(

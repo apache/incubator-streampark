@@ -63,8 +63,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             YarnQueueService {
 
     public static final String DEFAULT_QUEUE = "default";
-    public static final String QUEUE_USED_FORMAT =
-            "Please remove the yarn queue for '%s' referenced it before '%s'.";
+    public static final String QUEUE_USED_FORMAT = "Please remove the yarn queue for '%s' referenced it before '%s'.";
     public static final String QUEUE_EXISTED_IN_TEAM_HINT =
             "The queue label existed already. Try on a new queue label, please.";
     public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
@@ -227,11 +226,11 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     @VisibleForTesting
     public void checkNotReferencedByFlinkClusters(
                                                   @Nonnull String queueLabel, @Nonnull String operation) {
-        List<FlinkCluster> clustersReferenceYarnQueueLabel =
-                flinkClusterService.listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
-                        .stream()
-                        .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
-                        .collect(Collectors.toList());
+        List<FlinkCluster> clustersReferenceYarnQueueLabel = flinkClusterService
+                .listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
+                .stream()
+                .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
+                .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
                 CollectionUtils.isEmpty(clustersReferenceYarnQueueLabel),
                 String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
@@ -241,19 +240,18 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public void checkNotReferencedByApplications(
                                                  @Nonnull Long teamId, @Nonnull String queueLabel,
                                                  @Nonnull String operation) {
-        List<Application> appsReferenceQueueLabel =
-                applicationManageService
-                        .listByTeamIdAndExecutionModes(
-                                teamId,
-                                Sets.newHashSet(
-                                        FlinkExecutionMode.YARN_APPLICATION, FlinkExecutionMode.YARN_PER_JOB))
-                        .stream()
-                        .filter(
-                                application -> {
-                                    application.setYarnQueueByHotParams();
-                                    return StringUtils.equals(application.getYarnQueue(), queueLabel);
-                                })
-                        .collect(Collectors.toList());
+        List<Application> appsReferenceQueueLabel = applicationManageService
+                .listByTeamIdAndExecutionModes(
+                        teamId,
+                        Sets.newHashSet(
+                                FlinkExecutionMode.YARN_APPLICATION, FlinkExecutionMode.YARN_PER_JOB))
+                .stream()
+                .filter(
+                        application -> {
+                            application.setYarnQueueByHotParams();
+                            return StringUtils.equals(application.getYarnQueue(), queueLabel);
+                        })
+                .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
                 CollectionUtils.isEmpty(appsReferenceQueueLabel),
                 String.format(QUEUE_USED_FORMAT, "applications", operation));

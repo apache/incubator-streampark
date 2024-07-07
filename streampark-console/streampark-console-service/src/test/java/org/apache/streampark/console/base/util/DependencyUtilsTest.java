@@ -70,17 +70,16 @@ class DependencyUtilsTest {
         List<String> factories = getConnectorFactory(connector);
 
         Class<Factory> className = Factory.class;
-        URL[] array =
-                files.stream()
-                        .map(
-                                x -> {
-                                    try {
-                                        return x.toURI().toURL();
-                                    } catch (MalformedURLException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                })
-                        .toArray(URL[]::new);
+        URL[] array = files.stream()
+                .map(
+                        x -> {
+                            try {
+                                return x.toURI().toURL();
+                            } catch (MalformedURLException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                .toArray(URL[]::new);
 
         URLClassLoader urlClassLoader = URLClassLoader.newInstance(array);
         ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);

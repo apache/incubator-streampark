@@ -43,8 +43,8 @@ public class YarnQueueLabelExpression {
     public static final String ERR_FORMAT_HINTS =
             "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
 
-    private static final Pattern QUEUE_LABEL_PATTERN =
-            Pattern.compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
+    private static final Pattern QUEUE_LABEL_PATTERN = Pattern
+            .compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
 
     private static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
 
@@ -95,8 +95,7 @@ public class YarnQueueLabelExpression {
 
     public static YarnQueueLabelExpression of(
                                               @Nonnull String queue, @Nullable String labelExpression) {
-        YarnQueueLabelExpression queueLabelExpression =
-                new YarnQueueLabelExpression(queue, labelExpression);
+        YarnQueueLabelExpression queueLabelExpression = new YarnQueueLabelExpression(queue, labelExpression);
         ApiAlertException.throwIfFalse(
                 isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
         return queueLabelExpression;

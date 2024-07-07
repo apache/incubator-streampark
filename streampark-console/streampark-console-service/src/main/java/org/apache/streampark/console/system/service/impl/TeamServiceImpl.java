@@ -77,8 +77,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public Team getByName(String teamName) {
-        LambdaQueryWrapper<Team> queryWrapper =
-                new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName);
+        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -126,11 +125,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public void updateTeam(Team team) {
-        Team oldTeam =
-                Optional.ofNullable(this.getById(team.getId()))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("Team id [id=%s] not found", team.getId())));
+        Team oldTeam = Optional.ofNullable(this.getById(team.getId()))
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                String.format("Team id [id=%s] not found", team.getId())));
         ApiAlertException.throwIfFalse(
                 oldTeam.getTeamName().equals(team.getTeamName()),
                 "Team name can't be changed. Update team failed.");
@@ -141,10 +139,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public List<Team> listByUserId(Long userId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+                .orElseThrow(
+                        () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
         // Admin has the permission for all teams.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
             return this.list();

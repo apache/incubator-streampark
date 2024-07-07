@@ -83,8 +83,7 @@ public class FlinkK8sWatcherWrapper {
     @Bean(destroyMethod = "close")
     public FlinkK8sWatcher registerFlinkK8sWatcher() {
         // lazy start tracking monitor
-        FlinkK8sWatcher flinkK8sWatcher =
-                FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
+        FlinkK8sWatcher flinkK8sWatcher = FlinkK8sWatcherFactory.createInstance(FlinkTrackConfig.fromConfigHub(), true);
         initFlinkK8sWatcher(flinkK8sWatcher);
 
         /*
@@ -129,8 +128,8 @@ public class FlinkK8sWatcherWrapper {
         FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
         Properties properties = flinkEnv.getFlinkConfig();
 
-        Map<String, String> dynamicProperties =
-                PropertiesUtils.extractDynamicPropertiesAsJava(app.getDynamicProperties());
+        Map<String, String> dynamicProperties = PropertiesUtils
+                .extractDynamicPropertiesAsJava(app.getDynamicProperties());
         String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
         if (archiveDir != null) {
             properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);

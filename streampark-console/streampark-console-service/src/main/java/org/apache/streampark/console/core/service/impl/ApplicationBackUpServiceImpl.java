@@ -70,9 +70,8 @@ public class ApplicationBackUpServiceImpl
     @Override
     public IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request) {
         Page<ApplicationBackUp> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, bakParam.getAppId());
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+                .eq(ApplicationBackUp::getAppId, bakParam.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
 
@@ -136,10 +135,9 @@ public class ApplicationBackUpServiceImpl
     public void revoke(Application appParam) {
         Page<ApplicationBackUp> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, appParam.getId())
-                        .orderByDesc(ApplicationBackUp::getCreateTime);
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+                .eq(ApplicationBackUp::getAppId, appParam.getId())
+                .orderByDesc(ApplicationBackUp::getCreateTime);
 
         Page<ApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
         if (!backUpPages.getRecords().isEmpty()) {
@@ -171,10 +169,9 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam) {
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, appParam.getId())
-                        .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+                .eq(ApplicationBackUp::getAppId, appParam.getId())
+                .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
         ApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
                 backUp, "Application backup can't be null. Rollback flink sql failed.");
@@ -199,10 +196,9 @@ public class ApplicationBackUpServiceImpl
     @Override
     public void backup(Application appParam, FlinkSql flinkSqlParam) {
         // basic configuration file backup
-        String appHome =
-                (appParam.isCustomCodeJob() && appParam.isCICDJob())
-                        ? appParam.getDistHome()
-                        : appParam.getAppHome();
+        String appHome = (appParam.isCustomCodeJob() && appParam.isCICDJob())
+                ? appParam.getDistHome()
+                : appParam.getAppHome();
         FsOperator fsOperator = appParam.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // move files to back up directory

@@ -41,28 +41,25 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void remove(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
-        LambdaQueryWrapper<Effective> queryWrapper =
-                new LambdaQueryWrapper<Effective>()
-                        .eq(Effective::getAppId, appId)
-                        .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+                .eq(Effective::getAppId, appId)
+                .eq(Effective::getTargetType, effectiveTypeEnum.getType());
         baseMapper.delete(queryWrapper);
     }
 
     @Override
     public Effective get(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
-        LambdaQueryWrapper<Effective> queryWrapper =
-                new LambdaQueryWrapper<Effective>()
-                        .eq(Effective::getAppId, appId)
-                        .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+                .eq(Effective::getAppId, appId)
+                .eq(Effective::getTargetType, effectiveTypeEnum.getType());
         return this.getOne(queryWrapper);
     }
 
     @Override
     public void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id) {
-        LambdaQueryWrapper<Effective> queryWrapper =
-                new LambdaQueryWrapper<Effective>()
-                        .eq(Effective::getAppId, appId)
-                        .eq(Effective::getTargetType, type.getType());
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
+                .eq(Effective::getAppId, appId)
+                .eq(Effective::getTargetType, type.getType());
         long count = count(queryWrapper);
         if (count == 0) {
             Effective effective = new Effective();
@@ -82,8 +79,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void removeByAppId(Long appId) {
-        LambdaQueryWrapper<Effective> queryWrapper =
-                new LambdaQueryWrapper<Effective>().eq(Effective::getAppId, appId);
+        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>().eq(Effective::getAppId, appId);
         this.remove(queryWrapper);
     }
 }
