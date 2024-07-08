@@ -62,7 +62,7 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateResource));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateResource));
         buttonCreateResource.click();
 
         // todo: can't be click
@@ -81,14 +81,14 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
         // select resource type.
         createResourceForm.btnSelectResourceTypeDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
+            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
         createResourceForm.selectResourceType().stream()
-                .filter(e -> e.getText().equals(resourceType))
-                .findFirst()
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                String.format("No %s in resourceType dropdown list", resourceType)))
-                .click();
+            .filter(e -> e.getText().equals(resourceType))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in resourceType dropdown list", resourceType)))
+            .click();
 
         createResourceForm.inputResourceName().sendKeys(resourceName);
         createResourceForm.textPom().sendKeys(resource);
@@ -103,13 +103,13 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         resourceList.stream()
-                .filter(e -> e.getText().contains(resourceName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Resource')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in resource list"))
-                .click();
+            .filter(e -> e.getText().contains(resourceName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Resource')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in resource list"))
+            .click();
 
         // todo: can't be click
         // select engine type.
@@ -149,16 +149,16 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         resourceList.stream()
-                .filter(e -> e.getText().contains(resourceName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Resource')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in resource list"))
-                .click();
+            .filter(e -> e.getText().contains(resourceName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Resource')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in resource list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
 
@@ -167,7 +167,7 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/resource/upload"));
+            .until(ExpectedConditions.urlContains("/resource/upload"));
     }
 
     @Getter

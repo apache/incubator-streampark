@@ -49,21 +49,21 @@ public class ResourceManagementTest {
     private static final String resourceName = "test-resource";
 
     private static final String mavenPom =
-            "<dependency>\n" +
-                    "    <groupId>junit</groupId>\n" +
-                    "    <artifactId>junit</artifactId>\n" +
-                    "    <version>4.13.2</version>\n" +
-                    "    <scope>test</scope>\n" +
-                    "</dependency>";
+        "<dependency>\n" +
+            "    <groupId>junit</groupId>\n" +
+            "    <artifactId>junit</artifactId>\n" +
+            "    <version>4.13.2</version>\n" +
+            "    <scope>test</scope>\n" +
+            "</dependency>";
 
     private static final String description = "Junit-jar-lib";
 
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(ResourcePage.class)
-                .goToTab(ResourceManagementPage.class);
+            .login(userName, password, teamName)
+            .goToNav(ResourcePage.class)
+            .goToTab(ResourceManagementPage.class);
     }
 
     @Test
@@ -73,19 +73,19 @@ public class ResourceManagementTest {
         resourceManagementPage.createResource(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(resourceManagementPage.resourceList())
-                                .as("Resource list should contain newly-created resource")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(resourceName))
-                                .anyMatch(it -> it.contains(description))
-                                /*
-                                 * todo: make Resource Type filed value same, hardcode here to pass test currently. In
-                                 * add resource page: Add Resource -> Resource Type: Jar Library In upload page:
-                                 * Resource List -> Resource Type: Jar library
-                                 */
-                                .anyMatch(it -> it.contains("Jar library"))
-                                .anyMatch(it -> it.contains(engineType)));
+            .untilAsserted(
+                () -> assertThat(resourceManagementPage.resourceList())
+                    .as("Resource list should contain newly-created resource")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(resourceName))
+                    .anyMatch(it -> it.contains(description))
+                    /*
+                     * todo: make Resource Type filed value same, hardcode here to pass test currently. In add resource
+                     * page: Add Resource -> Resource Type: Jar Library In upload page: Resource List -> Resource Type:
+                     * Jar library
+                     */
+                    .anyMatch(it -> it.contains("Jar library"))
+                    .anyMatch(it -> it.contains(engineType)));
     }
 
     @Test
@@ -95,12 +95,12 @@ public class ResourceManagementTest {
         resourceManagementPage.createResource(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(resourceManagementPage.errorMessageList())
-                                .as("Resource Name Duplicated Error message should be displayed")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(
-                                        String.format("the resource %s already exists, please check.", resourceName))));
+            .untilAsserted(
+                () -> assertThat(resourceManagementPage.errorMessageList())
+                    .as("Resource Name Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(
+                        String.format("the resource %s already exists, please check.", resourceName))));
 
         resourceManagementPage.errorMessageConfirmButton().click();
         resourceManagementPage.createResourceForm().buttonCancel().click();
@@ -112,29 +112,29 @@ public class ResourceManagementTest {
         final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
         String editDescription = "Kafka-jar-lib";
         String editResource =
-                "<dependency>\n" +
-                        "    <groupId>org.apache.kafka</groupId>\n" +
-                        "    <artifactId>kafka-clients</artifactId>\n" +
-                        "    <version>3.7.1</version>\n" +
-                        "</dependency>";
+            "<dependency>\n" +
+                "    <groupId>org.apache.kafka</groupId>\n" +
+                "    <artifactId>kafka-clients</artifactId>\n" +
+                "    <version>3.7.1</version>\n" +
+                "</dependency>";
 
         resourceManagementPage.editResource(engineType, resourceType, resourceName, editResource,
-                editDescription);
+            editDescription);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(resourceManagementPage.resourceList())
-                                .as("Resource list should contain edit resource")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(resourceName))
-                                .anyMatch(it -> it.contains(editDescription))
-                                /*
-                                 * todo: make Resource Type filed value same, hardcode here to pass test currently. In
-                                 * add resource page: Add Resource -> Resource Type: Jar Library In upload page:
-                                 * Resource List -> Resource Type: Jar library
-                                 */
-                                .anyMatch(it -> it.contains("Jar library"))
-                                .anyMatch(it -> it.contains(engineType)));
+            .untilAsserted(
+                () -> assertThat(resourceManagementPage.resourceList())
+                    .as("Resource list should contain edit resource")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(resourceName))
+                    .anyMatch(it -> it.contains(editDescription))
+                    /*
+                     * todo: make Resource Type filed value same, hardcode here to pass test currently. In add resource
+                     * page: Add Resource -> Resource Type: Jar Library In upload page: Resource List -> Resource Type:
+                     * Jar library
+                     */
+                    .anyMatch(it -> it.contains("Jar library"))
+                    .anyMatch(it -> it.contains(engineType)));
     }
 
     @Test
@@ -143,12 +143,12 @@ public class ResourceManagementTest {
         final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
         resourceManagementPage.deleteResource(resourceName);
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(resourceManagementPage.resourceList())
-                                    .noneMatch(it -> it.getText().contains(resourceName));
-                        });
+                    assertThat(resourceManagementPage.resourceList())
+                        .noneMatch(it -> it.getText().contains(resourceName));
+                });
     }
 }
