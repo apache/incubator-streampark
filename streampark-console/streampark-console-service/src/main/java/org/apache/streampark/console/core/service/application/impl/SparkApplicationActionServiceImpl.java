@@ -365,7 +365,6 @@ public class SparkApplicationActionServiceImpl
 
                     // 3) success
                     applicationLog.setSuccess(true);
-                    log.info("*********spark on yarn app id: {}", response.sparkAppId());
                     // TODO：修改为spark对应的参数
                     if (response.sparkConfig() != null) {
                         String jmMemory = response.sparkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
@@ -379,7 +378,6 @@ public class SparkApplicationActionServiceImpl
                     }
                     application.setAppId(response.clusterId());
                     if (StringUtils.isNoneEmpty(response.sparkAppId())) {
-                        log.info("[sparkappwatcher test], appid：{}", response.sparkAppId());
                         application.setJobId(response.sparkAppId());
                     }
 

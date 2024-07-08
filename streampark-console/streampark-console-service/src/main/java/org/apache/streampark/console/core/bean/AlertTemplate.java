@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
@@ -224,6 +225,17 @@ public class AlertTemplate implements Serializable {
 
         public AlertTemplateBuilder setLink(FlinkExecutionMode mode, String appId) {
             if (FlinkExecutionMode.isYarnMode(mode)) {
+                String format = "%s/proxy/%s/";
+                String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
+                alertTemplate.setLink(url);
+            } else {
+                alertTemplate.setLink(null);
+            }
+            return this;
+        }
+
+        public AlertTemplateBuilder setLink(SparkExecutionMode mode, String appId) {
+            if (SparkExecutionMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
                 String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
                 alertTemplate.setLink(url);
