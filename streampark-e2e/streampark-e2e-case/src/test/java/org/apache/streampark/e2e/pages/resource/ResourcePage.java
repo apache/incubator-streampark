@@ -38,6 +38,9 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Projects')]//..")
     private WebElement resourceProjectsManagement;
 
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Uploads')]//..")
+    private WebElement resourceManagement;
+
     public ResourcePage(RemoteWebDriver driver) {
         super(driver);
     }
@@ -55,6 +58,13 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
                 .until(ExpectedConditions.elementToBeClickable(resourceProjectsManagement));
             resourceProjectsManagement.click();
             return tab.cast(new ProjectsPage(driver));
+        }
+
+        if (tab == ResourceManagementPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(resourceManagement));
+            resourceManagement.click();
+            return tab.cast(new ResourceManagementPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
