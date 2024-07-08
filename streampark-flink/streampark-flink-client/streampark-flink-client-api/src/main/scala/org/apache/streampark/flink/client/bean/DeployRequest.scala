@@ -60,8 +60,7 @@ case class DeployRequest(
       flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
       appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
-    )
+      appPlugins = workspace.APP_PLUGINS)
   }
 }
 

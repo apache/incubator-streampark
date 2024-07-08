@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer
 
 import org.apache.streampark.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
@@ -44,12 +45,11 @@ class MavenArtifactSpec extends AnyWordSpec with Matchers {
         art.version mustBe "1.13.0"
       }
       "with illegal coords" in {
-        illegalArtifactCoordsCases.foreach(
-          coord => {
-            assertThrows[IllegalArgumentException] {
-              Artifact.of(coord)
-            }
-          })
+        illegalArtifactCoordsCases.foreach(coord => {
+          assertThrows[IllegalArgumentException] {
+            Artifact.of(coord)
+          }
+        })
       }
     }
   }

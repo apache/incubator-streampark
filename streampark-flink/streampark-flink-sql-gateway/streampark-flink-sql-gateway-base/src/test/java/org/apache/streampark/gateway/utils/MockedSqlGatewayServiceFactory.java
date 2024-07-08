@@ -28,23 +28,20 @@ import java.util.Set;
 /** Factory for {@link SqlGatewayService}. */
 public class MockedSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
-    public static final ConfigOption<String> HOST =
-            ConfigOption.key("host")
-                    .stringType()
-                    .noDefaultValue()
-                    .withDescription("The host of the Mocked SQL gateway service.");
+    public static final ConfigOption<String> HOST = ConfigOption.key("host")
+            .stringType()
+            .noDefaultValue()
+            .withDescription("The host of the Mocked SQL gateway service.");
 
-    public static final ConfigOption<Integer> PORT =
-            ConfigOption.key("port")
-                    .intType()
-                    .noDefaultValue()
-                    .withDescription("The port of the Mocked SQL gateway service.");
+    public static final ConfigOption<Integer> PORT = ConfigOption.key("port")
+            .intType()
+            .noDefaultValue()
+            .withDescription("The port of the Mocked SQL gateway service.");
 
-    public static final ConfigOption<Integer> DESCRIPTION =
-            ConfigOption.key("description")
-                    .intType()
-                    .defaultValue(8080)
-                    .withDescription("The Mocked SQL gateway service.");
+    public static final ConfigOption<Integer> DESCRIPTION = ConfigOption.key("description")
+            .intType()
+            .defaultValue(8080)
+            .withDescription("The Mocked SQL gateway service.");
 
     @Override
     public String factoryIdentifier() {

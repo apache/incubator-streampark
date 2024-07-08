@@ -69,13 +69,12 @@ public class FlinkSqlController {
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line
             String exception = flinkSqlValidationResult.exception();
-            RestResponse response =
-                    RestResponse.success()
-                            .data(false)
-                            .message(exception)
-                            .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
-                            .put(START, flinkSqlValidationResult.lineStart())
-                            .put(END, flinkSqlValidationResult.lineEnd());
+            RestResponse response = RestResponse.success()
+                    .data(false)
+                    .message(exception)
+                    .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
+                    .put(START, flinkSqlValidationResult.lineStart())
+                    .put(END, flinkSqlValidationResult.lineEnd());
 
             if (flinkSqlValidationResult.errorLine() > 0) {
                 response

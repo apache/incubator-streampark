@@ -51,8 +51,8 @@ public class FlinkCheckpointProcessor {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
     private static final Integer SAVEPOINT_CACHE_HOUR = 1;
 
-    private final Cache<String, Long> checkPointCache =
-            Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS).build();
+    private final Cache<String, Long> checkPointCache = Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS)
+            .build();
 
     /**
      * Cache to store the savepoint if be stored in the db. Use the {appId}_{jobID}_{chkId} from
@@ -61,8 +61,8 @@ public class FlinkCheckpointProcessor {
      * 'maxConcurrent of Checkpoint' > 1: 1. savepoint(n-1) is completed after completed
      * checkpoint(n); 2. savepoint(n-1) is completed after completed savepoint(n).
      */
-    private final Cache<String, Byte> savepointedCache =
-            Caffeine.newBuilder().expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
+    private final Cache<String, Byte> savepointedCache = Caffeine.newBuilder()
+            .expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -122,8 +122,7 @@ public class FlinkCheckpointProcessor {
             return;
         }
         checkPointFailedCache.remove(appId);
-        FailoverStrategyEnum failoverStrategyEnum =
-                FailoverStrategyEnum.of(application.getCpFailureAction());
+        FailoverStrategyEnum failoverStrategyEnum = FailoverStrategyEnum.of(application.getCpFailureAction());
         AssertUtils.required(
                 failoverStrategyEnum != null,
                 "Unexpected cpFailureAction: " + application.getCpFailureAction());

@@ -27,10 +27,9 @@ object IngressController extends Logger {
 
   private[this] val VERSION_REGEXP = "(\\d+\\.\\d+)".r
 
-  private lazy val clusterVersion = new DefaultKubernetesClient().autoClose(
-    client => {
-      VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
-    })
+  private lazy val clusterVersion = new DefaultKubernetesClient().autoClose(client => {
+    VERSION_REGEXP.findFirstIn(client.getVersion.getGitVersion).get.toDouble
+  })
 
   private lazy val ingressStrategy: IngressStrategy = {
     if (clusterVersion >= 1.19) {

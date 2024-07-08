@@ -71,8 +71,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public void removeByTeamId(Long teamId) {
-        LambdaQueryWrapper<Member> queryWrapper =
-                new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId);
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>().eq(Member::getTeamId, teamId);
         this.remove(queryWrapper);
     }
 
@@ -104,17 +103,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     private Member findByUserId(Long teamId, Long userId) {
         ApiAlertException.throwIfNull(teamId, "The team id is required.");
-        LambdaQueryWrapper<Member> queryWrapper =
-                new LambdaQueryWrapper<Member>()
-                        .eq(Member::getTeamId, teamId)
-                        .eq(Member::getUserId, userId);
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>()
+                .eq(Member::getTeamId, teamId)
+                .eq(Member::getUserId, userId);
         return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
     public List<Long> listUserIdsByRoleId(Long roleId) {
-        LambdaQueryWrapper<Member> queryWrapper =
-                new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
+        LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>().eq(Member::getRoleId, roleId);
         List<Member> memberList = baseMapper.selectList(queryWrapper);
         return memberList.stream().map(Member::getUserId).collect(Collectors.toList());
     }

@@ -48,16 +48,15 @@ public class FlinkSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
     @Override
     public SqlGatewayService createSqlGatewayService(Context context) {
-        SqlGatewayServiceFactoryUtils.EndpointFactoryHelper helper =
-                SqlGatewayServiceFactoryUtils.createEndpointFactoryHelper(this, context);
+        SqlGatewayServiceFactoryUtils.EndpointFactoryHelper helper = SqlGatewayServiceFactoryUtils
+                .createEndpointFactoryHelper(this, context);
         helper.validate();
         String baseUri = context.getGateWayServiceOptions().get(BASE_URI.getKey());
         return new FlinkSqlGatewayImpl(baseUri);
     }
 
-    public static final ConfigOption<String> BASE_URI =
-            ConfigOption.key("base-uri")
-                    .stringType()
-                    .noDefaultValue()
-                    .withDescription("The base uri of the flink cluster.");
+    public static final ConfigOption<String> BASE_URI = ConfigOption.key("base-uri")
+            .stringType()
+            .noDefaultValue()
+            .withDescription("The base uri of the flink cluster.");
 }

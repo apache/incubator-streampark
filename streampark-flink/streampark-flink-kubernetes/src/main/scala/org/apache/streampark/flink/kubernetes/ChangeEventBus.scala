@@ -33,8 +33,7 @@ class ChangeEventBus {
     60L,
     TimeUnit.SECONDS,
     new LinkedBlockingQueue[Runnable],
-    ThreadUtils.threadFactory("streampark-k8s-watching-thread")
-  )
+    ThreadUtils.threadFactory("streampark-k8s-watching-thread"))
 
   private[kubernetes] val asyncEventBus =
     new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool)

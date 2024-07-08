@@ -38,10 +38,11 @@ case class TrackId(
   def isLegal: Boolean = {
     executeMode match {
       case FlinkK8sExecuteMode.APPLICATION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty)
+          .getOrElse(false)
       case FlinkK8sExecuteMode.SESSION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(
-          jobId.nonEmpty).getOrElse(false)
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty)
+          .getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
       case _ => false
     }
   }

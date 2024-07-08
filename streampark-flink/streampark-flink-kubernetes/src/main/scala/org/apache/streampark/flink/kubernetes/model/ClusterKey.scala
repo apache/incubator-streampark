@@ -28,7 +28,8 @@ case class ClusterKey(
 
   override def toString: String = executeMode.toString + namespace + clusterId
 
-  override def hashCode(): Int = Utils.hashCode(executeMode, namespace, clusterId)
+  override def hashCode(): Int =
+    Utils.hashCode(executeMode, namespace, clusterId)
 
   override def equals(obj: Any): Boolean = {
     obj match {

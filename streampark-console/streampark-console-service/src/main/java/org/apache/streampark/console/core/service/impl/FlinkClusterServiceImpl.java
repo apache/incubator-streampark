@@ -103,8 +103,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         result.setStatus(0);
 
         // 1) Check name if already exists
-        Boolean existsByClusterName =
-                this.existsByClusterName(cluster.getClusterName(), cluster.getId());
+        Boolean existsByClusterName = this.existsByClusterName(cluster.getClusterName(), cluster.getId());
         if (existsByClusterName) {
             result.setMsg("ClusterName already exists, please check!");
             result.setStatus(1);
@@ -173,9 +172,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
                     deployResponse,
                     "Deploy cluster failed, unknown reason，please check you params or StreamPark error log");
             if (FlinkExecutionMode.isYarnSessionMode(flinkCluster.getFlinkExecutionModeEnum())) {
-                String address =
-                        String.format(
-                                "%s/proxy/%s/", YarnUtils.getRMWebAppURL(true), deployResponse.clusterId());
+                String address = String.format(
+                        "%s/proxy/%s/", YarnUtils.getRMWebAppURL(true), deployResponse.clusterId());
                 flinkCluster.setAddress(address);
                 flinkCluster.setJobManagerUrl(deployResponse.address());
             } else {
@@ -244,8 +242,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         FlinkCluster flinkCluster = this.getById(cluster.getId());
 
         try {
-            ShutDownResponse shutDownResponse =
-                    shutdownInternal(flinkCluster, flinkCluster.getClusterId());
+            ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, flinkCluster.getClusterId());
             ApiAlertException.throwIfNull(shutDownResponse, "Get shutdown response failed");
             flinkCluster.setClusterState(ClusterState.CANCELED.getState());
             flinkCluster.setEndTime(new Date());
@@ -271,8 +268,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         checkActiveIfNeeded(flinkCluster);
 
         // 3) check job if running on cluster
-        boolean existsRunningJob =
-                applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
+        boolean existsRunningJob = applicationInfoService.existsRunningByClusterId(flinkCluster.getId());
         ApiAlertException.throwIfTrue(
                 existsRunningJob, "Some app is running on this cluster, the cluster cannot be shutdown");
         return true;
@@ -290,8 +286,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public Boolean existsByFlinkEnvId(Long flinkEnvId) {
-        LambdaQueryWrapper<FlinkCluster> lambdaQueryWrapper =
-                new LambdaQueryWrapper<FlinkCluster>().eq(FlinkCluster::getVersionId, flinkEnvId);
+        LambdaQueryWrapper<FlinkCluster> lambdaQueryWrapper = new LambdaQueryWrapper<FlinkCluster>()
+                .eq(FlinkCluster::getVersionId, flinkEnvId);
         return getBaseMapper().exists(lambdaQueryWrapper);
     }
 
@@ -310,10 +306,9 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public void updateClusterState(Long id, ClusterState state) {
-        LambdaUpdateWrapper<FlinkCluster> updateWrapper =
-                new LambdaUpdateWrapper<FlinkCluster>()
-                        .eq(FlinkCluster::getId, id)
-                        .set(FlinkCluster::getClusterState, state.getState());
+        LambdaUpdateWrapper<FlinkCluster> updateWrapper = new LambdaUpdateWrapper<FlinkCluster>()
+                .eq(FlinkCluster::getId, id)
+                .set(FlinkCluster::getClusterState, state.getState());
 
         switch (state) {
             case KILLED:
@@ -403,28 +398,25 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     private ShutDownResponse shutdownInternal(FlinkCluster flinkCluster,
                                               String clusterId) throws InterruptedException, ExecutionException, TimeoutException {
-        ShutDownRequest stopRequest =
-                new ShutDownRequest(
-                        flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
-                        flinkCluster.getFlinkExecutionModeEnum(),
-                        flinkCluster.getProperties(),
-                        clusterId,
-                        flinkCluster.getId(),
-                        getKubernetesDeployDesc(flinkCluster, "shutdown"));
-        Future<ShutDownResponse> future =
-                executorService.submit(() -> FlinkClient.shutdown(stopRequest));
+        ShutDownRequest stopRequest = new ShutDownRequest(
+                flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
+                flinkCluster.getFlinkExecutionModeEnum(),
+                flinkCluster.getProperties(),
+                clusterId,
+                flinkCluster.getId(),
+                getKubernetesDeployDesc(flinkCluster, "shutdown"));
+        Future<ShutDownResponse> future = executorService.submit(() -> FlinkClient.shutdown(stopRequest));
         return future.get(60, TimeUnit.SECONDS);
     }
 
     private DeployResponse deployInternal(FlinkCluster flinkCluster) throws InterruptedException, ExecutionException, TimeoutException {
-        DeployRequest deployRequest =
-                new DeployRequest(
-                        flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
-                        flinkCluster.getFlinkExecutionModeEnum(),
-                        flinkCluster.getProperties(),
-                        flinkCluster.getClusterId(),
-                        flinkCluster.getId(),
-                        getKubernetesDeployDesc(flinkCluster, "start"));
+        DeployRequest deployRequest = new DeployRequest(
+                flinkEnvService.getById(flinkCluster.getVersionId()).getFlinkVersion(),
+                flinkCluster.getFlinkExecutionModeEnum(),
+                flinkCluster.getProperties(),
+                flinkCluster.getClusterId(),
+                flinkCluster.getId(),
+                getKubernetesDeployDesc(flinkCluster, "start"));
         log.info("Deploy cluster request {}", deployRequest);
         Future<DeployResponse> future = executorService.submit(() -> FlinkClient.deploy(deployRequest));
         return future.get(60, TimeUnit.SECONDS);

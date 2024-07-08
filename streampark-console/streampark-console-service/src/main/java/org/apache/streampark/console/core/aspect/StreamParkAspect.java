@@ -73,8 +73,7 @@ public class StreamParkAspect {
     public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("restResponse aspect, method:{}", methodSignature.getName());
-        Boolean isApi =
-                (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
+        Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
         if (isApi != null && isApi) {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
@@ -104,8 +103,7 @@ public class StreamParkAspect {
     @Around("permissionAction()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        PermissionScope permissionScope =
-                methodSignature.getMethod().getAnnotation(PermissionScope.class);
+        PermissionScope permissionScope = methodSignature.getMethod().getAnnotation(PermissionScope.class);
 
         User currentUser = serviceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
@@ -134,8 +132,7 @@ public class StreamParkAspect {
                 Application app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
                 if (!currentUser.getUserId().equals(app.getUserId())) {
-                    Member member =
-                            memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
+                    Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
                     ApiAlertException.throwIfTrue(
                             member == null,
                             "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");

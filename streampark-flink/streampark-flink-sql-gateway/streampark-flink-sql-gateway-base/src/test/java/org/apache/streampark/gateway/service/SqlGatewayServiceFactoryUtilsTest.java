@@ -47,7 +47,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class SqlGatewayServiceFactoryUtilsTest {
 
     public static final InstanceOfAssertFactory<Stream, ListAssert<Throwable>> STREAM_THROWABLE =
-            new InstanceOfAssertFactory<>(Stream.class, Assertions::<Throwable>assertThat);
+            new InstanceOfAssertFactory<>(
+                    Stream.class, Assertions::<Throwable>assertThat);
 
     @Test
     public void testCreateServices() {
@@ -55,8 +56,8 @@ public class SqlGatewayServiceFactoryUtilsTest {
         Map<String, String> config = getDefaultConfig(id);
         config.put("streampark.sql-gateway.service", "mocked;fake");
         List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
-        MockedSqlGatewayService expectedMocked =
-                new MockedSqlGatewayService("localhost", 8080, "The Mocked SQL gateway service");
+        MockedSqlGatewayService expectedMocked = new MockedSqlGatewayService("localhost", 8080,
+                "The Mocked SQL gateway service");
         assertThat(actual).isEqualTo(Arrays.asList(expectedMocked, FakeSqlGatewayService.INSTANCE));
     }
 

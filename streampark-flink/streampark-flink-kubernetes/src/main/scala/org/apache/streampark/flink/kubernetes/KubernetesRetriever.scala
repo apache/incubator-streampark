@@ -60,7 +60,8 @@ object KubernetesRetriever extends Logger {
     Try(newK8sClient().getVersion != null).getOrElse(false)
   }
 
-  private val clusterClientServiceLoader = new DefaultClusterClientServiceLoader()
+  private val clusterClientServiceLoader =
+    new DefaultClusterClientServiceLoader()
 
   /** get new flink cluster client of kubernetes mode */
   def newFinkClusterClient(
@@ -88,18 +89,17 @@ object KubernetesRetriever extends Logger {
       .getClusterClientFactory(flinkConfig)
       .createClusterDescriptor(flinkConfig)
       .asInstanceOf[KubernetesClusterDescriptor]
-      .autoClose(
-        clusterProvider =>
-          Try {
-            clusterProvider
-              .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-              .getClusterClient
-          } match {
-            case Success(v) => Some(v)
-            case Failure(e) =>
-              logError(s"Get flinkClient error, the error is: $e")
-              None
-          })
+      .autoClose(clusterProvider =>
+        Try {
+          clusterProvider
+            .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+            .getClusterClient
+        } match {
+          case Success(v) => Some(v)
+          case Failure(e) =>
+            logError(s"Get flinkClient error, the error is: $e")
+            None
+        })
   }
 
   /**
@@ -114,17 +114,16 @@ object KubernetesRetriever extends Logger {
 
     KubernetesRetriever
       .newK8sClient()
-      .autoClose(
-        client => {
-          client
-            .apps()
-            .deployments()
-            .inNamespace(namespace)
-            .withLabel("type", "flink-native-kubernetes")
-            .list()
-            .getItems
-            .exists(_.getMetadata.getName == deploymentName)
-        }) {
+      .autoClose(client => {
+        client
+          .apps()
+          .deployments()
+          .inNamespace(namespace)
+          .withLabel("type", "flink-native-kubernetes")
+          .list()
+          .getItems
+          .exists(_.getMetadata.getName == deploymentName)
+      }) {
         e =>
           logWarn(
             s"""
@@ -132,8 +131,7 @@ object KubernetesRetriever extends Logger {
                |namespace: $namespace,
                |deploymentName: $deploymentName,
                |error: $e
-               |""".stripMargin
-          )
+               |""".stripMargin)
           val key = s"${namespace}_$deploymentName"
           DEPLOYMENT_LOST_TIME.get(key) match {
             case Some(time) =>
@@ -145,8 +143,7 @@ object KubernetesRetriever extends Logger {
                      |namespace: $namespace,
                      |deploymentName: $deploymentName,
                      |detail: deployment: $deploymentName Not Found more than 3 minutes, $e
-                     |""".stripMargin
-                )
+                     |""".stripMargin)
                 DEPLOYMENT_LOST_TIME -= key
                 return false
               }

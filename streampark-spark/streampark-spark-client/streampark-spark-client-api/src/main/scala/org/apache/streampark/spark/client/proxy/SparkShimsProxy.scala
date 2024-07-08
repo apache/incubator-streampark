@@ -33,7 +33,8 @@ object SparkShimsProxy extends Logger {
 
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
-  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
+  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE =
+    MutableMap[String, ClassLoader]()
 
   private[this] val INCLUDE_PATTERN: Pattern =
     Pattern.compile(
@@ -49,12 +50,14 @@ object SparkShimsProxy extends Logger {
 
   def proxy[T](sparkVersion: SparkVersion, func: ClassLoader => T): T = {
     val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
-    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils
+      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   def proxy[T](sparkVersion: SparkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
-    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils
+      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   // need to load all spark-table dependencies compatible with different versions
@@ -64,10 +67,12 @@ object SparkShimsProxy extends Logger {
       s"${sparkVersion.fullVersion}", {
         val getSparkTable: File => Boolean = _.getName.startsWith("spark-table")
         // 1) spark/lib/spark-table*
-        val libTableURL = getSparkHomeLib(sparkVersion.sparkHome, "lib", getSparkTable)
+        val libTableURL =
+          getSparkHomeLib(sparkVersion.sparkHome, "lib", getSparkTable)
 
         // 2) After version 1.15 need add spark/opt/spark-table*
-        val optTableURL = getSparkHomeLib(sparkVersion.sparkHome, "opt", getSparkTable)
+        val optTableURL =
+          getSparkHomeLib(sparkVersion.sparkHome, "opt", getSparkTable)
         val shimsUrls = ListBuffer[URL](libTableURL ++ optTableURL: _*)
 
         // 3) add only streampark shims jar
@@ -83,8 +88,7 @@ object SparkShimsProxy extends Logger {
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
           getSparkShimsResourcePattern(sparkVersion.majorVersion))
-      }
-    )
+      })
   }
 
   def addShimsUrls(sparkVersion: SparkVersion, addShimUrl: File => Unit): Unit = {
@@ -101,32 +105,33 @@ object SparkShimsProxy extends Logger {
 
     libPath
       .listFiles()
-      .foreach(
-        (jar: File) => {
-          val jarName = jar.getName
-          if (jarName.endsWith(Constant.JAR_SUFFIX)) {
-            if (jarName.startsWith(SPARK_SHIMS_PREFIX)) {
-              val prefixVer = s"$SPARK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"
-              if (jarName.startsWith(prefixVer)) {
-                addShimUrl(jar)
-                logInfo(s"Include spark shims jar lib: $jarName")
-              }
-            } else {
-              if (INCLUDE_PATTERN.matcher(jarName).matches()) {
-                addShimUrl(jar)
-                logInfo(s"Include jar lib: $jarName")
-              } else if (jarName.matches(s"^streampark-.*_$scalaVersion.*$$")) {
-                addShimUrl(jar)
-                logInfo(s"Include streampark lib: $jarName")
-              }
+      .foreach((jar: File) => {
+        val jarName = jar.getName
+        if (jarName.endsWith(Constant.JAR_SUFFIX)) {
+          if (jarName.startsWith(SPARK_SHIMS_PREFIX)) {
+            val prefixVer =
+              s"$SPARK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"
+            if (jarName.startsWith(prefixVer)) {
+              addShimUrl(jar)
+              logInfo(s"Include spark shims jar lib: $jarName")
+            }
+          } else {
+            if (INCLUDE_PATTERN.matcher(jarName).matches()) {
+              addShimUrl(jar)
+              logInfo(s"Include jar lib: $jarName")
+            } else if (jarName.matches(s"^streampark-.*_$scalaVersion.*$$")) {
+              addShimUrl(jar)
+              logInfo(s"Include streampark lib: $jarName")
             }
           }
-        })
+        }
+      })
   }
 
   def proxyVerifySql[T](sparkVersion: SparkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getVerifySqlLibClassLoader(sparkVersion)
-    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils
+      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   private[this] def getSParkShimsClassLoader(sparkVersion: SparkVersion): ClassLoader = {
@@ -150,10 +155,8 @@ object SparkShimsProxy extends Logger {
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
-          getSparkShimsResourcePattern(sparkVersion.majorVersion)
-        )
-      }
-    )
+          getSparkShimsResourcePattern(sparkVersion.majorVersion))
+      })
   }
 
   private[this] def getSparkHomeLib(
@@ -169,12 +172,13 @@ object SparkShimsProxy extends Logger {
   def getObject[T](loader: ClassLoader, obj: Object): T = {
     val arrayOutputStream = new ByteArrayOutputStream
     new ObjectOutputStream(arrayOutputStream)
-      .autoClose(
-        objectOutputStream => {
-          objectOutputStream.writeObject(obj)
-          val byteArrayInputStream = new ByteArrayInputStream(arrayOutputStream.toByteArray)
-          new ClassLoaderObjectInputStream(loader, byteArrayInputStream).autoClose(_.readObject())
-        })
+      .autoClose(objectOutputStream => {
+        objectOutputStream.writeObject(obj)
+        val byteArrayInputStream =
+          new ByteArrayInputStream(arrayOutputStream.toByteArray)
+        new ClassLoaderObjectInputStream(loader, byteArrayInputStream)
+          .autoClose(_.readObject())
+      })
       .asInstanceOf[T]
   }
 

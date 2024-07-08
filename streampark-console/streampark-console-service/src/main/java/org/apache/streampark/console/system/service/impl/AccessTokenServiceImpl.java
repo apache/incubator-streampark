@@ -59,10 +59,9 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         if (user == null) {
             return RestResponse.success().put("code", 0).message("user not available");
         }
-        String token =
-                WebUtils.encryptToken(
-                        JWTUtil.sign(
-                                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
+        String token = WebUtils.encryptToken(
+                JWTUtil.sign(
+                        user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
         JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
 
         AccessToken accessToken = new AccessToken();
@@ -107,10 +106,9 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
                     "user status is locked, could not operate this accessToken!");
         }
 
-        Integer status =
-                tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
-                        ? AccessToken.STATUS_DISABLE
-                        : AccessToken.STATUS_ENABLE;
+        Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
+                ? AccessToken.STATUS_DISABLE
+                : AccessToken.STATUS_ENABLE;
 
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.hc.client5.http.auth.{AuthSchemeFactory, AuthScope, Credentials, StandardAuthScheme}
@@ -47,7 +48,8 @@ object HttpClientUtils {
   }
 
   /** Get HttpClient with connection manager */
-  private[this] def getHttpClient = HttpClients.custom.setConnectionManager(connectionManager).build
+  private[this] def getHttpClient =
+    HttpClients.custom.setConnectionManager(connectionManager).build
 
   private[this] def getHttpGet(
       url: String,
@@ -121,7 +123,9 @@ object HttpClientUtils {
 
   private[this] def paramsToNameValuePairs(
       params: JavaMap[String, AnyRef]): JavaList[NameValuePair] = {
-    params.entrySet.map(p => new BasicNameValuePair(p.getKey, p.getValue.toString)).toList
+    params.entrySet
+      .map(p => new BasicNameValuePair(p.getKey, p.getValue.toString))
+      .toList
   }
 
   def httpAuthGetRequest(url: String, config: RequestConfig): String = {

@@ -70,10 +70,9 @@ public class EnvInitializer implements ApplicationRunner {
 
     private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
-    private static final Pattern PATTERN_FLINK_SHIMS_JAR =
-            Pattern.compile(
-                    "^streampark-flink-shims_flink-(1.1[2-9])_(2.12)-(.*).jar$",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
+            "^streampark-flink-shims_flink-(1.1[2-9])_(2.12)-(.*).jar$",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @SneakyThrows
     @Override
@@ -179,9 +178,8 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     private void uploadShimsJar(Workspace workspace, FsOperator fsOperator) {
-        File[] shims =
-                WebUtils.getAppLibDir()
-                        .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
+        File[] shims = WebUtils.getAppLibDir()
+                .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
         AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
         String appShims = workspace.APP_SHIMS();

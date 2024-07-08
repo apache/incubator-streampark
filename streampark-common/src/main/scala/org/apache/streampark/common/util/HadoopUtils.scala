@@ -109,7 +109,10 @@ object HadoopUtils extends Logger {
       val hadoopConfDir = new File(confDir)
       val confName = List("hdfs-default.xml", "core-site.xml", "hdfs-site.xml", "yarn-site.xml")
       val files =
-        hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
+        hadoopConfDir
+          .listFiles()
+          .filter(x => x.isFile && confName.contains(x.getName))
+          .toList
       val conf = new HadoopConfiguration()
       if (CollectionUtils.isNotEmpty(files)) {
         files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
@@ -168,8 +171,7 @@ object HadoopUtils extends Logger {
 
     require(
       HadoopConfigUtils.kerberosPrincipal.nonEmpty && HadoopConfigUtils.kerberosKeytab.nonEmpty,
-      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty"
-    )
+      s"$KEY_SECURITY_KERBEROS_PRINCIPAL and $KEY_SECURITY_KERBEROS_KEYTAB must not be empty")
 
     System.setProperty("javax.security.auth.useSubjectCredsOnly", "false")
 
@@ -219,8 +221,7 @@ object HadoopUtils extends Logger {
                 }
               },
               tgtRefreshTime,
-              tgtRefreshTime
-            )
+              tgtRefreshTime)
           }
           fs
         case Failure(e) =>
@@ -253,7 +254,9 @@ object HadoopUtils extends Logger {
     val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))
-    if (!fs.exists(sourcePath)) throw new IOException(s"jar file: $jarOnHdfs doesn't exist.")
+    if (!fs.exists(sourcePath)) {
+      throw new IOException(s"jar file: $jarOnHdfs doesn't exist.")
+    }
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath
@@ -276,8 +279,7 @@ object HadoopUtils extends Logger {
       "dfs.client.datanode-restart.timeout",
       "dfs.ha.log-roll.period",
       "dfs.ha.tail-edits.period",
-      "dfs.datanode.bp-ready.timeout"
-    )
+      "dfs.datanode.bp-ready.timeout")
 
     private def getHexDigits(value: String): String = {
       var negative = false

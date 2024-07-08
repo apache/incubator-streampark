@@ -58,7 +58,8 @@ object PackerResourceGC extends Logger {
   }
 
   private def findLastModifiedOfSubFile(file: File): Array[(File, Long)] = {
-    val isApplicationMode = file.listFiles.map(_.getName).exists(_.contains(Constant.JAR_SUFFIX))
+    val isApplicationMode =
+      file.listFiles.map(_.getName).exists(_.contains(Constant.JAR_SUFFIX))
     if (isApplicationMode) {
       Array(file -> file.listFiles.map(_.lastModified).max)
     } else {

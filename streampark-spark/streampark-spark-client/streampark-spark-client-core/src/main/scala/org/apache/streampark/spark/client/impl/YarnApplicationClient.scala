@@ -18,7 +18,7 @@
 package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
+import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
@@ -28,8 +28,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
 import java.util.concurrent.{CountDownLatch, Executors, ExecutorService}
-
-import scala.util.control.Breaks.break
 
 /** yarn application mode submit */
 object YarnApplicationClient extends SparkClientTrait {
@@ -53,7 +51,9 @@ object YarnApplicationClient extends SparkClientTrait {
   private def launch(submitRequest: SubmitRequest): SubmitResponse = {
     val launcher: SparkLauncher = new SparkLauncher()
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
-      .setAppResource(submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+      .setAppResource(submitRequest.buildResult
+        .asInstanceOf[ShadedBuildResponse]
+        .shadedJarPath)
       .setMainClass(submitRequest.appMain)
       .setMaster("yarn")
       .setDeployMode("cluster")
@@ -63,13 +63,14 @@ object YarnApplicationClient extends SparkClientTrait {
       .setConf("spark.num.executors", "1")
       .setConf(
         "spark.yarn.jars",
-        submitRequest.asInstanceOf[SubmitRequest].hdfsWorkspace.sparkLib + "/*.jar")
+        submitRequest
+          .asInstanceOf[SubmitRequest]
+          .hdfsWorkspace
+          .sparkLib + "/*.jar")
       .setVerbose(true)
 
-    if (
-      MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter.containsKey(
-        "sql")
-    ) {
+    if (MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter
+        .containsKey("sql")) {
       launcher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
     }
 

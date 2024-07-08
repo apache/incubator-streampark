@@ -60,16 +60,14 @@ object YarnApplicationClient extends YarnClientTrait {
         flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
       AssertUtils.required(
         HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
-        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!"
-      )
+        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
     }
     val providedLibs = {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
         submitRequest.hdfsWorkspace.flinkPlugins,
         submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins
-      )
+        submitRequest.hdfsWorkspace.appPlugins)
       submitRequest.developmentMode match {
         case FlinkDevelopmentMode.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
@@ -91,7 +89,9 @@ object YarnApplicationClient extends YarnClientTrait {
       .safeSet(
         PipelineOptions.JARS,
         Collections.singletonList(
-          submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath))
+          submitRequest.buildResult
+            .asInstanceOf[ShadedBuildResponse]
+            .shadedJarPath))
       // yarn application name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, submitRequest.effectiveAppName)
       // yarn application Type
@@ -101,7 +101,8 @@ object YarnApplicationClient extends YarnClientTrait {
       val pyVenv: String = workspace.APP_PYTHON_VENV
       AssertUtils.required(FsOperator.hdfs.exists(pyVenv), s"$pyVenv File does not exist")
 
-      val localLib: String = s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
+      val localLib: String =
+        s"${Workspace.local.APP_WORKSPACE}/${submitRequest.id}/lib"
       if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
         flinkConfig.safeSet(PipelineOptions.JARS, util.Arrays.asList(localLib))
       }
@@ -121,7 +122,8 @@ object YarnApplicationClient extends YarnClientTrait {
         // python.executable
         .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
 
-      val args: util.List[String] = flinkConfig.get(ApplicationConfiguration.APPLICATION_ARGS)
+      val args: util.List[String] =
+        flinkConfig.get(ApplicationConfiguration.APPLICATION_ARGS)
       // Caused by: java.lang.UnsupportedOperationException
       val argsList: util.ArrayList[String] = new util.ArrayList[String](args)
       argsList.add("-pym")
@@ -142,13 +144,12 @@ object YarnApplicationClient extends YarnClientTrait {
     var proxyUserUgi: UserGroupInformation = UserGroupInformation.getCurrentUser
     val currentUser = UserGroupInformation.getCurrentUser
     val enableProxyState =
-      !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils.isNotEmpty(
-        submitRequest.hadoopUser)
+      !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils
+        .isNotEmpty(submitRequest.hadoopUser)
     if (enableProxyState) {
       proxyUserUgi = UserGroupInformation.createProxyUser(
         submitRequest.hadoopUser,
-        currentUser
-      )
+        currentUser)
     }
 
     proxyUserUgi.doAs[SubmitResponse](new PrivilegedAction[SubmitResponse] {
@@ -156,15 +157,18 @@ object YarnApplicationClient extends YarnClientTrait {
         val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
         val clientFactory =
           clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-        val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+        val clusterDescriptor =
+          clientFactory.createClusterDescriptor(flinkConfig)
+        val clusterSpecification =
+          clientFactory.getClusterSpecification(flinkConfig)
         logInfo(s"""
                    |------------------------<<specification>>-------------------------
                    |$clusterSpecification
                    |------------------------------------------------------------------
                    |""".stripMargin)
 
-        val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
+        val applicationConfiguration =
+          ApplicationConfiguration.fromConfiguration(flinkConfig)
         var applicationId: ApplicationId = null
         var jobManagerUrl: String = null
         val clusterClient = clusterDescriptor

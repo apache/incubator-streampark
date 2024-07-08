@@ -48,8 +48,7 @@ public final class GZipUtils {
                 FileInputStream inputStream = new FileInputStream(tarZipSource);
                 BufferedInputStream bufInput = new BufferedInputStream(inputStream);
                 GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
-                ArchiveInputStream archiveInput =
-                        archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
+                ArchiveInputStream archiveInput = archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
 
             TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
 

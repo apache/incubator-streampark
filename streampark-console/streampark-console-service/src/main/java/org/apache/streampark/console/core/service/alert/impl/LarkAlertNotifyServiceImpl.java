@@ -72,9 +72,8 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             // format markdown
             String markdown = FreemarkerUtils.format(template, alertTemplate);
-            Map<String, Object> cardMap =
-                    mapper.readValue(markdown, new TypeReference<Map<String, Object>>() {
-                    });
+            Map<String, Object> cardMap = mapper.readValue(markdown, new TypeReference<Map<String, Object>>() {
+            });
             Map<String, Object> body = renderBody(alertLarkParams, cardMap);
             sendMessage(alertLarkParams, body);
             return true;

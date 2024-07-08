@@ -139,11 +139,9 @@ public class SparkApplicationActionServiceImpl
     @Autowired
     private ResourceService resourceService;
 
-    private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
-            new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
 
-    private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap =
-            new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap = new ConcurrentHashMap<>();
 
     @Override
     public void revoke(Long appId) throws ApplicationException {
@@ -320,28 +318,26 @@ public class SparkApplicationActionServiceImpl
         }
 
         // Get the args after placeholder replacement
-        String applicationArgs =
-                variableService.replaceVariable(application.getTeamId(), application.getArgs());
+        String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getArgs());
 
-        SubmitRequest submitRequest =
-                new SubmitRequest(
-                        sparkEnv.getSparkVersion(),
-                        SparkExecutionMode.of(application.getExecutionMode()),
-                        getProperties(application),
-                        sparkEnv.getSparkConf(),
-                        FlinkDevelopmentMode.of(application.getJobType()),
-                        application.getId(),
-                        jobId,
-                        application.getJobName(),
-                        appConf,
-                        application.getApplicationType(),
-                        applicationArgs,
-                        application.getHadoopUser(),
-                        buildResult,
-                        extraParameter);
+        SubmitRequest submitRequest = new SubmitRequest(
+                sparkEnv.getSparkVersion(),
+                SparkExecutionMode.of(application.getExecutionMode()),
+                getProperties(application),
+                sparkEnv.getSparkConf(),
+                FlinkDevelopmentMode.of(application.getJobType()),
+                application.getId(),
+                jobId,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType(),
+                applicationArgs,
+                application.getHadoopUser(),
+                buildResult,
+                extraParameter);
 
-        CompletableFuture<SubmitResponse> future =
-                CompletableFuture.supplyAsync(() -> SparkClient.submit(submitRequest), executorService);
+        CompletableFuture<SubmitResponse> future = CompletableFuture
+                .supplyAsync(() -> SparkClient.submit(submitRequest), executorService);
 
         startFutureMap.put(application.getId(), future);
         future.whenComplete(
@@ -415,11 +411,10 @@ public class SparkApplicationActionServiceImpl
     private boolean checkAppRepeatInYarn(String jobName) {
         try {
             YarnClient yarnClient = HadoopUtils.yarnClient();
-            Set<String> types =
-                    Sets.newHashSet(
-                            ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
-            EnumSet<YarnApplicationState> states =
-                    EnumSet.of(YarnApplicationState.RUNNING, YarnApplicationState.ACCEPTED);
+            Set<String> types = Sets.newHashSet(
+                    ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+            EnumSet<YarnApplicationState> states = EnumSet.of(YarnApplicationState.RUNNING,
+                    YarnApplicationState.ACCEPTED);
             List<ApplicationReport> applications = yarnClient.getApplications(types, states);
             for (ApplicationReport report : applications) {
                 if (report.getName().equals(jobName)) {
@@ -456,10 +451,9 @@ public class SparkApplicationActionServiceImpl
                 // 1) dist_userJar
                 String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
                 // 2) appConfig
-                appConf =
-                        applicationConfig == null
-                                ? null
-                                : String.format("yaml://%s", applicationConfig.getContent());
+                appConf = applicationConfig == null
+                        ? null
+                        : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
                     String clientPath = Workspace.remote().APP_CLIENT();
@@ -468,8 +462,7 @@ public class SparkApplicationActionServiceImpl
                 break;
 
             case PYFLINK:
-                Resource resource =
-                        resourceService.findByResourceName(application.getTeamId(), application.getJar());
+                Resource resource = resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
                         resource, "pyflink file can't be null, start application failed.");
@@ -486,28 +479,25 @@ public class SparkApplicationActionServiceImpl
 
             case CUSTOM_CODE:
                 if (application.isUploadJob()) {
-                    appConf =
-                            String.format(
-                                    "json://{\"%s\":\"%s\"}",
-                                    ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                    appConf = String.format(
+                            "json://{\"%s\":\"%s\"}",
+                            ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
                             ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(applicationConfig.getFormat());
                             if (fileType != null && ConfigFileTypeEnum.UNKNOWN != fileType) {
-                                appConf =
-                                        String.format(
-                                                "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
+                                appConf = String.format(
+                                        "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
                             } else {
                                 throw new IllegalArgumentException(
                                         "application' config type error,must be ( yaml| properties| hocon )");
                             }
                             break;
                         case APACHE_SPARK:
-                            appConf =
-                                    String.format(
-                                            "json://{\"%s\":\"%s\"}",
-                                            ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                            appConf = String.format(
+                                    "json://{\"%s\":\"%s\"}",
+                                    ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(
@@ -518,24 +508,21 @@ public class SparkApplicationActionServiceImpl
                 if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
-                            flinkUserJar =
-                                    String.format(
-                                            "%s/%s",
-                                            application.getAppLib(),
-                                            application.getModule().concat(Constant.JAR_SUFFIX));
+                            flinkUserJar = String.format(
+                                    "%s/%s",
+                                    application.getAppLib(),
+                                    application.getModule().concat(Constant.JAR_SUFFIX));
                             break;
                         case APACHE_SPARK:
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             if (!FsOperator.hdfs().exists(flinkUserJar)) {
-                                resource =
-                                        resourceService.findByResourceName(
-                                                application.getTeamId(), application.getJar());
+                                resource = resourceService.findByResourceName(
+                                        application.getTeamId(), application.getJar());
                                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                                    flinkUserJar =
-                                            String.format(
-                                                    "%s/%s",
-                                                    application.getAppHome(),
-                                                    new File(resource.getFilePath()).getName());
+                                    flinkUserJar = String.format(
+                                            "%s/%s",
+                                            application.getAppHome(),
+                                            new File(resource.getFilePath()).getName());
                                 }
                             }
                             break;
@@ -552,10 +539,8 @@ public class SparkApplicationActionServiceImpl
     private Map<String, Object> getProperties(SparkApplication application) {
         Map<String, Object> properties = new HashMap<>(application.getOptionMap());
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
-            String yarnQueue =
-                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
-            String yarnLabelExpr =
-                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
+            String yarnQueue = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
+            String yarnLabelExpr = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
             Optional.ofNullable(yarnQueue)
                     .ifPresent(yq -> properties.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yq));
             Optional.ofNullable(yarnLabelExpr)
@@ -566,8 +551,8 @@ public class SparkApplicationActionServiceImpl
             properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
         }
 
-        Map<String, String> dynamicProperties =
-                PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        Map<String, String> dynamicProperties = PropertiesUtils
+                .extractDynamicPropertiesAsJava(application.getDynamicProperties());
         properties.putAll(dynamicProperties);
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
         if (resolveOrder != null) {
@@ -587,8 +572,8 @@ public class SparkApplicationActionServiceImpl
         // kill application
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
             try {
-                List<ApplicationReport> applications =
-                        applicationInfoService.getYarnAppReport(application.getJobName());
+                List<ApplicationReport> applications = applicationInfoService
+                        .getYarnAppReport(application.getJobName());
                 if (!applications.isEmpty()) {
                     YarnClient yarnClient = HadoopUtils.yarnClient();
                     yarnClient.killApplication(applications.get(0).getApplicationId());

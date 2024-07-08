@@ -33,7 +33,9 @@ class CommandUtilsTest extends AnyFunSuite {
     commands.add("echo 'Hello'")
     commands.add("echo 'World'")
     val outputConsumer = new java.util.function.Consumer[String] {
+      // scalastyle:off println
       override def accept(output: String): Unit = println(output)
+      // scalastyle:on println
     }
     val exitCode = CommandUtils.execute(directory, commands, outputConsumer)
     assert(exitCode == 0)

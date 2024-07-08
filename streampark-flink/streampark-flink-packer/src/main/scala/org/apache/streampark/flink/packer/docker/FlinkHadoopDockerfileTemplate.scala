@@ -50,10 +50,14 @@ case class FlinkHadoopDockerfileTemplate(
   extends FlinkDockerfileTemplateTrait {
 
   val hadoopConfDir: String =
-    workspace.relativize(Paths.get(Option(hadoopConfDirPath).getOrElse(""))).toString
+    workspace
+      .relativize(Paths.get(Option(hadoopConfDirPath).getOrElse("")))
+      .toString
 
   val hiveConfDir: String =
-    workspace.relativize(Paths.get(Option(hiveConfDirPath).getOrElse(""))).toString
+    workspace
+      .relativize(Paths.get(Option(hiveConfDirPath).getOrElse("")))
+      .toString
 
   /** offer content of DockerFile */
   override def offerDockerfileContent: String = {
@@ -61,18 +65,20 @@ case class FlinkHadoopDockerfileTemplate(
       s"""FROM $flinkBaseImage
          |RUN mkdir -p $FLINK_HOME/usrlib
          |""".stripMargin
-    if (hadoopConfDir.nonEmpty)
+    if (hadoopConfDir.nonEmpty) {
       dockerfile +=
         s"""
            |COPY $hadoopConfDir /opt/hadoop-conf
            |ENV HADOOP_CONF_DIR /opt/hadoop-conf
            |""".stripMargin
-    if (hiveConfDir.nonEmpty)
+    }
+    if (hiveConfDir.nonEmpty) {
       dockerfile +=
         s"""
            |COPY $hiveConfDir /opt/hive-conf
            |ENV HIVE_CONF_DIR /opt/hive-conf
            |""".stripMargin
+    }
     dockerfile +=
       s"""
          |COPY $extraLibName $FLINK_HOME/lib/

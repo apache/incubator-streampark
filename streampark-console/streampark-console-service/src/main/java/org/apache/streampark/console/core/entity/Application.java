@@ -286,10 +286,9 @@ public class Application implements Serializable {
         if (MapUtils.isNotEmpty(hotParamsMap)
                 && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
             String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
-            String labelExpr =
-                    Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
-                            .map(Object::toString)
-                            .orElse(null);
+            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
+                    .map(Object::toString)
+                    .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
         }
     }
@@ -380,8 +379,7 @@ public class Application implements Serializable {
     /** Local compilation and packaging working directory */
     @JsonIgnore
     public String getDistHome() {
-        String path =
-                String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
         log.info("local distHome:{}", path);
         return path;
     }
@@ -614,11 +612,8 @@ public class Application implements Serializable {
         public static final SFunction<Application, Integer> TM_MEMORY = Application::getTmMemory;
         public static final SFunction<Application, Integer> STATE = Application::getState;
         public static final SFunction<Application, String> OPTIONS = Application::getOptions;
-        public static final SFunction<Application, Integer> AVAILABLE_SLOT =
-                Application::getAvailableSlot;
-        public static final SFunction<Application, Integer> EXECUTION_MODE =
-                Application::getExecutionMode;
-        public static final SFunction<Application, String> JOB_MANAGER_URL =
-                Application::getJobManagerUrl;
+        public static final SFunction<Application, Integer> AVAILABLE_SLOT = Application::getAvailableSlot;
+        public static final SFunction<Application, Integer> EXECUTION_MODE = Application::getExecutionMode;
+        public static final SFunction<Application, String> JOB_MANAGER_URL = Application::getJobManagerUrl;
     }
 }

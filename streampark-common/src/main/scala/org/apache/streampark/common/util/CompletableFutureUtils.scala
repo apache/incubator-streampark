@@ -41,7 +41,8 @@ object CompletableFutureUtils {
     val result = new CompletableFuture[T]
     completableDelayer.schedule(
       new Callable[Boolean] {
-        override def call(): Boolean = result.completeExceptionally(new TimeoutException)
+        override def call(): Boolean =
+          result.completeExceptionally(new TimeoutException)
       },
       timeout,
       unit)

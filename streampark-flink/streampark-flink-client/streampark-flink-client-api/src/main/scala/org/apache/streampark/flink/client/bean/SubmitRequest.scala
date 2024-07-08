@@ -65,17 +65,20 @@ case class SubmitRequest(
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL => Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case FlinkDevelopmentMode.FLINK_SQL =>
+      Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS
     case FlinkDevelopmentMode.PYFLINK => Constant.PYTHON_FLINK_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
   lazy val effectiveAppName: String =
-    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME) else this.appName
+    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME)
+    else this.appName
 
   lazy val libs: List[URL] = {
     val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
-    Try(new File(path).listFiles().map(_.toURI.toURL).toList).getOrElse(List.empty[URL])
+    Try(new File(path).listFiles().map(_.toURI.toURL).toList)
+      .getOrElse(List.empty[URL])
   }
 
   lazy val classPaths: List[URL] = flinkVersion.flinkLibs ++ libs
@@ -83,12 +86,16 @@ case class SubmitRequest(
   lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
 
   lazy val allowNonRestoredState: Boolean = Try(
-    properties.get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key).toString.toBoolean)
+    properties
+      .get(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key)
+      .toString
+      .toBoolean)
     .getOrElse(false)
 
   lazy val savepointRestoreSettings: SavepointRestoreSettings = {
     savePoint match {
-      case sp if Try(sp.isEmpty).getOrElse(true) => SavepointRestoreSettings.none
+      case sp if Try(sp.isEmpty).getOrElse(true) =>
+        SavepointRestoreSettings.none
       case sp => SavepointRestoreSettings.forPath(sp, allowNonRestoredState)
     }
   }
@@ -179,8 +186,7 @@ case class SubmitRequest(
       flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
       appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
-    )
+      appPlugins = workspace.APP_PLUGINS)
   }
 
   @throws[Exception]
@@ -191,14 +197,12 @@ case class SubmitRequest(
           buildResult != null,
           s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +
             s",clusterId=$clusterId," +
-            s",namespace=$kubernetesNamespace"
-        )
+            s",namespace=$kubernetesNamespace")
         AssertUtils.required(
           buildResult.pass,
           s"[flink-submit] current job ${this.effectiveAppName} build failed, clusterId" +
             s",clusterId=$clusterId," +
-            s",namespace=$kubernetesNamespace"
-        )
+            s",namespace=$kubernetesNamespace")
       case _ =>
         AssertUtils.required(
           this.buildResult != null,

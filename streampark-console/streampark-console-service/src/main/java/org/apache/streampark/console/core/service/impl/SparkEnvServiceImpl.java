@@ -57,8 +57,8 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
     @Override
     public FlinkEnvCheckEnum check(SparkEnv version) {
         // 1) check name
-        LambdaQueryWrapper<SparkEnv> queryWrapper =
-                new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName, version.getSparkName());
+        LambdaQueryWrapper<SparkEnv> queryWrapper = new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName,
+                version.getSparkName());
         if (version.getId() != null) {
             queryWrapper.ne(SparkEnv::getId, version.getId());
         }

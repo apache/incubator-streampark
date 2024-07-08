@@ -66,7 +66,8 @@ abstract class MultipleOutputsFormat[K, V](
    * @throws IOException
    *   when output should not be attempted
    */
-  override def checkOutputSpecs(context: JobContext): Unit = outputFormat.checkOutputSpecs(context)
+  override def checkOutputSpecs(context: JobContext): Unit =
+    outputFormat.checkOutputSpecs(context)
 
   /**
    * Get the output committer for this output format. This is responsible for ensuring the output is
@@ -128,13 +129,15 @@ abstract class MultipleOutputsFormat[K, V](
         }
       }
 
-      override def close(context: TaskAttemptContext): Unit = multipleOutputs.close()
+      override def close(context: TaskAttemptContext): Unit =
+        multipleOutputs.close()
     }
 
   private class DummyOutputCommitter extends OutputCommitter {
     override def setupJob(jobContext: JobContext): Unit = ()
 
-    override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean = false
+    override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean =
+      false
 
     override def setupTask(taskContext: TaskAttemptContext): Unit = ()
 

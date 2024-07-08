@@ -185,10 +185,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     @Override
     public Resource findByResourceName(Long teamId, String name) {
-        LambdaQueryWrapper<Resource> queryWrapper =
-                new LambdaQueryWrapper<Resource>()
-                        .eq(Resource::getResourceName, name)
-                        .eq(Resource::getTeamId, teamId);
+        LambdaQueryWrapper<Resource> queryWrapper = new LambdaQueryWrapper<Resource>()
+                .eq(Resource::getResourceName, name)
+                .eq(Resource::getTeamId, teamId);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -222,12 +221,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Resource findResource = getById(id);
         checkOrElseAlert(findResource);
 
-        String filePath =
-                String.format(
-                        "%s/%d/%s",
-                        Workspace.local().APP_UPLOADS(),
-                        findResource.getTeamId(),
-                        findResource.getResourceName());
+        String filePath = String.format(
+                "%s/%d/%s",
+                Workspace.local().APP_UPLOADS(),
+                findResource.getTeamId(),
+                findResource.getResourceName());
 
         if (!new File(filePath).exists() && StringUtils.isNotBlank(findResource.getFilePath())) {
             filePath = findResource.getFilePath();
@@ -239,8 +237,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     public List<Resource> listByTeamId(Long teamId) {
-        LambdaQueryWrapper<Resource> queryWrapper =
-                new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
+        LambdaQueryWrapper<Resource> queryWrapper = new LambdaQueryWrapper<Resource>().eq(Resource::getTeamId, teamId);
         return baseMapper.selectList(queryWrapper);
     }
 
@@ -252,10 +249,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
      */
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
-        LambdaUpdateWrapper<Resource> updateWrapper =
-                new LambdaUpdateWrapper<Resource>()
-                        .eq(Resource::getCreatorId, userId)
-                        .set(Resource::getCreatorId, targetUserId);
+        LambdaUpdateWrapper<Resource> updateWrapper = new LambdaUpdateWrapper<Resource>()
+                .eq(Resource::getCreatorId, userId)
+                .set(Resource::getCreatorId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -322,8 +318,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         }
 
         // 2) check connector exists
-        boolean exists =
-                existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
+        boolean exists = existsFlinkConnector(resourceParam.getId(), connectorResource.getFactoryIdentifier());
         if (exists) {
             return buildExceptResponse(new RuntimeException("connector already exists"), 4);
         }
@@ -369,8 +364,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     private boolean existsFlinkConnector(Long id, String connectorId) {
-        LambdaQueryWrapper<Resource> lambdaQueryWrapper =
-                new LambdaQueryWrapper<Resource>().eq(Resource::getResourceName, connectorId);
+        LambdaQueryWrapper<Resource> lambdaQueryWrapper = new LambdaQueryWrapper<Resource>()
+                .eq(Resource::getResourceName, connectorId);
         if (id != null) {
             lambdaQueryWrapper.ne(Resource::getId, id);
         }
@@ -379,11 +374,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private FlinkConnector getConnectorResource(List<File> jars, List<String> factories) {
         Class<Factory> className = Factory.class;
-        URL[] array =
-                jars.stream()
-                        .map(
-                                file -> ExceptionUtils.wrapRuntimeException(file, handle -> handle.toURI().toURL()))
-                        .toArray(URL[]::new);
+        URL[] array = jars.stream()
+                .map(
+                        file -> ExceptionUtils.wrapRuntimeException(file, handle -> handle.toURI().toURL()))
+                .toArray(URL[]::new);
 
         try (URLClassLoader urlClassLoader = URLClassLoader.newInstance(array)) {
             ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
@@ -444,8 +438,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             List<File> files = MavenTool.resolveArtifacts(artifact);
             if (!files.isEmpty()) {
                 String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
-                Optional<File> jarFile =
-                        files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
+                Optional<File> jarFile = files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
                 jarFile.ifPresent(
                         file -> transferTeamResource(resource.getTeamId(), file.getAbsolutePath()));
                 return jarFile.orElse(null);
@@ -481,9 +474,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     private List<Application> getResourceApplicationsById(Resource resource) {
         List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationManageService.listByTeamId(resource.getTeamId());
-        Map<Long, Application> applicationMap =
-                applications.stream()
-                        .collect(Collectors.toMap(Application::getId, application -> application));
+        Map<Long, Application> applicationMap = applications.stream()
+                .collect(Collectors.toMap(Application::getId, application -> application));
 
         // Get the application that depends on this resource
         List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(resource.getTeamId());

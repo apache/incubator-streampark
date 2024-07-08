@@ -100,19 +100,17 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             config.save();
             File workTree = git.getRepository().getWorkTree();
             printWorkTree(workTree, "");
-            String successMsg =
-                    String.format("[StreamPark] project [%s] git clone successful!%n", project.getName());
+            String successMsg = String.format("[StreamPark] project [%s] git clone successful!%n", project.getName());
             fileLogger.info(successMsg);
             git.close();
             return true;
         } catch (Exception e) {
             if (e instanceof InvalidRemoteException) {
                 if (project.isHttpRepositoryUrl()) {
-                    String url =
-                            project
-                                    .getUrl()
-                                    .replaceAll(
-                                            "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
+                    String url = project
+                            .getUrl()
+                            .replaceAll(
+                                    "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
                     project.setUrl(url);
                     fileLogger.info(
                             "clone project by https(http) failed, Now try to clone project by ssh...");
@@ -144,11 +142,10 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     }
 
     private boolean projectBuild(Project project) {
-        int code =
-                CommandUtils.execute(
-                        project.getMavenWorkHome(),
-                        Collections.singletonList(project.getMavenArgs()),
-                        (line) -> fileLogger.info(line));
+        int code = CommandUtils.execute(
+                project.getMavenWorkHome(),
+                Collections.singletonList(project.getMavenArgs()),
+                (line) -> fileLogger.info(line));
         return code == 0;
     }
 
@@ -172,9 +169,8 @@ public class ProjectBuildTask extends AbstractLogFileTask {
                 }
                 // xzvf jar
                 if (app.exists()) {
-                    String cmd =
-                            String.format(
-                                    "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
+                    String cmd = String.format(
+                            "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
                     CommandUtils.execute(cmd);
                 }
             } else {

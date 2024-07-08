@@ -36,20 +36,22 @@ class StreamingContext(
   extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /** for scala */
-  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
+  def this(args: (ParameterTool, StreamExecutionEnvironment)) =
+    this(args._1, args._2)
 
   /** for Java */
-  def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initialize(args))
+  def this(args: StreamEnvConfig) =
+    this(FlinkStreamingInitializer.initialize(args))
 
   /** Recommend use this Api to start task */
   def start(): JobExecutionResult = execute()
 
-  @Deprecated override def execute(): JobExecutionResult = {
+  @deprecated override def execute(): JobExecutionResult = {
     val appName = parameter.getAppName(required = true)
     execute(appName)
   }
 
-  @Deprecated override def execute(jobName: String): JobExecutionResult = {
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
     Utils.printLogo(s"FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }

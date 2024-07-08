@@ -81,7 +81,8 @@ object DataStreamExt {
         override def checkAndGetNextWatermark(
             lastElement: T,
             extractedTimestamp: Long): Watermark = {
-          if (checkFunc(lastElement)) new Watermark(extractedTimestamp) else null
+          if (checkFunc(lastElement)) new Watermark(extractedTimestamp)
+          else null
         }
       }
       dataStream.assignTimestampsAndWatermarks(
@@ -99,8 +100,7 @@ object DataStreamExt {
      */
     def proc[R: TypeInformation](
         processFunction: (T, ProcFunc[T, R]#Context, Collector[R]) => Unit,
-        onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null)
-        : DStream[R] = {
+        onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null): DStream[R] = {
 
       dataStream.process(new ProcFunc[T, R] {
         override def processElement(

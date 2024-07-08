@@ -80,10 +80,9 @@ public class Dependency {
 
     public DependencyInfo toJarPackDeps() {
         List<Artifact> mvnArts = toArtifact();
-        List<String> extJars =
-                this.jar.stream()
-                        .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                        .collect(Collectors.toList());
+        List<String> extJars = this.jar.stream()
+                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+                .collect(Collectors.toList());
         return new DependencyInfo(mvnArts, extJars);
     }
 

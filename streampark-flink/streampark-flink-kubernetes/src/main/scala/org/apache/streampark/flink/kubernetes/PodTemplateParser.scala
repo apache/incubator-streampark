@@ -69,10 +69,9 @@ object PodTemplateParser {
           }))
     }
 
-    if (
-      root.containsKey("spec")
-      && Try(!root.get("spec").asInstanceOf[JavaMap[String, Any]].isEmpty).getOrElse(false)
-    ) {
+    if (root.containsKey("spec")
+      && Try(!root.get("spec").asInstanceOf[JavaMap[String, Any]].isEmpty)
+        .getOrElse(false)) {
       res.put("spec", root.get("spec"))
     }
     yaml.dumpAsMap(res)
@@ -123,14 +122,12 @@ object PodTemplateParser {
         .groupBy(_._2)
         .mapValues(_.keys)
         .toList
-        .map(
-          e => {
-            val map = new util.LinkedHashMap[String, Any]()
-            map.put("ip", e._1)
-            map.put("hostnames", new util.ArrayList(e._2.toList))
-            map
-          })
-    )
+        .map(e => {
+          val map = new util.LinkedHashMap[String, Any]()
+          map.put("ip", e._1)
+          map.put("hostnames", new util.ArrayList(e._2.toList))
+          map
+        }))
 
   /**
    * Extract host-ip map from pod template. When parser pod template error, it would return empty
@@ -148,7 +145,8 @@ object PodTemplateParser {
     }
     try {
       val yaml = new Yaml
-      val root = yaml.load(podTemplateContent).asInstanceOf[JavaMap[String, Any]]
+      val root =
+        yaml.load(podTemplateContent).asInstanceOf[JavaMap[String, Any]]
       if (!root.containsKey("spec")) {
         return hosts
       }
@@ -156,7 +154,8 @@ object PodTemplateParser {
       if (!spec.containsKey("hostAliases")) {
         return hosts
       }
-      val hostAliases = spec.get("hostAliases").asInstanceOf[JavaList[JavaMap[String, Any]]]
+      val hostAliases =
+        spec.get("hostAliases").asInstanceOf[JavaList[JavaMap[String, Any]]]
       if (CollectionUtils.isEmpty(hostAliases)) {
         return hosts
       }
@@ -165,7 +164,8 @@ object PodTemplateParser {
           if (!hostAlias.containsKey("ip") && !hostAlias.containsKey("hostnames")) break
           val ip = hostAlias.get("ip").asInstanceOf[String]
           if (StringUtils.isBlank(ip)) break
-          val hostnames = hostAlias.get("hostnames").asInstanceOf[JavaList[String]]
+          val hostnames =
+            hostAlias.get("hostnames").asInstanceOf[JavaList[String]]
           hostnames
             .filter(StringUtils.isNotBlank(_))
             .foreach(hosts.put(_, ip))

@@ -29,7 +29,8 @@ object FlinkK8sExecuteMode extends Enumeration {
     mode match {
       case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION => SESSION
       case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => APPLICATION
-      case _ => throw new IllegalStateException(s"Illegal K8sExecuteMode, ${mode.name}")
+      case _ =>
+        throw new IllegalStateException(s"Illegal K8sExecuteMode, ${mode.name}")
     }
   }
 

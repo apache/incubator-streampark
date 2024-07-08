@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
@@ -101,8 +102,7 @@ class SparkVersion(val sparkHome: String) extends java.io.Serializable with Logg
             sparkVersion.set(matcher.group(2))
           }
         }
-      }
-    )
+      })
     logInfo(buffer.toString())
     if (!success.get()) {
       throw new IllegalStateException(s"[StreamPark] parse spark version failed. $buffer")

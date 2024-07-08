@@ -28,7 +28,8 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
 
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
+  override def useModules(strings: String*): Unit =
+    tableEnv.useModules(strings: _*)
 
   override def createTemporaryTable(path: String, descriptor: TableDescriptor): Unit = {
     tableEnv.createTemporaryTable(path, descriptor)
@@ -42,7 +43,8 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
     tableEnv.from(tableDescriptor)
   }
 
-  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+  override def listFullModules(): Array[ModuleEntry] =
+    tableEnv.listFullModules()
 
   /** @since 1.15 */
   override def listTables(catalogName: String, databaseName: String): Array[String] =
@@ -53,5 +55,6 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
     tableEnv.loadPlan(planReference)
 
   /** @since 1.15 */
-  override def compilePlanSql(stmt: String): CompiledPlan = tableEnv.compilePlanSql(stmt)
+  override def compilePlanSql(stmt: String): CompiledPlan =
+    tableEnv.compilePlanSql(stmt)
 }

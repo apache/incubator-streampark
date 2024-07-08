@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.Constant
@@ -26,7 +27,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object ClassLoaderUtils extends Logger {
 
-  private[this] val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
+  private[this] val originalClassLoader: ClassLoader =
+    Thread.currentThread().getContextClassLoader
 
   /**
    * Execute with the specified classloader for scala API
@@ -147,7 +149,8 @@ object ClassLoaderUtils extends Logger {
         val field = classLoader.getClass.getDeclaredField("ucp")
         field.setAccessible(true)
         val ucp = field.get(classLoader)
-        val addURL = ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+        val addURL =
+          ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
         addURL.setAccessible(true)
         addURL.invoke(ucp, file.toURI.toURL)
     }

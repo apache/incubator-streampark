@@ -58,18 +58,18 @@ trait YarnClientTrait extends FlinkClientTrait {
       applicationId != null,
       "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
 
-    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
+    val clusterDescriptor =
+      clusterClientFactory.createClusterDescriptor(flinkConf)
     clusterDescriptor
       .retrieve(applicationId)
       .getClusterClient
-      .autoClose(
-        client =>
-          Try(actionFunc(getJobID(savepointRequestTrait.jobId), client)).recover {
-            case e =>
-              throw new FlinkException(
-                s"[StreamPark] Do ${savepointRequestTrait.getClass.getSimpleName} for the job ${savepointRequestTrait.jobId} failed. " +
-                  s"detail: ${ExceptionUtils.stringifyException(e)}");
-          }.get)
+      .autoClose(client =>
+        Try(actionFunc(getJobID(savepointRequestTrait.jobId), client)).recover {
+          case e =>
+            throw new FlinkException(
+              s"[StreamPark] Do ${savepointRequestTrait.getClass.getSimpleName} for the job ${savepointRequestTrait.jobId} failed. " +
+                s"detail: ${ExceptionUtils.stringifyException(e)}");
+        }.get)
   }
 
   override def doTriggerSavepoint(
@@ -127,19 +127,24 @@ trait YarnClientTrait extends FlinkClientTrait {
   private[client] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](
       flinkConfig: Configuration): (ApplicationId, T) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+    val clientFactory =
+      serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
     val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
     require(yarnClusterId != null)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
+    val clusterDescriptor =
+      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
     (yarnClusterId, clusterDescriptor)
   }
 
   private[client] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](
       flinkConfig: Configuration): (ClusterSpecification, T) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
+    val clientFactory =
+      serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
+    val clusterSpecification =
+      clientFactory.getClusterSpecification(flinkConfig)
+    val clusterDescriptor =
+      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
     (clusterSpecification, clusterDescriptor)
   }
 }

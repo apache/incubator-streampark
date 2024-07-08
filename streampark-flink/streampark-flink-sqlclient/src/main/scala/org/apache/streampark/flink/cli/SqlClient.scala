@@ -46,32 +46,36 @@ object SqlClient extends App {
     }
   }
 
-  private[this] val sets = SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
+  private[this] val sets =
+    SqlCommandParser.parseSQL(flinkSql).filter(_.command == SqlCommand.SET)
 
   private[this] val defaultMode = RuntimeExecutionMode.STREAMING.name()
 
-  private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
-    case Some(e) =>
-      // 1) flink sql execution.runtime-mode has highest priority
-      val m = e.operands(1).toUpperCase()
-      arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
-      m
-    case None =>
-      // 2) dynamic properties execution.runtime-mode
-      parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null) match {
-        case null =>
-          val m = parameterTool.get(KEY_APP_CONF(), null) match {
-            case null => defaultMode
-            case f =>
-              val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
-              // 3) application conf execution.runtime-mode
-              parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode).toUpperCase()
-          }
-          arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
-          m
-        case m => m
-      }
-  }
+  private[this] val mode =
+    sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
+      case Some(e) =>
+        // 1) flink sql execution.runtime-mode has highest priority
+        val m = e.operands(1).toUpperCase()
+        arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+        m
+      case None =>
+        // 2) dynamic properties execution.runtime-mode
+        parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null) match {
+          case null =>
+            val m = parameterTool.get(KEY_APP_CONF(), null) match {
+              case null => defaultMode
+              case f =>
+                val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
+                // 3) application conf execution.runtime-mode
+                parameter
+                  .getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+                  .toUpperCase()
+            }
+            arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+            m
+          case m => m
+        }
+    }
 
   mode match {
     case "STREAMING" | "AUTOMATIC" => StreamSqlApp.main(arguments.toArray)

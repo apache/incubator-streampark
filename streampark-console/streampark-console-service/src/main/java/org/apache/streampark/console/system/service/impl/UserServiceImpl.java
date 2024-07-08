@@ -87,8 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User getByUsername(String username) {
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -107,8 +106,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateLoginTime(String username) {
         User user = new User();
         user.setLastLoginTime(new Date());
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         this.baseMapper.update(user, queryWrapper);
     }
 
@@ -176,8 +174,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String password = ShaHashUtils.encrypt(salt, newPassword);
         user.setSalt(salt);
         user.setPassword(password);
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         this.baseMapper.update(user, queryWrapper);
         return newPassword;
     }
@@ -268,10 +265,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         updateLoginTime(user.getUsername());
-        String token =
-                WebUtils.encryptToken(
-                        JWTUtil.sign(
-                                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
+        String token = WebUtils.encryptToken(
+                JWTUtil.sign(
+                        user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);

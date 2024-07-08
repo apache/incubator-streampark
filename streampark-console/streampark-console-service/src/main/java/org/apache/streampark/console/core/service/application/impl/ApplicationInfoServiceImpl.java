@@ -94,8 +94,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
     private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
-    private static final Pattern JOB_NAME_PATTERN =
-            Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
     private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
@@ -367,16 +366,14 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public List<ApplicationReport> getYarnAppReport(String appName) {
         try {
             YarnClient yarnClient = HadoopUtils.yarnClient();
-            Set<String> types =
-                    Sets.newHashSet(
-                            ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
-            EnumSet<YarnApplicationState> states =
-                    EnumSet.of(
-                            YarnApplicationState.NEW,
-                            YarnApplicationState.NEW_SAVING,
-                            YarnApplicationState.SUBMITTED,
-                            YarnApplicationState.ACCEPTED,
-                            YarnApplicationState.RUNNING);
+            Set<String> types = Sets.newHashSet(
+                    ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+            EnumSet<YarnApplicationState> states = EnumSet.of(
+                    YarnApplicationState.NEW,
+                    YarnApplicationState.NEW_SAVING,
+                    YarnApplicationState.SUBMITTED,
+                    YarnApplicationState.ACCEPTED,
+                    YarnApplicationState.RUNNING);
             Set<String> yarnTag = Sets.newHashSet("streampark");
             List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
             return applications.stream()
@@ -397,20 +394,18 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
                 FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
                 "Job executionMode must be kubernetes-session|kubernetes-application.");
 
-        CompletableFuture<String> future =
-                CompletableFuture.supplyAsync(
-                        () -> KubernetesDeploymentHelper.watchDeploymentLog(
-                                application.getK8sNamespace(),
-                                application.getJobName(),
-                                application.getJobId()));
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(
+                () -> KubernetesDeploymentHelper.watchDeploymentLog(
+                        application.getK8sNamespace(),
+                        application.getJobName(),
+                        application.getJobId()));
 
         return future
                 .exceptionally(
                         e -> {
-                            String errorLog =
-                                    String.format(
-                                            "%s/%s_err.log",
-                                            WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
+                            String errorLog = String.format(
+                                    "%s/%s_err.log",
+                                    WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
                             File file = new File(errorLog);
                             if (file.exists() && file.isFile()) {
                                 return file.getAbsolutePath();
@@ -458,9 +453,8 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             return AppExistsStateEnum.INVALID;
         }
 
-        Application application =
-                baseMapper.selectOne(
-                        new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+        Application application = baseMapper.selectOne(
+                new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
         if (application != null && !application.getId().equals(appParamId)) {
             return AppExistsStateEnum.IN_DB;
         }
@@ -494,8 +488,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         } else {
             Project project = new Project();
             project.setId(appParam.getProjectId());
-            String modulePath =
-                    project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
+            String modulePath = project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
             jarFile = new File(modulePath, appParam.getJar());
         }
         return Utils.getJarManClass(jarFile);
@@ -514,20 +507,17 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             final String pathPart = uri.getPath();
             String error = null;
             if (scheme == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+                error = "This state.savepoints.dir value "
+                        + savepointPath
+                        + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+                error = "This state.savepoints.dir value "
+                        + savepointPath
+                        + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " Cannot use the root directory for checkpoints.";
+                error = "This state.savepoints.dir value "
+                        + savepointPath
+                        + " Cannot use the root directory for checkpoints.";
             }
             return error;
         } else {

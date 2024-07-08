@@ -100,8 +100,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for 1st page, size = 2, order by create time with queue_label
         queryParams.setQueueLabel("q3");
-        IPage<YarnQueue> yarnQueuesWithQueueLabelLikeQuery =
-                yarnQueueService.getPage(queryParams, request);
+        IPage<YarnQueue> yarnQueuesWithQueueLabelLikeQuery = yarnQueueService.getPage(queryParams, request);
         assertThat(
                 yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
                         .map(YarnQueue::getQueueLabel)
