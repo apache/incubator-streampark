@@ -113,7 +113,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         YarnQueue yarnQueue = mockYarnQueue(targetTeamId, queueLabel);
         yarnQueueService.save(yarnQueue);
         Application application = mockYarnModeJobApp(targetTeamId, "app1", queueLabel,
-                FlinkExecutionMode.YARN_APPLICATION);
+            FlinkExecutionMode.YARN_APPLICATION);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isTrue();
 
         // Test application without available queue

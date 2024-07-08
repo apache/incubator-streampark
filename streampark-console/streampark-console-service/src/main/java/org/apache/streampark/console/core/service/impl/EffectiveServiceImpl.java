@@ -36,30 +36,30 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective>
-        implements
-            EffectiveService {
+    implements
+        EffectiveService {
 
     @Override
     public void remove(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
         LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+            .eq(Effective::getAppId, appId)
+            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
         baseMapper.delete(queryWrapper);
     }
 
     @Override
     public Effective get(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
         LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+            .eq(Effective::getAppId, appId)
+            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
         return this.getOne(queryWrapper);
     }
 
     @Override
     public void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id) {
         LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-                .eq(Effective::getAppId, appId)
-                .eq(Effective::getTargetType, type.getType());
+            .eq(Effective::getAppId, appId)
+            .eq(Effective::getTargetType, type.getType());
         long count = count(queryWrapper);
         if (count == 0) {
             Effective effective = new Effective();
@@ -70,10 +70,10 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             save(effective);
         } else {
             update(
-                    new LambdaUpdateWrapper<Effective>()
-                            .eq(Effective::getAppId, appId)
-                            .eq(Effective::getTargetType, type.getType())
-                            .set(Effective::getTargetId, id));
+                new LambdaUpdateWrapper<Effective>()
+                    .eq(Effective::getAppId, appId)
+                    .eq(Effective::getTargetType, type.getType())
+                    .set(Effective::getTargetId, id));
         }
     }
 

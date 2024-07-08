@@ -29,19 +29,19 @@ import java.util.Set;
 public class FakeSqlGatewayServiceFactory implements SqlGatewayServiceFactory {
 
     public static final ConfigOption<String> HOST = ConfigOption.key("host")
-            .stringType()
-            .noDefaultValue()
-            .withDescription("The host of the Fake SQL gateway service.");
+        .stringType()
+        .noDefaultValue()
+        .withDescription("The host of the Fake SQL gateway service.");
 
     public static final ConfigOption<Integer> PORT = ConfigOption.key("port")
-            .intType()
-            .noDefaultValue()
-            .withDescription("The port of the Fake SQL gateway service.");
+        .intType()
+        .noDefaultValue()
+        .withDescription("The port of the Fake SQL gateway service.");
 
     public static final ConfigOption<Integer> DESCRIPTION = ConfigOption.key("description")
-            .intType()
-            .defaultValue(8080)
-            .withDescription("The Fake SQL gateway service.");
+        .intType()
+        .defaultValue(8080)
+        .withDescription("The Fake SQL gateway service.");
 
     @Override
     public String factoryIdentifier() {

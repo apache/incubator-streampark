@@ -54,28 +54,28 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
     public <T extends SystemPage.Tab> T goToTab(Class<T> tab) {
         if (tab == UserManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
+                .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
             menuUserManagement.click();
             return tab.cast(new UserManagementPage(driver));
         }
 
         if (tab == TeamManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
+                .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
             menuTeamManagement.click();
             return tab.cast(new TeamManagementPage(driver));
         }
 
         if (tab == RoleManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuRoleManagement));
+                .until(ExpectedConditions.elementToBeClickable(menuRoleManagement));
             menuRoleManagement.click();
             return tab.cast(new RoleManagementPage(driver));
         }
 
         if (tab == MemberManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
+                .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
             menuMemberManagement.click();
             return tab.cast(new MemberManagementPage(driver));
         }

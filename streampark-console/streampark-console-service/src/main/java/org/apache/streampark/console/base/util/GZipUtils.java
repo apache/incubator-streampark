@@ -45,10 +45,11 @@ public final class GZipUtils {
         // tar compress format
         ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
         try (
-                FileInputStream inputStream = new FileInputStream(tarZipSource);
-                BufferedInputStream bufInput = new BufferedInputStream(inputStream);
-                GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
-                ArchiveInputStream archiveInput = archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
+            FileInputStream inputStream = new FileInputStream(tarZipSource);
+            BufferedInputStream bufInput = new BufferedInputStream(inputStream);
+            GZIPInputStream gzipInput = new GZIPInputStream(bufInput);
+            ArchiveInputStream archiveInput =
+                archiveStreamFactory.createArchiveInputStream("tar", gzipInput)) {
 
             TarArchiveEntry entry = (TarArchiveEntry) archiveInput.getNextEntry();
 
@@ -63,8 +64,8 @@ public final class GZipUtils {
                 } else if (entry.isFile()) {
                     String fullFileName = createDir(targetDir, entryName, 2);
                     try (
-                            FileOutputStream outputStream = new FileOutputStream(fullFileName);
-                            BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream)) {
+                        FileOutputStream outputStream = new FileOutputStream(fullFileName);
+                        BufferedOutputStream bufOutput = new BufferedOutputStream(outputStream)) {
                         int b = -1;
                         while ((b = archiveInput.read()) != -1) {
                             bufOutput.write(b);

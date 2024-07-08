@@ -41,10 +41,10 @@ public class YarnQueueLabelExpression {
 
     @VisibleForTesting
     public static final String ERR_FORMAT_HINTS =
-            "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
+        "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
 
     private static final Pattern QUEUE_LABEL_PATTERN = Pattern
-            .compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
+        .compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
 
     private static final String QUEUE_LABEL_FORMAT = "%s" + AT + "%s";
 
@@ -67,8 +67,8 @@ public class YarnQueueLabelExpression {
     @Override
     public String toString() {
         return StringUtils.isBlank(labelExpression)
-                ? queue
-                : String.format(QUEUE_LABEL_FORMAT, queue, labelExpression);
+            ? queue
+            : String.format(QUEUE_LABEL_FORMAT, queue, labelExpression);
     }
 
     public static boolean isValid(String queueLabel, boolean ignoreEmpty) {
@@ -97,7 +97,7 @@ public class YarnQueueLabelExpression {
                                               @Nonnull String queue, @Nullable String labelExpression) {
         YarnQueueLabelExpression queueLabelExpression = new YarnQueueLabelExpression(queue, labelExpression);
         ApiAlertException.throwIfFalse(
-                isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
+            isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
         return queueLabelExpression;
     }
 
@@ -108,8 +108,8 @@ public class YarnQueueLabelExpression {
         YarnQueueLabelExpression yarnQueueLabelExpression = of(queueLabelExp);
         Map<String, String> queueLabelMap = new HashMap<>(2);
         yarnQueueLabelExpression
-                .getLabelExpression()
-                .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
+            .getLabelExpression()
+            .ifPresent(labelExp -> queueLabelMap.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), labelExp));
         queueLabelMap.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yarnQueueLabelExpression.queue);
         return queueLabelMap;
     }

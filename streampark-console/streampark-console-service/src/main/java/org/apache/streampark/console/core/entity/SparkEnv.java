@@ -86,9 +86,9 @@ public class SparkEnv implements Serializable {
         this.setScalaVersion(this.getSparkVersion().scalaVersion());
         if (!streamParkScalaVersion.startsWith(this.getSparkVersion().scalaVersion())) {
             throw new UnsupportedOperationException(
-                    String.format(
-                            "The current Scala version of StreamPark is %s, but the scala version of Spark to be added is %s, which does not match, Please check",
-                            streamParkScalaVersion, this.getSparkVersion().scalaVersion()));
+                String.format(
+                    "The current Scala version of StreamPark is %s, but the scala version of Spark to be added is %s, which does not match, Please check",
+                    streamParkScalaVersion, this.getSparkVersion().scalaVersion()));
         }
     }
 

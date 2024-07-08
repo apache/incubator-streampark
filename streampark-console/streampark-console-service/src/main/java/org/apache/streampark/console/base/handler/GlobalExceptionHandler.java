@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
     public RestResponse handleException(Exception e) {
         log.error("internal server error:", e);
         return RestResponse.fail(
-                ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
+            ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
     /**

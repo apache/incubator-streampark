@@ -39,11 +39,11 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
                                 String url) {
 
         return StringUtils.isBlank(sql)
-                ? ""
-                : String.format(
-                        "%s  | consume %d ms | SQL statement：%n %s;",
-                        DateUtils.formatFullTime(LocalDateTime.now()),
-                        elapsed,
-                        sql.replaceAll("\\s+", StringUtils.SPACE));
+            ? ""
+            : String.format(
+                "%s  | consume %d ms | SQL statement：%n %s;",
+                DateUtils.formatFullTime(LocalDateTime.now()),
+                elapsed,
+                sql.replaceAll("\\s+", StringUtils.SPACE));
     }
 }

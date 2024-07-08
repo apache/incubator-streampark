@@ -70,8 +70,8 @@ public class RoleController {
     public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
         List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(roleId);
         List<String> menuIdList = roleMenuList.stream()
-                .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
-                .collect(Collectors.toList());
+            .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
+            .collect(Collectors.toList());
         return RestResponse.success(menuIdList);
     }
 

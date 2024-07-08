@@ -150,8 +150,8 @@ public class FlinkCluster implements Serializable {
     public URI getRemoteURI() {
         try {
             HttpClientUtils.httpGetRequest(
-                    this.address,
-                    RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+                this.address,
+                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
             return new URI(address);
         } catch (Exception e) {
             log.error("FlinkCluster getRemoteURI error", e);
@@ -163,7 +163,7 @@ public class FlinkCluster implements Serializable {
     public Map<String, String> getFlinkConfig() throws JsonProcessingException {
         String restUrl = this.address + "/jobmanager/config";
         String json = HttpClientUtils.httpGetRequest(
-                restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+            restUrl, RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
         if (StringUtils.isBlank(json)) {
             return new HashMap<>();
         }
@@ -178,7 +178,7 @@ public class FlinkCluster implements Serializable {
     public Map<String, Object> getProperties() {
         Map<String, Object> propertyMap = new HashMap<>();
         Map<String, String> dynamicPropertyMap = PropertiesUtils
-                .extractDynamicPropertiesAsJava(this.getDynamicProperties());
+            .extractDynamicPropertiesAsJava(this.getDynamicProperties());
         propertyMap.putAll(this.getOptionMap());
         propertyMap.putAll(dynamicPropertyMap);
         ResolveOrder resolveOrder = ResolveOrder.of(this.getResolveOrder());

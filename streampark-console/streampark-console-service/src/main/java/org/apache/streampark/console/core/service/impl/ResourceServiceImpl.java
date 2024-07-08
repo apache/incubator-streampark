@@ -89,8 +89,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
-        implements
-            ResourceService {
+    implements
+        ResourceService {
 
     public static final String STATE = "state";
     public static final String EXCEPTION = "exception";
@@ -142,9 +142,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         }
 
         ApiAlertException.throwIfNotNull(
-                this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
-                "the resource %s already exists, please check.",
-                resource.getResourceName());
+            this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
+            "the resource %s already exists, please check.",
+            resource.getResourceName());
 
         if (!jars.isEmpty()) {
             String resourcePath = jars.get(0);
@@ -164,30 +164,30 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
         resource.setResourceName(connectorResource.getFactoryIdentifier());
         Optional.ofNullable(connectorResource.getRequiredOptions())
-                .ifPresent(
-                        v -> resource.setConnectorRequiredOptions(
-                                ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
+            .ifPresent(
+                v -> resource.setConnectorRequiredOptions(
+                    ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
         Optional.ofNullable(connectorResource.getOptionalOptions())
-                .ifPresent(
-                        v -> resource.setConnectorOptionalOptions(
-                                ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
+            .ifPresent(
+                v -> resource.setConnectorOptionalOptions(
+                    ExceptionUtils.wrapRuntimeException(v, JacksonUtils::write)));
     }
 
     private void check(Resource resource, List<String> jars, List<MavenPom> poms) {
         ApiAlertException.throwIfTrue(
-                jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+            jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
         ApiAlertException.throwIfTrue(
-                resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
-                "Please upload jar for Flink_App resource");
+            resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
+            "Please upload jar for Flink_App resource");
         ApiAlertException.throwIfTrue(
-                jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+            jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
     }
 
     @Override
     public Resource findByResourceName(Long teamId, String name) {
         LambdaQueryWrapper<Resource> queryWrapper = new LambdaQueryWrapper<Resource>()
-                .eq(Resource::getResourceName, name)
-                .eq(Resource::getTeamId, teamId);
+            .eq(Resource::getResourceName, name)
+            .eq(Resource::getTeamId, teamId);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -199,8 +199,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         String resourceName = resource.getResourceName();
         if (resourceName != null) {
             ApiAlertException.throwIfFalse(
-                    resourceName.equals(findResource.getResourceName()),
-                    "Please make sure the resource name is not changed.");
+                resourceName.equals(findResource.getResourceName()),
+                "Please make sure the resource name is not changed.");
 
             Dependency dependency = Dependency.toDependency(resource.getResource());
             if (!dependency.getJar().isEmpty()) {
@@ -222,10 +222,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         checkOrElseAlert(findResource);
 
         String filePath = String.format(
-                "%s/%d/%s",
-                Workspace.local().APP_UPLOADS(),
-                findResource.getTeamId(),
-                findResource.getResourceName());
+            "%s/%d/%s",
+            Workspace.local().APP_UPLOADS(),
+            findResource.getTeamId(),
+            findResource.getResourceName());
 
         if (!new File(filePath).exists() && StringUtils.isNotBlank(findResource.getFilePath())) {
             filePath = findResource.getFilePath();
@@ -250,8 +250,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
         LambdaUpdateWrapper<Resource> updateWrapper = new LambdaUpdateWrapper<Resource>()
-                .eq(Resource::getCreatorId, userId)
-                .set(Resource::getCreatorId, targetUserId);
+            .eq(Resource::getCreatorId, userId)
+            .set(Resource::getCreatorId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -324,19 +324,19 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         }
 
         if (resourceParam.getId() != null
-                && !(getById(resourceParam.getId())
-                        .getResourceName()
-                        .equals(connectorResource.getFactoryIdentifier()))) {
+            && !(getById(resourceParam.getId())
+                .getResourceName()
+                .equals(connectorResource.getFactoryIdentifier()))) {
             return buildExceptResponse(
-                    new RuntimeException("resource name different with FactoryIdentifier"), 5);
+                new RuntimeException("resource name different with FactoryIdentifier"), 5);
         }
         return RestResponse.success()
-                .data(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
+            .data(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
     }
 
     private static RestResponse buildExceptResponse(Exception e, int code) {
         return RestResponse.success()
-                .data(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
+            .data(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
     }
 
     private RestResponse checkFlinkApp(Resource resourceParam) {
@@ -349,7 +349,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(e, 1);
         }
         ApiAlertException.throwIfTrue(
-                jarFile == null || !jarFile.exists(), "flink app jar must exist.");
+            jarFile == null || !jarFile.exists(), "flink app jar must exist.");
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
@@ -365,7 +365,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private boolean existsFlinkConnector(Long id, String connectorId) {
         LambdaQueryWrapper<Resource> lambdaQueryWrapper = new LambdaQueryWrapper<Resource>()
-                .eq(Resource::getResourceName, connectorId);
+            .eq(Resource::getResourceName, connectorId);
         if (id != null) {
             lambdaQueryWrapper.ne(Resource::getId, id);
         }
@@ -375,9 +375,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     private FlinkConnector getConnectorResource(List<File> jars, List<String> factories) {
         Class<Factory> className = Factory.class;
         URL[] array = jars.stream()
-                .map(
-                        file -> ExceptionUtils.wrapRuntimeException(file, handle -> handle.toURI().toURL()))
-                .toArray(URL[]::new);
+            .map(
+                file -> ExceptionUtils.wrapRuntimeException(file,
+                    handle -> handle.toURI().toURL()))
+            .toArray(URL[]::new);
 
         try (URLClassLoader urlClassLoader = URLClassLoader.newInstance(array)) {
             ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
@@ -390,17 +391,17 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                         connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
                     } catch (Exception e) {
                         log.error(
-                                "Failed to set class name or factory identifier for connector resource. Class name: {}, Factory identifier: {}",
-                                factoryClassName,
-                                factory.factoryIdentifier(),
-                                e);
+                            "Failed to set class name or factory identifier for connector resource. Class name: {}, Factory identifier: {}",
+                            factoryClassName,
+                            factory.factoryIdentifier(),
+                            e);
                     }
 
                     try {
                         Map<String, String> requiredOptions = new HashMap<>(0);
                         factory
-                                .requiredOptions()
-                                .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
+                            .requiredOptions()
+                            .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
                         connectorResource.setRequiredOptions(requiredOptions);
                     } catch (Exception e) {
                         log.error("Failed to set required options for connector resource.", e);
@@ -409,8 +410,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                     try {
                         Map<String, String> optionalOptions = new HashMap<>(0);
                         factory
-                                .optionalOptions()
-                                .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
+                            .optionalOptions()
+                            .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
                         connectorResource.setOptionalOptions(optionalOptions);
                     } catch (Exception e) {
                         log.error("Fail to set optional options for connector resource.", e);
@@ -440,7 +441,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 String fileName = String.format("%s-%s.jar", artifact.artifactId(), artifact.version());
                 Optional<File> jarFile = files.stream().filter(x -> x.getName().equals(fileName)).findFirst();
                 jarFile.ifPresent(
-                        file -> transferTeamResource(resource.getTeamId(), file.getAbsolutePath()));
+                    file -> transferTeamResource(resource.getTeamId(), file.getAbsolutePath()));
                 return jarFile.orElse(null);
             }
             return null;
@@ -455,16 +456,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         File localJar = new File(resourcePath);
         File teamUploadJar = new File(teamUploads, localJar.getName());
         ApiAlertException.throwIfFalse(
-                localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
+            localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
         FsOperator.lfs()
-                .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
+            .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
     }
 
     private void checkOrElseAlert(Resource resource) {
         ApiAlertException.throwIfNull(resource, "The resource does not exist.");
 
         ApiAlertException.throwIfTrue(
-                isDependByApplications(resource), "The resource is still in use, cannot be removed.");
+            isDependByApplications(resource), "The resource is still in use, cannot be removed.");
     }
 
     private boolean isDependByApplications(Resource resource) {
@@ -475,14 +476,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationManageService.listByTeamId(resource.getTeamId());
         Map<Long, Application> applicationMap = applications.stream()
-                .collect(Collectors.toMap(Application::getId, application -> application));
+            .collect(Collectors.toMap(Application::getId, application -> application));
 
         // Get the application that depends on this resource
         List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(resource.getTeamId());
         for (FlinkSql flinkSql : flinkSqls) {
             String sqlTeamResource = flinkSql.getTeamResource();
             if (sqlTeamResource != null
-                    && sqlTeamResource.contains(String.valueOf(resource.getTeamId()))) {
+                && sqlTeamResource.contains(String.valueOf(resource.getTeamId()))) {
                 Application app = applicationMap.get(flinkSql.getAppId());
                 if (!dependApplications.contains(app)) {
                     dependApplications.add(applicationMap.get(flinkSql.getAppId()));

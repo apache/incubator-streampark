@@ -50,24 +50,26 @@ public class EmailConfig {
             EmailConfig emailConfig = new EmailConfig();
 
             emailConfig.setSmtpHost(
-                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
+                SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
 
             emailConfig.setSmtpPort(
-                    Integer.valueOf(
-                            SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue()));
+                Integer.valueOf(
+                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PORT)
+                        .getSettingValue()));
 
             emailConfig.setFrom(
-                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
+                SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
 
             emailConfig.setUserName(
-                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
+                SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
 
             emailConfig.setPassword(
-                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+                SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
 
             emailConfig.setSsl(
-                    Boolean.parseBoolean(
-                            SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue()));
+                Boolean.parseBoolean(
+                    SettingService.SETTINGS.get(SettingService.KEY_ALERT_EMAIL_SSL)
+                        .getSettingValue()));
 
             return emailConfig;
         } catch (Exception e) {

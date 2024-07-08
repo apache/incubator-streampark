@@ -104,8 +104,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findByUserId(Long teamId, Long userId) {
         ApiAlertException.throwIfNull(teamId, "The team id is required.");
         LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>()
-                .eq(Member::getTeamId, teamId)
-                .eq(Member::getUserId, userId);
+            .eq(Member::getTeamId, teamId)
+            .eq(Member::getUserId, userId);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -122,14 +122,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         ApiAlertException.throwIfNull(user, "The username [%s] not found", member.getUserName());
 
         ApiAlertException.throwIfNull(
-                roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+            roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
         Team team = teamService.getById(member.getTeamId());
         ApiAlertException.throwIfNull(team, "The teamId [%s] not found", member.getTeamId());
         ApiAlertException.throwIfNotNull(
-                findByUserId(member.getTeamId(), user.getUserId()),
-                "The user [%s] has been added the team [%s], please don't add it again.",
-                member.getUserName(),
-                team.getTeamName());
+            findByUserId(member.getTeamId(), user.getUserId()),
+            "The user [%s] has been added the team [%s], please don't add it again.",
+            member.getUserName(),
+            team.getTeamName());
 
         member.setId(null);
         member.setUserId(user.getUserId());
@@ -153,11 +153,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         Member oldMember = this.getById(member.getId());
         ApiAlertException.throwIfNull(oldMember, "The member [id=%s] not found", member.getId());
         AssertUtils.state(
-                oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
+            oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
         AssertUtils.state(
-                oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
+            oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
         ApiAlertException.throwIfNull(
-                roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+            roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
         oldMember.setRoleId(member.getRoleId());
         updateById(oldMember);
     }

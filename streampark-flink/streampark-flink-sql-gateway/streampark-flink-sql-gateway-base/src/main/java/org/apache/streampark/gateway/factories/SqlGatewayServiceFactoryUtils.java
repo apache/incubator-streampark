@@ -42,38 +42,38 @@ public class SqlGatewayServiceFactoryUtils {
     public static List<SqlGatewayService> createSqlGatewayService(Map<String, String> configuration) {
 
         String identifiersStr = Optional.ofNullable(configuration.get(SQL_GATEWAY_SERVICE_TYPE.getKey()))
-                .map(
-                        idStr -> {
-                            if (idStr.trim().isEmpty()) {
-                                return null;
-                            }
-                            return idStr.trim();
-                        })
-                .orElseThrow(
-                        () -> new ValidationException(
-                                String.format(
-                                        "Service options do not contain an option key '%s' for discovering an service.",
-                                        SQL_GATEWAY_SERVICE_TYPE.getKey())));
+            .map(
+                idStr -> {
+                    if (idStr.trim().isEmpty()) {
+                        return null;
+                    }
+                    return idStr.trim();
+                })
+            .orElseThrow(
+                () -> new ValidationException(
+                    String.format(
+                        "Service options do not contain an option key '%s' for discovering an service.",
+                        SQL_GATEWAY_SERVICE_TYPE.getKey())));
 
         List<String> identifiers = Arrays.asList(identifiersStr.split(Constant.SEMICOLON));
 
         if (identifiers.isEmpty()) {
             throw new ValidationException(
-                    String.format(
-                            "Service options do not contain an option key '%s' for discovering an service.",
-                            SQL_GATEWAY_SERVICE_TYPE.getKey()));
+                String.format(
+                    "Service options do not contain an option key '%s' for discovering an service.",
+                    SQL_GATEWAY_SERVICE_TYPE.getKey()));
         }
         validateSpecifiedServicesAreUnique(identifiers);
 
         List<SqlGatewayService> services = new ArrayList<>();
         for (String identifier : identifiers) {
             final SqlGatewayServiceFactory factory = FactoryUtil.discoverFactory(
-                    Thread.currentThread().getContextClassLoader(),
-                    SqlGatewayServiceFactory.class,
-                    identifier);
+                Thread.currentThread().getContextClassLoader(),
+                SqlGatewayServiceFactory.class,
+                identifier);
 
             services.add(
-                    factory.createSqlGatewayService(new DefaultServiceFactoryContext(configuration)));
+                factory.createSqlGatewayService(new DefaultServiceFactoryContext(configuration)));
         }
         return services;
     }
@@ -103,18 +103,18 @@ public class SqlGatewayServiceFactoryUtils {
                                                   Set<ConfigOption<?>> requiredOptions, Map<String, String> options) {
 
             final List<String> missingRequiredOptions = requiredOptions.stream()
-                    .map(ConfigOption::getKey)
-                    .filter(key -> options.get(key) == null)
-                    .sorted()
-                    .collect(Collectors.toList());
+                .map(ConfigOption::getKey)
+                .filter(key -> options.get(key) == null)
+                .sorted()
+                .collect(Collectors.toList());
 
             if (!missingRequiredOptions.isEmpty()) {
                 throw new ValidationException(
-                        String.format(
-                                "One or more required options are missing.\n\n"
-                                        + "Missing required options are:\n\n"
-                                        + "%s",
-                                String.join("\n", missingRequiredOptions)));
+                    String.format(
+                        "One or more required options are missing.\n\n"
+                            + "Missing required options are:\n\n"
+                            + "%s",
+                        String.join("\n", missingRequiredOptions)));
             }
         }
     }
@@ -140,10 +140,10 @@ public class SqlGatewayServiceFactoryUtils {
         for (String identifier : identifiers) {
             if (uniqueIdentifiers.contains(identifier)) {
                 throw new ValidationException(
-                        String.format(
-                                "Get the duplicate service identifier '%s' for the option '%s'. "
-                                        + "Please keep the specified service identifier unique.",
-                                identifier, SQL_GATEWAY_SERVICE_TYPE.getKey()));
+                    String.format(
+                        "Get the duplicate service identifier '%s' for the option '%s'. "
+                            + "Please keep the specified service identifier unique.",
+                        identifier, SQL_GATEWAY_SERVICE_TYPE.getKey()));
             }
             uniqueIdentifiers.add(identifier);
         }

@@ -49,9 +49,9 @@ public class TeamManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(SystemPage.class)
-                .goToTab(TeamManagementPage.class);
+            .login(userName, password, teamName)
+            .goToNav(SystemPage.class)
+            .goToTab(TeamManagementPage.class);
     }
 
     @Test
@@ -61,11 +61,11 @@ public class TeamManagementTest {
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(teamManagementPage.teamList())
-                                .as("Team list should contain newly-created team")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(newTeamName)));
+            .untilAsserted(
+                () -> assertThat(teamManagementPage.teamList())
+                    .as("Team list should contain newly-created team")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(newTeamName)));
     }
 
     @Test
@@ -75,11 +75,11 @@ public class TeamManagementTest {
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(teamManagementPage.errorMessageList())
-                                .as("Team Duplicated Error message should be displayed")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("Create team failed.")));
+            .untilAsserted(
+                () -> assertThat(teamManagementPage.errorMessageList())
+                    .as("Team Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("Create team failed.")));
 
         teamManagementPage.errorMessageConfirmButton().click();
         teamManagementPage.createTeamForm().buttonCancel().click();
@@ -94,11 +94,11 @@ public class TeamManagementTest {
         teamManagementPage.editTeam(newTeamName, editDescription);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(teamManagementPage.teamList())
-                                .as("Team list should contain edited team")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(editDescription)));
+            .untilAsserted(
+                () -> assertThat(teamManagementPage.teamList())
+                    .as("Team list should contain edited team")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(editDescription)));
     }
 
     @Test
@@ -109,12 +109,12 @@ public class TeamManagementTest {
         teamManagementPage.deleteTeam(newTeamName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(teamManagementPage.teamList())
-                                    .noneMatch(it -> it.getText().contains(newTeamName));
-                        });
+                    assertThat(teamManagementPage.teamList())
+                        .noneMatch(it -> it.getText().contains(newTeamName));
+                });
     }
 }

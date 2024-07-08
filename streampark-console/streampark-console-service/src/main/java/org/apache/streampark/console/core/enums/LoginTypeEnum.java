@@ -49,8 +49,8 @@ public enum LoginTypeEnum {
 
     public static LoginTypeEnum of(String loginType) {
         return Arrays.stream(values())
-                .filter((x) -> Objects.equals(x.toString(), loginType))
-                .findFirst()
-                .orElse(null);
+            .filter((x) -> Objects.equals(x.toString(), loginType))
+            .findFirst()
+            .orElse(null);
     }
 }

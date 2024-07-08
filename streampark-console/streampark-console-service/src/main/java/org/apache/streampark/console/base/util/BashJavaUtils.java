@@ -89,12 +89,12 @@ public class BashJavaUtils {
                 String flinkPort = config.getOrDefault("rest.port", "8081");
                 System.setOut(originalOut);
                 System.out.println(
-                        flinkHome
-                                .getAbsolutePath()
-                                .concat(",")
-                                .concat(flinkHome.getName())
-                                .concat(",")
-                                .concat(flinkPort));
+                    flinkHome
+                        .getAbsolutePath()
+                        .concat(",")
+                        .concat(flinkHome.getName())
+                        .concat(",")
+                        .concat(flinkPort));
                 break;
             case "--replace":
                 String filePath = actionArgs[0];

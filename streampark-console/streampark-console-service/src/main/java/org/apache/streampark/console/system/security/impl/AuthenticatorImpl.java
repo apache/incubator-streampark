@@ -45,7 +45,7 @@ public class AuthenticatorImpl implements Authenticator {
         LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
 
         ApiAlertException.throwIfNull(
-                loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
+            loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
 
         switch (loginTypeEnum) {
             case PASSWORD:
@@ -56,7 +56,7 @@ public class AuthenticatorImpl implements Authenticator {
                 return ssoAuthenticate(username);
             default:
                 throw new ApiAlertException(
-                        String.format("the login type [%s] is not supported.", loginType));
+                    String.format("the login type [%s] is not supported.", loginType));
         }
     }
 
@@ -66,15 +66,15 @@ public class AuthenticatorImpl implements Authenticator {
         ApiAlertException.throwIfNull(user, String.format("User [%s] does not exist", username));
 
         ApiAlertException.throwIfTrue(
-                user.getLoginType() != LoginTypeEnum.PASSWORD,
-                "user [%s] can not login with PASSWORD",
-                username);
+            user.getLoginType() != LoginTypeEnum.PASSWORD,
+            "user [%s] can not login with PASSWORD",
+            username);
 
         String salt = user.getSalt();
         password = ShaHashUtils.encrypt(salt, password);
 
         ApiAlertException.throwIfFalse(
-                StringUtils.equals(user.getPassword(), password), "Incorrect password");
+            StringUtils.equals(user.getPassword(), password), "Incorrect password");
 
         return user;
     }
@@ -89,10 +89,10 @@ public class AuthenticatorImpl implements Authenticator {
 
         if (user != null) {
             ApiAlertException.throwIfTrue(
-                    user.getLoginType() != LoginTypeEnum.LDAP,
-                    "user [%s] can only sign in with %s",
-                    username,
-                    user.getLoginType());
+                user.getLoginType() != LoginTypeEnum.LDAP,
+                "user [%s] can only sign in with %s",
+                username,
+                user.getLoginType());
 
             return user;
         }
@@ -105,10 +105,10 @@ public class AuthenticatorImpl implements Authenticator {
 
         if (user != null) {
             ApiAlertException.throwIfTrue(
-                    user.getLoginType() != LoginTypeEnum.SSO,
-                    "user [%s] can only sign in with %s",
-                    username,
-                    user.getLoginType());
+                user.getLoginType() != LoginTypeEnum.SSO,
+                "user [%s] can only sign in with %s",
+                username,
+                user.getLoginType());
             return user;
         }
 

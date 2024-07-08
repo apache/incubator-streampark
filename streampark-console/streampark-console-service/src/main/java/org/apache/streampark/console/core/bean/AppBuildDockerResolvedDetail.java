@@ -50,9 +50,9 @@ public class AppBuildDockerResolvedDetail {
             return detail;
         }
         return detail
-                .setPull(ImagePull.of(snapshot.pull()))
-                .setBuild(ImageBuild.of(snapshot.build()))
-                .setPush(ImagePush.of(snapshot.push()));
+            .setPull(ImagePull.of(snapshot.pull()))
+            .setBuild(ImageBuild.of(snapshot.build()))
+            .setPush(ImagePush.of(snapshot.push()));
     }
 
     @Data
@@ -67,18 +67,19 @@ public class AppBuildDockerResolvedDetail {
                 return null;
             }
             return new ImagePull()
-                    .setSt(new Date(snapshot.emitTime()))
-                    .setLayers(
-                            snapshot.detailAsJava().stream()
-                                    .map(
-                                            e -> new ImageLayer()
-                                                    .setLayerId(e.layerId())
-                                                    .setStatus(e.status())
-                                                    .setCurrentMb(e.currentMb())
-                                                    .setTotalMb(e.totalMb())
-                                                    .setPercent(e.percent()))
-                                    .sorted(Comparator.comparing(ImageLayer::getStatus).reversed())
-                                    .collect(Collectors.toList()));
+                .setSt(new Date(snapshot.emitTime()))
+                .setLayers(
+                    snapshot.detailAsJava().stream()
+                        .map(
+                            e -> new ImageLayer()
+                                .setLayerId(e.layerId())
+                                .setStatus(e.status())
+                                .setCurrentMb(e.currentMb())
+                                .setTotalMb(e.totalMb())
+                                .setPercent(e.percent()))
+                        .sorted(Comparator.comparing(ImageLayer::getStatus)
+                            .reversed())
+                        .collect(Collectors.toList()));
         }
     }
 
@@ -94,11 +95,12 @@ public class AppBuildDockerResolvedDetail {
                 return null;
             }
             return new ImageBuild()
-                    .setSt(new Date(snapshot.emitTime()))
-                    .setSteps(
-                            snapshot.detailAsJava().stream()
-                                    .filter(e -> e.trim().startsWith("Step") || e.trim().startsWith("step"))
-                                    .collect(Collectors.toList()));
+                .setSt(new Date(snapshot.emitTime()))
+                .setSteps(
+                    snapshot.detailAsJava().stream()
+                        .filter(e -> e.trim().startsWith("Step")
+                            || e.trim().startsWith("step"))
+                        .collect(Collectors.toList()));
         }
     }
 
@@ -114,18 +116,19 @@ public class AppBuildDockerResolvedDetail {
                 return null;
             }
             return new ImagePush()
-                    .setSt(new Date(snapshot.emitTime()))
-                    .setLayers(
-                            snapshot.detailAsJava().stream()
-                                    .map(
-                                            e -> new ImageLayer()
-                                                    .setLayerId(e.layerId())
-                                                    .setStatus(e.status())
-                                                    .setCurrentMb(e.currentMb())
-                                                    .setTotalMb(e.totalMb())
-                                                    .setPercent(e.percent()))
-                                    .sorted(Comparator.comparing(ImageLayer::getStatus).reversed())
-                                    .collect(Collectors.toList()));
+                .setSt(new Date(snapshot.emitTime()))
+                .setLayers(
+                    snapshot.detailAsJava().stream()
+                        .map(
+                            e -> new ImageLayer()
+                                .setLayerId(e.layerId())
+                                .setStatus(e.status())
+                                .setCurrentMb(e.currentMb())
+                                .setTotalMb(e.totalMb())
+                                .setPercent(e.percent()))
+                        .sorted(Comparator.comparing(ImageLayer::getStatus)
+                            .reversed())
+                        .collect(Collectors.toList()));
         }
     }
 

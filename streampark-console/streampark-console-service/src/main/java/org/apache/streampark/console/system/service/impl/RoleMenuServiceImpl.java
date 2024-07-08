@@ -33,8 +33,8 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
-        implements
-            RoleMenuService {
+    implements
+        RoleMenuService {
 
     @Override
     @Transactional
@@ -48,7 +48,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
     public void removeByMenuIds(String[] menuIds) {
         List<String> menuIdList = Arrays.asList(menuIds);
         LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<RoleMenu>().in(RoleMenu::getMenuId,
-                menuIdList);
+            menuIdList);
         baseMapper.delete(queryWrapper);
     }
 

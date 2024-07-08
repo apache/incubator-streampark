@@ -78,21 +78,21 @@ public class ServiceHelper {
         if (flinkSqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
             ApiAlertException.throwIfFalse(
-                    localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
+                localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
 
             String regex = String.format("streampark-flink-sqlclient_%s-.*\\.jar", flinkEnv.getScalaVersion());
 
             List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
-                    .filter(x -> x.matches(regex))
-                    .collect(Collectors.toList());
+                .filter(x -> x.matches(regex))
+                .collect(Collectors.toList());
 
             ApiAlertException.throwIfTrue(
-                    jars.isEmpty(),
-                    "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+                jars.isEmpty(),
+                "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
 
             ApiAlertException.throwIfTrue(
-                    jars.size() > 1,
-                    "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+                jars.size() > 1,
+                "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
             flinkSqlClientJar = jars.get(0);
         }
         return flinkSqlClientJar;
@@ -102,20 +102,21 @@ public class ServiceHelper {
         if (sparkSqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
             ApiAlertException.throwIfFalse(
-                    localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
+                localClient.exists(), "[StreamPark] " + localClient + " no exists. please check.");
             List<String> jars = Arrays.stream(Objects.requireNonNull(localClient.list()))
-                    .filter(
-                            x -> x.matches(
-                                    "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion() + "-.*\\.jar"))
-                    .collect(Collectors.toList());
+                .filter(
+                    x -> x.matches(
+                        "streampark-spark-sqlclient_" + sparkEnv.getScalaVersion()
+                            + "-.*\\.jar"))
+                .collect(Collectors.toList());
 
             ApiAlertException.throwIfTrue(
-                    jars.isEmpty(),
-                    "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
+                jars.isEmpty(),
+                "[StreamPark] can't found streampark-flink-sqlclient jar in " + localClient);
 
             ApiAlertException.throwIfTrue(
-                    jars.size() > 1,
-                    "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
+                jars.size() > 1,
+                "[StreamPark] found multiple streampark-flink-sqlclient jar in " + localClient);
 
             sparkSqlClientJar = jars.get(0);
         }

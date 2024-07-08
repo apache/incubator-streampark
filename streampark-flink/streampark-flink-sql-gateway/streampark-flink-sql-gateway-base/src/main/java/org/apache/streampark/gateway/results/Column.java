@@ -60,8 +60,8 @@ public class Column implements Serializable {
         }
         Column column = (Column) o;
         return Objects.equals(name, column.name)
-                && Objects.equals(type, column.type)
-                && Objects.equals(comment, column.comment);
+            && Objects.equals(type, column.type)
+            && Objects.equals(comment, column.comment);
     }
 
     @Override
@@ -72,15 +72,15 @@ public class Column implements Serializable {
     @Override
     public String toString() {
         return "Column{"
-                + "name='"
-                + name
-                + '\''
-                + ", type='"
-                + type
-                + '\''
-                + ", comment='"
-                + comment
-                + '\''
-                + '}';
+            + "name='"
+            + name
+            + '\''
+            + ", type='"
+            + type
+            + '\''
+            + ", comment='"
+            + comment
+            + '\''
+            + '}';
     }
 }

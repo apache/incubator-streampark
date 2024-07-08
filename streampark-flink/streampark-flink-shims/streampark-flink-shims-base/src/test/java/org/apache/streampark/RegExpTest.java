@@ -36,15 +36,15 @@ class RegExpTest {
      * Example：create catalog hive_catalog with('name' = 'my_hive', 'conf' = '/home/hive/conf')
      */
     private static final Pattern CREATE_HIVE_CATALOG = Pattern.compile("CREATE\\s+CATALOG\\s+.+",
-            DEFAULT_PATTERN_FLAGS);
+        DEFAULT_PATTERN_FLAGS);
 
     @Test
     void testCreateHiveCatalog() {
         String str = "create catalog hive with (\n"
-                + "    'type' = 'hive',\n"
-                + "    'hadoop-conf-dir' = 'D:\\IDEAWorkspace\\work\\baishan\\log\\data-max\\src\\main\\resources',\n"
-                + "    'hive-conf-dir' = 'D:\\IDEAWorkspace\\work\\baishan\\log\\data-max\\src\\main\\resources'\n"
-                + ")";
+            + "    'type' = 'hive',\n"
+            + "    'hadoop-conf-dir' = 'D:\\IDEAWorkspace\\work\\baishan\\log\\data-max\\src\\main\\resources',\n"
+            + "    'hive-conf-dir' = 'D:\\IDEAWorkspace\\work\\baishan\\log\\data-max\\src\\main\\resources'\n"
+            + ")";
         Matcher matcher = CREATE_HIVE_CATALOG.matcher(str);
         System.out.println(matcher.matches());
     }
@@ -55,20 +55,20 @@ class RegExpTest {
      * Example：create function test_fun as com.flink.testFun
      */
     private static final Pattern CREATE_FUNCTION = Pattern.compile(
-            "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+'([A-Za-z].+)'\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*)",
-            DEFAULT_PATTERN_FLAGS);
+        "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF NOT EXISTS\\s+|)([A-Za-z]+[A-Za-z\\d.\\-_]+)\\s+AS\\s+'([A-Za-z].+)'\\s+LANGUAGE\\s+(JAVA|SCALA|PYTHON)\\s*)",
+        DEFAULT_PATTERN_FLAGS);
 
     @Test
     void testCreateFunction() {
         String str =
-                "create   function if not exists hive.get_json_value as 'com.flink.function.JsonValueFunction' language java";
+            "create   function if not exists hive.get_json_value as 'com.flink.function.JsonValueFunction' language java";
         Matcher matcher = CREATE_FUNCTION.matcher(str);
         System.out.println(matcher.matches());
     }
 
     /** USE [catalog_name.]database_name */
     private static final Pattern USE_DATABASE = Pattern.compile("USE\\s+(?!(CATALOG|MODULES)).*",
-            DEFAULT_PATTERN_FLAGS);
+        DEFAULT_PATTERN_FLAGS);
 
     @Test
     void testUseDatabase() {
@@ -79,7 +79,7 @@ class RegExpTest {
 
     /** SHOW [USER] FUNCTIONS */
     private static final Pattern SHOW_FUNCTIONS = Pattern.compile("SHOW\\s+(USER\\s+|)FUNCTIONS",
-            DEFAULT_PATTERN_FLAGS);
+        DEFAULT_PATTERN_FLAGS);
 
     @Test
     void testShowFunction() {

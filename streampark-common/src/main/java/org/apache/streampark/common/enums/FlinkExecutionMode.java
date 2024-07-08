@@ -185,7 +185,7 @@ public enum FlinkExecutionMode {
     @Nonnull
     public static List<Integer> getKubernetesMode() {
         return Lists.newArrayList(
-                KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
+            KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
     }
 
     /** Judge the given flink execution mode whether is session execution mode. */

@@ -40,17 +40,17 @@ public class ThrowsTest {
     @Test
     void testThrowIfTrue() {
         assertThatThrownBy(() -> Throws.throwIfTrue(true, null))
-                .hasMessage("The target exception must be specified.");
+            .hasMessage("The target exception must be specified.");
         assertThatThrownBy(() -> Throws.throwIfTrue(true, AlertException.class))
-                .hasCauseInstanceOf(NoSuchMethodException.class);
+            .hasCauseInstanceOf(NoSuchMethodException.class);
         assertThatThrownBy(() -> Throws.throwIfTrue(true, AlertException.class, PURE_MSG_TPL))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(PURE_MSG_TPL);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(PURE_MSG_TPL);
         assertThatThrownBy(() -> Throws.throwIfTrue(true, AlertException.class, MSG_TPL, ARG))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(RENDERED_STR);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(RENDERED_STR);
         assertThatThrownBy(() -> Throws.throwIfTrue(true, TestRuntimeException.class))
-                .isInstanceOf(TestRuntimeException.class);
+            .isInstanceOf(TestRuntimeException.class);
 
         Throws.throwIfTrue(false, null);
         Throws.throwIfTrue(false, AlertException.class);
@@ -62,17 +62,17 @@ public class ThrowsTest {
     @Test
     void testThrowIfFalse() {
         assertThatThrownBy(() -> Throws.throwIfFalse(false, null))
-                .hasMessage("The target exception must be specified.");
+            .hasMessage("The target exception must be specified.");
         assertThatThrownBy(() -> Throws.throwIfFalse(false, AlertException.class))
-                .hasCauseInstanceOf(NoSuchMethodException.class);
+            .hasCauseInstanceOf(NoSuchMethodException.class);
         assertThatThrownBy(() -> Throws.throwIfFalse(false, AlertException.class, PURE_MSG_TPL))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(PURE_MSG_TPL);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(PURE_MSG_TPL);
         assertThatThrownBy(() -> Throws.throwIfFalse(false, AlertException.class, MSG_TPL, ARG))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(RENDERED_STR);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(RENDERED_STR);
         assertThatThrownBy(() -> Throws.throwIfFalse(false, TestRuntimeException.class))
-                .isInstanceOf(TestRuntimeException.class);
+            .isInstanceOf(TestRuntimeException.class);
 
         Throws.throwIfFalse(true, null);
         Throws.throwIfFalse(true, AlertException.class);
@@ -84,17 +84,17 @@ public class ThrowsTest {
     @Test
     void testThrowIfNull() {
         assertThatThrownBy(() -> Throws.throwIfNull(null, null))
-                .hasMessage("The target exception must be specified.");
+            .hasMessage("The target exception must be specified.");
         assertThatThrownBy(() -> Throws.throwIfNull(null, AlertException.class))
-                .hasCauseInstanceOf(NoSuchMethodException.class);
+            .hasCauseInstanceOf(NoSuchMethodException.class);
         assertThatThrownBy(() -> Throws.throwIfNull(null, AlertException.class, PURE_MSG_TPL))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(PURE_MSG_TPL);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(PURE_MSG_TPL);
         assertThatThrownBy(() -> Throws.throwIfNull(null, AlertException.class, MSG_TPL, ARG))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(RENDERED_STR);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(RENDERED_STR);
         assertThatThrownBy(() -> Throws.throwIfNull(null, TestRuntimeException.class))
-                .isInstanceOf(TestRuntimeException.class);
+            .isInstanceOf(TestRuntimeException.class);
 
         Throws.throwIfNull(this, null);
         Throws.throwIfNull(this, AlertException.class);
@@ -106,17 +106,17 @@ public class ThrowsTest {
     @Test
     void testThrowIfNonnull() {
         assertThatThrownBy(() -> Throws.throwIfNonnull(this, null))
-                .hasMessage("The target exception must be specified.");
+            .hasMessage("The target exception must be specified.");
         assertThatThrownBy(() -> Throws.throwIfNonnull(this, AlertException.class))
-                .hasCauseInstanceOf(NoSuchMethodException.class);
+            .hasCauseInstanceOf(NoSuchMethodException.class);
         assertThatThrownBy(() -> Throws.throwIfNonnull(this, AlertException.class, PURE_MSG_TPL))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(PURE_MSG_TPL);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(PURE_MSG_TPL);
         assertThatThrownBy(() -> Throws.throwIfNonnull(this, AlertException.class, MSG_TPL, ARG))
-                .isInstanceOf(AlertException.class)
-                .hasMessage(RENDERED_STR);
+            .isInstanceOf(AlertException.class)
+            .hasMessage(RENDERED_STR);
         assertThatThrownBy(() -> Throws.throwIfNonnull(this, TestRuntimeException.class))
-                .isInstanceOf(TestRuntimeException.class);
+            .isInstanceOf(TestRuntimeException.class);
 
         Throws.throwIfNonnull(null, null);
         Throws.throwIfNonnull(null, AlertException.class);

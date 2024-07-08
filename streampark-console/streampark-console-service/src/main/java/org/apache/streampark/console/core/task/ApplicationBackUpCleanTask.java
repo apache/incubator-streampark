@@ -41,27 +41,30 @@ public class ApplicationBackUpCleanTask {
         log.info("Start to clean application backup");
         // select all application backup which count > maxBackupNum group by app_id
         backUpService.lambdaQuery().groupBy(ApplicationBackUp::getAppId)
-                .having("count(*) > " + maxBackupNum).list().stream()
-                .map(ApplicationBackUp::getAppId)
-                .forEach(
-                        appId -> {
-                            // order by create_time desc and skip first maxBackupNum records and delete others
-                            backUpService.lambdaQuery().eq(ApplicationBackUp::getAppId, appId)
-                                    .orderByDesc(ApplicationBackUp::getCreateTime).list().stream()
-                                    .skip(maxBackupNum)
-                                    .forEach(
-                                            backUp -> {
-                                                try {
-                                                    backUpService.removeById(backUp.getId());
-                                                } catch (Exception e) {
-                                                    log.error(
-                                                            "Clean application backup failed for app id: {} , backup id: {}",
-                                                            appId,
-                                                            backUp.getId(),
-                                                            e);
-                                                }
-                                            });
-                        });
+            .having("count(*) > " + maxBackupNum).list().stream()
+            .map(ApplicationBackUp::getAppId)
+            .forEach(
+                appId -> {
+                    // order by create_time desc and skip first maxBackupNum records and delete
+                    // others
+                    backUpService.lambdaQuery().eq(ApplicationBackUp::getAppId, appId)
+                        .orderByDesc(ApplicationBackUp::getCreateTime).list()
+                        .stream()
+                        .skip(maxBackupNum)
+                        .forEach(
+                            backUp -> {
+                                try {
+                                    backUpService.removeById(
+                                        backUp.getId());
+                                } catch (Exception e) {
+                                    log.error(
+                                        "Clean application backup failed for app id: {} , backup id: {}",
+                                        appId,
+                                        backUp.getId(),
+                                        e);
+                                }
+                            });
+                });
         log.info("Clean application backup finished");
     }
 }

@@ -81,7 +81,7 @@ class AlertServiceTest {
         alertTemplate.setRestartIndex(2);
         Date date = new Date();
         alertTemplate.setStartTime(
-                DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+            DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration("");
     }
@@ -109,7 +109,7 @@ class AlertServiceTest {
         alertTemplate.setCpFailureRateInterval("10%");
         Date date = new Date();
         alertTemplate.setStartTime(
-                DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+            DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration("");
     }
@@ -207,20 +207,20 @@ class AlertServiceTest {
         AlertTemplate template = new AlertTemplate();
         template.setJobName(application.getJobName());
         template.setStartTime(
-                DateUtils.format(
-                        application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+            DateUtils.format(
+                application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toDuration(duration));
         template.setLink(url);
         template.setEndTime(
-                DateUtils.format(
-                        application.getEndTime() == null ? new Date() : application.getEndTime(),
-                        DateUtils.fullFormat(),
-                        TimeZone.getDefault()));
+            DateUtils.format(
+                application.getEndTime() == null ? new Date() : application.getEndTime(),
+                DateUtils.fullFormat(),
+                TimeZone.getDefault()));
         template.setRestart(application.isNeedRestartOnFailed());
         template.setRestartIndex(application.getRestartCount());
         template.setTotalRestart(application.getRestartSize());
         template.setCpFailureRateInterval(
-                DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
+            DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60));
         template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
 
         return template;

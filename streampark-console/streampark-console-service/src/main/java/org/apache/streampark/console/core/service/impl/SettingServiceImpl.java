@@ -55,8 +55,8 @@ import java.util.Properties;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-        implements
-            SettingService {
+    implements
+        SettingService {
 
     private final Setting emptySetting = new Setting();
 
@@ -80,7 +80,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             Setting entity = new Setting();
             entity.setSettingValue(setting.getSettingValue());
             LambdaQueryWrapper<Setting> queryWrapper = new LambdaQueryWrapper<Setting>().eq(Setting::getSettingKey,
-                    setting.getSettingKey());
+                setting.getSettingKey());
             this.update(entity, queryWrapper);
 
             getMavenConfig().updateConfig();
@@ -106,22 +106,22 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getStreamParkAddress() {
         return SETTINGS
-                .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
-                .getSettingValue();
+            .getOrDefault(SettingService.KEY_STREAMPARK_ADDRESS, emptySetting)
+            .getSettingValue();
     }
 
     @Override
     public String getIngressModeDefault() {
         return SETTINGS
-                .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
-                .getSettingValue();
+            .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
+            .getSettingValue();
     }
 
     @Override
     public ResponseResult checkDocker(DockerConfig dockerConfig) {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withRegistryUrl(dockerConfig.getAddress())
-                .build();
+            .withRegistryUrl(dockerConfig.getAddress())
+            .build();
 
         DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
 
@@ -129,9 +129,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
         try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
             AuthConfig authConfig = new AuthConfig()
-                    .withUsername(dockerConfig.getUsername())
-                    .withPassword(dockerConfig.getPassword())
-                    .withRegistryAddress(dockerConfig.getAddress());
+                .withUsername(dockerConfig.getUsername())
+                .withPassword(dockerConfig.getPassword())
+                .withRegistryAddress(dockerConfig.getAddress());
             AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
             if (response.getStatus().equals("Login Succeeded")) {
                 result.setStatus(200);
@@ -145,7 +145,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             } else if (e.getMessage().contains("Status 401")) {
                 result.setStatus(500);
                 result.setMsg(
-                        "Failed to validate Docker registry, unauthorized: incorrect username or password ");
+                    "Failed to validate Docker registry, unauthorized: incorrect username or password ");
             } else {
                 result.setStatus(500);
                 result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
@@ -209,7 +209,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         try {
             Transport transport = session.getTransport("smtp");
             transport.connect(
-                    senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
+                senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
             transport.close();
             result.setStatus(200);
         } catch (MessagingException e) {

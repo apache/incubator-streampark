@@ -60,7 +60,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
 
         buttonCreateApplication.click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/flink/app/add"));
+            .until(ExpectedConditions.urlContains("/flink/app/add"));
         return new ApplicationForm(driver);
     }
 
@@ -68,12 +68,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         WebElement extraButton = applicationsList().stream()
-                .filter(it -> it.getText().contains(applicationName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/..")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No extra button in applications list"));
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/.."))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No extra button in applications list"));
         Actions actions = new Actions(this.driver);
         actions.moveToElement(extraButton).perform();
         deleteButton.click();
@@ -86,32 +87,35 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         applicationsList().stream()
-                .filter(it -> it.getText().contains(applicationName))
-                .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:start')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No start button in applications list"))
-                .click();
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:start')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No start button in applications list"))
+            .click();
 
         StartJobForm startJobForm = new StartJobForm();
         String startJobFormMessage = "Start Job";
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(.,'%s')]", startJobFormMessage))));
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(.,'%s')]",
+                        startJobFormMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint()));
+            .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint()));
         startJobForm.radioFromSavepoint().click();
         startJobForm.buttonSubmit().click();
         String startPopUpMessage = "The current job is starting";
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", startPopUpMessage))));
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        startPopUpMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.invisibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", startPopUpMessage))));
+            .until(
+                ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        startPopUpMessage))));
 
         return this;
     }
@@ -120,13 +124,14 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         applicationsList().stream()
-                .filter(it -> it.getText().contains(applicationName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@auth, 'app:release')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No release button in applications list"))
-                .click();
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@auth, 'app:release')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No release button in applications list"))
+            .click();
 
         return this;
     }
@@ -135,40 +140,44 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         applicationsList().stream()
-                .filter(it -> it.getText().contains(applicationName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@auth, 'app:cancel')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No cancel button in applications list"))
-                .click();
+            .filter(it -> it.getText().contains(applicationName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@auth, 'app:cancel')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No cancel button in applications list"))
+            .click();
 
         CancelJobForm cancelJobForm = new CancelJobForm();
         String cancelJobFormMessage = "Stop Job";
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(.,'%s')]", cancelJobFormMessage))));
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(.,'%s')]",
+                        cancelJobFormMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint()));
+            .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint()));
         cancelJobForm.radioFromSavepoint().click();
         cancelJobForm.buttonSubmit().click();
         String cancelPopUpMessage = "The current job is canceling";
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", cancelPopUpMessage))));
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        cancelPopUpMessage))));
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.invisibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", cancelPopUpMessage))));
+            .until(
+                ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        cancelPopUpMessage))));
 
         return this;
     }
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/flink/app"));
+            .until(ExpectedConditions.urlContains("/flink/app"));
     }
 
     @Getter

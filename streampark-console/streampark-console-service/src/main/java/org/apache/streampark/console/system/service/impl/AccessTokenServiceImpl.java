@@ -47,8 +47,8 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, AccessToken>
-        implements
-            AccessTokenService {
+    implements
+        AccessTokenService {
 
     @Autowired
     private UserService userService;
@@ -60,8 +60,9 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             return RestResponse.success().put("code", 0).message("user not available");
         }
         String token = WebUtils.encryptToken(
-                JWTUtil.sign(
-                        user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.OPENAPI));
+            JWTUtil.sign(
+                user.getUserId(), user.getUsername(), user.getSalt(),
+                AuthenticationType.OPENAPI));
         JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
 
         AccessToken accessToken = new AccessToken();
@@ -102,13 +103,13 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
             return RestResponse.fail(
-                    ResponseCode.CODE_FAIL_ALERT,
-                    "user status is locked, could not operate this accessToken!");
+                ResponseCode.CODE_FAIL_ALERT,
+                "user status is locked, could not operate this accessToken!");
         }
 
         Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
-                ? AccessToken.STATUS_DISABLE
-                : AccessToken.STATUS_ENABLE;
+            ? AccessToken.STATUS_DISABLE
+            : AccessToken.STATUS_ENABLE;
 
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);
