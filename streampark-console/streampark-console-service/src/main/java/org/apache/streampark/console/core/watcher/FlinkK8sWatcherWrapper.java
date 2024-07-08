@@ -110,8 +110,8 @@ public class FlinkK8sWatcherWrapper {
         // query k8s execution mode application from db
         final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
-                .eq(Application::getTracking, 1)
-                .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
+            .eq(Application::getTracking, 1)
+            .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
 
         List<Application> k8sApplication = applicationManageService.list(queryWrapper);
         if (CollectionUtils.isEmpty(k8sApplication)) {
@@ -119,9 +119,9 @@ public class FlinkK8sWatcherWrapper {
         }
         // filter out the application that should be tracking
         return k8sApplication.stream()
-                .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
-                .map(this::toTrackId)
-                .collect(Collectors.toList());
+            .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getStateEnum())))
+            .map(this::toTrackId)
+            .collect(Collectors.toList());
     }
 
     public TrackId toTrackId(Application app) {
@@ -129,30 +129,30 @@ public class FlinkK8sWatcherWrapper {
         Properties properties = flinkEnv.getFlinkConfig();
 
         Map<String, String> dynamicProperties = PropertiesUtils
-                .extractDynamicPropertiesAsJava(app.getDynamicProperties());
+            .extractDynamicPropertiesAsJava(app.getDynamicProperties());
         String archiveDir = dynamicProperties.get(JobManagerOptions.ARCHIVE_DIR.key());
         if (archiveDir != null) {
             properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
         }
         if (FlinkExecutionMode.isKubernetesApplicationMode(app.getExecutionMode())) {
             return TrackId.onApplication(
-                    app.getK8sNamespace(),
-                    app.getJobName(),
-                    app.getId(),
-                    app.getJobId(),
-                    app.getTeamId().toString(),
-                    properties);
+                app.getK8sNamespace(),
+                app.getJobName(),
+                app.getId(),
+                app.getJobId(),
+                app.getTeamId().toString(),
+                properties);
         } else if (FlinkExecutionMode.isKubernetesSessionMode(app.getExecutionMode())) {
             FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
             String namespace = flinkCluster.getK8sNamespace();
             String clusterId = flinkCluster.getClusterId();
             return TrackId.onSession(
-                    namespace,
-                    clusterId,
-                    app.getId(),
-                    app.getJobId(),
-                    app.getTeamId().toString(),
-                    properties);
+                namespace,
+                clusterId,
+                app.getId(),
+                app.getJobId(),
+                app.getTeamId().toString(),
+                properties);
         } else {
             throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
         }

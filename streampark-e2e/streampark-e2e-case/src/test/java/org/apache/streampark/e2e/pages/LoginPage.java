@@ -55,7 +55,7 @@ public final class LoginPage extends NavBarPage {
     @SneakyThrows
     public NavBarPage login(String username, String password, String teamName) {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonLogin));
+            .until(ExpectedConditions.elementToBeClickable(buttonLogin));
 
         inputUsername().sendKeys(username);
         inputPassword().sendKeys(password);
@@ -63,22 +63,23 @@ public final class LoginPage extends NavBarPage {
 
         try {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
+                .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
 
             teamForm.btnSelectTeamDropdown.click();
             teamForm.selectTeam.stream()
-                    .filter(it -> it.getText().contains(teamName))
-                    .findFirst()
-                    .orElseThrow(
-                            () -> new RuntimeException(String.format("No %s in team dropdown list", teamName)))
-                    .click();
+                .filter(it -> it.getText().contains(teamName))
+                .findFirst()
+                .orElseThrow(
+                    () -> new RuntimeException(
+                        String.format("No %s in team dropdown list", teamName)))
+                .click();
             teamForm.buttonSubmit.click();
         } catch (Exception e) {
             log.warn("No team selection required:", e);
         }
 
         new WebDriverWait(driver, Duration.ofSeconds(30))
-                .until(ExpectedConditions.urlContains("/flink/app"));
+            .until(ExpectedConditions.urlContains("/flink/app"));
         return new NavBarPage(driver);
     }
 

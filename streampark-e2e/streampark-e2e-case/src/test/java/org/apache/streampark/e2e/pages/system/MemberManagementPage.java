@@ -60,31 +60,31 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateMember));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateMember));
         buttonCreateMember.click();
 
         createMemberForm.btnSelectUserNameDropDown().click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectUserName));
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectUserName));
         createMemberForm.selectUserName.stream()
-                .filter(e -> e.getText().equals(userName))
-                .findFirst()
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                String.format("No %s in username dropdown list", userName)))
-                .click();
+            .filter(e -> e.getText().equals(userName))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in username dropdown list", userName)))
+            .click();
 
         createMemberForm().btnSelectRoleDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
-                .filter(e -> e.getText().equals(role))
-                .findFirst()
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                String.format("No %s in role dropdown list", role)))
-                .click();
+            .filter(e -> e.getText().equals(role))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in role dropdown list", role)))
+            .click();
 
         createMemberForm.buttonSubmit.click();
         return this;
@@ -94,24 +94,25 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         memberList().stream()
-                .filter(it -> it.getText().contains(userName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Member')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in member list"))
-                .click();
+            .filter(it -> it.getText().contains(userName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Member')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in member list"))
+            .click();
 
         createMemberForm().btnSelectRoleDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
-                .filter(e -> e.getText().equals(role))
-                .findFirst()
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                String.format("No %s in role dropdown list", role)))
-                .click();
+            .filter(e -> e.getText().equals(role))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in role dropdown list", role)))
+            .click();
 
         createMemberForm.buttonSubmit.click();
 
@@ -121,16 +122,17 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         memberList().stream()
-                .filter(it -> it.getText().contains(userName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Member')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in member list"))
-                .click();
+            .filter(it -> it.getText().contains(userName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Member')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in member list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
 
@@ -139,7 +141,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/system/member"));
+            .until(ExpectedConditions.urlContains("/system/member"));
     }
 
     @Getter

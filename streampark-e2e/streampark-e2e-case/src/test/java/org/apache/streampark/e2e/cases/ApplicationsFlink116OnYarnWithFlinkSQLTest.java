@@ -57,9 +57,9 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
     @BeforeAll
     public static void setup() {
         FlinkHomePage flinkHomePage = new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(ApacheFlinkPage.class)
-                .goToTab(FlinkHomePage.class);
+            .login(userName, password, teamName)
+            .goToNav(ApacheFlinkPage.class)
+            .goToTab(FlinkHomePage.class);
 
         flinkHomePage.createFlinkHome(flinkName, flinkHome, "");
 
@@ -75,20 +75,20 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
 
         applicationsDynamicParams.flinkSQL(TEST_FLINK_SQL);
         applicationsPage
-                .createApplication()
-                .addApplication(
-                        ApplicationForm.DevelopmentMode.FLINK_SQL,
-                        ApplicationForm.ExecutionMode.YARN_APPLICATION,
-                        applicationName,
-                        flinkName,
-                        applicationsDynamicParams);
+            .createApplication()
+            .addApplication(
+                ApplicationForm.DevelopmentMode.FLINK_SQL,
+                ApplicationForm.ExecutionMode.YARN_APPLICATION,
+                applicationName,
+                flinkName,
+                applicationsDynamicParams);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain newly-created application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(applicationName)));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain newly-created application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(applicationName)));
     }
 
     @Test
@@ -99,11 +99,11 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.releaseApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain released application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("SUCCESS")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain released application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("SUCCESS")));
     }
 
     @Test
@@ -114,18 +114,18 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.startApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain started application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("RUNNING")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain started application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("RUNNING")));
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain finished application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("FINISHED")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain finished application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("FINISHED")));
     }
 
     @Test
@@ -138,20 +138,20 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.startApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain restarted application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("RUNNING")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain restarted application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("RUNNING")));
 
         applicationsPage.cancelApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain canceled application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("CANCELED")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain canceled application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("CANCELED")));
     }
 
     @Test
@@ -162,13 +162,13 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.deleteApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(applicationsPage.applicationsList())
-                                    .noneMatch(it -> it.getText().contains(applicationName));
-                        });
+                    assertThat(applicationsPage.applicationsList())
+                        .noneMatch(it -> it.getText().contains(applicationName));
+                });
     }
 
     @Test
@@ -179,20 +179,20 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
         applicationsDynamicParams.flinkSQL(TEST_FLINK_SQL);
         applicationsPage
-                .createApplication()
-                .addApplication(
-                        ApplicationForm.DevelopmentMode.FLINK_SQL,
-                        ApplicationForm.ExecutionMode.YARN_PER_JOB,
-                        applicationName,
-                        flinkName,
-                        applicationsDynamicParams);
+            .createApplication()
+            .addApplication(
+                ApplicationForm.DevelopmentMode.FLINK_SQL,
+                ApplicationForm.ExecutionMode.YARN_PER_JOB,
+                applicationName,
+                flinkName,
+                applicationsDynamicParams);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain newly-created application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(applicationName)));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain newly-created application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(applicationName)));
     }
 
     @Test
@@ -203,11 +203,11 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.releaseApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain released application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("SUCCESS")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain released application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("SUCCESS")));
     }
 
     @Test
@@ -218,18 +218,18 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.startApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain started application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("RUNNING")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain started application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("RUNNING")));
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(applicationsPage.applicationsList())
-                                .as("Applications list should contain finished application")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("FINISHED")));
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain finished application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("FINISHED")));
     }
 
     @Test
@@ -240,12 +240,12 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
         applicationsPage.deleteApplication(applicationName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(applicationsPage.applicationsList())
-                                    .noneMatch(it -> it.getText().contains(applicationName));
-                        });
+                    assertThat(applicationsPage.applicationsList())
+                        .noneMatch(it -> it.getText().contains(applicationName));
+                });
     }
 }

@@ -68,27 +68,27 @@ public class AlertConfigParams implements Serializable {
         }
         AlertConfigParams params = new AlertConfigParams();
         BeanUtils.copyProperties(
-                config,
-                params,
-                "emailParams",
-                "dingTalkParams",
-                "weComParams",
-                "httpCallbackParams",
-                "larkParams");
+            config,
+            params,
+            "emailParams",
+            "dingTalkParams",
+            "weComParams",
+            "httpCallbackParams",
+            "larkParams");
         try {
             if (StringUtils.isNotBlank(config.getEmailParams())) {
                 params.setEmailParams(JacksonUtils.read(config.getEmailParams(), AlertEmailParams.class));
             }
             if (StringUtils.isNotBlank(config.getDingTalkParams())) {
                 params.setDingTalkParams(
-                        JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
+                    JacksonUtils.read(config.getDingTalkParams(), AlertDingTalkParams.class));
             }
             if (StringUtils.isNotBlank(config.getWeComParams())) {
                 params.setWeComParams(JacksonUtils.read(config.getWeComParams(), AlertWeComParams.class));
             }
             if (StringUtils.isNotBlank(config.getHttpCallbackParams())) {
                 params.setHttpCallbackParams(
-                        JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
+                    JacksonUtils.read(config.getHttpCallbackParams(), AlertHttpCallbackParams.class));
             }
             if (StringUtils.isNotBlank(config.getLarkParams())) {
                 params.setLarkParams(JacksonUtils.read(config.getLarkParams(), AlertLarkParams.class));

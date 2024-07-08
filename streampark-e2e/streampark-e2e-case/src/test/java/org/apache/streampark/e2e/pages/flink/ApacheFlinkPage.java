@@ -49,14 +49,14 @@ public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
     public <T extends ApacheFlinkPage.Tab> T goToTab(Class<T> tab) {
         if (tab == ApplicationsPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuApplications));
+                .until(ExpectedConditions.elementToBeClickable(menuApplications));
             menuApplications.click();
             return tab.cast(new ApplicationsPage(driver));
         }
 
         if (tab == FlinkHomePage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
+                .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
             menuFlinkHome.click();
             return tab.cast(new FlinkHomePage(driver));
         }

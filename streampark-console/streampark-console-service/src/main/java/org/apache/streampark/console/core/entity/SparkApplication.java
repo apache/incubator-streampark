@@ -273,17 +273,17 @@ public class SparkApplication implements Serializable {
 
     public void setYarnQueueByHotParams() {
         if (!(SparkExecutionMode.YARN_CLIENT == this.getSparkExecutionMode()
-                || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
+            || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
             return;
         }
 
         Map<String, Object> hotParamsMap = this.getHotParamsMap();
         if (MapUtils.isNotEmpty(hotParamsMap)
-                && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
+            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
             String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
             String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
-                    .map(Object::toString)
-                    .orElse(null);
+                .map(Object::toString)
+                .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
         }
     }
@@ -353,14 +353,14 @@ public class SparkApplication implements Serializable {
 
     public boolean cpFailedTrigger() {
         return this.cpMaxFailureInterval != null
-                && this.cpFailureRateInterval != null
-                && this.cpFailureAction != null;
+            && this.cpFailureRateInterval != null
+            && this.cpFailureAction != null;
     }
 
     public boolean eqFlinkJob(SparkApplication other) {
         if (this.isSparkSqlJob()
-                && other.isSparkSqlJob()
-                && this.getSparkSql().trim().equals(other.getSparkSql().trim())) {
+            && other.isSparkSqlJob()
+            && this.getSparkSql().trim().equals(other.getSparkSql().trim())) {
             return this.getDependencyObject().equals(other.getDependencyObject());
         }
         return false;
@@ -400,7 +400,7 @@ public class SparkApplication implements Serializable {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                        "unsupported executionMode ".concat(getSparkExecutionMode().getName()));
+                    "unsupported executionMode ".concat(getSparkExecutionMode().getName()));
         }
     }
 
@@ -439,19 +439,19 @@ public class SparkApplication implements Serializable {
     @JsonIgnore
     public boolean isCustomCodeOrPySparkJob() {
         return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
-                || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isUploadJob() {
         return isCustomCodeOrPySparkJob()
-                && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore
     public boolean isCICDJob() {
         return isCustomCodeOrPySparkJob()
-                && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
     }
 
     public boolean isStreamParkJob() {

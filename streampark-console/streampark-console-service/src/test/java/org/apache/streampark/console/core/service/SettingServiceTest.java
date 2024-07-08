@@ -44,17 +44,17 @@ class SettingServiceTest extends SpringUnitTestBase {
         settingService.updateDocker(dockerConfig);
 
         Assertions.assertEquals(
-                "test-address-setting-value",
-                settingService.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getSettingValue());
+            "test-address-setting-value",
+            settingService.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getSettingValue());
         Assertions.assertEquals(
-                "test-username-setting-value",
-                settingService.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+            "test-username-setting-value",
+            settingService.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
         Assertions.assertEquals(
-                "test-password-setting-value",
-                settingService.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getSettingValue());
+            "test-password-setting-value",
+            settingService.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getSettingValue());
         Assertions.assertEquals(
-                "test-namespace-setting-value",
-                settingService.get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE).getSettingValue());
+            "test-namespace-setting-value",
+            settingService.get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE).getSettingValue());
     }
 
     @Test
@@ -70,21 +70,21 @@ class SettingServiceTest extends SpringUnitTestBase {
         settingService.updateEmail(senderEmail);
 
         Assertions.assertEquals(
-                "test-host-setting-value",
-                settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
+            "test-host-setting-value",
+            settingService.get(SettingService.KEY_ALERT_EMAIL_HOST).getSettingValue());
         Assertions.assertEquals(
-                "test-from-setting-value",
-                settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
+            "test-from-setting-value",
+            settingService.get(SettingService.KEY_ALERT_EMAIL_FROM).getSettingValue());
         Assertions.assertEquals(
-                "test-username-setting-value",
-                settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
+            "test-username-setting-value",
+            settingService.get(SettingService.KEY_ALERT_EMAIL_USERNAME).getSettingValue());
         Assertions.assertEquals(
-                "test-password-setting-value",
-                settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
+            "test-password-setting-value",
+            settingService.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getSettingValue());
         Assertions.assertEquals(
-                "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
+            "456", settingService.get(SettingService.KEY_ALERT_EMAIL_PORT).getSettingValue());
         Assertions.assertEquals(
-                "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
+            "true", settingService.get(SettingService.KEY_ALERT_EMAIL_SSL).getSettingValue());
     }
 
     @Test

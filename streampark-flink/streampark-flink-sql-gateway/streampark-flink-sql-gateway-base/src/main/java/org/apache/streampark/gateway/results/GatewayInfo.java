@@ -64,12 +64,12 @@ public class GatewayInfo implements Serializable {
     @Override
     public String toString() {
         return "GatewayInfo{"
-                + "serviceType='"
-                + serviceType
-                + '\''
-                + ", version='"
-                + version
-                + '\''
-                + '}';
+            + "serviceType='"
+            + serviceType
+            + '\''
+            + ", version='"
+            + version
+            + '\''
+            + '}';
     }
 }

@@ -124,17 +124,17 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         } catch (Exception e) {
             log.error("Failed to request DingTalk robot alarm,\nurl:{}", url, e);
             throw new AlertException(
-                    String.format("Failed to request DingTalk robot alert,\nurl:%s", url), e);
+                String.format("Failed to request DingTalk robot alert,\nurl:%s", url), e);
         }
         if (robotResponse == null) {
             throw new AlertException(
-                    String.format("Failed to request DingTalk robot alert,\nurl:%s", url));
+                String.format("Failed to request DingTalk robot alert,\nurl:%s", url));
         }
         if (robotResponse.getErrcode() != 0) {
             throw new AlertException(
-                    String.format(
-                            "Failed to request DingTalk robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
-                            url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
+                String.format(
+                    "Failed to request DingTalk robot alert,\nurl:%s,\nerrorCode:%d,\nerrorMsg:%s",
+                    url, robotResponse.getErrcode(), robotResponse.getErrmsg()));
         }
     }
 
@@ -153,8 +153,8 @@ public class DingTalkAlertNotifyServiceImpl implements AlertNotifyService {
         if (params.getSecretEnable()) {
             Long timestamp = System.currentTimeMillis();
             url = String.format(
-                    "%s?access_token=%s&timestamp=%d&sign=%s",
-                    urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
+                "%s?access_token=%s&timestamp=%d&sign=%s",
+                urlPrefix, params.getToken(), timestamp, getSign(params.getSecretToken(), timestamp));
         } else {
             url = String.format("%s?access_token=%s", urlPrefix, params.getToken());
         }

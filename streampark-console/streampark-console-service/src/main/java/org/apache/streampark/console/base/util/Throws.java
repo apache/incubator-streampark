@@ -36,7 +36,7 @@ import scala.Tuple2;
 public class Throws {
 
     private static final Cache<Tuple2<Class<?>, Class<?>>, Constructor<?>> CACHE = Caffeine.newBuilder()
-            .expireAfterAccess(1, TimeUnit.DAYS).maximumSize(32).build();
+        .expireAfterAccess(1, TimeUnit.DAYS).maximumSize(32).build();
 
     private Throws() {
     }
@@ -169,22 +169,22 @@ public class Throws {
         AssertUtils.notNull(exceptionClass, "The target exception must be specified.");
         Tuple2<Class<?>, Class<?>> key = new Tuple2<>(exceptionClass, hasElements(errorMsgs) ? String.class : null);
         Constructor<?> constructor = CACHE.get(
-                key,
-                classAndParams -> {
-                    try {
-                        return hasElements(errorMsgs)
-                                ? exceptionClass.getConstructor(String.class)
-                                : exceptionClass.getConstructor();
-                    } catch (NoSuchMethodException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            key,
+            classAndParams -> {
+                try {
+                    return hasElements(errorMsgs)
+                        ? exceptionClass.getConstructor(String.class)
+                        : exceptionClass.getConstructor();
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         AssertUtils.notNull(
-                constructor,
-                String.format("There's no a constructor for exception '%s'.", exceptionClass.getName()));
+            constructor,
+            String.format("There's no a constructor for exception '%s'.", exceptionClass.getName()));
         return hasElements(errorMsgs)
-                ? (T) constructor.newInstance(errorMsgs[0])
-                : (T) constructor.newInstance();
+            ? (T) constructor.newInstance(errorMsgs[0])
+            : (T) constructor.newInstance();
     }
 
     private static boolean hasElements(Object[] objects) {

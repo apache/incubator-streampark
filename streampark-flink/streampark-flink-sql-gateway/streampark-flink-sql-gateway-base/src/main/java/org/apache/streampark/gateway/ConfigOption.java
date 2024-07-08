@@ -118,7 +118,7 @@ public class ConfigOption<T> {
          */
         @SuppressWarnings("unchecked")
         private static final Class<Map<String, String>> PROPERTIES_MAP_CLASS =
-                (Class<Map<String, String>>) (Class<?>) Map.class;
+            (Class<Map<String, String>>) (Class<?>) Map.class;
 
         /** The key for the config option. */
         private final String key;

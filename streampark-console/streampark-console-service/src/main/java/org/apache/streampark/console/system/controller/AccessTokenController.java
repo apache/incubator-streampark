@@ -109,25 +109,26 @@ public class AccessTokenController {
         CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
 
         curlBuilder
-                .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .addHeader(
-                        "Authorization", accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
+            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            .addHeader(
+                "Authorization",
+                accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
 
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder
-                    .addFormData("allowNonRestored", "false")
-                    .addFormData("savePoint", "")
-                    .addFormData("savePointed", "false")
-                    .addFormData("id", appId)
-                    .build();
+                .addFormData("allowNonRestored", "false")
+                .addFormData("savePoint", "")
+                .addFormData("savePointed", "false")
+                .addFormData("id", appId)
+                .build();
         } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder
-                    .addFormData("id", appId)
-                    .addFormData("savePointed", "false")
-                    .addFormData("drain", "false")
-                    .addFormData("nativeFormat", "false")
-                    .addFormData("savePoint", "")
-                    .build();
+                .addFormData("id", appId)
+                .addFormData("savePointed", "false")
+                .addFormData("drain", "false")
+                .addFormData("nativeFormat", "false")
+                .addFormData("savePoint", "")
+                .build();
         }
         return RestResponse.success(resultCURL);
     }

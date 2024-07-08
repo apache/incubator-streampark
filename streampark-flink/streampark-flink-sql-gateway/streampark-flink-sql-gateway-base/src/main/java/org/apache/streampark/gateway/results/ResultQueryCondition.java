@@ -81,12 +81,12 @@ public class ResultQueryCondition implements Serializable {
     @Override
     public String toString() {
         return "ResultQueryCondition{"
-                + "orientation="
-                + orientation
-                + ", token="
-                + token
-                + ", maxRows="
-                + maxRows
-                + '}';
+            + "orientation="
+            + orientation
+            + ", token="
+            + token
+            + ", maxRows="
+            + maxRows
+            + '}';
     }
 }

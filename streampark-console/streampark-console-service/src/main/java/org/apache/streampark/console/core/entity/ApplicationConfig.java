@@ -90,24 +90,36 @@ public class ApplicationConfig {
 
         if (MapUtils.isNotEmpty(configs)) {
             return configs.entrySet().stream()
-                    .collect(
-                            Collectors.toMap(
-                                    entry -> {
-                                        String key = entry.getKey();
-                                        if (key.startsWith(ConfigKeys.KEY_FLINK_OPTION_PREFIX())) {
-                                            key = key.substring(ConfigKeys.KEY_FLINK_OPTION_PREFIX().length());
-                                        } else if (key.startsWith(ConfigKeys.KEY_FLINK_PROPERTY_PREFIX())) {
-                                            key = key.substring(ConfigKeys.KEY_FLINK_PROPERTY_PREFIX().length());
-                                        } else if (key.startsWith(ConfigKeys.KEY_FLINK_TABLE_PREFIX())) {
-                                            key = key.substring(ConfigKeys.KEY_FLINK_TABLE_PREFIX().length());
-                                        } else if (key.startsWith(ConfigKeys.KEY_APP_PREFIX())) {
-                                            key = key.substring(ConfigKeys.KEY_APP_PREFIX().length());
-                                        } else if (key.startsWith(ConfigKeys.KEY_SQL_PREFIX())) {
-                                            key = key.substring(ConfigKeys.KEY_SQL_PREFIX().length());
-                                        }
-                                        return key;
-                                    },
-                                    Map.Entry::getValue));
+                .collect(
+                    Collectors.toMap(
+                        entry -> {
+                            String key = entry.getKey();
+                            if (key.startsWith(
+                                ConfigKeys.KEY_FLINK_OPTION_PREFIX())) {
+                                key = key.substring(
+                                    ConfigKeys.KEY_FLINK_OPTION_PREFIX()
+                                        .length());
+                            } else if (key.startsWith(ConfigKeys
+                                .KEY_FLINK_PROPERTY_PREFIX())) {
+                                key = key.substring(ConfigKeys
+                                    .KEY_FLINK_PROPERTY_PREFIX()
+                                    .length());
+                            } else if (key.startsWith(
+                                ConfigKeys.KEY_FLINK_TABLE_PREFIX())) {
+                                key = key.substring(ConfigKeys
+                                    .KEY_FLINK_TABLE_PREFIX().length());
+                            } else if (key.startsWith(
+                                ConfigKeys.KEY_APP_PREFIX())) {
+                                key = key.substring(ConfigKeys.KEY_APP_PREFIX()
+                                    .length());
+                            } else if (key.startsWith(
+                                ConfigKeys.KEY_SQL_PREFIX())) {
+                                key = key.substring(ConfigKeys.KEY_SQL_PREFIX()
+                                    .length());
+                            }
+                            return key;
+                        },
+                        Map.Entry::getValue));
         }
         return new HashMap<>();
     }

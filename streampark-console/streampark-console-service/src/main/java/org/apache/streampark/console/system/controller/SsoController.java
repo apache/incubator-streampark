@@ -71,8 +71,8 @@ public class SsoController {
 
         // Check SSO enable status
         ApiAlertException.throwIfTrue(
-                !ssoEnable,
-                "Single Sign On (SSO) is not available, please contact the administrator to enable");
+            !ssoEnable,
+            "Single Sign On (SSO) is not available, please contact the administrator to enable");
 
         Subject subject = SecurityUtils.getSubject();
         PrincipalCollection principals = subject.getPrincipals();
@@ -88,7 +88,7 @@ public class SsoController {
 
         // Check Principal name
         ApiAlertException.throwIfNull(
-                principal.getName(), "Please configure the correct Principal Name Attribute");
+            principal.getName(), "Please configure the correct Principal Name Attribute");
 
         User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
 

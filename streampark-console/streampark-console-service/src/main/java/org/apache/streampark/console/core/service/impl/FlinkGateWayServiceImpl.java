@@ -41,13 +41,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, FlinkGateWay>
-        implements
-            FlinkGateWayService {
+    implements
+        FlinkGateWayService {
 
     private void preHandleGatewayInfo(FlinkGateWay flinkGateWay) {
         // validate gateway name
         ApiAlertException.throwIfTrue(
-                existsByGatewayName(flinkGateWay.getGatewayName()), "gateway name already exists");
+            existsByGatewayName(flinkGateWay.getGatewayName()), "gateway name already exists");
 
         // validate gateway address and set gateway type
         flinkGateWay.setGatewayType(getGatewayVersion(flinkGateWay.getAddress()));
@@ -68,7 +68,7 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
     @Override
     public boolean existsByGatewayName(String name) {
         return getBaseMapper()
-                .exists(new LambdaQueryWrapper<FlinkGateWay>().eq(FlinkGateWay::getGatewayName, name));
+            .exists(new LambdaQueryWrapper<FlinkGateWay>().eq(FlinkGateWay::getGatewayName, name));
     }
 
     @Override
@@ -76,8 +76,8 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
         String restUrl = address + "/api_versions";
         try {
             String result = HttpClientUtils.httpGetRequest(
-                    restUrl,
-                    RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
+                restUrl,
+                RequestConfig.custom().setConnectTimeout(2000, TimeUnit.MILLISECONDS).build());
             if (result != null) {
                 String versionStr = JacksonUtils.read(result, GetApiVersionResponseBody.class).getVersions().get(0);
                 return "V1".equals(versionStr) ? GatewayTypeEnum.FLINK_V1 : GatewayTypeEnum.FLINK_V2;

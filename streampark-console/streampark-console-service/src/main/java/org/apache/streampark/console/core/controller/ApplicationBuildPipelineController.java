@@ -70,7 +70,7 @@ public class ApplicationBuildPipelineController {
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
 
         if (pipeline.isPresent()
-                && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
+            && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }

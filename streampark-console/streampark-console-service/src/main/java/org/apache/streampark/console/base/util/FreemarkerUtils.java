@@ -36,7 +36,7 @@ public class FreemarkerUtils {
 
     static {
         SpringTemplateLoader templateLoader = new SpringTemplateLoader(new DefaultResourceLoader(),
-                "classpath:alert-template");
+            "classpath:alert-template");
         CONFIGURATION = new Configuration(Configuration.VERSION_2_3_28);
         CONFIGURATION.setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
         CONFIGURATION.setTemplateLoader(templateLoader);

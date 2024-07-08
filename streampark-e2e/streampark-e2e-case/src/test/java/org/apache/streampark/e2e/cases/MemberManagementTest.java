@@ -49,9 +49,9 @@ public class MemberManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(SystemPage.class)
-                .goToTab(MemberManagementPage.class);
+            .login(userName, password, teamName)
+            .goToNav(SystemPage.class)
+            .goToTab(MemberManagementPage.class);
     }
 
     @Test
@@ -62,11 +62,11 @@ public class MemberManagementTest {
         memberManagementPage.createMember(existUserName, existRole);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(memberManagementPage.memberList())
-                                .as("Member list should contain newly-created member")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(existUserName)));
+            .untilAsserted(
+                () -> assertThat(memberManagementPage.memberList())
+                    .as("Member list should contain newly-created member")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(existUserName)));
     }
 
     @Test
@@ -77,14 +77,14 @@ public class MemberManagementTest {
         memberManagementPage.createMember(existUserName, existRole);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(memberManagementPage.errorMessageList())
-                                .as("Member Duplicated Error message should be displayed")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(
-                                        String.format(
-                                                "The user [%s] has been added the team [%s], please don't add it again.",
-                                                existUserName, teamName))));
+            .untilAsserted(
+                () -> assertThat(memberManagementPage.errorMessageList())
+                    .as("Member Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(
+                        String.format(
+                            "The user [%s] has been added the team [%s], please don't add it again.",
+                            existUserName, teamName))));
 
         memberManagementPage.errorMessageConfirmButton().click();
         memberManagementPage.createMemberForm().buttonCancel().click();
@@ -99,12 +99,12 @@ public class MemberManagementTest {
         memberManagementPage.editMember(existUserName, anotherRole);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(memberManagementPage.memberList())
-                                .as("Team list should contain edited team")
-                                .extracting(WebElement::getText)
-                                .anyMatch(
-                                        it -> it.contains(existUserName)));
+            .untilAsserted(
+                () -> assertThat(memberManagementPage.memberList())
+                    .as("Team list should contain edited team")
+                    .extracting(WebElement::getText)
+                    .anyMatch(
+                        it -> it.contains(existUserName)));
     }
 
     @Test
@@ -115,12 +115,12 @@ public class MemberManagementTest {
         memberManagementPage.deleteMember(existUserName);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(memberManagementPage.memberList())
-                                    .noneMatch(it -> it.getText().contains(existUserName));
-                        });
+                    assertThat(memberManagementPage.memberList())
+                        .noneMatch(it -> it.getText().contains(existUserName));
+                });
     }
 }

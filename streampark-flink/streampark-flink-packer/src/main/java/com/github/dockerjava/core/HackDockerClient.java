@@ -37,7 +37,7 @@ public class HackDockerClient extends DockerClientImpl {
                                                DockerHttpClient dockerHttpClient) {
         HackDockerClient client = new HackDockerClient(dockerClientConfig);
         client.dockerCmdExecFactory = new DefaultDockerCmdExecFactory(dockerHttpClient,
-                dockerClientConfig.getObjectMapper());
+            dockerClientConfig.getObjectMapper());
         ((DockerClientConfigAware) client.dockerCmdExecFactory).init(dockerClientConfig);
         return client;
     }
@@ -50,16 +50,16 @@ public class HackDockerClient extends DockerClientImpl {
     @Override
     public HackPullImageCmd pullImageCmd(String repository) {
         return new HackPullImageCmd(
-                dockerCmdExecFactory.createPullImageCmdExec(),
-                dockerClientConfig.effectiveAuthConfig(repository),
-                repository);
+            dockerCmdExecFactory.createPullImageCmdExec(),
+            dockerClientConfig.effectiveAuthConfig(repository),
+            repository);
     }
 
     @Override
     public HackPushImageCmd pushImageCmd(String name) {
         return new HackPushImageCmd(
-                dockerCmdExecFactory.createPushImageCmdExec(),
-                dockerClientConfig.effectiveAuthConfig(name),
-                name);
+            dockerCmdExecFactory.createPushImageCmdExec(),
+            dockerClientConfig.effectiveAuthConfig(name),
+            name);
     }
 }

@@ -47,22 +47,22 @@ public class DockerConfig {
             DockerConfig dockerConfig = new DockerConfig();
 
             dockerConfig.setAddress(
-                    SettingService.SETTINGS
-                            .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
-                            .getSettingValue());
+                SettingService.SETTINGS
+                    .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
+                    .getSettingValue());
 
             dockerConfig.setUsername(
-                    SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
+                SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
 
             dockerConfig.setPassword(
-                    SettingService.SETTINGS
-                            .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
-                            .getSettingValue());
+                SettingService.SETTINGS
+                    .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
+                    .getSettingValue());
 
             dockerConfig.setNamespace(
-                    SettingService.SETTINGS
-                            .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
-                            .getSettingValue());
+                SettingService.SETTINGS
+                    .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
+                    .getSettingValue());
 
             return dockerConfig;
         } catch (Exception e) {

@@ -110,7 +110,7 @@ public class AlertController {
         alertTemplate.setRestart(false);
         Date date = new Date();
         alertTemplate.setStartTime(
-                DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
+            DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration("");
         return RestResponse.success(alertService.alert(id, alertTemplate));

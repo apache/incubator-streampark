@@ -61,8 +61,8 @@ public final class ObjectIdentifier implements Serializable {
         }
         ObjectIdentifier that = (ObjectIdentifier) o;
         return Objects.equals(catalogName, that.catalogName)
-                && Objects.equals(databaseName, that.databaseName)
-                && Objects.equals(objectName, that.objectName);
+            && Objects.equals(databaseName, that.databaseName)
+            && Objects.equals(objectName, that.objectName);
     }
 
     @Override
@@ -73,15 +73,15 @@ public final class ObjectIdentifier implements Serializable {
     @Override
     public String toString() {
         return "ObjectIdentifier{"
-                + "catalogName='"
-                + catalogName
-                + '\''
-                + ", databaseName='"
-                + databaseName
-                + '\''
-                + ", objectName='"
-                + objectName
-                + '\''
-                + '}';
+            + "catalogName='"
+            + catalogName
+            + '\''
+            + ", databaseName='"
+            + databaseName
+            + '\''
+            + ", objectName='"
+            + objectName
+            + '\''
+            + '}';
     }
 }

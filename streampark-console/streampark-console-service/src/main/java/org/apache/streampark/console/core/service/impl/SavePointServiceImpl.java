@@ -87,8 +87,8 @@ import static org.apache.streampark.console.core.enums.CheckPointTypeEnum.CHECKP
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
-        implements
-            SavePointService {
+    implements
+        SavePointService {
 
     @Autowired
     private FlinkEnvService flinkEnvService;
@@ -133,8 +133,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public SavePoint getLatest(Long id) {
         LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
-                .eq(SavePoint::getAppId, id)
-                .eq(SavePoint::getLatest, true);
+            .eq(SavePoint::getAppId, id)
+            .eq(SavePoint::getLatest, true);
         return this.getOne(queryWrapper);
     }
 
@@ -180,10 +180,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
         // infer savepoint
         TriggerSavepointRequest request = renderTriggerSavepointRequest(savepointPath, nativeFormat, application,
-                flinkEnv);
+            flinkEnv);
 
         CompletableFuture<SavepointResponse> savepointFuture = CompletableFuture
-                .supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
+            .supplyAsync(() -> FlinkClient.triggerSavepoint(request), executorService);
 
         handleSavepointResponseFuture(application, applicationLog, savepointFuture);
     }
@@ -218,7 +218,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         request.setSortField("trigger_time");
         Page<SavePoint> page = MybatisPager.getPage(request);
         LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId,
-                savePoint.getAppId());
+            savePoint.getAppId());
         return this.page(page, queryWrapper);
     }
 
@@ -231,8 +231,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
         try {
             appParam
-                    .getFsOperator()
-                    .delete(appParam.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+                .getFsOperator()
+                .delete(appParam.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -245,32 +245,32 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                                                ApplicationLog applicationLog,
                                                CompletableFuture<SavepointResponse> savepointFuture) {
         CompletableFutureUtils.runTimeout(
-                savepointFuture,
-                10L,
-                TimeUnit.MINUTES,
-                savepointResponse -> {
-                    if (savepointResponse != null && savepointResponse.savePointDir() != null) {
-                        applicationLog.setSuccess(true);
-                        String savePointDir = savepointResponse.savePointDir();
-                        log.info("Request savepoint successful, savepointDir: {}", savePointDir);
-                    }
-                },
-                e -> {
-                    log.error("Trigger savepoint for flink job failed.", e);
-                    String exception = ExceptionUtils.stringifyException(e);
-                    applicationLog.setException(exception);
-                    if (!(e instanceof TimeoutException)) {
-                        applicationLog.setSuccess(false);
-                    }
-                })
-                .whenComplete(
-                        (t, e) -> {
-                            applicationLogService.save(applicationLog);
-                            application.setOptionState(OptionStateEnum.NONE.getValue());
-                            application.setOptionTime(new Date());
-                            applicationManageService.update(application);
-                            flinkAppHttpWatcher.init();
-                        });
+            savepointFuture,
+            10L,
+            TimeUnit.MINUTES,
+            savepointResponse -> {
+                if (savepointResponse != null && savepointResponse.savePointDir() != null) {
+                    applicationLog.setSuccess(true);
+                    String savePointDir = savepointResponse.savePointDir();
+                    log.info("Request savepoint successful, savepointDir: {}", savePointDir);
+                }
+            },
+            e -> {
+                log.error("Trigger savepoint for flink job failed.", e);
+                String exception = ExceptionUtils.stringifyException(e);
+                applicationLog.setException(exception);
+                if (!(e instanceof TimeoutException)) {
+                    applicationLog.setSuccess(false);
+                }
+            })
+            .whenComplete(
+                (t, e) -> {
+                    applicationLogService.save(applicationLog);
+                    application.setOptionState(OptionStateEnum.NONE.getValue());
+                    application.setOptionTime(new Date());
+                    applicationManageService.update(application);
+                    flinkAppHttpWatcher.init();
+                });
     }
 
     private String getFinalSavepointDir(@Nullable String savepointPath, Application application) {
@@ -280,9 +280,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 result = this.getSavePointPath(application);
             } catch (Exception e) {
                 throw new ApiAlertException(
-                        "Error in getting savepoint path for triggering savepoint for app "
-                                + application.getId(),
-                        e);
+                    "Error in getting savepoint path for triggering savepoint for app "
+                        + application.getId(),
+                    e);
             }
         }
         return result;
@@ -294,10 +294,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
         if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
             AssertUtils.notNull(
-                    cluster,
-                    String.format(
-                            "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                            application.getFlinkClusterId()));
+                cluster,
+                String.format(
+                    "The clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                    application.getFlinkClusterId()));
             URI activeAddress = cluster.getRemoteURI();
             properties.put(RestOptions.ADDRESS.key(), activeAddress.getHost());
             properties.put(RestOptions.PORT.key(), activeAddress.getPort());
@@ -308,15 +308,15 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     private String getClusterId(Application application, FlinkCluster cluster) {
         if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
             return FlinkExecutionMode.isKubernetesSessionMode(application.getExecutionMode())
-                    ? cluster.getClusterId()
-                    : application.getClusterId();
+                ? cluster.getClusterId()
+                : application.getClusterId();
         } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
             if (FlinkExecutionMode.YARN_SESSION.equals(application.getFlinkExecutionMode())) {
                 AssertUtils.notNull(
-                        cluster,
-                        String.format(
-                                "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
-                                application.getFlinkClusterId()));
+                    cluster,
+                    String.format(
+                        "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or the cluster has been deleted. Please contact the Admin.",
+                        application.getFlinkClusterId()));
                 return cluster.getClusterId();
             } else {
                 return application.getClusterId();
@@ -357,8 +357,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         }
         Map<String, String> configMap = applicationConfig.readConfig();
         return FlinkUtils.isCheckpointEnabled(configMap)
-                ? configMap.get(SAVEPOINT_DIRECTORY.key())
-                : null;
+            ? configMap.get(SAVEPOINT_DIRECTORY.key())
+            : null;
     }
 
     /**
@@ -381,11 +381,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         // At the remote mode, request the flink webui interface to get the savepoint path
         FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
         AssertUtils.notNull(
-                cluster,
-                String.format(
-                        "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
-                                + "the cluster has been deleted. Please contact the Admin.",
-                        application.getFlinkClusterId()));
+            cluster,
+            String.format(
+                "The clusterId=%s cannot be find, maybe the clusterId is wrong or "
+                    + "the cluster has been deleted. Please contact the Admin.",
+                application.getFlinkClusterId()));
         Map<String, String> config = cluster.getFlinkConfig();
         return config.isEmpty() ? null : config.get(SAVEPOINT_DIRECTORY.key());
     }
@@ -402,10 +402,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 return Optional.of(value);
             }
             log.warn(
-                    "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be greater than 0");
+                "This value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be greater than 0");
         } catch (NumberFormatException e) {
             log.error(
-                    "This value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
+                "This value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
         }
         return Optional.empty();
     }
@@ -416,11 +416,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         String flinkConfNumRetained = flinkEnv.convertFlinkYamlAsMap().get(MAX_RETAINED_CHECKPOINTS.key());
         if (StringUtils.isBlank(flinkConfNumRetained)) {
             log.info(
-                    "The application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
-                    application.getJobName(),
-                    MAX_RETAINED_CHECKPOINTS.key(),
-                    flinkEnv.getFlinkHome(),
-                    MAX_RETAINED_CHECKPOINTS.defaultValue());
+                "The application: {} is not set {} in dynamicProperties or value is invalid, and flink-conf.yaml is the same problem of flink env: {}, default value: {} will be use.",
+                application.getJobName(),
+                MAX_RETAINED_CHECKPOINTS.key(),
+                flinkEnv.getFlinkHome(),
+                MAX_RETAINED_CHECKPOINTS.defaultValue());
             return MAX_RETAINED_CHECKPOINTS.defaultValue();
         }
         try {
@@ -429,13 +429,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 return value;
             }
             log.warn(
-                    "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be greater than 0, default value: {} will be used",
-                    MAX_RETAINED_CHECKPOINTS.defaultValue());
+                "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be greater than 0, default value: {} will be used",
+                MAX_RETAINED_CHECKPOINTS.defaultValue());
         } catch (NumberFormatException e) {
             log.error(
-                    "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be used",
-                    flinkEnv.getFlinkHome(),
-                    flinkConfNumRetained);
+                "The value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be used",
+                flinkEnv.getFlinkHome(),
+                flinkConfNumRetained);
         }
         return MAX_RETAINED_CHECKPOINTS.defaultValue();
     }
@@ -447,33 +447,33 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         AssertUtils.notNull(application);
 
         int cpThreshold = tryGetChkNumRetainedFromDynamicProps(application.getDynamicProperties())
-                .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
+            .orElse(getChkNumRetainedFromFlinkEnv(flinkEnv, application));
         cpThreshold = CHECKPOINT == CheckPointTypeEnum.of(entity.getType()) ? cpThreshold - 1 : cpThreshold;
 
         if (cpThreshold == 0) {
             LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
-                    .eq(SavePoint::getAppId, entity.getAppId())
-                    .eq(SavePoint::getType, CHECKPOINT.get());
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .eq(SavePoint::getType, CHECKPOINT.get());
             this.remove(queryWrapper);
             return;
         }
 
         LambdaQueryWrapper<SavePoint> queryWrapper = new LambdaQueryWrapper<SavePoint>()
-                .select(SavePoint::getTriggerTime)
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .eq(SavePoint::getType, CHECKPOINT.get())
-                .orderByDesc(SavePoint::getTriggerTime);
+            .select(SavePoint::getTriggerTime)
+            .eq(SavePoint::getAppId, entity.getAppId())
+            .eq(SavePoint::getType, CHECKPOINT.get())
+            .orderByDesc(SavePoint::getTriggerTime);
 
         Page<SavePoint> savePointPage = this.baseMapper.selectPage(new Page<>(1, cpThreshold + 1), queryWrapper);
         if (CollectionUtils.isEmpty(savePointPage.getRecords())
-                || savePointPage.getRecords().size() <= cpThreshold) {
+            || savePointPage.getRecords().size() <= cpThreshold) {
             return;
         }
         SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
         LambdaQueryWrapper<SavePoint> lambdaQueryWrapper = new LambdaQueryWrapper<SavePoint>()
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .eq(SavePoint::getType, CHECKPOINT.get())
-                .lt(SavePoint::getTriggerTime, savePoint.getTriggerTime());
+            .eq(SavePoint::getAppId, entity.getAppId())
+            .eq(SavePoint::getType, CHECKPOINT.get())
+            .lt(SavePoint::getTriggerTime, savePoint.getTriggerTime());
         this.remove(lambdaQueryWrapper);
     }
 
@@ -491,14 +491,14 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         Map<String, Object> properties = this.tryGetRestProps(application, cluster);
 
         return new TriggerSavepointRequest(
-                application.getId(),
-                flinkEnv.getFlinkVersion(),
-                application.getFlinkExecutionMode(),
-                properties,
-                clusterId,
-                application.getJobId(),
-                customSavepoint,
-                nativeFormat,
-                application.getK8sNamespace());
+            application.getId(),
+            flinkEnv.getFlinkVersion(),
+            application.getFlinkExecutionMode(),
+            properties,
+            clusterId,
+            application.getJobId(),
+            customSavepoint,
+            nativeFormat,
+            application.getK8sNamespace());
     }
 }

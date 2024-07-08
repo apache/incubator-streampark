@@ -108,19 +108,20 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             if (e instanceof InvalidRemoteException) {
                 if (project.isHttpRepositoryUrl()) {
                     String url = project
-                            .getUrl()
-                            .replaceAll(
-                                    "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
+                        .getUrl()
+                        .replaceAll(
+                            "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$",
+                            "git@$2:$3/$4.git");
                     project.setUrl(url);
                     fileLogger.info(
-                            "clone project by https(http) failed, Now try to clone project by ssh...");
+                        "clone project by https(http) failed, Now try to clone project by ssh...");
                     return cloneSourceCode(project);
                 }
             }
             fileLogger.error(
-                    String.format(
-                            "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
-                            project.getName(), project.getBranches(), e));
+                String.format(
+                    "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
+                    project.getName(), project.getBranches(), e));
             fileLogger.error(String.format("project %s clone error ", project.getName()), e);
             return false;
         }
@@ -143,9 +144,9 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
     private boolean projectBuild(Project project) {
         int code = CommandUtils.execute(
-                project.getMavenWorkHome(),
-                Collections.singletonList(project.getMavenArgs()),
-                (line) -> fileLogger.info(line));
+            project.getMavenWorkHome(),
+            Collections.singletonList(project.getMavenArgs()),
+            (line) -> fileLogger.info(line));
         return code == 0;
     }
 
@@ -157,7 +158,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
         findTarOrJar(apps, path);
         if (apps.isEmpty()) {
             throw new RuntimeException(
-                    "[StreamPark] can't find tar.gz or jar in " + path.getAbsolutePath());
+                "[StreamPark] can't find tar.gz or jar in " + path.getAbsolutePath());
         }
         for (File app : apps) {
             String appPath = app.getAbsolutePath();
@@ -170,7 +171,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
                 // xzvf jar
                 if (app.exists()) {
                     String cmd = String.format(
-                            "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
+                        "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
                     CommandUtils.execute(cmd);
                 }
             } else {
@@ -205,8 +206,8 @@ public class ProjectBuildTask extends AbstractLogFileTask {
                         }
                         // 2) try look for jar files, there may be multiple jars found.
                         if (!targetFile.getName().startsWith("original-")
-                                && !targetFile.getName().endsWith("-sources.jar")
-                                && targetFile.getName().endsWith(Constant.JAR_SUFFIX)) {
+                            && !targetFile.getName().endsWith("-sources.jar")
+                            && targetFile.getName().endsWith(Constant.JAR_SUFFIX)) {
                             if (jar == null) {
                                 jar = targetFile;
                             } else {

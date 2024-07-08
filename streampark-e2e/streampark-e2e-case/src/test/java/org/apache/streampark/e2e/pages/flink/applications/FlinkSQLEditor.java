@@ -43,7 +43,7 @@ public final class FlinkSQLEditor {
 
     public FlinkSQLEditor content(String content) {
         new WebDriverWait(this.driver, Duration.ofSeconds(20))
-                .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
+            .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
 
         flinkSqlEditor.click();
 

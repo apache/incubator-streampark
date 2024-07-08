@@ -63,8 +63,8 @@ public class SessionEnvironment implements Serializable {
         }
         SessionEnvironment that = (SessionEnvironment) o;
         return Objects.equals(sessionName, that.sessionName)
-                && Objects.equals(defaultCatalog, that.defaultCatalog)
-                && Objects.equals(sessionConfig, that.sessionConfig);
+            && Objects.equals(defaultCatalog, that.defaultCatalog)
+            && Objects.equals(sessionConfig, that.sessionConfig);
     }
 
     @Override
@@ -75,14 +75,14 @@ public class SessionEnvironment implements Serializable {
     @Override
     public String toString() {
         return "SessionEnvironment{"
-                + "sessionName='"
-                + sessionName
-                + '\''
-                + ", defaultCatalog='"
-                + defaultCatalog
-                + '\''
-                + ", sessionConfig="
-                + sessionConfig
-                + '}';
+            + "sessionName='"
+            + sessionName
+            + '\''
+            + ", defaultCatalog='"
+            + defaultCatalog
+            + '\''
+            + ", sessionConfig="
+            + sessionConfig
+            + '}';
     }
 }

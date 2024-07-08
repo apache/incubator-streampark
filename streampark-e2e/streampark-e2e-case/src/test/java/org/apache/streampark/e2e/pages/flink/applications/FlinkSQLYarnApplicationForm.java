@@ -54,12 +54,12 @@ public final class FlinkSQLYarnApplicationForm {
     public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
         buttonFlinkVersionDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
+            .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
         selectFlinkVersion.stream()
-                .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
-                .click();
+            .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
+            .click();
 
         new FlinkSQLEditor(driver).content(flinkSql);
 

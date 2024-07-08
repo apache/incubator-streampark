@@ -42,7 +42,7 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
     public <T extends ResourcePage.Tab> T goToTab(Class<T> tab) {
         if (tab == VariableManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(resourceVariableManagement));
+                .until(ExpectedConditions.elementToBeClickable(resourceVariableManagement));
             resourceVariableManagement.click();
             return tab.cast(new VariableManagementPage(driver));
         }

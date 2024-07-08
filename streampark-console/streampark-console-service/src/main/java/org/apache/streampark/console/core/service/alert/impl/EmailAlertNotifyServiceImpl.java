@@ -46,7 +46,7 @@ public class EmailAlertNotifyServiceImpl implements AlertNotifyService {
     @Override
     public boolean doAlert(AlertConfigParams alertConfig, AlertTemplate template) throws AlertException {
         EmailConfig emailConfig = Optional.ofNullable(EmailConfig.fromSetting())
-                .orElseThrow(() -> new AlertException("Please configure the email sender first"));
+            .orElseThrow(() -> new AlertException("Please configure the email sender first"));
         String contacts = alertConfig.getEmailParams() == null ? null : alertConfig.getEmailParams().getContacts();
         if (!StringUtils.hasLength(contacts)) {
             throw new AlertException("Please configure a valid contacts");

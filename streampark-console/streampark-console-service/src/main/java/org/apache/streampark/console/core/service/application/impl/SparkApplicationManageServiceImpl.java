@@ -85,13 +85,13 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkApplicationManageServiceImpl
-        extends
-            ServiceImpl<SparkApplicationMapper, SparkApplication>
-        implements
-            SparkApplicationManageService {
+    extends
+        ServiceImpl<SparkApplicationMapper, SparkApplication>
+    implements
+        SparkApplicationManageService {
 
     private static final String ERROR_APP_QUEUE_HINT =
-            "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
+        "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
     @Autowired
     private ProjectService projectService;
@@ -197,8 +197,8 @@ public class SparkApplicationManageServiceImpl
         removeById(appId);
         try {
             application
-                    .getFsOperator()
-                    .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .getFsOperator()
+                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
             String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
@@ -217,12 +217,12 @@ public class SparkApplicationManageServiceImpl
         Page<SparkApplication> page = MybatisPager.getPage(request);
 
         if (ArrayUtils.isNotEmpty(appParam.getStateArray())
-                && Arrays.stream(appParam.getStateArray())
-                        .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
+            && Arrays.stream(appParam.getStateArray())
+                .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
             Integer[] newArray = ArrayUtils.insert(
-                    appParam.getStateArray().length,
-                    appParam.getStateArray(),
-                    FlinkAppStateEnum.POS_TERMINATED.getValue());
+                appParam.getStateArray().length,
+                appParam.getStateArray(),
+                FlinkAppStateEnum.POS_TERMINATED.getValue());
             appParam.setStateArray(newArray);
         }
         this.baseMapper.selectPage(page, appParam);
@@ -233,27 +233,27 @@ public class SparkApplicationManageServiceImpl
         Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
 
         List<SparkApplication> newRecords = records.stream()
-                .peek(
-                        record -> {
-                            if (pipeStates.containsKey(record.getId())) {
-                                record.setBuildStatus(pipeStates.get(record.getId()).getCode());
-                            }
+            .peek(
+                record -> {
+                    if (pipeStates.containsKey(record.getId())) {
+                        record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                    }
 
-                            AppControl appControl = new AppControl()
-                                    .setAllowBuild(
-                                            record.getBuildStatus() == null
-                                                    || !PipelineStatusEnum.running
-                                                            .getCode()
-                                                            .equals(record.getBuildStatus()))
-                                    .setAllowStart(
-                                            !record.shouldTracking()
-                                                    && PipelineStatusEnum.success
-                                                            .getCode()
-                                                            .equals(record.getBuildStatus()))
-                                    .setAllowStop(record.isRunning());
-                            record.setAppControl(appControl);
-                        })
-                .collect(Collectors.toList());
+                    AppControl appControl = new AppControl()
+                        .setAllowBuild(
+                            record.getBuildStatus() == null
+                                || !PipelineStatusEnum.running
+                                    .getCode()
+                                    .equals(record.getBuildStatus()))
+                        .setAllowStart(
+                            !record.shouldTracking()
+                                && PipelineStatusEnum.success
+                                    .getCode()
+                                    .equals(record.getBuildStatus()))
+                        .setAllowStop(record.isRunning());
+                    record.setAppControl(appControl);
+                })
+            .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
     }
@@ -261,8 +261,8 @@ public class SparkApplicationManageServiceImpl
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
         LambdaUpdateWrapper<SparkApplication> updateWrapper = new LambdaUpdateWrapper<SparkApplication>()
-                .eq(SparkApplication::getUserId, userId)
-                .set(SparkApplication::getUserId, targetUserId);
+            .eq(SparkApplication::getUserId, userId)
+            .set(SparkApplication::getUserId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -270,7 +270,7 @@ public class SparkApplicationManageServiceImpl
     @Override
     public boolean create(SparkApplication appParam) {
         ApiAlertException.throwIfNull(
-                appParam.getTeamId(), "The teamId can't be null. Create application failed.");
+            appParam.getTeamId(), "The teamId can't be null. Create application failed.");
         appParam.setUserId(serviceHelper.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
@@ -281,13 +281,13 @@ public class SparkApplicationManageServiceImpl
 
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
-                success,
-                String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            success,
+            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = String.format(
-                    "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
                 Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
@@ -313,7 +313,7 @@ public class SparkApplicationManageServiceImpl
 
     private boolean existsByJobName(String jobName) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
     }
 
     @SuppressWarnings("checkstyle:WhitespaceAround")
@@ -322,8 +322,8 @@ public class SparkApplicationManageServiceImpl
     public Long copy(SparkApplication appParam) {
         boolean existsByJobName = this.existsByJobName(appParam.getJobName());
         ApiAlertException.throwIfFalse(
-                !existsByJobName,
-                "[StreamPark] Application names can't be repeated, copy application failed.");
+            !existsByJobName,
+            "[StreamPark] Application names can't be repeated, copy application failed.");
 
         SparkApplication oldApp = getById(appParam.getId());
         SparkApplication newApp = new SparkApplication();
@@ -396,7 +396,7 @@ public class SparkApplicationManageServiceImpl
             return newApp.getId();
         } else {
             throw new ApiAlertException(
-                    "create application from copy failed, copy source app: " + oldApp.getJobName());
+                "create application from copy failed, copy source app: " + oldApp.getJobName());
         }
     }
 
@@ -409,8 +409,8 @@ public class SparkApplicationManageServiceImpl
 
         boolean success = validateQueueIfNeeded(application, appParam);
         ApiAlertException.throwIfFalse(
-                success,
-                String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            success,
+            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
         application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
@@ -436,7 +436,7 @@ public class SparkApplicationManageServiceImpl
 
         // 3) flink version changed
         if (!application.getBuild()
-                && !Objects.equals(application.getVersionId(), appParam.getVersionId())) {
+            && !Objects.equals(application.getVersionId(), appParam.getVersionId())) {
             application.setBuild(true);
         }
 
@@ -523,7 +523,7 @@ public class SparkApplicationManageServiceImpl
             // get previous flink sql and decode
             FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
             ApiAlertException.throwIfNull(
-                    copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
+                copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
             copySourceFlinkSql.decode();
 
             // get submit flink sql
@@ -600,14 +600,15 @@ public class SparkApplicationManageServiceImpl
                                                                 Long teamId,
                                                                 Collection<SparkExecutionMode> executionModeEnums) {
         return getBaseMapper()
-                .selectList(
-                        new LambdaQueryWrapper<SparkApplication>()
-                                .eq((SFunction<SparkApplication, Long>) SparkApplication::getTeamId, teamId)
-                                .in(
-                                        SparkApplication::getExecutionMode,
-                                        executionModeEnums.stream()
-                                                .map(SparkExecutionMode::getMode)
-                                                .collect(Collectors.toSet())));
+            .selectList(
+                new LambdaQueryWrapper<SparkApplication>()
+                    .eq((SFunction<SparkApplication, Long>) SparkApplication::getTeamId,
+                        teamId)
+                    .in(
+                        SparkApplication::getExecutionMode,
+                        executionModeEnums.stream()
+                            .map(SparkExecutionMode::getMode)
+                            .collect(Collectors.toSet())));
     }
 
     @Override
@@ -698,7 +699,7 @@ public class SparkApplicationManageServiceImpl
 
         oldApp.setYarnQueueByHotParams();
         if (SparkExecutionMode.isYarnMode(newApp.getSparkExecutionMode())
-                && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
+            && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
         return yarnQueueService.existByTeamIdQueueLabel(newApp.getTeamId(), newApp.getYarnQueue());
@@ -714,13 +715,13 @@ public class SparkApplicationManageServiceImpl
      */
     private boolean isYarnNotDefaultQueue(SparkApplication application) {
         return SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())
-                && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
+            && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
     private boolean isYarnApplicationModeChange(
                                                 SparkApplication application, SparkApplication appParam) {
         return !application.getExecutionMode().equals(appParam.getExecutionMode())
-                && (SparkExecutionMode.YARN_CLIENT == appParam.getSparkExecutionMode()
-                        || SparkExecutionMode.YARN_CLUSTER == application.getSparkExecutionMode());
+            && (SparkExecutionMode.YARN_CLIENT == appParam.getSparkExecutionMode()
+                || SparkExecutionMode.YARN_CLUSTER == application.getSparkExecutionMode());
     }
 }
