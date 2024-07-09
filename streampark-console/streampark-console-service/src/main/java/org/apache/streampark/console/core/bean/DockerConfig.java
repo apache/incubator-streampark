@@ -42,35 +42,6 @@ public class DockerConfig {
     private String password;
     private String namespace;
 
-    public static DockerConfig fromSetting() {
-        try {
-            DockerConfig dockerConfig = new DockerConfig();
-
-            dockerConfig.setAddress(
-                SettingService.SETTINGS
-                    .get(SettingService.KEY_DOCKER_REGISTER_ADDRESS)
-                    .getSettingValue());
-
-            dockerConfig.setUsername(
-                SettingService.SETTINGS.get(SettingService.KEY_DOCKER_REGISTER_USER).getSettingValue());
-
-            dockerConfig.setPassword(
-                SettingService.SETTINGS
-                    .get(SettingService.KEY_DOCKER_REGISTER_PASSWORD)
-                    .getSettingValue());
-
-            dockerConfig.setNamespace(
-                SettingService.SETTINGS
-                    .get(SettingService.KEY_DOCKER_REGISTER_NAMESPACE)
-                    .getSettingValue());
-
-            return dockerConfig;
-        } catch (Exception e) {
-            log.warn("Failed to create DockerConfig from settings", e);
-        }
-        return null;
-    }
-
     public static List<Setting> toSettings(DockerConfig dockerConfig) {
         Setting address = new Setting();
         address.setSettingKey(SettingService.KEY_DOCKER_REGISTER_ADDRESS);

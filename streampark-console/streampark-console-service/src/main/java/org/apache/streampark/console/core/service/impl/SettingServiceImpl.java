@@ -17,16 +17,6 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.core.bean.DockerConfig;
-import org.apache.streampark.console.core.bean.MavenConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
-import org.apache.streampark.console.core.bean.SenderEmail;
-import org.apache.streampark.console.core.entity.Setting;
-import org.apache.streampark.console.core.mapper.SettingMapper;
-import org.apache.streampark.console.core.service.SettingService;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.dockerjava.api.DockerClient;
@@ -38,6 +28,15 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.bean.MavenConfig;
+import org.apache.streampark.console.core.bean.ResponseResult;
+import org.apache.streampark.console.core.bean.SenderEmail;
+import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.mapper.SettingMapper;
+import org.apache.streampark.console.core.service.SettingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +45,7 @@ import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -56,9 +55,12 @@ import java.util.Properties;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     implements
-        SettingService {
+    SettingService {
 
     private final Setting emptySetting = new Setting();
+
+    @Autowired
+    SettingMapper settingMapper;
 
     @PostConstruct
     public void loadSettings() {
@@ -100,7 +102,31 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public DockerConfig getDockerConfig() {
-        return DockerConfig.fromSetting();
+        List<Setting> settingList = settingMapper.querySettingByKeys(Arrays.asList(
+            SettingService.KEY_DOCKER_REGISTER_ADDRESS,
+            SettingService.KEY_DOCKER_REGISTER_USER,
+            SettingService.KEY_DOCKER_REGISTER_PASSWORD,
+            SettingService.KEY_DOCKER_REGISTER_NAMESPACE));
+        DockerConfig dockerConfig = new DockerConfig();
+        settingList.forEach(setting -> {
+            switch (setting.getSettingKey()) {
+                case SettingService.KEY_DOCKER_REGISTER_ADDRESS:
+                    dockerConfig.setAddress(setting.getSettingValue());
+                    break;
+                case SettingService.KEY_DOCKER_REGISTER_USER:
+                    dockerConfig.setUsername(setting.getSettingValue());
+                    break;
+                case SettingService.KEY_DOCKER_REGISTER_PASSWORD:
+                    dockerConfig.setPassword(setting.getSettingValue());
+                    break;
+                case SettingService.KEY_DOCKER_REGISTER_NAMESPACE:
+                    dockerConfig.setNamespace(setting.getSettingValue());
+                    break;
+                default:
+                    break;
+            }
+        });
+        return dockerConfig;
     }
 
     @Override
