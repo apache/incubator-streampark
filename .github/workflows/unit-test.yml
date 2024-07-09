@@ -100,6 +100,7 @@ jobs:
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
+          submodules: true
       - name: SonarCloud Scan
         uses: ./.github/actions/sonarqube-action
         with:
