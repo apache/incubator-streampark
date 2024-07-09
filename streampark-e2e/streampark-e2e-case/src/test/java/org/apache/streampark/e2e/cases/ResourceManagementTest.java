@@ -92,6 +92,7 @@ public class ResourceManagementTest {
     @Order(20)
     void testCreateDuplicateResource() {
         final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
+        browser.navigate().refresh();
         resourceManagementPage.createResource(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
@@ -110,12 +111,14 @@ public class ResourceManagementTest {
     @Order(30)
     void testEditResource() {
         final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
+        browser.navigate().refresh();
+
         String editDescription = "Kafka-jar-lib";
         String editResource =
             "<dependency>\n" +
-                "    <groupId>org.apache.kafka</groupId>\n" +
-                "    <artifactId>kafka-clients</artifactId>\n" +
-                "    <version>3.7.1</version>\n" +
+                "   <groupId>org.apache.kafka</groupId>\n" +
+                "   <artifactId>kafka-clients</artifactId>\n" +
+                "   <version>3.7.1</version>\n" +
                 "</dependency>";
 
         resourceManagementPage.editResource(engineType, resourceType, resourceName, editResource,

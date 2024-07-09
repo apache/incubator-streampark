@@ -65,18 +65,17 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             .until(ExpectedConditions.elementToBeClickable(buttonCreateResource));
         buttonCreateResource.click();
 
-        // todo: can't be click
         // select engine type.
-        // createResourceForm().btnSelectEngineTypeDropDown.click();
-        // new WebDriverWait(driver, Duration.ofSeconds(10))
-        // .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType));
-        // createResourceForm.selectResourceType.stream()
-        // .filter(e -> e.getText().equals(engineType))
-        // .findFirst()
-        // .orElseThrow(
-        // () -> new RuntimeException(
-        // String.format("No %s in resourceType dropdown list", resourceType)))
-        // .click();
+        createResourceForm.btnSelectEngineTypeDropDown().click();
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType()));
+        createResourceForm.selectResourceType().stream()
+            .filter(e -> e.getText().equals(engineType))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in engineType dropdown list", engineType)))
+            .click();
 
         // select resource type.
         createResourceForm.btnSelectResourceTypeDropDown().click();
@@ -111,30 +110,29 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             .orElseThrow(() -> new RuntimeException("No edit button in resource list"))
             .click();
 
-        // todo: can't be click
         // select engine type.
-        // createResourceForm().btnSelectEngineTypeDropDown.click();
-        // new WebDriverWait(driver, Duration.ofSeconds(10))
-        // .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType));
-        // createResourceForm.selectResourceType.stream()
-        // .filter(e -> e.getText().equals(engineType))
-        // .findFirst()
-        // .orElseThrow(
-        // () -> new RuntimeException(
-        // String.format("No %s in resourceType dropdown list", resourceType)))
-        // .click();
+        createResourceForm.btnSelectEngineTypeDropDown().click();
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType()));
+        createResourceForm.selectResourceType.stream()
+            .filter(e -> e.getText().equals(engineType))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in resourceType dropdown list", resourceType)))
+            .click();
 
-        // todo: can't be click
-        // createResourceForm.btnSelectResourceTypeDropDown().click();
-        // new WebDriverWait(driver, Duration.ofSeconds(10))
-        // .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
-        // createResourceForm.selectResourceType().stream()
-        // .filter(e -> e.getText().equals(resourceType))
-        // .findFirst()
-        // .orElseThrow(
-        // () -> new RuntimeException(
-        // String.format("No %s in resourceType dropdown list", resourceType)))
-        // .click();
+        // select resource type.
+        createResourceForm.btnSelectResourceTypeDropDown().click();
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
+        createResourceForm.selectResourceType().stream()
+            .filter(e -> e.getText().equals(resourceType))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in resourceType dropdown list", resourceType)))
+            .click();
 
         createResourceForm.textPom().sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
         createResourceForm.textPom().sendKeys(resource);
@@ -177,13 +175,13 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "form_item_engineType")
+        @FindBy(xpath = "//*[@id='form_item_engineType']/ancestor::div[contains(@class, 'ant-select-selector')]")
         private WebElement btnSelectEngineTypeDropDown;
 
         @FindBy(xpath = "//*[@id='form_item_engineType']//following::div[@class='ant-select-item-option-content']")
         private List<WebElement> selectEngineType;
 
-        @FindBy(id = "form_item_resourceType")
+        @FindBy(xpath = "//*[@id='form_item_resourceType']/ancestor::div[contains(@class, 'ant-select-selector')]")
         private WebElement btnSelectResourceTypeDropDown;
 
         @FindBy(xpath = "//*[@id='form_item_resourceType']//following::div[@class='ant-select-item-option-content']")
