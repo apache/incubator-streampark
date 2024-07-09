@@ -22,6 +22,7 @@ import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
+import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ class SettingServiceTest extends SpringUnitTestBase {
 
     @Autowired
     SettingService settingService;
+
+    @Autowired
+    SettingMapper settingMapper;
 
     @Test
     void testUpdateDockerConfigTest() {
@@ -113,5 +117,21 @@ class SettingServiceTest extends SpringUnitTestBase {
 
         ResponseResult result = settingService.checkDocker(dockerConfig);
         Assertions.assertEquals(result.getStatus(), 200);
+    }
+
+    @Test
+    void testGetDockerConfig() {
+        String username = "XXXXXXXX";
+        String password = "XXXXXXXX";
+
+        DockerConfig initDockerConfig = new DockerConfig();
+        initDockerConfig.setAddress("registry.cn-hangzhou.aliyuncs.com");
+        initDockerConfig.setUsername(username);
+        initDockerConfig.setPassword(password);
+        initDockerConfig.setNamespace("streampark");
+        settingService.updateDocker(initDockerConfig);
+
+        DockerConfig dockerConfig = settingService.getDockerConfig();
+        Assertions.assertEquals(dockerConfig, initDockerConfig);
     }
 }
