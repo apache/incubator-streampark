@@ -38,7 +38,6 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,9 +60,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         SettingService {
 
     private final Setting emptySetting = new Setting();
-
-    @Autowired
-    SettingMapper settingMapper;
 
     @PostConstruct
     public void loadSettings() {
@@ -105,7 +101,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public DockerConfig getDockerConfig() {
-        List<Setting> settingList = settingMapper.querySettingByKeys(Arrays.asList(
+        List<Setting> settingList = baseMapper.querySettingByKeys(Arrays.asList(
             SettingService.KEY_DOCKER_REGISTER_ADDRESS,
             SettingService.KEY_DOCKER_REGISTER_USER,
             SettingService.KEY_DOCKER_REGISTER_PASSWORD,
