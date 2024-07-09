@@ -64,7 +64,6 @@ object YarnApplicationClient extends SparkClientTrait {
       .setConf(
         "spark.yarn.jars",
         submitRequest
-          .asInstanceOf[SubmitRequest]
           .hdfsWorkspace
           .sparkLib + "/*.jar")
       .setVerbose(true)

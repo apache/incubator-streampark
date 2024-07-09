@@ -50,10 +50,10 @@ public class MavenPom {
     @Override
     public String toString() {
         return String.format(
-                "%s:%s:%s%s",
-                groupId,
-                artifactId,
-                version,
-                StringUtils.isBlank(classifier) ? "" : ":".concat(classifier));
+            "%s:%s:%s%s",
+            groupId,
+            artifactId,
+            version,
+            StringUtils.isBlank(classifier) ? "" : ":".concat(classifier));
     }
 }

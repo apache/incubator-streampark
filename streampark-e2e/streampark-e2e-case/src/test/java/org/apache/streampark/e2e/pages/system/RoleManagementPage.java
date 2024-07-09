@@ -58,7 +58,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateRole));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateRole));
         buttonCreateRole.click();
 
         createRoleForm.inputRoleName().sendKeys(roleName);
@@ -74,13 +74,14 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         new WebDriverWait(driver, Duration.ofSeconds(2));
 
         roleList().stream()
-                .filter(it -> it.getText().contains(roleName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Edit Role')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in role list"))
-                .click();
+            .filter(it -> it.getText().contains(roleName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Edit Role')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in role list"))
+            .click();
 
         createRoleForm.inputDescription().sendKeys(description);
         editRoleMenu(menuName);
@@ -93,16 +94,17 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     public RoleManagementPage deleteRole(String roleName) {
         waitForPageLoading();
         roleList().stream()
-                .filter(it -> it.getText().contains(roleName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Role')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in role list"))
-                .click();
+            .filter(it -> it.getText().contains(roleName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Role')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in role list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
 
@@ -111,22 +113,22 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/system/role"));
+            .until(ExpectedConditions.urlContains("/system/role"));
     }
 
     private void editRoleMenu(String menuName) {
         createRoleForm.inputMenus.stream()
-                .filter(e -> Objects.equals(
-                        e.findElement(By.xpath(
-                                ".//span[contains(@class, 'streampark-tree__title') and contains(@class, 'pl-2')]"))
-                                .getText(),
-                        menuName))
-                .findFirst()
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                String.format("No %s in menus checkbox tree", menuName)))
-                .findElement(By.className("ant-tree-checkbox-inner"))
-                .click();
+            .filter(e -> Objects.equals(
+                e.findElement(By.xpath(
+                    ".//span[contains(@class, 'streampark-tree__title') and contains(@class, 'pl-2')]"))
+                    .getText(),
+                menuName))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in menus checkbox tree", menuName)))
+            .findElement(By.className("ant-tree-checkbox-inner"))
+            .click();
     }
 
     @Getter

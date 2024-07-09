@@ -36,11 +36,11 @@ class JWTTest extends SpringUnitTestBase {
         String userName = "black";
         String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
         String token = JWTUtil.sign(
-                10000L,
-                userName,
-                "streampark",
-                AuthenticationType.SIGN,
-                DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+            10000L,
+            userName,
+            "streampark",
+            AuthenticationType.SIGN,
+            DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
 
         assert token != null;
         Date expiresAt = JWT.decode(token).getExpiresAt();

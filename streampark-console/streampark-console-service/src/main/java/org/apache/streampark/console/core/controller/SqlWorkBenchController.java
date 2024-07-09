@@ -114,7 +114,7 @@ public class SqlWorkBenchController {
                                          @PathVariable String sessionHandle,
                                          @PathVariable String operationHandle) {
         return RestResponse.success(
-                sqlWorkBenchService.getOperationInfo(flinkGatewayId, sessionHandle, operationHandle));
+            sqlWorkBenchService.getOperationInfo(flinkGatewayId, sessionHandle, operationHandle));
     }
 
     @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/resultSchema")
@@ -123,8 +123,8 @@ public class SqlWorkBenchController {
                                                  @PathVariable String sessionHandle,
                                                  @PathVariable String operationHandle) {
         return RestResponse.success(
-                sqlWorkBenchService.getOperationResultSchema(
-                        flinkGatewayId, sessionHandle, operationHandle));
+            sqlWorkBenchService.getOperationResultSchema(
+                flinkGatewayId, sessionHandle, operationHandle));
     }
 
     // -------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ public class SqlWorkBenchController {
                                          @PathVariable String sessionHandle,
                                          @RequestParam String statement) {
         return RestResponse.success(
-                sqlWorkBenchService.executeStatement(flinkGatewayId, sessionHandle, statement));
+            sqlWorkBenchService.executeStatement(flinkGatewayId, sessionHandle, statement));
     }
 
     @PostMapping("sessions/{sessionHandle}/statements/{operationHandle}/info")
@@ -147,8 +147,8 @@ public class SqlWorkBenchController {
                                      @PathVariable String operationHandle,
                                      @RequestBody ResultQueryCondition resultQueryCondition) {
         return RestResponse.success(
-                sqlWorkBenchService.fetchResults(
-                        flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
+            sqlWorkBenchService.fetchResults(
+                flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
     }
 
     // -------------------------------------------------------------------------------------------

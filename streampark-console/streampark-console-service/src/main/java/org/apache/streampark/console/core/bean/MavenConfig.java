@@ -53,22 +53,22 @@ public class MavenConfig {
         Map<String, Setting> settings = SettingService.SETTINGS;
         if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH().key())) {
             mavenConfig.setMvnSettings(
-                    settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());
         }
 
         if (settings.containsKey(CommonConfig.MAVEN_REMOTE_URL().key())) {
             mavenConfig.setMvnRepository(
-                    settings.get(CommonConfig.MAVEN_REMOTE_URL().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_REMOTE_URL().key()).getSettingValue());
         }
 
         if (settings.containsKey(CommonConfig.MAVEN_AUTH_USER().key())) {
             mavenConfig.setMvnAuthUser(
-                    settings.get(CommonConfig.MAVEN_AUTH_USER().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_AUTH_USER().key()).getSettingValue());
         }
 
         if (settings.containsKey(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
             mavenConfig.setMvnAuthPassword(
-                    settings.get(CommonConfig.MAVEN_AUTH_PASSWORD().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_AUTH_PASSWORD().key()).getSettingValue());
         }
 
         return mavenConfig;

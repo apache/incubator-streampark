@@ -62,7 +62,7 @@ class YarnQueueLabelExpressionTest {
         assertThat(YarnQueueLabelExpression.of("a").getLabelExpression()).isEmpty();
         assertThat(YarnQueueLabelExpression.of("a").getQueue()).isEqualTo("a");
         assertThatThrownBy(() -> YarnQueueLabelExpression.of("a@"))
-                .isInstanceOf(ApiAlertException.class)
-                .hasMessageContaining(ERR_FORMAT_HINTS);
+            .isInstanceOf(ApiAlertException.class)
+            .hasMessageContaining(ERR_FORMAT_HINTS);
     }
 }

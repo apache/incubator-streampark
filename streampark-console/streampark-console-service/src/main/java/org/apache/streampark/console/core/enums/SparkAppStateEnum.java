@@ -101,11 +101,11 @@ public enum SparkAppStateEnum {
     public static boolean isEndState(Integer appState) {
         SparkAppStateEnum sparkAppStateEnum = SparkAppStateEnum.of(appState);
         return SparkAppStateEnum.FAILED == sparkAppStateEnum
-                || SparkAppStateEnum.KILLED == sparkAppStateEnum
-                || SparkAppStateEnum.FINISHED == sparkAppStateEnum
-                || SparkAppStateEnum.SUCCEEDED == sparkAppStateEnum
-                || SparkAppStateEnum.LOST == sparkAppStateEnum
-                || SparkAppStateEnum.TERMINATED == sparkAppStateEnum;
+            || SparkAppStateEnum.KILLED == sparkAppStateEnum
+            || SparkAppStateEnum.FINISHED == sparkAppStateEnum
+            || SparkAppStateEnum.SUCCEEDED == sparkAppStateEnum
+            || SparkAppStateEnum.LOST == sparkAppStateEnum
+            || SparkAppStateEnum.TERMINATED == sparkAppStateEnum;
     }
 
     public static boolean isLost(Integer appState) {

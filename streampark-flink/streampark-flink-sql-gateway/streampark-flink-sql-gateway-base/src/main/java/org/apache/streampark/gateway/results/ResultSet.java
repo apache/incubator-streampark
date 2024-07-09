@@ -127,12 +127,12 @@ public class ResultSet implements Serializable {
         }
         ResultSet resultSet = (ResultSet) o;
         return isQueryResult == resultSet.isQueryResult
-                && resultType == resultSet.resultType
-                && Objects.equals(nextToken, resultSet.nextToken)
-                && Objects.equals(columns, resultSet.columns)
-                && Objects.equals(data, resultSet.data)
-                && Objects.equals(jobID, resultSet.jobID)
-                && resultKindEnum == resultSet.resultKindEnum;
+            && resultType == resultSet.resultType
+            && Objects.equals(nextToken, resultSet.nextToken)
+            && Objects.equals(columns, resultSet.columns)
+            && Objects.equals(data, resultSet.data)
+            && Objects.equals(jobID, resultSet.jobID)
+            && resultKindEnum == resultSet.resultKindEnum;
     }
 
     @Override
@@ -143,21 +143,21 @@ public class ResultSet implements Serializable {
     @Override
     public String toString() {
         return "ResultSet{"
-                + "resultType="
-                + resultType
-                + ", nextToken="
-                + nextToken
-                + ", resultSchema="
-                + columns
-                + ", data="
-                + data
-                + ", isQueryResult="
-                + isQueryResult
-                + ", jobID="
-                + jobID
-                + ", resultKind="
-                + resultKindEnum
-                + '}';
+            + "resultType="
+            + resultType
+            + ", nextToken="
+            + nextToken
+            + ", resultSchema="
+            + columns
+            + ", data="
+            + data
+            + ", isQueryResult="
+            + isQueryResult
+            + ", jobID="
+            + jobID
+            + ", resultKind="
+            + resultKindEnum
+            + '}';
     }
 
     /** Describe the kind of the result. */

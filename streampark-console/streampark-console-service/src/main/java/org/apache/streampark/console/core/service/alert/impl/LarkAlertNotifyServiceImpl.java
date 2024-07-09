@@ -113,7 +113,7 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         } catch (Exception e) {
             log.error("Failed to request Lark robot alarm,\nurl:{}", url, e);
             throw new AlertException(
-                    String.format("Failed to request Lark robot alert,%nurl:%s", url), e);
+                String.format("Failed to request Lark robot alert,%nurl:%s", url), e);
         }
 
         if (robotResponse == null) {
@@ -121,9 +121,9 @@ public class LarkAlertNotifyServiceImpl implements AlertNotifyService {
         }
         if (robotResponse.getStatusCode() == null || robotResponse.getStatusCode() != 0) {
             throw new AlertException(
-                    String.format(
-                            "Failed to request Lark robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
-                            url, robotResponse.getCode(), robotResponse.getMsg()));
+                String.format(
+                    "Failed to request Lark robot alert,%nurl:%s,%nerrorCode:%d,%nerrorMsg:%s",
+                    url, robotResponse.getCode(), robotResponse.getMsg()));
         }
     }
 

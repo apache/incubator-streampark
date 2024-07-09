@@ -53,9 +53,9 @@ public class VariableManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(ResourcePage.class)
-                .goToTab(VariableManagementPage.class);
+            .login(userName, password, teamName)
+            .goToNav(ResourcePage.class)
+            .goToTab(VariableManagementPage.class);
     }
 
     @Test
@@ -65,11 +65,11 @@ public class VariableManagementTest {
         variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(variableManagementPage.variableList())
-                                .as("Variable list should contain newly-created variable")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(variableCode)));
+            .untilAsserted(
+                () -> assertThat(variableManagementPage.variableList())
+                    .as("Variable list should contain newly-created variable")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(variableCode)));
     }
 
     @Test
@@ -79,11 +79,12 @@ public class VariableManagementTest {
         variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(variableManagementPage.errorMessageList())
-                                .as("Variable Code Duplicated Error message should be displayed")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains("The variable code already exists.")));
+            .untilAsserted(
+                () -> assertThat(variableManagementPage.errorMessageList())
+                    .as("Variable Code Duplicated Error message should be displayed")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(
+                        "The variable code already exists.")));
 
         variableManagementPage.errorMessageConfirmButton().click();
         variableManagementPage.createVariableForm().buttonCancel().click();
@@ -98,12 +99,12 @@ public class VariableManagementTest {
 
         variableManagementPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(variableManagementPage.variableList())
-                                .as("Variable list should contain edited variable")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(editVariableValue))
-                                .anyMatch(it -> it.contains(editDescription)));
+            .untilAsserted(
+                () -> assertThat(variableManagementPage.variableList())
+                    .as("Variable list should contain edited variable")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(editVariableValue))
+                    .anyMatch(it -> it.contains(editDescription)));
     }
 
     @Test
@@ -114,9 +115,9 @@ public class VariableManagementTest {
         variableManagementPage.deleteVariable(variableCode);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(variableManagementPage.variableList())
-                                .extracting(WebElement::getText)
-                                .noneMatch(it -> it.contains(variableCode)));
+            .untilAsserted(
+                () -> assertThat(variableManagementPage.variableList())
+                    .extracting(WebElement::getText)
+                    .noneMatch(it -> it.contains(variableCode)));
     }
 }

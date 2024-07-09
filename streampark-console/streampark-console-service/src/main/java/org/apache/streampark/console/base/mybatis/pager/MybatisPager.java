@@ -35,7 +35,7 @@ public final class MybatisPager<T> {
         boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
         if (invalid) {
             throw new IllegalArgumentException(
-                    String.format("Invalid argument sortField: %s", request.getSortField()));
+                String.format("Invalid argument sortField: %s", request.getSortField()));
         }
 
         if (request.getSortOrder() == null) {

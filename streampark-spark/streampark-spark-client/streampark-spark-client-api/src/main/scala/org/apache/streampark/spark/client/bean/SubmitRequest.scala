@@ -138,7 +138,7 @@ case class SubmitRequest(
     Files.isSymbolicLink(file.toPath)
   }
 
-  private[client] lazy val hdfsWorkspace = {
+  private[client] val hdfsWorkspace = {
 
     /**
      * The spark version and configuration in the native spark and hdfs must be kept exactly the

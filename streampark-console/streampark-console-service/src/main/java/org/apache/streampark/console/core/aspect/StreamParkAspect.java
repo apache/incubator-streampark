@@ -63,8 +63,8 @@ public class StreamParkAspect {
     private ApplicationManageService applicationManageService;
 
     @Pointcut("execution(public"
-            + " org.apache.streampark.console.base.domain.RestResponse"
-            + " org.apache.streampark.console.*.controller.*.*(..))")
+        + " org.apache.streampark.console.base.domain.RestResponse"
+        + " org.apache.streampark.console.*.controller.*.*(..))")
     public void openAPI() {
     }
 
@@ -114,16 +114,16 @@ public class StreamParkAspect {
             // 1) check userId
             Long userId = getId(joinPoint, methodSignature, permissionScope.user());
             ApiAlertException.throwIfTrue(
-                    userId != null && !currentUser.getUserId().equals(userId),
-                    "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
+                userId != null && !currentUser.getUserId().equals(userId),
+                "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
             // 2) check team
             Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(
-                        member == null,
-                        "Permission denied, only members of this team can access this permission");
+                    member == null,
+                    "Permission denied, only members of this team can access this permission");
             }
 
             // 3) check app
@@ -134,8 +134,8 @@ public class StreamParkAspect {
                 if (!currentUser.getUserId().equals(app.getUserId())) {
                     Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
                     ApiAlertException.throwIfTrue(
-                            member == null,
-                            "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+                        member == null,
+                        "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
                 }
             }
         }
@@ -165,7 +165,7 @@ public class StreamParkAspect {
             return Long.parseLong(value.toString());
         } catch (NumberFormatException e) {
             throw new ApiAlertException(
-                    "Wrong use of annotation on method " + methodSignature.getName(), e);
+                "Wrong use of annotation on method " + methodSignature.getName(), e);
         }
     }
 }

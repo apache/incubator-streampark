@@ -53,9 +53,9 @@ public class FlinkHomeTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-                .login(userName, password, teamName)
-                .goToNav(ApacheFlinkPage.class)
-                .goToTab(FlinkHomePage.class);
+            .login(userName, password, teamName)
+            .goToNav(ApacheFlinkPage.class)
+            .goToTab(FlinkHomePage.class);
     }
 
     @Test
@@ -65,11 +65,11 @@ public class FlinkHomeTest {
         flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(flinkHomePage.flinkHomeList())
-                                .as("Flink Home list should contain newly-created flink home")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(flinkName)));
+            .untilAsserted(
+                () -> assertThat(flinkHomePage.flinkHomeList())
+                    .as("Flink Home list should contain newly-created flink home")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(flinkName)));
     }
 
     @Test
@@ -79,11 +79,11 @@ public class FlinkHomeTest {
         flinkHomePage.editFlinkHome(flinkName, newFlinkHome);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> assertThat(flinkHomePage.flinkHomeList())
-                                .as("Flink Home list should contain edited flink home")
-                                .extracting(WebElement::getText)
-                                .anyMatch(it -> it.contains(newFlinkHome)));
+            .untilAsserted(
+                () -> assertThat(flinkHomePage.flinkHomeList())
+                    .as("Flink Home list should contain edited flink home")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(newFlinkHome)));
     }
 
     @Test
@@ -93,12 +93,12 @@ public class FlinkHomeTest {
         flinkHomePage.deleteFlinkHome(newFlinkHome);
 
         Awaitility.await()
-                .untilAsserted(
-                        () -> {
-                            browser.navigate().refresh();
+            .untilAsserted(
+                () -> {
+                    browser.navigate().refresh();
 
-                            assertThat(flinkHomePage.flinkHomeList())
-                                    .noneMatch(it -> it.getText().contains(newFlinkHome));
-                        });
+                    assertThat(flinkHomePage.flinkHomeList())
+                        .noneMatch(it -> it.getText().contains(newFlinkHome));
+                });
     }
 }

@@ -123,8 +123,8 @@ public class MockedSqlGatewayService implements SqlGatewayService {
         }
         MockedSqlGatewayService that = (MockedSqlGatewayService) o;
         return port == that.port
-                && Objects.equals(host, that.host)
-                && Objects.equals(description, that.description);
+            && Objects.equals(host, that.host)
+            && Objects.equals(description, that.description);
     }
 
     @Override

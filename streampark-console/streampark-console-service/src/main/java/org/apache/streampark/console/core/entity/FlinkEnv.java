@@ -109,9 +109,9 @@ public class FlinkEnv implements Serializable {
         this.setScalaVersion(this.getFlinkVersion().scalaVersion());
         if (!streamParkScalaVersion.startsWith(this.getFlinkVersion().scalaVersion())) {
             throw new UnsupportedOperationException(
-                    String.format(
-                            "The current Scala version of StreamPark is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
-                            streamParkScalaVersion, this.getFlinkVersion().scalaVersion()));
+                String.format(
+                    "The current Scala version of StreamPark is %s, but the scala version of Flink to be added is %s, which does not match, Please check",
+                    streamParkScalaVersion, this.getFlinkVersion().scalaVersion()));
         }
     }
 

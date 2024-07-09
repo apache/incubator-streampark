@@ -50,7 +50,7 @@ public class SpringProperties {
         String dialect = userConfig.getProperty("datasource.dialect", "");
         if (StringUtils.isBlank(dialect)) {
             throw new ExceptionInInitializerError(
-                    "datasource.dialect is required, please check config.yaml");
+                "datasource.dialect is required, please check config.yaml");
         }
         switch (dialect.toLowerCase()) {
             case "mysql":
@@ -63,8 +63,8 @@ public class SpringProperties {
                         springConfig.put("spring.datasource.driver-class-name", "com.mysql.jdbc.Driver");
                     } catch (ClassNotFoundException e1) {
                         throw new ExceptionInInitializerError(
-                                "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
-                                        + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
+                            "datasource.dialect is mysql, \"com.mysql.cj.jdbc.Driver\" and \"com.mysql.jdbc.Driver\" classes not found, Please ensure that the MySQL Connector/J can be found under $streampark/lib,\n"
+                                + "Notice: The MySQL Connector/J is incompatible with the Apache 2.0 license, You need to download and put it into $streampark/lib");
                     }
                 }
                 break;
@@ -81,10 +81,10 @@ public class SpringProperties {
                 }
 
                 springConfig.put(
-                        "spring.datasource.url",
-                        String.format(
-                                "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
-                                h2DataDir));
+                    "spring.datasource.url",
+                    String.format(
+                        "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+                        h2DataDir));
 
                 String userName = userConfig.getProperty("datasource.username", "admin");
                 String password = userConfig.getProperty("datasource.password", "streampark");
@@ -117,25 +117,25 @@ public class SpringProperties {
         configMapping.put("datasource.url", "spring.datasource.url");
 
         userConfig.forEach(
-                (k, v) -> {
-                    String key = configMapping.get(k);
-                    if (key != null) {
-                        springConfig.put(key, v);
-                    } else {
-                        springConfig.put(k, v);
-                    }
-                });
+            (k, v) -> {
+                String key = configMapping.get(k);
+                if (key != null) {
+                    springConfig.put(key, v);
+                } else {
+                    springConfig.put(k, v);
+                }
+            });
     }
 
     private static Properties getUserConfig() {
         String appHome = WebUtils.getAppHome();
         if (StringUtils.isBlank(appHome)) {
             throw new ExceptionInInitializerError(
-                    String.format(
-                            "[StreamPark] The system initialization check failed. If started local for development and debugging,"
-                                    + " please ensure the -D%s parameter is clearly specified,"
-                                    + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
-                            ConfigKeys.KEY_APP_HOME()));
+                String.format(
+                    "[StreamPark] The system initialization check failed. If started local for development and debugging,"
+                        + " please ensure the -D%s parameter is clearly specified,"
+                        + " more detail: https://streampark.apache.org/docs/user-guide/deployment",
+                    ConfigKeys.KEY_APP_HOME()));
         }
         Properties properties = new Properties();
         File file = new File(appHome, "conf/config.yaml");

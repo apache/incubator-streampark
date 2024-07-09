@@ -60,7 +60,7 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateVariable));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateVariable));
         buttonCreateVariable.click();
         createVariableForm.inputVariableCode().sendKeys(variableCode);
         createVariableForm.inputVariableValue().sendKeys(variableValue);
@@ -78,16 +78,18 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         variableList().stream()
-                .filter(it -> it.getText().contains(variableCode))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Variable')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in variable list"))
-                .click();
+            .filter(it -> it.getText().contains(variableCode))
+            .flatMap(
+                it -> it.findElements(
+                    By.xpath("//button[contains(@tooltip,'Modify Variable')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in variable list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(createVariableForm.buttonSubmit));
+            .until(ExpectedConditions.elementToBeClickable(createVariableForm.buttonSubmit));
         createVariableForm.inputVariableValue().sendKeys(variableValue);
         createVariableForm.inputDescription().clear();
         createVariableForm.inputDescription().sendKeys(description);
@@ -103,16 +105,18 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
         waitForPageLoading();
 
         variableList().stream()
-                .filter(it -> it.getText().contains(variableCode))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Variable')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in variable list"))
-                .click();
+            .filter(it -> it.getText().contains(variableCode))
+            .flatMap(
+                it -> it.findElements(
+                    By.xpath("//button[contains(@tooltip,'Delete Variable')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in variable list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
         return this;
@@ -120,7 +124,7 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/resource/variable"));
+            .until(ExpectedConditions.urlContains("/resource/variable"));
     }
 
     @Getter

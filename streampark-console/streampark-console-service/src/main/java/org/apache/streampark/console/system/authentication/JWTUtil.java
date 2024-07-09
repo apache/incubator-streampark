@@ -107,11 +107,11 @@ public class JWTUtil {
         Date date = new Date(expireTime);
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
-                .withClaim("userId", userId)
-                .withClaim("userName", userName)
-                .withClaim("type", authType.get())
-                .withExpiresAt(date)
-                .sign(algorithm);
+            .withClaim("userId", userId)
+            .withClaim("userName", userName)
+            .withClaim("type", authType.get())
+            .withExpiresAt(date)
+            .sign(algorithm);
     }
 
     public static Long getTTLOfSecond() {
@@ -121,7 +121,7 @@ public class JWTUtil {
             Pattern pattern = Pattern.compile(regexp);
             if (!pattern.matcher(ttl).matches()) {
                 throw new IllegalArgumentException(
-                        "server.session.ttl is invalid, Time units must be [s|m|h|d], e.g: 24h, 2d... please check config.yaml ");
+                    "server.session.ttl is invalid, Time units must be [s|m|h|d], e.g: 24h, 2d... please check config.yaml ");
             }
             String unit = ttl.substring(ttl.length() - 1);
             String time = ttl.substring(0, ttl.length() - 1);

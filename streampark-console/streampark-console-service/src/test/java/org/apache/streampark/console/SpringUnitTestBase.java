@@ -86,16 +86,16 @@ public abstract class SpringUnitTestBase {
 
         System.setProperty(ConfigKeys.KEY_APP_HOME(), mockedHome);
         System.setProperty(
-                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-                localWorkspace.toAbsolutePath().toString());
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            localWorkspace.toAbsolutePath().toString());
 
         Files.createDirectories(new File(mockedHome + "/temp").toPath());
 
         LOG.info(
-                "Complete mock EnvInitializer init, app home: {}, {}: {}",
-                tempPath.getAbsolutePath(),
-                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-                localWorkspace.toAbsolutePath());
+            "Complete mock EnvInitializer init, app home: {}, {}: {}",
+            tempPath.getAbsolutePath(),
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            localWorkspace.toAbsolutePath());
     }
 
     // Help methods.

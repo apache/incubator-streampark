@@ -99,12 +99,12 @@ public class ShiroRealm extends AuthorizingRealm {
             // Check whether the token belongs to the api and whether the permission is valid
             AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
             if (accessToken == null
-                    || !accessToken.getToken().equals(WebUtils.encryptToken(credential))) {
+                || !accessToken.getToken().equals(WebUtils.encryptToken(credential))) {
                 throw new AuthenticationException("the openapi authorization token is invalid");
             }
             if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
                 throw new AuthenticationException(
-                        "the openapi authorization token has been disabled, please contact the administrator");
+                    "the openapi authorization token has been disabled, please contact the administrator");
             }
             SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
         }

@@ -38,7 +38,7 @@ trait SparkClientTrait extends Logger {
          |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
-         |------------------------------------------------------------------------------`-------------
+         |-----------------------------------------------------------------------------------------------
          |""".stripMargin)
 
     submitRequest.developmentMode match {

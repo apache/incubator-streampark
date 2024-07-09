@@ -71,7 +71,7 @@ public class Dependency {
         Set<String> otherJars = new HashSet<>(other.jar);
         for (String jarName : jar) {
             if (!otherJars.contains(jarName)
-                    || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+                || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
                 return false;
             }
         }
@@ -81,16 +81,17 @@ public class Dependency {
     public DependencyInfo toJarPackDeps() {
         List<Artifact> mvnArts = toArtifact();
         List<String> extJars = this.jar.stream()
-                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
-                .collect(Collectors.toList());
+            .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+            .collect(Collectors.toList());
         return new DependencyInfo(mvnArts, extJars);
     }
 
     public List<Artifact> toArtifact() {
         return this.pom.stream()
-                .map(
-                        pom -> new Artifact(
-                                pom.getGroupId(), pom.getArtifactId(), pom.getVersion(), pom.getClassifier()))
-                .collect(Collectors.toList());
+            .map(
+                pom -> new Artifact(
+                    pom.getGroupId(), pom.getArtifactId(), pom.getVersion(),
+                    pom.getClassifier()))
+            .collect(Collectors.toList());
     }
 }

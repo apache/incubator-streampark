@@ -30,6 +30,6 @@ class ShaHashUtilsTest {
         String randomSalt = "rh8b1ojwog777yrg0daesf04gk";
         String encryptPassword = ShaHashUtils.encrypt(randomSalt, Constant.STREAM_PARK);
         Assertions.assertEquals(
-                "2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
+            "2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
     }
 }

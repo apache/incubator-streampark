@@ -117,9 +117,9 @@ public class Project implements Serializable {
             sourcePath.mkdirs();
         } else if (sourcePath.isFile()) {
             throw new IllegalArgumentException(
-                    "[StreamPark] project source base path: "
-                            + sourcePath.getAbsolutePath()
-                            + " must be directory");
+                "[StreamPark] project source base path: "
+                    + sourcePath.getAbsolutePath()
+                    + " must be directory");
         }
 
         String sourceDir = getSourceDirName();
@@ -219,8 +219,9 @@ public class Project implements Serializable {
         String illegalArg = getIllegalArgs(cmd);
         if (illegalArg != null) {
             throw new IllegalArgumentException(
-                    String.format(
-                            "Invalid maven argument, illegal args: %s, in your maven args: %s", illegalArg, cmd));
+                String.format(
+                    "Invalid maven argument, illegal args: %s, in your maven args: %s",
+                    illegalArg, cmd));
         }
 
         String mvn = getMvn();
@@ -257,9 +258,10 @@ public class Project implements Serializable {
         if (StringUtils.isNotBlank(this.buildArgs)) {
             String args = getIllegalArgs(this.buildArgs);
             AssertUtils.required(
-                    args == null,
-                    String.format(
-                            "Illegal argument: \"%s\" in maven build parameters: %s", args, this.buildArgs));
+                args == null,
+                String.format(
+                    "Illegal argument: \"%s\" in maven build parameters: %s", args,
+                    this.buildArgs));
             return this.buildArgs.trim();
         }
         return null;
@@ -272,9 +274,10 @@ public class Project implements Serializable {
         }
         File file = new File(setting);
         AssertUtils.required(
-                !file.exists() || !file.isFile(),
-                String.format(
-                        "Invalid maven-setting file path \"%s\", the path not exist or is not file", setting));
+            !file.exists() || !file.isFile(),
+            String.format(
+                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                setting));
         return setting;
     }
 
@@ -310,15 +313,15 @@ public class Project implements Serializable {
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-                "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
-                getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
+            "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
+            getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-                "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
-                getLogHeader("git clone"), getName(), getBranches(), getAppSource());
+            "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
+            getLogHeader("git clone"), getName(), getBranches(), getAppSource());
     }
 
     @JsonIgnore

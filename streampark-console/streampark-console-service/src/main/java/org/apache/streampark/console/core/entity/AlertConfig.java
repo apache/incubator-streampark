@@ -74,13 +74,13 @@ public class AlertConfig implements Serializable {
         }
         AlertConfig alertConfig = new AlertConfig();
         BeanUtils.copyProperties(
-                params,
-                alertConfig,
-                "emailParams",
-                "dingTalkParams",
-                "weComParams",
-                "httpCallbackParams",
-                "larkParams");
+            params,
+            alertConfig,
+            "emailParams",
+            "dingTalkParams",
+            "weComParams",
+            "httpCallbackParams",
+            "larkParams");
         try {
             if (params.getEmailParams() != null) {
                 alertConfig.setEmailParams(JacksonUtils.write(params.getEmailParams()));

@@ -42,8 +42,8 @@ final class TestDescription implements org.testcontainers.lifecycle.TestDescript
         final String contextId = context.getUniqueId();
         try {
             return (contextId == null || contextId.trim().isEmpty())
-                    ? UNKNOWN_NAME
-                    : URLEncoder.encode(contextId, UTF_8.toString());
+                ? UNKNOWN_NAME
+                : URLEncoder.encode(contextId, UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             return UNKNOWN_NAME;
         }

@@ -80,106 +80,118 @@ public final class ApplicationForm {
                                           ApplicationsDynamicParams applicationsDynamicParams) {
         Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
+            .until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
+            .until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
         switch (developmentMode) {
             case CUSTOM_CODE:
                 selectDevelopmentMode.stream()
-                        .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.CUSTOM_CODE.desc()))
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("Development mode not found: %s", developmentMode.desc())))
-                        .click();
+                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.CUSTOM_CODE.desc()))
+                    .findFirst()
+                    .orElseThrow(
+                        () -> new IllegalArgumentException(
+                            String.format("Development mode not found: %s",
+                                developmentMode.desc())))
+                    .click();
                 break;
             case FLINK_SQL:
                 selectDevelopmentMode.stream()
-                        .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.FLINK_SQL.desc()))
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("Development mode not found: %s", developmentMode.desc())))
-                        .click();
+                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.FLINK_SQL.desc()))
+                    .findFirst()
+                    .orElseThrow(
+                        () -> new IllegalArgumentException(
+                            String.format("Development mode not found: %s",
+                                developmentMode.desc())))
+                    .click();
                 buttonExecutionModeDropdown.click();
                 switch (executionMode) {
                     case REMOTE:
                         selectExecutionMode.stream()
-                                .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         break;
                     case YARN_APPLICATION:
                         selectExecutionMode.stream()
-                                .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_APPLICATION.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(e -> e.getText()
+                                .equalsIgnoreCase(ExecutionMode.YARN_APPLICATION.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         new FlinkSQLYarnApplicationForm(driver)
-                                .add(flinkVersion, applicationsDynamicParams.flinkSQL());
+                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
                         break;
                     case YARN_SESSION:
                         selectExecutionMode.stream()
-                                .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         break;
                     case KUBERNETES_SESSION:
                         selectExecutionMode.stream()
-                                .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.KUBERNETES_SESSION.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(e -> e.getText()
+                                .equalsIgnoreCase(ExecutionMode.KUBERNETES_SESSION.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         break;
                     case KUBERNETES_APPLICATION:
                         selectExecutionMode.stream()
-                                .filter(
-                                        e -> e.getText().equalsIgnoreCase(ExecutionMode.KUBERNETES_APPLICATION.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(
+                                e -> e.getText().equalsIgnoreCase(
+                                    ExecutionMode.KUBERNETES_APPLICATION.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         break;
                     case YARN_PER_JOB:
                         selectExecutionMode.stream()
-                                .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () -> new IllegalArgumentException(
-                                                String.format("Execution mode not found: %s", executionMode.desc())))
-                                .click();
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc()))
+                            .findFirst()
+                            .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Execution mode not found: %s",
+                                        executionMode.desc())))
+                            .click();
                         new FlinkSQLYarnApplicationForm(driver)
-                                .add(flinkVersion, applicationsDynamicParams.flinkSQL());
+                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
                         break;
                     default:
                         throw new IllegalArgumentException(
-                                String.format("Unknown execution mode: %s", executionMode.desc()));
+                            String.format("Unknown execution mode: %s", executionMode.desc()));
                 }
                 break;
             case PYTHON_FLINK:
                 selectDevelopmentMode.stream()
-                        .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.PYTHON_FLINK.toString()))
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("Development mode not found: %s", developmentMode)))
-                        .click();
+                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.PYTHON_FLINK.toString()))
+                    .findFirst()
+                    .orElseThrow(
+                        () -> new IllegalArgumentException(
+                            String.format("Development mode not found: %s",
+                                developmentMode)))
+                    .click();
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unknown development mode: %s", developmentMode));
+                    String.format("Unknown development mode: %s", developmentMode));
         }
         inputApplicationName.sendKeys(applicationName);
 
@@ -205,10 +217,10 @@ public final class ApplicationForm {
     public enum ExecutionMode {
 
         REMOTE("remote"), YARN_APPLICATION("yarn application"), YARN_SESSION("yarn session"), KUBERNETES_SESSION(
-                "kubernetes session"),
+            "kubernetes session"),
         KUBERNETES_APPLICATION("kubernetes application"), YARN_PER_JOB(
-                "yarn per-job (deprecated, please use yarn-application mode)"),
-                ;
+            "yarn per-job (deprecated, please use yarn-application mode)"),
+            ;
 
         private final String desc;
 

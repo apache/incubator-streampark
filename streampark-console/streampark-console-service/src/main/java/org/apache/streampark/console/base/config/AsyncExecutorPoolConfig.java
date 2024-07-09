@@ -41,13 +41,13 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("triggerSavepointExecutor")
     public Executor savepointExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("trigger-savepoint-executor-"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("trigger-savepoint-executor-"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -58,12 +58,12 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("flinkRestAPIWatchingExecutor")
     public Executor restAPIWatchingExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("flink-restapi-watching-executor-"));
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("flink-restapi-watching-executor-"));
     }
 
     /**
@@ -74,12 +74,12 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("sparkRestAPIWatchingExecutor")
     public Executor sparkRestAPIWatchingExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("spark-cluster-watching-executor-"));
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("spark-cluster-watching-executor-"));
     }
 
     /**
@@ -90,12 +90,12 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("flinkClusterWatchingExecutor")
     public Executor clusterWatchingExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("flink-cluster-watching-executor-"));
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("flink-cluster-watching-executor-"));
     }
 
     /**
@@ -106,13 +106,13 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkBuildPipelineExecutor")
     public ExecutorService pipelineExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streampark-build-pipeline-executor"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -123,13 +123,13 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkClusterExecutor")
     public ExecutorService clusterExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("streampark-cluster-executor"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streampark-cluster-executor"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -140,13 +140,13 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkNotifyExecutor")
     public Executor notifyExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                20L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("streampark-notify-executor-"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            20L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streampark-notify-executor-"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -157,13 +157,13 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkDeployExecutor")
     public Executor deployExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("streampark-deploy-executor-"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streampark-deploy-executor-"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -174,12 +174,12 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     @Bean("streamparkBuildExecutor")
     public Executor buildExecutor() {
         return new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors() * 5,
-                Runtime.getRuntime().availableProcessors() * 10,
-                60L,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1024),
-                ThreadUtils.threadFactory("streampark-build-executor-"),
-                new ThreadPoolExecutor.AbortPolicy());
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streampark-build-executor-"),
+            new ThreadPoolExecutor.AbortPolicy());
     }
 }

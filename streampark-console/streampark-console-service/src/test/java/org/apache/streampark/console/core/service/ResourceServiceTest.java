@@ -50,11 +50,11 @@ class ResourceServiceTest extends SpringUnitTestBase {
         FileUtils.createFile(fileToUpload.getAbsolutePath());
         assertThat(fileToUpload).exists();
         MultipartFile mulFile = new MockMultipartFile(
-                "test", // fileName (eg: streampark.jar)
-                fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
-                // /tmp/file/streampark.jar)
-                ContentType.APPLICATION_OCTET_STREAM.toString(),
-                new FileInputStream(fileToStoreUploadFile));
+            "test", // fileName (eg: streampark.jar)
+            fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
+            // /tmp/file/streampark.jar)
+            ContentType.APPLICATION_OCTET_STREAM.toString(),
+            new FileInputStream(fileToStoreUploadFile));
         resourceService.upload(mulFile);
     }
 }

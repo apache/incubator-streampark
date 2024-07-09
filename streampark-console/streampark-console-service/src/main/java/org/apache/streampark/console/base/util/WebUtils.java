@@ -86,14 +86,14 @@ public final class WebUtils {
         }
         StringBuilder result = new StringBuilder();
         IntStream.range(0, arr.length)
-                .forEach(
-                        i -> {
-                            if (i != arr.length - 1) {
-                                result.append(arr[i]).append(StringPool.UNDERSCORE);
-                            } else {
-                                result.append(arr[i]);
-                            }
-                        });
+            .forEach(
+                i -> {
+                    if (i != arr.length - 1) {
+                        result.append(arr[i]).append(StringPool.UNDERSCORE);
+                    } else {
+                        result.append(arr[i]);
+                    }
+                });
         return StringUtils.lowerCase(result.toString());
     }
 

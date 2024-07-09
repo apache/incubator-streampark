@@ -52,7 +52,7 @@ public class FlinkCheckpointProcessor {
     private static final Integer SAVEPOINT_CACHE_HOUR = 1;
 
     private final Cache<String, Long> checkPointCache = Caffeine.newBuilder().expireAfterAccess(1, TimeUnit.DAYS)
-            .build();
+        .build();
 
     /**
      * Cache to store the savepoint if be stored in the db. Use the {appId}_{jobID}_{chkId} from
@@ -62,7 +62,7 @@ public class FlinkCheckpointProcessor {
      * checkpoint(n); 2. savepoint(n-1) is completed after completed savepoint(n).
      */
     private final Cache<String, Byte> savepointedCache = Caffeine.newBuilder()
-            .expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
+        .expireAfterWrite(SAVEPOINT_CACHE_HOUR, TimeUnit.HOURS).build();
 
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
@@ -117,15 +117,15 @@ public class FlinkCheckpointProcessor {
 
         long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
         if (minute > application.getCpFailureRateInterval()
-                || counter.getCount() < application.getCpMaxFailureInterval()) {
+            || counter.getCount() < application.getCpMaxFailureInterval()) {
             counter.increment();
             return;
         }
         checkPointFailedCache.remove(appId);
         FailoverStrategyEnum failoverStrategyEnum = FailoverStrategyEnum.of(application.getCpFailureAction());
         AssertUtils.required(
-                failoverStrategyEnum != null,
-                "Unexpected cpFailureAction: " + application.getCpFailureAction());
+            failoverStrategyEnum != null,
+            "Unexpected cpFailureAction: " + application.getCpFailureAction());
         processFailoverStrategy(application, failoverStrategyEnum);
     }
 
@@ -134,7 +134,7 @@ public class FlinkCheckpointProcessor {
         switch (failoverStrategyEnum) {
             case ALERT:
                 alertService.alert(
-                        application.getAlertId(), AlertTemplate.of(application, CheckPointStatusEnum.FAILED));
+                    application.getAlertId(), AlertTemplate.of(application, CheckPointStatusEnum.FAILED));
                 break;
             case RESTART:
                 try {
@@ -160,20 +160,20 @@ public class FlinkCheckpointProcessor {
             return false;
         }
         return savepointedCache.getIfPresent(checkPointKey.getSavePointId()) == null
-                // If the savepoint triggered before SAVEPOINT_CACHE_HOUR span, we'll see it as out-of-time
-                // savepoint and ignore it.
-                && checkPoint.getTriggerTimestamp() >= System.currentTimeMillis()
-                        - TimeUnit.HOURS.toMillis(SAVEPOINT_CACHE_HOUR);
+            // If the savepoint triggered before SAVEPOINT_CACHE_HOUR span, we'll see it as out-of-time
+            // savepoint and ignore it.
+            && checkPoint.getTriggerTimestamp() >= System.currentTimeMillis()
+                - TimeUnit.HOURS.toMillis(SAVEPOINT_CACHE_HOUR);
     }
 
     @Nullable
     private Long getLatestCheckpointedId(Long appId, String cacheId) {
         return checkPointCache.get(
-                cacheId,
-                key -> {
-                    SavePoint savePoint = savePointService.getLatest(appId);
-                    return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
-                });
+            cacheId,
+            key -> {
+                SavePoint savePoint = savePointService.getLatest(appId);
+                return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
+            });
     }
 
     private boolean shouldProcessFailedTrigger(

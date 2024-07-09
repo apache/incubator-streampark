@@ -36,22 +36,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog>
-        implements
-            ApplicationLogService {
+    implements
+        ApplicationLogService {
 
     @Override
     public IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request) {
         request.setSortField("option_time");
         Page<ApplicationLog> page = MybatisPager.getPage(request);
         LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
-                .eq(ApplicationLog::getAppId, applicationLog.getAppId());
+            .eq(ApplicationLog::getAppId, applicationLog.getAppId());
         return this.page(page, queryWrapper);
     }
 
     @Override
     public void removeByAppId(Long appId) {
         LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
-                .eq(ApplicationLog::getAppId, appId);
+            .eq(ApplicationLog::getAppId, appId);
         this.remove(queryWrapper);
     }
 }
