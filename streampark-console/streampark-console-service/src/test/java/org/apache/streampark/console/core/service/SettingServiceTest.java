@@ -22,7 +22,6 @@ import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
-import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -33,9 +32,6 @@ class SettingServiceTest extends SpringUnitTestBase {
 
     @Autowired
     SettingService settingService;
-
-    @Autowired
-    SettingMapper settingMapper;
 
     @Test
     void testUpdateDockerConfigTest() {
