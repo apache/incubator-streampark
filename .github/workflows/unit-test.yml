@@ -102,7 +102,7 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
       - name: SonarCloud Scan
-        uses: kitabisa/sonarqube-action@v1.2.0
+        uses: ./.github/actions/sonarqube-action
         with:
           host: https://sonarcloud.io
           login: 7ef5d3a630b7009a1f4fdca48e776d0605e69d7d
