@@ -25,4 +25,18 @@
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="description" jdbcType="VARCHAR" property="description"/>
     </resultMap>
+
+    <sql id="baseSql">
+        order_num, setting_name, setting_key, setting_value, type
+    </sql>
+
+    <select id="querySettingByKeys" resultType="org.apache.streampark.console.core.entity.Setting">
+        SELECT
+            <include refid="baseSql"/>
+        FROM t_setting
+        WHERE setting_key IN
+        <foreach collection="settingKeys" item="key" open="(" separator="," close=")">
+            #{key}
+        </foreach>
+    </select>
 </mapper>
