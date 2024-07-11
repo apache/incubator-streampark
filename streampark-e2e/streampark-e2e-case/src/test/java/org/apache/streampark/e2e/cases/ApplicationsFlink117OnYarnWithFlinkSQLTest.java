@@ -211,8 +211,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-//    @Test
-//    @Order(70)
+    // @Test
+    // @Order(70)
     void testStartFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
