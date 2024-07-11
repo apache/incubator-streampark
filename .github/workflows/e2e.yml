@@ -117,12 +117,12 @@ jobs:
             class: org.apache.streampark.e2e.cases.UserManagementTest
           - name: TeamManagementTest
             class: org.apache.streampark.e2e.cases.TeamManagementTest
-          - name: ApplicationsFlink116OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink116OnYarnTest
-          - name: ApplicationsFlink117OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink117OnYarnTest
-          - name: ApplicationsFlink118OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink118OnYarnTest
+          - name: ApplicationsFlink116OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink116OnYarnWithFlinkSQLTest
+          - name: ApplicationsFlink117OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink117OnYarnWithFlinkSQLTest
+          - name: ApplicationsFlink118OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink118OnYarnWithFlinkSQLTest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
