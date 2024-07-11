@@ -23,4 +23,6 @@ import lombok.experimental.UtilityClass;
 public class Constants {
 
     public static final Integer DEFAULT_SLEEP_SECONDS = 1000;
+
+    public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
 }

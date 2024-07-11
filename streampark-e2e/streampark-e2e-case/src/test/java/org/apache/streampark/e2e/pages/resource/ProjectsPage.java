@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -180,6 +181,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                 ExpectedConditions.invisibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         deletePopUpMessage))));
+        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
         return this;
     }
 

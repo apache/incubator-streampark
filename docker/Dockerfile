@@ -18,7 +18,7 @@ FROM ubuntu:22.04
 
 USER root
 
-RUN sed -i "s/ports.ubuntu.com\/ubuntu-ports\//mirrors.tuna.tsinghua.edu.cn\/ubuntu-ports\//g" /etc/apt/sources.list
+#RUN sed -i "s/ports.ubuntu.com\/ubuntu-ports\//mirrors.tuna.tsinghua.edu.cn\/ubuntu-ports\//g" /etc/apt/sources.list
 # Install basic tools
 RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
     && apt install software-properties-common -y \

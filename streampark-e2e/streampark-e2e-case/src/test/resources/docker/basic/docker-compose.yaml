@@ -33,7 +33,7 @@ services:
     networks:
       - e2e
     volumes:
-      - ${HOME}/logs:/tmp/streampark/logs/build_logs/
+      - ${HOME}/streampark_build_logs:/tmp/streampark/logs/build_logs/
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:10000" ]
       interval: 5s
