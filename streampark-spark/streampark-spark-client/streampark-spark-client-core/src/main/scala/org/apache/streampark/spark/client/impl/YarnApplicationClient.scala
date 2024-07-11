@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
+import org.apache.streampark.spark.client.conf.SparkConfiguration
 
 import org.apache.commons.collections.MapUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
@@ -45,7 +46,6 @@ object YarnApplicationClient extends SparkClientTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     launch(submitRequest)
-
   }
 
   private def launch(submitRequest: SubmitRequest): SubmitResponse = {
@@ -58,15 +58,18 @@ object YarnApplicationClient extends SparkClientTrait {
       .setMaster("yarn")
       .setDeployMode("cluster")
       .setAppName(submitRequest.appName)
-      .setConf("spark.executor.memory", "5g")
-      .setConf("spark.executor.cores", "4")
-      .setConf("spark.num.executors", "1")
       .setConf(
         "spark.yarn.jars",
         submitRequest
           .hdfsWorkspace
           .sparkLib + "/*.jar")
       .setVerbose(true)
+
+    import scala.collection.JavaConverters._
+    setDynamicProperties(launcher, submitRequest.properties.asScala.toMap)
+
+    // TODO: Adds command line arguments for the application.
+    // launcher.addAppArgs()
 
     if (MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter
         .containsKey("sql")) {
@@ -87,8 +90,7 @@ object YarnApplicationClient extends SparkClientTrait {
                 if (cdlForApplicationId.getCount != 0) {
                   cdlForApplicationId.countDown()
                 }
-                logInfo(
-                  String.format("%s stateChanged :%s", handle.getAppId, handle.getState.toString))
+                logger.info("{} stateChanged :{}", Array(handle.getAppId, handle.getState.toString))
               } else logger.info("stateChanged :{}", handle.getState.toString)
 
               if (SparkAppHandle.State.FAILED.toString == handle.getState.toString) {
@@ -111,12 +113,22 @@ object YarnApplicationClient extends SparkClientTrait {
     })
 
     cdlForApplicationId.await()
-    logInfo(
-      String.format(
-        "The task is executing, handle current state is %s, appid is %s",
-        sparkAppHandle.getState.toString,
-        sparkAppHandle.getAppId))
+    logger.info(
+      "The task is executing, handle current state is {}, appid is {}",
+      Array(sparkAppHandle.getState.toString, sparkAppHandle.getAppId))
     SubmitResponse(null, null, sparkAppHandle.getAppId)
+  }
+
+  private def setDynamicProperties(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {
+    logger.info("Spark launcher start configuration.")
+    val finalProperties: Map[String, Any] = SparkConfiguration.defaultParameters ++ properties
+    for ((k, v) <- finalProperties) {
+      if (k.startsWith("spark.")) {
+        sparkLauncher.setConf(k, v.toString)
+      } else {
+        logger.info("\"{}\" doesn't start with \"spark.\". Skip it.", k)
+      }
+    }
   }
 
 }

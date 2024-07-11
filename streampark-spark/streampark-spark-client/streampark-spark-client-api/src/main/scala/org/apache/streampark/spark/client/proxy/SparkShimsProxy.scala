@@ -140,7 +140,7 @@ object SparkShimsProxy extends Logger {
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
         // 1) spark/lib
-        val libURL = getSparkHomeLib(sparkVersion.sparkHome, "jars", !_.getName.startsWith("log4j"))
+        val libURL = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
         val shimsUrls = ListBuffer[URL](libURL: _*)
 
         // 2) add all shims jar

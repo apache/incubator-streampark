@@ -22,7 +22,6 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
@@ -35,10 +34,10 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
-import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
@@ -48,10 +47,10 @@ import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
@@ -68,9 +67,7 @@ import org.apache.streampark.spark.client.bean.SubmitResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.MemorySize;
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.hadoop.service.Service.STATE;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -119,7 +116,7 @@ public class SparkApplicationActionServiceImpl
     private ApplicationConfigService configService;
 
     @Autowired
-    private ApplicationLogService applicationLogService;
+    private SparkApplicationLogService applicationLogService;
 
     @Autowired
     private SparkEnvService sparkEnvService;
@@ -197,12 +194,12 @@ public class SparkApplicationActionServiceImpl
         SparkApplication application = getById(appParam.getId());
         application.setState(SparkAppStateEnum.CANCELLING.getValue());
 
-        ApplicationLog applicationLog = new ApplicationLog();
+        SparkApplicationLog applicationLog = new SparkApplicationLog();
         applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
-        applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+        applicationLog.setTrackUrl(application.getJobManagerUrl());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setYarnAppId(application.getJobId());
+        applicationLog.setSparkAppId(application.getJobId());
         applicationLog.setUserId(serviceHelper.getUserId());
         application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
@@ -288,7 +285,7 @@ public class SparkApplicationActionServiceImpl
         starting(application);
 
         String jobId = new JobID().toHexString();
-        ApplicationLog applicationLog = new ApplicationLog();
+        SparkApplicationLog applicationLog = new SparkApplicationLog();
         applicationLog.setOptionName(OperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
@@ -383,9 +380,9 @@ public class SparkApplicationActionServiceImpl
 
                 if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
                     application.setJobManagerUrl(response.jobManagerUrl());
-                    applicationLog.setJobManagerUrl(response.jobManagerUrl());
+                    applicationLog.setTrackUrl(response.jobManagerUrl());
                 }
-                applicationLog.setYarnAppId(response.sparkAppId());
+                applicationLog.setSparkAppId(response.sparkAppId());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
 
@@ -545,18 +542,9 @@ public class SparkApplicationActionServiceImpl
                 .ifPresent(yLabel -> properties.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), yLabel));
         }
 
-        if (application.getAllowNonRestored()) {
-            properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
-        }
-
         Map<String, String> dynamicProperties = PropertiesUtils
             .extractDynamicPropertiesAsJava(application.getDynamicProperties());
         properties.putAll(dynamicProperties);
-        ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
-        if (resolveOrder != null) {
-            properties.put(CoreOptions.CLASSLOADER_RESOLVE_ORDER.key(), resolveOrder.getName());
-        }
-
         return properties;
     }
 
