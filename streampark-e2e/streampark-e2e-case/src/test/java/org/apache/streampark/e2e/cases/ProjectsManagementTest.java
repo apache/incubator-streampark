@@ -21,6 +21,7 @@ import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.resource.ProjectsPage;
 import org.apache.streampark.e2e.pages.resource.ResourcePage;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ProjectsManagementTest {
+
     private static RemoteWebDriver browser;
 
     private static final String userName = "admin";
@@ -50,7 +52,8 @@ public class ProjectsManagementTest {
 
     private static final String branch = "dev";
 
-    private static final String buildArgument = "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.16 -am -Dmaven.test.skip=true";
+    private static final String buildArgument =
+        "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.16 -am -Dmaven.test.skip=true";
 
     private static final String description = "e2e test project description";
 
