@@ -40,7 +40,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(xpath = "//button[contains(@class, 'ant-btn-dashed')]/span[contains(text(), 'Add New')]")
     private WebElement buttonCreateProject;
 
-    @FindBy(xpath = "//div[contains(@class, 'item-meta')]")
+    @FindBy(xpath = "//div[contains(@class, 'ant-list')]")
     private List<WebElement> projectList;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
