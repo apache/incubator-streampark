@@ -108,9 +108,9 @@ jobs:
           - name: MemberManagementTest
             class: org.apache.streampark.e2e.cases.MemberManagementTest
           - name: ProjectsManagementTest
-            class: org.apache.streampark.e2e.pages.resource.ProjectsManagementTest
+            class: org.apache.streampark.e2e.cases.ProjectsManagementTest
           - name: VariableManagementTest
-            class: org.apache.streampark.e2e.pages.resource.VariableManagementTest
+            class: org.apache.streampark.e2e.cases.VariableManagementTest
           - name: RoleManagementTest
             class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: UserManagementTest
