@@ -100,7 +100,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                     String projectBuildArgument,
                                     String projectDescription) {
         waitForPageLoading();
-        projectList.stream()
+        projectList().stream()
             .filter(project -> project.getText().contains(oldProjectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project edit button not found"))
