@@ -29,6 +29,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
@@ -102,7 +104,7 @@ public class ProjectsManagementTest {
 
         projectsPage.buildProject(editedProjectName);
 
-        Awaitility.await()
+        Awaitility.await().timeout(Duration.ofMinutes(10))
             .untilAsserted(
                 () -> assertThat(projectsPage.projectList())
                     .as("Projects list should contain build successful project")
@@ -115,7 +117,7 @@ public class ProjectsManagementTest {
     void testDeleteProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
-        projectsPage.buildProject(editedProjectName);
+        projectsPage.deleteProject(editedProjectName);
 
         Awaitility.await()
             .untilAsserted(

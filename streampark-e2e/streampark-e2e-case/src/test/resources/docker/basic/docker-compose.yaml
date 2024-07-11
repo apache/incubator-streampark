@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-version: "3.8"
-
 services:
   streampark:
     image: apache/streampark:ci-basic
@@ -34,6 +32,8 @@ services:
     restart: unless-stopped
     networks:
       - e2e
+    volumes:
+      - ${HOME}/logs:/tmp/streampark/logs/build_logs/
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:10000" ]
       interval: 5s

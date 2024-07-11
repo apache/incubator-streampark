@@ -67,7 +67,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
 
         createProjectForm.inputProjectName().sendKeys(projectName);
         createProjectForm.selectCveDropdown().click();
-        createProjectForm.selectCveText.stream()
+        createProjectForm.selectCveText().stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectCvs))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Cvs not found: %s", projectCvs)))
@@ -109,11 +109,13 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         new WebDriverWait(driver, Duration.ofSeconds(10))
             .until(ExpectedConditions.urlContains("/project/edit"));
 
-        createProjectForm.inputProjectName.sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputProjectName.sendKeys(Keys.BACK_SPACE);
+        createProjectForm.inputProjectName().sendKeys(Keys.CONTROL + "a");
+        createProjectForm.inputProjectName().sendKeys(Keys.BACK_SPACE);
         createProjectForm.inputProjectName().sendKeys(newProjectName);
         createProjectForm.selectCveDropdown().click();
-        createProjectForm.selectCveText.stream()
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectCveText()));
+        createProjectForm.selectCveText().stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectCvs))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Cvs not found: %s", projectCvs)))
@@ -167,6 +169,17 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                 By.xpath("//..//li[contains(@class, 'ant-list-item')]//button[contains(@class, 'ant-btn')][4]"))
             .click();
         popupConfirmButton.click();
+        String deletePopUpMessage = "delete successful";
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        deletePopUpMessage))));
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(
+                ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        deletePopUpMessage))));
         return this;
     }
 

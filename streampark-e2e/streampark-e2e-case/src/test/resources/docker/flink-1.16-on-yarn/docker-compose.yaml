@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: "3"
-
 services:
   namenode:
     image: apache/streampark-flink-1.16.3-on-yarn:ci

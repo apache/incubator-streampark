@@ -171,6 +171,13 @@ jobs:
           name: recording-${{ matrix.case.name }}
           path: ${{ env.RECORDING_PATH }}
           retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        name: Upload Test
+        with:
+          name: logs-${{ matrix.case.name }}
+          path: ~/logs
+          retention-days: 1
   result:
     name: E2E - Result
     runs-on: ubuntu-latest
