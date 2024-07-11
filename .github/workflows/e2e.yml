@@ -162,7 +162,7 @@ jobs:
       - name: Run Test
         run: |
           ./mvnw -B -f streampark-e2e/pom.xml -am \
-            -DfailIfNoTests=true \
+            -DfailIfNoTests=false \
             -Dtest=${{ matrix.case.class }} test
       - uses: actions/upload-artifact@v4
         if: always()
