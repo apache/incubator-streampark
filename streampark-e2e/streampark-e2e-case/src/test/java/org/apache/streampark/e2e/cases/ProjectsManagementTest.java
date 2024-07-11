@@ -28,11 +28,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ProjectsManagementTest {
@@ -75,7 +75,7 @@ public class ProjectsManagementTest {
 
         projectsPage.createProject(projectName, cvs, url, branch, buildArgument, description);
 
-        Awaitility.await()
+        await()
             .untilAsserted(
                 () -> assertThat(projectsPage.projectList())
                     .as("Projects list should contain newly-created project")
@@ -90,7 +90,7 @@ public class ProjectsManagementTest {
 
         projectsPage.editProject(projectName, editedProjectName, cvs, url, branch, buildArgument, description);
 
-        Awaitility.await()
+        await()
             .untilAsserted(
                 () -> assertThat(projectsPage.projectList())
                     .as("Projects list should contain edited project")
@@ -105,7 +105,7 @@ public class ProjectsManagementTest {
 
         projectsPage.buildProject(editedProjectName);
 
-        Awaitility.await().timeout(Duration.ofMinutes(Constants.DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES))
+        await().timeout(Duration.ofMinutes(Constants.DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES))
             .untilAsserted(
                 () -> assertThat(projectsPage.projectList())
                     .as("Projects list should contain build successful project")
@@ -120,7 +120,7 @@ public class ProjectsManagementTest {
 
         projectsPage.deleteProject(editedProjectName);
 
-        Awaitility.await()
+        await()
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();

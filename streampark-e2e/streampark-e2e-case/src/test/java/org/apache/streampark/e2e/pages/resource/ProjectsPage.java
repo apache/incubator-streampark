@@ -148,7 +148,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @SneakyThrows
     public ProjectsPage buildProject(String projectName) {
         waitForPageLoading();
-        projectList.stream()
+        projectList().stream()
             .filter(project -> project.getText().contains(projectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project build button not found"))
@@ -162,7 +162,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @SneakyThrows
     public ProjectsPage deleteProject(String projectName) {
         waitForPageLoading();
-        projectList.stream()
+        projectList().stream()
             .filter(project -> project.getText().contains(projectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project delete button not found"))
