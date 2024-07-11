@@ -106,8 +106,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-//    @Test
-//    @Order(30)
+    // @Test
+    // @Order(30)
     void testStartFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -128,8 +128,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("FINISHED")));
     }
 
-//    @Test
-//    @Order(31)
+    // @Test
+    // @Order(31)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
