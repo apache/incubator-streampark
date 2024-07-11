@@ -102,7 +102,6 @@
               icon: 'error',
               title: t('setting.system.update.dockerNotStart'),
               showConfirmButton: true,
-              timer: 3500,
             });
             return;
           case 500:
@@ -110,7 +109,6 @@
               icon: 'error',
               title: resp.msg,
               showConfirmButton: true,
-              timer: 3500,
             });
             return;
           default:
@@ -126,7 +124,6 @@
             icon: 'error',
             title: resp.msg,
             showConfirmButton: true,
-            timer: 3500,
           });
           return;
         }
