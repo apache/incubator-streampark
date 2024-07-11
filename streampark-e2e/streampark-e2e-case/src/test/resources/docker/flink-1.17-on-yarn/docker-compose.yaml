@@ -144,6 +144,15 @@ services:
     tty: true
     stdin_open: true
     restart: always
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      resourcemanager:
+        condition: service_healthy
+      nodemanager:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "http://streampark:10000" ]
       interval: 5s

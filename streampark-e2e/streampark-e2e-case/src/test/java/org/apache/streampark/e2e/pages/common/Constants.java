@@ -22,7 +22,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Constants {
 
-    public static final Integer DEFAULT_SLEEP_SECONDS = 1000;
+    public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
 
     public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
 }

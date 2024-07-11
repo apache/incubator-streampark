@@ -181,7 +181,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                 ExpectedConditions.invisibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         deletePopUpMessage))));
-        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         return this;
     }
 

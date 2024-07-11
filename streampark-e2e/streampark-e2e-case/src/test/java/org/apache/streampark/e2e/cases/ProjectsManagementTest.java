@@ -124,7 +124,7 @@ public class ProjectsManagementTest {
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
-                    Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+                    Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
 
                     assertThat(projectsPage.projectList())
                         .noneMatch(it -> it.getText().contains(editedProjectName));

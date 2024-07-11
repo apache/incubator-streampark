@@ -132,7 +132,7 @@ public class ApplicationsFlink118OnYarnWithFlinkSQLTest {
     @Order(31)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
-        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.startApplication(applicationName);
@@ -237,7 +237,7 @@ public class ApplicationsFlink118OnYarnWithFlinkSQLTest {
     @Order(71)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnPerJobMode() {
-        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         applicationsPage.startApplication(applicationName);
