@@ -17,7 +17,6 @@
 
 package org.apache.streampark.e2e.cases;
 
-import lombok.SneakyThrows;
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.common.Constants;
@@ -60,8 +59,6 @@ public class ProjectsManagementTest {
         "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.16 -am -Dmaven.test.skip=true";
 
     private static final String description = "e2e test project description";
-
-    private static final Awaitility awaitility = new Awaitility();
 
     @BeforeAll
     public static void setup() {
@@ -123,7 +120,7 @@ public class ProjectsManagementTest {
 
         projectsPage.deleteProject(editedProjectName);
 
-        awaitility.await()
+        Awaitility.await()
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
