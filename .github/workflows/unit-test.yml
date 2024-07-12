@@ -107,10 +107,10 @@ jobs:
         uses: sonarsource/sonarcloud-github-action@v2.3.0
         env:
           SONAR_TOKEN: 7ef5d3a630b7009a1f4fdca48e776d0605e69d7d
-#          SONAR_TOKEN: ${SONARCLOUD_TOKEN}
+#          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
         with:
           args: >
-            -Dsonar.host.url=https://sonarcloud.io
+#            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.organization=apache
             -Dsonar.projectKey=apache_incubator-streampark
             -Dsonar.sourceEncoding=UTF-8
