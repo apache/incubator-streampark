@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.cases.resource;
+package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;

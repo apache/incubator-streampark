@@ -100,8 +100,8 @@ final class StreamParkExtension implements BeforeAllCallback, AfterAllCallback, 
         driver
             .manage()
             .timeouts()
-            .implicitlyWait(Duration.ofSeconds(10))
-            .pageLoadTimeout(Duration.ofSeconds(10));
+            .implicitlyWait(Duration.ofSeconds(2))
+            .pageLoadTimeout(Duration.ofSeconds(5));
         driver.manage().window().maximize();
 
         driver.get(new URL("http", address.getHost(), address.getPort(), rootPath).toString());
