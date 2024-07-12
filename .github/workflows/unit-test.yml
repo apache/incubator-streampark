@@ -110,7 +110,6 @@ jobs:
 #          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
         with:
           args: >
-#            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.organization=apache
             -Dsonar.projectKey=apache_incubator-streampark
             -Dsonar.sourceEncoding=UTF-8
