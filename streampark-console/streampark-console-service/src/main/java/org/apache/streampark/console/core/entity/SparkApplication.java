@@ -300,7 +300,6 @@ public class SparkApplication implements Serializable {
             case FINISHED:
             case FAILED:
             case KILLED:
-            case TERMINATED:
                 return false;
             default:
                 return true;
@@ -318,7 +317,6 @@ public class SparkApplication implements Serializable {
             case FAILED:
             case FINISHED:
             case LOST:
-            case TERMINATED:
             case SUCCEEDED:
             case KILLED:
                 return true;

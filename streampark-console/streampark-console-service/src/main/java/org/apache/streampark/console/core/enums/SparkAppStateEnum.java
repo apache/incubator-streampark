@@ -62,14 +62,11 @@ public enum SparkAppStateEnum {
     /** Has rollback. */
     REVOKED(12),
 
-    /** Spark job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
-    TERMINATED(13),
-
     /** Spark job has being cancelling(killing) by streampark */
-    CANCELLING(14),
+    STOPPING(13),
 
     /** Job SUCCEEDED on yarn. */
-    SUCCEEDED(15),
+    SUCCEEDED(14),
 
     /** Has killed in Yarn. */
     KILLED(-9);
@@ -104,8 +101,7 @@ public enum SparkAppStateEnum {
             || SparkAppStateEnum.KILLED == sparkAppStateEnum
             || SparkAppStateEnum.FINISHED == sparkAppStateEnum
             || SparkAppStateEnum.SUCCEEDED == sparkAppStateEnum
-            || SparkAppStateEnum.LOST == sparkAppStateEnum
-            || SparkAppStateEnum.TERMINATED == sparkAppStateEnum;
+            || SparkAppStateEnum.LOST == sparkAppStateEnum;
     }
 
     public static boolean isLost(Integer appState) {

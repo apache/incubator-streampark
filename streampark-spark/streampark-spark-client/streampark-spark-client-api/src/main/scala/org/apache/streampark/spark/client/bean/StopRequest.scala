@@ -24,7 +24,7 @@ import javax.annotation.Nullable
 
 import java.util.{Map => JavaMap}
 
-case class CancelRequest(
+case class StopRequest(
     id: Long,
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,

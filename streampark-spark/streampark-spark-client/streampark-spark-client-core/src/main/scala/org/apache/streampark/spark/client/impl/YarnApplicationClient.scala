@@ -37,8 +37,8 @@ object YarnApplicationClient extends SparkClientTrait {
 
   private[this] lazy val workspace = Workspace.remote
 
-  override def doCancel(cancelRequest: CancelRequest): CancelResponse = {
-    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(cancelRequest.jobId))
+  override def doStop(stopRequest: StopRequest): StopResponse = {
+    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
     null
   }
 

@@ -24,8 +24,8 @@ import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.base.util.Tuple3;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
 import org.apache.streampark.console.core.metrics.spark.SparkExecutor;
@@ -124,7 +124,7 @@ public class SparkAppHttpWatcher {
      */
     private static final Map<Long, Long> CANCELLED_JOB_MAP = new ConcurrentHashMap<>(0);
 
-    private static final Map<Long, OptionStateEnum> OPTIONING = new ConcurrentHashMap<>(0);
+    private static final Map<Long, SparkOptionStateEnum> OPTIONING = new ConcurrentHashMap<>(0);
 
     private Long lastWatchTime = 0L;
 
@@ -201,7 +201,7 @@ public class SparkAppHttpWatcher {
      * @param application spark application
      */
     private void getStateFromYarn(SparkApplication application) throws Exception {
-        OptionStateEnum optionStateEnum = OPTIONING.get(application.getId());
+        SparkOptionStateEnum optionStateEnum = OPTIONING.get(application.getId());
 
         // query the status from the yarn rest Api
         YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
@@ -314,7 +314,7 @@ public class SparkAppHttpWatcher {
         applicationManageService.persistMetrics(application);
     }
 
-    private void cleanOptioning(OptionStateEnum optionStateEnum, Long key) {
+    private void cleanOptioning(SparkOptionStateEnum optionStateEnum, Long key) {
         if (optionStateEnum != null) {
             lastOptionTime = System.currentTimeMillis();
             OPTIONING.remove(key);
@@ -322,10 +322,10 @@ public class SparkAppHttpWatcher {
     }
 
     /** set current option state */
-    public static void setOptionState(Long appId, OptionStateEnum state) {
+    public static void setOptionState(Long appId, SparkOptionStateEnum state) {
         log.info("[StreamPark][SparkAppHttpWatcher]  setOptioning");
         OPTIONING.put(appId, state);
-        if (OptionStateEnum.CANCELLING == state) {
+        if (SparkOptionStateEnum.STOPPING == state) {
             STOP_FROM_MAP.put(appId, StopFromEnum.STREAMPARK);
         }
     }

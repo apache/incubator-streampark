@@ -40,10 +40,10 @@ import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
-import org.apache.streampark.console.core.enums.OperationEnum;
-import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkOperationEnum;
+import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -59,8 +59,8 @@ import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.spark.client.SparkClient;
-import org.apache.streampark.spark.client.bean.CancelRequest;
-import org.apache.streampark.spark.client.bean.CancelResponse;
+import org.apache.streampark.spark.client.bean.StopRequest;
+import org.apache.streampark.spark.client.bean.StopResponse;
 import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
 
@@ -138,7 +138,7 @@ public class SparkApplicationActionServiceImpl
 
     private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
 
-    private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<StopResponse>> stopFutureMap = new ConcurrentHashMap<>();
 
     @Override
     public void revoke(Long appId) throws ApplicationException {
@@ -168,34 +168,34 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void restart(SparkApplication appParam) throws Exception {
-        this.cancel(appParam);
+        this.stop(appParam);
         this.start(appParam, false);
     }
 
     @Override
     public void forcedStop(Long id) {
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
-        CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(id);
+        CompletableFuture<StopResponse> stopFuture = stopFutureMap.remove(id);
         SparkApplication application = this.baseMapper.selectApp(id);
         if (startFuture != null) {
             startFuture.cancel(true);
         }
-        if (cancelFuture != null) {
-            cancelFuture.cancel(true);
+        if (stopFuture != null) {
+            stopFuture.cancel(true);
         }
-        if (startFuture == null && cancelFuture == null) {
+        if (startFuture == null && stopFuture == null) {
             this.doStopped(id);
         }
     }
 
     @Override
-    public void cancel(SparkApplication appParam) throws Exception {
-        SparkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
+    public void stop(SparkApplication appParam) throws Exception {
+        SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STOPPING);
         SparkApplication application = getById(appParam.getId());
-        application.setState(SparkAppStateEnum.CANCELLING.getValue());
+        application.setState(SparkAppStateEnum.STOPPING.getValue());
 
         SparkApplicationLog applicationLog = new SparkApplicationLog();
-        applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
+        applicationLog.setOptionName(SparkOperationEnum.STOP.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackUrl(application.getJobManagerUrl());
         applicationLog.setOptionTime(new Date());
@@ -213,8 +213,8 @@ public class SparkApplicationActionServiceImpl
 
         Map<String, Object> properties = new HashMap<>();
 
-        CancelRequest cancelRequest =
-            new CancelRequest(
+        StopRequest stopRequest =
+            new StopRequest(
                 application.getId(),
                 sparkEnv.getSparkVersion(),
                 SparkExecutionMode.of(application.getExecutionMode()),
@@ -223,13 +223,13 @@ public class SparkApplicationActionServiceImpl
                 appParam.getDrain(),
                 appParam.getNativeFormat());
 
-        CompletableFuture<CancelResponse> cancelFuture =
-            CompletableFuture.supplyAsync(() -> SparkClient.cancel(cancelRequest), executorService);
+        CompletableFuture<StopResponse> stopFuture =
+            CompletableFuture.supplyAsync(() -> SparkClient.stop(stopRequest), executorService);
 
-        cancelFutureMap.put(application.getId(), cancelFuture);
-        cancelFuture.whenComplete(
+        stopFutureMap.put(application.getId(), stopFuture);
+        stopFuture.whenComplete(
             (cancelResponse, throwable) -> {
-                cancelFutureMap.remove(application.getId());
+                stopFutureMap.remove(application.getId());
                 if (throwable != null) {
                     String exception = ExceptionUtils.stringifyException(throwable);
                     applicationLog.setException(exception);
@@ -240,7 +240,7 @@ public class SparkApplicationActionServiceImpl
                         doStopped(application.getId());
                     } else {
                         log.error("stop spark job failed.", throwable);
-                        application.setOptionState(OptionStateEnum.NONE.getValue());
+                        application.setOptionState(SparkOptionStateEnum.NONE.getValue());
                         application.setState(SparkAppStateEnum.FAILED.getValue());
                         updateById(application);
                         SparkAppHttpWatcher.unWatching(application.getId());
@@ -286,7 +286,7 @@ public class SparkApplicationActionServiceImpl
 
         String jobId = new JobID().toHexString();
         SparkApplicationLog applicationLog = new SparkApplicationLog();
-        applicationLog.setOptionName(OperationEnum.START.getValue());
+        applicationLog.setOptionName(SparkOperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
         applicationLog.setUserId(serviceHelper.getUserId());
@@ -353,7 +353,7 @@ public class SparkApplicationActionServiceImpl
                     } else {
                         SparkApplication app = getById(appParam.getId());
                         app.setState(SparkAppStateEnum.FAILED.getValue());
-                        app.setOptionState(OptionStateEnum.NONE.getValue());
+                        app.setOptionState(SparkOptionStateEnum.NONE.getValue());
                         updateById(app);
                         SparkAppHttpWatcher.unWatching(appParam.getId());
                     }
@@ -387,7 +387,7 @@ public class SparkApplicationActionServiceImpl
                 application.setEndTime(null);
 
                 // if start completed, will be added task to tracking queue
-                SparkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
+                SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STARTING);
                 SparkAppHttpWatcher.doWatching(application);
 
                 // update app
@@ -550,7 +550,7 @@ public class SparkApplicationActionServiceImpl
 
     private void doStopped(Long id) {
         SparkApplication application = getById(id);
-        application.setOptionState(OptionStateEnum.NONE.getValue());
+        application.setOptionState(SparkOptionStateEnum.NONE.getValue());
         application.setState(SparkAppStateEnum.KILLED.getValue());
         application.setOptionTime(new Date());
         updateById(application);

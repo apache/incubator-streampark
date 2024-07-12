@@ -15,25 +15,6 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.spark.client.bean
 
-import lombok.Getter;
-
-import java.util.Arrays;
-
-/** Spark Operation type */
-@Getter
-public enum SparkOperationEnum {
-
-    RELEASE(0), START(1), STOP(2);
-
-    private final int value;
-
-    SparkOperationEnum(int value) {
-        this.value = value;
-    }
-
-    public static SparkOperationEnum of(Integer option) {
-        return Arrays.stream(values()).filter((x) -> x.value == option).findFirst().orElse(null);
-    }
-}
+case class StopResponse(savePointDir: String)

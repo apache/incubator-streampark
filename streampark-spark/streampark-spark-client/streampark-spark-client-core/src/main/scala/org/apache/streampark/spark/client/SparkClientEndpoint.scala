@@ -38,12 +38,12 @@ object SparkClientEndpoint {
     }
   }
 
-  def cancel(cancelRequest: CancelRequest): CancelResponse = {
-    clients.get(cancelRequest.executionMode) match {
-      case Some(client) => client.cancel(cancelRequest)
+  def stop(stopRequest: StopRequest): StopResponse = {
+    clients.get(stopRequest.executionMode) match {
+      case Some(client) => client.stop(stopRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${cancelRequest.executionMode} cancel ")
+          s"Unsupported ${stopRequest.executionMode} stop ")
     }
   }
 
