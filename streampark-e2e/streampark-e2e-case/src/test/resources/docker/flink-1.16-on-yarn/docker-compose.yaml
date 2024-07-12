@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: "3"
-
 services:
   namenode:
     image: apache/streampark-flink-1.16.3-on-yarn:ci
@@ -146,6 +144,15 @@ services:
     tty: true
     stdin_open: true
     restart: always
+    depends_on:
+        namenode:
+            condition: service_healthy
+        datanode:
+            condition: service_healthy
+        resourcemanager:
+            condition: service_healthy
+        nodemanager:
+            condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "http://streampark:10000" ]
       interval: 5s
