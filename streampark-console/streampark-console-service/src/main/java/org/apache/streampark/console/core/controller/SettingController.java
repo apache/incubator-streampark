@@ -71,7 +71,7 @@ public class SettingController {
   @PostMapping("docker")
   @RequiresPermissions("setting:view")
   public RestResponse docker() {
-    DockerConfig dockerConfig = DockerConfig.fromSetting();
+    DockerConfig dockerConfig = settingService.getDockerConfig();
     return RestResponse.success(dockerConfig);
   }
 

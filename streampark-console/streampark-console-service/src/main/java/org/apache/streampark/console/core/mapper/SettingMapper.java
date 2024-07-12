@@ -19,6 +19,13 @@ package org.apache.streampark.console.core.mapper;
 
 import org.apache.streampark.console.core.entity.Setting;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SettingMapper extends BaseMapper<Setting> {}
+import java.util.List;
+
+public interface SettingMapper extends BaseMapper<Setting> {
+
+  List<Setting> querySettingByKeys(@Param("settingKeys") List<String> settingKeys);
+}

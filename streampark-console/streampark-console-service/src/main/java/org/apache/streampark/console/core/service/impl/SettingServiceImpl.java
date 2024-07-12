@@ -48,6 +48,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -150,6 +151,38 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     return SETTINGS
         .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
         .getSettingValue();
+  }
+
+  @Override
+  public DockerConfig getDockerConfig() {
+    List<Setting> settingList =
+        baseMapper.querySettingByKeys(
+            Arrays.asList(
+                SettingService.KEY_DOCKER_REGISTER_ADDRESS,
+                SettingService.KEY_DOCKER_REGISTER_USER,
+                SettingService.KEY_DOCKER_REGISTER_PASSWORD,
+                SettingService.KEY_DOCKER_REGISTER_NAMESPACE));
+    DockerConfig dockerConfig = new DockerConfig();
+    settingList.forEach(
+        setting -> {
+          switch (setting.getSettingKey()) {
+            case SettingService.KEY_DOCKER_REGISTER_ADDRESS:
+              dockerConfig.setAddress(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_USER:
+              dockerConfig.setUserName(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_PASSWORD:
+              dockerConfig.setPassword(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_NAMESPACE:
+              dockerConfig.setNamespace(setting.getSettingValue());
+              break;
+            default:
+              break;
+          }
+        });
+    return dockerConfig;
   }
 
   @Override
