@@ -85,7 +85,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set up java ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java }}
           distribution: "adopt"

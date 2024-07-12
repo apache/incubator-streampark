@@ -90,7 +90,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-unit-test
           restore-keys: ${{ runner.os }}-maven-
       - name: Set up java ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java }}
           distribution: "adopt"
@@ -112,7 +112,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-unit-test
           restore-keys: ${{ runner.os }}-maven-
       - name: Set up JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: 11
           distribution: 'adopt'
@@ -126,7 +126,7 @@ jobs:
           -Dsonar.token=7ef5d3a630b7009a1f4fdca48e776d0605e69d7d \
           -Dmaven.test.skip=true \
           -Dspotless.skip=true \
-          -Dsonar.exclusions=/**/target/dependency-reduced-pom.xml
+          -Dsonar.exclusions=target/dependency-reduced-pom.xml
 
 #      - name: SonarCloud Scan
 #        uses: sonarsource/sonarcloud-github-action@v2.3.0
