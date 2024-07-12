@@ -90,6 +90,11 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: "adopt"
           cache: "maven"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-backend
+          restore-keys: ${{ runner.os }}-maven-
       - name: Backend Build with Maven
         run: ./mvnw -B clean install -Pshaded -DskipTests
   result:
