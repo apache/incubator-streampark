@@ -66,4 +66,6 @@ public interface SettingService extends IService<Setting> {
   ResponseResult checkDocker(DockerConfig dockerConfig);
 
   ResponseResult checkEmail(SenderEmail senderEmail);
+
+  DockerConfig getDockerConfig();
 }

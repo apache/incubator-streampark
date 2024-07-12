@@ -68,12 +68,12 @@ public class SettingController {
     return RestResponse.success(updated);
   }
 
-    @PostMapping("docker")
-    @RequiresPermissions("setting:view")
-    public RestResponse docker() {
-        DockerConfig dockerConfig = settingService.getDockerConfig();
-        return RestResponse.success(dockerConfig);
-    }
+  @PostMapping("docker")
+  @RequiresPermissions("setting:view")
+  public RestResponse docker() {
+    DockerConfig dockerConfig = settingService.getDockerConfig();
+    return RestResponse.success(dockerConfig);
+  }
 
   @PostMapping("check/docker")
   @RequiresPermissions("setting:view")

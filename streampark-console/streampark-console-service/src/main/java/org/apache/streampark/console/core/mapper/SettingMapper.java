@@ -25,8 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.List;
 
-
 public interface SettingMapper extends BaseMapper<Setting> {
 
-    List<Setting> querySettingByKeys(@Param("settingKeys") List<String> settingKeys);
+  List<Setting> querySettingByKeys(@Param("settingKeys") List<String> settingKeys);
 }

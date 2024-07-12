@@ -146,7 +146,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     return null;
   }
 
-
   @Override
   public String getIngressModeDefault() {
     return SETTINGS
@@ -154,34 +153,37 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         .getSettingValue();
   }
 
-    @Override
-    public DockerConfig getDockerConfig() {
-        List<Setting> settingList = baseMapper.querySettingByKeys(Arrays.asList(
-            SettingService.KEY_DOCKER_REGISTER_ADDRESS,
-            SettingService.KEY_DOCKER_REGISTER_USER,
-            SettingService.KEY_DOCKER_REGISTER_PASSWORD,
-            SettingService.KEY_DOCKER_REGISTER_NAMESPACE));
-        DockerConfig dockerConfig = new DockerConfig();
-        settingList.forEach(setting -> {
-            switch (setting.getSettingKey()) {
-                case SettingService.KEY_DOCKER_REGISTER_ADDRESS:
-                    dockerConfig.setAddress(setting.getSettingValue());
-                    break;
-                case SettingService.KEY_DOCKER_REGISTER_USER:
-                    dockerConfig.setUserName(setting.getSettingValue());
-                    break;
-                case SettingService.KEY_DOCKER_REGISTER_PASSWORD:
-                    dockerConfig.setPassword(setting.getSettingValue());
-                    break;
-                case SettingService.KEY_DOCKER_REGISTER_NAMESPACE:
-                    dockerConfig.setNamespace(setting.getSettingValue());
-                    break;
-                default:
-                    break;
-            }
+  @Override
+  public DockerConfig getDockerConfig() {
+    List<Setting> settingList =
+        baseMapper.querySettingByKeys(
+            Arrays.asList(
+                SettingService.KEY_DOCKER_REGISTER_ADDRESS,
+                SettingService.KEY_DOCKER_REGISTER_USER,
+                SettingService.KEY_DOCKER_REGISTER_PASSWORD,
+                SettingService.KEY_DOCKER_REGISTER_NAMESPACE));
+    DockerConfig dockerConfig = new DockerConfig();
+    settingList.forEach(
+        setting -> {
+          switch (setting.getSettingKey()) {
+            case SettingService.KEY_DOCKER_REGISTER_ADDRESS:
+              dockerConfig.setAddress(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_USER:
+              dockerConfig.setUserName(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_PASSWORD:
+              dockerConfig.setPassword(setting.getSettingValue());
+              break;
+            case SettingService.KEY_DOCKER_REGISTER_NAMESPACE:
+              dockerConfig.setNamespace(setting.getSettingValue());
+              break;
+            default:
+              break;
+          }
         });
-        return dockerConfig;
-    }
+    return dockerConfig;
+  }
 
   @Override
   public ResponseResult checkDocker(DockerConfig dockerConfig) {
