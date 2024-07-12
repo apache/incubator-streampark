@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.cases.resource;
+package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.resource.ResourceManagementPage;
 import org.apache.streampark.e2e.pages.resource.ResourcePage;
+import org.apache.streampark.e2e.pages.resource.UploadsPage;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -32,7 +32,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
-public class ResourceManagementTest {
+public class UploadManagementTest {
 
     private static RemoteWebDriver browser;
 
@@ -63,54 +63,49 @@ public class ResourceManagementTest {
         new LoginPage(browser)
             .login(userName, password, teamName)
             .goToNav(ResourcePage.class)
-            .goToTab(ResourceManagementPage.class);
+            .goToTab(UploadsPage.class);
     }
 
     @Test
     @Order(10)
-    void testCreateResource() {
-        final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
-        resourceManagementPage.createResource(engineType, resourceType, resourceName, mavenPom, description);
+    void testCreateUpload() {
+        final UploadsPage uploadsPage = new UploadsPage(browser);
+        uploadsPage.createUpload(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(resourceManagementPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList())
                     .as("Resource list should contain newly-created resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
                     .anyMatch(it -> it.contains(description))
-                    /*
-                     * todo: make Resource Type filed value same, hardcode here to pass test currently. In add resource
-                     * page: Add Resource -> Resource Type: Jar Library In upload page: Resource List -> Resource Type:
-                     * Jar library
-                     */
-                    .anyMatch(it -> it.contains("Jar library"))
+                    .anyMatch(it -> it.contains(resourceType))
                     .anyMatch(it -> it.contains(engineType)));
     }
 
     @Test
     @Order(20)
-    void testCreateDuplicateResource() {
-        final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
+    void testCreateDuplicateUpload() {
+        final UploadsPage uploadsPage = new UploadsPage(browser);
         browser.navigate().refresh();
-        resourceManagementPage.createResource(engineType, resourceType, resourceName, mavenPom, description);
+        uploadsPage.createUpload(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(resourceManagementPage.errorMessageList())
+                () -> assertThat(uploadsPage.errorMessageList())
                     .as("Resource Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         String.format("the resource %s already exists, please check.", resourceName))));
 
-        resourceManagementPage.errorMessageConfirmButton().click();
-        resourceManagementPage.createResourceForm().buttonCancel().click();
+        uploadsPage.errorMessageConfirmButton().click();
+        uploadsPage.createUploadForm().buttonCancel().click();
     }
 
     @Test
     @Order(30)
-    void testEditResource() {
-        final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
+    void testEditUpload() {
+        final UploadsPage uploadsPage = new UploadsPage(browser);
         browser.navigate().refresh();
 
         String editDescription = "Kafka-jar-lib";
@@ -121,36 +116,31 @@ public class ResourceManagementTest {
                 "   <version>3.7.1</version>\n" +
                 "</dependency>";
 
-        resourceManagementPage.editResource(engineType, resourceType, resourceName, editResource,
+        uploadsPage.editUpload(engineType, resourceType, resourceName, editResource,
             editDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(resourceManagementPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList())
                     .as("Resource list should contain edit resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
                     .anyMatch(it -> it.contains(editDescription))
-                    /*
-                     * todo: make Resource Type filed value same, hardcode here to pass test currently. In add resource
-                     * page: Add Resource -> Resource Type: Jar Library In upload page: Resource List -> Resource Type:
-                     * Jar library
-                     */
-                    .anyMatch(it -> it.contains("Jar library"))
+                    .anyMatch(it -> it.contains(resourceType))
                     .anyMatch(it -> it.contains(engineType)));
     }
 
     @Test
     @Order(40)
-    void testDeleteResource() {
-        final ResourceManagementPage resourceManagementPage = new ResourceManagementPage(browser);
-        resourceManagementPage.deleteResource(resourceName);
+    void testDeleteUpload() {
+        final UploadsPage uploadsPage = new UploadsPage(browser);
+        uploadsPage.deleteUpload(resourceName);
         Awaitility.await()
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(resourceManagementPage.resourceList())
+                    assertThat(uploadsPage.resourceList())
                         .noneMatch(it -> it.getText().contains(resourceName));
                 });
     }

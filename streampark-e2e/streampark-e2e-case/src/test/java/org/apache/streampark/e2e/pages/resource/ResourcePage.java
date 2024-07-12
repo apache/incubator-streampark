@@ -33,38 +33,38 @@ import java.time.Duration;
 public final class ResourcePage extends NavBarPage implements NavBarItem {
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Variables')]//..")
-    private WebElement resourceVariableManagement;
+    private WebElement menuVariables;
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Projects')]//..")
-    private WebElement resourceProjectsManagement;
+    private WebElement menuProjects;
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Uploads')]//..")
-    private WebElement resourceManagement;
+    private WebElement menuUploads;
 
     public ResourcePage(RemoteWebDriver driver) {
         super(driver);
     }
 
     public <T extends ResourcePage.Tab> T goToTab(Class<T> tab) {
-        if (tab == VariableManagementPage.class) {
+        if (tab == VariablesPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(resourceVariableManagement));
-            resourceVariableManagement.click();
-            return tab.cast(new VariableManagementPage(driver));
+                .until(ExpectedConditions.elementToBeClickable(menuVariables));
+            menuVariables.click();
+            return tab.cast(new VariablesPage(driver));
         }
 
         if (tab == ProjectsPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(resourceProjectsManagement));
-            resourceProjectsManagement.click();
+                .until(ExpectedConditions.elementToBeClickable(menuProjects));
+            menuProjects.click();
             return tab.cast(new ProjectsPage(driver));
         }
 
-        if (tab == ResourceManagementPage.class) {
+        if (tab == UploadsPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(resourceManagement));
-            resourceManagement.click();
-            return tab.cast(new ResourceManagementPage(driver));
+                .until(ExpectedConditions.elementToBeClickable(menuUploads));
+            menuUploads.click();
+            return tab.cast(new UploadsPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());

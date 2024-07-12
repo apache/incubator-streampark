@@ -33,12 +33,12 @@ import java.time.Duration;
 import java.util.List;
 
 @Getter
-public class ResourceManagementPage extends NavBarPage implements ResourcePage.Tab {
+public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
     @FindBy(xpath = "//span[contains(., 'Resource List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
     private WebElement buttonCreateResource;
 
-    private final CreateResourceForm createResourceForm = new CreateResourceForm();
+    private final CreateUploadForm createUploadForm = new CreateUploadForm();
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
     private List<WebElement> resourceList;
@@ -52,13 +52,13 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
     private WebElement deleteConfirmButton;
 
-    public ResourceManagementPage(RemoteWebDriver driver) {
+    public UploadsPage(RemoteWebDriver driver) {
         super(driver);
     }
 
-    public ResourceManagementPage createResource(String engineType, String resourceType, String resourceName,
-                                                 String resource,
-                                                 String description) {
+    public UploadsPage createUpload(String engineType, String resourceType, String resourceName,
+                                    String resource,
+                                    String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
@@ -66,10 +66,10 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
         buttonCreateResource.click();
 
         // select engine type.
-        createResourceForm.btnSelectEngineTypeDropDown().click();
+        createUploadForm.btnSelectEngineTypeDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType()));
-        createResourceForm.selectResourceType().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
+        createUploadForm.selectEngineType().stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
@@ -78,10 +78,10 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             .click();
 
         // select resource type.
-        createResourceForm.btnSelectResourceTypeDropDown().click();
+        createUploadForm.btnSelectResourceTypeDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
-        createResourceForm.selectResourceType().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
+        createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
             .orElseThrow(
@@ -89,16 +89,16 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
                     String.format("No %s in resourceType dropdown list", resourceType)))
             .click();
 
-        createResourceForm.inputResourceName().sendKeys(resourceName);
-        createResourceForm.textPom().sendKeys(resource);
-        createResourceForm.inputDescription().sendKeys(description);
+        createUploadForm.inputResourceName().sendKeys(resourceName);
+        createUploadForm.textPom().sendKeys(resource);
+        createUploadForm.inputDescription().sendKeys(description);
 
-        createResourceForm.buttonSubmit().click();
+        createUploadForm.buttonSubmit().click();
         return this;
     }
 
-    public ResourceManagementPage editResource(String engineType, String resourceType, String resourceName,
-                                               String resource, String description) {
+    public UploadsPage editUpload(String engineType, String resourceType, String resourceName,
+                                  String resource, String description) {
         waitForPageLoading();
 
         resourceList.stream()
@@ -111,10 +111,10 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             .click();
 
         // select engine type.
-        createResourceForm.btnSelectEngineTypeDropDown().click();
+        createUploadForm.btnSelectEngineTypeDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectEngineType()));
-        createResourceForm.selectResourceType.stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
+        createUploadForm.selectResourceType.stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
@@ -123,10 +123,10 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
             .click();
 
         // select resource type.
-        createResourceForm.btnSelectResourceTypeDropDown().click();
+        createUploadForm.btnSelectResourceTypeDropDown().click();
         new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(createResourceForm.selectResourceType()));
-        createResourceForm.selectResourceType().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
+        createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
             .orElseThrow(
@@ -134,16 +134,16 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
                     String.format("No %s in resourceType dropdown list", resourceType)))
             .click();
 
-        createResourceForm.textPom().sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-        createResourceForm.textPom().sendKeys(resource);
-        createResourceForm.inputDescription().clear();
-        createResourceForm.inputDescription().sendKeys(description);
+        createUploadForm.textPom().sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+        createUploadForm.textPom().sendKeys(resource);
+        createUploadForm.inputDescription().clear();
+        createUploadForm.inputDescription().sendKeys(description);
 
-        createResourceForm.buttonSubmit().click();
+        createUploadForm.buttonSubmit().click();
         return this;
     }
 
-    public ResourceManagementPage deleteResource(String resourceName) {
+    public UploadsPage deleteUpload(String resourceName) {
         waitForPageLoading();
 
         resourceList.stream()
@@ -169,9 +169,9 @@ public class ResourceManagementPage extends NavBarPage implements ResourcePage.T
     }
 
     @Getter
-    public class CreateResourceForm {
+    public class CreateUploadForm {
 
-        CreateResourceForm() {
+        CreateUploadForm() {
             PageFactory.initElements(driver, this);
         }
 

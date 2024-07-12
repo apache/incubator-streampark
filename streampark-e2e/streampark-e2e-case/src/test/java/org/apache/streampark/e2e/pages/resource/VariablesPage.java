@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Getter
-public class VariableManagementPage extends NavBarPage implements ResourcePage.Tab {
+public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
 
     @FindBy(xpath = "//span[contains(., 'Variable List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
     private WebElement buttonCreateVariable;
@@ -51,12 +51,12 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
 
     private final CreateVariableForm createVariableForm = new CreateVariableForm();
 
-    public VariableManagementPage(RemoteWebDriver driver) {
+    public VariablesPage(RemoteWebDriver driver) {
         super(driver);
     }
 
-    public VariableManagementPage createVariable(String variableCode, String variableValue, String description,
-                                                 boolean notVisible) {
+    public VariablesPage createVariable(String variableCode, String variableValue, String description,
+                                        boolean notVisible) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
@@ -73,8 +73,8 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
         return this;
     }
 
-    public VariableManagementPage editVariable(String variableCode, String variableValue, String description,
-                                               boolean notVisible) {
+    public VariablesPage editVariable(String variableCode, String variableValue, String description,
+                                      boolean notVisible) {
         waitForPageLoading();
 
         variableList().stream()
@@ -90,6 +90,7 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
             .until(ExpectedConditions.elementToBeClickable(createVariableForm.buttonSubmit));
+        createVariableForm.inputVariableValue().clear();
         createVariableForm.inputVariableValue().sendKeys(variableValue);
         createVariableForm.inputDescription().clear();
         createVariableForm.inputDescription().sendKeys(description);
@@ -101,7 +102,7 @@ public class VariableManagementPage extends NavBarPage implements ResourcePage.T
         return this;
     }
 
-    public VariableManagementPage deleteVariable(String variableCode) {
+    public VariablesPage deleteVariable(String variableCode) {
         waitForPageLoading();
 
         variableList().stream()
