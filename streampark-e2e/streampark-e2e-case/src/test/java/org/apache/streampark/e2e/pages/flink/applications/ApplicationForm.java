@@ -78,7 +78,7 @@ public final class ApplicationForm {
                                           String applicationName,
                                           String flinkVersion,
                                           ApplicationsDynamicParams applicationsDynamicParams) {
-        Thread.sleep(Constants.DEFAULT_SLEEP_SECONDS);
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         new WebDriverWait(driver, Duration.ofSeconds(10))
             .until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();

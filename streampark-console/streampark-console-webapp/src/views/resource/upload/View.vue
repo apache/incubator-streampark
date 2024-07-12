@@ -57,9 +57,9 @@
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.JAR_LIBRARY">
             <template #icon>
-              <img :src="jarSvg" class="svg-icon" alt="jar library" />
+              <img :src="jarSvg" class="svg-icon" alt="Jar Library" />
             </template>
-            Jar library
+            Jar Library
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.GROUP">
