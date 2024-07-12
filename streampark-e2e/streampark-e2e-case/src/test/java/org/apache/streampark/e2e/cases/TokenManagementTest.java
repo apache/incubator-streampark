@@ -73,7 +73,6 @@ public class TokenManagementTest {
     @Order(20)
     void testCopyToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
-        browser.navigate().refresh();
         tokenManagementPage.copyToken(existUserName);
 
         // put clipboard value into createTokenForm.description
@@ -94,20 +93,21 @@ public class TokenManagementTest {
     @Order(30)
     void testCreateDuplicateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
-
+        browser.navigate().refresh();
         tokenManagementPage.createToken(existUserName, newTokenDescription);
 
         Awaitility.await()
             .untilAsserted(
                 () -> assertThat(tokenManagementPage.errorMessageSearchLayout())
                     .as("Please select a user").isNotNull());
+
+        tokenManagementPage.createTokenForm().buttonCancel().click();
     }
 
     @Test
     @Order(40)
     void testDeleteToken() {
         final TokenManagementPage teamManagementPage = new TokenManagementPage(browser);
-        browser.navigate().refresh();
         teamManagementPage.deleteToken(existUserName);
 
         Awaitility.await()
