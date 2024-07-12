@@ -278,18 +278,17 @@ public class Application implements Serializable {
 
     public void setYarnQueueByHotParams() {
         if (!(FlinkExecutionMode.YARN_APPLICATION == this.getFlinkExecutionMode()
-                || FlinkExecutionMode.YARN_PER_JOB == this.getFlinkExecutionMode())) {
+            || FlinkExecutionMode.YARN_PER_JOB == this.getFlinkExecutionMode())) {
             return;
         }
 
         Map<String, Object> hotParamsMap = this.getHotParamsMap();
         if (MapUtils.isNotEmpty(hotParamsMap)
-                && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
+            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
             String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
-            String labelExpr =
-                    Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
-                            .map(Object::toString)
-                            .orElse(null);
+            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
+                .map(Object::toString)
+                .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
         }
     }
@@ -364,14 +363,14 @@ public class Application implements Serializable {
 
     public boolean cpFailedTrigger() {
         return this.cpMaxFailureInterval != null
-                && this.cpFailureRateInterval != null
-                && this.cpFailureAction != null;
+            && this.cpFailureRateInterval != null
+            && this.cpFailureAction != null;
     }
 
     public boolean eqFlinkJob(Application other) {
         if (this.isFlinkSqlJob()
-                && other.isFlinkSqlJob()
-                && this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
+            && other.isFlinkSqlJob()
+            && this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
             return this.getDependencyObject().equals(other.getDependencyObject());
         }
         return false;
@@ -380,8 +379,7 @@ public class Application implements Serializable {
     /** Local compilation and packaging working directory */
     @JsonIgnore
     public String getDistHome() {
-        String path =
-                String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
         log.info("local distHome:{}", path);
         return path;
     }
@@ -415,7 +413,7 @@ public class Application implements Serializable {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                        "unsupported executionMode ".concat(getFlinkExecutionMode().getName()));
+                    "unsupported executionMode ".concat(getFlinkExecutionMode().getName()));
         }
     }
 
@@ -449,7 +447,7 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isFlinkSqlJobOrPyFlinkJob() {
         return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType())
-                || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
@@ -460,19 +458,19 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isCustomCodeOrPyFlinkJob() {
         return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
-                || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isUploadJob() {
         return isCustomCodeOrPyFlinkJob()
-                && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore
     public boolean isCICDJob() {
         return isCustomCodeOrPyFlinkJob()
-                && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
     }
 
     public boolean isStreamParkJob() {
@@ -614,11 +612,8 @@ public class Application implements Serializable {
         public static final SFunction<Application, Integer> TM_MEMORY = Application::getTmMemory;
         public static final SFunction<Application, Integer> STATE = Application::getState;
         public static final SFunction<Application, String> OPTIONS = Application::getOptions;
-        public static final SFunction<Application, Integer> AVAILABLE_SLOT =
-                Application::getAvailableSlot;
-        public static final SFunction<Application, Integer> EXECUTION_MODE =
-                Application::getExecutionMode;
-        public static final SFunction<Application, String> JOB_MANAGER_URL =
-                Application::getJobManagerUrl;
+        public static final SFunction<Application, Integer> AVAILABLE_SLOT = Application::getAvailableSlot;
+        public static final SFunction<Application, Integer> EXECUTION_MODE = Application::getExecutionMode;
+        public static final SFunction<Application, String> JOB_MANAGER_URL = Application::getJobManagerUrl;
     }
 }

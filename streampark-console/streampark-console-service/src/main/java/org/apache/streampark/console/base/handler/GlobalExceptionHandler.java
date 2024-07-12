@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
     public RestResponse handleException(Exception e) {
         log.error("internal server error:", e);
         return RestResponse.fail(
-                ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
+            ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
     /**
@@ -112,8 +112,7 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
             Path path = violation.getPropertyPath();
-            String[] pathArr =
-                    StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
+            String[] pathArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));

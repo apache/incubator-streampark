@@ -39,7 +39,8 @@ class StreamTableContext(
   def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) =
     this(args._1, args._2, args._3)
 
-  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initialize(args))
+  def this(args: StreamTableEnvConfig) =
+    this(FlinkTableInitializer.initialize(args))
 
   override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table =
     tableEnv.fromDataStream[T](dataStream, schema)
@@ -59,7 +60,8 @@ class StreamTableContext(
   override def createTemporaryView[T](
       path: String,
       dataStream: DataStream[T],
-      schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
+      schema: Schema): Unit =
+    tableEnv.createTemporaryView[T](path, dataStream, schema)
 
   override def toDataStream(table: Table): DataStream[Row] = {
     isConvertedToDataStream = true
@@ -94,9 +96,11 @@ class StreamTableContext(
     tableEnv.toChangelogStream(table, targetSchema, changelogMode)
   }
 
-  override def createStatementSet(): StreamStatementSet = tableEnv.createStatementSet()
+  override def createStatementSet(): StreamStatementSet =
+    tableEnv.createStatementSet()
 
-  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
+  override def useModules(strings: String*): Unit =
+    tableEnv.useModules(strings: _*)
 
   override def createTemporaryTable(path: String, descriptor: TableDescriptor): Unit =
     tableEnv.createTemporaryTable(path, descriptor)
@@ -104,19 +108,23 @@ class StreamTableContext(
   override def createTable(path: String, descriptor: TableDescriptor): Unit =
     tableEnv.createTable(path, descriptor)
 
-  override def from(descriptor: TableDescriptor): Table = tableEnv.from(descriptor)
+  override def from(descriptor: TableDescriptor): Table =
+    tableEnv.from(descriptor)
 
-  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+  override def listFullModules(): Array[ModuleEntry] =
+    tableEnv.listFullModules()
 
   /** @since 1.15 */
-  override def listTables(s: String, s1: String): Array[String] = tableEnv.listTables(s, s1)
+  override def listTables(s: String, s1: String): Array[String] =
+    tableEnv.listTables(s, s1)
 
   /** @since 1.15 */
   override def loadPlan(planReference: PlanReference): CompiledPlan =
     tableEnv.loadPlan(planReference)
 
   /** @since 1.15 */
-  override def compilePlanSql(s: String): CompiledPlan = tableEnv.compilePlanSql(s)
+  override def compilePlanSql(s: String): CompiledPlan =
+    tableEnv.compilePlanSql(s)
 
   /** @since 1.17 */
   override def createFunction(

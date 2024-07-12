@@ -103,8 +103,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
 
     @Test
     void testCheckQueueValidationIfNeeded() {
-        ApplicationManageServiceImpl applicationServiceImpl =
-                (ApplicationManageServiceImpl) applicationManageService;
+        ApplicationManageServiceImpl applicationServiceImpl = (ApplicationManageServiceImpl) applicationManageService;
 
         // ------- Test it for the create operation. -------
         final String queueLabel = "queue1@label1";
@@ -113,8 +112,8 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         // Test application with available queue
         YarnQueue yarnQueue = mockYarnQueue(targetTeamId, queueLabel);
         yarnQueueService.save(yarnQueue);
-        Application application =
-                mockYarnModeJobApp(targetTeamId, "app1", queueLabel, FlinkExecutionMode.YARN_APPLICATION);
+        Application application = mockYarnModeJobApp(targetTeamId, "app1", queueLabel,
+            FlinkExecutionMode.YARN_APPLICATION);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isTrue();
 
         // Test application without available queue
@@ -129,10 +128,8 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         final Long teamId2 = 2L;
 
         // Test update for both versions in yarn-app or per-job with same yarn queue
-        Application app1 =
-                mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
-        Application app2 =
-                mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_PER_JOB);
+        Application app1 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
+        Application app2 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_PER_JOB);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
         // Test available queue

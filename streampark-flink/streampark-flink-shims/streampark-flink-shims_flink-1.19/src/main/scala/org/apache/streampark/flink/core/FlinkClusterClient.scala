@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.core
 
 import org.apache.flink.api.common.JobID
@@ -32,7 +33,8 @@ class FlinkClusterClient[T](clusterClient: ClusterClient[T])
     clusterClient.triggerSavepoint(
       jobID,
       savepointDir,
-      if (nativeFormat) SavepointFormatType.NATIVE else SavepointFormatType.CANONICAL)
+      if (nativeFormat) SavepointFormatType.NATIVE
+      else SavepointFormatType.CANONICAL)
   }
 
   override def cancelWithSavepoint(
@@ -42,7 +44,8 @@ class FlinkClusterClient[T](clusterClient: ClusterClient[T])
     clusterClient.cancelWithSavepoint(
       jobID,
       savepointDirectory,
-      if (nativeFormat) SavepointFormatType.NATIVE else SavepointFormatType.CANONICAL)
+      if (nativeFormat) SavepointFormatType.NATIVE
+      else SavepointFormatType.CANONICAL)
   }
 
   override def stopWithSavepoint(
@@ -54,7 +57,8 @@ class FlinkClusterClient[T](clusterClient: ClusterClient[T])
       jobID,
       advanceToEndOfEventTime,
       savepointDirectory,
-      if (nativeFormat) SavepointFormatType.NATIVE else SavepointFormatType.CANONICAL)
+      if (nativeFormat) SavepointFormatType.NATIVE
+      else SavepointFormatType.CANONICAL)
   }
 
 }

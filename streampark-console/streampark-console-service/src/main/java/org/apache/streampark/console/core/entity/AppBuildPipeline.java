@@ -125,11 +125,11 @@ public class AppBuildPipeline {
         }
         try {
             return JacksonUtils.read(
-                    stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatusEnum>>() {
-                    });
+                stepStatusJson, new TypeReference<HashMap<Integer, PipelineStepStatusEnum>>() {
+                });
         } catch (JsonProcessingException e) {
             log.error(
-                    "json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
+                "json parse error on ApplicationBuildPipeline, stepStatusJson={}", stepStatusJson, e);
             return new HashMap<>();
         }
     }
@@ -140,11 +140,11 @@ public class AppBuildPipeline {
             this.stepStatusJson = JacksonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
             log.error(
-                    "json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
-                    stepStatus.entrySet().stream()
-                            .map(et -> et.getKey() + "->" + et.getValue())
-                            .collect(Collectors.joining(",")),
-                    e);
+                "json parse error on ApplicationBuildPipeline, stepStatusMap=({})",
+                stepStatus.entrySet().stream()
+                    .map(et -> et.getKey() + "->" + et.getValue())
+                    .collect(Collectors.joining(",")),
+                e);
         }
         return this;
     }
@@ -157,13 +157,13 @@ public class AppBuildPipeline {
         }
         try {
             return JacksonUtils.read(
-                    stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
-                    });
+                stepStatusTimestampJson, new TypeReference<HashMap<Integer, Long>>() {
+                });
         } catch (JsonProcessingException e) {
             log.error(
-                    "json parse error on ApplicationBuildPipeline, stepStatusJson={}",
-                    stepStatusTimestampJson,
-                    e);
+                "json parse error on ApplicationBuildPipeline, stepStatusJson={}",
+                stepStatusTimestampJson,
+                e);
             return new HashMap<>();
         }
     }
@@ -174,11 +174,11 @@ public class AppBuildPipeline {
             this.stepStatusTimestampJson = JacksonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
             log.error(
-                    "json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
-                    stepStatusSt.entrySet().stream()
-                            .map(et -> et.getKey() + "->" + et.getValue())
-                            .collect(Collectors.joining(",")),
-                    e);
+                "json parse error on ApplicationBuildPipeline, stepStatusSt=({})",
+                stepStatusSt.entrySet().stream()
+                    .map(et -> et.getKey() + "->" + et.getValue())
+                    .collect(Collectors.joining(",")),
+                e);
         }
         return this;
     }
@@ -244,7 +244,7 @@ public class AppBuildPipeline {
             return (R) JacksonUtils.read(buildResultJson, pipeType.getResultType());
         } catch (JsonProcessingException e) {
             log.error(
-                    "json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
+                "json parse error on ApplicationBuildPipeline, buildResultJson={}", buildResultJson, e);
             return null;
         }
     }
@@ -257,14 +257,14 @@ public class AppBuildPipeline {
     /** Create object from PipeSnapshot */
     public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipelineSnapshot snapshot) {
         return new AppBuildPipeline()
-                .setPipeType(snapshot.pipeType())
-                .setPipeStatus(snapshot.pipeStatus())
-                .setTotalStep(snapshot.allSteps())
-                .setCurStep(snapshot.curStep())
-                .setStepStatus(snapshot.pureStepStatusAsJava())
-                .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
-                .setError(snapshot.error())
-                .setModifyTime(new Date(snapshot.emitTime()));
+            .setPipeType(snapshot.pipeType())
+            .setPipeStatus(snapshot.pipeStatus())
+            .setTotalStep(snapshot.allSteps())
+            .setCurStep(snapshot.curStep())
+            .setStepStatus(snapshot.pureStepStatusAsJava())
+            .setStepStatusTimestamp(snapshot.stepStatusTimestampAsJava())
+            .setError(snapshot.error())
+            .setModifyTime(new Date(snapshot.emitTime()));
     }
 
     /** Covert to view object */
@@ -298,11 +298,10 @@ public class AppBuildPipeline {
             Map<Integer, Long> stepTs = pipe.getStepStatusTimestamp();
             List<Step> steps = new ArrayList<>(stepDesc.size());
             for (int i = 1; i <= pipe.getPipeType().getSteps().size(); i++) {
-                Step step =
-                        new Step()
-                                .setSeq(i)
-                                .setDesc(stepDesc.getOrDefault(i, "unknown step"))
-                                .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
+                Step step = new Step()
+                    .setSeq(i)
+                    .setDesc(stepDesc.getOrDefault(i, "unknown step"))
+                    .setStatus(stepStatus.getOrDefault(i, PipelineStepStatusEnum.unknown).getCode());
                 Long st = stepTs.get(i);
                 if (st != null) {
                     step.setTs(new Date(st));
@@ -311,21 +310,22 @@ public class AppBuildPipeline {
             }
 
             return new View()
-                    .setAppId(pipe.getAppId())
-                    .setPipeType(pipe.getPipeTypeCode())
-                    .setPipeStatus(pipe.getPipeStatusCode())
-                    .setCurStep(pipe.getCurStep())
-                    .setTotalStep(pipe.getTotalStep())
-                    .setPercent(
-                            Utils.calPercent(
-                                    pipe.getBuildResult() == null ? pipe.getCurStep() - 1 : pipe.getCurStep(),
-                                    pipe.getTotalStep()))
-                    .setCostSec(pipe.calCostSecond())
-                    .setSteps(steps)
-                    .setHasError(pipe.getError().nonEmpty())
-                    .setErrorSummary(pipe.getError().summary())
-                    .setErrorStack(pipe.getError().exceptionStack())
-                    .setUpdateTime(pipe.getModifyTime());
+                .setAppId(pipe.getAppId())
+                .setPipeType(pipe.getPipeTypeCode())
+                .setPipeStatus(pipe.getPipeStatusCode())
+                .setCurStep(pipe.getCurStep())
+                .setTotalStep(pipe.getTotalStep())
+                .setPercent(
+                    Utils.calPercent(
+                        pipe.getBuildResult() == null ? pipe.getCurStep() - 1
+                            : pipe.getCurStep(),
+                        pipe.getTotalStep()))
+                .setCostSec(pipe.calCostSecond())
+                .setSteps(steps)
+                .setHasError(pipe.getError().nonEmpty())
+                .setErrorSummary(pipe.getError().summary())
+                .setErrorStack(pipe.getError().exceptionStack())
+                .setUpdateTime(pipe.getModifyTime());
         }
     }
 

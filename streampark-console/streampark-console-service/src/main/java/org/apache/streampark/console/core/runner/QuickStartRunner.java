@@ -64,8 +64,7 @@ public class QuickStartRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        Map<String, HashMap<String, String>> map =
-                PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
+        Map<String, HashMap<String, String>> map = PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
 
         Map<String, String> quickstart = map.get("quickstart");
 

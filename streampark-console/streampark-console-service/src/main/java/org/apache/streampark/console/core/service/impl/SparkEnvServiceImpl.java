@@ -41,8 +41,8 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
-        implements
-            SparkEnvService {
+    implements
+        SparkEnvService {
 
     @Autowired
     private FlinkClusterService flinkClusterService;
@@ -57,8 +57,8 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
     @Override
     public FlinkEnvCheckEnum check(SparkEnv version) {
         // 1) check name
-        LambdaQueryWrapper<SparkEnv> queryWrapper =
-                new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName, version.getSparkName());
+        LambdaQueryWrapper<SparkEnv> queryWrapper = new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getSparkName,
+            version.getSparkName());
         if (version.getId() != null) {
             queryWrapper.ne(SparkEnv::getId, version.getId());
         }
@@ -92,8 +92,8 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
         checkOrElseAlert(sparkEnv);
         Long count = this.baseMapper.selectCount(null);
         ApiAlertException.throwIfFalse(
-                !(count > 1 && sparkEnv.getIsDefault()),
-                "The spark home is set as default, please change it first.");
+            !(count > 1 && sparkEnv.getIsDefault()),
+            "The spark home is set as default, please change it first.");
 
         this.baseMapper.deleteById(id);
     }
@@ -125,7 +125,7 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
     @Override
     public SparkEnv getDefault() {
         return this.baseMapper.selectOne(
-                new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getIsDefault, true));
+            new LambdaQueryWrapper<SparkEnv>().eq(SparkEnv::getIsDefault, true));
     }
 
     @Override

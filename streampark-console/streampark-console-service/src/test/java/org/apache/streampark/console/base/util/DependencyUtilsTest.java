@@ -70,17 +70,16 @@ class DependencyUtilsTest {
         List<String> factories = getConnectorFactory(connector);
 
         Class<Factory> className = Factory.class;
-        URL[] array =
-                files.stream()
-                        .map(
-                                x -> {
-                                    try {
-                                        return x.toURI().toURL();
-                                    } catch (MalformedURLException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                })
-                        .toArray(URL[]::new);
+        URL[] array = files.stream()
+            .map(
+                x -> {
+                    try {
+                        return x.toURI().toURL();
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+            .toArray(URL[]::new);
 
         URLClassLoader urlClassLoader = URLClassLoader.newInstance(array);
         ServiceLoader<Factory> serviceLoader = ServiceLoader.load(className, urlClassLoader);
@@ -95,14 +94,14 @@ class DependencyUtilsTest {
                     connectorResource.setFactoryIdentifier(factory.factoryIdentifier());
                     Map<String, String> requiredOptions = new HashMap<>(0);
                     factory
-                            .requiredOptions()
-                            .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
+                        .requiredOptions()
+                        .forEach(x -> requiredOptions.put(x.key(), getOptionDefaultValue(x)));
                     connectorResource.setRequiredOptions(requiredOptions);
 
                     Map<String, String> optionalOptions = new HashMap<>(0);
                     factory
-                            .optionalOptions()
-                            .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
+                        .optionalOptions()
+                        .forEach(x -> optionalOptions.put(x.key(), getOptionDefaultValue(x)));
                     connectorResource.setOptionalOptions(optionalOptions);
 
                     connectorResources.add(connectorResource);

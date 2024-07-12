@@ -55,7 +55,7 @@ public class ProjectController {
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
         ApiAlertException.throwIfNull(
-                project.getTeamId(), "The teamId can't be null. Create team failed.");
+            project.getTeamId(), "The teamId can't be null. Create team failed.");
         return projectService.create(project);
     }
 

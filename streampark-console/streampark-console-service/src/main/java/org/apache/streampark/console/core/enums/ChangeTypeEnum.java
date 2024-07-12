@@ -62,9 +62,9 @@ public enum ChangeTypeEnum {
      */
     public static ChangeTypeEnum of(Integer value) {
         return Arrays.stream(values())
-                .filter(changeTypeEnum -> changeTypeEnum.value == value)
-                .findFirst()
-                .orElse(null);
+            .filter(changeTypeEnum -> changeTypeEnum.value == value)
+            .findFirst()
+            .orElse(null);
     }
 
     /**

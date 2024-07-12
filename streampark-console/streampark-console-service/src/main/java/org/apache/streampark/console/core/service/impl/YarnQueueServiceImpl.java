@@ -59,14 +59,13 @@ import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue>
-        implements
-            YarnQueueService {
+    implements
+        YarnQueueService {
 
     public static final String DEFAULT_QUEUE = "default";
-    public static final String QUEUE_USED_FORMAT =
-            "Please remove the yarn queue for '%s' referenced it before '%s'.";
+    public static final String QUEUE_USED_FORMAT = "Please remove the yarn queue for '%s' referenced it before '%s'.";
     public static final String QUEUE_EXISTED_IN_TEAM_HINT =
-            "The queue label existed already. Try on a new queue label, please.";
+        "The queue label existed already. Try on a new queue label, please.";
     public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
     public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
 
@@ -79,7 +78,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public IPage<YarnQueue> getPage(YarnQueue yarnQueue, RestRequest request) {
         AssertUtils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
         AssertUtils.notNull(
-                yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
+            yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
         Page<YarnQueue> page = MybatisPager.getPage(request);
         return this.baseMapper.selectPage(page, yarnQueue);
     }
@@ -136,7 +135,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
         // 1) no data to update
         if (StringUtils.equals(yarnQueue.getQueueLabel(), queueFromDB.getQueueLabel())
-                && StringUtils.equals(yarnQueue.getDescription(), queueFromDB.getDescription())) {
+            && StringUtils.equals(yarnQueue.getDescription(), queueFromDB.getDescription())) {
             return;
         }
 
@@ -151,7 +150,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
         ApiAlertException.throwIfFalse(isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
 
         checkNotReferencedByApplications(
-                queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "updating");
+            queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "updating");
 
         checkNotReferencedByFlinkClusters(queueFromDB.getQueueLabel(), "updating");
 
@@ -165,7 +164,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
         YarnQueue queueFromDB = getYarnQueueByIdWithPreconditions(yarnQueue);
 
         checkNotReferencedByApplications(
-                queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "deleting");
+            queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "deleting");
 
         checkNotReferencedByFlinkClusters(queueFromDB.getQueueLabel(), "deleting");
 
@@ -201,16 +200,16 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     @Override
     public boolean existByQueueLabel(String queueLabel) {
         return getBaseMapper()
-                .exists(new LambdaQueryWrapper<YarnQueue>().eq(YarnQueue::getQueueLabel, queueLabel));
+            .exists(new LambdaQueryWrapper<YarnQueue>().eq(YarnQueue::getQueueLabel, queueLabel));
     }
 
     @Override
     public boolean existByTeamIdQueueLabel(Long teamId, String queueLabel) {
         return getBaseMapper()
-                .exists(
-                        new LambdaQueryWrapper<YarnQueue>()
-                                .eq(YarnQueue::getTeamId, teamId)
-                                .eq(YarnQueue::getQueueLabel, queueLabel));
+            .exists(
+                new LambdaQueryWrapper<YarnQueue>()
+                    .eq(YarnQueue::getTeamId, teamId)
+                    .eq(YarnQueue::getQueueLabel, queueLabel));
     }
 
     // --------- private methods------------
@@ -227,35 +226,35 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     @VisibleForTesting
     public void checkNotReferencedByFlinkClusters(
                                                   @Nonnull String queueLabel, @Nonnull String operation) {
-        List<FlinkCluster> clustersReferenceYarnQueueLabel =
-                flinkClusterService.listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
-                        .stream()
-                        .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
-                        .collect(Collectors.toList());
+        List<FlinkCluster> clustersReferenceYarnQueueLabel = flinkClusterService
+            .listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
+            .stream()
+            .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
+            .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
-                CollectionUtils.isEmpty(clustersReferenceYarnQueueLabel),
-                String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
+            CollectionUtils.isEmpty(clustersReferenceYarnQueueLabel),
+            String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
     }
 
     @VisibleForTesting
     public void checkNotReferencedByApplications(
                                                  @Nonnull Long teamId, @Nonnull String queueLabel,
                                                  @Nonnull String operation) {
-        List<Application> appsReferenceQueueLabel =
-                applicationManageService
-                        .listByTeamIdAndExecutionModes(
-                                teamId,
-                                Sets.newHashSet(
-                                        FlinkExecutionMode.YARN_APPLICATION, FlinkExecutionMode.YARN_PER_JOB))
-                        .stream()
-                        .filter(
-                                application -> {
-                                    application.setYarnQueueByHotParams();
-                                    return StringUtils.equals(application.getYarnQueue(), queueLabel);
-                                })
-                        .collect(Collectors.toList());
+        List<Application> appsReferenceQueueLabel = applicationManageService
+            .listByTeamIdAndExecutionModes(
+                teamId,
+                Sets.newHashSet(
+                    FlinkExecutionMode.YARN_APPLICATION,
+                    FlinkExecutionMode.YARN_PER_JOB))
+            .stream()
+            .filter(
+                application -> {
+                    application.setYarnQueueByHotParams();
+                    return StringUtils.equals(application.getYarnQueue(), queueLabel);
+                })
+            .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
-                CollectionUtils.isEmpty(appsReferenceQueueLabel),
-                String.format(QUEUE_USED_FORMAT, "applications", operation));
+            CollectionUtils.isEmpty(appsReferenceQueueLabel),
+            String.format(QUEUE_USED_FORMAT, "applications", operation));
     }
 }

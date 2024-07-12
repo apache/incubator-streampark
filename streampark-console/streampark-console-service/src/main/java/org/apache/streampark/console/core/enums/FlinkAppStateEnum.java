@@ -130,12 +130,12 @@ public enum FlinkAppStateEnum {
     public static boolean isEndState(Integer appState) {
         FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.of(appState);
         return FlinkAppStateEnum.CANCELED == flinkAppStateEnum
-                || FlinkAppStateEnum.FAILED == flinkAppStateEnum
-                || FlinkAppStateEnum.KILLED == flinkAppStateEnum
-                || FlinkAppStateEnum.FINISHED == flinkAppStateEnum
-                || FlinkAppStateEnum.SUCCEEDED == flinkAppStateEnum
-                || FlinkAppStateEnum.LOST == flinkAppStateEnum
-                || FlinkAppStateEnum.TERMINATED == flinkAppStateEnum;
+            || FlinkAppStateEnum.FAILED == flinkAppStateEnum
+            || FlinkAppStateEnum.KILLED == flinkAppStateEnum
+            || FlinkAppStateEnum.FINISHED == flinkAppStateEnum
+            || FlinkAppStateEnum.SUCCEEDED == flinkAppStateEnum
+            || FlinkAppStateEnum.LOST == flinkAppStateEnum
+            || FlinkAppStateEnum.TERMINATED == flinkAppStateEnum;
     }
 
     public static boolean isLost(Integer appState) {

@@ -87,8 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User getByUsername(String username) {
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -107,8 +106,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateLoginTime(String username) {
         User user = new User();
         user.setLastLoginTime(new Date());
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         this.baseMapper.update(user, queryWrapper);
     }
 
@@ -141,11 +139,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private boolean needTransferResource(User existsUser, User user) {
         if (User.STATUS_LOCK.equals(existsUser.getStatus())
-                || User.STATUS_VALID.equals(user.getStatus())) {
+            || User.STATUS_VALID.equals(user.getStatus())) {
             return false;
         }
         return applicationInfoService.existsByUserId(user.getUserId())
-                || resourceService.existsByUserId(user.getUserId());
+            || resourceService.existsByUserId(user.getUserId());
     }
 
     @Override
@@ -153,13 +151,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = getById(userParam.getUserId());
         ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
         ApiAlertException.throwIfFalse(
-                user.getLoginType() == LoginTypeEnum.PASSWORD,
-                "Can only update password for user who sign in with PASSWORD");
+            user.getLoginType() == LoginTypeEnum.PASSWORD,
+            "Can only update password for user who sign in with PASSWORD");
 
         String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
         ApiAlertException.throwIfFalse(
-                StringUtils.equals(user.getPassword(), saltPassword),
-                "Old password error. Update password failed.");
+            StringUtils.equals(user.getPassword(), saltPassword),
+            "Old password error. Update password failed.");
 
         String salt = ShaHashUtils.getRandomSalt();
         String password = ShaHashUtils.encrypt(salt, userParam.getPassword());
@@ -176,8 +174,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String password = ShaHashUtils.encrypt(salt, newPassword);
         user.setSalt(salt);
         user.setPassword(password);
-        LambdaQueryWrapper<User> queryWrapper =
-                new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
         this.baseMapper.update(user, queryWrapper);
         return newPassword;
     }
@@ -226,8 +223,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
 
             ApiAlertException.throwIfTrue(
-                    CollectionUtils.isEmpty(teams),
-                    "The current user does not belong to any team, please contact the administrator!");
+                CollectionUtils.isEmpty(teams),
+                "The current user does not belong to any team, please contact the administrator!");
 
             if (teams.size() == 1) {
                 Team team = teams.get(0);
@@ -263,15 +260,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // no team.
         if (user.getLastTeamId() == null) {
             return RestResponse.success()
-                    .data(user.getUserId())
-                    .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
+                .data(user.getUserId())
+                .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
         }
 
         updateLoginTime(user.getUsername());
-        String token =
-                WebUtils.encryptToken(
-                        JWTUtil.sign(
-                                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
+        String token = WebUtils.encryptToken(
+            JWTUtil.sign(
+                user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);

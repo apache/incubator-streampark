@@ -56,11 +56,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
-        implements
-            VariableService {
+    implements
+        VariableService {
 
-    private static final Pattern PLACEHOLDER_PATTERN =
-            Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([A-Za-z])+([A-Za-z0-9._-])+\\}");
 
     private static final String PLACEHOLDER_START = "${";
 
@@ -79,8 +78,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     public void createVariable(Variable variable) {
 
         ApiAlertException.throwIfTrue(
-                this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
-                "The variable code already exists.");
+            this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
+            "The variable code already exists.");
 
         variable.setCreatorId(serviceHelper.getUserId());
         this.save(variable);
@@ -89,7 +88,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     @Override
     public void remove(Variable variable) {
         ApiAlertException.throwIfTrue(
-                isDependByApplications(variable), "The variable is actually used.");
+            isDependByApplications(variable), "The variable is actually used.");
         this.removeById(variable);
     }
 
@@ -127,8 +126,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         Variable findVariable = this.baseMapper.selectById(variable.getId());
         ApiAlertException.throwIfNull(findVariable, "The variable does not exist.");
         ApiAlertException.throwIfFalse(
-                findVariable.getVariableCode().equals(variable.getVariableCode()),
-                "The variable code cannot be updated.");
+            findVariable.getVariableCode().equals(variable.getVariableCode()),
+            "The variable code cannot be updated.");
         this.baseMapper.updateById(variable);
         // endregion
 
@@ -136,21 +135,21 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         List<Application> applications = getDependApplicationsByCode(variable);
         if (CollectionUtils.isNotEmpty(applications)) {
             applicationManageService.update(
-                    new UpdateWrapper<Application>()
-                            .lambda()
-                            .in(
-                                    Application::getId,
-                                    applications.stream().map(Application::getId).collect(Collectors.toList()))
-                            .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
+                new UpdateWrapper<Application>()
+                    .lambda()
+                    .in(
+                        Application::getId,
+                        applications.stream().map(Application::getId)
+                            .collect(Collectors.toList()))
+                    .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
         }
     }
 
     @Override
     public Variable findByVariableCode(Long teamId, String variableCode) {
-        LambdaQueryWrapper<Variable> queryWrapper =
-                new LambdaQueryWrapper<Variable>()
-                        .eq(Variable::getVariableCode, variableCode)
-                        .eq(Variable::getTeamId, teamId);
+        LambdaQueryWrapper<Variable> queryWrapper = new LambdaQueryWrapper<Variable>()
+            .eq(Variable::getVariableCode, variableCode)
+            .eq(Variable::getTeamId, teamId);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -193,9 +192,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         if (CollectionUtils.isEmpty(variables)) {
             return mixed;
         }
-        Map<String, String> variableMap =
-                variables.stream()
-                        .collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
+        Map<String, String> variableMap = variables.stream()
+            .collect(Collectors.toMap(Variable::getVariableCode, Variable::getVariableValue));
         String restore = mixed;
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(restore);
         while (matcher.find()) {
@@ -216,9 +214,8 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     private List<Application> getDependApplicationsByCode(Variable variable) {
         List<Application> dependApplications = new ArrayList<>();
         List<Application> applications = applicationManageService.listByTeamId(variable.getTeamId());
-        Map<Long, Application> applicationMap =
-                applications.stream()
-                        .collect(Collectors.toMap(Application::getId, application -> application));
+        Map<Long, Application> applicationMap = applications.stream()
+            .collect(Collectors.toMap(Application::getId, application -> application));
 
         // Get applications that depend on this variable in application args
         for (Application app : applications) {
@@ -257,7 +254,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
     private String getCodeFromPlaceholder(String placeholder) {
         return placeholder.substring(
-                PLACEHOLDER_START.length(), placeholder.length() - PLACEHOLDER_END.length());
+            PLACEHOLDER_START.length(), placeholder.length() - PLACEHOLDER_END.length());
     }
 
     @Override

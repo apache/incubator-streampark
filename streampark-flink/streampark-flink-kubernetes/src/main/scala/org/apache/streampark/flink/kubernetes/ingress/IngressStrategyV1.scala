@@ -32,26 +32,29 @@ class IngressStrategyV1 extends IngressStrategy {
       nameSpace: String,
       clusterId: String,
       clusterClient: ClusterClient[_]): String = {
-    new DefaultKubernetesClient().autoClose(
-      client =>
-        Try {
-          Option(
-            Try(client.network.v1.ingresses().inNamespace(nameSpace).withName(clusterId).get())
-              .getOrElse(null)
-          ) match {
-            case Some(ingress) =>
-              Option(ingress)
-                .map(ingress => ingress.getSpec.getRules.head)
-                .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
-                .map { case (host, path) => s"http://$host$path" }
-                .getOrElse(clusterClient.autoClose(_.getWebInterfaceURL))
-            case None => clusterClient.autoClose(_.getWebInterfaceURL)
-          }
-        } match {
-          case Success(value) => value
-          case Failure(e) =>
-            throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
-        })
+    new DefaultKubernetesClient().autoClose(client =>
+      Try {
+        Option(
+          Try(
+            client.network.v1
+              .ingresses()
+              .inNamespace(nameSpace)
+              .withName(clusterId)
+              .get())
+            .getOrElse(null)) match {
+          case Some(ingress) =>
+            Option(ingress)
+              .map(ingress => ingress.getSpec.getRules.head)
+              .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
+              .map { case (host, path) => s"http://$host$path" }
+              .getOrElse(clusterClient.autoClose(_.getWebInterfaceURL))
+          case None => clusterClient.autoClose(_.getWebInterfaceURL)
+        }
+      } match {
+        case Success(value) => value
+        case Failure(e) =>
+          throw new RuntimeException(s"[StreamPark] get ingressUrlAddress error: $e")
+      })
   }
 
   private[this] def touchIngressBackendRestPort(
@@ -70,52 +73,51 @@ class IngressStrategyV1 extends IngressStrategy {
   }
 
   override def configureIngress(domainName: String, clusterId: String, nameSpace: String): Unit = {
-    new DefaultKubernetesClient().autoClose(
-      client => {
-        val ownerReference = getOwnerReference(nameSpace, clusterId, client)
-        val ingressBackendRestServicePort =
-          touchIngressBackendRestPort(client, clusterId, nameSpace)
-        val ingress = new IngressBuilder()
-          .withNewMetadata()
-          .withName(clusterId)
-          .addToAnnotations(buildIngressAnnotations(clusterId, nameSpace))
-          .addToLabels(buildIngressLabels(clusterId))
-          .addToOwnerReferences(ownerReference) // Add OwnerReference
-          .endMetadata()
-          .withNewSpec()
-          .withIngressClassName(ingressClass)
-          .addNewRule()
-          .withHost(domainName)
-          .withNewHttp()
-          .addNewPath()
-          .withPath(s"/$nameSpace/$clusterId/")
-          .withPathType("ImplementationSpecific")
-          .withNewBackend()
-          .withNewService()
-          .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
-          .withNewPort()
-          .withNumber(ingressBackendRestServicePort)
-          .endPort()
-          .endService()
-          .endBackend()
-          .endPath()
-          .addNewPath()
-          .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
-          .withPathType("ImplementationSpecific")
-          .withNewBackend()
-          .withNewService()
-          .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
-          .withNewPort()
-          .withNumber(ingressBackendRestServicePort)
-          .endPort()
-          .endService()
-          .endBackend()
-          .endPath()
-          .endHttp()
-          .endRule()
-          .endSpec()
-          .build()
-        client.network.v1.ingresses().inNamespace(nameSpace).create(ingress)
-      })
+    new DefaultKubernetesClient().autoClose(client => {
+      val ownerReference = getOwnerReference(nameSpace, clusterId, client)
+      val ingressBackendRestServicePort =
+        touchIngressBackendRestPort(client, clusterId, nameSpace)
+      val ingress = new IngressBuilder()
+        .withNewMetadata()
+        .withName(clusterId)
+        .addToAnnotations(buildIngressAnnotations(clusterId, nameSpace))
+        .addToLabels(buildIngressLabels(clusterId))
+        .addToOwnerReferences(ownerReference) // Add OwnerReference
+        .endMetadata()
+        .withNewSpec()
+        .withIngressClassName(ingressClass)
+        .addNewRule()
+        .withHost(domainName)
+        .withNewHttp()
+        .addNewPath()
+        .withPath(s"/$nameSpace/$clusterId/")
+        .withPathType("ImplementationSpecific")
+        .withNewBackend()
+        .withNewService()
+        .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
+        .withNewPort()
+        .withNumber(ingressBackendRestServicePort)
+        .endPort()
+        .endService()
+        .endBackend()
+        .endPath()
+        .addNewPath()
+        .withPath(s"/$nameSpace/$clusterId" + "(/|$)(.*)")
+        .withPathType("ImplementationSpecific")
+        .withNewBackend()
+        .withNewService()
+        .withName(s"$clusterId-$REST_SERVICE_IDENTIFICATION")
+        .withNewPort()
+        .withNumber(ingressBackendRestServicePort)
+        .endPort()
+        .endService()
+        .endBackend()
+        .endPath()
+        .endHttp()
+        .endRule()
+        .endSpec()
+        .build()
+      client.network.v1.ingresses().inNamespace(nameSpace).create(ingress)
+    })
   }
 }

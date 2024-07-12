@@ -67,20 +67,18 @@ public class ApplicationBackUp {
             case YARN_SESSION:
             case REMOTE:
             case LOCAL:
-                this.path =
-                        String.format(
-                                "%s/%d/%d",
-                                Workspace.local().APP_BACKUPS(), application.getId(), createTime.getTime());
+                this.path = String.format(
+                    "%s/%d/%d",
+                    Workspace.local().APP_BACKUPS(), application.getId(), createTime.getTime());
                 break;
             case YARN_APPLICATION:
-                this.path =
-                        String.format(
-                                "%s/%d/%d",
-                                Workspace.remote().APP_BACKUPS(), application.getId(), createTime.getTime());
+                this.path = String.format(
+                    "%s/%d/%d",
+                    Workspace.remote().APP_BACKUPS(), application.getId(), createTime.getTime());
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        "unsupported executionMode ".concat(application.getFlinkExecutionMode().getName()));
+                    "unsupported executionMode ".concat(application.getFlinkExecutionMode().getName()));
         }
     }
 }

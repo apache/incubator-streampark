@@ -44,8 +44,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, ExternalLink>
-        implements
-            ExternalLinkService {
+    implements
+        ExternalLinkService {
 
     private final ApplicationManageService applicationManageService;
 
@@ -94,17 +94,17 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         placeholderValueMap.put(PlaceholderTypeEnum.YARN_ID.get(), app.getClusterId());
         PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("{", "}");
         link.setRenderedLinkUrl(
-                propertyPlaceholderHelper.replacePlaceholders(
-                        link.getLinkUrl().trim(), placeholderValueMap::get));
+            propertyPlaceholderHelper.replacePlaceholders(
+                link.getLinkUrl().trim(), placeholderValueMap::get));
     }
 
     private boolean check(ExternalLink params) {
         LambdaQueryWrapper<ExternalLink> queryWrapper = new LambdaQueryWrapper<ExternalLink>();
         // badgeName and LinkUrl cannot be duplicated
         queryWrapper.nested(
-                qw -> qw.eq(ExternalLink::getBadgeName, params.getBadgeName())
-                        .or()
-                        .eq(ExternalLink::getLinkUrl, params.getLinkUrl()));
+            qw -> qw.eq(ExternalLink::getBadgeName, params.getBadgeName())
+                .or()
+                .eq(ExternalLink::getLinkUrl, params.getLinkUrl()));
         if (params.getId() != null) {
             queryWrapper.and(qw -> qw.ne(ExternalLink::getId, params.getId()));
         }
@@ -113,11 +113,11 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
             return true;
         }
         AssertUtils.required(
-                !result.getBadgeName().equals(params.getBadgeName()),
-                String.format("The name: %s is already existing.", result.getBadgeName()));
+            !result.getBadgeName().equals(params.getBadgeName()),
+            String.format("The name: %s is already existing.", result.getBadgeName()));
         AssertUtils.required(
-                !result.getLinkUrl().equals(params.getLinkUrl()),
-                String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
+            !result.getLinkUrl().equals(params.getLinkUrl()),
+            String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
         return false;
     }
 }

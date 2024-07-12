@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.conf.ConfigKeys._
@@ -30,7 +31,8 @@ import scala.collection.convert.ImplicitConversions._
 class HBaseClient(func: () => Connection) extends Serializable {
   lazy val connection: Connection = func()
 
-  def table(table: String): Table = connection.getTable(TableName.valueOf(table))
+  def table(table: String): Table =
+    connection.getTable(TableName.valueOf(table))
 }
 
 object HBaseClient {
@@ -39,19 +41,18 @@ object HBaseClient {
   def apply(prop: Properties): HBaseClient = {
     val user = prop.remove(KEY_HBASE_AUTH_USER)
     prop.foreach(x => conf.set(x._1, x._2))
-    new HBaseClient(
-      () => {
-        if (user != null) {
-          UserGroupInformation.setConfiguration(conf)
-          val remoteUser: UserGroupInformation =
-            UserGroupInformation.createRemoteUser(user.toString)
-          UserGroupInformation.setLoginUser(remoteUser)
-        }
-        val connection = ConnectionFactory.createConnection(conf)
-        sys.addShutdownHook {
-          connection.close()
-        }
-        connection
-      })
+    new HBaseClient(() => {
+      if (user != null) {
+        UserGroupInformation.setConfiguration(conf)
+        val remoteUser: UserGroupInformation =
+          UserGroupInformation.createRemoteUser(user.toString)
+        UserGroupInformation.setLoginUser(remoteUser)
+      }
+      val connection = ConnectionFactory.createConnection(conf)
+      sys.addShutdownHook {
+        connection.close()
+      }
+      connection
+    })
   }
 }

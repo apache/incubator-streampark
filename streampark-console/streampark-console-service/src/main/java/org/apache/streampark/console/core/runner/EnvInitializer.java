@@ -70,10 +70,9 @@ public class EnvInitializer implements ApplicationRunner {
 
     private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
-    private static final Pattern PATTERN_FLINK_SHIMS_JAR =
-            Pattern.compile(
-                    "^streampark-flink-shims_flink-(1.1[2-9])_(2.12)-(.*).jar$",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
+        "^streampark-flink-shims_flink-(1.1[2-9])_(2.12)-(.*).jar$",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @SneakyThrows
     @Override
@@ -94,13 +93,13 @@ public class EnvInitializer implements ApplicationRunner {
         Environment env = context.getEnvironment();
         // override config from spring application.yaml
         InternalConfigHolder.keys().stream()
-                .filter(env::containsProperty)
-                .forEach(
-                        key -> {
-                            InternalOption config = InternalConfigHolder.getConfig(key);
-                            AssertUtils.notNull(config);
-                            InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
-                        });
+            .filter(env::containsProperty)
+            .forEach(
+                key -> {
+                    InternalOption config = InternalConfigHolder.getConfig(key);
+                    AssertUtils.notNull(config);
+                    InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
+                });
 
         InternalConfigHolder.log();
 
@@ -147,13 +146,13 @@ public class EnvInitializer implements ApplicationRunner {
             fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
         }
         Arrays.asList(
-                workspace.APP_UPLOADS(),
-                workspace.APP_WORKSPACE(),
-                workspace.APP_BACKUPS(),
-                workspace.APP_SAVEPOINTS(),
-                workspace.APP_PYTHON(),
-                workspace.APP_JARS())
-                .forEach(fsOperator::mkdirsIfNotExists);
+            workspace.APP_UPLOADS(),
+            workspace.APP_WORKSPACE(),
+            workspace.APP_BACKUPS(),
+            workspace.APP_SAVEPOINTS(),
+            workspace.APP_PYTHON(),
+            workspace.APP_JARS())
+            .forEach(fsOperator::mkdirsIfNotExists);
     }
 
     private static void createMvnLocalRepoDir() {
@@ -166,8 +165,8 @@ public class EnvInitializer implements ApplicationRunner {
     private void uploadClientJar(Workspace workspace, FsOperator fsOperator) {
         File client = WebUtils.getAppClientDir();
         AssertUtils.required(
-                client.exists() && client.listFiles().length > 0,
-                client.getAbsolutePath().concat(" is not exists or empty directory "));
+            client.exists() && client.listFiles().length > 0,
+            client.getAbsolutePath().concat(" is not exists or empty directory "));
 
         String appClient = workspace.APP_CLIENT();
         fsOperator.mkCleanDirs(appClient);
@@ -179,9 +178,8 @@ public class EnvInitializer implements ApplicationRunner {
     }
 
     private void uploadShimsJar(Workspace workspace, FsOperator fsOperator) {
-        File[] shims =
-                WebUtils.getAppLibDir()
-                        .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
+        File[] shims = WebUtils.getAppLibDir()
+            .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
         AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
         String appShims = workspace.APP_SHIMS();
@@ -214,7 +212,7 @@ public class EnvInitializer implements ApplicationRunner {
         String flinkLocalHome = flinkEnv.getFlinkHome();
         if (StringUtils.isBlank(flinkLocalHome)) {
             throw new ExceptionInInitializerError(
-                    "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
+                "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
         Workspace workspace = Workspace.of(storageType);
         String appFlink = workspace.APP_FLINK();
@@ -239,7 +237,7 @@ public class EnvInitializer implements ApplicationRunner {
         String sparkLocalHome = sparkEnv.getSparkHome();
         if (StringUtils.isBlank(sparkLocalHome)) {
             throw new ExceptionInInitializerError(
-                    "[StreamPark] SPARK_HOME is undefined,Make sure that Spark is installed.");
+                "[StreamPark] SPARK_HOME is undefined,Make sure that Spark is installed.");
         }
         Workspace workspace = Workspace.of(storageType);
         String appSpark = workspace.APP_SPARK();

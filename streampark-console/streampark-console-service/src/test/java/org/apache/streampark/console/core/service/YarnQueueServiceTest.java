@@ -93,20 +93,19 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         request.setSortOrder("desc");
         IPage<YarnQueue> yarnQueues = yarnQueueService.getPage(queryParams, request);
         assertThat(
-                yarnQueues.getRecords().stream()
-                        .map(YarnQueue::getQueueLabel)
-                        .collect(Collectors.toList()))
-                                .containsExactlyInAnyOrder(q3AtL3, q3AtL1, q2AtL1, q1AtL1);
+            yarnQueues.getRecords().stream()
+                .map(YarnQueue::getQueueLabel)
+                .collect(Collectors.toList()))
+                    .containsExactlyInAnyOrder(q3AtL3, q3AtL1, q2AtL1, q1AtL1);
 
         // Test for 1st page, size = 2, order by create time with queue_label
         queryParams.setQueueLabel("q3");
-        IPage<YarnQueue> yarnQueuesWithQueueLabelLikeQuery =
-                yarnQueueService.getPage(queryParams, request);
+        IPage<YarnQueue> yarnQueuesWithQueueLabelLikeQuery = yarnQueueService.getPage(queryParams, request);
         assertThat(
-                yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
-                        .map(YarnQueue::getQueueLabel)
-                        .collect(Collectors.toList()))
-                                .containsExactlyInAnyOrder(q3AtL3, q3AtL1);
+            yarnQueuesWithQueueLabelLikeQuery.getRecords().stream()
+                .map(YarnQueue::getQueueLabel)
+                .collect(Collectors.toList()))
+                    .containsExactlyInAnyOrder(q3AtL3, q3AtL1);
     }
 
     @Test
@@ -176,8 +175,8 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         // Test for error queue label format
         yarnQueue.setQueueLabel("q1@");
         assertThatThrownBy(() -> yarnQueueService.updateYarnQueue(yarnQueue))
-                .isInstanceOf(ApiAlertException.class)
-                .hasMessage(ERR_FORMAT_HINTS);
+            .isInstanceOf(ApiAlertException.class)
+            .hasMessage(ERR_FORMAT_HINTS);
 
         // Test for formal cases.
         yarnQueue.setQueueLabel(newQueue);
@@ -208,21 +207,21 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for null yarn queue
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("Yarn queue mustn't be null.");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Yarn queue mustn't be null.");
 
         // Test for null yarn queue id
         YarnQueue yarnQueue = new YarnQueue();
         yarnQueue.setId(null);
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(yarnQueue))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("Yarn queue id mustn't be null.");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Yarn queue id mustn't be null.");
 
         // Test for yarn queue non-existed in database.
         yarnQueue.setId(1L);
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(yarnQueue))
-                .isInstanceOf(ApiAlertException.class)
-                .hasMessage("The queue doesn't exist.");
+            .isInstanceOf(ApiAlertException.class)
+            .hasMessage("The queue doesn't exist.");
 
         // Test for expected condition.
         yarnQueue.setQueueLabel(queueLabel);
@@ -249,9 +248,9 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         // Test for existed clusters with specified yarn queue.
         flinkClusterService.save(mockYarnSessionFlinkCluster("fc1", queueLabel, 1L));
         assertThatThrownBy(
-                () -> yarnQueueServiceImpl.checkNotReferencedByFlinkClusters(queueLabel, operation))
-                        .isInstanceOf(ApiAlertException.class)
-                        .hasMessage(String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
+            () -> yarnQueueServiceImpl.checkNotReferencedByFlinkClusters(queueLabel, operation))
+                .isInstanceOf(ApiAlertException.class)
+                .hasMessage(String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
     }
 
     @Test
@@ -270,26 +269,27 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for existed applications that don't belong to the same team, in yarn mode
         applicationManageService.save(
-                mockYarnModeJobApp(2L, "app2", null, FlinkExecutionMode.YARN_APPLICATION));
+            mockYarnModeJobApp(2L, "app2", null, FlinkExecutionMode.YARN_APPLICATION));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that belong to the same team, but not in yarn mode.
         applicationManageService.save(
-                mockYarnModeJobApp(targetTeamId, "app3", null, FlinkExecutionMode.REMOTE));
+            mockYarnModeJobApp(targetTeamId, "app3", null, FlinkExecutionMode.REMOTE));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that belong to the same team, but without yarn queue value.
         applicationManageService.save(
-                mockYarnModeJobApp(targetTeamId, "app4", null, FlinkExecutionMode.YARN_PER_JOB));
+            mockYarnModeJobApp(targetTeamId, "app4", null, FlinkExecutionMode.YARN_PER_JOB));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications, some apps belong to the same team, but others don't belong to.
         applicationManageService.save(
-                mockYarnModeJobApp(targetTeamId, "app5", queueLabel, FlinkExecutionMode.YARN_PER_JOB));
+            mockYarnModeJobApp(targetTeamId, "app5", queueLabel, FlinkExecutionMode.YARN_PER_JOB));
         assertThatThrownBy(
-                () -> yarnQueueServiceImpl.checkNotReferencedByApplications(
-                        targetTeamId, queueLabel, operation))
-                                .isInstanceOf(ApiAlertException.class)
-                                .hasMessage(String.format(QUEUE_USED_FORMAT, "applications", operation));
+            () -> yarnQueueServiceImpl.checkNotReferencedByApplications(
+                targetTeamId, queueLabel, operation))
+                    .isInstanceOf(ApiAlertException.class)
+                    .hasMessage(String.format(QUEUE_USED_FORMAT, "applications",
+                        operation));
     }
 }

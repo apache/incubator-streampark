@@ -1,22 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.apache.streampark.e2e.pages.flink;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
@@ -56,7 +54,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
         buttonCreateFlinkHome.click();
         createFlinkHomeForm.inputFlinkName().sendKeys(flinkName);
         createFlinkHomeForm.inputFlinkHome().sendKeys(flinkHome);
@@ -71,17 +69,17 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         waitForPageLoading();
 
         flinkHomeList().stream()
-                .filter(it -> it.getText().contains(oldFlinkName))
-                .flatMap(
-                        it -> it
-                                .findElements(
-                                        By.xpath(
-                                                "//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'edit')]"))
-                                .stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in flink home list"))
-                .click();
+            .filter(it -> it.getText().contains(oldFlinkName))
+            .flatMap(
+                it -> it
+                    .findElements(
+                        By.xpath(
+                            "//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'edit')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in flink home list"))
+            .click();
 
         createFlinkHomeForm.inputFlinkName().sendKeys(Keys.CONTROL + "a");
         createFlinkHomeForm.inputFlinkName().sendKeys(Keys.BACK_SPACE);
@@ -96,17 +94,17 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         waitForPageLoading();
 
         flinkHomeList().stream()
-                .filter(it -> it.getText().contains(flinkName))
-                .flatMap(
-                        it -> it
-                                .findElements(
-                                        By.xpath(
-                                                "//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'delete')]"))
-                                .stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in flink home list"))
-                .click();
+            .filter(it -> it.getText().contains(flinkName))
+            .flatMap(
+                it -> it
+                    .findElements(
+                        By.xpath(
+                            "//button[contains(@class,'ant-btn')]/span[contains(@aria-label,'delete')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in flink home list"))
+            .click();
 
         deleteConfirmButton.click();
 
@@ -116,18 +114,20 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/flink/home"));
+            .until(ExpectedConditions.urlContains("/flink/home"));
     }
 
     private void waitForClickFinish(String message) {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", message))));
+            .until(
+                ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        message))));
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(
-                        ExpectedConditions.invisibilityOfElementLocated(
-                                By.xpath(String.format("//*[contains(text(),'%s')]", message))));
+            .until(
+                ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath(String.format("//*[contains(text(),'%s')]",
+                        message))));
     }
 
     @Getter

@@ -55,13 +55,13 @@ object SparkClient extends Logger {
         val requestClass = classLoader.loadClass(requestBody._1)
         val method = submitClass.getDeclaredMethod(requestBody._2, requestClass)
         method.setAccessible(true)
-        val obj = method.invoke(null, SparkShimsProxy.getObject(classLoader, request))
+        val obj =
+          method.invoke(null, SparkShimsProxy.getObject(classLoader, request))
         if (obj == null) null.asInstanceOf[T]
         else {
           SparkShimsProxy.getObject[T](this.getClass.getClassLoader, obj)
         }
-      }
-    )
+      })
   }
 
 }

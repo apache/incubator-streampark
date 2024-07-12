@@ -53,10 +53,10 @@ import java.util.Scanner;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationConfigServiceImpl
-        extends
-            ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
-        implements
-            ApplicationConfigService {
+    extends
+        ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
+    implements
+        ApplicationConfigService {
 
     private String flinkConfTemplate = null;
 
@@ -77,8 +77,8 @@ public class ApplicationConfigServiceImpl
         if (appParam.getFormat() != null) {
             ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(appParam.getFormat());
             ApiAlertException.throwIfTrue(
-                    fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
-                    "application' config error. must be (.properties|.yaml|.yml |.conf)");
+                fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
+                "application' config error. must be (.properties|.yaml|.yml |.conf)");
 
             applicationConfig.setFormat(fileType.getValue());
         }
@@ -112,8 +112,7 @@ public class ApplicationConfigServiceImpl
         }
     }
 
-    private void updateForNonFlinkSqlJob(
-                                         Application appParam, Boolean latest, ApplicationConfig latestConfig) {
+    private void updateForNonFlinkSqlJob(Application appParam, Boolean latest, ApplicationConfig latestConfig) {
         // may be re-selected a config file (without config id), or may be based on an original edit
         // (with config Id).
         Long configId = appParam.getConfigId();
@@ -218,18 +217,16 @@ public class ApplicationConfigServiceImpl
     public IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request) {
         request.setSortField("version");
         Page<ApplicationConfig> page = MybatisPager.getPage(request);
-        IPage<ApplicationConfig> configList =
-                this.baseMapper.selectPageByAppId(page, config.getAppId());
+        IPage<ApplicationConfig> configList = this.baseMapper.selectPageByAppId(page, config.getAppId());
         fillEffectiveField(config.getAppId(), configList.getRecords());
         return configList;
     }
 
     @Override
     public List<ApplicationConfig> list(Long appId) {
-        LambdaQueryWrapper<ApplicationConfig> queryWrapper =
-                new LambdaQueryWrapper<ApplicationConfig>()
-                        .eq(ApplicationConfig::getAppId, appId)
-                        .orderByDesc(ApplicationConfig::getVersion);
+        LambdaQueryWrapper<ApplicationConfig> queryWrapper = new LambdaQueryWrapper<ApplicationConfig>()
+            .eq(ApplicationConfig::getAppId, appId)
+            .orderByDesc(ApplicationConfig::getVersion);
 
         List<ApplicationConfig> configList = this.baseMapper.selectList(queryWrapper);
         fillEffectiveField(appId, configList);
@@ -260,7 +257,7 @@ public class ApplicationConfigServiceImpl
     @Override
     public void removeByAppId(Long appId) {
         baseMapper.delete(
-                new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId));
+            new LambdaQueryWrapper<ApplicationConfig>().eq(ApplicationConfig::getAppId, appId));
     }
 
     private void fillEffectiveField(Long id, List<ApplicationConfig> configList) {
@@ -271,8 +268,8 @@ public class ApplicationConfigServiceImpl
         }
 
         configList.stream()
-                .filter(config -> config.getId().equals(effective.getId()))
-                .findFirst()
-                .ifPresent(config -> config.setEffective(true));
+            .filter(config -> config.getId().equals(effective.getId()))
+            .findFirst()
+            .ifPresent(config -> config.setEffective(true));
     }
 }

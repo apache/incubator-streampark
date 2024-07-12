@@ -273,18 +273,17 @@ public class SparkApplication implements Serializable {
 
     public void setYarnQueueByHotParams() {
         if (!(SparkExecutionMode.YARN_CLIENT == this.getSparkExecutionMode()
-                || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
+            || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
             return;
         }
 
         Map<String, Object> hotParamsMap = this.getHotParamsMap();
         if (MapUtils.isNotEmpty(hotParamsMap)
-                && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
+            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
             String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
-            String labelExpr =
-                    Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
-                            .map(Object::toString)
-                            .orElse(null);
+            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
+                .map(Object::toString)
+                .orElse(null);
             this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
         }
     }
@@ -354,14 +353,14 @@ public class SparkApplication implements Serializable {
 
     public boolean cpFailedTrigger() {
         return this.cpMaxFailureInterval != null
-                && this.cpFailureRateInterval != null
-                && this.cpFailureAction != null;
+            && this.cpFailureRateInterval != null
+            && this.cpFailureAction != null;
     }
 
     public boolean eqFlinkJob(SparkApplication other) {
         if (this.isSparkSqlJob()
-                && other.isSparkSqlJob()
-                && this.getSparkSql().trim().equals(other.getSparkSql().trim())) {
+            && other.isSparkSqlJob()
+            && this.getSparkSql().trim().equals(other.getSparkSql().trim())) {
             return this.getDependencyObject().equals(other.getDependencyObject());
         }
         return false;
@@ -370,8 +369,7 @@ public class SparkApplication implements Serializable {
     /** Local compilation and packaging working directory */
     @JsonIgnore
     public String getDistHome() {
-        String path =
-                String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
+        String path = String.format("%s/%s/%s", Workspace.APP_LOCAL_DIST(), projectId.toString(), getModule());
         log.info("local distHome:{}", path);
         return path;
     }
@@ -402,7 +400,7 @@ public class SparkApplication implements Serializable {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                        "unsupported executionMode ".concat(getSparkExecutionMode().getName()));
+                    "unsupported executionMode ".concat(getSparkExecutionMode().getName()));
         }
     }
 
@@ -441,19 +439,19 @@ public class SparkApplication implements Serializable {
     @JsonIgnore
     public boolean isCustomCodeOrPySparkJob() {
         return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
-                || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isUploadJob() {
         return isCustomCodeOrPySparkJob()
-                && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore
     public boolean isCICDJob() {
         return isCustomCodeOrPySparkJob()
-                && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
+            && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
     }
 
     public boolean isStreamParkJob() {
@@ -573,27 +571,18 @@ public class SparkApplication implements Serializable {
 
         public static final SFunction<SparkApplication, Long> ID = SparkApplication::getId;
         public static final SFunction<SparkApplication, String> JOB_ID = SparkApplication::getJobId;
-        public static final SFunction<SparkApplication, Date> START_TIME =
-                SparkApplication::getStartTime;
+        public static final SFunction<SparkApplication, Date> START_TIME = SparkApplication::getStartTime;
         public static final SFunction<SparkApplication, Date> END_TIME = SparkApplication::getEndTime;
         public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;
-        public static final SFunction<SparkApplication, Integer> TOTAL_TASK =
-                SparkApplication::getTotalTask;
-        public static final SFunction<SparkApplication, Integer> TOTAL_TM =
-                SparkApplication::getTotalTM;
-        public static final SFunction<SparkApplication, Integer> TOTAL_SLOT =
-                SparkApplication::getTotalSlot;
-        public static final SFunction<SparkApplication, Integer> JM_MEMORY =
-                SparkApplication::getJmMemory;
-        public static final SFunction<SparkApplication, Integer> TM_MEMORY =
-                SparkApplication::getTmMemory;
+        public static final SFunction<SparkApplication, Integer> TOTAL_TASK = SparkApplication::getTotalTask;
+        public static final SFunction<SparkApplication, Integer> TOTAL_TM = SparkApplication::getTotalTM;
+        public static final SFunction<SparkApplication, Integer> TOTAL_SLOT = SparkApplication::getTotalSlot;
+        public static final SFunction<SparkApplication, Integer> JM_MEMORY = SparkApplication::getJmMemory;
+        public static final SFunction<SparkApplication, Integer> TM_MEMORY = SparkApplication::getTmMemory;
         public static final SFunction<SparkApplication, Integer> STATE = SparkApplication::getState;
         public static final SFunction<SparkApplication, String> OPTIONS = SparkApplication::getOptions;
-        public static final SFunction<SparkApplication, Integer> AVAILABLE_SLOT =
-                SparkApplication::getAvailableSlot;
-        public static final SFunction<SparkApplication, Integer> EXECUTION_MODE =
-                SparkApplication::getExecutionMode;
-        public static final SFunction<SparkApplication, String> JOB_MANAGER_URL =
-                SparkApplication::getJobManagerUrl;
+        public static final SFunction<SparkApplication, Integer> AVAILABLE_SLOT = SparkApplication::getAvailableSlot;
+        public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getExecutionMode;
+        public static final SFunction<SparkApplication, String> JOB_MANAGER_URL = SparkApplication::getJobManagerUrl;
     }
 }

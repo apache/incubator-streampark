@@ -38,10 +38,9 @@ public class FlinkSqlGateway {
 
     public static void main(String[] args) throws ApiException {
         DefaultApi api = new DefaultApi(new ApiClient());
-        OpenSessionResponseBody openSessionResponseBody =
-                api.openSession(
-                        new OpenSessionRequestBody()
-                                .sessionName("example")
-                                .properties(Collections.singletonMap("foo", "bar")));
+        OpenSessionResponseBody openSessionResponseBody = api.openSession(
+            new OpenSessionRequestBody()
+                .sessionName("example")
+                .properties(Collections.singletonMap("foo", "bar")));
     }
 }

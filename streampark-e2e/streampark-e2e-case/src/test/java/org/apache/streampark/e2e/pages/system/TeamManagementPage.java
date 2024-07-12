@@ -1,22 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.apache.streampark.e2e.pages.system;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
@@ -62,7 +60,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
         buttonCreateTeam.click();
         createTeamForm.inputTeamName().sendKeys(teamName);
         createTeamForm.inputDescription().sendKeys(description);
@@ -75,16 +73,17 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         teamList().stream()
-                .filter(it -> it.getText().contains(teamName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No edit button in team list"))
-                .click();
+            .filter(it -> it.getText().contains(teamName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No edit button in team list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
+            .until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
         createTeamForm.inputDescription().sendKeys(Keys.CONTROL + "a");
         createTeamForm.inputDescription().sendKeys(Keys.BACK_SPACE);
         createTeamForm.inputDescription().sendKeys(description);
@@ -98,16 +97,17 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         teamList().stream()
-                .filter(it -> it.getText().contains(teamName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in team list"))
-                .click();
+            .filter(it -> it.getText().contains(teamName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]"))
+                    .stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in team list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
 
@@ -116,7 +116,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/system/team"));
+            .until(ExpectedConditions.urlContains("/system/team"));
     }
 
     @Getter

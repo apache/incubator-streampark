@@ -47,8 +47,8 @@ public enum GatewayTypeEnum {
 
     public static GatewayTypeEnum of(int value) {
         return Arrays.stream(values())
-                .filter(x -> x.value == value)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown GatewayTypeEnum value: " + value));
+            .filter(x -> x.value == value)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown GatewayTypeEnum value: " + value));
     }
 }

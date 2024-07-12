@@ -87,15 +87,14 @@ import static org.apache.streampark.common.enums.StorageType.LFS;
 @Slf4j
 @Service
 public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, Application>
-        implements
-            ApplicationInfoService {
+    implements
+        ApplicationInfoService {
 
     private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
     private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
-    private static final Pattern JOB_NAME_PATTERN =
-            Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
     private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
@@ -173,7 +172,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
         // result json
         return constructDashboardMap(
-                overview, totalJmMemory, totalTmMemory, totalTm, availableSlot, totalSlot, runningJob);
+            overview, totalJmMemory, totalTmMemory, totalTm, availableSlot, totalSlot, runningJob);
     }
 
     private void renderJobsOverviewTaskByTask(JobsOverview.Task overview, JobsOverview.Task task) {
@@ -236,7 +235,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             envInitializer.storageInitialize(application.getStorageType());
 
             if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()
-                    || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
+                || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
                 if (!conned) {
@@ -254,7 +253,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public boolean checkAlter(Application appParam) {
         Long appId = appParam.getId();
         if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()
-                && FlinkAppStateEnum.FINISHED != appParam.getStateEnum()) {
+            && FlinkAppStateEnum.FINISHED != appParam.getStateEnum()) {
             return false;
         }
         long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
@@ -265,36 +264,38 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     @Override
     public boolean existsByTeamId(Long teamId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
+            new LambdaQueryWrapper<Application>().eq(Application::getTeamId, teamId));
     }
 
     @Override
     public boolean existsByUserId(Long userId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<Application>().eq(Application::getUserId, userId));
+            new LambdaQueryWrapper<Application>().eq(Application::getUserId, userId));
     }
 
     @Override
     public boolean existsRunningByClusterId(Long clusterId) {
         return baseMapper.existsRunningJobByClusterId(clusterId)
-                || FlinkAppHttpWatcher.getWatchingApps().stream()
-                        .anyMatch(
-                                application -> clusterId.equals(application.getFlinkClusterId())
-                                        && FlinkAppStateEnum.RUNNING == application.getStateEnum());
+            || FlinkAppHttpWatcher.getWatchingApps().stream()
+                .anyMatch(
+                    application -> clusterId.equals(application.getFlinkClusterId())
+                        && FlinkAppStateEnum.RUNNING == application
+                            .getStateEnum());
     }
 
     @Override
     public boolean existsByClusterId(Long clusterId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId));
+            new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId));
     }
 
     @Override
     public Integer countByClusterId(Long clusterId) {
         return baseMapper
-                .selectCount(
-                        new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId, clusterId))
-                .intValue();
+            .selectCount(
+                new LambdaQueryWrapper<Application>().eq(Application::getFlinkClusterId,
+                    clusterId))
+            .intValue();
     }
 
     @Override
@@ -305,7 +306,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     @Override
     public boolean existsByFlinkEnvId(Long flinkEnvId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId));
+            new LambdaQueryWrapper<Application>().eq(Application::getVersionId, flinkEnvId));
     }
 
     @Override
@@ -341,12 +342,12 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     @Override
     public List<String> listHistoryUploadJars() {
         return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
-                .filter(File::isFile)
-                .sorted(Comparator.comparingLong(File::lastModified).reversed())
-                .map(File::getName)
-                .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
-                .limit(DEFAULT_HISTORY_RECORD_LIMIT)
-                .collect(Collectors.toList());
+            .filter(File::isFile)
+            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+            .map(File::getName)
+            .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
+            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -367,24 +368,22 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public List<ApplicationReport> getYarnAppReport(String appName) {
         try {
             YarnClient yarnClient = HadoopUtils.yarnClient();
-            Set<String> types =
-                    Sets.newHashSet(
-                            ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
-            EnumSet<YarnApplicationState> states =
-                    EnumSet.of(
-                            YarnApplicationState.NEW,
-                            YarnApplicationState.NEW_SAVING,
-                            YarnApplicationState.SUBMITTED,
-                            YarnApplicationState.ACCEPTED,
-                            YarnApplicationState.RUNNING);
+            Set<String> types = Sets.newHashSet(
+                ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+            EnumSet<YarnApplicationState> states = EnumSet.of(
+                YarnApplicationState.NEW,
+                YarnApplicationState.NEW_SAVING,
+                YarnApplicationState.SUBMITTED,
+                YarnApplicationState.ACCEPTED,
+                YarnApplicationState.RUNNING);
             Set<String> yarnTag = Sets.newHashSet("streampark");
             List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
             return applications.stream()
-                    .filter(report -> report.getName().equals(appName))
-                    .collect(Collectors.toList());
+                .filter(report -> report.getName().equals(appName))
+                .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(
-                    "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
+                "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
         }
     }
 
@@ -392,43 +391,43 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
         Application application = getById(id);
         ApiAlertException.throwIfNull(
-                application, String.format("The application id=%s can't be found.", id));
+            application, String.format("The application id=%s can't be found.", id));
         ApiAlertException.throwIfFalse(
-                FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
-                "Job executionMode must be kubernetes-session|kubernetes-application.");
+            FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
+            "Job executionMode must be kubernetes-session|kubernetes-application.");
 
-        CompletableFuture<String> future =
-                CompletableFuture.supplyAsync(
-                        () -> KubernetesDeploymentHelper.watchDeploymentLog(
-                                application.getK8sNamespace(),
-                                application.getJobName(),
-                                application.getJobId()));
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(
+            () -> KubernetesDeploymentHelper.watchDeploymentLog(
+                application.getK8sNamespace(),
+                application.getJobName(),
+                application.getJobId()));
 
         return future
-                .exceptionally(
-                        e -> {
-                            String errorLog =
-                                    String.format(
-                                            "%s/%s_err.log",
-                                            WebUtils.getAppTempDir().getAbsolutePath(), application.getJobId());
-                            File file = new File(errorLog);
-                            if (file.exists() && file.isFile()) {
-                                return file.getAbsolutePath();
-                            }
-                            return null;
-                        })
-                .thenApply(
-                        path -> {
-                            if (!future.isDone()) {
-                                future.cancel(true);
-                            }
-                            if (org.apache.streampark.common.util.FileUtils.exists(path)) {
-                                return org.apache.streampark.common.util.FileUtils.tailOf(path, offset, limit);
-                            }
-                            return null;
-                        })
-                .toCompletableFuture()
-                .get(5, TimeUnit.SECONDS);
+            .exceptionally(
+                e -> {
+                    String errorLog = String.format(
+                        "%s/%s_err.log",
+                        WebUtils.getAppTempDir().getAbsolutePath(),
+                        application.getJobId());
+                    File file = new File(errorLog);
+                    if (file.exists() && file.isFile()) {
+                        return file.getAbsolutePath();
+                    }
+                    return null;
+                })
+            .thenApply(
+                path -> {
+                    if (!future.isDone()) {
+                        future.cancel(true);
+                    }
+                    if (org.apache.streampark.common.util.FileUtils.exists(path)) {
+                        return org.apache.streampark.common.util.FileUtils.tailOf(path, offset,
+                            limit);
+                    }
+                    return null;
+                })
+            .toCompletableFuture()
+            .get(5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -453,26 +452,25 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         Long appParamId = appParam.getId();
 
         if (StringUtils.isBlank(jobName)
-                || !JOB_NAME_PATTERN.matcher(jobName.trim()).matches()
-                || !SINGLE_SPACE_PATTERN.matcher(jobName.trim()).matches()) {
+            || !JOB_NAME_PATTERN.matcher(jobName.trim()).matches()
+            || !SINGLE_SPACE_PATTERN.matcher(jobName.trim()).matches()) {
             return AppExistsStateEnum.INVALID;
         }
 
-        Application application =
-                baseMapper.selectOne(
-                        new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+        Application application = baseMapper.selectOne(
+            new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
         if (application != null && !application.getId().equals(appParamId)) {
             return AppExistsStateEnum.IN_DB;
         }
 
         if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                && YarnUtils.isContains(jobName)) {
+            && YarnUtils.isContains(jobName)) {
             return AppExistsStateEnum.IN_YARN;
         }
 
         if (appParam.isKubernetesModeJob()
-                && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
-                        flinkK8sWatcherWrapper.toTrackId(appParam))) {
+            && k8SFlinkTrackMonitor.checkIsInRemoteCluster(
+                flinkK8sWatcherWrapper.toTrackId(appParam))) {
             return AppExistsStateEnum.IN_KUBERNETES;
         }
 
@@ -494,8 +492,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
         } else {
             Project project = new Project();
             project.setId(appParam.getProjectId());
-            String modulePath =
-                    project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
+            String modulePath = project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
             jarFile = new File(modulePath, appParam.getJar());
         }
         return Utils.getJarManClass(jarFile);
@@ -514,20 +511,17 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             final String pathPart = uri.getPath();
             String error = null;
             if (scheme == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " Cannot use the root directory for checkpoints.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " Cannot use the root directory for checkpoints.";
             }
             return error;
         } else {

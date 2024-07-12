@@ -77,6 +77,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: 8
+          distribution: 'adopt'
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
@@ -105,22 +110,26 @@ jobs:
     strategy:
       matrix:
         case:
-          - name: MemberManagementTest
-            class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: UploadManagementTest
+            class: org.apache.streampark.e2e.cases.UploadManagementTest
+          - name: ProjectsManagementTest
+            class: org.apache.streampark.e2e.cases.ProjectsManagementTest
           - name: VariableManagementTest
-            class: org.apache.streampark.e2e.pages.resource.VariableManagementTest
-          - name: RoleManagementTest
-            class: org.apache.streampark.e2e.cases.RoleManagementTest
+            class: org.apache.streampark.e2e.cases.VariableManagementTest
           - name: UserManagementTest
             class: org.apache.streampark.e2e.cases.UserManagementTest
+          - name: RoleManagementTest
+            class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: TeamManagementTest
             class: org.apache.streampark.e2e.cases.TeamManagementTest
-          - name: ApplicationsFlink116OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink116OnYarnTest
-          - name: ApplicationsFlink117OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink117OnYarnTest
-          - name: ApplicationsFlink118OnYarnTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink118OnYarnTest
+          - name: MemberManagementTest
+            class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: ApplicationsFlink116OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink116OnYarnWithFlinkSQLTest
+          - name: ApplicationsFlink117OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink117OnYarnWithFlinkSQLTest
+          - name: ApplicationsFlink118OnYarnWithFlinkSQLTest
+            class: org.apache.streampark.e2e.cases.ApplicationsFlink118OnYarnWithFlinkSQLTest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
@@ -142,6 +151,10 @@ jobs:
         with:
           java-version: 11
           distribution: 'adopt'
+      - name: Collect Workflow Telemetry
+        uses: ./.github/actions/workflow-telemetry-action
+        with:
+          comment_on_pr: false
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
@@ -168,6 +181,13 @@ jobs:
         with:
           name: recording-${{ matrix.case.name }}
           path: ${{ env.RECORDING_PATH }}
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        name: Upload Projects Build Logs
+        with:
+          name: ${{ matrix.case.name }}-projects-build-logs
+          path: ~/streampark_build_logs
           retention-days: 1
   result:
     name: E2E - Result

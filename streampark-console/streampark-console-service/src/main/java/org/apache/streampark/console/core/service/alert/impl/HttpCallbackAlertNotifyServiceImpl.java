@@ -67,9 +67,8 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
         try {
             Template template = FreemarkerUtils.loadTemplateString(requestTemplate);
             String format = FreemarkerUtils.format(template, alertTemplate);
-            Map<String, Object> body =
-                    mapper.readValue(format, new TypeReference<Map<String, Object>>() {
-                    });
+            Map<String, Object> body = mapper.readValue(format, new TypeReference<Map<String, Object>>() {
+            });
             sendMessage(alertHttpCallbackParams, body);
             return true;
         } catch (AlertException alertException) {
@@ -93,13 +92,13 @@ public class HttpCallbackAlertNotifyServiceImpl implements AlertNotifyService {
             }
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
             RequestCallback requestCallback = alertRestTemplate.httpEntityCallback(entity, Object.class);
-            ResponseExtractor<ResponseEntity<Object>> responseExtractor =
-                    alertRestTemplate.responseEntityExtractor(Object.class);
+            ResponseExtractor<ResponseEntity<Object>> responseExtractor = alertRestTemplate
+                .responseEntityExtractor(Object.class);
             response = alertRestTemplate.execute(url, httpMethod, requestCallback, responseExtractor);
         } catch (Exception e) {
             log.error("Failed to request httpCallback alert,\nurl:{}", url, e);
             throw new AlertException(
-                    String.format("Failed to request httpCallback alert,%nurl:%s", url), e);
+                String.format("Failed to request httpCallback alert,%nurl:%s", url), e);
         }
 
         if (response == null) {

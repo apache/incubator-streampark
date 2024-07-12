@@ -51,7 +51,9 @@ object YarnApplicationClient extends SparkClientTrait {
   private def launch(submitRequest: SubmitRequest): Unit = {
     val launcher: SparkLauncher = new SparkLauncher()
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
-      .setAppResource(submitRequest.buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+      .setAppResource(submitRequest.buildResult
+        .asInstanceOf[ShadedBuildResponse]
+        .shadedJarPath)
       .setMainClass(submitRequest.appMain)
       .setMaster("yarn")
       .setDeployMode("cluster")
@@ -61,13 +63,14 @@ object YarnApplicationClient extends SparkClientTrait {
       .setConf("spark.num.executors", "1")
       .setConf(
         "spark.yarn.jars",
-        submitRequest.asInstanceOf[SubmitRequest].hdfsWorkspace.sparkLib + "/*.jar")
+        submitRequest
+          .asInstanceOf[SubmitRequest]
+          .hdfsWorkspace
+          .sparkLib + "/*.jar")
       .setVerbose(true)
 
-    if (
-      MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter.containsKey(
-        "sql")
-    ) {
+    if (MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter
+        .containsKey("sql")) {
       launcher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
     }
 

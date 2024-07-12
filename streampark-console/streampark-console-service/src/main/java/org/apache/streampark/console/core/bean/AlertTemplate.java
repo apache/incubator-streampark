@@ -66,72 +66,78 @@ public class AlertTemplate implements Serializable {
 
     public static AlertTemplate of(Application application, FlinkAppStateEnum appState) {
         return new AlertTemplateBuilder()
-                .setDuration(application.getStartTime(), application.getEndTime())
-                .setJobName(application.getJobName())
-                .setLink(application.getFlinkExecutionMode(), application.getClusterId())
-                .setStartTime(application.getStartTime())
-                .setEndTime(application.getEndTime())
-                .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
-                .setRestartIndex(application.getRestartCount())
-                .setTotalRestart(application.getRestartSize())
-                .setType(1)
-                .setTitle(
-                        String.format(
-                                "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))
-                .setSubject(
-                        String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(), appState))
-                .setStatus(appState.name())
-                .build();
+            .setDuration(application.getStartTime(), application.getEndTime())
+            .setJobName(application.getJobName())
+            .setLink(application.getFlinkExecutionMode(), application.getClusterId())
+            .setStartTime(application.getStartTime())
+            .setEndTime(application.getEndTime())
+            .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
+            .setRestartIndex(application.getRestartCount())
+            .setTotalRestart(application.getRestartSize())
+            .setType(1)
+            .setTitle(
+                String.format(
+                    "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(),
+                    appState.name()))
+            .setSubject(
+                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(),
+                    appState))
+            .setStatus(appState.name())
+            .build();
     }
 
     public static AlertTemplate of(Application application, CheckPointStatusEnum statusEnum) {
         return new AlertTemplateBuilder()
-                .setDuration(application.getStartTime(), application.getEndTime())
-                .setJobName(application.getJobName())
-                .setLink(application.getFlinkExecutionMode(), application.getClusterId())
-                .setStartTime(application.getStartTime())
-                .setType(2)
-                .setCpFailureRateInterval(
-                        DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
-                .setCpMaxFailureInterval(application.getCpMaxFailureInterval())
-                .setTitle(
-                        String.format("%s %s checkpoint FAILED", ALERT_TITLE_PREFIX, application.getJobName()))
-                .setSubject(
-                        String.format(
-                                "%s %s, checkPoint is Failed", ALERT_SUBJECT_PREFIX, application.getJobName()))
-                .build();
+            .setDuration(application.getStartTime(), application.getEndTime())
+            .setJobName(application.getJobName())
+            .setLink(application.getFlinkExecutionMode(), application.getClusterId())
+            .setStartTime(application.getStartTime())
+            .setType(2)
+            .setCpFailureRateInterval(
+                DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
+            .setCpMaxFailureInterval(application.getCpMaxFailureInterval())
+            .setTitle(
+                String.format("%s %s checkpoint FAILED", ALERT_TITLE_PREFIX,
+                    application.getJobName()))
+            .setSubject(
+                String.format(
+                    "%s %s, checkPoint is Failed", ALERT_SUBJECT_PREFIX,
+                    application.getJobName()))
+            .build();
     }
 
     public static AlertTemplate of(FlinkCluster cluster, ClusterState clusterState) {
         return new AlertTemplateBuilder()
-                .setDuration(cluster.getStartTime(), cluster.getEndTime())
-                .setJobName(cluster.getClusterName())
-                .setLink(cluster.getFlinkExecutionModeEnum(), cluster.getClusterId())
-                .setStartTime(cluster.getStartTime())
-                .setEndTime(cluster.getEndTime())
-                .setType(3)
-                .setTitle(
-                        String.format(
-                                "%s %s %s", ALERT_TITLE_PREFIX, cluster.getClusterName(), clusterState.name()))
-                .setSubject(
-                        String.format("%s %s %s", ALERT_SUBJECT_PREFIX, cluster.getClusterName(), clusterState))
-                .setStatus(clusterState.name())
-                .setAllJobs(cluster.getAllJobs())
-                .setAffectedJobs(cluster.getAffectedJobs())
-                .build();
+            .setDuration(cluster.getStartTime(), cluster.getEndTime())
+            .setJobName(cluster.getClusterName())
+            .setLink(cluster.getFlinkExecutionModeEnum(), cluster.getClusterId())
+            .setStartTime(cluster.getStartTime())
+            .setEndTime(cluster.getEndTime())
+            .setType(3)
+            .setTitle(
+                String.format(
+                    "%s %s %s", ALERT_TITLE_PREFIX, cluster.getClusterName(),
+                    clusterState.name()))
+            .setSubject(
+                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, cluster.getClusterName(),
+                    clusterState))
+            .setStatus(clusterState.name())
+            .setAllJobs(cluster.getAllJobs())
+            .setAffectedJobs(cluster.getAffectedJobs())
+            .build();
     }
 
     public static AlertTemplate of(AlertProbeMsg alertProbeMsg) {
         return new AlertTemplateBuilder()
-                .setType(4)
-                .setUser(alertProbeMsg.getUser())
-                .setProbeJobs(alertProbeMsg.getProbeJobs())
-                .setFailedJobs(alertProbeMsg.getFailedJobs())
-                .setLostJobs(alertProbeMsg.getLostJobs())
-                .setCancelledJobs(alertProbeMsg.getCancelledJobs())
-                .setSubject(String.format("%s %s", ALERT_SUBJECT_PREFIX, PROBE))
-                .setTitle(PROBE)
-                .build();
+            .setType(4)
+            .setUser(alertProbeMsg.getUser())
+            .setProbeJobs(alertProbeMsg.getProbeJobs())
+            .setFailedJobs(alertProbeMsg.getFailedJobs())
+            .setLostJobs(alertProbeMsg.getLostJobs())
+            .setCancelledJobs(alertProbeMsg.getCancelledJobs())
+            .setSubject(String.format("%s %s", ALERT_SUBJECT_PREFIX, PROBE))
+            .setTitle(PROBE)
+            .build();
     }
 
     private static class AlertTemplateBuilder {
@@ -165,16 +171,16 @@ public class AlertTemplate implements Serializable {
 
         public AlertTemplateBuilder setStartTime(Date startTime) {
             alertTemplate.setStartTime(
-                    DateUtils.format(startTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+                DateUtils.format(startTime, DateUtils.fullFormat(), TimeZone.getDefault()));
             return this;
         }
 
         public AlertTemplateBuilder setEndTime(Date endTime) {
             alertTemplate.setEndTime(
-                    DateUtils.format(
-                            endTime == null ? new Date() : endTime,
-                            DateUtils.fullFormat(),
-                            TimeZone.getDefault()));
+                DateUtils.format(
+                    endTime == null ? new Date() : endTime,
+                    DateUtils.fullFormat(),
+                    TimeZone.getDefault()));
             return this;
         }
 

@@ -37,7 +37,10 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
   private lazy val offsetManager = {
     sparkConf.get("spark.source.kafka.offset.store.class", "none").trim match {
       case "none" =>
-        sparkConf.get("spark.source.kafka.offset.store.type", "none").trim.toLowerCase match {
+        sparkConf
+          .get("spark.source.kafka.offset.store.type", "none")
+          .trim
+          .toLowerCase match {
           case "redis" => new RedisOffset(sparkConf)
           case "hbase" => new HBaseOffset(sparkConf)
           case "kafka" => new DefaultOffset(sparkConf)
@@ -54,7 +57,9 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
         val constructorTakingSparkConf = constructors.find {
           c => c.getParameterTypes.sameElements(Array(classOf[SparkConf]))
         }
-        constructorTakingSparkConf.get.newInstance(sparkConf).asInstanceOf[Offset]
+        constructorTakingSparkConf.get
+          .newInstance(sparkConf)
+          .asInstanceOf[Offset]
     }
   }
 
@@ -82,7 +87,8 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
       val stream = KafkaUtils.createDirectStream[K, V](
         ssc,
         LocationStrategies.PreferConsistent,
-        ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets))
+        ConsumerStrategies
+          .Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets))
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     } else {
@@ -109,7 +115,9 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
       case "kafka" => canCommitOffsets.commitAsync(offsetRanges)
       case _ =>
         val tps =
-          offsetRanges.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
+          offsetRanges
+            .map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset)
+            .toMap
         offsetManager.update(groupId, tps)
     }
   }

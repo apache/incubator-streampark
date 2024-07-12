@@ -22,8 +22,7 @@ import java.util.Arrays;
 /** Git connection method */
 public enum GitCredentialEnum {
 
-    HTTPS(1),
-    SSH(2);
+    HTTPS(1), SSH(2);
 
     private final int value;
 

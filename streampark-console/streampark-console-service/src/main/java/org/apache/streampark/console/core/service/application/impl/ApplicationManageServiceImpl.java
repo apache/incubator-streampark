@@ -95,11 +95,11 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper, Application>
-        implements
-            ApplicationManageService {
+    implements
+        ApplicationManageService {
 
     private static final String ERROR_APP_QUEUE_HINT =
-            "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
+        "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
     @Autowired
     private ProjectService projectService;
@@ -231,11 +231,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         removeById(appId);
         try {
             application
-                    .getFsOperator()
-                    .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .getFsOperator()
+                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path =
-                    Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -252,13 +251,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         Page<Application> page = MybatisPager.getPage(request);
 
         if (ArrayUtils.isNotEmpty(appParam.getStateArray())
-                && Arrays.stream(appParam.getStateArray())
-                        .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-            Integer[] newArray =
-                    ArrayUtils.insert(
-                            appParam.getStateArray().length,
-                            appParam.getStateArray(),
-                            FlinkAppStateEnum.POS_TERMINATED.getValue());
+            && Arrays.stream(appParam.getStateArray())
+                .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
+            Integer[] newArray = ArrayUtils.insert(
+                appParam.getStateArray().length,
+                appParam.getStateArray(),
+                FlinkAppStateEnum.POS_TERMINATED.getValue());
             appParam.setStateArray(newArray);
         }
         this.baseMapper.selectPage(page, appParam);
@@ -266,59 +264,58 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         long now = System.currentTimeMillis();
 
         List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
-        Map<Long, PipelineStatusEnum> pipeStates =
-                appBuildPipeService.listAppIdPipelineStatusMap(appIds);
+        Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
 
-        List<Application> newRecords =
-                records.stream()
-                        .peek(
-                                record -> {
-                                    // status of flink job on kubernetes mode had been automatically persisted to db
-                                    // in time.
-                                    if (record.isKubernetesModeJob()) {
-                                        // set duration
-                                        String restUrl =
-                                                k8SFlinkTrackMonitor
-                                                        .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
-                                        record.setFlinkRestUrl(restUrl);
-                                        setAppDurationIfNeeded(record, now);
-                                    }
-                                    if (pipeStates.containsKey(record.getId())) {
-                                        record.setBuildStatus(pipeStates.get(record.getId()).getCode());
-                                    }
-                                    AppControl appControl = getAppControl(record);
-                                    record.setAppControl(appControl);
-                                })
-                        .collect(Collectors.toList());
+        List<Application> newRecords = records.stream()
+            .peek(
+                record -> {
+                    // status of flink job on kubernetes mode had been automatically persisted
+                    // to db
+                    // in time.
+                    if (record.isKubernetesModeJob()) {
+                        // set duration
+                        String restUrl = k8SFlinkTrackMonitor
+                            .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
+                        record.setFlinkRestUrl(restUrl);
+                        setAppDurationIfNeeded(record, now);
+                    }
+                    if (pipeStates.containsKey(record.getId())) {
+                        record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                    }
+                    AppControl appControl = getAppControl(record);
+                    record.setAppControl(appControl);
+                })
+            .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
     }
 
     private void setAppDurationIfNeeded(Application record, long now) {
         if (record.getTracking() == 1
-                && record.getStartTime() != null
-                && record.getStartTime().getTime() > 0) {
+            && record.getStartTime() != null
+            && record.getStartTime().getTime() > 0) {
             record.setDuration(now - record.getStartTime().getTime());
         }
     }
 
     private AppControl getAppControl(Application record) {
         return new AppControl()
-                .setAllowBuild(
-                        record.getBuildStatus() == null
-                                || !PipelineStatusEnum.running.getCode().equals(record.getBuildStatus()))
-                .setAllowStart(
-                        !record.shouldTracking()
-                                && PipelineStatusEnum.success.getCode().equals(record.getBuildStatus()))
-                .setAllowStop(record.isRunning());
+            .setAllowBuild(
+                record.getBuildStatus() == null
+                    || !PipelineStatusEnum.running.getCode()
+                        .equals(record.getBuildStatus()))
+            .setAllowStart(
+                !record.shouldTracking()
+                    && PipelineStatusEnum.success.getCode()
+                        .equals(record.getBuildStatus()))
+            .setAllowStop(record.isRunning());
     }
 
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
-        LambdaUpdateWrapper<Application> updateWrapper =
-                new LambdaUpdateWrapper<Application>()
-                        .eq(Application::getUserId, userId)
-                        .set(Application::getUserId, targetUserId);
+        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<Application>()
+            .eq(Application::getUserId, userId)
+            .set(Application::getUserId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -326,7 +323,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public boolean create(Application appParam) {
         ApiAlertException.throwIfNull(
-                appParam.getTeamId(), "The teamId can't be null. Create application failed.");
+            appParam.getTeamId(), "The teamId can't be null. Create application failed.");
         appParam.setUserId(serviceHelper.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
@@ -338,17 +335,15 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
-                success,
-                String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            success,
+            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
-            String jarPath =
-                    String.format(
-                            "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+            String jarPath = String.format(
+                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
-                Resource resource =
-                        resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
+                Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                     jarPath = resource.getFilePath();
                 }
@@ -372,7 +367,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     private boolean existsByJobName(String jobName) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
+            new LambdaQueryWrapper<Application>().eq(Application::getJobName, jobName));
     }
 
     @SuppressWarnings("checkstyle:WhitespaceAround")
@@ -381,8 +376,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     public Long copy(Application appParam) {
         boolean existsByJobName = this.existsByJobName(appParam.getJobName());
         ApiAlertException.throwIfFalse(
-                !existsByJobName,
-                "[StreamPark] Application names can't be repeated, copy application failed.");
+            !existsByJobName,
+            "[StreamPark] Application names can't be repeated, copy application failed.");
 
         Application persist = getById(appParam.getId());
         Application newApp = new Application();
@@ -390,9 +385,9 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
         newApp.setJobName(jobName);
         newApp.setClusterId(
-                FlinkExecutionMode.isSessionMode(persist.getFlinkExecutionMode())
-                        ? persist.getClusterId()
-                        : null);
+            FlinkExecutionMode.isSessionMode(persist.getFlinkExecutionMode())
+                ? persist.getClusterId()
+                : null);
         newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : persist.getArgs());
         newApp.setVersionId(persist.getVersionId());
 
@@ -460,7 +455,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             return newApp.getId();
         } else {
             throw new ApiAlertException(
-                    "create application from copy failed, copy source app: " + persist.getJobName());
+                "create application from copy failed, copy source app: " + persist.getJobName());
         }
     }
 
@@ -476,16 +471,16 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             case KUBERNETES_NATIVE_SESSION:
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 ApiAlertException.throwIfFalse(
-                        flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
-                        "[StreamPark] update failed, because bind flink cluster not running");
+                    flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
+                    "[StreamPark] update failed, because bind flink cluster not running");
                 break;
             default:
         }
 
         boolean success = validateQueueIfNeeded(application, appParam);
         ApiAlertException.throwIfFalse(
-                success,
-                String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            success,
+            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
 
         application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
@@ -516,7 +511,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
         // 3) flink version changed
         if (!application.getBuild()
-                && !Objects.equals(application.getVersionId(), appParam.getVersionId())) {
+            && !Objects.equals(application.getVersionId(), appParam.getVersionId())) {
             application.setBuild(true);
         }
 
@@ -610,7 +605,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             // get previous flink sql and decode
             FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
             ApiAlertException.throwIfNull(
-                    copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
+                copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
             copySourceFlinkSql.decode();
 
             // get submit flink sql
@@ -624,8 +619,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             // if has been changed
             if (changeTypeEnum.hasChanged()) {
                 // check if there is a candidate version for the newly added record
-                FlinkSql newFlinkSql =
-                        flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
                 // If the candidate version of the new record exists, it will be deleted directly,
                 // and only one candidate version will be retained. If the new candidate version is not
                 // effective,
@@ -635,8 +629,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                     // delete all records about candidates
                     flinkSqlService.removeById(newFlinkSql.getId());
                 }
-                FlinkSql historyFlinkSql =
-                        flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
+                FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
                 // remove candidate flags that already exist but are set as candidates
                 if (historyFlinkSql != null) {
                     flinkSqlService.cleanCandidate(historyFlinkSql.getId());
@@ -689,14 +682,15 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                                                            Long teamId,
                                                            @Nonnull Collection<FlinkExecutionMode> executionModeEnums) {
         return getBaseMapper()
-                .selectList(
-                        new LambdaQueryWrapper<Application>()
-                                .eq((SFunction<Application, Long>) Application::getTeamId, teamId)
-                                .in(
-                                        Application::getExecutionMode,
-                                        executionModeEnums.stream()
-                                                .map(FlinkExecutionMode::getMode)
-                                                .collect(Collectors.toSet())));
+            .selectList(
+                new LambdaQueryWrapper<Application>()
+                    .eq((SFunction<Application, Long>) Application::getTeamId,
+                        teamId)
+                    .in(
+                        Application::getExecutionMode,
+                        executionModeEnums.stream()
+                            .map(FlinkExecutionMode::getMode)
+                            .collect(Collectors.toSet())));
     }
 
     @Override
@@ -715,8 +709,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
             // backup
             if (appParam.isFlinkSqlJob()) {
-                FlinkSql newFlinkSql =
-                        flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
+                FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
                 if (!appParam.isNeedRollback() && newFlinkSql != null) {
                     backUpService.backup(appParam, newFlinkSql);
                 }
@@ -755,15 +748,13 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             flinkSql.setToApplication(application);
         } else {
             if (application.isCICDJob()) {
-                String path =
-                        this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+                String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }
         }
         // add flink web url info for k8s-mode
         if (application.isKubernetesModeJob()) {
-            String restUrl =
-                    k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
+            String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
             application.setFlinkRestUrl(restUrl);
 
             // set duration
@@ -807,7 +798,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
         oldApp.setYarnQueueByHotParams();
         if (FlinkExecutionMode.isYarnPerJobOrAppMode(newApp.getFlinkExecutionMode())
-                && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
+            && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
         return yarnQueueService.existByTeamIdQueueLabel(newApp.getTeamId(), newApp.getYarnQueue());
@@ -823,27 +814,31 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
      */
     private boolean isYarnNotDefaultQueue(Application application) {
         return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
-                && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
+            && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
     private boolean isK8sPodTemplateChanged(Application application, Application appParam) {
         return FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
-                && (ObjectUtils.trimNoEquals(
-                        application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
-                        || ObjectUtils.trimNoEquals(
-                                application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
-                        || ObjectUtils.trimNoEquals(
-                                application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
-                        || ObjectUtils.trimNoEquals(
-                                application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
-                        || ObjectUtils.trimNoEquals(
-                                application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
-                        || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage()));
+            && (ObjectUtils.trimNoEquals(
+                application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
+                || ObjectUtils.trimNoEquals(
+                    application.getK8sJmPodTemplate(),
+                    appParam.getK8sJmPodTemplate())
+                || ObjectUtils.trimNoEquals(
+                    application.getK8sTmPodTemplate(),
+                    appParam.getK8sTmPodTemplate())
+                || ObjectUtils.trimNoEquals(
+                    application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
+                || ObjectUtils.trimNoEquals(
+                    application.getK8sHadoopIntegration(),
+                    appParam.getK8sHadoopIntegration())
+                || ObjectUtils.trimNoEquals(application.getFlinkImage(),
+                    appParam.getFlinkImage()));
     }
 
     private boolean isYarnApplicationModeChange(Application application, Application appParam) {
         return !application.getExecutionMode().equals(appParam.getExecutionMode())
-                && (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
-                        || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode());
+            && (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
+                || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode());
     }
 }

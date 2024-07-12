@@ -76,31 +76,31 @@ public class AlertServiceImpl implements AlertService {
                                                          AlertTemplate alertTemplate,
                                                          List<AlertTypeEnum> alertTypeEnums, AlertConfigParams params) {
         return alertTypeEnums.stream()
-                .map(
-                        alertTypeEnum -> {
-                            try {
-                                boolean alertRes =
-                                        SpringContextUtils.getBean(alertTypeEnum.getClazz())
-                                                .doAlert(params, alertTemplate);
-                                return new Tuple2<Boolean, AlertException>(alertRes, null);
-                            } catch (AlertException e) {
-                                return new Tuple2<>(false, e);
-                            }
-                        })
-                .reduce(
-                        new Tuple2<>(true, null),
-                        (tp1, tp2) -> {
-                            boolean alertResult = tp1.f0 & tp2.f0;
-                            if (tp1.f1 == null && tp2.f1 == null) {
-                                return new Tuple2<>(tp1.f0 & tp2.f0, null);
-                            }
-                            if (tp1.f1 != null && tp2.f1 != null) {
-                                // merge multiple exception, and keep the details of the first exception
-                                AlertException alertException =
-                                        new AlertException(tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(), tp1.f1);
-                                return new Tuple2<>(alertResult, alertException);
-                            }
-                            return new Tuple2<>(alertResult, tp1.f1 == null ? tp2.f1 : tp1.f1);
-                        });
+            .map(
+                alertTypeEnum -> {
+                    try {
+                        boolean alertRes = SpringContextUtils.getBean(alertTypeEnum.getClazz())
+                            .doAlert(params, alertTemplate);
+                        return new Tuple2<Boolean, AlertException>(alertRes, null);
+                    } catch (AlertException e) {
+                        return new Tuple2<>(false, e);
+                    }
+                })
+            .reduce(
+                new Tuple2<>(true, null),
+                (tp1, tp2) -> {
+                    boolean alertResult = tp1.f0 & tp2.f0;
+                    if (tp1.f1 == null && tp2.f1 == null) {
+                        return new Tuple2<>(tp1.f0 & tp2.f0, null);
+                    }
+                    if (tp1.f1 != null && tp2.f1 != null) {
+                        // merge multiple exception, and keep the details of the first exception
+                        AlertException alertException = new AlertException(
+                            tp1.f1.getMessage() + "\n" + tp2.f1.getMessage(),
+                            tp1.f1);
+                        return new Tuple2<>(alertResult, alertException);
+                    }
+                    return new Tuple2<>(alertResult, tp1.f1 == null ? tp2.f1 : tp1.f1);
+                });
     }
 }

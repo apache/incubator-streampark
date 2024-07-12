@@ -40,8 +40,8 @@ import java.util.Date;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
-        implements
-            FlinkEnvService {
+    implements
+        FlinkEnvService {
 
     @Autowired
     private FlinkClusterService flinkClusterService;
@@ -56,8 +56,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     @Override
     public FlinkEnvCheckEnum check(FlinkEnv version) {
         // 1) check name
-        LambdaQueryWrapper<FlinkEnv> queryWrapper =
-                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName, version.getFlinkName());
+        LambdaQueryWrapper<FlinkEnv> queryWrapper = new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getFlinkName,
+            version.getFlinkName());
         if (version.getId() != null) {
             queryWrapper.ne(FlinkEnv::getId, version.getId());
         }
@@ -101,8 +101,8 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         checkOrElseAlert(flinkEnv);
         Long count = this.baseMapper.selectCount(null);
         ApiAlertException.throwIfFalse(
-                !(count > 1 && flinkEnv.getIsDefault()),
-                "The flink home is set as default, please change it first.");
+            !(count > 1 && flinkEnv.getIsDefault()),
+            "The flink home is set as default, please change it first.");
 
         this.baseMapper.deleteById(id);
     }
@@ -134,7 +134,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     @Override
     public FlinkEnv getDefault() {
         return this.baseMapper.selectOne(
-                new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true));
+            new LambdaQueryWrapper<FlinkEnv>().eq(FlinkEnv::getIsDefault, true));
     }
 
     @Override
@@ -163,12 +163,12 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
         // 2.check if it is being used by any flink cluster
         ApiAlertException.throwIfTrue(
-                flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
-                "The flink home is still in use by some flink cluster, please check.");
+            flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
+            "The flink home is still in use by some flink cluster, please check.");
 
         // 3.check if it is being used by any application
         ApiAlertException.throwIfTrue(
-                applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
-                "The flink home is still in use by some application, please check.");
+            applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
+            "The flink home is still in use by some application, please check.");
     }
 }

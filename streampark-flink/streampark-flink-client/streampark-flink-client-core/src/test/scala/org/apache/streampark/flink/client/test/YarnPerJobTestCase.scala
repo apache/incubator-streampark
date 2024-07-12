@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.client.test
 
 import org.apache.streampark.common.util.Logger
@@ -131,7 +132,8 @@ object YarnPerJobTestCase extends Logger {
       customCommandLines.filter(_.isActive(line)).get(0)
     }
 
-    val executorConfig = checkNotNull(activeCommandLine).toConfiguration(commandLine)
+    val executorConfig =
+      checkNotNull(activeCommandLine).toConfiguration(commandLine)
     val flinkConfig = new Configuration(executorConfig)
     flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     flinkConfig.set(
@@ -150,16 +152,21 @@ object YarnPerJobTestCase extends Logger {
 
     val clusterDescriptor = {
       val clusterDescriptor =
-        clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
+        clientFactory
+          .createClusterDescriptor(flinkConfig)
+          .asInstanceOf[YarnClusterDescriptor]
       val flinkDistJar =
-        new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist.*\\.jar")) match {
+        new File(s"$FLINK_HOME/lib")
+          .list()
+          .filter(_.matches("flink-dist.*\\.jar")) match {
           case Array() =>
             throw new IllegalArgumentException(
               s"[StreamPark] can no found flink-dist jar in $FLINK_HOME/lib")
           case array if array.length == 1 => s"$FLINK_HOME/lib/${array.head}"
           case more =>
             throw new IllegalArgumentException(
-              s"[StreamPark] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
+              s"[StreamPark] found multiple flink-dist jar in $FLINK_HOME/lib,[${more
+                  .mkString(",")}]")
         }
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
       clusterDescriptor
@@ -167,7 +174,8 @@ object YarnPerJobTestCase extends Logger {
 
     try {
       val clusterClient = {
-        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+        val clusterSpecification =
+          clientFactory.getClusterSpecification(flinkConfig)
         logInfo("------------------<<specification>>------------------")
         logInfo(s"$clusterSpecification")
         logInfo("------------------------------------")

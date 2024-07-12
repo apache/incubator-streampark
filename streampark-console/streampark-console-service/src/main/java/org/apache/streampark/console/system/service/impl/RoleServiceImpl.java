@@ -86,17 +86,17 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void removeById(Long roleId) {
-        Role role =
-                Optional.ofNullable(this.getById(roleId))
-                        .orElseThrow(
-                                () -> new ApiAlertException(
-                                        String.format("Role id [%s] not found. Delete role failed.", roleId)));
+        Role role = Optional.ofNullable(this.getById(roleId))
+            .orElseThrow(
+                () -> new ApiAlertException(
+                    String.format("Role id [%s] not found. Delete role failed.",
+                        roleId)));
         List<Long> userIdsByRoleId = memberService.listUserIdsByRoleId(roleId);
         ApiAlertException.throwIfFalse(
-                CollectionUtils.isEmpty(userIdsByRoleId),
-                String.format(
-                        "There are some users of role %s, delete role failed, please unbind it first.",
-                        role.getRoleName()));
+            CollectionUtils.isEmpty(userIdsByRoleId),
+            String.format(
+                "There are some users of role %s, delete role failed, please unbind it first.",
+                role.getRoleName()));
         super.removeById(roleId);
         this.roleMenuService.removeByRoleId(roleId);
     }
@@ -105,13 +105,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public void updateRole(Role role) {
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
-        LambdaQueryWrapper<RoleMenu> queryWrapper =
-                new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId());
+        LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId,
+            role.getRoleId());
         roleMenuMapper.delete(queryWrapper);
 
         String menuId = role.getMenuId();
         if (StringUtils.contains(menuId, Constant.APP_DETAIL_MENU_ID)
-                && !StringUtils.contains(menuId, Constant.APP_MENU_ID)) {
+            && !StringUtils.contains(menuId, Constant.APP_MENU_ID)) {
             menuId = menuId + StringPool.COMMA + Constant.APP_MENU_ID;
         }
         String[] menuIds = menuId.split(StringPool.COMMA);

@@ -40,7 +40,10 @@ object ReflectUtils extends Logger {
    */
   @throws[SecurityException]
   def getField(beanClass: Class[_], name: String): Field = {
-    Try(beanClass.getDeclaredFields.filter(f => Objects.equals(name, f.getName)).head)
+    Try(
+      beanClass.getDeclaredFields
+        .filter(f => Objects.equals(name, f.getName))
+        .head)
       .getOrElse(null)
   }
 
@@ -62,9 +65,10 @@ object ReflectUtils extends Logger {
 
   def setFieldValue(obj: Any, fieldName: String, value: Any): Unit = {
     val field = getAccessibleField(obj, fieldName)
-    if (Objects.isNull(field))
+    if (field == null) {
       throw new IllegalArgumentException(
         "Could not find field [" + fieldName + "] on target [" + obj + "]")
+    }
     try
       field.set(obj, value)
     catch {
@@ -92,11 +96,9 @@ object ReflectUtils extends Logger {
   }
 
   private def makeAccessible(field: Field): Unit = {
-    if (
-      (!Modifier.isPublic(field.getModifiers)
+    if ((!Modifier.isPublic(field.getModifiers)
         || !Modifier.isPublic(field.getDeclaringClass.getModifiers)
-        || Modifier.isFinal(field.getModifiers)) && !field.isAccessible
-    ) {
+        || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
       field.setAccessible(true)
     }
   }

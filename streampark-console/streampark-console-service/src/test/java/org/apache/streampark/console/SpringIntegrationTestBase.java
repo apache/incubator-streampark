@@ -85,14 +85,13 @@ public abstract class SpringIntegrationTestBase {
 
     protected static final Logger LOG = LoggerFactory.getLogger(SpringIntegrationTestBase.class);
 
-    protected static final String RUN_PKG_SCRIPT_HINT =
-            "Please run package script before running the test case.";
+    protected static final String RUN_PKG_SCRIPT_HINT = "Please run package script before running the test case.";
 
     protected static final String DEFAULT_APP_HOME_DIR_NAME = "apache-streampark";
     protected static final String DEFAULT_LOCAL_WORKSPACE_DIR_NAME = "localWorkspace";
     protected static final String DEFAULT_FLINK_VERSION = "1.17.1";
-    protected static final FileFilter PKG_NAME_FILTER =
-            file -> file.getName().startsWith(DEFAULT_APP_HOME_DIR_NAME) && file.isDirectory();
+    protected static final FileFilter PKG_NAME_FILTER = file -> file.getName().startsWith(DEFAULT_APP_HOME_DIR_NAME)
+        && file.isDirectory();
     protected static String defaultFlinkHome = "/tmp/flink-1.17.1";
     protected static String appHome;
 
@@ -104,38 +103,36 @@ public abstract class SpringIntegrationTestBase {
         LOG.info("Integration test base tmp dir: {}", tempAbsPath);
 
         FileUtils.copyDirectory(
-                tryFindStreamParkPackagedDirFile(), new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME));
+            tryFindStreamParkPackagedDirFile(), new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME));
 
-        Path localWorkspace =
-                Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
+        Path localWorkspace = Files.createDirectories(new File(tempAbsPath, DEFAULT_LOCAL_WORKSPACE_DIR_NAME).toPath());
 
         appHome = new File(tempAbsPath, DEFAULT_APP_HOME_DIR_NAME).getAbsolutePath();
         System.setProperty(ConfigKeys.KEY_APP_HOME(), appHome);
         System.setProperty(
-                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-                localWorkspace.toAbsolutePath().toString());
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            localWorkspace.toAbsolutePath().toString());
 
         LOG.info(
-                "Complete mock EnvInitializer init, app home: {}, {}: {}",
-                appHome,
-                CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
-                localWorkspace.toAbsolutePath());
+            "Complete mock EnvInitializer init, app home: {}, {}: {}",
+            appHome,
+            CommonConfig.STREAMPARK_WORKSPACE_LOCAL().key(),
+            localWorkspace.toAbsolutePath());
     }
 
     private static File tryFindStreamParkPackagedDirFile() {
         String userDir = AssertUtils.notNull(SystemPropertyUtils.get("user.dir"));
         File pkgTargetDirFile = new File(userDir, "target");
         AssertUtils.state(
-                pkgTargetDirFile.exists(),
-                String.format(
-                        "The target directory of %s doesn't exist. %s", userDir, RUN_PKG_SCRIPT_HINT));
-        Optional<File> availablePkgParentFileOpt =
-                Arrays.stream(requireNonNull(pkgTargetDirFile.listFiles(PKG_NAME_FILTER))).findFirst();
-        final File availablePkgParentFile =
-                availablePkgParentFileOpt.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
-        Optional<File> targetDirFile =
-                Arrays.stream(requireNonNull(availablePkgParentFile.listFiles(PKG_NAME_FILTER)))
-                        .findFirst();
+            pkgTargetDirFile.exists(),
+            String.format(
+                "The target directory of %s doesn't exist. %s", userDir, RUN_PKG_SCRIPT_HINT));
+        Optional<File> availablePkgParentFileOpt = Arrays
+            .stream(requireNonNull(pkgTargetDirFile.listFiles(PKG_NAME_FILTER))).findFirst();
+        final File availablePkgParentFile = availablePkgParentFileOpt
+            .orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
+        Optional<File> targetDirFile = Arrays.stream(requireNonNull(availablePkgParentFile.listFiles(PKG_NAME_FILTER)))
+            .findFirst();
         return targetDirFile.orElseThrow(() -> new RuntimeException(RUN_PKG_SCRIPT_HINT));
     }
 }

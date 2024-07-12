@@ -63,8 +63,8 @@ public class StreamParkAspect {
     private ApplicationManageService applicationManageService;
 
     @Pointcut("execution(public"
-            + " org.apache.streampark.console.base.domain.RestResponse"
-            + " org.apache.streampark.console.*.controller.*.*(..))")
+        + " org.apache.streampark.console.base.domain.RestResponse"
+        + " org.apache.streampark.console.*.controller.*.*(..))")
     public void openAPI() {
     }
 
@@ -73,8 +73,7 @@ public class StreamParkAspect {
     public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("restResponse aspect, method:{}", methodSignature.getName());
-        Boolean isApi =
-                (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
+        Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
         if (isApi != null && isApi) {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
@@ -104,8 +103,7 @@ public class StreamParkAspect {
     @Around("permissionAction()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        PermissionScope permissionScope =
-                methodSignature.getMethod().getAnnotation(PermissionScope.class);
+        PermissionScope permissionScope = methodSignature.getMethod().getAnnotation(PermissionScope.class);
 
         User currentUser = serviceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
@@ -116,16 +114,16 @@ public class StreamParkAspect {
             // 1) check userId
             Long userId = getId(joinPoint, methodSignature, permissionScope.user());
             ApiAlertException.throwIfTrue(
-                    userId != null && !currentUser.getUserId().equals(userId),
-                    "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
+                userId != null && !currentUser.getUserId().equals(userId),
+                "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
             // 2) check team
             Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(
-                        member == null,
-                        "Permission denied, only members of this team can access this permission");
+                    member == null,
+                    "Permission denied, only members of this team can access this permission");
             }
 
             // 3) check app
@@ -134,11 +132,10 @@ public class StreamParkAspect {
                 Application app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
                 if (!currentUser.getUserId().equals(app.getUserId())) {
-                    Member member =
-                            memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
+                    Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
                     ApiAlertException.throwIfTrue(
-                            member == null,
-                            "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+                        member == null,
+                        "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
                 }
             }
         }
@@ -168,7 +165,7 @@ public class StreamParkAspect {
             return Long.parseLong(value.toString());
         } catch (NumberFormatException e) {
             throw new ApiAlertException(
-                    "Wrong use of annotation on method " + methodSignature.getName(), e);
+                "Wrong use of annotation on method " + methodSignature.getName(), e);
         }
     }
 }

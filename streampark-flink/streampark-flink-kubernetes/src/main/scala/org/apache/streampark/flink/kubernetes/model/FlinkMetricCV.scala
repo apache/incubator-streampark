@@ -46,8 +46,7 @@ case class FlinkMetricCV(
           finishedJob + another.finishedJob,
           cancelledJob + another.cancelledJob,
           failedJob + another.failedJob,
-          pollAckTime = math.max(pollAckTime, another.pollAckTime)
-        )
+          pollAckTime = math.max(pollAckTime, another.pollAckTime))
       } else this
     }
   }

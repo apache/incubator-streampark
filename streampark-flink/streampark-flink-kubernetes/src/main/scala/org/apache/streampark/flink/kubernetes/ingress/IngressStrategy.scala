@@ -30,7 +30,8 @@ trait IngressStrategy {
 
   val REST_SERVICE_IDENTIFICATION = "rest"
 
-  lazy val ingressClass: String = InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
+  lazy val ingressClass: String =
+    InternalConfigHolder.get[String](K8sFlinkConfig.ingressClass)
 
   def getIngressUrl(nameSpace: String, clusterId: String, clusterClient: ClusterClient[_]): String
 
@@ -50,18 +51,19 @@ trait IngressStrategy {
 
   def buildIngressAnnotations(clusterId: String, namespace: String): Map[String, String] = {
     Map(
-      "nginx.ingress.kubernetes.io/rewrite-target" -> "/$2",
-      "nginx.ingress.kubernetes.io/proxy-body-size" -> "1024m",
-      "nginx.ingress.kubernetes.io/configuration-snippet" -> s"""rewrite ^(/$clusterId)$$ $$1/ permanent; sub_filter '<base href="./">' '<base href="/$namespace/$clusterId/">'; sub_filter_once off;"""
-    )
+      "nginx.ingress.kubernetes.io/rewrite-target"
+        -> "/$2",
+      "nginx.ingress.kubernetes.io/proxy-body-size"
+        -> "1024m",
+      "nginx.ingress.kubernetes.io/configuration-snippet"
+        -> s"""rewrite ^(/$clusterId)$$ $$1/ permanent; sub_filter '<base href="./">' '<base href="/$namespace/$clusterId/">'; sub_filter_once off;""")
   }
 
   def buildIngressLabels(clusterId: String): Map[String, String] = {
     Map(
       "app" -> clusterId,
       "type" -> ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL,
-      "component" -> "ingress"
-    )
+      "component" -> "ingress")
   }
 
   def getOwnerReference(

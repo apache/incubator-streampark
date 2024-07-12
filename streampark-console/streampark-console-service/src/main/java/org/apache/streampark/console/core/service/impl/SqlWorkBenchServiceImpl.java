@@ -69,12 +69,12 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
         FlinkGateWay flinkGateWay = flinkGateWayService.getById(flinkGatewayId);
         if (flinkGateWay == null) {
             throw new IllegalArgumentException(
-                    "flinkGateWay is not exist, please check your config, id: " + flinkGatewayId);
+                "flinkGateWay is not exist, please check your config, id: " + flinkGatewayId);
         }
         Map<String, String> config = new HashMap<>(2);
         config.put(
-                FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),
-                flinkGateWay.getGatewayType().getIdentifier());
+            FactoryUtil.SQL_GATEWAY_SERVICE_TYPE.getKey(),
+            flinkGateWay.getGatewayType().getIdentifier());
         config.put(FlinkSqlGatewayServiceFactory.BASE_URI.getKey(), flinkGateWay.getAddress());
         List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
         if (actual.size() > 1) {
@@ -102,11 +102,12 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
 
         streamParkConf.put("execution.target", executionModeEnum.getName());
         renderConfByFlinkExecutionMode(
-                executionModeEnum, streamParkConf, host, port, clusterId, flinkCluster);
+            executionModeEnum, streamParkConf, host, port, clusterId, flinkCluster);
 
         return sqlGateWayService.openSession(
-                new SessionEnvironment(
-                        flinkGatewayId + flinkClusterId + UUID.randomUUID().toString(), null, streamParkConf));
+            new SessionEnvironment(
+                flinkGatewayId + flinkClusterId + UUID.randomUUID().toString(), null,
+                streamParkConf));
     }
 
     private void renderConfByFlinkExecutionMode(
@@ -124,23 +125,23 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
             case YARN_SESSION:
                 streamParkConf.put("yarn.application.id", clusterId);
                 HadoopConfigUtils.readSystemHadoopConf()
-                        .forEach((k, v) -> streamParkConf.put("flink.hadoop." + k, v));
+                    .forEach((k, v) -> streamParkConf.put("flink.hadoop." + k, v));
                 break;
             case KUBERNETES_NATIVE_SESSION:
                 String k8sNamespace = flinkCluster.getK8sNamespace();
                 String restAddress;
                 try (
-                        ClusterClient<?> clusterClient =
-                                (ClusterClient<?>) KubernetesRetriever.newFinkClusterClient(
-                                        clusterId, k8sNamespace, FlinkK8sExecuteMode.of(executionModeEnum))) {
-                    restAddress =
-                            IngressController.getIngressUrlAddress(k8sNamespace, clusterId, clusterClient);
+                    ClusterClient<?> clusterClient =
+                        (ClusterClient<?>) KubernetesRetriever.newFinkClusterClient(
+                            clusterId, k8sNamespace,
+                            FlinkK8sExecuteMode.of(executionModeEnum))) {
+                    restAddress = IngressController.getIngressUrlAddress(k8sNamespace, clusterId, clusterClient);
                 } catch (Exception e) {
                     throw new IllegalArgumentException("get k8s rest address error", e);
                 }
                 streamParkConf.put("kubernetes.cluster-id", clusterId);
                 streamParkConf.put(
-                        "kubernetes.jobmanager.service-account", flinkCluster.getServiceAccount());
+                    "kubernetes.jobmanager.service-account", flinkCluster.getServiceAccount());
                 streamParkConf.put("kubernetes.namespace", k8sNamespace);
                 streamParkConf.put("rest.address", restAddress);
                 break;
@@ -159,36 +160,36 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
     public void cancelOperation(
                                 Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
         getSqlGateWayService(flinkGatewayId)
-                .cancelOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
+            .cancelOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
     }
 
     @Override
     public void closeOperation(Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
         getSqlGateWayService(flinkGatewayId)
-                .closeOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
+            .closeOperation(new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
     }
 
     @Override
     public OperationInfo getOperationInfo(
                                           Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
         return getSqlGateWayService(flinkGatewayId)
-                .getOperationInfo(
-                        new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
+            .getOperationInfo(
+                new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
     }
 
     @Override
     public Column getOperationResultSchema(
                                            Long flinkGatewayId, String sessionHandleUUIDStr, String operationId) {
         return getSqlGateWayService(flinkGatewayId)
-                .getOperationResultSchema(
-                        new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
+            .getOperationResultSchema(
+                new SessionHandle(sessionHandleUUIDStr), new OperationHandle(operationId));
     }
 
     @Override
     public OperationHandle executeStatement(
                                             Long flinkGatewayId, String sessionHandleUUIDStr, String statement) {
         return getSqlGateWayService(flinkGatewayId)
-                .executeStatement(new SessionHandle(sessionHandleUUIDStr), statement, 10000L, null);
+            .executeStatement(new SessionHandle(sessionHandleUUIDStr), statement, 10000L, null);
     }
 
     @Override
@@ -198,10 +199,10 @@ public class SqlWorkBenchServiceImpl implements SqlWorkBenchService {
                                   String operationId,
                                   ResultQueryCondition resultQueryCondition) {
         return getSqlGateWayService(flinkGatewayId)
-                .fetchResults(
-                        new SessionHandle(sessionHandleUUIDStr),
-                        new OperationHandle(operationId),
-                        resultQueryCondition);
+            .fetchResults(
+                new SessionHandle(sessionHandleUUIDStr),
+                new OperationHandle(operationId),
+                resultQueryCondition);
     }
 
     @Override

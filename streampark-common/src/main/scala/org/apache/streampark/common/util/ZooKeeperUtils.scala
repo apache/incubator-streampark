@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util
 
 import org.apache.curator.RetryPolicy
@@ -37,16 +38,6 @@ object ZooKeeperUtils {
       case Some(x) => x
       case None =>
         try {
-          // Set the reconnection policy ExponentialBackoffRetry, baseSleepTimeMs: initial sleep time, maxRetries: maximum number of retries, maxSleepMs: maximum retry time
-          // val retryPolicy = new ExponentialBackoffRetry(10000, 5)
-          // (Recommended) Curator link zookeeper strategy: RetryNTimes n: the number of retries sleepMsBetweenRetries: the time between each retry
-          // val retryPolicy:RetryPolicy = new RetryNTimes(3, 5000)
-          // (Not recommended) Curator link zookeeper strategy: RetryOneTime sleepMsBetweenRetry: the time between each retry, this strategy will only be retried once
-          // val retryPolicy:RetryPolicy = new RetryOneTime(3000)
-          // Retry forever, not recommended
-          // val retryPolicy:RetryPolicy = new RetryForever(retryIntervalMs)
-          // Curator link zookeeper strategy: RetryUntilElapsed maxElapsedTimeMs: Maximum retry time sleepMsBetweenRetries: After each retry interval, after the retry time exceeds maxElapsedTimeMs, it will not retry
-          // val retryPolicy:RetryPolicy = new RetryUntilElapsed(2000, 3000)
           val retryPolicy: RetryPolicy = new RetryNTimes(5, 2000)
           val client = CuratorFrameworkFactory.builder
             .connectString(url)
@@ -95,7 +86,11 @@ object ZooKeeperUtils {
           }
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
           val opResult =
-            client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data)
+            client
+              .create()
+              .creatingParentsIfNeeded()
+              .withMode(mode)
+              .forPath(path, data)
           path == opResult
         case _ => false
       }
@@ -116,13 +111,16 @@ object ZooKeeperUtils {
       val stat = client.checkExists.forPath(path)
       stat match {
         case null =>
-          val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
+          val mode =
+            if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
           val opResult = client.create.creatingParentsIfNeeded
             .withMode(mode)
             .forPath(path, value.getBytes(StandardCharsets.UTF_8))
           path == opResult
         case _ =>
-          val opResult = client.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8))
+          val opResult = client
+            .setData()
+            .forPath(path, value.getBytes(StandardCharsets.UTF_8))
           opResult != null
       }
     } catch {

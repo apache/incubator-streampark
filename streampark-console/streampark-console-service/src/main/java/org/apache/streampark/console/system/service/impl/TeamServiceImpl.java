@@ -77,8 +77,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public Team getByName(String teamName) {
-        LambdaQueryWrapper<Team> queryWrapper =
-                new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName);
+        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<Team>().eq(Team::getTeamName, teamName);
         return baseMapper.selectOne(queryWrapper);
     }
 
@@ -86,10 +85,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     public void createTeam(Team team) {
         Team existedTeam = getByName(team.getTeamName());
         ApiAlertException.throwIfFalse(
-                existedTeam == null,
-                String.format(
-                        "Team name [%s] exists already. Create team failed. Please rename and try again.",
-                        team.getTeamName()));
+            existedTeam == null,
+            String.format(
+                "Team name [%s] exists already. Create team failed. Please rename and try again.",
+                team.getTeamName()));
         team.setId(null);
         Date date = new Date();
         team.setCreateTime(date);
@@ -105,19 +104,19 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);
 
         ApiAlertException.throwIfTrue(
-                applicationInfoService.existsByTeamId(teamId),
-                "Please delete the applications under the team[name=%s] first!",
-                team.getTeamName());
+            applicationInfoService.existsByTeamId(teamId),
+            "Please delete the applications under the team[name=%s] first!",
+            team.getTeamName());
 
         ApiAlertException.throwIfTrue(
-                projectService.existsByTeamId(teamId),
-                "Please delete the projects under the team[name=%s] first!",
-                team.getTeamName());
+            projectService.existsByTeamId(teamId),
+            "Please delete the projects under the team[name=%s] first!",
+            team.getTeamName());
 
         ApiAlertException.throwIfTrue(
-                variableService.existsByTeamId(teamId),
-                "Please delete the variables under the team[name=%s] first!",
-                team.getTeamName());
+            variableService.existsByTeamId(teamId),
+            "Please delete the variables under the team[name=%s] first!",
+            team.getTeamName());
 
         memberService.removeByTeamId(teamId);
         userService.clearLastTeam(teamId);
@@ -126,14 +125,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public void updateTeam(Team team) {
-        Team oldTeam =
-                Optional.ofNullable(this.getById(team.getId()))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("Team id [id=%s] not found", team.getId())));
+        Team oldTeam = Optional.ofNullable(this.getById(team.getId()))
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("Team id [id=%s] not found", team.getId())));
         ApiAlertException.throwIfFalse(
-                oldTeam.getTeamName().equals(team.getTeamName()),
-                "Team name can't be changed. Update team failed.");
+            oldTeam.getTeamName().equals(team.getTeamName()),
+            "Team name can't be changed. Update team failed.");
         oldTeam.setDescription(team.getDescription());
         oldTeam.setModifyTime(new Date());
         updateById(oldTeam);
@@ -141,10 +139,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public List<Team> listByUserId(Long userId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new ApiAlertException(String.format("The userId [%s] not found.", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(
+                () -> new ApiAlertException(
+                    String.format("The userId [%s] not found.", userId)));
         // Admin has the permission for all teams.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
             return this.list();

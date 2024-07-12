@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-[submodule ".github/actions/paths-filter"]
-	path = .github/actions/paths-filter
-	url = https://github.com/dorny/paths-filter
-	branch = de90cc6fb38fc0963ad72b210f1f284cd68cea36
+[submodule ".github/actions/workflow-telemetry-action"]
+	path = .github/actions/workflow-telemetry-action
+	url = https://github.com/catchpoint/workflow-telemetry-action

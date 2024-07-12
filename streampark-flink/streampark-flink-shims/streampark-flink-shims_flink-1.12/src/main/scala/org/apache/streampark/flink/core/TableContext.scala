@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.util.Utils
@@ -41,7 +42,7 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
    */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initialize(args))
 
-  @Deprecated override def connect(
+  @deprecated override def connect(
       connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor =
     tableEnv.connect(connectorDescriptor)
 
@@ -50,24 +51,27 @@ class TableContext(override val parameter: ParameterTool, private val tableEnv: 
     null
   }
 
-  @Deprecated override def fromTableSource(source: TableSource[_]): Table =
+  @deprecated override def fromTableSource(source: TableSource[_]): Table =
     tableEnv.fromTableSource(source)
 
-  @Deprecated override def insertInto(
+  @deprecated override def insertInto(
       table: Table,
       sinkPath: String,
       sinkPathContinued: String*): Unit =
     tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @Deprecated override def insertInto(targetPath: String, table: Table): Unit =
+  @deprecated override def insertInto(targetPath: String, table: Table): Unit =
     tableEnv.insertInto(targetPath, table)
 
-  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @deprecated override def explain(table: Table): String =
+    tableEnv.explain(table)
 
-  @Deprecated override def explain(table: Table, extended: Boolean): String =
+  @deprecated override def explain(table: Table, extended: Boolean): String =
     tableEnv.explain(table, extended)
 
-  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @deprecated override def explain(extended: Boolean): String =
+    tableEnv.explain(extended)
 
-  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @deprecated override def sqlUpdate(stmt: String): Unit =
+    tableEnv.sqlUpdate(stmt)
 }

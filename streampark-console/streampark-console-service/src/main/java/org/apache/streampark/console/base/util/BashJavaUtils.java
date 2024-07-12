@@ -74,8 +74,7 @@ public class BashJavaUtils {
             case "--read_flink":
                 String input = actionArgs[0];
                 String[] inputs = input.split(":");
-                String flinkDist =
-                        Arrays.stream(inputs).filter(c -> c.contains("flink-dist-")).findFirst().get();
+                String flinkDist = Arrays.stream(inputs).filter(c -> c.contains("flink-dist-")).findFirst().get();
                 File flinkHome = new File(flinkDist.replaceAll("/lib/.*", ""));
                 FlinkVersion flinkVersion = new FlinkVersion(flinkHome.getAbsolutePath());
 
@@ -84,19 +83,18 @@ public class BashJavaUtils {
 
                 String version = flinkVersion.majorVersion();
                 float ver = Float.parseFloat(version);
-                File yaml =
-                        new File(flinkHome, ver < 1.19f ? "/conf/flink-conf.yaml" : "/conf/config.yaml");
+                File yaml = new File(flinkHome, ver < 1.19f ? "/conf/flink-conf.yaml" : "/conf/config.yaml");
 
                 Map<String, String> config = PropertiesUtils.fromYamlFileAsJava(yaml.getAbsolutePath());
                 String flinkPort = config.getOrDefault("rest.port", "8081");
                 System.setOut(originalOut);
                 System.out.println(
-                        flinkHome
-                                .getAbsolutePath()
-                                .concat(",")
-                                .concat(flinkHome.getName())
-                                .concat(",")
-                                .concat(flinkPort));
+                    flinkHome
+                        .getAbsolutePath()
+                        .concat(",")
+                        .concat(flinkHome.getName())
+                        .concat(",")
+                        .concat(flinkPort));
                 break;
             case "--replace":
                 String filePath = actionArgs[0];

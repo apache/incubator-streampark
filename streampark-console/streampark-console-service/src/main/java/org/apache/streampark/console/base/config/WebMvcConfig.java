@@ -68,12 +68,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry
-                .addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedMethods(CORS_MAPPINGS_ALLOWED_METHODS)
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+            .addMapping("/**")
+            .allowedOriginPatterns("*")
+            .allowedMethods(CORS_MAPPINGS_ALLOWED_METHODS)
+            .allowedHeaders("*")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
 
     @Bean
@@ -92,7 +92,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry
-                .addInterceptor(uploadFileTypeInterceptor)
-                .addPathPatterns("/flink/app/upload", "/resource/upload");
+            .addInterceptor(uploadFileTypeInterceptor)
+            .addPathPatterns("/flink/app/upload", "/resource/upload");
     }
 }

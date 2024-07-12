@@ -50,10 +50,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationBackUpServiceImpl
-        extends
-            ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
-        implements
-            ApplicationBackUpService {
+    extends
+        ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp>
+    implements
+        ApplicationBackUpService {
 
     @Autowired
     private ApplicationManageService applicationManageService;
@@ -70,9 +70,8 @@ public class ApplicationBackUpServiceImpl
     @Override
     public IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request) {
         Page<ApplicationBackUp> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, bakParam.getAppId());
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, bakParam.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
 
@@ -109,11 +108,11 @@ public class ApplicationBackUpServiceImpl
             configService.setLatestOrEffective(true, bakParam.getId(), bakParam.getAppId());
         } else {
             effectiveService.saveOrUpdate(
-                    bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
+                bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
             // if flink sql task, will be rollback sql and dependencies
             if (application.isFlinkSqlJob()) {
                 effectiveService.saveOrUpdate(
-                        bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
+                    bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
             }
         }
 
@@ -126,20 +125,19 @@ public class ApplicationBackUpServiceImpl
 
         // update restart status
         applicationManageService.update(
-                new UpdateWrapper<Application>()
-                        .lambda()
-                        .eq(Application::getId, application.getId())
-                        .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
+            new UpdateWrapper<Application>()
+                .lambda()
+                .eq(Application::getId, application.getId())
+                .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
     }
 
     @Override
     public void revoke(Application appParam) {
         Page<ApplicationBackUp> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, appParam.getId())
-                        .orderByDesc(ApplicationBackUp::getCreateTime);
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appParam.getId())
+            .orderByDesc(ApplicationBackUp::getCreateTime);
 
         Page<ApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
         if (!backUpPages.getRecords().isEmpty()) {
@@ -154,16 +152,16 @@ public class ApplicationBackUpServiceImpl
     public void remove(Application appParam) {
         try {
             baseMapper.delete(
-                    new LambdaQueryWrapper<ApplicationBackUp>()
-                            .eq(ApplicationBackUp::getAppId, appParam.getId()));
+                new LambdaQueryWrapper<ApplicationBackUp>()
+                    .eq(ApplicationBackUp::getAppId, appParam.getId()));
             appParam
-                    .getFsOperator()
-                    .delete(
-                            appParam
-                                    .getWorkspace()
-                                    .APP_BACKUPS()
-                                    .concat("/")
-                                    .concat(appParam.getId().toString()));
+                .getFsOperator()
+                .delete(
+                    appParam
+                        .getWorkspace()
+                        .APP_BACKUPS()
+                        .concat("/")
+                        .concat(appParam.getId().toString()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -171,13 +169,12 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public void rollbackFlinkSql(Application appParam, FlinkSql flinkSqlParam) {
-        LambdaQueryWrapper<ApplicationBackUp> queryWrapper =
-                new LambdaQueryWrapper<ApplicationBackUp>()
-                        .eq(ApplicationBackUp::getAppId, appParam.getId())
-                        .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
+            .eq(ApplicationBackUp::getAppId, appParam.getId())
+            .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
         ApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
-                backUp, "Application backup can't be null. Rollback flink sql failed.");
+            backUp, "Application backup can't be null. Rollback flink sql failed.");
         // rollback config and sql
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.CONFIG, backUp.getId());
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.FLINKSQL, backUp.getSqlId());
@@ -199,10 +196,9 @@ public class ApplicationBackUpServiceImpl
     @Override
     public void backup(Application appParam, FlinkSql flinkSqlParam) {
         // basic configuration file backup
-        String appHome =
-                (appParam.isCustomCodeJob() && appParam.isCICDJob())
-                        ? appParam.getDistHome()
-                        : appParam.getAppHome();
+        String appHome = (appParam.isCustomCodeJob() && appParam.isCICDJob())
+            ? appParam.getDistHome()
+            : appParam.getAppHome();
         FsOperator fsOperator = appParam.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // move files to back up directory

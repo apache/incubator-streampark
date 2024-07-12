@@ -53,8 +53,8 @@ public class ShiroService {
             throw new RuntimeException("Fail to get ShiroFilter from shiroFilterFactoryBean!");
         }
         securityManager = (DefaultWebSecurityManager) shiroFilter.getSecurityManager();
-        PathMatchingFilterChainResolver filterChainResolver =
-                (PathMatchingFilterChainResolver) shiroFilter.getFilterChainResolver();
+        PathMatchingFilterChainResolver filterChainResolver = (PathMatchingFilterChainResolver) shiroFilter
+            .getFilterChainResolver();
         filterChainManager = (DefaultFilterChainManager) filterChainResolver.getFilterChainManager();
     }
 
@@ -67,12 +67,12 @@ public class ShiroService {
     public void addFilters(Map<String, Filter> filters) {
         synchronized (this) {
             filters.forEach(
-                    (key, value) -> {
-                        // The new filter can be appended after the existing map.
-                        // As the sequence doesn't matter.
-                        shiroFilterFactoryBean.getFilters().put(key, value);
-                        filterChainManager.addFilter(key, value);
-                    });
+                (key, value) -> {
+                    // The new filter can be appended after the existing map.
+                    // As the sequence doesn't matter.
+                    shiroFilterFactoryBean.getFilters().put(key, value);
+                    filterChainManager.addFilter(key, value);
+                });
         }
     }
 
@@ -87,10 +87,10 @@ public class ShiroService {
             // Reset the filterChainDefinitionMap
             shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
             filterChainDefinitionMap.forEach(
-                    (key, value) -> {
-                        String chainDefinition = value.trim();
-                        filterChainManager.createChain(key, chainDefinition);
-                    });
+                (key, value) -> {
+                    String chainDefinition = value.trim();
+                    filterChainManager.createChain(key, chainDefinition);
+                });
         }
     }
 }

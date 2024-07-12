@@ -101,9 +101,9 @@ public class FlinkK8sChangeEventListener {
         // email alerts when necessary
         FlinkAppStateEnum state = app.getStateEnum();
         if (FlinkAppStateEnum.FAILED == state
-                || FlinkAppStateEnum.LOST == state
-                || FlinkAppStateEnum.RESTARTING == state
-                || FlinkAppStateEnum.FINISHED == state) {
+            || FlinkAppStateEnum.LOST == state
+            || FlinkAppStateEnum.RESTARTING == state
+            || FlinkAppStateEnum.FINISHED == state) {
             executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
         }
     }
@@ -156,14 +156,13 @@ public class FlinkK8sChangeEventListener {
         checkPoint.setLatest(latest);
 
         checkpointProcessor.process(
-                applicationManageService.getById(event.trackId().appId()), checkPoint);
+            applicationManageService.getById(event.trackId().appId()), checkPoint);
     }
 
     private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
         // infer the final flink job state
-        Enumeration.Value state =
-                FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-                        jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
+        Enumeration.Value state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
+            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
         // corrective start-time / end-time / duration
         long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

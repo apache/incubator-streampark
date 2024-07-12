@@ -69,18 +69,17 @@ public class FlinkSqlController {
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line
             String exception = flinkSqlValidationResult.exception();
-            RestResponse response =
-                    RestResponse.success()
-                            .data(false)
-                            .message(exception)
-                            .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
-                            .put(START, flinkSqlValidationResult.lineStart())
-                            .put(END, flinkSqlValidationResult.lineEnd());
+            RestResponse response = RestResponse.success()
+                .data(false)
+                .message(exception)
+                .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
+                .put(START, flinkSqlValidationResult.lineStart())
+                .put(END, flinkSqlValidationResult.lineEnd());
 
             if (flinkSqlValidationResult.errorLine() > 0) {
                 response
-                        .put(START, flinkSqlValidationResult.errorLine())
-                        .put(END, flinkSqlValidationResult.errorLine() + 1);
+                    .put(START, flinkSqlValidationResult.errorLine())
+                    .put(END, flinkSqlValidationResult.errorLine() + 1);
             }
             return response;
         }
@@ -106,7 +105,7 @@ public class FlinkSqlController {
     @PermissionScope(app = "#appId", team = "#teamId")
     public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
-                appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
+            appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
         String[] array = id.split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();

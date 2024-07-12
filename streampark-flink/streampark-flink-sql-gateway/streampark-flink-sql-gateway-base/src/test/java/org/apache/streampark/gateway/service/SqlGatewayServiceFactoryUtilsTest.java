@@ -47,7 +47,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class SqlGatewayServiceFactoryUtilsTest {
 
     public static final InstanceOfAssertFactory<Stream, ListAssert<Throwable>> STREAM_THROWABLE =
-            new InstanceOfAssertFactory<>(Stream.class, Assertions::<Throwable>assertThat);
+        new InstanceOfAssertFactory<>(
+            Stream.class, Assertions::<Throwable>assertThat);
 
     @Test
     public void testCreateServices() {
@@ -55,8 +56,8 @@ public class SqlGatewayServiceFactoryUtilsTest {
         Map<String, String> config = getDefaultConfig(id);
         config.put("streampark.sql-gateway.service", "mocked;fake");
         List<SqlGatewayService> actual = SqlGatewayServiceFactoryUtils.createSqlGatewayService(config);
-        MockedSqlGatewayService expectedMocked =
-                new MockedSqlGatewayService("localhost", 8080, "The Mocked SQL gateway service");
+        MockedSqlGatewayService expectedMocked = new MockedSqlGatewayService("localhost", 8080,
+            "The Mocked SQL gateway service");
         assertThat(actual).isEqualTo(Arrays.asList(expectedMocked, FakeSqlGatewayService.INSTANCE));
     }
 
@@ -65,9 +66,9 @@ public class SqlGatewayServiceFactoryUtilsTest {
         Map<String, String> config = getDefaultConfig();
         config.put("streampark.sql-gateway.service", "mocked;mocked");
         validateException(
-                config,
-                "Get the duplicate service identifier 'mocked' for the option 'streampark.sql-gateway.service'. "
-                        + "Please keep the specified service identifier unique.");
+            config,
+            "Get the duplicate service identifier 'mocked' for the option 'streampark.sql-gateway.service'. "
+                + "Please keep the specified service identifier unique.");
     }
 
     @Test
@@ -75,8 +76,8 @@ public class SqlGatewayServiceFactoryUtilsTest {
         Map<String, String> config = getDefaultConfig();
         config.remove("streampark.sql-gateway.service");
         validateException(
-                config,
-                "Service options do not contain an option key 'streampark.sql-gateway.service' for discovering an service.");
+            config,
+            "Service options do not contain an option key 'streampark.sql-gateway.service' for discovering an service.");
     }
 
     @Test
@@ -84,11 +85,11 @@ public class SqlGatewayServiceFactoryUtilsTest {
         Map<String, String> config = getDefaultConfig();
         config.put("streampark.sql-gateway.service", "mocked;unknown");
         validateException(
-                config,
-                String.format(
-                        "Could not find any factory for identifier 'unknown' "
-                                + "that implements '%s' in the classpath.",
-                        SqlGatewayServiceFactory.class.getCanonicalName()));
+            config,
+            String.format(
+                "Could not find any factory for identifier 'unknown' "
+                    + "that implements '%s' in the classpath.",
+                SqlGatewayServiceFactory.class.getCanonicalName()));
     }
 
     /*
@@ -111,7 +112,7 @@ public class SqlGatewayServiceFactoryUtilsTest {
 
     private void validateException(Map<String, String> config, String errorMessage) {
         assertThatThrownBy(() -> createSqlGatewayService(config))
-                .satisfies(anyCauseMatches(ValidationException.class, errorMessage));
+            .satisfies(anyCauseMatches(ValidationException.class, errorMessage));
     }
 
     private Map<String, String> getDefaultConfig() {
@@ -137,20 +138,20 @@ public class SqlGatewayServiceFactoryUtilsTest {
      */
     public static ListAssert<Throwable> assertThatChainOfCauses(Throwable root) {
         return Assertions.assertThat(root)
-                .extracting(SqlGatewayServiceFactoryUtilsTest::chainOfCauses, STREAM_THROWABLE);
+            .extracting(SqlGatewayServiceFactoryUtilsTest::chainOfCauses, STREAM_THROWABLE);
     }
 
     public static ThrowingConsumer<? super Throwable> anyCauseMatches(
                                                                       Class<? extends Throwable> clazz,
                                                                       String containsMessage) {
         return t -> assertThatChainOfCauses(t)
-                .as(
-                        "Any cause is instance of class '%s' and contains message '%s'",
-                        clazz, containsMessage)
-                .anySatisfy(
-                        cause -> Assertions.assertThat(cause)
-                                .isInstanceOf(clazz)
-                                .hasMessageContaining(containsMessage));
+            .as(
+                "Any cause is instance of class '%s' and contains message '%s'",
+                clazz, containsMessage)
+            .anySatisfy(
+                cause -> Assertions.assertThat(cause)
+                    .isInstanceOf(clazz)
+                    .hasMessageContaining(containsMessage));
     }
 
     /**

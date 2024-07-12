@@ -62,17 +62,15 @@ class UserServiceTest extends SpringUnitTestBase {
         userService.createUser(user);
         // lock user
         user.setStatus(User.STATUS_LOCK);
-        Map<String, Object> data =
-                (Map<String, Object>) userService
-                        .updateUser(user)
-                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Map<String, Object> data = (Map<String, Object>) userService
+            .updateUser(user)
+            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
         Assertions.assertNotEquals(true, data.get("needTransferResource"));
         // unlock user
         user.setStatus(User.STATUS_VALID);
-        Map<String, Object> data1 =
-                (Map<String, Object>) userService
-                        .updateUser(user)
-                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Map<String, Object> data1 = (Map<String, Object>) userService
+            .updateUser(user)
+            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
         Assertions.assertNotEquals(true, data1.get("needTransferResource"));
 
         Resource resource = new Resource();
@@ -84,10 +82,9 @@ class UserServiceTest extends SpringUnitTestBase {
         resourceService.save(resource);
         // lock user when has resource
         user.setStatus(User.STATUS_LOCK);
-        Map<String, Object> data2 =
-                (Map<String, Object>) userService
-                        .updateUser(user)
-                        .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Map<String, Object> data2 = (Map<String, Object>) userService
+            .updateUser(user)
+            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
         Assertions.assertEquals(true, data2.get("needTransferResource"));
     }
 

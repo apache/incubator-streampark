@@ -83,8 +83,8 @@ import java.util.stream.Stream;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
-        implements
-            ProjectService {
+    implements
+        ProjectService {
 
     @Autowired
     private ApplicationManageService applicationManageService;
@@ -101,8 +101,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper =
-                new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
+            project.getName());
         long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
 
@@ -134,11 +134,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(projectParam.getId());
         AssertUtils.notNull(project);
         ApiAlertException.throwIfFalse(
-                project.getTeamId().equals(projectParam.getTeamId()),
-                "TeamId can't be changed, update project failed.");
+            project.getTeamId().equals(projectParam.getTeamId()),
+            "TeamId can't be changed, update project failed.");
         ApiAlertException.throwIfFalse(
-                !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
-                "The project is being built, update project failed.");
+            !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
+            "The project is being built, update project failed.");
         updateInternal(projectParam, project);
         if (project.isHttpRepositoryUrl()) {
             if (StringUtils.isBlank(projectParam.getUserName())) {
@@ -171,12 +171,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 List<Application> applications = listApps(project);
                 // Update deployment status
                 applications.forEach(
-                        (app) -> {
-                            log.info(
-                                    "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
-                            app.setRelease(ReleaseStateEnum.NEED_CHECK.get());
-                            applicationManageService.updateRelease(app);
-                        });
+                    (app) -> {
+                        log.info(
+                            "update deploy by project: {}, appName:{}", project.getName(),
+                            app.getJobName());
+                        app.setRelease(ReleaseStateEnum.NEED_CHECK.get());
+                        applicationManageService.updateRelease(app);
+                    });
             }
         }
         baseMapper.updateById(project);
@@ -199,8 +200,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean removeById(Long id) {
         Project project = getById(id);
         AssertUtils.notNull(project);
-        LambdaQueryWrapper<Application> queryWrapper =
-                new LambdaQueryWrapper<Application>().eq(Application::getProjectId, id);
+        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
+            .eq(Application::getProjectId, id);
         long count = applicationManageService.count(queryWrapper);
         if (count > 0) {
             return false;
@@ -234,41 +235,39 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public void build(Long id) throws Exception {
         Long currentBuildCount = this.baseMapper.getBuildingCount();
         ApiAlertException.throwIfTrue(
-                maxProjectBuildNum > -1 && currentBuildCount > maxProjectBuildNum,
-                String.format(
-                        "The number of running Build projects exceeds the maximum number: %d of max-build-num",
-                        maxProjectBuildNum));
+            maxProjectBuildNum > -1 && currentBuildCount > maxProjectBuildNum,
+            String.format(
+                "The number of running Build projects exceeds the maximum number: %d of max-build-num",
+                maxProjectBuildNum));
         Project project = getById(id);
         this.baseMapper.updateBuildState(project.getId(), BuildStateEnum.BUILDING.get());
         String logPath = getBuildLogPath(id);
-        ProjectBuildTask projectBuildTask =
-                new ProjectBuildTask(
-                        logPath,
-                        project,
-                        buildStateEnum -> {
-                            baseMapper.updateBuildState(id, buildStateEnum.get());
-                            if (buildStateEnum == BuildStateEnum.SUCCESSFUL) {
-                                baseMapper.updateBuildTime(id);
-                            }
-                            flinkAppHttpWatcher.init();
-                        },
-                        fileLogger -> {
-                            List<Application> applications =
-                                    this.applicationManageService.listByProjectId(project.getId());
-                            applications.forEach(
-                                    (app) -> {
-                                        fileLogger.info(
-                                                "update deploy by project: {}, appName:{}",
-                                                project.getName(),
-                                                app.getJobName());
-                                        app.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
-                                        app.setBuild(true);
-                                        this.applicationManageService.updateRelease(app);
-                                    });
-                            flinkAppHttpWatcher.init();
-                        });
-        CompletableFuture<Void> buildTask =
-                CompletableFuture.runAsync(projectBuildTask, executorService);
+        ProjectBuildTask projectBuildTask = new ProjectBuildTask(
+            logPath,
+            project,
+            buildStateEnum -> {
+                baseMapper.updateBuildState(id, buildStateEnum.get());
+                if (buildStateEnum == BuildStateEnum.SUCCESSFUL) {
+                    baseMapper.updateBuildTime(id);
+                }
+                flinkAppHttpWatcher.init();
+            },
+            fileLogger -> {
+                List<Application> applications =
+                    this.applicationManageService.listByProjectId(project.getId());
+                applications.forEach(
+                    (app) -> {
+                        fileLogger.info(
+                            "update deploy by project: {}, appName:{}",
+                            project.getName(),
+                            app.getJobName());
+                        app.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
+                        app.setBuild(true);
+                        this.applicationManageService.updateRelease(app);
+                    });
+                flinkAppHttpWatcher.init();
+            });
+        CompletableFuture<Void> buildTask = CompletableFuture.runAsync(projectBuildTask, executorService);
         // TODO May need to define parameters to set the build timeout in the future.
         CompletableFutureUtils.runTimeout(buildTask, 20, TimeUnit.MINUTES);
     }
@@ -279,35 +278,34 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         AssertUtils.notNull(project);
 
         if (BuildStateEnum.SUCCESSFUL != BuildStateEnum.of(project.getBuildState())
-                || !project.getDistHome().exists()) {
+            || !project.getDistHome().exists()) {
             return Collections.emptyList();
         }
 
         File[] files = project.getDistHome().listFiles();
         return files == null
-                ? Collections.emptyList()
-                : Stream.of(files).map(File::getName).collect(Collectors.toList());
+            ? Collections.emptyList()
+            : Stream.of(files).map(File::getName).collect(Collectors.toList());
     }
 
     @Override
     public List<String> listJars(Project project) {
         ApiAlertException.throwIfNull(
-                project.getModule(), "Project module can't be null, please check.");
+            project.getModule(), "Project module can't be null, please check.");
         File projectModuleDir = new File(project.getDistHome(), project.getModule());
         return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
-                .map(File::getName)
-                .filter(name -> name.endsWith(Constant.JAR_SUFFIX))
-                .collect(Collectors.toList());
+            .map(File::getName)
+            .filter(name -> name.endsWith(Constant.JAR_SUFFIX))
+            .collect(Collectors.toList());
     }
 
     @Override
     public String getAppConfPath(Long id, String module) {
         Project project = getById(id);
         File appHome = project.getDistHome();
-        Optional<File> fileOptional =
-                Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                        .filter((x) -> x.getName().equals(module))
-                        .findFirst();
+        Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
+            .filter((x) -> x.getName().equals(module))
+            .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -325,9 +323,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         return this.baseMapper.exists(
-                new LambdaQueryWrapper<Project>()
-                        .eq(Project::getName, project.getName())
-                        .eq(Project::getTeamId, project.getTeamId()));
+            new LambdaQueryWrapper<Project>()
+                .eq(Project::getName, project.getName())
+                .eq(Project::getTeamId, project.getTeamId()));
     }
 
     @Override
@@ -387,8 +385,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public RestResponse getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
-            String errorMsg =
-                    String.format("Build log file(fileName=%s) not found, please build first.", logFile);
+            String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
             return RestResponse.success().data(errorMsg);
         }
@@ -401,8 +398,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             startOffset = 0L;
         }
         try {
-            long maxSize =
-                    MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
+            long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
                 fileContent = FileUtils.readEndOfFile(logFile, maxSize);
             } else {
@@ -411,12 +407,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
             return RestResponse.success()
-                    .data(new String(fileContent, StandardCharsets.UTF_8))
-                    .put("offset", endOffset)
-                    .put("readFinished", readFinished);
+                .data(new String(fileContent, StandardCharsets.UTF_8))
+                .put("offset", endOffset)
+                .put("readFinished", readFinished);
         } catch (IOException e) {
-            String error =
-                    String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
+            String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
             return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
         }

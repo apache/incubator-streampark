@@ -84,18 +84,18 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
       )
     // retrieve flink metrics in thread pool
     val futures: Set[Future[Option[CheckpointCV]]] =
-      trackIds.map(
-        id => {
-          val future = Future(collect(id))
-          future.onComplete(_.getOrElse(None) match {
-            case Some(cp) => eventBus.postAsync(FlinkJobCheckpointChangeEvent(id, cp))
-            case _ =>
-          })
-          future
+      trackIds.map(id => {
+        val future = Future(collect(id))
+        future.onComplete(_.getOrElse(None) match {
+          case Some(cp) =>
+            eventBus.postAsync(FlinkJobCheckpointChangeEvent(id, cp))
+          case _ =>
         })
+        future
+      })
 
     // blocking until all future are completed or timeout is reached
-    Try(Await.ready(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
+    Try(Await.result(Future.sequence(futures), conf.requestTimeoutSec seconds)).failed.map {
       _ =>
         logError(
           s"[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout," +
@@ -134,8 +134,7 @@ class FlinkCheckpointWatcher(conf: MetricWatcherConfig = MetricWatcherConfig.def
         isSavepoint = checkpoint.isSavepoint,
         checkpointType = checkpoint.checkpointType,
         status = checkpoint.status,
-        triggerTimestamp = checkpoint.triggerTimestamp
-      )
+        triggerTimestamp = checkpoint.triggerTimestamp)
       Some(checkpointCV)
     } else None
   }
@@ -168,8 +167,7 @@ object Checkpoint {
               externalPath = (completed \ "external_path").extractOpt[String].orNull,
               isSavepoint = (completed \ "is_savepoint").extractOpt[Boolean].getOrElse(false),
               checkpointType = (completed \ "checkpoint_type").extractOpt[String].orNull,
-              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L)
-            )
+              triggerTimestamp = (completed \ "trigger_timestamp").extractOpt[Long].getOrElse(0L))
             Some(cp)
         }
       case Failure(_) => None

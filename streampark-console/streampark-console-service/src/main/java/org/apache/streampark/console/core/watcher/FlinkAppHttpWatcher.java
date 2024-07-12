@@ -116,18 +116,18 @@ public class FlinkAppHttpWatcher {
      * set the state of the task to savepoint
      * </pre>
      */
-    private static final Cache<Long, Byte> SAVEPOINT_CACHE =
-            Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+    private static final Cache<Long, Byte> SAVEPOINT_CACHE = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+        .build();
 
     /**
      * Record the status of the first tracking task, because after the task is started, the overview
      * of the task will be obtained during the first tracking
      */
-    private static final Cache<Long, Byte> STARTING_CACHE =
-            Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
+    private static final Cache<Long, Byte> STARTING_CACHE = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES)
+        .build();
 
-    private static final Cache<Long, Date> LOST_CACHE =
-            Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
+    private static final Cache<Long, Date> LOST_CACHE = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES)
+        .build();
 
     /** tracking task list */
     private static final Map<Long, Application> WATCHING_APPS = new ConcurrentHashMap<>(0);
@@ -149,11 +149,11 @@ public class FlinkAppHttpWatcher {
      * Cancelling tasks are placed in this cache with an expiration time of 10 seconds (the time of 2
      * task monitoring polls).
      */
-    private static final Cache<Long, Byte> CANCELING_CACHE =
-            Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
+    private static final Cache<Long, Byte> CANCELING_CACHE = Caffeine.newBuilder()
+        .expireAfterWrite(10, TimeUnit.SECONDS).build();
 
-    private static final Cache<Long, StateChangeEvent> PREVIOUS_STATUS =
-            Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
+    private static final Cache<Long, StateChangeEvent> PREVIOUS_STATUS = Caffeine.newBuilder()
+        .expireAfterWrite(24, TimeUnit.HOURS).build();
 
     /**
      * Task canceled tracking list, record who cancelled the tracking task Map<applicationId,userId>
@@ -177,22 +177,21 @@ public class FlinkAppHttpWatcher {
     @PostConstruct
     public void init() {
         WATCHING_APPS.clear();
-        List<Application> applications =
-                applicationManageService.list(
-                        new LambdaQueryWrapper<Application>()
-                                .eq(Application::getTracking, 1)
-                                .notIn(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
+        List<Application> applications = applicationManageService.list(
+            new LambdaQueryWrapper<Application>()
+                .eq(Application::getTracking, 1)
+                .notIn(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
         applications.forEach(
-                (app) -> {
-                    WATCHING_APPS.put(app.getId(), app);
-                    STARTING_CACHE.put(app.getId(), DEFAULT_FLAG_BYTE);
-                });
+            (app) -> {
+                WATCHING_APPS.put(app.getId(), app);
+                STARTING_CACHE.put(app.getId(), DEFAULT_FLAG_BYTE);
+            });
     }
 
     @PreDestroy
     public void doStop() {
         log.info(
-                "[StreamPark][FlinkAppHttpWatcher] StreamPark Console will be shutdown,persistent application to database.");
+            "[StreamPark][FlinkAppHttpWatcher] StreamPark Console will be shutdown,persistent application to database.");
         WATCHING_APPS.forEach((k, v) -> applicationManageService.persistMetrics(v));
     }
 
@@ -208,9 +207,9 @@ public class FlinkAppHttpWatcher {
     public void start() {
         Long timeMillis = System.currentTimeMillis();
         if (lastWatchTime == null
-                || !OPTIONING.isEmpty()
-                || timeMillis - lastOptionTime <= OPTION_INTERVAL.toMillis()
-                || timeMillis - lastWatchTime >= WATCHING_INTERVAL.toMillis()) {
+            || !OPTIONING.isEmpty()
+            || timeMillis - lastOptionTime <= OPTION_INTERVAL.toMillis()
+            || timeMillis - lastWatchTime >= WATCHING_INTERVAL.toMillis()) {
             lastWatchTime = timeMillis;
             WATCHING_APPS.forEach(this::watch);
         }
@@ -218,21 +217,21 @@ public class FlinkAppHttpWatcher {
 
     private void watch(Long id, Application application) {
         watchExecutor.execute(
-                () -> {
+            () -> {
+                try {
+                    // query status from flink rest api
+                    getStateFromFlink(application);
+                    cleanupLost(application);
+                } catch (Exception flinkException) {
+                    // query status from yarn rest api
                     try {
-                        // query status from flink rest api
-                        getStateFromFlink(application);
+                        getStateFromYarn(application);
                         cleanupLost(application);
-                    } catch (Exception flinkException) {
-                        // query status from yarn rest api
-                        try {
-                            getStateFromYarn(application);
-                            cleanupLost(application);
-                        } catch (Exception yarnException) {
-                            doStateFailed(application);
-                        }
+                    } catch (Exception yarnException) {
+                        doStateFailed(application);
                     }
-                });
+                }
+            });
     }
 
     private void cleanupLost(Application application) {
@@ -250,7 +249,7 @@ public class FlinkAppHttpWatcher {
             // non-mapping
             if (application.getState() != FlinkAppStateEnum.MAPPING.getValue()) {
                 log.error(
-                        "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
+                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
                 if (StopFromEnum.NONE.equals(stopFrom)) {
                     Date lostTime = LOST_CACHE.getIfPresent(application.getId());
                     if (lostTime == null) {
@@ -297,22 +296,20 @@ public class FlinkAppHttpWatcher {
         Optional<JobsOverview.Job> optional;
         FlinkExecutionMode execMode = application.getFlinkExecutionMode();
         if (FlinkExecutionMode.YARN_APPLICATION.equals(execMode)
-                || FlinkExecutionMode.YARN_PER_JOB.equals(execMode)) {
+            || FlinkExecutionMode.YARN_PER_JOB.equals(execMode)) {
             if (jobsOverview.getJobs() != null) {
-                optional =
-                        jobsOverview.getJobs().size() > 1
-                                ? jobsOverview.getJobs().stream()
-                                        .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
-                                        .findFirst()
-                                : jobsOverview.getJobs().stream().findFirst();
+                optional = jobsOverview.getJobs().size() > 1
+                    ? jobsOverview.getJobs().stream()
+                        .filter(a -> StringUtils.equals(application.getJobId(), a.getId()))
+                        .findFirst()
+                    : jobsOverview.getJobs().stream().findFirst();
             } else {
                 optional = Optional.empty();
             }
         } else {
-            optional =
-                    jobsOverview.getJobs().stream()
-                            .filter(x -> x.getId().equals(application.getJobId()))
-                            .findFirst();
+            optional = jobsOverview.getJobs().stream()
+                .filter(x -> x.getId().equals(application.getJobId()))
+                .findFirst();
         }
 
         if (optional.isPresent()) {
@@ -345,8 +342,8 @@ public class FlinkAppHttpWatcher {
 
     private StopFromEnum getStopFrom(Application application) {
         return STOP_FROM_MAP.getOrDefault(application.getId(), null) == null
-                ? StopFromEnum.NONE
-                : STOP_FROM_MAP.get(application.getId());
+            ? StopFromEnum.NONE
+            : STOP_FROM_MAP.get(application.getId());
     }
 
     /**
@@ -417,10 +414,9 @@ public class FlinkAppHttpWatcher {
             switch (releaseState) {
                 case NEED_RESTART:
                 case NEED_ROLLBACK:
-                    LambdaUpdateWrapper<Application> updateWrapper =
-                            new LambdaUpdateWrapper<Application>()
-                                    .eq(Application::getId, appId)
-                                    .set(Application::getRelease, ReleaseStateEnum.DONE.get());
+                    LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<Application>()
+                        .eq(Application::getId, appId)
+                        .set(Application::getRelease, ReleaseStateEnum.DONE.get());
                     applicationManageService.update(updateWrapper);
                     break;
                 default:
@@ -488,14 +484,14 @@ public class FlinkAppHttpWatcher {
             case CANCELED:
             case FINISHED:
                 log.info(
-                        "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
-                        currentState.name());
+                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!",
+                    currentState.name());
                 cleanSavepoint(application);
                 application.setState(currentState.getValue());
                 if (StopFromEnum.NONE.equals(stopFrom) || applicationInfoService.checkAlter(application)) {
                     if (StopFromEnum.NONE.equals(stopFrom)) {
                         log.info(
-                                "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
+                            "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
                         savePointService.expire(application.getId());
                     }
                     stopCanceledJob(application.getId());
@@ -515,8 +511,8 @@ public class FlinkAppHttpWatcher {
                 break;
             case RESTARTING:
                 log.info(
-                        "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {},add to starting",
-                        currentState.name());
+                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job state {},add to starting",
+                    currentState.name());
                 STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
                 break;
             default:
@@ -555,10 +551,10 @@ public class FlinkAppHttpWatcher {
             } finally {
                 if (StopFromEnum.NONE.equals(stopFrom)) {
                     log.error(
-                            "[StreamPark][FlinkAppHttpWatcher] query previous state was canceling and stopFrom NotFound,savePoint expired!");
+                        "[StreamPark][FlinkAppHttpWatcher] query previous state was canceling and stopFrom NotFound,savePoint expired!");
                     savePointService.expire(application.getId());
                     if (flinkAppState == FlinkAppStateEnum.KILLED
-                            || flinkAppState == FlinkAppStateEnum.FAILED) {
+                        || flinkAppState == FlinkAppStateEnum.FAILED) {
                         doAlert(application, flinkAppState);
                     }
                 }
@@ -574,7 +570,7 @@ public class FlinkAppHttpWatcher {
             if (yarnAppInfo == null) {
                 if (!FlinkExecutionMode.REMOTE.equals(application.getFlinkExecutionMode())) {
                     throw new RuntimeException(
-                            "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi failed ");
+                        "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi failed ");
                 }
             } else {
                 try {
@@ -586,7 +582,7 @@ public class FlinkAppHttpWatcher {
                     if (FlinkAppStateEnum.KILLED.equals(flinkAppState)) {
                         if (StopFromEnum.NONE.equals(stopFrom)) {
                             log.error(
-                                    "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi,job was killed and stopFrom NotFound,savePoint expired!");
+                                "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi,job was killed and stopFrom NotFound,savePoint expired!");
                             savePointService.expire(application.getId());
                         }
                         flinkAppState = FlinkAppStateEnum.CANCELED;
@@ -600,10 +596,10 @@ public class FlinkAppHttpWatcher {
                     cleanOptioning(optionState, application.getId());
                     doPersistMetrics(application, true);
                     if (flinkAppState.equals(FlinkAppStateEnum.FAILED)
-                            || flinkAppState.equals(FlinkAppStateEnum.LOST)
-                            || (flinkAppState.equals(FlinkAppStateEnum.CANCELED)
-                                    && StopFromEnum.NONE.equals(stopFrom))
-                            || applicationInfoService.checkAlter(application)) {
+                        || flinkAppState.equals(FlinkAppStateEnum.LOST)
+                        || (flinkAppState.equals(FlinkAppStateEnum.CANCELED)
+                            && StopFromEnum.NONE.equals(stopFrom))
+                        || applicationInfoService.checkAlter(application)) {
                         doAlert(application, flinkAppState);
                         stopCanceledJob(application.getId());
                         if (flinkAppState.equals(FlinkAppStateEnum.FAILED)) {
@@ -613,7 +609,7 @@ public class FlinkAppHttpWatcher {
                 } catch (Exception e) {
                     if (!FlinkExecutionMode.REMOTE.equals(application.getFlinkExecutionMode())) {
                         throw new RuntimeException(
-                                "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi error,", e);
+                            "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi error,", e);
                     }
                 }
             }
@@ -723,7 +719,7 @@ public class FlinkAppHttpWatcher {
         String appId = application.getClusterId();
         if (appId != null) {
             if (application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_APPLICATION)
-                    || application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_PER_JOB)) {
+                || application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_PER_JOB)) {
                 String reqURL;
                 if (StringUtils.isEmpty(application.getJobManagerUrl())) {
                     String format = "proxy/%s/overview";
@@ -755,19 +751,18 @@ public class FlinkAppHttpWatcher {
 
         if (application.getJobId() != null && FlinkExecutionMode.isRemoteMode(execMode)) {
             return httpRemoteCluster(
-                    application.getFlinkClusterId(),
-                    cluster -> {
-                        String remoteUrl = cluster.getAddress() + "/" + flinkUrl;
-                        JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
-                        if (jobsOverview != null) {
-                            List<JobsOverview.Job> jobs =
-                                    jobsOverview.getJobs().stream()
-                                            .filter(x -> x.getId().equals(application.getJobId()))
-                                            .collect(Collectors.toList());
-                            jobsOverview.setJobs(jobs);
-                        }
-                        return jobsOverview;
-                    });
+                application.getFlinkClusterId(),
+                cluster -> {
+                    String remoteUrl = cluster.getAddress() + "/" + flinkUrl;
+                    JobsOverview jobsOverview = httpRestRequest(remoteUrl, JobsOverview.class);
+                    if (jobsOverview != null) {
+                        List<JobsOverview.Job> jobs = jobsOverview.getJobs().stream()
+                            .filter(x -> x.getId().equals(application.getJobId()))
+                            .collect(Collectors.toList());
+                        jobsOverview.setJobs(jobs);
+                    }
+                    return jobsOverview;
+                });
         }
         return null;
     }
@@ -789,12 +784,12 @@ public class FlinkAppHttpWatcher {
 
         if (application.getJobId() != null && FlinkExecutionMode.isRemoteMode(execMode)) {
             return httpRemoteCluster(
-                    application.getFlinkClusterId(),
-                    cluster -> {
-                        String remoteUrl =
-                                cluster.getAddress() + "/" + String.format(flinkUrl, application.getJobId());
-                        return httpRestRequest(remoteUrl, CheckPoints.class);
-                    });
+                application.getFlinkClusterId(),
+                cluster -> {
+                    String remoteUrl = cluster.getAddress() + "/"
+                        + String.format(flinkUrl, application.getJobId());
+                    return httpRestRequest(remoteUrl, CheckPoints.class);
+                });
         }
         return null;
     }
@@ -805,9 +800,8 @@ public class FlinkAppHttpWatcher {
     }
 
     private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
-        String result =
-                HttpClientUtils.httpGetRequest(
-                        url, RequestConfig.custom().setConnectTimeout(HTTP_TIMEOUT).build());
+        String result = HttpClientUtils.httpGetRequest(
+            url, RequestConfig.custom().setConnectTimeout(HTTP_TIMEOUT).build());
         if (null == result) {
             return null;
         }
@@ -862,10 +856,10 @@ public class FlinkAppHttpWatcher {
             }
             StateChangeEvent that = (StateChangeEvent) object;
             return Objects.equals(id, that.id)
-                    && Objects.equals(jobId, that.jobId)
-                    && Objects.equals(appState, that.appState)
-                    && Objects.equals(optionState, that.optionState)
-                    && Objects.equals(jobManagerUrl, that.jobManagerUrl);
+                && Objects.equals(jobId, that.jobId)
+                && Objects.equals(appState, that.appState)
+                && Objects.equals(optionState, that.optionState)
+                && Objects.equals(jobManagerUrl, that.jobManagerUrl);
         }
 
         @Override

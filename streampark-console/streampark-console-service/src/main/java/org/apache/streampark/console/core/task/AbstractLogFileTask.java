@@ -99,8 +99,8 @@ public abstract class AbstractLogFileTask implements Runnable {
         fileAppender.setContext(lc);
         fileAppender.start();
 
-        ch.qos.logback.classic.Logger logger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Thread.currentThread().getName());
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+            .getLogger(Thread.currentThread().getName());
         logger.addAppender(fileAppender);
         logger.setLevel(Level.INFO);
         logger.setAdditive(false);

@@ -80,17 +80,16 @@ import static org.apache.streampark.common.enums.StorageType.LFS;
 @Slf4j
 @Service
 public class SparkApplicationInfoServiceImpl
-        extends
-            ServiceImpl<SparkApplicationMapper, SparkApplication>
-        implements
-            SparkApplicationInfoService {
+    extends
+        ServiceImpl<SparkApplicationMapper, SparkApplication>
+    implements
+        SparkApplicationInfoService {
 
     private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
     private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
 
-    private static final Pattern JOB_NAME_PATTERN =
-            Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
+    private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
     private static final Pattern SINGLE_SPACE_PATTERN = Pattern.compile("^\\S+(\\s\\S+)*$");
 
@@ -233,38 +232,39 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public boolean existsByTeamId(Long teamId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getTeamId, teamId));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getTeamId, teamId));
     }
 
     @Override
     public boolean existsByUserId(Long userId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getUserId, userId));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getUserId, userId));
     }
 
     @Override
     public boolean existsRunningByClusterId(Long clusterId) {
         return baseMapper.existsRunningJobByClusterId(clusterId)
-                || FlinkAppHttpWatcher.getWatchingApps().stream()
-                        .anyMatch(
-                                application -> clusterId.equals(application.getFlinkClusterId())
-                                        && FlinkAppStateEnum.RUNNING == application.getStateEnum());
+            || FlinkAppHttpWatcher.getWatchingApps().stream()
+                .anyMatch(
+                    application -> clusterId.equals(application.getFlinkClusterId())
+                        && FlinkAppStateEnum.RUNNING == application
+                            .getStateEnum());
     }
 
     @Override
     public boolean existsByClusterId(Long clusterId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>()
-                        .eq(SparkApplication::getSparkClusterId, clusterId));
+            new LambdaQueryWrapper<SparkApplication>()
+                .eq(SparkApplication::getSparkClusterId, clusterId));
     }
 
     @Override
     public Integer countByClusterId(Long clusterId) {
         return baseMapper
-                .selectCount(
-                        new LambdaQueryWrapper<SparkApplication>()
-                                .eq(SparkApplication::getSparkClusterId, clusterId))
-                .intValue();
+            .selectCount(
+                new LambdaQueryWrapper<SparkApplication>()
+                    .eq(SparkApplication::getSparkClusterId, clusterId))
+            .intValue();
     }
 
     @Override
@@ -275,7 +275,7 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public boolean existsBySparkEnvId(Long sparkEnvId) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getVersionId, sparkEnvId));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getVersionId, sparkEnvId));
     }
 
     @Override
@@ -306,12 +306,12 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public List<String> listHistoryUploadJars() {
         return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
-                .filter(File::isFile)
-                .sorted(Comparator.comparingLong(File::lastModified).reversed())
-                .map(File::getName)
-                .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
-                .limit(DEFAULT_HISTORY_RECORD_LIMIT)
-                .collect(Collectors.toList());
+            .filter(File::isFile)
+            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+            .map(File::getName)
+            .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
+            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -332,24 +332,22 @@ public class SparkApplicationInfoServiceImpl
     public List<ApplicationReport> getYarnAppReport(String appName) {
         try {
             YarnClient yarnClient = HadoopUtils.yarnClient();
-            Set<String> types =
-                    Sets.newHashSet(
-                            ApplicationType.STREAMPARK_SPARK.getName(), ApplicationType.APACHE_SPARK.getName());
-            EnumSet<YarnApplicationState> states =
-                    EnumSet.of(
-                            YarnApplicationState.NEW,
-                            YarnApplicationState.NEW_SAVING,
-                            YarnApplicationState.SUBMITTED,
-                            YarnApplicationState.ACCEPTED,
-                            YarnApplicationState.RUNNING);
+            Set<String> types = Sets.newHashSet(
+                ApplicationType.STREAMPARK_SPARK.getName(), ApplicationType.APACHE_SPARK.getName());
+            EnumSet<YarnApplicationState> states = EnumSet.of(
+                YarnApplicationState.NEW,
+                YarnApplicationState.NEW_SAVING,
+                YarnApplicationState.SUBMITTED,
+                YarnApplicationState.ACCEPTED,
+                YarnApplicationState.RUNNING);
             Set<String> yarnTag = Sets.newHashSet("streampark");
             List<ApplicationReport> applications = yarnClient.getApplications(types, states, yarnTag);
             return applications.stream()
-                    .filter(report -> report.getName().equals(appName))
-                    .collect(Collectors.toList());
+                .filter(report -> report.getName().equals(appName))
+                .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(
-                    "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
+                "getYarnAppReport failed. Ensure that yarn is running properly. ", e);
         }
     }
 
@@ -391,7 +389,7 @@ public class SparkApplicationInfoServiceImpl
             if (FlinkAppStateEnum.isEndState(app.getState())) {
                 // check whether jobName exists on yarn
                 if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                        && YarnUtils.isContains(appParam.getJobName())) {
+                    && YarnUtils.isContains(appParam.getJobName())) {
                     return AppExistsStateEnum.IN_YARN;
                 }
             }
@@ -402,7 +400,7 @@ public class SparkApplicationInfoServiceImpl
 
             // check whether jobName exists on yarn
             if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                    && YarnUtils.isContains(appParam.getJobName())) {
+                && YarnUtils.isContains(appParam.getJobName())) {
                 return AppExistsStateEnum.IN_YARN;
             }
         }
@@ -411,7 +409,7 @@ public class SparkApplicationInfoServiceImpl
 
     private boolean existsByJobName(String jobName) {
         return baseMapper.exists(
-                new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
     }
 
     @Override
@@ -443,20 +441,17 @@ public class SparkApplicationInfoServiceImpl
             final String pathPart = uri.getPath();
             String error = null;
             if (scheme == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
             } else if (pathPart == null) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
             } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error =
-                        "This state.savepoints.dir value "
-                                + savepointPath
-                                + " Cannot use the root directory for checkpoints.";
+                error = "This state.savepoints.dir value "
+                    + savepointPath
+                    + " Cannot use the root directory for checkpoints.";
             }
             return error;
         } else {
@@ -467,7 +462,7 @@ public class SparkApplicationInfoServiceImpl
     private Boolean checkJobName(String jobName) {
         if (!StringUtils.isBlank(jobName.trim())) {
             return JOB_NAME_PATTERN.matcher(jobName).matches()
-                    && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
+                && SINGLE_SPACE_PATTERN.matcher(jobName).matches();
         }
         return false;
     }

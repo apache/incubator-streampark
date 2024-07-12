@@ -44,7 +44,8 @@ object SqlClient extends App {
     }
   }
 
-  private[this] val sets = SqlCommandParser.parseSQL(sparkSql).filter(_.command == SqlCommand.SET)
+  private[this] val sets =
+    SqlCommandParser.parseSQL(sparkSql).filter(_.command == SqlCommand.SET)
 
   private[this] val defaultMode = "BATCH"
 

@@ -49,7 +49,7 @@ public class TableInfo implements Serializable {
         }
         TableInfo tableInfo = (TableInfo) o;
         return Objects.equals(identifier, tableInfo.identifier)
-                && tableKindEnum == tableInfo.tableKindEnum;
+            && tableKindEnum == tableInfo.tableKindEnum;
     }
 
     @Override

@@ -45,8 +45,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, AlertConfig>
-        implements
-            AlertConfigService {
+    implements
+        AlertConfigService {
 
     @Autowired
     private ApplicationInfoService applicationInfoService;
@@ -63,7 +63,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
         Page<AlertConfigParams> result = new Page<>();
         if (CollectionUtils.isNotEmpty(resultPage.getRecords())) {
             result.setRecords(
-                    resultPage.getRecords().stream().map(AlertConfigParams::of).collect(Collectors.toList()));
+                resultPage.getRecords().stream().map(AlertConfigParams::of).collect(Collectors.toList()));
         }
 
         return result;
@@ -77,14 +77,13 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
 
     @Override
     public boolean removeById(Long id) throws AlertException {
-        long count =
-                applicationInfoService.count(
-                        new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
+        long count = applicationInfoService.count(
+            new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
         if (count > 0) {
             throw new AlertException(
-                    String.format(
-                            "AlertId:%d, this is bound by application. Please clear the configuration first",
-                            id));
+                String.format(
+                    "AlertId:%d, this is bound by application. Please clear the configuration first",
+                    id));
         }
         return super.removeById(id);
     }

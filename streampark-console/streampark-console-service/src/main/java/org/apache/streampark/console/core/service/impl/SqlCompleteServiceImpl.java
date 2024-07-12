@@ -126,15 +126,15 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 scanner.close();
                 String dict = stringBuffer.toString();
                 Arrays.stream(dict.split(SPLIT_CHAR))
-                        .map(e -> e.trim().toLowerCase())
-                        .forEach(e -> this.initSearchTree(e, 1));
+                    .map(e -> e.trim().toLowerCase())
+                    .forEach(e -> this.initSearchTree(e, 1));
             } catch (IOException e) {
                 log.error("FstTree require reserved word init fail, {}", e.getMessage());
             }
 
             Arrays.stream(CHARACTER_NOTICE.split(SPLIT_CHAR))
-                    .map(e -> e.trim().toLowerCase())
-                    .forEach(e -> this.initSearchTree(e, 1));
+                .map(e -> e.trim().toLowerCase())
+                .forEach(e -> this.initSearchTree(e, 1));
 
             try {
                 Resource resource = new ClassPathResource("sql-statistics.dict");
@@ -230,8 +230,8 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
                 returnSource.add(new WordWithFrequency(buffer + now.getStep(), now.getCount()));
             } else {
                 now.getNext()
-                        .values()
-                        .forEach(each -> this.getDFSWord(returnSource, buffer + now.getStep(), each));
+                    .values()
+                    .forEach(each -> this.getDFSWord(returnSource, buffer + now.getStep(), each));
             }
         }
 
@@ -243,10 +243,9 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             SortedSet<WordWithFrequency> returnSource;
             SqlCompleteFstTree.Single breLoc = new Single();
             this.getMaybeNodeList(word, tree, breLoc).forEach(each -> this.getDFSWord(temp, "", each));
-            returnSource =
-                    temp.stream()
-                            .map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word, e.count))
-                            .collect(Collectors.toCollection(TreeSet::new));
+            returnSource = temp.stream()
+                .map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word, e.count))
+                .collect(Collectors.toCollection(TreeSet::new));
 
             // When FST appears that the prefix cannot be completely matched, such as: sela users may want
             // to enter sele, there is no sela in FstTree.
@@ -259,13 +258,14 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
 
             if (breLoc.loc < word.length() && breLoc.loc > 1) {
                 this.getMaybeNodeList(word.substring(0, breLoc.loc - 1), tree, breLoc)
-                        .forEach(each -> this.getDFSWord(tempNPreview, "", each));
+                    .forEach(each -> this.getDFSWord(tempNPreview, "", each));
 
                 // Note: that due to the use of variable variables, here breloc has been-1
                 returnSource.addAll(
-                        tempNPreview.stream()
-                                .map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word, e.count))
-                                .collect(Collectors.toList()));
+                    tempNPreview.stream()
+                        .map(e -> new WordWithFrequency(word.substring(0, breLoc.loc) + e.word,
+                            e.count))
+                        .collect(Collectors.toList()));
             }
 
             // returns the length of the last successful match, which is used to measure the correctness
@@ -301,21 +301,21 @@ public class SqlCompleteServiceImpl implements SqlCompleteService {
             SqlCompleteFstTree.Single searchFromHeadPassLength = new Single();
             SqlCompleteFstTree.Single searchFromReversePassLength = new Single();
 
-            SortedSet<WordWithFrequency> head =
-                    tryComplicate(word, READ_FROM_HEAD, searchFromHeadPassLength);
+            SortedSet<WordWithFrequency> head = tryComplicate(word, READ_FROM_HEAD, searchFromHeadPassLength);
 
             // Reverse search is used for error correction. Normal scenes have no meaning, such as sel,
             // the reverse order will return l data in reverse order (because there is no les character)
-            SortedSet<WordWithFrequency> tail =
-                    tryComplicate(
-                            new StringBuffer(word).reverse().toString(),
-                            READ_FROM_HEAD,
-                            searchFromReversePassLength)
-                                    .stream()
-                                    .map(
-                                            e -> new WordWithFrequency(new StringBuffer(e.word).reverse().toString(),
-                                                    e.count))
-                                    .collect(Collectors.toCollection(TreeSet::new));
+            SortedSet<WordWithFrequency> tail = tryComplicate(
+                new StringBuffer(word).reverse().toString(),
+                READ_FROM_HEAD,
+                searchFromReversePassLength)
+                    .stream()
+                    .map(
+                        e -> new WordWithFrequency(
+                            new StringBuffer(e.word).reverse()
+                                .toString(),
+                            e.count))
+                    .collect(Collectors.toCollection(TreeSet::new));
 
             SortedSet<WordWithFrequency> temp = new TreeSet<>(head);
             temp.retainAll(tail);

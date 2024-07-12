@@ -59,11 +59,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<String> listPermissions(Long userId, Long teamId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("The userId [%s] not found", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("The userId [%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
             return this.list().stream().map(Menu::getPerms).collect(Collectors.toList());
@@ -73,15 +72,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> listMenus(Long userId, Long teamId) {
-        User user =
-                Optional.ofNullable(userService.getById(userId))
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        String.format("The userId:[%s] not found", userId)));
+        User user = Optional.ofNullable(userService.getById(userId))
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("The userId:[%s] not found", userId)));
         // Admin has the permission for all menus.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
-            LambdaQueryWrapper<Menu> queryWrapper =
-                    new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0").orderByAsc(Menu::getOrderNum);
+            LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<Menu>().eq(Menu::getType, "0")
+                .orderByAsc(Menu::getOrderNum);
             return this.list(queryWrapper);
         }
         return this.baseMapper.selectMenus(userId, teamId);
@@ -96,10 +94,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                 queryWrapper.eq(Menu::getMenuName, menu.getMenuName());
             }
             if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
-                    && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
+                && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
                 queryWrapper
-                        .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
-                        .le(Menu::getCreateTime, menu.getCreateTimeTo());
+                    .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
+                    .le(Menu::getCreateTime, menu.getCreateTimeTo());
             }
             List<Menu> menus = baseMapper.selectList(queryWrapper);
 
@@ -107,10 +105,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<String> ids = new ArrayList<>();
 
             menus.forEach(
-                    m -> {
-                        ids.add(m.getMenuId().toString());
-                        trees.add(new RouterTree(m));
-                    });
+                m -> {
+                    ids.add(m.getMenuId().toString());
+                    trees.add(new RouterTree(m));
+                });
             result.put(IDS, ids);
             result.put(TOTAL, menus.size());
             RouterTree<Menu> routerTree = VueRouterUtils.buildRouterTree(trees);
@@ -129,16 +127,16 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         // The query type is the menu type
         List<Menu> menus = this.listMenus(userId, teamId);
         menus.forEach(
-                menu -> {
-                    VueRouter<Menu> route = new VueRouter<>();
-                    route.setId(menu.getMenuId().toString());
-                    route.setParentId(menu.getParentId().toString());
-                    route.setPath(menu.getPath());
-                    route.setComponent(menu.getComponent());
-                    route.setName(menu.getMenuName());
-                    route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
-                    routes.add(route);
-                });
+            menu -> {
+                VueRouter<Menu> route = new VueRouter<>();
+                route.setId(menu.getMenuId().toString());
+                route.setParentId(menu.getParentId().toString());
+                route.setPath(menu.getPath());
+                route.setComponent(menu.getComponent());
+                route.setName(menu.getMenuName());
+                route.setMeta(new RouterMeta(true, !menu.isDisplay(), true, menu.getIcon()));
+                routes.add(route);
+            });
         return VueRouterUtils.buildVueRouter(routes);
     }
 }

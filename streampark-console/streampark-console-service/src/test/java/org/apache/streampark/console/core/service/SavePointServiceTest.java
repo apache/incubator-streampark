@@ -88,7 +88,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
         assertThat(savePointServiceImpl.getSavepointFromDynamicProps(null)).isNull();
         assertThat(savePointServiceImpl.getSavepointFromDynamicProps(props)).isEqualTo("hdfs:///test");
         assertThat(savePointServiceImpl.getSavepointFromDynamicProps(propsWithEmptyTargetValue))
-                .isEmpty();
+            .isEmpty();
     }
 
     @Test
@@ -132,9 +132,10 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
         // Test for configured CHECKPOINTING_INTERVAL
         appCfg.setContent(
-                DeflaterUtils.zipString(
-                        "state.savepoints.dir=hdfs:///test\n"
-                                + String.format("%s=%s", CHECKPOINTING_INTERVAL.key(), "3min")));
+            DeflaterUtils.zipString(
+                "state.savepoints.dir=hdfs:///test\n"
+                    + String.format("%s=%s", CHECKPOINTING_INTERVAL.key(),
+                        "3min")));
         configService.updateById(appCfg);
         Effective effective = new Effective();
         effective.setTargetId(appCfg.getId());
@@ -168,7 +169,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
 
         // Test for non-remote mode
         assertThat(savePointServiceImpl.getSavepointFromDeployLayer(application))
-                .isEqualTo("hdfs:///test");
+            .isEqualTo("hdfs:///test");
 
         // Start the test lines for remote mode
         Long clusterId = 1L;
@@ -177,7 +178,7 @@ class SavePointServiceTest extends SpringUnitTestBase {
         application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
         application.setFlinkClusterId(clusterId);
         assertThatThrownBy(() -> savePointServiceImpl.getSavepointFromDeployLayer(application))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
 
         // Ignored.
         // Test for it with empty config

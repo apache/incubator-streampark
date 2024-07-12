@@ -1,22 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.apache.streampark.e2e.pages.resource;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
@@ -35,18 +33,38 @@ import java.time.Duration;
 public final class ResourcePage extends NavBarPage implements NavBarItem {
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Variables')]//..")
-    private WebElement resourceVariableManagement;
+    private WebElement menuVariables;
+
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Projects')]//..")
+    private WebElement menuProjects;
+
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Uploads')]//..")
+    private WebElement menuUploads;
 
     public ResourcePage(RemoteWebDriver driver) {
         super(driver);
     }
 
     public <T extends ResourcePage.Tab> T goToTab(Class<T> tab) {
-        if (tab == VariableManagementPage.class) {
+        if (tab == VariablesPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(resourceVariableManagement));
-            resourceVariableManagement.click();
-            return tab.cast(new VariableManagementPage(driver));
+                .until(ExpectedConditions.elementToBeClickable(menuVariables));
+            menuVariables.click();
+            return tab.cast(new VariablesPage(driver));
+        }
+
+        if (tab == ProjectsPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(menuProjects));
+            menuProjects.click();
+            return tab.cast(new ProjectsPage(driver));
+        }
+
+        if (tab == UploadsPage.class) {
+            new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(menuUploads));
+            menuUploads.click();
+            return tab.cast(new UploadsPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());

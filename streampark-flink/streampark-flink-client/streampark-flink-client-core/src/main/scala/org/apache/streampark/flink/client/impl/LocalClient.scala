@@ -43,12 +43,14 @@ object LocalClient extends FlinkClientTrait {
       flinkConfig: Configuration): SubmitResponse = {
 
     // build JobGraph
-    val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
+    val programJobGraph =
+      super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
     val jobGraph = programJobGraph._2
     val client = createLocalCluster(flinkConfig)
     val jobId = client.submitJob(jobGraph).get().toString
-    val resp = SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
+    val resp =
+      SubmitResponse(jobId, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     closeSubmit(submitRequest, packageProgram, client)
     resp
   }
@@ -74,7 +76,8 @@ object LocalClient extends FlinkClientTrait {
         ConfigConstants.LOCAL_NUMBER_TASK_MANAGER,
         ConfigConstants.DEFAULT_LOCAL_NUMBER_TASK_MANAGER)
 
-      val numSlotsPerTaskManager = flinkConfig.getInteger(TaskManagerOptions.NUM_TASK_SLOTS)
+      val numSlotsPerTaskManager =
+        flinkConfig.getInteger(TaskManagerOptions.NUM_TASK_SLOTS)
 
       val miniClusterConfig = new MiniClusterConfiguration.Builder()
         .setConfiguration(flinkConfig)
