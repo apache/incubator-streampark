@@ -18,7 +18,3 @@
 [submodule ".github/actions/workflow-telemetry-action"]
 	path = .github/actions/workflow-telemetry-action
 	url = https://github.com/catchpoint/workflow-telemetry-action
-[submodule ".github/actions/sonarqube-action"]
-	path = .github/actions/sonarqube-action
-	url = https://github.com/kitabisa/sonarqube-action.git
-	branch = 616b2df627ff42c04eb4fcaf491029aa57861daf
