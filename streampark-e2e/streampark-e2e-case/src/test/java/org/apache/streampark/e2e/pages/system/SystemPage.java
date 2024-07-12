@@ -74,7 +74,7 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         }
         if (tab == TokenManagementPage.class) {
             new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.elementToBeClickable(menuTokenManagement));
+                .until(ExpectedConditions.elementToBeClickable(menuTokenManagement));
             menuTokenManagement.click();
             return tab.cast(new TokenManagementPage(driver));
         }

@@ -1,22 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.apache.streampark.e2e.pages.system;
 
 import org.apache.streampark.e2e.pages.common.NavBarPage;
@@ -59,11 +57,11 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(buttonCreateToken));
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateToken));
         buttonCreateToken.click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName()));
+            .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName()));
         createTokenForm.inputUserName().sendKeys(existUserName);
         createTokenForm.inputUserName().sendKeys(Keys.RETURN);
 
@@ -76,13 +74,13 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         tokenList().stream()
-                .filter(it -> it.getText().contains(existUserName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Copy Token')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No Copy button in token list"))
-                .click();
+            .filter(it -> it.getText().contains(existUserName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Copy Token')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No Copy button in token list"))
+            .click();
 
         return this;
     }
@@ -91,16 +89,16 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
 
         tokenList().stream()
-                .filter(it -> it.getText().contains(existUserName))
-                .flatMap(
-                        it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Token')]")).stream())
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No delete button in token list"))
-                .click();
+            .filter(it -> it.getText().contains(existUserName))
+            .flatMap(
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Token')]")).stream())
+            .filter(WebElement::isDisplayed)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No delete button in token list"))
+            .click();
 
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
         deleteConfirmButton.click();
 
         return this;
@@ -108,7 +106,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.urlContains("/system/token"));
+            .until(ExpectedConditions.urlContains("/system/token"));
     }
 
     @Getter
