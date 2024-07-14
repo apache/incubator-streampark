@@ -81,12 +81,10 @@ class ChildFirstClassLoader(
         super.findLoadedClass(name) match {
           case null =>
             // check whether the class should go parent-first
-            for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-              if (name.startsWith(parentFirstPattern)) {
-                return super.loadClass(name, resolve)
-              }
+            PARENT_FIRST_PATTERNS.find(name.startsWith) match {
+              case Some(_) => super.loadClass(name, resolve)
+              case _ => Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
             }
-            Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
           case c =>
             if (resolve) {
               resolveClass(c)
@@ -97,7 +95,7 @@ class ChildFirstClassLoader(
     } catch {
       case e: Throwable =>
         classLoadingExceptionHandler.accept(e)
-        throw e
+        null
     }
   }
 
