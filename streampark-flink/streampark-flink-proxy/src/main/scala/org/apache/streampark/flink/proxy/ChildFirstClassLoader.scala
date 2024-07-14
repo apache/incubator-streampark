@@ -48,7 +48,7 @@ class ChildFirstClassLoader(
       parent,
       flinkResourcePattern,
       new Consumer[Throwable] {
-        override def accept(t: Throwable): Unit = {}
+        override def accept(t: Throwable): Unit = { throw t }
       })
   }
 
@@ -64,6 +64,7 @@ class ChildFirstClassLoader(
     "org.apache.log4j",
     "org.apache.logging",
     "org.apache.commons.logging",
+    "org.apache.commons.cli",
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
@@ -73,11 +74,25 @@ class ChildFirstClassLoader(
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
     try {
-      this.synchronized(this.loadClassWithoutExceptionHandling(name, resolve))
+      this.synchronized {
+        super.findLoadedClass(name) match {
+          case null =>
+            // check whether the class should go parent-first
+            PARENT_FIRST_PATTERNS.find(name.startsWith) match {
+              case Some(_) => super.loadClass(name, resolve)
+              case _ => Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
+            }
+          case c =>
+            if (resolve) {
+              resolveClass(c)
+            }
+            c
+        }
+      }
     } catch {
       case e: Throwable =>
         classLoadingExceptionHandler.accept(e)
-        throw e
+        null
     }
   }
 
@@ -135,26 +150,6 @@ class ChildFirstClassLoader(
       override def hasMoreElements: Boolean = iter.hasNext
 
       override def nextElement: URL = iter.next
-    }
-  }
-
-  @throws[ClassNotFoundException]
-  private def loadClassWithoutExceptionHandling(name: String, resolve: Boolean): Class[_] = {
-    // First, check if the class has already been loaded
-    super.findLoadedClass(name) match {
-      case null =>
-        // check whether the class should go parent-first
-        for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-          if (name.startsWith(parentFirstPattern)) {
-            return super.loadClass(name, resolve)
-          }
-        }
-        Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
-      case c =>
-        if (resolve) {
-          resolveClass(c)
-        }
-        c
     }
   }
 
