@@ -20,9 +20,9 @@ package org.apache.streampark.flink.proxy
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
 import java.util
+import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.language.existentials
 import scala.util.Try
 
 /**
@@ -33,8 +33,26 @@ import scala.util.Try
  * we don't override that.
  */
 
-class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern)
+class ChildFirstClassLoader(
+    urls: Array[URL],
+    parent: ClassLoader,
+    flinkResourcePattern: Pattern,
+    classLoadingExceptionHandler: Consumer[Throwable])
   extends URLClassLoader(urls, parent) {
+
+  ClassLoader.registerAsParallelCapable()
+
+  def this(urls: Array[URL], parent: ClassLoader, flinkResourcePattern: Pattern) {
+    this(
+      urls,
+      parent,
+      flinkResourcePattern,
+      new Consumer[Throwable] {
+        override def accept(t: Throwable): Unit = {
+          throw t
+        }
+      })
+  }
 
   ClassLoader.registerAsParallelCapable()
 
@@ -57,24 +75,29 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
 
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
-    this.synchronized {
-      // First, check if the class has already been loaded
-      val clazz = super.findLoadedClass(name) match {
-        case null =>
-          // check whether the class should go parent-first
-          for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-            if (name.startsWith(parentFirstPattern)) {
-              super.loadClass(name, resolve)
+    try {
+      this.synchronized {
+        // First, check if the class has already been loaded
+        super.findLoadedClass(name) match {
+          case null =>
+            // check whether the class should go parent-first
+            for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
+              if (name.startsWith(parentFirstPattern)) {
+                return super.loadClass(name, resolve)
+              }
             }
-          }
-          Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
-        case c: Class[_] =>
-          if (resolve) {
-            resolveClass(c)
-          }
-          c
+            Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
+          case c =>
+            if (resolve) {
+              resolveClass(c)
+            }
+            c
+        }
       }
-      clazz
+    } catch {
+      case e: Throwable =>
+        classLoadingExceptionHandler.accept(e)
+        throw e
     }
   }
 
@@ -99,9 +122,7 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, flinkResource
       val spec = urlClassLoaderResource.getFile
       val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
       val matchState =
-        FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern
-          .matcher(filename)
-          .matches
+        FLINK_PATTERN.matcher(filename).matches && !flinkResourcePattern.matcher(filename).matches
       if (matchState) {
         return null
       }
