@@ -37,8 +37,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.apache.streampark.e2e.core.Constants.TEST_FLINK_SQL;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
-public class Flink118OnYarnTest {
+@StreamPark(composeFiles = "docker/flink-1.16-on-yarn/docker-compose.yaml")
+public class FlinkSQL116OnYarnTest {
 
     private static RemoteWebDriver browser;
 
@@ -48,11 +48,11 @@ public class Flink118OnYarnTest {
 
     private static final String teamName = "default";
 
-    private static final String flinkName = "flink-1.18.1";
+    private static final String flinkName = "flink-1.16.3";
 
-    private static final String flinkHome = "/flink-1.18.1";
+    private static final String flinkHome = "/flink-1.16.3";
 
-    private static final String applicationName = "flink-118-e2e-test";
+    private static final String applicationName = "flink-116-e2e-test";
 
     @BeforeAll
     public static void setup() {
@@ -177,7 +177,6 @@ public class Flink118OnYarnTest {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
         ApplicationsDynamicParams applicationsDynamicParams = new ApplicationsDynamicParams();
-
         applicationsDynamicParams.flinkSQL(TEST_FLINK_SQL);
         applicationsPage
             .createApplication()
@@ -231,32 +230,6 @@ public class Flink118OnYarnTest {
                     .as("Applications list should contain finished application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("FINISHED")));
-    }
-
-    @Test
-    @Order(71)
-    @SneakyThrows
-    void testRestartAndCancelFlinkApplicationOnYarnPerJobMode() {
-        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
-
-        applicationsPage.startApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
-                    .as("Applications list should contain restarted application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("RUNNING")));
-
-        applicationsPage.cancelApplication(applicationName);
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
-                    .as("Applications list should contain canceled application")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("CANCELED")));
     }
 
     @Test

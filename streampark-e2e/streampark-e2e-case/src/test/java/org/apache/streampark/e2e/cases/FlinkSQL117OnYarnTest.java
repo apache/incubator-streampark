@@ -38,7 +38,7 @@ import static org.apache.streampark.e2e.core.Constants.TEST_FLINK_SQL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
-public class Flink117OnYarnTest {
+public class FlinkSQL117OnYarnTest {
 
     private static RemoteWebDriver browser;
 
