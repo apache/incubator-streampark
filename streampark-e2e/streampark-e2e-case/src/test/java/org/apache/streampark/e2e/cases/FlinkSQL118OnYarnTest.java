@@ -37,8 +37,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.apache.streampark.e2e.core.Constants.TEST_FLINK_SQL;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
-public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
+@StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
+public class FlinkSQL118OnYarnTest {
 
     private static RemoteWebDriver browser;
 
@@ -48,11 +48,11 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
 
     private static final String teamName = "default";
 
-    private static final String flinkName = "flink-1.17.2";
+    private static final String flinkName = "flink-1.18.1";
 
-    private static final String flinkHome = "/flink-1.17.2";
+    private static final String flinkHome = "/flink-1.18.1";
 
-    private static final String applicationName = "flink-117-e2e-test";
+    private static final String applicationName = "flink-118-e2e-test";
 
     @BeforeAll
     public static void setup() {
@@ -106,8 +106,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-    // @Test
-    // @Order(30)
+    @Test
+    @Order(30)
     void testStartFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -128,8 +128,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("FINISHED")));
     }
 
-    // @Test
-    // @Order(31)
+    @Test
+    @Order(31)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
@@ -211,8 +211,8 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-    // @Test
-    // @Order(70)
+    @Test
+    @Order(70)
     void testStartFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -231,6 +231,32 @@ public class ApplicationsFlink117OnYarnWithFlinkSQLTest {
                     .as("Applications list should contain finished application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("FINISHED")));
+    }
+
+    @Test
+    @Order(71)
+    @SneakyThrows
+    void testRestartAndCancelFlinkApplicationOnYarnPerJobMode() {
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
+        final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
+
+        applicationsPage.startApplication(applicationName);
+
+        Awaitility.await()
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain restarted application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("RUNNING")));
+
+        applicationsPage.cancelApplication(applicationName);
+
+        Awaitility.await()
+            .untilAsserted(
+                () -> assertThat(applicationsPage.applicationsList())
+                    .as("Applications list should contain canceled application")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains("CANCELED")));
     }
 
     @Test
