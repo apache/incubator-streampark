@@ -47,11 +47,7 @@ class ChildFirstClassLoader(
       urls,
       parent,
       flinkResourcePattern,
-      new Consumer[Throwable] {
-        override def accept(t: Throwable): Unit = {
-          throw t
-        }
-      })
+      (t: Throwable) => throw t)
   }
 
   ClassLoader.registerAsParallelCapable()
@@ -68,6 +64,7 @@ class ChildFirstClassLoader(
     "org.apache.log4j",
     "org.apache.logging",
     "org.apache.commons.logging",
+    "org.apache.commons.cli",
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
