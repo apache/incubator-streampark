@@ -32,11 +32,14 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   private[this] lazy val FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$")
 
-  private[this] lazy val FLINK_VERSION_PATTERN =
-    Pattern.compile("^Version: (\\d+\\.\\d+\\.\\d+).*, Commit ID: (.*)$")
+  private[this] lazy val FLINK_VERSION_PATTERN = Pattern.compile("^Version: (.*), Commit ID: (.*)$")
 
   private[this] lazy val FLINK_SCALA_VERSION_PATTERN =
     Pattern.compile("^flink-dist_(\\d\\.\\d+).*.jar$")
+
+  private[this] lazy val APACHE_FLINK_VERSION_PATTERN = Pattern.compile("(^\\d+\\.\\d+\\.\\d+)")
+
+  private[this] lazy val OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)")
 
   lazy val scalaVersion: String = {
     val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)
@@ -64,8 +67,9 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
 
   lazy val version: String = {
     val flinkVersion = new AtomicReference[String]
+
     val cmd = List(
-      s"java -classpath ${flinkDistJar.getAbsolutePath} org.apache.flink.client.cli.CliFrontend --version")
+      s"java -classpath ${flinkDistJar.getName} org.apache.flink.client.cli.CliFrontend --version")
     val success = new AtomicBoolean(false)
     val buffer = new mutable.StringBuilder
     CommandUtils.execute(
@@ -76,8 +80,18 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
           buffer.append(out).append("\n")
           val matcher = FLINK_VERSION_PATTERN.matcher(out)
           if (matcher.find) {
-            success.set(true)
-            flinkVersion.set(matcher.group(1))
+            val version = matcher.group(1)
+            val matcher1 = APACHE_FLINK_VERSION_PATTERN.matcher(version)
+            if (matcher1.find) {
+              success.set(true)
+              flinkVersion.set(version)
+            } else {
+              val matcher2 = OTHER_FLINK_VERSION_PATTERN.matcher(version)
+              if (matcher2.find) {
+                success.set(true)
+                flinkVersion.set(s"${matcher2.group(1)}.0")
+              }
+            }
           }
         }
       }
@@ -127,7 +141,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   }
 
   // StreamPark flink shims version, like "streampark-flink-shims_flink-1.13"
-  lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
+  private lazy val shimsVersion: String = s"streampark-flink-shims_flink-$majorVersion"
 
   override def toString: String =
     s"""
