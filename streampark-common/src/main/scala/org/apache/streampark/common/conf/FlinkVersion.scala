@@ -43,7 +43,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   lazy val scalaVersion: String = {
     val matcher = FLINK_SCALA_VERSION_PATTERN.matcher(flinkDistJar.getName)
     if (matcher.matches()) {
-      matcher.group(1);
+      matcher.group(1)
     } else {
       // flink 1.15 + on support scala 2.12
       "2.12"
