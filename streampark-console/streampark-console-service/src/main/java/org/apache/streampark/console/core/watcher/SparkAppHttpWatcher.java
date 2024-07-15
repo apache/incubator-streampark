@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.watcher;
 
-import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.Tuple2;
@@ -36,7 +35,6 @@ import org.apache.streampark.console.core.service.application.SparkApplicationIn
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 
 import org.apache.flink.annotation.VisibleForTesting;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.util.Timeout;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -104,20 +102,11 @@ public class SparkAppHttpWatcher {
     private static final Map<Long, SparkApplication> WATCHING_APPS = new ConcurrentHashMap<>(0);
 
     /**
-     *
-     *
      * <pre>
      * StopFrom: Recording spark application stopped by streampark or stopped by other actions
      * </pre>
      */
     private static final Map<Long, StopFromEnum> STOP_FROM_MAP = new ConcurrentHashMap<>(0);
-
-    /**
-     * Cancelling tasks are placed in this cache with an expiration time of 10 seconds (the time of 2
-     * task monitoring polls).
-     */
-    private static final Cache<Long, Byte> CANCELING_CACHE =
-        Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
 
     /**
      * Task canceled tracking list, record who cancelled the tracking task Map<applicationId,userId>
@@ -383,23 +372,8 @@ public class SparkAppHttpWatcher {
         return JacksonUtils.read(result, clazz);
     }
 
-    private <T> T httpRestRequest(String url, Class<T> clazz) throws IOException {
-        String result =
-            HttpClientUtils.httpGetRequest(
-                url, RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
-        if (null == result) {
-            return null;
-        }
-        return JacksonUtils.read(result, clazz);
-    }
-
     public boolean isWatchingApp(Long id) {
         return WATCHING_APPS.containsKey(id);
-    }
-
-    interface Callback<T, R> {
-
-        R call(T e) throws Exception;
     }
 
     /**

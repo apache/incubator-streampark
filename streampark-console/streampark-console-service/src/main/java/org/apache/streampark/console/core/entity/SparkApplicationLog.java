@@ -36,7 +36,7 @@ public class SparkApplicationLog {
     private Long appId;
     /** applicationId */
     private String sparkAppId;
-    /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
+    /** tracking url of current spark application */
     private String trackUrl;
     /** start status */
     private Boolean success;

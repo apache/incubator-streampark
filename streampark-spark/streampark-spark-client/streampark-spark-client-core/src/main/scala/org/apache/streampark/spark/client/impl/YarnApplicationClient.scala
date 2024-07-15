@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.enums.SparkExecutionMode
 import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
@@ -56,7 +57,14 @@ object YarnApplicationClient extends SparkClientTrait {
         .shadedJarPath)
       .setMainClass(submitRequest.appMain)
       .setMaster("yarn")
-      .setDeployMode("cluster")
+      .setDeployMode(submitRequest.executionMode match {
+        case SparkExecutionMode.YARN_CLIENT => "client"
+        case SparkExecutionMode.YARN_CLUSTER => "cluster"
+        case _ =>
+          throw new IllegalArgumentException(
+            "[StreamPark][YarnApplicationClient] Yarn mode only support \"client\" and \"cluster\".")
+
+      })
       .setAppName(submitRequest.appName)
       .setConf(
         "spark.yarn.jars",
@@ -76,7 +84,7 @@ object YarnApplicationClient extends SparkClientTrait {
       launcher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
     }
 
-    logger.info("The spark task start")
+    logger.info("[StreamPark][YarnApplicationClient] The spark task start")
     val cdlForApplicationId: CountDownLatch = new CountDownLatch(1)
 
     var sparkAppHandle: SparkAppHandle = null
@@ -114,19 +122,19 @@ object YarnApplicationClient extends SparkClientTrait {
 
     cdlForApplicationId.await()
     logger.info(
-      "The task is executing, handle current state is {}, appid is {}",
+      "[StreamPark][YarnApplicationClient] The task is executing, handle current state is {}, appid is {}",
       Array(sparkAppHandle.getState.toString, sparkAppHandle.getAppId))
     SubmitResponse(null, null, sparkAppHandle.getAppId)
   }
 
   private def setDynamicProperties(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {
-    logger.info("Spark launcher start configuration.")
+    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start configuration.")
     val finalProperties: Map[String, Any] = SparkConfiguration.defaultParameters ++ properties
     for ((k, v) <- finalProperties) {
       if (k.startsWith("spark.")) {
         sparkLauncher.setConf(k, v.toString)
       } else {
-        logger.info("\"{}\" doesn't start with \"spark.\". Skip it.", k)
+        logger.info("[StreamPark][YarnApplicationClient] \"{}\" doesn't start with \"spark.\". Skip it.", k)
       }
     }
   }

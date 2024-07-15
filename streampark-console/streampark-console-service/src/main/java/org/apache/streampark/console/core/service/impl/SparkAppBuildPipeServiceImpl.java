@@ -56,7 +56,7 @@ import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
-import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
@@ -132,7 +132,7 @@ public class SparkAppBuildPipeServiceImpl
     private SparkApplicationLogService applicationLogService;
 
     @Autowired
-    private FlinkAppHttpWatcher flinkAppHttpWatcher;
+    private SparkAppHttpWatcher sparkAppHttpWatcher;
 
     @Autowired
     private ApplicationConfigService applicationConfigService;
@@ -202,8 +202,8 @@ public class SparkAppBuildPipeServiceImpl
                     app.setRelease(ReleaseStateEnum.RELEASING.get());
                     applicationManageService.updateRelease(app);
 
-                    if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
-                        flinkAppHttpWatcher.init();
+                    if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
+                        sparkAppHttpWatcher.init();
                     }
 
                     // 1) checkEnv
@@ -331,8 +331,8 @@ public class SparkAppBuildPipeServiceImpl
                     }
                     applicationManageService.updateRelease(app);
                     applicationLogService.save(applicationLog);
-                    if (flinkAppHttpWatcher.isWatchingApp(app.getId())) {
-                        flinkAppHttpWatcher.init();
+                    if (sparkAppHttpWatcher.isWatchingApp(app.getId())) {
+                        sparkAppHttpWatcher.init();
                     }
                 }
             });

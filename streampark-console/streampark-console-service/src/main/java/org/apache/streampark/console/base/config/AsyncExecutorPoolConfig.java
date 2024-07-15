@@ -67,7 +67,7 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     }
 
     /**
-     * Create a ThreadPoolTaskExecutor for FlinkClusterWatcher.
+     * Create a ThreadPoolTaskExecutor for SparkAppHttpWatcher.
      *
      * @return Executor
      */

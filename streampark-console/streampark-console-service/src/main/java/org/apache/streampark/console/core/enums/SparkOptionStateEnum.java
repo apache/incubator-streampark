@@ -31,7 +31,7 @@ public enum SparkOptionStateEnum {
     RELEASING(1),
     /** Application which is currently action: starting. */
     STARTING(2),
-    /** Application which is currently action: starting. */
+    /** Application which is currently action: stopping. */
     STOPPING(3);
 
     private final int value;
