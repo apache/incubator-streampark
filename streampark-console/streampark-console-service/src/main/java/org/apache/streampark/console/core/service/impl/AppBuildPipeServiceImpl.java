@@ -356,7 +356,7 @@ public class AppBuildPipeServiceImpl
         log.info("Submit params to building pipeline : {}", k8sSessionBuildRequest);
         return FlinkK8sSessionBuildPipeline.of(k8sSessionBuildRequest);
       case KUBERNETES_NATIVE_APPLICATION:
-        DockerConfig dockerConfig = DockerConfig.fromSetting();
+        DockerConfig dockerConfig = settingService.getDockerConfig();
         FlinkK8sApplicationBuildRequest k8sApplicationBuildRequest =
             new FlinkK8sApplicationBuildRequest(
                 app.getJobName(),
