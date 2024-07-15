@@ -28,7 +28,7 @@ trait SparkClientTrait extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |--------------------------------------- spark job start ---------------------------------------
+         |--------------------------------------- spark job start -----------------------------------
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
          |    appName          : ${submitRequest.appName}
@@ -38,7 +38,7 @@ trait SparkClientTrait extends Logger {
          |    properties       : ${submitRequest.properties.mkString(" ")}
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
-         |-----------------------------------------------------------------------------------------------
+         |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
     submitRequest.developmentMode match {
