@@ -21,7 +21,7 @@ on:
   push:
     branches:
       - dev
-  pull_request:
+  pull_request_target:
     paths:
       - '**/pom.xml'
 
@@ -30,6 +30,9 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -42,7 +45,13 @@ jobs:
           java-version: 8
           distribution: 'adopt'
       - name: Run OWASP Dependency Check
-        run: ./mvnw -B clean install dependency-check:check -Dowasp.skip=false -Dspotless.skip=true -Drat.skip=true
+        run: |
+          ./mvnw -B clean install dependency-check:check \
+          -Dowasp.skip=false \
+          -Dspotless.skip=true \
+          -Drat.skip=true
+        env:
+          NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
       - name: Upload report
         uses: actions/upload-artifact@v4
         if: ${{ cancelled() || failure() }}

@@ -110,24 +110,26 @@ jobs:
     strategy:
       matrix:
         case:
-          - name: MemberManagementTest
-            class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: UploadManagementTest
+            class: org.apache.streampark.e2e.cases.UploadManagementTest
           - name: ProjectsManagementTest
             class: org.apache.streampark.e2e.cases.ProjectsManagementTest
           - name: VariableManagementTest
             class: org.apache.streampark.e2e.cases.VariableManagementTest
-          - name: RoleManagementTest
-            class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: UserManagementTest
             class: org.apache.streampark.e2e.cases.UserManagementTest
+          - name: RoleManagementTest
+            class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: TeamManagementTest
             class: org.apache.streampark.e2e.cases.TeamManagementTest
-          - name: ApplicationsFlink116OnYarnWithFlinkSQLTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink116OnYarnWithFlinkSQLTest
-          - name: ApplicationsFlink117OnYarnWithFlinkSQLTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink117OnYarnWithFlinkSQLTest
-          - name: ApplicationsFlink118OnYarnWithFlinkSQLTest
-            class: org.apache.streampark.e2e.cases.ApplicationsFlink118OnYarnWithFlinkSQLTest
+          - name: MemberManagementTest
+            class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: FlinkSQL116OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL116OnYarnTest
+          - name: FlinkSQL117OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL117OnYarnTest
+          - name: FlinkSQL118OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL118OnYarnTest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:

@@ -38,7 +38,7 @@ import static org.apache.streampark.e2e.core.Constants.TEST_FLINK_SQL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/flink-1.16-on-yarn/docker-compose.yaml")
-public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
+public class FlinkSQL116OnYarnTest {
 
     private static RemoteWebDriver browser;
 
@@ -106,8 +106,8 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-    // @Test
-    // @Order(30)
+    @Test
+    @Order(30)
     void testStartFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -128,8 +128,8 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("FINISHED")));
     }
 
-    // @Test
-    // @Order(31)
+    @Test
+    @Order(31)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnApplicationMode() {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
@@ -210,8 +210,8 @@ public class ApplicationsFlink116OnYarnWithFlinkSQLTest {
                     .anyMatch(it -> it.contains("SUCCESS")));
     }
 
-    // @Test
-    // @Order(70)
+    @Test
+    @Order(70)
     void testStartFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 

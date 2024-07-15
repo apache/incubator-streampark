@@ -20,7 +20,7 @@ package org.apache.streampark.e2e.cases;
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.resource.ResourcePage;
-import org.apache.streampark.e2e.pages.resource.VariableManagementPage;
+import org.apache.streampark.e2e.pages.resource.VariablesPage;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -55,18 +55,18 @@ public class VariableManagementTest {
         new LoginPage(browser)
             .login(userName, password, teamName)
             .goToNav(ResourcePage.class)
-            .goToTab(VariableManagementPage.class);
+            .goToTab(VariablesPage.class);
     }
 
     @Test
     @Order(10)
     void testCreateVariable() {
-        final VariableManagementPage variableManagementPage = new VariableManagementPage(browser);
-        variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
+        final VariablesPage variablesPage = new VariablesPage(browser);
+        variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
+                () -> assertThat(variablesPage.variableList())
                     .as("Variable list should contain newly-created variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(variableCode)));
@@ -75,32 +75,32 @@ public class VariableManagementTest {
     @Test
     @Order(20)
     void testCreateDuplicateVariable() {
-        final VariableManagementPage variableManagementPage = new VariableManagementPage(browser);
-        variableManagementPage.createVariable(variableCode, variableValue, description, isNotVisible);
+        final VariablesPage variablesPage = new VariablesPage(browser);
+        variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variableManagementPage.errorMessageList())
+                () -> assertThat(variablesPage.errorMessageList())
                     .as("Variable Code Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "The variable code already exists.")));
 
-        variableManagementPage.errorMessageConfirmButton().click();
-        variableManagementPage.createVariableForm().buttonCancel().click();
+        variablesPage.errorMessageConfirmButton().click();
+        variablesPage.createVariableForm().buttonCancel().click();
     }
 
     @Test
     @Order(30)
     void testEditVariable() {
-        final VariableManagementPage variableManagementPage = new VariableManagementPage(browser);
+        final VariablesPage variablesPage = new VariablesPage(browser);
         String editVariableValue = "6379";
         String editDescription = "Redis default port";
 
-        variableManagementPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
+        variablesPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
+                () -> assertThat(variablesPage.variableList())
                     .as("Variable list should contain edited variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editVariableValue))
@@ -109,14 +109,14 @@ public class VariableManagementTest {
 
     @Test
     @Order(40)
-    void testDeleteTeam() {
-        final VariableManagementPage variableManagementPage = new VariableManagementPage(browser);
+    void testDeleteVariable() {
+        final VariablesPage variablesPage = new VariablesPage(browser);
 
-        variableManagementPage.deleteVariable(variableCode);
+        variablesPage.deleteVariable(variableCode);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variableManagementPage.variableList())
+                () -> assertThat(variablesPage.variableList())
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(variableCode)));
     }

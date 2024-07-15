@@ -33,13 +33,9 @@ object FlinkShimsProxy extends Logger {
 
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
-  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE =
-    MutableMap[String, ClassLoader]()
+  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
-  private[this] val INCLUDE_PATTERN: Pattern =
-    Pattern.compile(
-      "(streampark-shaded-jackson-)(.*).jar",
-      Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+  private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile("(streampark-shaded-jackson-)(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] def getFlinkShimsResourcePattern(majorVersion: String) =
     Pattern.compile(s"flink-(.*)-$majorVersion(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
@@ -58,8 +54,7 @@ object FlinkShimsProxy extends Logger {
    */
   def proxy[T](flinkVersion: FlinkVersion, func: ClassLoader => T): T = {
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
-    ClassLoaderUtils
-      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   /**
@@ -74,8 +69,7 @@ object FlinkShimsProxy extends Logger {
    */
   def proxy[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getFlinkShimsClassLoader(flinkVersion)
-    ClassLoaderUtils
-      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   // need to load all flink-table dependencies compatible with different versions
@@ -85,12 +79,10 @@ object FlinkShimsProxy extends Logger {
       s"${flinkVersion.fullVersion}", {
         val getFlinkTable: File => Boolean = _.getName.startsWith("flink-table")
         // 1) flink/lib/flink-table*
-        val libTableURL =
-          getFlinkHomeLib(flinkVersion.flinkHome, "lib", getFlinkTable)
+        val libTableURL = getFlinkHomeLib(flinkVersion.flinkHome, "lib", getFlinkTable)
 
         // 2) After version 1.15 need add flink/opt/flink-table*
-        val optTableURL =
-          getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTable)
+        val optTableURL = getFlinkHomeLib(flinkVersion.flinkHome, "opt", getFlinkTable)
         val shimsUrls = ListBuffer[URL](libTableURL ++ optTableURL: _*)
 
         // 3) add only streampark shims jar
@@ -158,8 +150,7 @@ object FlinkShimsProxy extends Logger {
    */
   def proxyVerifySql[T](flinkVersion: FlinkVersion, func: JavaFunc[ClassLoader, T]): T = {
     val shimsClassLoader = getVerifySqlLibClassLoader(flinkVersion)
-    ClassLoaderUtils
-      .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
+    ClassLoaderUtils.runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   private[this] def getFlinkShimsClassLoader(flinkVersion: FlinkVersion): ClassLoader = {
