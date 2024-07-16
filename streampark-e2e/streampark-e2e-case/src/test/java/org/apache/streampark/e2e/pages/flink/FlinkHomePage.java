@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.flink;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -53,7 +53,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
     public FlinkHomePage createFlinkHome(String flinkName, String flinkHome, String description) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
         buttonCreateFlinkHome.click();
         createFlinkHomeForm.inputFlinkName().sendKeys(flinkName);
@@ -113,17 +113,17 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/flink/home"));
     }
 
     private void waitForClickFinish(String message) {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         message))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.invisibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",

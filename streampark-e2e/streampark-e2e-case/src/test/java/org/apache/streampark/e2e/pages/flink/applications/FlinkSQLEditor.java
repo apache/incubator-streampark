@@ -17,6 +17,8 @@
 
 package org.apache.streampark.e2e.pages.flink.applications;
 
+import org.apache.streampark.e2e.pages.common.Constants;
+
 import lombok.Getter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,8 +27,6 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 @Getter
 public final class FlinkSQLEditor {
@@ -42,7 +42,7 @@ public final class FlinkSQLEditor {
     }
 
     public FlinkSQLEditor content(String content) {
-        new WebDriverWait(this.driver, Duration.ofSeconds(20))
+        new WebDriverWait(this.driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
 
         flinkSqlEditor.click();

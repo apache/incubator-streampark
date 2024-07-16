@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -59,7 +59,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
     public TeamManagementPage createTeam(String teamName, String description) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
         buttonCreateTeam.click();
         createTeamForm.inputTeamName().sendKeys(teamName);
@@ -82,7 +82,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in team list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
         createTeamForm.inputDescription().sendKeys(Keys.CONTROL + "a");
         createTeamForm.inputDescription().sendKeys(Keys.BACK_SPACE);
@@ -106,7 +106,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in team list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
@@ -115,7 +115,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/team"));
     }
 

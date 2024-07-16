@@ -32,7 +32,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -63,7 +62,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                       String projectDescription) {
         waitForPageLoading();
         buttonCreateProject.click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/add"));
 
         createProjectForm.inputProjectName().sendKeys(projectName);
@@ -76,7 +75,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
 
         createProjectForm.inputProjectUrl().sendKeys(projectUrl);
         createProjectForm.selectBranchDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText()));
         createProjectForm.selectBranchText().stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectBranch))
@@ -107,14 +106,14 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
             .findElement(
                 By.xpath("//..//li[contains(@class, 'ant-list-item')]//button[contains(@class, 'ant-btn')][3]"))
             .click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/edit"));
 
         createProjectForm.inputProjectName().sendKeys(Keys.CONTROL + "a");
         createProjectForm.inputProjectName().sendKeys(Keys.BACK_SPACE);
         createProjectForm.inputProjectName().sendKeys(newProjectName);
         createProjectForm.selectCveDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectCveText()));
         createProjectForm.selectCveText().stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectCvs))
@@ -126,7 +125,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.inputProjectUrl().sendKeys(Keys.BACK_SPACE);
         createProjectForm.inputProjectUrl().sendKeys(projectUrl);
         createProjectForm.selectBranchDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText()));
         createProjectForm.selectBranchText().stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectBranch))
@@ -171,12 +170,12 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
             .click();
         popupConfirmButton.click();
         String deletePopUpMessage = "delete successful";
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         deletePopUpMessage))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.invisibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
@@ -186,7 +185,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/resource/project"));
     }
 
