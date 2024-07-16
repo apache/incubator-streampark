@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -59,13 +59,13 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     public MemberManagementPage createMember(String userName, String role) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateMember));
         buttonCreateMember.click();
 
         createMemberForm.btnSelectUserNameDropDown().click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectUserName));
         createMemberForm.selectUserName.stream()
             .filter(e -> e.getText().equals(userName))
@@ -76,7 +76,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm().btnSelectRoleDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
             .filter(e -> e.getText().equals(role))
@@ -104,7 +104,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm().btnSelectRoleDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
             .filter(e -> e.getText().equals(role))
@@ -131,7 +131,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in member list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
@@ -140,7 +140,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/member"));
     }
 

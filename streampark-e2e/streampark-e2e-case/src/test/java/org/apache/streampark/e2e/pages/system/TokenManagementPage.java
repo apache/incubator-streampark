@@ -33,82 +33,72 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
 
 @Getter
-public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
+public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Team List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateTeam;
+    @FindBy(xpath = "//span[contains(., 'Token List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    private WebElement buttonCreateToken;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
-    private List<WebElement> teamList;
-
-    @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
-
-    @FindBy(xpath = "//button[contains(text(), 'OK')]")
-    private WebElement errorMessageConfirmButton;
+    private List<WebElement> tokenList;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
     private WebElement deleteConfirmButton;
 
-    private final CreateTeamForm createTeamForm = new CreateTeamForm();
+    @FindBy(className = "ant-form-item-explain-error")
+    private WebElement errorMessageSearchLayout;
 
-    public TeamManagementPage(RemoteWebDriver driver) {
+    private final CreateTokenForm createTokenForm = new CreateTokenForm();
+
+    public TokenManagementPage(RemoteWebDriver driver) {
         super(driver);
     }
 
-    public TeamManagementPage createTeam(String teamName, String description) {
+    public TokenManagementPage createToken(String existUserName, String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(buttonCreateTeam));
-        buttonCreateTeam.click();
-        createTeamForm.inputTeamName().sendKeys(teamName);
-        createTeamForm.inputDescription().sendKeys(description);
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateToken));
+        buttonCreateToken.click();
 
-        createTeamForm.buttonSubmit().click();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName()));
+        createTokenForm.inputUserName().sendKeys(existUserName);
+        createTokenForm.inputUserName().sendKeys(Keys.RETURN);
+
+        createTokenForm.inputDescription().sendKeys(description);
+        createTokenForm.buttonSubmit().click();
         return this;
     }
 
-    public TeamManagementPage editTeam(String teamName, String description) {
+    public TokenManagementPage copyToken(String existUserName) {
         waitForPageLoading();
 
-        teamList().stream()
-            .filter(it -> it.getText().contains(teamName))
+        tokenList().stream()
+            .filter(it -> it.getText().contains(existUserName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]"))
-                    .stream())
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Copy Token')]")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in team list"))
+            .orElseThrow(() -> new RuntimeException("No Copy button in token list"))
             .click();
 
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(createTeamForm.buttonSubmit));
-        createTeamForm.inputDescription().sendKeys(Keys.CONTROL + "a");
-        createTeamForm.inputDescription().sendKeys(Keys.BACK_SPACE);
-        createTeamForm.inputDescription().sendKeys(description);
-
-        createTeamForm.buttonSubmit().click();
-
         return this;
     }
 
-    public TeamManagementPage deleteTeam(String teamName) {
+    public TokenManagementPage deleteToken(String existUserName) {
         waitForPageLoading();
 
-        teamList().stream()
-            .filter(it -> it.getText().contains(teamName))
+        tokenList().stream()
+            .filter(it -> it.getText().contains(existUserName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]"))
-                    .stream())
+                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Token')]")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
-            .orElseThrow(() -> new RuntimeException("No delete button in team list"))
+            .orElseThrow(() -> new RuntimeException("No delete button in token list"))
             .click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
-
         deleteConfirmButton.click();
 
         return this;
@@ -116,20 +106,20 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
     private void waitForPageLoading() {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.urlContains("/system/team"));
+            .until(ExpectedConditions.urlContains("/system/token"));
     }
 
     @Getter
-    public class CreateTeamForm {
+    public class CreateTokenForm {
 
-        CreateTeamForm() {
+        CreateTokenForm() {
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "TeamEditForm_teamName")
-        private WebElement inputTeamName;
+        @FindBy(id = "form_item_userId")
+        private WebElement inputUserName;
 
-        @FindBy(id = "TeamEditForm_description")
+        @FindBy(id = "form_item_description")
         private WebElement inputDescription;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -28,7 +29,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -59,7 +59,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
                                         boolean notVisible) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateVariable));
         buttonCreateVariable.click();
         createVariableForm.inputVariableCode().sendKeys(variableCode);
@@ -88,7 +88,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in variable list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(createVariableForm.buttonSubmit));
         createVariableForm.inputVariableValue().clear();
         createVariableForm.inputVariableValue().sendKeys(variableValue);
@@ -116,7 +116,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in variable list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
@@ -124,7 +124,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/resource/variable"));
     }
 
