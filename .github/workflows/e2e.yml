@@ -110,6 +110,8 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: TokenManagementTest
+            class: org.apache.streampark.e2e.cases.TokenManagementTest
           - name: UploadManagementTest
             class: org.apache.streampark.e2e.cases.UploadManagementTest
           - name: ProjectsManagementTest
