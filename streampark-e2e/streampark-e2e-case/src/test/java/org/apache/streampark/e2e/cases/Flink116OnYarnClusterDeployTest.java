@@ -35,8 +35,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
-public class Flink117OnYarnClustersTest {
+@StreamPark(composeFiles = "docker/flink-1.16-on-yarn/docker-compose.yaml")
+public class Flink116OnYarnClusterDeployTest {
 
     private static RemoteWebDriver browser;
 
@@ -46,15 +46,15 @@ public class Flink117OnYarnClustersTest {
 
     private static final String teamName = "default";
 
-    private static final String flinkName = "flink-1.17.2";
+    private static final String flinkName = "flink-1.16.3";
 
-    private static final String flinkHome = "/flink-1.17.2";
+    private static final String flinkHome = "/flink-1.16.3";
 
     private static final String flinkDescription = "description test";
 
-    private static final String flinkClusterName = "flink_1.17.2_cluster_e2e";
+    private static final String flinkClusterName = "flink_1.16.3_cluster_e2e";
 
-    private static final String flinkClusterNameEdited = "flink_1.17.2_cluster_e2e_edited";
+    private static final String flinkClusterNameEdited = "flink_1.16.3_cluster_e2e_edited";
 
     private static final ClusterDetailForm.ExecutionMode executionMode = ClusterDetailForm.ExecutionMode.YARN_SESSION;
 

@@ -126,12 +126,12 @@ jobs:
             class: org.apache.streampark.e2e.cases.TeamManagementTest
           - name: MemberManagementTest
             class: org.apache.streampark.e2e.cases.MemberManagementTest
-          - name: Flink116OnYarnClustersTest
-            class: org.apache.streampark.e2e.cases.Flink116OnYarnClustersTest
-          - name: Flink117OnYarnClustersTest
-            class: org.apache.streampark.e2e.cases.Flink117OnYarnClustersTest
-          - name: Flink118OnYarnClustersTest
-            class: org.apache.streampark.e2e.cases.Flink118OnYarnClustersTest
+          - name: Flink116OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnYarnClusterDeployTest
+          - name: Flink117OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnYarnClusterDeployTest
+          - name: Flink118OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnYarnClusterDeployTest
           - name: FlinkSQL116OnYarnTest
             class: org.apache.streampark.e2e.cases.FlinkSQL116OnYarnTest
           - name: FlinkSQL117OnYarnTest
