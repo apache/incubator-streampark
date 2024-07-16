@@ -38,6 +38,7 @@ RUN \
     if [ "$TARGETPLATFORM" = "linux/arm64" ];then \
         sudo rm -f /etc/yum.repos.d/*.repo; \
         sudo wget http://mirrors.aliyun.com/repo/Centos-altarch-7.repo -O /etc/yum.repos.d/CentOS-Base.repo; \
+        sudo sed -i "s/http:\/\//https:\/\//g" /etc/yum.repos.d/CentOS-Base.repo; \
         sudo yum install -y java-1.8.0-openjdk-devel; \
     elif [ "$TARGETPLATFORM" = "linux/amd64" ];then \
         sudo yum install -y java-1.8.0-openjdk-devel; \

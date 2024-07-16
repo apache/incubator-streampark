@@ -17,9 +17,11 @@
 
 package org.apache.streampark.e2e.pages.flink;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
 import org.apache.streampark.e2e.pages.flink.applications.ApplicationsPage;
+import org.apache.streampark.e2e.pages.flink.clusters.FlinkClustersPage;
 
 import lombok.Getter;
 import org.openqa.selenium.WebElement;
@@ -27,8 +29,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 @Getter
 public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
@@ -48,17 +48,24 @@ public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
 
     public <T extends ApacheFlinkPage.Tab> T goToTab(Class<T> tab) {
         if (tab == ApplicationsPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuApplications));
             menuApplications.click();
             return tab.cast(new ApplicationsPage(driver));
         }
 
         if (tab == FlinkHomePage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuFlinkHome));
             menuFlinkHome.click();
             return tab.cast(new FlinkHomePage(driver));
+        }
+
+        if (tab == FlinkClustersPage.class) {
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+                .until(ExpectedConditions.elementToBeClickable(menuClusters));
+            menuClusters.click();
+            return tab.cast(new FlinkClustersPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
