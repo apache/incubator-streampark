@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -30,7 +31,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -54,7 +54,7 @@ public final class LoginPage extends NavBarPage {
 
     @SneakyThrows
     public NavBarPage login(String username, String password, String teamName) {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonLogin));
 
         inputUsername().sendKeys(username);
@@ -62,7 +62,7 @@ public final class LoginPage extends NavBarPage {
         buttonLogin().click();
 
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
 
             teamForm.btnSelectTeamDropdown.click();
@@ -78,7 +78,7 @@ public final class LoginPage extends NavBarPage {
             log.warn("No team selection required:", e);
         }
 
-        new WebDriverWait(driver, Duration.ofSeconds(30))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/flink/app"));
         return new NavBarPage(driver);
     }

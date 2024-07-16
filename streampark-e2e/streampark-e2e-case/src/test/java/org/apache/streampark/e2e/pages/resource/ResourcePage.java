@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
 
@@ -26,8 +27,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 @Getter
 public final class ResourcePage extends NavBarPage implements NavBarItem {
@@ -47,21 +46,21 @@ public final class ResourcePage extends NavBarPage implements NavBarItem {
 
     public <T extends ResourcePage.Tab> T goToTab(Class<T> tab) {
         if (tab == VariablesPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuVariables));
             menuVariables.click();
             return tab.cast(new VariablesPage(driver));
         }
 
         if (tab == ProjectsPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuProjects));
             menuProjects.click();
             return tab.cast(new ProjectsPage(driver));
         }
 
         if (tab == UploadsPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuUploads));
             menuUploads.click();
             return tab.cast(new UploadsPage(driver));

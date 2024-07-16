@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.common.NavBarPage.NavBarItem;
 
@@ -26,8 +27,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 @Getter
 public final class SystemPage extends NavBarPage implements NavBarItem {
@@ -53,21 +52,21 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
 
     public <T extends SystemPage.Tab> T goToTab(Class<T> tab) {
         if (tab == UserManagementPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuUserManagement));
             menuUserManagement.click();
             return tab.cast(new UserManagementPage(driver));
         }
 
         if (tab == TeamManagementPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuTeamManagement));
             menuTeamManagement.click();
             return tab.cast(new TeamManagementPage(driver));
         }
 
         if (tab == RoleManagementPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuRoleManagement));
             menuRoleManagement.click();
             return tab.cast(new RoleManagementPage(driver));
@@ -80,7 +79,7 @@ public final class SystemPage extends NavBarPage implements NavBarItem {
         }
 
         if (tab == MemberManagementPage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuMemberManagement));
             menuMemberManagement.click();
             return tab.cast(new MemberManagementPage(driver));

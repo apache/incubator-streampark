@@ -19,10 +19,14 @@ package org.apache.streampark.e2e.pages.common;
 
 import lombok.experimental.UtilityClass;
 
+import java.time.Duration;
+
 @UtilityClass
 public class Constants {
 
     public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
 
     public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
+
+    public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
 }

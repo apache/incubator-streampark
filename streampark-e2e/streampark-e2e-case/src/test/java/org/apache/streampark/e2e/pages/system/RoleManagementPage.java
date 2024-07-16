@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -57,7 +58,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     public RoleManagementPage createRole(String roleName, String description, String menuName) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateRole));
         buttonCreateRole.click();
 
@@ -103,7 +104,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in role list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
@@ -112,7 +113,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/role"));
     }
 

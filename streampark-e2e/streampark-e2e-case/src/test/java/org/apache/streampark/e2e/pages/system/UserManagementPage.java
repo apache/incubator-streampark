@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementStatus;
 import org.apache.streampark.e2e.pages.system.entity.UserManagementUserType;
@@ -32,7 +33,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -61,7 +61,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
                                          UserManagementUserType userManagementUserType) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateUser));
         buttonCreateUser.click();
         createUserForm.inputUserName().sendKeys(userName);
@@ -70,7 +70,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
         createUserForm.inputEmail().sendKeys(email);
 
         createUserForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUserForm.selectUserType));
         createUserForm.selectUserType.stream()
             .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
@@ -107,7 +107,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
         createUserForm.inputEmail().sendKeys(email);
 
         createUserForm.btnSelectUserTypeDropdown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUserForm.selectUserType));
         createUserForm.selectUserType.stream()
             .filter(e -> e.getText().equalsIgnoreCase(String.valueOf(userManagementUserType)))
@@ -135,7 +135,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/user"));
     }
 
