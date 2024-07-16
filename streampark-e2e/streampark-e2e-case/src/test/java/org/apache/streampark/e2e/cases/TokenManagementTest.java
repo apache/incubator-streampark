@@ -25,6 +25,7 @@ import org.apache.streampark.e2e.pages.system.TokenManagementPage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -93,13 +94,13 @@ public class TokenManagementTest {
     @Order(30)
     void testCreateDuplicateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
-        browser.navigate().refresh();
+
         tokenManagementPage.createToken(existUserName, newTokenDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(tokenManagementPage.errorMessageSearchLayout())
-                    .as("Please select a user").isNotNull());
+                () -> assertThat(browser.findElement(By.tagName("body")).getText())
+                    .contains(String.format("user %s already has a token", existUserName)));
 
         tokenManagementPage.createTokenForm().buttonCancel().click();
     }
