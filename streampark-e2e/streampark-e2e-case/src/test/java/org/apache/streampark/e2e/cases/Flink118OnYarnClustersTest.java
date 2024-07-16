@@ -25,6 +25,7 @@ import org.apache.streampark.e2e.pages.flink.FlinkHomePage;
 import org.apache.streampark.e2e.pages.flink.clusters.ClusterDetailForm;
 import org.apache.streampark.e2e.pages.flink.clusters.FlinkClustersPage;
 import org.apache.streampark.e2e.pages.flink.clusters.YarnSessionForm;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

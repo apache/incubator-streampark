@@ -59,7 +59,8 @@ public class ClusterDetailForm {
                     .click();
                 return (T) new YarnSessionForm(this);
             default:
-                throw new UnsupportedOperationException(String.format("Unknown execution mode: %s", executionMode.desc()));
+                throw new UnsupportedOperationException(
+                    String.format("Unknown execution mode: %s", executionMode.desc()));
         }
     }
 

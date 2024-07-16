@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.system;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -56,11 +56,11 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
     public TokenManagementPage createToken(String existUserName, String description) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateToken));
         buttonCreateToken.click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName()));
         createTokenForm.inputUserName().sendKeys(existUserName);
         createTokenForm.inputUserName().sendKeys(Keys.RETURN);
@@ -97,7 +97,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in token list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
         deleteConfirmButton.click();
 
@@ -105,7 +105,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/token"));
     }
 
