@@ -97,6 +97,8 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
       - name: Backend Build with Maven
         run: ./mvnw -B clean install -Pshaded -DskipTests
+      - name: Check dependency license
+        run: tools/dependencies/check-LICENSE.sh
   result:
     name: Backend - Result
     runs-on: ubuntu-latest
