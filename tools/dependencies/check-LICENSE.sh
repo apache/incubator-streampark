@@ -45,3 +45,8 @@ echo '=== Third party dependencies: ' && grep -vf $check_path/self-modules.txt $
 # using the same command (and default arguments)"
 
 diff -w -B -U0 <(sort < tools/dependencies/known-dependencies.txt) <(sort < $check_path/third-party-dependencies.txt)
+
+if [ $? -ne 0 ]; then
+  echo "Third-party dependencies are not all known, please add the license to LICENSE file and add the dependency to tools/dependencies/known-dependencies.txt"
+  exit 1
+fi
