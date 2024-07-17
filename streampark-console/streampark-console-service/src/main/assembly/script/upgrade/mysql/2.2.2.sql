@@ -79,7 +79,7 @@ insert into `t_menu` values (130303, 130300, 'resource delete', NULL, NULL, 'res
 insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system', 'setting/system/View', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/alarm/View', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/externalLink', 'setting/externalLink/View', 'menu:view', null, '0', 1, 5, now(), now());
-insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/yarnQueue/View', 'menu:view', null, '0', 1, 6, now(), now());
+insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarn-queue', 'setting/yarn-queue/View', 'menu:view', null, '0', 1, 6, now(), now());
 insert into `t_menu` values (140101, 140100, 'setting view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (140102, 140100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 

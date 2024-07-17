@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.flink.applications;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
 
@@ -30,8 +31,9 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
+
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWaitForElementVisibilityAndInvisibility;
 
 @Getter
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
@@ -59,7 +61,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         waitForPageLoading();
 
         buttonCreateApplication.click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/flink/app/add"));
         return new ApplicationForm(driver);
     }
@@ -96,22 +98,22 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
 
         StartJobForm startJobForm = new StartJobForm();
         String startJobFormMessage = "Start Job";
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         startJobFormMessage))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint()));
         startJobForm.radioFromSavepoint().click();
         startJobForm.buttonSubmit().click();
         String startPopUpMessage = "The current job is starting";
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         startPopUpMessage))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.invisibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(text(),'%s')]",
@@ -151,32 +153,23 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
 
         CancelJobForm cancelJobForm = new CancelJobForm();
         String cancelJobFormMessage = "Stop Job";
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         cancelJobFormMessage))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint()));
         cancelJobForm.radioFromSavepoint().click();
         cancelJobForm.buttonSubmit().click();
         String cancelPopUpMessage = "The current job is canceling";
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(String.format("//*[contains(text(),'%s')]",
-                        cancelPopUpMessage))));
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                    By.xpath(String.format("//*[contains(text(),'%s')]",
-                        cancelPopUpMessage))));
+        WebDriverWaitForElementVisibilityAndInvisibility(driver, cancelPopUpMessage);
 
         return this;
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/flink/app"));
     }
 

@@ -136,7 +136,7 @@
         <spotless.scalafmt.version>3.7.5</spotless.scalafmt.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
-        <owasp-dependency-check-maven.version>9.2.0</owasp-dependency-check-maven.version>
+        <owasp-dependency-check-maven.version>10.0.2</owasp-dependency-check-maven.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <flink.table.uber.artifact.id>flink-table-uber_${scala.binary.version}</flink.table.uber.artifact.id>
@@ -240,6 +240,7 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -831,6 +832,7 @@
                         <skipRuntimeScope>true</skipRuntimeScope>
                         <skipSystemScope>true</skipSystemScope>
                         <failBuildOnCVSS>7</failBuildOnCVSS>
+                        <nvdApiKeyEnvironmentVariable>NIST_NVD_API_KEY</nvdApiKeyEnvironmentVariable>
                     </configuration>
                     <executions>
                         <execution>
