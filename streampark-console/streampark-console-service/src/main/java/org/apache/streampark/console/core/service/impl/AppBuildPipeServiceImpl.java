@@ -429,15 +429,16 @@ public class AppBuildPipeServiceImpl
         Application app = applicationManageService.getById(appId);
 
         // 1) check flink version
-        FlinkEnv env = flinkEnvService.getById(app.getVersionId());
+        String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";
+        FlinkEnv env = flinkEnvService.getByIdOrDefault(app.getVersionId());
+        ApiAlertException.throwIfNull(env, checkEnvErrorMessage);
         boolean checkVersion = env.getFlinkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
             checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
-        ApiAlertException.throwIfFalse(
-            envOk, "Check flink env failed, please check the flink version of this job");
+        ApiAlertException.throwIfFalse(envOk, checkEnvErrorMessage);
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
