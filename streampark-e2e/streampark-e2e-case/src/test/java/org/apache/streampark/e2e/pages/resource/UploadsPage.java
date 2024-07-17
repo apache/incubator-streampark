@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -29,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -61,13 +61,13 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
                                     String description) {
         waitForPageLoading();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateResource));
         buttonCreateResource.click();
 
         // select engine type.
         createUploadForm.btnSelectEngineTypeDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
         createUploadForm.selectEngineType().stream()
             .filter(e -> e.getText().equals(engineType))
@@ -79,7 +79,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select resource type.
         createUploadForm.btnSelectResourceTypeDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
         createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
@@ -112,7 +112,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select engine type.
         createUploadForm.btnSelectEngineTypeDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
         createUploadForm.selectResourceType.stream()
             .filter(e -> e.getText().equals(engineType))
@@ -124,7 +124,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select resource type.
         createUploadForm.btnSelectResourceTypeDropDown().click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
         createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
@@ -155,7 +155,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
             .orElseThrow(() -> new RuntimeException("No delete button in resource list"))
             .click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
@@ -164,7 +164,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
     }
 
     private void waitForPageLoading() {
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/resource/upload"));
     }
 

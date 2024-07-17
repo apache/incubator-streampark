@@ -53,8 +53,8 @@
         const status = parseInt(res.status);
         if (status === 0) {
           const resp = await fetchCreateCluster(params);
-          if (resp.data.code == 200) {
-            Swal.fire({
+          if (resp) {
+            await Swal.fire({
               icon: 'success',
               title: values.clusterName.concat(
                 t('setting.flinkCluster.operateMessage.createFlinkSessionClusterSuccessful'),
@@ -64,7 +64,7 @@
             });
             go('/flink/cluster');
           } else {
-            Swal.fire(
+            await Swal.fire(
               'Failed',
               t('setting.flinkCluster.operateMessage.createFlinkSessionClusterFailed'),
               'error',
