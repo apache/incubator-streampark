@@ -58,7 +58,7 @@ public class YarnQueueTest {
 
     @Test
     @Order(10)
-    public void testYarnQueue() {
+    void testYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
 
@@ -73,7 +73,7 @@ public class YarnQueueTest {
 
     @Test
     @Order(20)
-    public void testCreateDuplicateYarnQueue() {
+    void testCreateDuplicateYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
         Awaitility.await()
@@ -88,7 +88,7 @@ public class YarnQueueTest {
 
     @Test
     @Order(30)
-    public void testEditYarnQueue() {
+    void testEditYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         String editDescription = "edit_" + description;
 
@@ -105,7 +105,7 @@ public class YarnQueueTest {
 
     @Test
     @Order(40)
-    public void testDeleteYarnQueue() {
+    void testDeleteYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
 
         queuePage.deleteYarnQueue(editQueueLabel);
