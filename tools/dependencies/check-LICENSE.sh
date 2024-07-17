@@ -26,7 +26,7 @@ mkdir $check_path || true
 
 tar -zxf dist/apache-streampark*-bin.tar.gz --strip=1 -C $check_path
 
-# List all modules(jars) that belong to the DolphinScheduler itself, these will be ignored when checking the dependency
+# List all modules(jars) that belong to the streampark itself, these will be ignored when checking the dependency
 # licenses
 echo '=== Self modules: ' && ./mvnw --batch-mode --quiet -Dexec.executable='echo' -Dexec.args='${project.artifactId}-${project.version}.jar' exec:exec | tee $check_path/self-modules.txt
 
@@ -37,8 +37,7 @@ echo '=== Third party dependencies: ' && grep -vf $check_path/self-modules.txt $
 
 # 1. Compare the third-party dependencies with known dependencies, expect that all third-party dependencies are KNOWN
 # and the exit code of the command is 0, otherwise we should add its license to LICENSE file
-# [dolphinscheduler-dist-license-check/release-docs/LICENSE] and [dolphinscheduler-dist-license-check/release-docs/licenses/]
-# and add the dependency to known-dependencies.txt.
+# add the dependency to known-dependencies.txt.
 #
 # 2. Unify the `sort` behaviour: here we'll sort them again in case that the behaviour of `sort` command in
 # target OS is different from what we used to sort the file `known-dependencies.txt`, i.e. "sort the two file
