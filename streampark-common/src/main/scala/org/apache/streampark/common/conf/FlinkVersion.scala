@@ -68,7 +68,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
   lazy val version: String = {
     val cmd = List(
       s"java -classpath ${flinkDistJar.getName} org.apache.flink.client.cli.CliFrontend --version")
-    var (flinkVersion: String, success: Boolean) = ("", false)
+    var flinkVersion: String = null
     val buffer = new mutable.StringBuilder
     CommandUtils.execute(
       flinkLib.getAbsolutePath,
@@ -81,20 +81,19 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
             val version = matcher.group(1)
             val matcher1 = APACHE_FLINK_VERSION_PATTERN.matcher(version)
             if (matcher1.find) {
-              success = true
               flinkVersion = version
             } else {
               val matcher2 = OTHER_FLINK_VERSION_PATTERN.matcher(version)
               if (matcher2.find) {
-                success = true
                 flinkVersion = version
               }
             }
           }
         }
       })
+
     logInfo(buffer.toString())
-    if (!success) {
+    if (flinkVersion == null) {
       throw new IllegalStateException(s"[StreamPark] parse flink version failed. $buffer")
     }
     buffer.clear()
