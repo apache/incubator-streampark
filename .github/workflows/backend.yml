@@ -96,7 +96,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-backend
           restore-keys: ${{ runner.os }}-maven-
       - name: Backend Build with Maven
-        run: ./mvnw -B clean install -Pshaded -DskipTests
+        run: ./mvnw -B clean install -Pshaded,webapp,dist -DskipTests
       - name: Check dependency license
         run: tools/dependencies/check-LICENSE.sh
   result:
