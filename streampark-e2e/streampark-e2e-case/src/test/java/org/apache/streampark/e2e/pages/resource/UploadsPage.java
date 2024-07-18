@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
+import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
@@ -56,6 +57,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         super(driver);
     }
 
+    @SneakyThrows
     public UploadsPage createUpload(String engineType, String resourceType, String resourceName,
                                     String resource,
                                     String description) {
@@ -67,8 +69,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select engine type.
         createUploadForm.btnSelectEngineTypeDropDown().click();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         createUploadForm.selectEngineType().stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
@@ -94,11 +95,10 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         createUploadForm.inputDescription().sendKeys(description);
 
         createUploadForm.buttonSubmit().click();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.invisibilityOf(createUploadForm.inputResourceName()));
         return this;
     }
 
+    @SneakyThrows
     public UploadsPage editUpload(String engineType, String resourceType, String resourceName,
                                   String resource, String description) {
         waitForPageLoading();
@@ -114,20 +114,18 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select engine type.
         createUploadForm.btnSelectEngineTypeDropDown().click();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
-        createUploadForm.selectResourceType().stream()
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
+        createUploadForm.selectEngineType().stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
                 () -> new RuntimeException(
-                    String.format("No %s in resourceType dropdown list", resourceType)))
+                    String.format("No %s in engineType dropdown list", resourceType)))
             .click();
 
         // select resource type.
         createUploadForm.btnSelectResourceTypeDropDown().click();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
