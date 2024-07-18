@@ -17,6 +17,7 @@
 
 package org.apache.streampark.e2e.pages.setting;
 
+import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
@@ -26,13 +27,14 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
 @Getter
 public class SettingPage extends NavBarPage implements NavBarPage.NavBarItem {
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Yarn Queue')]//..")
     private WebElement menuYarnQueueManagement;
+
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'External Link')]//..")
+    private WebElement menuExternalLinkManagement;
 
     public SettingPage(RemoteWebDriver driver) {
         super(driver);
@@ -40,10 +42,17 @@ public class SettingPage extends NavBarPage implements NavBarPage.NavBarItem {
 
     public <T extends SettingPage.Tab> T goToTab(Class<T> tab) {
         if (tab == YarnQueuePage.class) {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                 .until(ExpectedConditions.elementToBeClickable(menuYarnQueueManagement));
             menuYarnQueueManagement.click();
             return tab.cast(new YarnQueuePage(driver));
+        }
+
+        if (tab == ExternalLinkPage.class) {
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+                .until(ExpectedConditions.elementToBeClickable(menuExternalLinkManagement));
+            menuExternalLinkManagement.click();
+            return tab.cast(new ExternalLinkPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());
