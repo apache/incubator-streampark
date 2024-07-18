@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 
@@ -53,7 +53,7 @@ public class SparkApplicationBuildPipelineController {
      */
     @PostMapping(value = "build")
     @RequiresPermissions("app:create")
-    @PermissionScope(app = "#appId")
+    @Permission(app = "#appId")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
         try {
             boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
@@ -71,7 +71,7 @@ public class SparkApplicationBuildPipelineController {
      */
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
-    @PermissionScope(app = "#appId")
+    @Permission(app = "#appId")
     public RestResponse getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);

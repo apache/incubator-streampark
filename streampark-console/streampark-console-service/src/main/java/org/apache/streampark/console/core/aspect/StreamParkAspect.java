@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.aspect;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ServiceHelper;
@@ -96,14 +96,14 @@ public class StreamParkAspect {
         return target;
     }
 
-    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
     public void permissionAction() {
     }
 
     @Around("permissionAction()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        PermissionScope permissionScope = methodSignature.getMethod().getAnnotation(PermissionScope.class);
+        Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
         User currentUser = serviceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
@@ -112,13 +112,13 @@ public class StreamParkAspect {
 
         if (!isAdmin) {
             // 1) check userId
-            Long userId = getId(joinPoint, methodSignature, permissionScope.user());
+            Long userId = getId(joinPoint, methodSignature, permission.user());
             ApiAlertException.throwIfTrue(
                 userId != null && !currentUser.getUserId().equals(userId),
                 "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
             // 2) check team
-            Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
+            Long teamId = getId(joinPoint, methodSignature, permission.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(
@@ -127,7 +127,7 @@ public class StreamParkAspect {
             }
 
             // 3) check app
-            Long appId = getId(joinPoint, methodSignature, permissionScope.app());
+            Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
                 Application app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");

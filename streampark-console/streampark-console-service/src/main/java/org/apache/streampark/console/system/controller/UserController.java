@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @PutMapping("update")
-    @PermissionScope(user = "#user.id")
+    @Permission(user = "#user.id")
     @RequiresPermissions("user:update")
     public RestResponse updateUser(@Valid User user) throws Exception {
         return this.userService.updateUser(user);
@@ -93,7 +93,7 @@ public class UserController {
     }
 
     @DeleteMapping("delete")
-    @PermissionScope(user = "#userId")
+    @Permission(user = "#userId")
     @RequiresPermissions("user:delete")
     public RestResponse deleteUser(Long userId) throws Exception {
         this.userService.deleteUser(userId);
@@ -113,7 +113,7 @@ public class UserController {
     }
 
     @PutMapping("password")
-    @PermissionScope(user = "#user.id")
+    @Permission(user = "#user.id")
     public RestResponse updatePassword(User user) throws Exception {
         userService.updatePassword(user);
         return RestResponse.success();

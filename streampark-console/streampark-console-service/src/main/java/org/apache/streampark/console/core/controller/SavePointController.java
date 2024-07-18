@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.service.SavePointService;
@@ -51,7 +51,7 @@ public class SavePointController {
     private SavePointService savePointService;
 
     @PostMapping("history")
-    @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
+    @Permission(app = "#sp.appId", team = "#sp.teamId")
     public RestResponse history(SavePoint sp, RestRequest request) {
         IPage<SavePoint> page = savePointService.getPage(sp, request);
         return RestResponse.success(page);
@@ -59,7 +59,7 @@ public class SavePointController {
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
-    @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
+    @Permission(app = "#sp.appId", team = "#sp.teamId")
     public RestResponse delete(SavePoint sp) throws InternalException {
         SavePoint savePoint = savePointService.getById(sp.getId());
         Application application = applicationManageService.getById(savePoint.getAppId());
@@ -68,7 +68,7 @@ public class SavePointController {
     }
 
     @PostMapping("trigger")
-    @PermissionScope(app = "#savePoint.appId", team = "#savePoint.teamId")
+    @Permission(app = "#savePoint.appId", team = "#savePoint.teamId")
     @RequiresPermissions("savepoint:trigger")
     public RestResponse trigger(
                                 Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {

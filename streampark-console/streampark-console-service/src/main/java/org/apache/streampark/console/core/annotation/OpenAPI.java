@@ -26,5 +26,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OpenAPI {
 
-    boolean value() default true;
+    Param[] value();
+
+    public @interface Param {
+
+        String name();
+
+        String description();
+
+        boolean required();
+
+        Class<?> type();
+    }
 }
