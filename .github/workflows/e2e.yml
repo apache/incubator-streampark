@@ -110,6 +110,8 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: YarnQueueTest
+            class: org.apache.streampark.e2e.cases.YarnQueueTest
           - name: TokenManagementTest
             class: org.apache.streampark.e2e.cases.TokenManagementTest
           - name: UploadManagementTest
