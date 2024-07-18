@@ -17,20 +17,21 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 
-import java.io.Serializable;
-import java.util.Date;
-
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_external_link")
-public class ExternalLink implements Serializable {
+public class ExternalLink extends BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -48,8 +49,4 @@ public class ExternalLink implements Serializable {
 
     @TableField(exist = false)
     private String renderedLinkUrl;
-
-    private Date createTime;
-
-    private Date modifyTime;
 }

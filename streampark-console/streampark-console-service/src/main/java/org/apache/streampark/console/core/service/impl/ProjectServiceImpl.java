@@ -67,7 +67,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,9 +117,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 throw new ApiAlertException("Project github/gitlab password decrypt failed");
             }
         }
-        Date date = new Date();
-        project.setCreateTime(date);
-        project.setModifyTime(date);
         boolean status = save(project);
 
         if (status) {

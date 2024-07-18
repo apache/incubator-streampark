@@ -81,8 +81,6 @@ public class RouterTree<T> {
         this.setTitle(menu.getMenuName());
         this.setIcon(menu.getIcon());
         this.setComponent(menu.getComponent());
-        this.setCreateTime(menu.getCreateTime());
-        this.setModifyTime(menu.getModifyTime());
         this.setPath(menu.getPath());
         this.setOrder(menu.getOrderNum());
         this.setPermission(menu.getPerms());
