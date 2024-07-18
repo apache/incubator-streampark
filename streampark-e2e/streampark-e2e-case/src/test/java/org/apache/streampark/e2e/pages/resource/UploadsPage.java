@@ -17,11 +17,11 @@
 
 package org.apache.streampark.e2e.pages.resource;
 
-import lombok.SneakyThrows;
 import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
