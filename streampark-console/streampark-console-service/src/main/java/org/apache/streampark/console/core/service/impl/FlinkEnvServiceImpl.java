@@ -139,6 +139,9 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
 
     @Override
     public FlinkEnv getByIdOrDefault(Long id) {
+        if (id == null) {
+            return getDefault();
+        }
         FlinkEnv flinkEnv = getById(id);
         return flinkEnv == null ? getDefault() : flinkEnv;
     }
