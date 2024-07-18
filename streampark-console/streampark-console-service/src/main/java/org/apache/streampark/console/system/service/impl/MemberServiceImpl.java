@@ -40,7 +40,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -134,9 +133,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         member.setId(null);
         member.setUserId(user.getUserId());
 
-        Date date = new Date();
-        member.setCreateTime(date);
-        member.setModifyTime(date);
         this.save(member);
     }
 

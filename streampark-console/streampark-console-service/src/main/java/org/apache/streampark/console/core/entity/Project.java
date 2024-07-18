@@ -23,6 +23,7 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
@@ -37,12 +38,12 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.lib.Constants;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -52,8 +53,9 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_flink_project")
-public class Project implements Serializable {
+public class Project extends BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -98,10 +100,6 @@ public class Project implements Serializable {
 
     /** 1) flink 2) spark */
     private Integer type;
-
-    private Date createTime;
-
-    private Date modifyTime;
 
     private transient String module;
 

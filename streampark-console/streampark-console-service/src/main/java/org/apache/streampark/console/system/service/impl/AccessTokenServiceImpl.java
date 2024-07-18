@@ -40,7 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -75,9 +74,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setUserId(user.getUserId());
         accessToken.setDescription(description);
 
-        Date date = new Date();
-        accessToken.setCreateTime(date);
-        accessToken.setModifyTime(date);
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
@@ -119,7 +115,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);
         updateObj.setId(tokenId);
-        updateObj.setModifyTime(new Date());
         return RestResponse.success(this.updateById(updateObj));
     }
 
