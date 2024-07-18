@@ -80,8 +80,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         // select resource type.
         createUploadForm.btnSelectResourceTypeDropDown().click();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
