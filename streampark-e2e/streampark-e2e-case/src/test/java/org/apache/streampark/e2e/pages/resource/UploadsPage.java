@@ -94,6 +94,8 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         createUploadForm.inputDescription().sendKeys(description);
 
         createUploadForm.buttonSubmit().click();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.invisibilityOf(createUploadForm.inputResourceName()));
         return this;
     }
 
