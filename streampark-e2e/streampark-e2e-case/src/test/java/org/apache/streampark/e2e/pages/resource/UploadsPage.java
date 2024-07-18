@@ -113,8 +113,8 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         // select engine type.
         createUploadForm.btnSelectEngineTypeDropDown().click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectEngineType()));
-        createUploadForm.selectResourceType.stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createUploadForm.selectResourceType()));
+        createUploadForm.selectResourceType().stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
