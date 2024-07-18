@@ -15,35 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.entity;
+package org.apache.streampark.console.base.mybatis.entity;
 
-import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
-import org.apache.streampark.console.core.enums.GatewayTypeEnum;
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Date;
 
+/** Base entity. */
 @Data
-@EqualsAndHashCode(callSuper = true)
-@TableName("t_flink_gateway")
-public class FlinkGateWay extends BaseEntity {
+public abstract class BaseEntity implements Serializable {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    private static final long serialVersionUID = 1L;
 
-    @NotBlank(message = "{required}")
-    private String gatewayName;
+    /** create time */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
 
-    private String description;
-
-    private GatewayTypeEnum gatewayType;
-
-    @NotBlank(message = "{required}")
-    private String address;
-
+    /** modify time */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date modifyTime;
 }

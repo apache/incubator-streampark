@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.PropertyPlaceholderHelper;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +53,6 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         if (!this.check(externalLink)) {
             return;
         }
-        Date date = new Date();
-        externalLink.setCreateTime(date);
-        externalLink.setModifyTime(date);
         externalLink.setId(null);
         this.save(externalLink);
     }
@@ -66,7 +62,6 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         if (!this.check(externalLink)) {
             return;
         }
-        externalLink.setModifyTime(new Date());
         baseMapper.updateById(externalLink);
     }
 

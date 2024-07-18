@@ -17,22 +17,21 @@
 
 package org.apache.streampark.console.system.entity;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import java.io.Serializable;
-import java.util.Date;
-
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_menu")
-public class Menu implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Menu extends BaseEntity {
 
     public static final String TYPE_MENU = "0";
 
@@ -62,10 +61,6 @@ public class Menu implements Serializable {
     private String type;
 
     private Double orderNum;
-
-    private Date createTime;
-
-    private Date modifyTime;
 
     private boolean display;
 
