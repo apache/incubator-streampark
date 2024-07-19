@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,13 +25,11 @@ import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-@Schema(name = "AlertEmail")
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertEmailParams implements Serializable {
 
-  @Schema(example = "xxx@xxx.com", description = "email address")
   @NotBlank(message = "The address of email must be not empty")
   private String contacts;
 }

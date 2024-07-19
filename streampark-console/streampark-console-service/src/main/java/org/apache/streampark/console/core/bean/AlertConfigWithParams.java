@@ -23,7 +23,6 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,40 +30,27 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
-@Schema(name = "AlertConfig")
 @Getter
 @Setter
 @Slf4j
 public class AlertConfigWithParams implements Serializable {
 
-  @Schema(example = "1")
   private Long id;
 
-  @Schema(example = "100000")
   private Long userId;
 
-  @Schema(example = "test-alert")
   private String alertName;
 
-  @Schema(
-      example = "1",
-      description =
-          "base type, email 1, dink-talk 2, we-com 4, http callback 8, lark 16, also choose a combination, e.g. 3 means email + dink-talk")
   private Integer alertType;
 
-  @Schema(description = "email alert parameters")
   private AlertEmailParams emailParams;
 
-  @Schema(description = "ding-talk alert parameters")
   private AlertDingTalkParams dingTalkParams;
 
-  @Schema(description = "we-com alert parameters")
   private AlertWeComParams weComParams;
 
-  @Schema(description = "http callback alert parameters")
   private AlertHttpCallbackParams httpCallbackParams;
 
-  @Schema(description = "lark alert parameters")
   private AlertLarkParams larkParams;
 
   public static AlertConfigWithParams of(AlertConfig config) {
