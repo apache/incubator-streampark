@@ -30,7 +30,6 @@ import org.apache.streampark.console.system.service.AccessTokenService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,8 +80,7 @@ public class AccessTokenController {
   /** query token list */
   @PostMapping(value = "list")
   @RequiresPermissions("token:view")
-  public RestResponse tokensList(
-      RestRequest restRequest, @Parameter(hidden = true) AccessToken accessToken) {
+  public RestResponse tokensList(RestRequest restRequest, AccessToken accessToken) {
     IPage<AccessToken> accessTokens = accessTokenService.page(accessToken, restRequest);
     return RestResponse.success(accessTokens);
   }
