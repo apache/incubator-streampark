@@ -43,7 +43,7 @@
                 icon: 'icon-park-outline:mind-mapping',
                 tooltip: t('flink.variable.table.depend'),
                 auth: 'variable:depend_apps',
-                onClick: () => router.push('/flink/variable/depend_apps?id=' + record.variableCode),
+                onClick: () => router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
                 icon: 'ant-design:delete-outlined',
