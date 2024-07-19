@@ -19,10 +19,11 @@ package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
+import org.apache.streampark.console.base.enums.MessageStatus;
+
+import java.text.MessageFormat;
 
 /**
- *
- *
  * <pre>
  * An exception message that needs to be notified to front-end,
  * is a detailed exception message,such as the stackTrace info,
@@ -32,16 +33,13 @@ import org.apache.streampark.console.base.domain.ResponseCode;
  */
 public class ApiDetailException extends AbstractApiException {
 
-    public ApiDetailException(String message) {
-        super(message, ResponseCode.CODE_FAIL_DETAIL);
-    }
-
     public ApiDetailException(Throwable cause) {
         super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
     }
 
-    public ApiDetailException(String message, Throwable cause) {
-        super(message + ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
+    public ApiDetailException(MessageStatus status, Throwable cause, Object... args) {
+        super(MessageFormat.format(status.getMsg(), ExceptionUtils.stringifyException(cause), args),
+            ResponseCode.CODE_FAIL_DETAIL);
     }
 
     @Override

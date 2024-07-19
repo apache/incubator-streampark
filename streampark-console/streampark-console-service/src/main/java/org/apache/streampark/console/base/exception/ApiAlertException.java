@@ -18,12 +18,12 @@
 package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
+import org.apache.streampark.console.base.enums.MessageStatus;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
- *
- *
  * <pre>
  * To notify the frontend of an exception message,
  * it is usually a <strong> clear </strong> and <strong> concise </strong> message, e.g:
@@ -38,8 +38,16 @@ public class ApiAlertException extends AbstractApiException {
         super(message, ResponseCode.CODE_FAIL_ALERT);
     }
 
+    public ApiAlertException(MessageStatus status, Object... args) {
+        super(MessageFormat.format(status.getMsg(), args), ResponseCode.CODE_FAIL_ALERT);
+    }
+
     public ApiAlertException(Throwable cause) {
         super(cause, ResponseCode.CODE_FAIL_ALERT);
+    }
+
+    public ApiAlertException(MessageStatus status, Throwable cause, Object... args) {
+        super(MessageFormat.format(status.getMsg(), args), cause, ResponseCode.CODE_FAIL_ALERT);
     }
 
     public ApiAlertException(String message, Throwable cause) {
@@ -55,12 +63,15 @@ public class ApiAlertException extends AbstractApiException {
         }
     }
 
-    public static void throwIfNotNull(Object object, String errorMsgFmt, Object... args) {
-        if (!Objects.isNull(object)) {
-            if (args == null || args.length < 1) {
-                throw new ApiAlertException(errorMsgFmt);
-            }
-            throw new ApiAlertException(String.format(errorMsgFmt, args));
+    public static void throwIfNull(Object object, MessageStatus status, Object... args) {
+        if (Objects.isNull(object)) {
+            throw new ApiAlertException(status, args);
+        }
+    }
+
+    public static void throwIfNotNull(Object object, MessageStatus status, Object... args) {
+        if (Objects.nonNull(object)) {
+            throw new ApiAlertException(status, args);
         }
     }
 
@@ -70,12 +81,13 @@ public class ApiAlertException extends AbstractApiException {
         }
     }
 
-    public static void throwIfTrue(boolean expression, String errorMsgFmt, Object... args) {
+    public static void throwIfFalse(boolean expression, MessageStatus status, Object... args) {
+        throwIfTrue(!expression, status, args);
+    }
+
+    public static void throwIfTrue(boolean expression, MessageStatus status, Object... args) {
         if (expression) {
-            if (args == null || args.length < 1) {
-                throw new ApiAlertException(errorMsgFmt);
-            }
-            throw new ApiAlertException(String.format(errorMsgFmt, args));
+            throw new ApiAlertException(status, args);
         }
     }
 }

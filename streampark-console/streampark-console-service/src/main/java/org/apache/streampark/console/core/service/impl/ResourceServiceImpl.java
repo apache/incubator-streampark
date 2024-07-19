@@ -24,6 +24,7 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.enums.MessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -85,6 +86,14 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_APP_JAR_EMPTY_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_JAR_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_MULTI_FILE_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NAME_MODIFY_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NOT_EXIST_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_POM_JAR_EMPTY;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_STILL_USE_DELETE_ERROR;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -143,7 +152,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         ApiAlertException.throwIfNotNull(
             this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
-            "the resource %s already exists, please check.",
+            MessageStatus.RESOURCE_ALREADY_ERROR,
             resource.getResourceName());
 
         if (!jars.isEmpty()) {
@@ -175,12 +184,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private void check(Resource resource, List<String> jars, List<MavenPom> poms) {
         ApiAlertException.throwIfTrue(
-            jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+            jars.isEmpty() && poms.isEmpty(), RESOURCE_POM_JAR_EMPTY);
         ApiAlertException.throwIfTrue(
             resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
-            "Please upload jar for Flink_App resource");
+            RESOURCE_FLINK_APP_JAR_EMPTY_ERROR);
         ApiAlertException.throwIfTrue(
-            jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+            jars.size() + poms.size() > 1, RESOURCE_MULTI_FILE_ERROR);
     }
 
     @Override
@@ -200,7 +209,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resourceName != null) {
             ApiAlertException.throwIfFalse(
                 resourceName.equals(findResource.getResourceName()),
-                "Please make sure the resource name is not changed.");
+                RESOURCE_NAME_MODIFY_ERROR);
 
             Dependency dependency = Dependency.toDependency(resource.getResource());
             if (!dependency.getJar().isEmpty()) {
@@ -244,7 +253,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     /**
      * change resource owner
      *
-     * @param userId original user id
+     * @param userId       original user id
      * @param targetUserId target user id
      */
     @Override
@@ -349,7 +358,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(e, 1);
         }
         ApiAlertException.throwIfTrue(
-            jarFile == null || !jarFile.exists(), "flink app jar must exist.");
+            jarFile == null || !jarFile.exists(), RESOURCE_FLINK_JAR_NULL);
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
@@ -462,10 +471,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     private void checkOrElseAlert(Resource resource) {
-        ApiAlertException.throwIfNull(resource, "The resource does not exist.");
+        ApiAlertException.throwIfNull(resource, RESOURCE_NOT_EXIST_ERROR);
 
         ApiAlertException.throwIfTrue(
-            isDependByApplications(resource), "The resource is still in use, cannot be removed.");
+            isDependByApplications(resource), RESOURCE_STILL_USE_DELETE_ERROR);
     }
 
     private boolean isDependByApplications(Resource resource) {

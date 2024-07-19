@@ -58,7 +58,7 @@ export function initAppConfigStore() {
     bgColor && updateSidebarBgColor(bgColor);
   }
   // init store
-  localeStore.initLocale();
+  // localeStore.initLocale();
   setTimeout(() => {
     clearObsoleteStorage();
   }, 16);

@@ -104,6 +104,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_REPEAT_START_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
+
 @Slf4j
 @Service
 public class SparkApplicationActionServiceImpl
@@ -315,7 +319,7 @@ public class SparkApplicationActionServiceImpl
         final SparkApplication application = getById(appParam.getId());
         AssertUtils.notNull(application);
         ApiAlertException.throwIfTrue(
-            !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
+            !application.isCanBeStart(), APP_ACTION_REPEAT_START_ERROR);
 
         if (SparkExecutionMode.isRemoteMode(application.getSparkExecutionMode())) {
             checkBeforeStart(application);
@@ -325,7 +329,7 @@ public class SparkApplicationActionServiceImpl
 
             ApiAlertException.throwIfTrue(
                 !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
-                "[StreamPark] The same task name is already running in the yarn queue");
+                APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR);
         }
 
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
@@ -333,7 +337,7 @@ public class SparkApplicationActionServiceImpl
 
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
 
-        ApiAlertException.throwIfNull(sparkEnv, "[StreamPark] can no found flink version");
+        ApiAlertException.throwIfNull(sparkEnv, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
 
         // if manually started, clear the restart flag
         if (!auto) {

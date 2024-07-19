@@ -37,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_GATEWAY_NAME_EXIST;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -47,7 +49,7 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
     private void preHandleGatewayInfo(FlinkGateWay flinkGateWay) {
         // validate gateway name
         ApiAlertException.throwIfTrue(
-            existsByGatewayName(flinkGateWay.getGatewayName()), "gateway name already exists");
+            existsByGatewayName(flinkGateWay.getGatewayName()), FLINK_GATEWAY_NAME_EXIST);
 
         // validate gateway address and set gateway type
         flinkGateWay.setGatewayType(getGatewayVersion(flinkGateWay.getAddress()));

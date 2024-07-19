@@ -122,6 +122,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_REPEAT_START_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -380,7 +384,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         final Application application = getById(appParam.getId());
         AssertUtils.notNull(application);
         ApiAlertException.throwIfTrue(
-            !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
+            !application.isCanBeStart(), APP_ACTION_REPEAT_START_ERROR);
 
         if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())
             || FlinkExecutionMode.isSessionMode(application.getFlinkExecutionMode())) {
@@ -390,14 +394,14 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         if (FlinkExecutionMode.isYarnMode(application.getFlinkExecutionMode())) {
             ApiAlertException.throwIfTrue(
                 !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
-                "[StreamPark] The same task name is already running in the yarn queue");
+                APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR);
         }
 
         AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         AssertUtils.notNull(buildPipeline);
 
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-        ApiAlertException.throwIfNull(flinkEnv, "[StreamPark] can no found flink version");
+        ApiAlertException.throwIfNull(flinkEnv, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
 
         // if manually started, clear the restart flag
         if (!auto) {

@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
 
-/** Release Status */
+/** Release MessageStatus */
 public enum ReleaseStateEnum {
 
     /** release failed */

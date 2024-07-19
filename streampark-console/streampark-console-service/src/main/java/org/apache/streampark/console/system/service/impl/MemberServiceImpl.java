@@ -19,6 +19,7 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.enums.MessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
@@ -126,7 +127,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         ApiAlertException.throwIfNull(team, "The teamId [%s] not found", member.getTeamId());
         ApiAlertException.throwIfNotNull(
             findByUserId(member.getTeamId(), user.getUserId()),
-            "The user [%s] has been added the team [%s], please don't add it again.",
+            MessageStatus.MEMBER_USER_TEAM_ALREADY_ERROR,
             member.getUserName(),
             team.getTeamName());
 

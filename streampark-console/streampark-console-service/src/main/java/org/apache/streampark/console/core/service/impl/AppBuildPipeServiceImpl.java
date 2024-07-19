@@ -111,6 +111,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_IS_INVALID;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
@@ -174,7 +176,7 @@ public class AppBuildPipeServiceImpl
     /**
      * Build application. This is an async call method.
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
@@ -422,7 +424,7 @@ public class AppBuildPipeServiceImpl
     /**
      * check the build environment
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      */
     private void checkBuildEnv(Long appId, boolean forceBuild) {
@@ -434,7 +436,7 @@ public class AppBuildPipeServiceImpl
         ApiAlertException.throwIfNull(env, checkEnvErrorMessage);
         boolean checkVersion = env.getFlinkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
-            checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+            checkVersion, FLINK_ENV_FLINK_VERSION_UNSUPPORT, env.getFlinkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
@@ -442,11 +444,12 @@ public class AppBuildPipeServiceImpl
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
-            !forceBuild && !allowToBuildNow(appId),
-            "The job is invalid, or the job cannot be built while it is running");
+            !forceBuild && !allowToBuildNow(appId), APP_JOB_IS_INVALID);
     }
 
-    /** create building pipeline instance */
+    /**
+     * create building pipeline instance
+     */
     private BuildPipeline createPipelineInstance(@Nonnull Application app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
         String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
@@ -576,7 +579,9 @@ public class AppBuildPipeServiceImpl
             getMergedDependencyInfo(app));
     }
 
-    /** copy from {@link ApplicationActionService#start(Application, boolean)} */
+    /**
+     * copy from {@link ApplicationActionService#start(Application, boolean)}
+     */
     private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
         switch (app.getDevelopmentMode()) {
             case CUSTOM_CODE:

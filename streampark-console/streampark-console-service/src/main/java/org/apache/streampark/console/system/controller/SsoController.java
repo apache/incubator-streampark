@@ -41,6 +41,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.SSO_CONFIG_PRINCIPAL_NAME_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.SSO_SINGLE_SIGN_NOT_AVAILABLE;
+
 @Slf4j
 @Controller
 @RequestMapping("sso")
@@ -72,7 +75,7 @@ public class SsoController {
         // Check SSO enable status
         ApiAlertException.throwIfTrue(
             !ssoEnable,
-            "Single Sign On (SSO) is not available, please contact the administrator to enable");
+            SSO_SINGLE_SIGN_NOT_AVAILABLE);
 
         Subject subject = SecurityUtils.getSubject();
         PrincipalCollection principals = subject.getPrincipals();
@@ -88,7 +91,7 @@ public class SsoController {
 
         // Check Principal name
         ApiAlertException.throwIfNull(
-            principal.getName(), "Please configure the correct Principal Name Attribute");
+            principal.getName(), SSO_CONFIG_PRINCIPAL_NAME_ERROR);
 
         User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
 

@@ -52,6 +52,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLES_ALREADY_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLES_EXIST_USE;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -79,7 +82,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
         ApiAlertException.throwIfTrue(
             this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
-            "The variable code already exists.");
+            SYSTEM_VARIABLES_ALREADY_EXIST);
 
         variable.setCreatorId(serviceHelper.getUserId());
         this.save(variable);
@@ -88,7 +91,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     @Override
     public void remove(Variable variable) {
         ApiAlertException.throwIfTrue(
-            isDependByApplications(variable), "The variable is actually used.");
+            isDependByApplications(variable), SYSTEM_VARIABLES_EXIST_USE);
         this.removeById(variable);
     }
 
@@ -180,7 +183,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
      * Replace variable with defined variable codes.
      *
      * @param teamId
-     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @param mixed  Text with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return
      */
     @Override
@@ -241,7 +244,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
      * Determine whether variableCode is dependent on mixed.
      *
      * @param variableCode Variable code, e.g. "kafka.cluster"
-     * @param mixed Text with placeholders, e.g. "--cluster ${kafka.cluster}"
+     * @param mixed        Text with placeholders, e.g. "--cluster ${kafka.cluster}"
      * @return If mixed can match the variableCode, return true, otherwise return false
      */
     private boolean isDepend(String variableCode, String mixed) {

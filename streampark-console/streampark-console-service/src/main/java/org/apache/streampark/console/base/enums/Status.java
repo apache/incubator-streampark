@@ -15,16 +15,34 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.console.base.enums;
 
-/** Status Internal Exception */
-public class InternalException extends Exception {
+import org.springframework.context.i18n.LocaleContextHolder;
 
-    public InternalException(String message) {
-        super(message);
+import java.util.Locale;
+
+public enum Status {
+
+    PROJECT(2, "Project", "项目"),
+    TEAM(2, "Team", "团队"),
+    VARIABLES(1, "Variables", "变量"),
+    ;
+
+    private final int code;
+    private final String enMsg;
+    private final String zhMsg;
+
+    Status(int code, String enMsg, String zhMsg) {
+        this.code = code;
+        this.enMsg = enMsg;
+        this.zhMsg = zhMsg;
     }
 
-    public InternalException(String message, Throwable cause) {
-        super(message, cause);
+    public String getMsg() {
+        if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage())) {
+            return this.zhMsg;
+        } else {
+            return this.enMsg;
+        }
     }
 }

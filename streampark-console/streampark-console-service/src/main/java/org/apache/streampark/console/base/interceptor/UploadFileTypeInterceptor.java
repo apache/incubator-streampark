@@ -37,7 +37,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Map;
 
-/** An interceptor used to handle file uploads */
+import static org.apache.streampark.console.base.enums.MessageStatus.HANDLER_UPLOAD_FILE_IS_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.HANDLER_UPLOAD_FILE_TYPE_ILLEGAL_ERROR;
+
+/**
+ * An interceptor used to handle file uploads
+ */
 @Component
 public class UploadFileTypeInterceptor implements HandlerInterceptor {
 
@@ -53,13 +58,10 @@ public class UploadFileTypeInterceptor implements HandlerInterceptor {
             Map<String, MultipartFile> files = multipartRequest.getFileMap();
             for (String file : files.keySet()) {
                 MultipartFile multipartFile = multipartRequest.getFile(file);
-                ApiAlertException.throwIfNull(
-                    multipartFile, "File to upload can't be null. Upload file failed.");
+                ApiAlertException.throwIfNull(multipartFile, HANDLER_UPLOAD_FILE_IS_NULL_ERROR);
                 InputStream input = multipartFile.getInputStream();
                 boolean isJarOrPyFile = FileUtils.isJarFileType(input) || isPythonFile(input);
-                ApiAlertException.throwIfFalse(
-                    isJarOrPyFile,
-                    "Illegal file type, Only support standard jar or python files. Upload file failed.");
+                ApiAlertException.throwIfFalse(isJarOrPyFile, HANDLER_UPLOAD_FILE_TYPE_ILLEGAL_ERROR);
             }
         }
         return true;

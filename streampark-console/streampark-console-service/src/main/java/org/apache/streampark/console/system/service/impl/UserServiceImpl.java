@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_NOT_BELONG_TEAM_LOGIN;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -220,7 +222,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             ApiAlertException.throwIfTrue(
                 CollectionUtils.isEmpty(teams),
-                "The current user does not belong to any team, please contact the administrator!");
+                SYSTEM_USER_NOT_BELONG_TEAM_LOGIN);
 
             if (teams.size() == 1) {
                 Team team = teams.get(0);

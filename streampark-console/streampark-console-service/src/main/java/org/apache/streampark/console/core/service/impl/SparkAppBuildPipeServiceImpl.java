@@ -93,6 +93,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_IS_INVALID;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
@@ -367,7 +368,7 @@ public class SparkAppBuildPipeServiceImpl
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
             !forceBuild && !allowToBuildNow(appId),
-            "The job is invalid, or the job cannot be built while it is running");
+            APP_JOB_IS_INVALID);
     }
 
     /** create building pipeline instance */

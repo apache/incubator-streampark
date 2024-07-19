@@ -167,7 +167,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         } catch (Exception e) {
             if (e.getMessage().contains("LastErrorException")) {
                 result.setStatus(400);
-            } else if (e.getMessage().contains("Status 401")) {
+            } else if (e.getMessage().contains("MessageStatus 401")) {
                 result.setStatus(500);
                 result.setMsg(
                     "Failed to validate Docker registry, unauthorized: incorrect username or password ");

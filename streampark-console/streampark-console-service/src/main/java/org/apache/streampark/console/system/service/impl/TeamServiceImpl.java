@@ -45,6 +45,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APPLICATION;
+import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.VARIABLES;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -97,22 +103,25 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         log.info("{} Proceed delete team[Id={}]", serviceHelper.getLoginUser().getUsername(), teamId);
         Team team = this.getById(teamId);
 
-        ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);
+        ApiAlertException.throwIfNull(team, SYSTEM_TEAM_NOT_EXIST);
 
         ApiAlertException.throwIfTrue(
             applicationInfoService.existsByTeamId(teamId),
-            "Please delete the applications under the team[name=%s] first!",
-            team.getTeamName());
+            SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
+            team.getTeamName(),
+            APPLICATION.getMsg());
 
         ApiAlertException.throwIfTrue(
             projectService.existsByTeamId(teamId),
-            "Please delete the projects under the team[name=%s] first!",
-            team.getTeamName());
+            SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
+            team.getTeamName(),
+            PROJECT.getMsg());
 
         ApiAlertException.throwIfTrue(
             variableService.existsByTeamId(teamId),
-            "Please delete the variables under the team[name=%s] first!",
-            team.getTeamName());
+            SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
+            team.getTeamName(),
+            VARIABLES.getMsg());
 
         memberService.removeByTeamId(teamId);
         userService.clearLastTeam(teamId);

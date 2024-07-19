@@ -79,7 +79,7 @@ public abstract class SpringUnitTestBase {
 
     @BeforeAll
     public static void init(@TempDir File tempPath) throws IOException {
-        // Skip the EnvInitializer#run method by flag in System.properties.
+        // Skip the EnvInitializer#run method by flag in Status.properties.
         LOG.info("Start mock EnvInitializer init.");
         String mockedHome = tempPath.getAbsolutePath();
         Path localWorkspace = Files.createDirectories(new File(mockedHome + "/localWorkspace").toPath());
