@@ -152,7 +152,6 @@
     if (Object.keys(app).length == 0) {
       if (
         [
-          ExecModeEnum.YARN_PER_JOB,
           ExecModeEnum.YARN_SESSION,
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)

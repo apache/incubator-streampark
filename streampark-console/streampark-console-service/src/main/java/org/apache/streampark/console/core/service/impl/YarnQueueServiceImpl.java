@@ -244,8 +244,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             .listByTeamIdAndExecutionModes(
                 teamId,
                 Sets.newHashSet(
-                    FlinkExecutionMode.YARN_APPLICATION,
-                    FlinkExecutionMode.YARN_PER_JOB))
+                    FlinkExecutionMode.YARN_APPLICATION))
             .stream()
             .filter(
                 application -> {

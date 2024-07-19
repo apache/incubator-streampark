@@ -129,7 +129,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
 
         // Test update for both versions in yarn-app or per-job with same yarn queue
         Application app1 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
-        Application app2 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_PER_JOB);
+        Application app2 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
         // Test available queue

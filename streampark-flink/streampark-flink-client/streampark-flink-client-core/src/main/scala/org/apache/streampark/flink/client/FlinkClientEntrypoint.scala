@@ -30,7 +30,6 @@ object FlinkClientEntrypoint {
     REMOTE -> RemoteClient,
     YARN_APPLICATION -> YarnApplicationClient,
     YARN_SESSION -> YarnSessionClient,
-    YARN_PER_JOB -> YarnPerJobClient,
     KUBERNETES_NATIVE_SESSION -> KubernetesNativeSessionClient,
     KUBERNETES_NATIVE_APPLICATION -> KubernetesNativeApplicationClient)
 

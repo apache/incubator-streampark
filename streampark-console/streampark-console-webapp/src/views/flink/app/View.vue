@@ -201,7 +201,7 @@
       [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(app.state) ||
       app['optionState'] === OptionStateEnum.SAVEPOINTING
     ) {
-      // yarn-per-job|yarn-session|yarn-application
+      // yarn-session|yarn-application
       await handleView(app, unref(yarn));
     }
   }

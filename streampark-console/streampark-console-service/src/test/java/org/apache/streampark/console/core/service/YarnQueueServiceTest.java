@@ -276,20 +276,5 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         applicationManageService.save(
             mockYarnModeJobApp(targetTeamId, "app3", null, FlinkExecutionMode.REMOTE));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
-
-        // Test for existed applications that belong to the same team, but without yarn queue value.
-        applicationManageService.save(
-            mockYarnModeJobApp(targetTeamId, "app4", null, FlinkExecutionMode.YARN_PER_JOB));
-        yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
-
-        // Test for existed applications, some apps belong to the same team, but others don't belong to.
-        applicationManageService.save(
-            mockYarnModeJobApp(targetTeamId, "app5", queueLabel, FlinkExecutionMode.YARN_PER_JOB));
-        assertThatThrownBy(
-            () -> yarnQueueServiceImpl.checkNotReferencedByApplications(
-                targetTeamId, queueLabel, operation))
-                    .isInstanceOf(ApiAlertException.class)
-                    .hasMessage(String.format(QUEUE_USED_FORMAT, "applications",
-                        operation));
     }
 }

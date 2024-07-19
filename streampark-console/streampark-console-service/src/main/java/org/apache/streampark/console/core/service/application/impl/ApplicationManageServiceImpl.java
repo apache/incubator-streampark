@@ -553,9 +553,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             case YARN_APPLICATION:
                 application.setHadoopUser(appParam.getHadoopUser());
                 break;
-            case YARN_PER_JOB:
-                application.setHadoopUser(appParam.getHadoopUser());
-                break;
             case KUBERNETES_NATIVE_APPLICATION:
                 application.setFlinkClusterId(null);
                 break;
@@ -797,7 +794,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         }
 
         oldApp.setYarnQueueByHotParams();
-        if (FlinkExecutionMode.isYarnPerJobOrAppMode(newApp.getFlinkExecutionMode())
+        if (FlinkExecutionMode.isYarnAppMode(newApp.getFlinkExecutionMode())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
@@ -813,7 +810,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
      *     (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(Application application) {
-        return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
+        return FlinkExecutionMode.isYarnAppMode(application.getFlinkExecutionMode())
             && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
