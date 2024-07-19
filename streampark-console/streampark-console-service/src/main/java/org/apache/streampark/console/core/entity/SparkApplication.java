@@ -25,6 +25,7 @@ import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.bean.Dependency;
@@ -52,7 +53,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ import java.util.Optional;
 @Data
 @TableName("t_spark_app")
 @Slf4j
-public class SparkApplication implements Serializable {
+public class SparkApplication extends BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -203,11 +203,7 @@ public class SparkApplication implements Serializable {
 
     private String description;
 
-    private Date createTime;
-
     private Date optionTime;
-
-    private Date modifyTime;
 
     /** 1: cicd (build from csv) 2: upload (upload local jar job) */
     private Integer resourceFrom;

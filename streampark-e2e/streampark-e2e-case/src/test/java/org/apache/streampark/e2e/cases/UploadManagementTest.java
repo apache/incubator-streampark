@@ -87,7 +87,7 @@ public class UploadManagementTest {
     @Order(20)
     void testCreateDuplicateUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
-        browser.navigate().refresh();
+
         uploadsPage.createUpload(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()

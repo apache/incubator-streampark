@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.pages.flink.applications;
+package org.apache.streampark.e2e.pages.flink.clusters;
+
+import org.apache.streampark.e2e.pages.common.Constants;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -24,16 +26,18 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
+
 @Getter
-public final class FlinkSQLYarnApplicationForm {
+public abstract class CommonForm {
 
     private WebDriver driver;
+
+    @FindBy(id = "form_item_clusterName")
+    private WebElement inputFlinkClusterName;
 
     @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
     private WebElement buttonFlinkVersionDropdown;
@@ -44,25 +48,40 @@ public final class FlinkSQLYarnApplicationForm {
     })
     private List<WebElement> selectFlinkVersion;
 
-    public FlinkSQLYarnApplicationForm(WebDriver driver) {
-        this.driver = driver;
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+    private WebElement buttonSubmit;
+
+    private final ClusterDetailForm parent;
+
+    CommonForm(ClusterDetailForm clusterDetailForm) {
+        final WebDriver driver = clusterDetailForm.driver();
 
         PageFactory.initElements(driver, this);
+
+        this.parent = clusterDetailForm;
+    }
+
+    public CommonForm clusterName(String clusterName) {
+        WebElementDeleteAndInput(inputFlinkClusterName, clusterName);
+        return this;
     }
 
     @SneakyThrows
-    public FlinkSQLYarnApplicationForm add(String flinkVersion, String flinkSql) {
+    public CommonForm flinkVersion(String flinkVersion) {
         buttonFlinkVersionDropdown.click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         selectFlinkVersion.stream()
             .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
+            .orElseThrow(() -> new IllegalArgumentException(String.format("Flink version not found: %s", flinkVersion)))
             .click();
 
-        new FlinkSQLEditor(driver).content(flinkSql);
-
         return this;
+    }
+
+    public ClusterDetailForm submit() {
+        buttonSubmit.click();
+
+        return parent();
     }
 }

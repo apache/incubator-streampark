@@ -15,12 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.pages.flink.applications.entity;
+package org.apache.streampark.console.base.mybatis.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
-@Data
-public class ApplicationsDynamicParams {
+import java.io.Serializable;
+import java.util.Date;
 
-    private String flinkSQL;
+/** Base entity. */
+@Data
+public abstract class BaseEntity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /** create time */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+
+    /** modify time */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date modifyTime;
 }

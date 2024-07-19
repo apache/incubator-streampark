@@ -18,19 +18,18 @@
 package org.apache.streampark.e2e.pages.flink.applications;
 
 import org.apache.streampark.e2e.pages.common.Constants;
-import org.apache.streampark.e2e.pages.flink.applications.entity.ApplicationsDynamicParams;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
 @Getter
@@ -59,6 +58,21 @@ public final class ApplicationForm {
     @FindBy(id = "form_item_jobName")
     private WebElement inputApplicationName;
 
+    @FindBy(xpath = "//div[contains(@codefield, 'yarnSessionClusterId')]//div[contains(@class, 'ant-select-selector')]")
+    private WebElement buttonFlinkClusterDropdown;
+
+    @FindBy(className = "ant-select-item-option-content")
+    private List<WebElement> selectFlinkCluster;
+
+    @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
+    private WebElement buttonFlinkVersionDropdown;
+
+    @FindBys({
+            @FindBy(css = "[codefield=versionId]"),
+            @FindBy(className = "ant-select-item-option-content")
+    })
+    private List<WebElement> selectFlinkVersion;
+
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
     private WebElement buttonSubmit;
 
@@ -72,17 +86,14 @@ public final class ApplicationForm {
     }
 
     @SneakyThrows
-    public ApplicationForm addApplication(
-                                          DevelopmentMode developmentMode,
+    public ApplicationForm addApplication(DevelopmentMode developmentMode,
                                           ExecutionMode executionMode,
-                                          String applicationName,
-                                          String flinkVersion,
-                                          ApplicationsDynamicParams applicationsDynamicParams) {
+                                          String applicationName) {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
         buttonDevelopmentModeDropdown.click();
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
         switch (developmentMode) {
             case CUSTOM_CODE:
@@ -126,8 +137,7 @@ public final class ApplicationForm {
                                     String.format("Execution mode not found: %s",
                                         executionMode.desc())))
                             .click();
-                        new FlinkSQLYarnApplicationForm(driver)
-                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
+
                         break;
                     case YARN_SESSION:
                         selectExecutionMode.stream()
@@ -171,8 +181,6 @@ public final class ApplicationForm {
                                     String.format("Execution mode not found: %s",
                                         executionMode.desc())))
                             .click();
-                        new FlinkSQLYarnApplicationForm(driver)
-                            .add(flinkVersion, applicationsDynamicParams.flinkSQL());
                         break;
                     default:
                         throw new IllegalArgumentException(
@@ -195,6 +203,45 @@ public final class ApplicationForm {
         }
         inputApplicationName.sendKeys(applicationName);
 
+        return this;
+    }
+
+    public ApplicationForm flinkVersion(String flinkVersion) {
+        new Actions(driver).moveToElement(buttonFlinkVersionDropdown).build().perform();
+        buttonFlinkVersionDropdown.click();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(selectFlinkVersion));
+        selectFlinkVersion.stream()
+            .filter(e -> e.getText().equalsIgnoreCase(flinkVersion))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Flink version not found"))
+            .click();
+
+        return this;
+    }
+
+    public ApplicationForm flinkSql(String flinkSql) {
+        new FlinkSQLEditor(driver).content(flinkSql);
+        return this;
+    }
+
+    @SneakyThrows
+    public ApplicationForm flinkCluster(String flinkClusterName) {
+        new Actions(driver).moveToElement(buttonFlinkClusterDropdown).build().perform();
+        buttonFlinkClusterDropdown.click();
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
+        selectFlinkCluster.stream()
+            .filter(e -> e.getText().contains(flinkClusterName))
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format("Flink cluster not found: %s", flinkClusterName)))
+            .click();
+
+        return this;
+    }
+
+    public ApplicationForm submit() {
         buttonSubmit.click();
 
         return this;

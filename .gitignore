@@ -45,3 +45,4 @@ hs_err_pid*
 *Spec-output/
 **/node
 dist/
+dist-license-check/

@@ -40,7 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -59,6 +58,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         if (user == null) {
             return RestResponse.success().put("code", 0).message("user not available");
         }
+        AccessToken existAccessToken = baseMapper.selectByUserId(user.getUserId());
+        if (existAccessToken != null) {
+            return RestResponse.success().put("code", 0)
+                .message(String.format("user %s already has a token", user.getUsername()));
+        }
         String token = WebUtils.encryptToken(
             JWTUtil.sign(
                 user.getUserId(), user.getUsername(), user.getSalt(),
@@ -70,9 +74,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setUserId(user.getUserId());
         accessToken.setDescription(description);
 
-        Date date = new Date();
-        accessToken.setCreateTime(date);
-        accessToken.setModifyTime(date);
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
@@ -114,7 +115,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         AccessToken updateObj = new AccessToken();
         updateObj.setStatus(status);
         updateObj.setId(tokenId);
-        updateObj.setModifyTime(new Date());
         return RestResponse.success(this.updateById(updateObj));
     }
 

@@ -112,9 +112,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void createUser(User user) {
-        Date date = new Date();
-        user.setCreateTime(date);
-        user.setModifyTime(date);
         if (StringUtils.isNoneBlank(user.getPassword())) {
             String salt = ShaHashUtils.getRandomSalt();
             String password = ShaHashUtils.encrypt(salt, user.getPassword());
@@ -129,7 +126,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User existsUser = getById(user.getUserId());
         user.setLoginType(null);
         user.setPassword(null);
-        user.setModifyTime(new Date());
         if (needTransferResource(existsUser, user)) {
             return RestResponse.success(Collections.singletonMap("needTransferResource", true));
         }
