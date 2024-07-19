@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,31 +25,21 @@ import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-@Schema(name = "AlertDingTalk")
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDingTalkParams implements Serializable {
 
-  @Schema(description = "dink-talk token")
   @NotBlank(message = "The access token of DingTalk must be not empty")
   private String token;
 
-  @Schema(description = "phone numbers, use ',' to split multiple phone numbers")
   private String contacts;
 
-  @Schema(description = "ding-talk url")
   private String alertDingURL;
 
-  @Schema(description = "is @all", example = "false", defaultValue = "false")
   private Boolean isAtAll = false;
 
-  @Schema(
-      description = "is ding-talk robot secret enabled",
-      example = "false",
-      defaultValue = "false")
   private Boolean secretEnable = false;
 
-  @Schema(description = "ding-talk robot webhook secret token")
   private String secretToken;
 }

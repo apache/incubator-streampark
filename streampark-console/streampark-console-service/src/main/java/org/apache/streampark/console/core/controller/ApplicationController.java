@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.domain.ApiDocConstant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -37,11 +36,6 @@ import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -88,7 +82,7 @@ public class ApplicationController {
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "copy")
   @RequiresPermissions("app:copy")
-  public RestResponse copy(@Parameter(hidden = true) Application app) throws IOException {
+  public RestResponse copy(Application app) throws IOException {
     Long id = applicationService.copy(app);
     Map<String, String> data = new HashMap<>();
     data.put("id", Long.toString(id));
@@ -97,7 +91,6 @@ public class ApplicationController {
         : RestResponse.success(true).data(data);
   }
 
-  @Operation(summary = "Update application")
   @AppUpdated
   @PermissionScope(app = "#app.id")
   @PostMapping("update")
@@ -148,53 +141,11 @@ public class ApplicationController {
     return RestResponse.success(stateEnum.get());
   }
 
-  @Operation(
-      summary = "Start application",
-      tags = {ApiDocConstant.OPENAPI_TAG})
-  @Parameters({
-    @Parameter(
-        name = "Authorization",
-        description = "Access authorization token",
-        in = ParameterIn.HEADER,
-        required = true,
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
-        name = "id",
-        description = "start app id",
-        in = ParameterIn.QUERY,
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "teamId",
-        description = "current user teamId",
-        in = ParameterIn.QUERY,
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "savePointed",
-        description = "restored app from the savepoint or latest checkpoint",
-        in = ParameterIn.QUERY,
-        example = "false",
-        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
-    @Parameter(
-        name = "savePoint",
-        description = "savepoint or checkpoint path",
-        in = ParameterIn.QUERY,
-        required = false,
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
-        name = "allowNonRestored",
-        description = "ignore savepoint if cannot be restored",
-        in = ParameterIn.QUERY,
-        schema = @Schema(implementation = boolean.class, defaultValue = "false"))
-  })
   @ApiAccess
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")
-  public RestResponse start(@Parameter(hidden = true) Application app) {
+  public RestResponse start(Application app) {
     try {
       applicationService.checkEnv(app);
       applicationService.start(app, false);
@@ -204,53 +155,10 @@ public class ApplicationController {
     }
   }
 
-  @Operation(
-      summary = "Cancel application",
-      tags = {ApiDocConstant.OPENAPI_TAG})
-  @ApiAccess
-  @Parameters({
-    @Parameter(
-        name = "Authorization",
-        description = "Access authorization token",
-        in = ParameterIn.HEADER,
-        required = true,
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
-        name = "id",
-        description = "cancel app id",
-        in = ParameterIn.QUERY,
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "teamId",
-        description = "current user teamId",
-        in = ParameterIn.QUERY,
-        required = true,
-        example = "100000",
-        schema = @Schema(implementation = Long.class)),
-    @Parameter(
-        name = "savePointed",
-        description = "trigger savepoint before taking stopping",
-        in = ParameterIn.QUERY,
-        schema = @Schema(implementation = boolean.class, defaultValue = "false")),
-    @Parameter(
-        name = "savePoint",
-        description = "savepoint path",
-        in = ParameterIn.QUERY,
-        example = "hdfs:///savepoint/100000",
-        schema = @Schema(implementation = String.class)),
-    @Parameter(
-        name = "drain",
-        description = "send max watermark before canceling",
-        in = ParameterIn.QUERY,
-        example = "false",
-        schema = @Schema(implementation = boolean.class, defaultValue = "false"))
-  })
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "cancel")
   @RequiresPermissions("app:cancel")
-  public RestResponse cancel(@Parameter(hidden = true) Application app) throws Exception {
+  public RestResponse cancel(Application app) throws Exception {
     applicationService.cancel(app);
     return RestResponse.success();
   }
