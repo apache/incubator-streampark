@@ -42,7 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,9 +89,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
                 "Team name [%s] exists already. Create team failed. Please rename and try again.",
                 team.getTeamName()));
         team.setId(null);
-        Date date = new Date();
-        team.setCreateTime(date);
-        team.setModifyTime(date);
         this.save(team);
     }
 
@@ -133,7 +129,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             oldTeam.getTeamName().equals(team.getTeamName()),
             "Team name can't be changed. Update team failed.");
         oldTeam.setDescription(team.getDescription());
-        oldTeam.setModifyTime(new Date());
         updateById(oldTeam);
     }
 

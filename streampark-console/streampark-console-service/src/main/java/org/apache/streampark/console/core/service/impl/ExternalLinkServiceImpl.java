@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
@@ -34,7 +35,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.PropertyPlaceholderHelper;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +54,6 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         if (!this.check(externalLink)) {
             return;
         }
-        Date date = new Date();
-        externalLink.setCreateTime(date);
-        externalLink.setModifyTime(date);
         externalLink.setId(null);
         this.save(externalLink);
     }
@@ -66,7 +63,6 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         if (!this.check(externalLink)) {
             return;
         }
-        externalLink.setModifyTime(new Date());
         baseMapper.updateById(externalLink);
     }
 
@@ -112,12 +108,11 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         if (result == null) {
             return true;
         }
-        AssertUtils.required(
-            !result.getBadgeName().equals(params.getBadgeName()),
+        ApiAlertException.throwIfTrue(result.getBadgeName().equals(params.getBadgeName()),
             String.format("The name: %s is already existing.", result.getBadgeName()));
-        AssertUtils.required(
-            !result.getLinkUrl().equals(params.getLinkUrl()),
+        ApiAlertException.throwIfTrue(result.getLinkUrl().equals(params.getLinkUrl()),
             String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
+
         return false;
     }
 }
