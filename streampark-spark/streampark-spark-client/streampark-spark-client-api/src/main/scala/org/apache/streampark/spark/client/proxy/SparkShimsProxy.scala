@@ -49,13 +49,13 @@ object SparkShimsProxy extends Logger {
   private[this] lazy val SPARK_SHIMS_PREFIX = "streampark-spark-shims_spark"
 
   def proxy[T](sparkVersion: SparkVersion, func: ClassLoader => T): T = {
-    val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
+    val shimsClassLoader = getSparkShimsClassLoader(sparkVersion)
     ClassLoaderUtils
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   def proxy[T](sparkVersion: SparkVersion, func: JavaFunc[ClassLoader, T]): T = {
-    val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
+    val shimsClassLoader = getSparkShimsClassLoader(sparkVersion)
     ClassLoaderUtils
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
@@ -134,14 +134,14 @@ object SparkShimsProxy extends Logger {
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
-  private[this] def getSParkShimsClassLoader(sparkVersion: SparkVersion): ClassLoader = {
+  private[this] def getSparkShimsClassLoader(sparkVersion: SparkVersion): ClassLoader = {
     logInfo(s"add spark shims urls classloader,spark version: $sparkVersion")
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
         // 1) spark/lib
-        val libURL = getSparkHomeLib(sparkVersion.sparkHome, "jars", !_.getName.startsWith("log4j"))
-        val shimsUrls = ListBuffer[URL](libURL: _*)
+        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+        val shimsUrls = ListBuffer[URL](libUrl: _*)
 
         // 2) add all shims jar
         addShimsUrls(

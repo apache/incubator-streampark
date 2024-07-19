@@ -15,21 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.metrics.spark;
 
-import org.apache.streampark.common.conf.SparkVersion
-import org.apache.streampark.common.enums.SparkExecutionMode
+import lombok.Data;
 
-import javax.annotation.Nullable
+import java.io.Serializable;
 
-import java.util.{Map => JavaMap}
+@Data
+public class SparkExecutor implements Serializable {
 
-case class CancelRequest(
-    id: Long,
-    sparkVersion: SparkVersion,
-    executionMode: SparkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    withDrain: Boolean,
-    nativeFormat: Boolean)
+    private Long memoryUsed;
+
+    private Long maxMemory;
+
+    private Long totalCores;
+}

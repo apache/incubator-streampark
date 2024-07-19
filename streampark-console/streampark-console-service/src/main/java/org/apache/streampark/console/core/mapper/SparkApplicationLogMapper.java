@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.mapper;
 
-import javax.annotation.Nullable
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 
-import java.util.{Map => JavaMap}
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String],
-    var sparkAppId: String,
-    @Nullable jobId: String = "",
-    @Nullable jobManagerUrl: String = "")
+public interface SparkApplicationLogMapper extends BaseMapper<SparkApplicationLog> {
+}

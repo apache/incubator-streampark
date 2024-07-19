@@ -18,16 +18,18 @@
 package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.enums.SparkExecutionMode
+import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
+import org.apache.streampark.spark.client.conf.SparkConfiguration
 
 import org.apache.commons.collections.MapUtils
+import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
 import java.util.concurrent.{CountDownLatch, Executors, ExecutorService}
-
-import scala.util.control.Breaks.break
 
 /** yarn application mode submit */
 object YarnApplicationClient extends SparkClientTrait {
@@ -36,7 +38,8 @@ object YarnApplicationClient extends SparkClientTrait {
 
   private[this] lazy val workspace = Workspace.remote
 
-  override def doCancel(cancelRequest: CancelRequest): CancelResponse = {
+  override def doStop(stopRequest: StopRequest): StopResponse = {
+    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
     null
   }
 
@@ -44,11 +47,9 @@ object YarnApplicationClient extends SparkClientTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     launch(submitRequest)
-    null
-
   }
 
-  private def launch(submitRequest: SubmitRequest): Unit = {
+  private def launch(submitRequest: SubmitRequest): SubmitResponse = {
     val launcher: SparkLauncher = new SparkLauncher()
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
       .setAppResource(submitRequest.buildResult
@@ -56,69 +57,61 @@ object YarnApplicationClient extends SparkClientTrait {
         .shadedJarPath)
       .setMainClass(submitRequest.appMain)
       .setMaster("yarn")
-      .setDeployMode("cluster")
+      .setDeployMode(submitRequest.executionMode match {
+        case SparkExecutionMode.YARN_CLIENT => "client"
+        case SparkExecutionMode.YARN_CLUSTER => "cluster"
+        case _ =>
+          throw new IllegalArgumentException(
+            "[StreamPark][YarnApplicationClient] Yarn mode only support \"client\" and \"cluster\".")
+
+      })
       .setAppName(submitRequest.appName)
-      .setConf("spark.executor.memory", "5g")
-      .setConf("spark.executor.cores", "4")
-      .setConf("spark.num.executors", "1")
       .setConf(
         "spark.yarn.jars",
         submitRequest
-          .asInstanceOf[SubmitRequest]
           .hdfsWorkspace
           .sparkLib + "/*.jar")
       .setVerbose(true)
+
+    import scala.collection.JavaConverters._
+    setDynamicProperties(launcher, submitRequest.properties.asScala.toMap)
+
+    // TODO: Adds command line arguments for the application.
+    // launcher.addAppArgs()
 
     if (MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter
         .containsKey("sql")) {
       launcher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
     }
 
-    logger.info("The spark task start")
+    logger.info("[StreamPark][YarnApplicationClient] The spark task start")
+    val cdlForApplicationId: CountDownLatch = new CountDownLatch(1)
 
+    var sparkAppHandle: SparkAppHandle = null
     threadPool.execute(new Runnable {
       override def run(): Unit = {
         try {
           val countDownLatch: CountDownLatch = new CountDownLatch(1)
-          val sparkAppHandle: SparkAppHandle =
-            launcher.startApplication(new SparkAppHandle.Listener() {
-              override def stateChanged(handle: SparkAppHandle): Unit = {
-                if (handle.getAppId != null) {
-                  logInfo(
-                    String.format("%s stateChanged :%s", handle.getAppId, handle.getState.toString))
-                } else logger.info("stateChanged :{}", handle.getState.toString)
-
-                if (SparkAppHandle.State.FAILED.toString == handle.getState.toString) {
-                  logger.error("Task run failure stateChanged :{}", handle.getState.toString)
+          sparkAppHandle = launcher.startApplication(new SparkAppHandle.Listener() {
+            override def stateChanged(handle: SparkAppHandle): Unit = {
+              if (handle.getAppId != null) {
+                if (cdlForApplicationId.getCount != 0) {
+                  cdlForApplicationId.countDown()
                 }
+                logger.info("{} stateChanged :{}", Array(handle.getAppId, handle.getState.toString))
+              } else logger.info("stateChanged :{}", handle.getState.toString)
 
-                if (handle.getState.isFinal) countDownLatch.countDown()
+              if (SparkAppHandle.State.FAILED.toString == handle.getState.toString) {
+                logger.error("Task run failure stateChanged :{}", handle.getState.toString)
               }
 
-              override def infoChanged(handle: SparkAppHandle): Unit = {}
-            })
-          logger.info(
-            "The task is executing, current is get application id before,please wait ........")
-          var applicationId: String = null
-          while ({
-            !(SparkAppHandle.State.RUNNING == sparkAppHandle.getState)
-          }) {
-            applicationId = sparkAppHandle.getAppId
-            if (applicationId != null) {
-              logInfo(
-                String.format(
-                  "handle current state is %s, appid is %s",
-                  sparkAppHandle.getState.toString,
-                  applicationId))
-              break // todo: break is not supported
-
+              if (handle.getState.isFinal) {
+                countDownLatch.countDown()
+              }
             }
-          }
-          logInfo(
-            String.format(
-              "handle current state is %s, appid is %s",
-              sparkAppHandle.getState.toString,
-              applicationId))
+
+            override def infoChanged(handle: SparkAppHandle): Unit = {}
+          })
           countDownLatch.await()
         } catch {
           case e: Exception =>
@@ -127,6 +120,23 @@ object YarnApplicationClient extends SparkClientTrait {
       }
     })
 
+    cdlForApplicationId.await()
+    logger.info(
+      "[StreamPark][YarnApplicationClient] The task is executing, handle current state is {}, appid is {}",
+      Array(sparkAppHandle.getState.toString, sparkAppHandle.getAppId))
+    SubmitResponse(null, null, sparkAppHandle.getAppId)
+  }
+
+  private def setDynamicProperties(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {
+    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start configuration.")
+    val finalProperties: Map[String, Any] = SparkConfiguration.defaultParameters ++ properties
+    for ((k, v) <- finalProperties) {
+      if (k.startsWith("spark.")) {
+        sparkLauncher.setConf(k, v.toString)
+      } else {
+        logger.info("[StreamPark][YarnApplicationClient] \"{}\" doesn't start with \"spark.\". Skip it.", k)
+      }
+    }
   }
 
 }
