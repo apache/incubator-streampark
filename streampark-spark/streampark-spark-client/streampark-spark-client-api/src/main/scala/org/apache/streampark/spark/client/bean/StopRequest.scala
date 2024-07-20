@@ -28,7 +28,5 @@ case class StopRequest(
     id: Long,
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    jobId: String,
-    withDrain: Boolean,
-    nativeFormat: Boolean)
+    @Nullable properties: JavaMap[String, String],
+    jobId: String)

@@ -26,6 +26,7 @@ import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResp
 import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
+import org.apache.commons.collections.MapUtils
 import org.apache.commons.io.FileUtils
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
 
@@ -118,9 +119,13 @@ case class SubmitRequest(
     }
   }
 
-  def hasProp(key: String): Boolean = properties.containsKey(key)
+  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(properties) && properties.containsKey(key)
 
   def getProp(key: String): Any = properties.get(key)
+
+  def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
+
+  def getExtra(key: String): Any = extraParameter.get(key)
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) {

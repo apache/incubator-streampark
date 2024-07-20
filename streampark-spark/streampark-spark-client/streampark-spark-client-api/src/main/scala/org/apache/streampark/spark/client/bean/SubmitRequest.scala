@@ -25,23 +25,22 @@ import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUt
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.commons.collections.MapUtils
 
 import javax.annotation.Nullable
 
 import java.io.{File, IOException}
-import java.net.URL
 import java.nio.file.Files
 import java.util.{Map => JavaMap}
 
 import scala.collection.convert.ImplicitConversions._
-import scala.util.Try
 
 case class SubmitRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    properties: JavaMap[String, Any],
+    properties: JavaMap[String, String],
     sparkYaml: String,
-    developmentMode: FlinkDevelopmentMode,
+    developmentMode: SparkDevelopmentMode,
     id: Long,
     jobId: String,
     appName: String,
@@ -52,43 +51,42 @@ case class SubmitRequest(
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
 
+  val DEFAULT_SUBMIT_PARAM = Map[String, String](
+    "spark.driver.cores" -> "1",
+    "spark.driver.memory" -> "1g",
+    "spark.executor.cores" -> "1",
+    "spark.executor.memory" -> "1g")
+
   private[this] lazy val appProperties: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL =>
-      Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.SPARK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case SparkDevelopmentMode.CUSTOM_CODE => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }
 
-  lazy val effectiveAppName: String =
-    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME)
-    else this.appName
-
-  lazy val libs: List[URL] = {
-    val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
-    Try(new File(path).listFiles().map(_.toURI.toURL).toList)
-      .getOrElse(List.empty[URL])
+  lazy val effectiveAppName: String = if (this.appName == null) {
+    appProperties(KEY_FLINK_APP_NAME)
+  } else {
+    this.appName
   }
 
-  lazy val classPaths: List[URL] = sparkVersion.sparkLibs ++ libs
-
-  lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
-
-  lazy val userJarFile: File = {
+  lazy val userJarPath: String = {
     executionMode match {
       case _ =>
         checkBuildResult()
-        new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+        buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
     }
   }
 
-  lazy val safePackageProgram: Boolean = {
-    sparkVersion.version.split("\\.").map(_.trim.toInt) match {
-      case Array(a, b, c) if a >= 3 => b > 1
-      case _ => false
-    }
-  }
+  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(properties) && properties.containsKey(key)
+
+  def getProp(key: String): Any = properties.get(key)
+
+  def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
+
+  def getExtra(key: String): Any = extraParameter.get(key)
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) {
@@ -133,7 +131,7 @@ case class SubmitRequest(
   }
 
   @throws[IOException]
-  def isSymlink(file: File): Boolean = {
+  private def isSymlink(file: File): Boolean = {
     if (file == null) throw new NullPointerException("File must not be null")
     Files.isSymbolicLink(file.toPath)
   }
@@ -163,7 +161,7 @@ case class SubmitRequest(
   }
 
   @throws[Exception]
-  def checkBuildResult(): Unit = {
+  private def checkBuildResult(): Unit = {
     executionMode match {
       case _ =>
         if (this.buildResult == null) {
