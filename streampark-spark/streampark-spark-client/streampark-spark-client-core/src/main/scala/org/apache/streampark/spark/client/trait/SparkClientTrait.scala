@@ -21,6 +21,7 @@ import org.apache.streampark.common.util._
 import org.apache.streampark.spark.client.bean._
 
 import scala.collection.convert.ImplicitConversions._
+import scala.util.{Failure, Success, Try}
 
 trait SparkClientTrait extends Logger {
 
@@ -31,7 +32,7 @@ trait SparkClientTrait extends Logger {
          |--------------------------------------- spark job start -----------------------------------
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
-         |    appName          : ${submitRequest.appName}
+         |    appName          : ${submitRequest.effectiveAppName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
@@ -41,17 +42,19 @@ trait SparkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-    submitRequest.developmentMode match {
-      case _ =>
-        if (submitRequest.userJarFile != null) {
-          val uri = submitRequest.userJarFile.getAbsolutePath
-        }
-    }
+    prepareConfig(submitRequest)
 
     setConfig(submitRequest)
 
-    doSubmit(submitRequest)
-
+    Try(doSubmit(submitRequest)) match {
+      case Success(resp) => resp
+      case Failure(e) =>
+        logError(
+          s"spark job ${submitRequest.appName} start failed, " +
+            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"detail: ${ExceptionUtils.stringifyException(e)}")
+        throw e
+    }
   }
 
   def setConfig(submitRequest: SubmitRequest): Unit
@@ -77,5 +80,22 @@ trait SparkClientTrait extends Logger {
 
   @throws[Exception]
   def doStop(stopRequest: StopRequest): StopResponse
+
+  private def prepareConfig(submitRequest: SubmitRequest): Unit = {
+    // 1) set default config
+    val userConfig = submitRequest.properties.filter(c => {
+      val k = c._1
+      if (k.startsWith("spark.")) {
+        true
+      } else {
+        logger.warn("[StreamPark] config {} doesn't start with \"spark.\" Skip it.", k)
+        false
+      }
+    })
+    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1))
+    submitRequest.properties.clear()
+    submitRequest.properties.putAll(userConfig)
+    submitRequest.properties.putAll(defaultConfig)
+  }
 
 }
