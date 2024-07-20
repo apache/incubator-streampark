@@ -28,7 +28,7 @@ trait SparkClientTrait extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |--------------------------------------- spark job start ---------------------------------------
+         |--------------------------------------- spark job start -----------------------------------
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
          |    appName          : ${submitRequest.appName}
@@ -57,27 +57,25 @@ trait SparkClientTrait extends Logger {
   def setConfig(submitRequest: SubmitRequest): Unit
 
   @throws[Exception]
-  def cancel(cancelRequest: CancelRequest): CancelResponse = {
+  def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
       s"""
-         |----------------------------------------- spark job cancel --------------------------------
-         |     userSparkHome     : ${cancelRequest.sparkVersion.sparkHome}
-         |     sparkVersion      : ${cancelRequest.sparkVersion.version}
-         |     clusterId         : ${cancelRequest.clusterId}
-         |     withDrain         : ${cancelRequest.withDrain}
-         |     nativeFormat      : ${cancelRequest.nativeFormat}
-         |     appId             : ${cancelRequest.clusterId}
-         |     jobId             : ${cancelRequest.jobId}
+         |----------------------------------------- spark job stop ----------------------------------
+         |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
+         |     sparkVersion      : ${stopRequest.sparkVersion.version}
+         |     withDrain         : ${stopRequest.withDrain}
+         |     nativeFormat      : ${stopRequest.nativeFormat}
+         |     jobId             : ${stopRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-    doCancel(cancelRequest)
+    doStop(stopRequest)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
   @throws[Exception]
-  def doCancel(cancelRequest: CancelRequest): CancelResponse
+  def doStop(stopRequest: StopRequest): StopResponse
 
 }

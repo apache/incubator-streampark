@@ -17,13 +17,18 @@
 
 package org.apache.streampark.spark.client.bean
 
+import org.apache.streampark.common.conf.SparkVersion
+import org.apache.streampark.common.enums.SparkExecutionMode
+
 import javax.annotation.Nullable
 
 import java.util.{Map => JavaMap}
 
-case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String],
-    var sparkAppId: String,
-    @Nullable jobId: String = "",
-    @Nullable jobManagerUrl: String = "")
+case class StopRequest(
+    id: Long,
+    sparkVersion: SparkVersion,
+    executionMode: SparkExecutionMode,
+    @Nullable properties: JavaMap[String, Any],
+    jobId: String,
+    withDrain: Boolean,
+    nativeFormat: Boolean)

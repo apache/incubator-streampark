@@ -32,15 +32,15 @@ object SparkClient extends Logger {
   private[this] val SUBMIT_REQUEST =
     "org.apache.streampark.spark.client.bean.SubmitRequest" -> "submit"
 
-  private[this] val CANCEL_REQUEST =
-    "org.apache.streampark.spark.client.bean.CancelRequest" -> "cancel"
+  private[this] val STOP_REQUEST =
+    "org.apache.streampark.spark.client.bean.StopRequest" -> "stop"
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     proxy[SubmitResponse](submitRequest, submitRequest.sparkVersion, SUBMIT_REQUEST)
   }
 
-  def cancel(stopRequest: CancelRequest): CancelResponse = {
-    proxy[CancelResponse](stopRequest, stopRequest.sparkVersion, CANCEL_REQUEST)
+  def stop(stopRequest: StopRequest): StopResponse = {
+    proxy[StopResponse](stopRequest, stopRequest.sparkVersion, STOP_REQUEST)
   }
 
   private[this] def proxy[T: ClassTag](

@@ -15,15 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.enums;
 
-import javax.annotation.Nullable
+import lombok.Getter;
 
-import java.util.{Map => JavaMap}
+import java.util.Arrays;
 
-case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String],
-    var sparkAppId: String,
-    @Nullable jobId: String = "",
-    @Nullable jobManagerUrl: String = "")
+/** Option status */
+@Getter
+public enum SparkOptionStateEnum {
+
+    /** Application which is currently action: none. */
+    NONE(0),
+    /** Application which is currently action: releasing. */
+    RELEASING(1),
+    /** Application which is currently action: starting. */
+    STARTING(2),
+    /** Application which is currently action: stopping. */
+    STOPPING(3);
+
+    private final int value;
+
+    SparkOptionStateEnum(int value) {
+        this.value = value;
+    }
+
+    public static SparkOptionStateEnum of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
+}

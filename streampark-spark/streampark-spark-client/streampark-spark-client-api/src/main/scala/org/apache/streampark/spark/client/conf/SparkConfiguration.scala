@@ -15,15 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.spark.client.conf
 
-import javax.annotation.Nullable
+object SparkConfiguration {
+  val defaultParameters = Map[String, Any](
+    "spark.driver.cores" -> "1",
+    "spark.driver.memory" -> "1g",
+    "spark.executor.cores" -> "1",
+    "spark.executor.memory" -> "1g")
 
-import java.util.{Map => JavaMap}
-
-case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String],
-    var sparkAppId: String,
-    @Nullable jobId: String = "",
-    @Nullable jobManagerUrl: String = "")
+}
