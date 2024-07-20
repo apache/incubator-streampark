@@ -19,9 +19,8 @@
 
 check_path=dist-license-check
 
-if [ -d "$check_path" ];then
-rm -rf $check_path
-fi
+[[ -d "$check_path" ]] && rm -rf $check_path
+
 mkdir $check_path || true
 
 tar -zxf dist/apache-streampark*-bin.tar.gz --strip=1 -C $check_path
@@ -45,7 +44,7 @@ echo '=== Third party dependencies: ' && grep -vf $check_path/self-modules.txt $
 
 diff -w -B -U0 <(sort < tools/dependencies/known-dependencies.txt) <(sort < $check_path/third-party-dependencies.txt)
 
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
   echo "Third-party dependencies are not all known, please add the license to LICENSE file and add the dependency to tools/dependencies/known-dependencies.txt"
   exit 1
 fi
