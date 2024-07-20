@@ -110,6 +110,8 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: AlarmTest
+            class: org.apache.streampark.e2e.cases.AlarmTest
           - name: ExternalLinkPageTest
             class: org.apache.streampark.e2e.cases.ExternalLinkPageTest
           - name: YarnQueueTest
