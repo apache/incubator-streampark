@@ -21,7 +21,7 @@ import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.SparkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
@@ -211,17 +211,15 @@ public class SparkApplicationActionServiceImpl
 
         SparkEnv sparkEnv = sparkEnvService.getById(application.getVersionId());
 
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> stopProper = new HashMap<>();
 
         StopRequest stopRequest =
             new StopRequest(
                 application.getId(),
                 sparkEnv.getSparkVersion(),
                 SparkExecutionMode.of(application.getExecutionMode()),
-                properties,
-                application.getJobId(),
-                appParam.getDrain(),
-                appParam.getNativeFormat());
+                stopProper,
+                application.getJobId());
 
         CompletableFuture<StopResponse> stopFuture =
             CompletableFuture.supplyAsync(() -> SparkClient.stop(stopRequest), executorService);
@@ -322,7 +320,7 @@ public class SparkApplicationActionServiceImpl
             SparkExecutionMode.of(application.getExecutionMode()),
             getProperties(application),
             sparkEnv.getSparkConf(),
-            FlinkDevelopmentMode.of(application.getJobType()),
+            SparkDevelopmentMode.valueOf(application.getJobType()),
             application.getId(),
             jobId,
             application.getJobName(),
@@ -374,15 +372,10 @@ public class SparkApplicationActionServiceImpl
                     }
                 }
                 application.setAppId(response.clusterId());
-                if (StringUtils.isNoneEmpty(response.sparkAppId())) {
-                    application.setJobId(response.sparkAppId());
+                if (StringUtils.isNoneEmpty(response.clusterId())) {
+                    application.setJobId(response.clusterId());
                 }
-
-                if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
-                    application.setJobManagerUrl(response.jobManagerUrl());
-                    applicationLog.setTrackUrl(response.jobManagerUrl());
-                }
-                applicationLog.setSparkAppId(response.sparkAppId());
+                applicationLog.setSparkAppId(response.clusterId());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
 
@@ -531,8 +524,8 @@ public class SparkApplicationActionServiceImpl
         return Tuple2.of(flinkUserJar, appConf);
     }
 
-    private Map<String, Object> getProperties(SparkApplication application) {
-        Map<String, Object> properties = new HashMap<>(application.getOptionMap());
+    private Map<String, String> getProperties(SparkApplication application) {
+        Map<String, String> properties = new HashMap<>(application.getOptionMap());
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
             String yarnQueue = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
             String yarnLabelExpr = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
