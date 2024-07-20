@@ -19,12 +19,12 @@ package org.apache.streampark.e2e.pages.setting;
 
 import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageDingTalk;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageEmail;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageLark;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageSMS;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageWeChat;
-import org.apache.streampark.e2e.pages.setting.entity.FaultAlert;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageDingTalkSetting;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageEmailSetting;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageLarkSetting;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageSmsSetting;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageWeChatSetting;
+import org.apache.streampark.e2e.pages.setting.entity.FaultAlertSetting;
 
 import lombok.Getter;
 import org.openqa.selenium.By;
@@ -64,7 +64,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'Yes')]")
     private WebElement deleteConfirmButton;
 
-    public AlarmPage createAlarm(String alertName, String alertType, FaultAlert faultAlert) {
+    public AlarmPage createAlarm(String alertName, String alertType, FaultAlertSetting faultAlertSetting) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -73,13 +73,13 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         buttonCreateAlarm.click();
         createAlarmForm.inputAlertName().sendKeys(alertName);
 
-        createFaultAlert(alertType, faultAlert);
+        createFaultAlert(alertType, faultAlertSetting);
         createAlarmForm.buttonSubmit().click();
 
         return this;
     }
 
-    public AlarmPage editAlarm(String alertName, String alertType, FaultAlert faultAlert) {
+    public AlarmPage editAlarm(String alertName, String alertType, FaultAlertSetting faultAlertSetting) {
         waitForPageLoading();
 
         alarmList().stream()
@@ -106,8 +106,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button found for alarm: " + alertName))
             .click();
 
-        // todo: edit alert type
-        // createFaultAlert(alertType, faultAlert);
+        createFaultAlert(alertType, faultAlertSetting);
         createAlarmForm.buttonSubmit().click();
         return this;
     }
@@ -147,7 +146,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
     }
 
     // create one fault alert resource in our system.
-    private void createFaultAlert(String alertType, FaultAlert faultAlert) {
+    private void createFaultAlert(String alertType, FaultAlertSetting faultAlertSetting) {
         createAlarmForm.btnAlertTypeDropdown().click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createAlarmForm.selectAlertType()));
@@ -159,21 +158,21 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
                     String.format("No %s in alertType dropdown list", alertType)))
             .click();
 
-        AlertService alertService = getAlertService(faultAlert);
-        alertService.createAlert(faultAlert);
+        AlertService alertService = getAlertService(faultAlertSetting);
+        alertService.createAlert(faultAlertSetting);
     }
 
-    private @Nonnull AlertService getAlertService(@Nonnull FaultAlert faultAlert) {
+    private @Nonnull AlertService getAlertService(@Nonnull FaultAlertSetting faultAlertSetting) {
         AlertService alertService = null;
-        if (faultAlert instanceof AlarmPageEmail) {
+        if (faultAlertSetting instanceof AlarmPageEmailSetting) {
             alertService = new CreateEmailAlertForm();
-        } else if (faultAlert instanceof AlarmPageDingTalk) {
+        } else if (faultAlertSetting instanceof AlarmPageDingTalkSetting) {
             alertService = new CreateDingTalkAlertForm();
-        } else if (faultAlert instanceof AlarmPageLark) {
+        } else if (faultAlertSetting instanceof AlarmPageLarkSetting) {
             alertService = new CreateLarkAlertForm();
-        } else if (faultAlert instanceof AlarmPageWeChat) {
+        } else if (faultAlertSetting instanceof AlarmPageWeChatSetting) {
             alertService = new CreateWeChatAlertForm();
-        } else if (faultAlert instanceof AlarmPageSMS) {
+        } else if (faultAlertSetting instanceof AlarmPageSmsSetting) {
             // ignore
             alertService = new CreateSMSAlertForm();
         }
@@ -197,8 +196,8 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         private WebElement inputAlertName;
 
         @FindBys({
-                @FindBy(xpath = "//span[text()='Fault Alert Type']"),
-                @FindBy(xpath = "./ancestor::div[contains(@class, 'ant-select-selector')]")
+                @FindBy(xpath = "//div[contains(@class, 'ant-select-selector')]"),
+                @FindBy(xpath = ".//input[@id='form_item_alertType']")
         })
         private WebElement btnAlertTypeDropdown;
 
@@ -222,9 +221,9 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         private WebElement inputEmail;
 
         @Override
-        public void createAlert(FaultAlert faultAlert) {
-            AlarmPageEmail alarmPageEmail = (AlarmPageEmail) faultAlert;
-            inputEmail.sendKeys(alarmPageEmail.email());
+        public void createAlert(FaultAlertSetting faultAlertSetting) {
+            AlarmPageEmailSetting alarmPageEmailSetting = (AlarmPageEmailSetting) faultAlertSetting;
+            inputEmail.sendKeys(alarmPageEmailSetting.email());
         }
     }
 
@@ -253,17 +252,17 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         private WebElement btnDingTalkEffectToAllUsers;
 
         @Override
-        public void createAlert(FaultAlert faultAlert) {
-            AlarmPageDingTalk alarmPageDingTalk = (AlarmPageDingTalk) faultAlert;
-            inputDingTalkURL.sendKeys(alarmPageDingTalk.url());
-            inputDingTalkToken.sendKeys(alarmPageDingTalk.token());
-            inputDingTalkReceiveUser.sendKeys(alarmPageDingTalk.receiveUser());
-            // if we open secret button, need to fill the token value.
-            if (alarmPageDingTalk.isSecretEnable()) {
+        public void createAlert(FaultAlertSetting faultAlertSetting) {
+            AlarmPageDingTalkSetting alarmPageDingTalkSetting = (AlarmPageDingTalkSetting) faultAlertSetting;
+            inputDingTalkURL.sendKeys(alarmPageDingTalkSetting.url());
+            inputDingTalkToken.sendKeys(alarmPageDingTalkSetting.token());
+            inputDingTalkReceiveUser.sendKeys(alarmPageDingTalkSetting.receiveUser());
+            // if open the secret button, fill token value.
+            if (alarmPageDingTalkSetting.isSecretEnable()) {
                 btnDingTalkSecret.click();
-                inputDingTalkSecretToken.sendKeys(alarmPageDingTalk.secretToken());
+                inputDingTalkSecretToken.sendKeys(alarmPageDingTalkSetting.secretToken());
             }
-            if (alarmPageDingTalk.isEffectToAllUsers()) {
+            if (alarmPageDingTalkSetting.isEffectToAllUsers()) {
                 btnDingTalkEffectToAllUsers.click();
             }
         }
@@ -279,9 +278,9 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         private WebElement inputWeChatToken;
 
         @Override
-        public void createAlert(FaultAlert faultAlert) {
-            AlarmPageWeChat alarmPageWeChat = (AlarmPageWeChat) faultAlert;
-            inputWeChatToken.sendKeys(alarmPageWeChat.token());
+        public void createAlert(FaultAlertSetting faultAlertSetting) {
+            AlarmPageWeChatSetting alarmPageWeChatSetting = (AlarmPageWeChatSetting) faultAlertSetting;
+            inputWeChatToken.sendKeys(alarmPageWeChatSetting.token());
         }
     }
 
@@ -304,15 +303,15 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         private WebElement inputLarkSecretToken;
 
         @Override
-        public void createAlert(FaultAlert faultAlert) {
-            AlarmPageLark alarmPageLark = (AlarmPageLark) faultAlert;
-            inputLarkToken.sendKeys(alarmPageLark.token());
-            // if we open secret button, need to fill the token value.
-            if (alarmPageLark.isSecretEnable()) {
+        public void createAlert(FaultAlertSetting faultAlertSetting) {
+            AlarmPageLarkSetting alarmPageLarkSetting = (AlarmPageLarkSetting) faultAlertSetting;
+            inputLarkToken.sendKeys(alarmPageLarkSetting.token());
+            // if open the secret button, fill token value.
+            if (alarmPageLarkSetting.isSecretEnable()) {
                 btnLarkSecret.click();
-                inputLarkSecretToken.sendKeys(alarmPageLark.SecretToken());
+                inputLarkSecretToken.sendKeys(alarmPageLarkSetting.SecretToken());
             }
-            if (alarmPageLark.isEffectToALlUsers()) {
+            if (alarmPageLarkSetting.isEffectToALlUsers()) {
                 btnLarkEffectToAllUsers.click();
             }
         }
@@ -326,12 +325,12 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         }
 
         @Override
-        public void createAlert(FaultAlert faultAlert) {
+        public void createAlert(FaultAlertSetting faultAlertSetting) {
         }
     }
 
     private interface AlertService {
 
-        void createAlert(FaultAlert faultAlert);
+        void createAlert(FaultAlertSetting faultAlertSetting);
     }
 }

@@ -22,9 +22,9 @@ import org.apache.streampark.e2e.pages.LoginPage;
 import org.apache.streampark.e2e.pages.setting.AlarmPage;
 import org.apache.streampark.e2e.pages.setting.SettingPage;
 import org.apache.streampark.e2e.pages.setting.entity.AlarmPageAlertType;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageEmail;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageWeChat;
-import org.apache.streampark.e2e.pages.setting.entity.FaultAlert;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageEmailSetting;
+import org.apache.streampark.e2e.pages.setting.entity.AlarmPageWeChatSetting;
+import org.apache.streampark.e2e.pages.setting.entity.FaultAlertSetting;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -48,7 +48,7 @@ public class AlarmTest {
 
     private static final String newAlarmName = "new_alarm";
 
-    private static FaultAlert faultAlert;
+    private static FaultAlertSetting faultAlertSetting;
 
     @BeforeAll
     public static void setup() {
@@ -57,7 +57,7 @@ public class AlarmTest {
             .goToNav(SettingPage.class)
             .goToTab(AlarmPage.class);
 
-        faultAlert = new AlarmPageEmail("test@test.com");
+        faultAlertSetting = new AlarmPageEmailSetting("test@test.com");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class AlarmTest {
     void testCreateAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
-        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlert);
+        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlertSetting);
 
         Awaitility.await()
             .untilAsserted(
@@ -81,7 +81,7 @@ public class AlarmTest {
     void testCreateDuplicateAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
-        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlert);
+        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlertSetting);
 
         Awaitility.await()
             .untilAsserted(
@@ -98,15 +98,17 @@ public class AlarmTest {
     @Order(30)
     void testEditAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
-        faultAlert = new AlarmPageWeChat().token("wechat_token");
-        alarmPage.editAlarm(newAlarmName, AlarmPageAlertType.WECHAT.value(), faultAlert);
+        faultAlertSetting = new AlarmPageWeChatSetting().token("wechat_token");
+        alarmPage.editAlarm(newAlarmName, AlarmPageAlertType.WECHAT.value(), faultAlertSetting);
 
         Awaitility.await()
             .untilAsserted(
                 () -> assertThat(alarmPage.alarmList())
                     .as("Alarm list should contain newly-edited alarm")
                     .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newAlarmName)));
+                    .anyMatch(it -> it.contains(newAlarmName))
+                    .anyMatch(it -> it.contains(AlarmPageAlertType.EMAIL.value()))
+                    .anyMatch(it -> it.contains(AlarmPageAlertType.WECHAT.value())));
     }
 
     @Test

@@ -17,12 +17,5 @@
 
 package org.apache.streampark.e2e.pages.setting.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class AlarmPageWeChat extends FaultAlert {
-
-    private String token;
+public abstract class FaultAlertSetting {
 }

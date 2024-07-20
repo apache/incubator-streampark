@@ -20,5 +20,10 @@ package org.apache.streampark.e2e.pages.setting.entity;
 import lombok.Getter;
 
 @Getter
-public class AlarmPageSMS extends FaultAlert {
+public class AlarmPageLarkSetting extends FaultAlertSetting {
+
+    private String token;
+    private String SecretToken;
+    private boolean isEffectToALlUsers;
+    private boolean isSecretEnable;
 }

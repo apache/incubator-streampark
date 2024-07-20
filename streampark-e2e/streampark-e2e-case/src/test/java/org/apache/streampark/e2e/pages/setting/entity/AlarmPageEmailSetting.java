@@ -17,5 +17,14 @@
 
 package org.apache.streampark.e2e.pages.setting.entity;
 
-public abstract class FaultAlert {
+import lombok.Getter;
+
+@Getter
+public class AlarmPageEmailSetting extends FaultAlertSetting {
+
+    private String email;
+
+    public AlarmPageEmailSetting(String email) {
+        this.email = email;
+    }
 }

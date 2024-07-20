@@ -18,14 +18,11 @@
 package org.apache.streampark.e2e.pages.setting.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class AlarmPageDingTalk extends FaultAlert {
+@Setter
+public class AlarmPageWeChatSetting extends FaultAlertSetting {
 
-    private String url;
     private String token;
-    private String receiveUser;
-    private String secretToken;
-    private boolean isSecretEnable;
-    private boolean isEffectToAllUsers;
 }

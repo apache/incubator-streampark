@@ -20,11 +20,5 @@ package org.apache.streampark.e2e.pages.setting.entity;
 import lombok.Getter;
 
 @Getter
-public class AlarmPageEmail extends FaultAlert {
-
-    private String email;
-
-    public AlarmPageEmail(String email) {
-        this.email = email;
-    }
+public class AlarmPageSmsSetting extends FaultAlertSetting {
 }

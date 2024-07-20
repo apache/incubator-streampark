@@ -23,10 +23,10 @@ import lombok.Getter;
 public enum AlarmPageAlertType {
 
     EMAIL("E-mail"),
-    DINGTALK(" Ding Talk"),
-    WECHAT(" WeChat"),
-    LARK(" Lark"),
-    SMS(" SMS"),;
+    DINGTALK("Ding Talk"),
+    WECHAT("WeChat"),
+    LARK("Lark"),
+    SMS("SMS"),;
 
     private final String value;
 
