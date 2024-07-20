@@ -19,10 +19,10 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Implicits._
 
-import java.util.{Map => JavaMap, Properties}
+import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
 

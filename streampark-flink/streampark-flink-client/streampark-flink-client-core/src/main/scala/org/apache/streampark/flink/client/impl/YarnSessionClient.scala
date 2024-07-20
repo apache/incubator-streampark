@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.util.{AssertUtils, Utils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
@@ -35,8 +36,6 @@ import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Submit Job to YARN Session Cluster */
 object YarnSessionClient extends YarnClientTrait {

@@ -19,10 +19,9 @@ package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.FlinkVersion
 import org.apache.streampark.common.enums.FlinkExecutionMode
+import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
-
-import java.util.{Map => JavaMap}
 
 trait DeployRequestTrait {
 

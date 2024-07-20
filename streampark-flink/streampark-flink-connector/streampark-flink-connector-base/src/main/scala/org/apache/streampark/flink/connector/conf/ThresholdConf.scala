@@ -22,8 +22,8 @@ import org.apache.streampark.flink.connector.conf.FailoverStorageType.{Console, 
 
 import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
+import org.apache.streampark.common.util.Implicits._
 
 case class ThresholdConf(prefixStr: String, parameters: Properties) {
 

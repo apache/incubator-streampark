@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.util.Implicits.JavaList
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
@@ -47,7 +48,7 @@ import org.apache.flink.table.module.Module
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 
-import java.util.{List => JavaList, Optional}
+import java.util.Optional
 
 /**
  * Integration api of stream and table

@@ -19,11 +19,40 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.util.Utils.close
 
-import java.lang.{Boolean => JavaBool, Byte => JavaByte, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
+import java.lang.{Boolean => JavaBool, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 
+import scala.collection.convert.{ToJavaImplicits, ToScalaImplicits}
 import scala.language.implicitConversions
 
-object ImplicitsUtils {
+object Implicits extends ToScalaImplicits with ToJavaImplicits {
+
+  type JavaMap[K, V] = java.util.Map[K, V]
+
+  type JavaHashMap[K, V] = java.util.HashMap[K, V]
+
+  type JavaLinkedMap[K, V] = java.util.LinkedHashMap[K, V]
+
+  type JavaCollection[T] = java.util.Collection[T]
+
+  type JavaList[T] = java.util.List[T]
+
+  type JavaArrayList[T] = java.util.ArrayList[T]
+
+  type JavaSet[T] = java.util.Set[T]
+
+  type JavaBool = java.lang.Boolean
+
+  type JavaByte = java.lang.Byte
+
+  type JavaDouble = java.lang.Double
+
+  type JavaFloat = java.lang.Float
+
+  type JavaInt = java.lang.Integer
+
+  type JavaLong = java.lang.Long
+
+  type JavaShort = java.lang.Short
 
   implicit class AutoCloseImplicits[T <: AutoCloseable](autoCloseable: T) {
 
@@ -53,12 +82,9 @@ object ImplicitsUtils {
         case c if c == classOf[JavaByte] => v.toByte.asInstanceOf[T]
         case c if c == classOf[JavaInt] => JavaInt.valueOf(v).asInstanceOf[T]
         case c if c == classOf[JavaLong] => JavaLong.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaFloat] =>
-          JavaFloat.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaDouble] =>
-          JavaDouble.valueOf(v).asInstanceOf[T]
-        case c if c == classOf[JavaShort] =>
-          JavaShort.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaFloat] => JavaFloat.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaDouble] => JavaDouble.valueOf(v).asInstanceOf[T]
+        case c if c == classOf[JavaShort] => JavaShort.valueOf(v).asInstanceOf[T]
         case c if c == classOf[JavaBool] => JavaBool.valueOf(v).asInstanceOf[T]
         case _ =>
           throw new IllegalArgumentException(s"Unsupported type: $classType")

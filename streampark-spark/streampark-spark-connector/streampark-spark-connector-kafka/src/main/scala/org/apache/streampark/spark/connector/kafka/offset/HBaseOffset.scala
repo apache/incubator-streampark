@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.connector.kafka.offset
 
 import org.apache.streampark.common.util.HBaseClient
+import org.apache.streampark.common.util.Implicits._
 
 import org.apache.hadoop.hbase._
 import org.apache.hadoop.hbase.client.{Delete, Put, Scan, Table}
@@ -28,7 +29,6 @@ import org.apache.spark.SparkConf
 
 import java.util
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {

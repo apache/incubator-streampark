@@ -19,10 +19,9 @@ package org.apache.streampark.spark.client.bean
 
 import org.apache.streampark.common.conf.SparkVersion
 import org.apache.streampark.common.enums.SparkExecutionMode
+import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
-
-import java.util.{Map => JavaMap}
 
 case class StopRequest(
     id: Long,

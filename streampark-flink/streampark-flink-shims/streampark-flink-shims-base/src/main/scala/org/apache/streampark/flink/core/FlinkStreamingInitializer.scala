@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.ApiType
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import collection.{mutable, Map}
@@ -31,8 +32,6 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.TableConfig
 
 import java.io.File
-
-import scala.collection.convert.ImplicitConversions._
 
 private[flink] object FlinkStreamingInitializer {
 

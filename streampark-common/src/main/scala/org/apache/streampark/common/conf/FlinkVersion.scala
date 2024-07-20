@@ -18,13 +18,13 @@
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
+import org.apache.streampark.common.util.Implicits._
 
 import java.io.File
 import java.net.{URL => NetURL}
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param flinkHome actual flink home that must be a readable local path */

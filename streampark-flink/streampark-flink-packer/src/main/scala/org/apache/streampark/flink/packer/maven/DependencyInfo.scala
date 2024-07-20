@@ -17,9 +17,7 @@
 
 package org.apache.streampark.flink.packer.maven
 
-import java.util.{List => JavaList}
-
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 /**
  * @param mavenArts

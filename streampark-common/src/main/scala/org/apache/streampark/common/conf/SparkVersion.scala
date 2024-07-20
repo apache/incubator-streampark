@@ -18,6 +18,7 @@
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
+import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.lang3.StringUtils
 
@@ -27,7 +28,6 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param sparkHome actual spark home that must be a readable local path */

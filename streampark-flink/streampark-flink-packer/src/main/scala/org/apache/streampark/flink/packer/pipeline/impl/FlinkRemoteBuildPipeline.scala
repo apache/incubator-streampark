@@ -19,12 +19,11 @@ package org.apache.streampark.flink.packer.pipeline.impl
 
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, LfsOperator}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
 import java.io.File
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for flink standalone session mode */
 class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends BuildPipeline {

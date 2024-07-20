@@ -18,14 +18,13 @@
 package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.kubernetes.model._
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 
 import java.util.Objects
 import java.util.concurrent.TimeUnit
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Tracking info cache pool on flink kubernetes mode. */
 class FlinkK8sWatchController extends Logger with AutoCloseable {

@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.kubernetes.helper
 
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 
 import com.google.common.base.Charsets
@@ -28,7 +28,6 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 import java.io.File
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Success, Try}
 
 object KubernetesDeploymentHelper extends Logger {

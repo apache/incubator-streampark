@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
+import org.apache.streampark.common.util.Implicits.JavaMap
 import org.apache.streampark.common.util.Utils
 
 import java.lang.{Long => JavaLong}
-import java.util.{Map => JavaMap}
 
 import scala.collection.JavaConverters._
 
