@@ -407,11 +407,11 @@ public class SparkApplication extends BaseEntity {
     @JsonIgnore
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public Map<String, Object> getOptionMap() {
+    public Map<String, String> getOptionMap() {
         if (StringUtils.isBlank(this.options)) {
             return new HashMap<>();
         }
-        Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
+        Map<String, String> optionMap = JacksonUtils.read(this.options, Map.class);
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);
         return optionMap;
     }

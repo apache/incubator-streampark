@@ -66,8 +66,6 @@ trait SparkClientTrait extends Logger {
          |----------------------------------------- spark job stop ----------------------------------
          |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
          |     sparkVersion      : ${stopRequest.sparkVersion.version}
-         |     withDrain         : ${stopRequest.withDrain}
-         |     nativeFormat      : ${stopRequest.nativeFormat}
          |     jobId             : ${stopRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
