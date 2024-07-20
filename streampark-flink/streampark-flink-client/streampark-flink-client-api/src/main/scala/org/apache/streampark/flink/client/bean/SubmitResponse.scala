@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.client.bean
 
-import javax.annotation.Nullable
+import org.apache.streampark.common.util.Implicits.JavaMap
 
-import java.util.{Map => JavaMap}
+import javax.annotation.Nullable
 
 case class SubmitResponse(
     clusterId: String,

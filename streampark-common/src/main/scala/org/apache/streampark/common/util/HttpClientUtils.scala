@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.hc.client5.http.auth.{AuthSchemeFactory, AuthScope, Credentials, StandardAuthScheme}
 import org.apache.hc.client5.http.classic.methods.{HttpGet, HttpPost, HttpUriRequestBase}
 import org.apache.hc.client5.http.config.RequestConfig
@@ -32,9 +34,6 @@ import org.apache.hc.core5.net.URIBuilder
 
 import java.nio.charset.{Charset, StandardCharsets}
 import java.security.Principal
-import java.util.{List => JavaList, Map => JavaMap}
-
-import scala.collection.convert.ImplicitConversions._
 
 object HttpClientUtils {
 

@@ -18,9 +18,9 @@
 package org.apache.streampark.spark.client.`trait`
 
 import org.apache.streampark.common.util._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.bean._
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 trait SparkClientTrait extends Logger {

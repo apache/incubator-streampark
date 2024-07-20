@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.watcher.{Checkpoint, FlinkRestJmConfigItem, FlinkRestOverview, JobDetails}
 
@@ -33,7 +34,6 @@ import org.junit.jupiter.api.Test
 
 import java.io.File
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 // scalastyle:off println

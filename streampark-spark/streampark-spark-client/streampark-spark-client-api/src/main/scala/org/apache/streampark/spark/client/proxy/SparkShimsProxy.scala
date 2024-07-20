@@ -20,7 +20,7 @@ package org.apache.streampark.spark.client.proxy
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{ConfigKeys, SparkVersion}
 import org.apache.streampark.common.util.{ChildFirstClassLoader, ClassLoaderObjectInputStream, ClassLoaderUtils, Logger}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
 import java.net.URL

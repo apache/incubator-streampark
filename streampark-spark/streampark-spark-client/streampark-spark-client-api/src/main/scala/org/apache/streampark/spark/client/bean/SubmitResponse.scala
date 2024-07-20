@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.client.bean
 
-import java.util.{Map => JavaMap}
+import org.apache.streampark.common.util.Implicits.JavaMap
 
 case class SubmitResponse(
     clusterId: String,

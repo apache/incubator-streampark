@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.test
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.client.bean
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -40,9 +41,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import java.io.File
 import java.lang.reflect.Method
 import java.util
-
-import scala.collection.JavaConverters._
-import scala.collection.convert.ImplicitConversions._
 
 /** perJob to submit jobs programmatically, */
 object YarnPerJobTestCase extends Logger {

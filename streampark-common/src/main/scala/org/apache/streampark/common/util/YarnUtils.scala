@@ -19,6 +19,7 @@ package org.apache.streampark.common.util
 
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.fs.CommonConfigurationKeys
@@ -34,10 +35,8 @@ import java.io.IOException
 import java.net.InetAddress
 import java.security.PrivilegedExceptionAction
 import java.util
-import java.util.{HashMap => JavaHashMap, List => JavaList}
 import java.util.concurrent.TimeUnit
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}

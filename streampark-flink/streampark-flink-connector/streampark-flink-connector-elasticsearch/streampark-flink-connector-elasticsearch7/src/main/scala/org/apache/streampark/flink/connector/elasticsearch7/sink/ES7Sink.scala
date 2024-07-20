@@ -38,7 +38,7 @@ import org.elasticsearch.action.ActionRequest
 import java.util.Properties
 
 import scala.annotation.meta.param
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object ES7Sink {
 

@@ -17,13 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Utils
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
-import java.util.{List => JavaList}
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Snapshot for docker resolved progress */
 @JsonIgnoreProperties(ignoreUnknown = true)

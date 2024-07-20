@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.{SparkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -31,9 +32,6 @@ import javax.annotation.Nullable
 
 import java.io.{File, IOException}
 import java.nio.file.Files
-import java.util.{Map => JavaMap}
-
-import scala.collection.convert.ImplicitConversions._
 
 case class SubmitRequest(
     sparkVersion: SparkVersion,

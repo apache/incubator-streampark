@@ -17,11 +17,11 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.util.ImplicitsUtils.{AutoCloseImplicits, StringImplicits}
+import org.apache.streampark.common.util.Implicits.{AutoCloseImplicits, StringImplicits}
 
 import org.scalatest.funsuite.AnyFunSuite
 
-class ImplicitsUtilsTest extends AnyFunSuite {
+class ImplicitsTest extends AnyFunSuite {
   test(
     "AutoCloseImplicits.autoClose should close the resource after execution and handle exceptions") {
     class MockResource extends AutoCloseable {

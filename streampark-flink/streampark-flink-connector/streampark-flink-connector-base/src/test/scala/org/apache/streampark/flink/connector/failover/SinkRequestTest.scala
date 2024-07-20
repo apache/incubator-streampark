@@ -19,7 +19,7 @@ package org.apache.streampark.flink.connector.failover
 
 import org.junit.jupiter.api.{Assertions, Test}
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 class SinkRequestTest {
   @Test

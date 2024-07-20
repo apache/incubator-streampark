@@ -37,7 +37,7 @@ import org.apache.hadoop.hbase.client.{Result, Table}
 import java.lang
 import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.util.{Success, Try}
 
 class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties)

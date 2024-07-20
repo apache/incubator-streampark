@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
@@ -34,9 +35,7 @@ import javax.annotation.Nullable
 
 import java.io.File
 import java.net.URL
-import java.util.{Map => JavaMap}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 
 case class SubmitRequest(

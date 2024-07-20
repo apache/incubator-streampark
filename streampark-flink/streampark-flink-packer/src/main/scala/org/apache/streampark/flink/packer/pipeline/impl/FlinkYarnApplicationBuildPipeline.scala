@@ -20,15 +20,13 @@ package org.apache.streampark.flink.packer.pipeline.impl
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
 import org.apache.commons.codec.digest.DigestUtils
 
 import java.io.{File, FileInputStream, IOException}
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for flink yarn application mode */
 class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildRequest)
