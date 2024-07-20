@@ -101,7 +101,7 @@ insert into `t_menu` values (130202, 130200, 'variable depend view', null, null,
 insert into `t_menu` values (130203, 130200, 'variable add', NULL, NULL, 'variable:add', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130204, 130200, 'variable update', NULL, NULL, 'variable:update', NULL, '1', 1, NULL, now(), now());
 insert into `t_menu` values (130205, 130200, 'variable delete', NULL, NULL, 'variable:delete', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (130206, 130200, 'variable depend apps', 'variable/depend_apps', 'variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
+insert into `t_menu` values (130206, 130200, 'variable depend apps', '/resource/variable/depend_apps', 'resource/variable/DependApps', 'variable:depend_apps', '', '0', 0, NULL, now(), now());
 insert into `t_menu` values (130207, 130200, 'variable show original', NULL, NULL, 'variable:show_original', NULL, '1', 1, NULL, now(), now());
 
 insert into `t_menu` values (130301, 130300, 'resource add', NULL, NULL, 'resource:add', NULL, '1', 1, NULL, now(), now());
