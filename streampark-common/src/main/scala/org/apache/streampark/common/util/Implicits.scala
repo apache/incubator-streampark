@@ -21,10 +21,10 @@ import org.apache.streampark.common.util.Utils.close
 
 import java.lang.{Boolean => JavaBool, Double => JavaDouble, Float => JavaFloat, Integer => JavaInt, Long => JavaLong, Short => JavaShort}
 
-import scala.collection.convert.{ToJavaImplicits, ToScalaImplicits}
+import scala.collection.convert.{DecorateAsJava, DecorateAsScala, ToJavaImplicits, ToScalaImplicits}
 import scala.language.implicitConversions
 
-object Implicits extends ToScalaImplicits with ToJavaImplicits {
+object Implicits extends ToScalaImplicits with ToJavaImplicits with DecorateAsJava with DecorateAsScala {
 
   type JavaMap[K, V] = java.util.Map[K, V]
 

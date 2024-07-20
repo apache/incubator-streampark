@@ -42,8 +42,6 @@ import java.io.File
 import java.lang.reflect.Method
 import java.util
 
-import scala.collection.JavaConverters._
-
 /** perJob to submit jobs programmatically, */
 object YarnPerJobTestCase extends Logger {
 

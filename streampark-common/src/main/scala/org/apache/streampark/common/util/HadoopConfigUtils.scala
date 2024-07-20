@@ -28,7 +28,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.{Collections, Optional}
 
-import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
