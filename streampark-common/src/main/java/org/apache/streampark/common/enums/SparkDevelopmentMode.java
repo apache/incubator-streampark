@@ -48,7 +48,7 @@ public enum SparkDevelopmentMode {
      * @return The parsed flink deployment mode.
      */
     @Nonnull
-    public static SparkDevelopmentMode of(@Nullable Integer value) {
+    public static SparkDevelopmentMode valueOf(@Nullable Integer value) {
         for (SparkDevelopmentMode flinkDevelopmentMode : values()) {
             if (flinkDevelopmentMode.mode.equals(value)) {
                 return flinkDevelopmentMode;
@@ -57,9 +57,4 @@ public enum SparkDevelopmentMode {
         return SparkDevelopmentMode.UNKNOWN;
     }
 
-    /** Get the mode value of the current {@link SparkDevelopmentMode} enum. */
-    @Nonnull
-    public Integer getMode() {
-        return mode;
-    }
 }

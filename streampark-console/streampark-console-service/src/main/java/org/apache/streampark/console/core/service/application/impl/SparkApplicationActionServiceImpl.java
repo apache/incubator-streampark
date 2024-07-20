@@ -320,7 +320,7 @@ public class SparkApplicationActionServiceImpl
             SparkExecutionMode.of(application.getExecutionMode()),
             getProperties(application),
             sparkEnv.getSparkConf(),
-            SparkDevelopmentMode.of(application.getJobType()),
+            SparkDevelopmentMode.valueOf(application.getJobType()),
             application.getId(),
             jobId,
             application.getJobName(),
