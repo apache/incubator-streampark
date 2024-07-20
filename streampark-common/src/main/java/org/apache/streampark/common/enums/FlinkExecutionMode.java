@@ -36,9 +36,6 @@ public enum FlinkExecutionMode {
     /** remote */
     REMOTE(1, "remote"),
 
-    /** yarn-per-job mode */
-    YARN_PER_JOB(2, "yarn-per-job"),
-
     /** yarn session */
     YARN_SESSION(3, "yarn-session"),
 
@@ -107,18 +104,18 @@ public enum FlinkExecutionMode {
      * @return The judged result.
      */
     public static boolean isYarnMode(@Nullable FlinkExecutionMode mode) {
-        return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
+        return YARN_APPLICATION == mode || YARN_SESSION == mode;
     }
 
     /**
-     * Judge the given mode whether is yarn per-job or application mode.
+     * Judge the given mode application mode.
      *
      * @param mode The given mode.
      * @return The judged result. TODO: We'll inline this method back to the corresponding caller
      *     lines after dropping the yarn perjob mode.
      */
-    public static boolean isYarnPerJobOrAppMode(@Nullable FlinkExecutionMode mode) {
-        return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
+    public static boolean isYarnAppMode(@Nullable FlinkExecutionMode mode) {
+        return YARN_APPLICATION == mode;
     }
 
     /**

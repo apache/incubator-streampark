@@ -109,7 +109,7 @@ export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
     const res = await fetchRemoteURL(app.flinkClusterId);
     window.open(res + '/#/job/' + app.jobId + '/overview');
   } else if (
-    [ExecModeEnum.YARN_PER_JOB, ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(
+    [ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(
       executionMode,
     )
   ) {
@@ -162,8 +162,7 @@ export function handleIsStart(app: Recordable, optionApps: Recordable) {
 
 export function handleYarnQueue(values: Recordable) {
   if (
-    values.executionMode == ExecModeEnum.YARN_APPLICATION ||
-    values.executionMode == ExecModeEnum.YARN_PER_JOB
+    values.executionMode == ExecModeEnum.YARN_APPLICATION
   ) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {

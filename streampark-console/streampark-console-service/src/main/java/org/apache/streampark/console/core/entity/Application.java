@@ -277,8 +277,7 @@ public class Application implements Serializable {
     }
 
     public void setYarnQueueByHotParams() {
-        if (!(FlinkExecutionMode.YARN_APPLICATION == this.getFlinkExecutionMode()
-            || FlinkExecutionMode.YARN_PER_JOB == this.getFlinkExecutionMode())) {
+        if (FlinkExecutionMode.YARN_APPLICATION != this.getFlinkExecutionMode()) {
             return;
         }
 
@@ -404,7 +403,6 @@ public class Application implements Serializable {
         switch (this.getFlinkExecutionMode()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PER_JOB:
             case YARN_SESSION:
             case REMOTE:
             case LOCAL:
@@ -516,7 +514,6 @@ public class Application implements Serializable {
         switch (Objects.requireNonNull(executionModeEnum)) {
             case YARN_APPLICATION:
                 return StorageType.HDFS;
-            case YARN_PER_JOB:
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
             case KUBERNETES_NATIVE_APPLICATION:
@@ -575,7 +572,7 @@ public class Application implements Serializable {
     }
 
     private boolean needFillYarnQueueLabel(FlinkExecutionMode mode) {
-        return FlinkExecutionMode.YARN_PER_JOB == mode || FlinkExecutionMode.YARN_APPLICATION == mode;
+        return FlinkExecutionMode.YARN_APPLICATION == mode;
     }
 
     @Override

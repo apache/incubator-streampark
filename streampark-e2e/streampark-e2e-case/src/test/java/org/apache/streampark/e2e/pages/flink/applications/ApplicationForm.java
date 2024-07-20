@@ -172,16 +172,6 @@ public final class ApplicationForm {
                                         executionMode.desc())))
                             .click();
                         break;
-                    case YARN_PER_JOB:
-                        selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc()))
-                            .findFirst()
-                            .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                    String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
-                            .click();
-                        break;
                     default:
                         throw new IllegalArgumentException(
                             String.format("Unknown execution mode: %s", executionMode.desc()));
@@ -265,9 +255,8 @@ public final class ApplicationForm {
 
         REMOTE("remote"), YARN_APPLICATION("yarn application"), YARN_SESSION("yarn session"), KUBERNETES_SESSION(
             "kubernetes session"),
-        KUBERNETES_APPLICATION("kubernetes application"), YARN_PER_JOB(
-            "yarn per-job (deprecated, please use yarn-application mode)"),
-            ;
+        KUBERNETES_APPLICATION("kubernetes application"),
+        ;
 
         private final String desc;
 

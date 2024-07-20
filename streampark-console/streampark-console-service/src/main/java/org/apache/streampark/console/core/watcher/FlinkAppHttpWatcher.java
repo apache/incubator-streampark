@@ -295,8 +295,7 @@ public class FlinkAppHttpWatcher {
         JobsOverview jobsOverview = httpJobsOverview(application);
         Optional<JobsOverview.Job> optional;
         FlinkExecutionMode execMode = application.getFlinkExecutionMode();
-        if (FlinkExecutionMode.YARN_APPLICATION.equals(execMode)
-            || FlinkExecutionMode.YARN_PER_JOB.equals(execMode)) {
+        if (FlinkExecutionMode.YARN_APPLICATION.equals(execMode)) {
             if (jobsOverview.getJobs() != null) {
                 optional = jobsOverview.getJobs().size() > 1
                     ? jobsOverview.getJobs().stream()
@@ -718,8 +717,7 @@ public class FlinkAppHttpWatcher {
     private Overview httpOverview(Application application) throws IOException {
         String appId = application.getClusterId();
         if (appId != null) {
-            if (application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_APPLICATION)
-                || application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_PER_JOB)) {
+            if (application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_APPLICATION)) {
                 String reqURL;
                 if (StringUtils.isEmpty(application.getJobManagerUrl())) {
                     String format = "proxy/%s/overview";

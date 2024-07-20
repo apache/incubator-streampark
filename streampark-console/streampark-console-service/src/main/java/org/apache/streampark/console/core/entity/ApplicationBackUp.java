@@ -63,7 +63,6 @@ public class ApplicationBackUp {
         switch (application.getFlinkExecutionMode()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
-            case YARN_PER_JOB:
             case YARN_SESSION:
             case REMOTE:
             case LOCAL:

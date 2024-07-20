@@ -327,7 +327,6 @@ export const useFlinkApplication = (openStartModal: Fn) => {
               <Alert message={app.jobName} type="info" />
             </Form.Item>
             {[
-              ExecModeEnum.YARN_PER_JOB,
               ExecModeEnum.YARN_SESSION,
               ExecModeEnum.YARN_APPLICATION,
             ].includes(app.executionMode) && (

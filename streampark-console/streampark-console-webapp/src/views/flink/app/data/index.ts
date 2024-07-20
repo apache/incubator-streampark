@@ -70,11 +70,6 @@ export const executionModes = [
     value: ExecModeEnum.KUBERNETES_APPLICATION,
     disabled: false,
   },
-  {
-    label: 'yarn per-job (deprecated, please use yarn-application mode)',
-    value: ExecModeEnum.YARN_PER_JOB,
-    disabled: false,
-  },
 ];
 
 export const cpTriggerAction = [

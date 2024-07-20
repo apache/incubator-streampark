@@ -455,8 +455,7 @@ export const useCreateAndEditSchema = (
         label: t('flink.app.yarnQueue'),
         component: 'Input',
         ifShow: ({ values }) =>
-          values.executionMode == ExecModeEnum.YARN_APPLICATION ||
-          values.executionMode == ExecModeEnum.YARN_PER_JOB,
+          values.executionMode == ExecModeEnum.YARN_APPLICATION,
         render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
       },
       {
@@ -560,7 +559,6 @@ export const useCreateAndEditSchema = (
               } else {
                 if (
                   [
-                    ExecModeEnum.YARN_PER_JOB,
                     ExecModeEnum.YARN_SESSION,
                     ExecModeEnum.YARN_APPLICATION,
                   ].includes(value)

@@ -836,7 +836,6 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         FlinkK8sRestExposedType exposedType = null;
         switch (application.getFlinkExecutionMode()) {
             case YARN_APPLICATION:
-            case YARN_PER_JOB:
             case YARN_SESSION:
                 clusterId = application.getClusterId();
                 break;
