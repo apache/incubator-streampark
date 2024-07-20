@@ -33,8 +33,6 @@ import javax.annotation.Nullable
 import java.io.{File, IOException}
 import java.nio.file.Files
 
-import scala.util.Try
-
 case class SubmitRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
