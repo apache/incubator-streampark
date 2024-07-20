@@ -52,18 +52,25 @@ case class SubmitRequest(
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
 
+  val DEFAULT_SUBMIT_PARAM = Map[String, Any](
+    "spark.driver.cores" -> "1",
+    "spark.driver.memory" -> "1g",
+    "spark.executor.cores" -> "1",
+    "spark.executor.memory" -> "1g")
+
   private[this] lazy val appProperties: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL =>
-      Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case FlinkDevelopmentMode.FLINK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
-  lazy val effectiveAppName: String =
-    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME)
-    else this.appName
+  lazy val effectiveAppName: String = if (this.appName == null) {
+    appProperties(KEY_FLINK_APP_NAME)
+  } else {
+    this.appName
+  }
 
   lazy val libs: List[URL] = {
     val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
@@ -71,22 +78,11 @@ case class SubmitRequest(
       .getOrElse(List.empty[URL])
   }
 
-  lazy val classPaths: List[URL] = sparkVersion.sparkLibs ++ libs
-
-  lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
-
-  lazy val userJarFile: File = {
+  lazy val userJarPath: String = {
     executionMode match {
       case _ =>
         checkBuildResult()
-        new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
-    }
-  }
-
-  lazy val safePackageProgram: Boolean = {
-    sparkVersion.version.split("\\.").map(_.trim.toInt) match {
-      case Array(a, b, c) if a >= 3 => b > 1
-      case _ => false
+        buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
     }
   }
 
@@ -133,7 +129,7 @@ case class SubmitRequest(
   }
 
   @throws[IOException]
-  def isSymlink(file: File): Boolean = {
+  private def isSymlink(file: File): Boolean = {
     if (file == null) throw new NullPointerException("File must not be null")
     Files.isSymbolicLink(file.toPath)
   }
@@ -163,7 +159,7 @@ case class SubmitRequest(
   }
 
   @throws[Exception]
-  def checkBuildResult(): Unit = {
+  private def checkBuildResult(): Unit = {
     executionMode match {
       case _ =>
         if (this.buildResult == null) {

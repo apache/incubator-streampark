@@ -17,4 +17,18 @@
 
 package org.apache.streampark.spark.client.bean
 
-case class CancelResponse(savePointDir: String)
+import org.apache.streampark.common.conf.SparkVersion
+import org.apache.streampark.common.enums.SparkExecutionMode
+
+import javax.annotation.Nullable
+
+import java.util.{Map => JavaMap}
+
+case class StopRequest(
+    id: Long,
+    sparkVersion: SparkVersion,
+    executionMode: SparkExecutionMode,
+    @Nullable properties: JavaMap[String, Any],
+    jobId: String,
+    withDrain: Boolean,
+    nativeFormat: Boolean)

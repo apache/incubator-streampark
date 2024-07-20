@@ -15,23 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.core;
+package org.apache.streampark.console.core.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-@UtilityClass
-public final class Constants {
-
-    /** tmp directory path */
-    public static final Path HOST_TMP_PATH = Paths.get(System.getProperty("java.io.tmpdir"));
-
-    /** chrome download path in host */
-    public static final Path HOST_CHROME_DOWNLOAD_PATH = HOST_TMP_PATH.resolve("download");
-
-    /** chrome download path in selenium/standalone-chrome-debug container */
-    public static final String SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH = "/home/seluser/Downloads";
-
+public interface SparkApplicationLogMapper extends BaseMapper<SparkApplicationLog> {
 }

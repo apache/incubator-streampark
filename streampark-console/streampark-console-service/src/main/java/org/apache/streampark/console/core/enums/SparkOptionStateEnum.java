@@ -15,23 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.core;
+package org.apache.streampark.console.core.enums;
 
-import lombok.experimental.UtilityClass;
+import lombok.Getter;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 
-@UtilityClass
-public final class Constants {
+/** Option status */
+@Getter
+public enum SparkOptionStateEnum {
 
-    /** tmp directory path */
-    public static final Path HOST_TMP_PATH = Paths.get(System.getProperty("java.io.tmpdir"));
+    /** Application which is currently action: none. */
+    NONE(0),
+    /** Application which is currently action: releasing. */
+    RELEASING(1),
+    /** Application which is currently action: starting. */
+    STARTING(2),
+    /** Application which is currently action: stopping. */
+    STOPPING(3);
 
-    /** chrome download path in host */
-    public static final Path HOST_CHROME_DOWNLOAD_PATH = HOST_TMP_PATH.resolve("download");
+    private final int value;
 
-    /** chrome download path in selenium/standalone-chrome-debug container */
-    public static final String SELENIUM_CONTAINER_CHROME_DOWNLOAD_PATH = "/home/seluser/Downloads";
+    SparkOptionStateEnum(int value) {
+        this.value = value;
+    }
 
+    public static SparkOptionStateEnum of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }

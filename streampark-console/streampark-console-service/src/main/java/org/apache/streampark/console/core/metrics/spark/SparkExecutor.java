@@ -15,12 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.pages.flink.applications.entity;
+package org.apache.streampark.console.core.metrics.spark;
 
 import lombok.Data;
 
-@Data
-public class ApplicationsDynamicParams {
+import java.io.Serializable;
 
-    private String flinkSQL;
+@Data
+public class SparkExecutor implements Serializable {
+
+    private Long memoryUsed;
+
+    private Long maxMemory;
+
+    private Long totalCores;
 }

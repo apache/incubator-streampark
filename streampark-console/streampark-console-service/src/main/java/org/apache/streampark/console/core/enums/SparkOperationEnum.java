@@ -15,21 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.enums;
 
-import org.apache.streampark.common.conf.SparkVersion
-import org.apache.streampark.common.enums.SparkExecutionMode
+import lombok.Getter;
 
-import javax.annotation.Nullable
+import java.util.Arrays;
 
-import java.util.{Map => JavaMap}
+/** Spark Operation type */
+@Getter
+public enum SparkOperationEnum {
 
-case class CancelRequest(
-    id: Long,
-    sparkVersion: SparkVersion,
-    executionMode: SparkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    withDrain: Boolean,
-    nativeFormat: Boolean)
+    RELEASE(0), START(1), STOP(2);
+
+    private final int value;
+
+    SparkOperationEnum(int value) {
+        this.value = value;
+    }
+
+    public static SparkOperationEnum of(Integer option) {
+        return Arrays.stream(values()).filter((x) -> x.value == option).findFirst().orElse(null);
+    }
+}

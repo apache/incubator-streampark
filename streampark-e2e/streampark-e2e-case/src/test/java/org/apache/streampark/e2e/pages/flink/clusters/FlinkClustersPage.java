@@ -22,6 +22,7 @@ import org.apache.streampark.e2e.pages.common.NavBarPage;
 import org.apache.streampark.e2e.pages.flink.ApacheFlinkPage;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -83,9 +84,10 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
         return new ClusterDetailForm(driver);
     }
 
+    @SneakyThrows
     public FlinkClustersPage startFlinkCluster(String flinkClusterName) {
         waitForPageLoading();
-
+        Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         flinkClusterList().stream()
             .filter(it -> it.getText().contains(flinkClusterName))
             .flatMap(

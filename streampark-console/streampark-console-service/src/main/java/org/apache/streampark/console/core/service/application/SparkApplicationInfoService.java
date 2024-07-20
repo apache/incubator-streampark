@@ -88,39 +88,6 @@ public interface SparkApplicationInfoService extends IService<SparkApplication> 
     boolean existsBySparkEnvId(Long sparkEnvId);
 
     /**
-     * Checks if a job is running for a given cluster ID.
-     *
-     * @param clusterId The ID of the cluster.
-     * @return true if a job is running for the given cluster ID; otherwise, false.
-     */
-    boolean existsRunningByClusterId(Long clusterId);
-
-    /**
-     * Checks if there is a job that is associated with the given cluster ID.
-     *
-     * @param clusterId The ID of the cluster.
-     * @return True if a job exists for the given cluster ID, false otherwise.
-     */
-    boolean existsByClusterId(Long clusterId);
-
-    /**
-     * Counts the number of items associated with the given cluster ID.
-     *
-     * @param clusterId The ID of the cluster.
-     * @return The number of items associated with the given cluster ID.
-     */
-    Integer countByClusterId(Long clusterId);
-
-    /**
-     * Counts the number of items associated with the given cluster ID and database type.
-     *
-     * @param clusterId The ID of the cluster.
-     * @param dbType The type of the database.
-     * @return The number of items associated with the given cluster ID and database type.
-     */
-    Integer countAffectedByClusterId(Long clusterId, String dbType);
-
-    /**
      * Gets the YARN name for the given application.
      *
      * @param appConfig The application's config for which to retrieve the YARN name.

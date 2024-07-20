@@ -26,75 +26,47 @@ public enum SparkAppStateEnum {
     /** Added new job to database. */
     ADDED(0),
 
-    /**
-     * The job has been received by the Dispatcher, and is waiting for the job manager to be created.
-     */
-    INITIALIZING(1),
+    /** (From Yarn)Application which was just created. */
+    NEW(1),
 
-    /** Job is newly created, no task has started to run. */
-    CREATED(2),
+    /** (From Yarn)Application which is being saved. */
+    NEW_SAVING(2),
 
     /** Application which is currently running. */
     STARTING(3),
 
-    /** Application which is currently running. */
-    RESTARTING(4),
+    /** (From Yarn)Application which has been submitted. */
+    SUBMITTED(4),
 
-    /** Some tasks are scheduled or running, some may be pending, some may be finished. */
-    RUNNING(5),
+    /** (From Yarn)Application has been accepted by the scheduler. */
+    ACCEPTED(5),
 
     /** The job has failed and is currently waiting for the cleanup to complete. */
-    FAILING(6),
+    RUNNING(6),
 
-    /** The job has failed with a non-recoverable task failure. */
-    FAILED(7),
+    /** (From Yarn)Application which finished successfully. */
+    FINISHED(7),
 
-    /** Job is being cancelled. */
-    CANCELLING(8),
-
-    /** Job has been cancelled. */
-    CANCELED(9),
-
-    /** All the job's tasks have successfully finished. */
-    FINISHED(10),
-
-    /**
-     * The job has been suspended which means that it has been stopped but not been removed from a
-     * potential HA job store.
-     */
-    SUSPENDED(11),
-
-    /** The job is currently reconciling and waits for task execution report to recover state. */
-    RECONCILING(12),
+    /** (From Yarn)Application which failed. */
+    FAILED(8),
 
     /** Loss of mapping. */
-    LOST(13),
+    LOST(9),
 
     /** Mapping. */
-    MAPPING(14),
+    MAPPING(10),
 
     /** Other statuses. */
-    OTHER(15),
+    OTHER(11),
 
     /** Has rollback. */
-    REVOKED(16),
+    REVOKED(12),
 
-    /**
-     * Lost track of Spark job temporarily. A complete loss of Spark job tracking translates into LOST
-     * state.
-     */
-    @Deprecated
-    SILENT(17),
-
-    /** Spark job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
-    TERMINATED(18),
-
-    /** Spark job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
-    @Deprecated
-    POS_TERMINATED(19),
+    /** Spark job has being cancelling(killing) by streampark */
+    STOPPING(13),
 
     /** Job SUCCEEDED on yarn. */
-    SUCCEEDED(20),
+    SUCCEEDED(14),
 
     /** Has killed in Yarn. */
     KILLED(-9);
@@ -125,13 +97,11 @@ public enum SparkAppStateEnum {
 
     public static boolean isEndState(Integer appState) {
         SparkAppStateEnum sparkAppStateEnum = SparkAppStateEnum.of(appState);
-        return SparkAppStateEnum.CANCELED == sparkAppStateEnum
-            || SparkAppStateEnum.FAILED == sparkAppStateEnum
+        return SparkAppStateEnum.FAILED == sparkAppStateEnum
             || SparkAppStateEnum.KILLED == sparkAppStateEnum
             || SparkAppStateEnum.FINISHED == sparkAppStateEnum
             || SparkAppStateEnum.SUCCEEDED == sparkAppStateEnum
-            || SparkAppStateEnum.LOST == sparkAppStateEnum
-            || SparkAppStateEnum.TERMINATED == sparkAppStateEnum;
+            || SparkAppStateEnum.LOST == sparkAppStateEnum;
     }
 
     public static boolean isLost(Integer appState) {

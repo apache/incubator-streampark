@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.proxy
+package org.apache.streampark.common.util
 
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
 import java.util
-import java.util.regex.Pattern
 
-import scala.language.existentials
 import scala.util.Try
 
 /**
@@ -33,48 +31,36 @@ import scala.util.Try
  * we don't override that.
  */
 
-class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePattern: Pattern)
+class ChildFirstClassLoader(
+    urls: Array[URL],
+    parent: ClassLoader,
+    parentFirstClasses: List[String],
+    loadJarFilter: String => Boolean)
   extends URLClassLoader(urls, parent) {
 
   ClassLoader.registerAsParallelCapable()
 
-  private val SPARK_PATTERN =
-    Pattern.compile("spark-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
-
-  private val JAR_PROTOCOL = "jar"
-
-  private val PARENT_FIRST_PATTERNS = List(
-    "java.",
-    "javax.xml",
-    "org.slf4j",
-    "org.apache.log4j",
-    "org.apache.logging",
-    "org.apache.commons.logging",
-    "ch.qos.logback",
-    "org.xml",
-    "org.w3c",
-    "org.apache.hadoop")
-
   @throws[ClassNotFoundException]
   override def loadClass(name: String, resolve: Boolean): Class[_] = {
-    this.synchronized {
-      // First, check if the class has already been loaded
-      val clazz = super.findLoadedClass(name) match {
-        case null =>
-          // check whether the class should go parent-first
-          for (parentFirstPattern <- PARENT_FIRST_PATTERNS) {
-            if (name.startsWith(parentFirstPattern)) {
-              super.loadClass(name, resolve)
+    try {
+      this.synchronized {
+        // First, check if the class has already been loaded
+        super.findLoadedClass(name) match {
+          case null =>
+            // check whether the class should go parent-first
+            parentFirstClasses.find(name.startsWith) match {
+              case Some(_) => super.loadClass(name, resolve)
+              case _ => Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
             }
-          }
-          Try(findClass(name)).getOrElse(super.loadClass(name, resolve))
-        case c: Class[_] =>
-          if (resolve) {
-            resolveClass(c)
-          }
-          c
+          case c =>
+            if (resolve) {
+              resolveClass(c)
+            }
+            c
+        }
       }
-      clazz
+    } catch {
+      case e: Throwable => throw e
     }
   }
 
@@ -86,15 +72,15 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePatte
     super.getResource(name)
   }
 
-  private def filterShimsResource(urlClassLoaderResource: URL): URL = {
-    if (urlClassLoaderResource != null && JAR_PROTOCOL == urlClassLoaderResource.getProtocol) {
+  /**
+   * @param urlClassLoaderResource
+   * @return
+   */
+  private def filterResource(urlClassLoaderResource: URL): URL = {
+    if (urlClassLoaderResource != null && "jar" == urlClassLoaderResource.getProtocol) {
       val spec = urlClassLoaderResource.getFile
-      val filename = new File(spec.substring(0, spec.indexOf("!/"))).getName
-      val matchState =
-        SPARK_PATTERN.matcher(filename).matches && !resourcePattern
-          .matcher(filename)
-          .matches
-      if (matchState) {
+      val jarName = new File(spec.substring(0, spec.indexOf("!/"))).getName
+      if (loadJarFilter(jarName)) {
         return null
       }
     }
@@ -103,7 +89,7 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePatte
 
   private def addResources(result: util.List[URL], resources: util.Enumeration[URL]) = {
     while (resources.hasMoreElements) {
-      val urlClassLoaderResource = filterShimsResource(resources.nextElement)
+      val urlClassLoaderResource = filterResource(resources.nextElement)
       if (urlClassLoaderResource != null) {
         result.add(urlClassLoaderResource)
       }
@@ -121,7 +107,7 @@ class ChildFirstClassLoader(urls: Array[URL], parent: ClassLoader, resourcePatte
       addResources(result, parent.getResources(name))
     }
     new util.Enumeration[URL]() {
-      final private[proxy] val iter = result.iterator
+      private[this] val iter = result.iterator
 
       override def hasMoreElements: Boolean = iter.hasNext
 

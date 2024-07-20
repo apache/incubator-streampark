@@ -64,7 +64,7 @@ trait FlinkClientTrait extends Logger {
          |--------------------------------------- flink job start ---------------------------------------
          |    userFlinkHome    : ${submitRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${submitRequest.flinkVersion.version}
-         |    appName          : ${submitRequest.appName}
+         |    appName          : ${submitRequest.effectiveAppName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    k8sNamespace     : ${submitRequest.kubernetesNamespace}

@@ -21,6 +21,7 @@ import org.apache.streampark.common.util._
 import org.apache.streampark.spark.client.bean._
 
 import scala.collection.convert.ImplicitConversions._
+import scala.util.{Failure, Success, Try}
 
 trait SparkClientTrait extends Logger {
 
@@ -28,10 +29,10 @@ trait SparkClientTrait extends Logger {
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |--------------------------------------- spark job start ---------------------------------------
+         |--------------------------------------- spark job start -----------------------------------
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
-         |    appName          : ${submitRequest.appName}
+         |    appName          : ${submitRequest.effectiveAppName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
@@ -41,43 +42,60 @@ trait SparkClientTrait extends Logger {
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-    submitRequest.developmentMode match {
-      case _ =>
-        if (submitRequest.userJarFile != null) {
-          val uri = submitRequest.userJarFile.getAbsolutePath
-        }
-    }
+    prepareConfig(submitRequest)
 
     setConfig(submitRequest)
 
-    doSubmit(submitRequest)
-
+    Try(doSubmit(submitRequest)) match {
+      case Success(resp) => resp
+      case Failure(e) =>
+        logError(
+          s"spark job ${submitRequest.appName} start failed, " +
+            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"detail: ${ExceptionUtils.stringifyException(e)}")
+        throw e
+    }
   }
 
   def setConfig(submitRequest: SubmitRequest): Unit
 
   @throws[Exception]
-  def cancel(cancelRequest: CancelRequest): CancelResponse = {
+  def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
       s"""
-         |----------------------------------------- spark job cancel --------------------------------
-         |     userSparkHome     : ${cancelRequest.sparkVersion.sparkHome}
-         |     sparkVersion      : ${cancelRequest.sparkVersion.version}
-         |     clusterId         : ${cancelRequest.clusterId}
-         |     withDrain         : ${cancelRequest.withDrain}
-         |     nativeFormat      : ${cancelRequest.nativeFormat}
-         |     appId             : ${cancelRequest.clusterId}
-         |     jobId             : ${cancelRequest.jobId}
+         |----------------------------------------- spark job stop ----------------------------------
+         |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
+         |     sparkVersion      : ${stopRequest.sparkVersion.version}
+         |     withDrain         : ${stopRequest.withDrain}
+         |     nativeFormat      : ${stopRequest.nativeFormat}
+         |     jobId             : ${stopRequest.jobId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-    doCancel(cancelRequest)
+    doStop(stopRequest)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
   @throws[Exception]
-  def doCancel(cancelRequest: CancelRequest): CancelResponse
+  def doStop(stopRequest: StopRequest): StopResponse
+
+  private def prepareConfig(submitRequest: SubmitRequest): Unit = {
+    // 1) set default config
+    val userConfig = submitRequest.properties.filter(c => {
+      val k = c._1
+      if (k.startsWith("spark.")) {
+        true
+      } else {
+        logger.warn("[StreamPark] config {} doesn't start with \"spark.\" Skip it.", k)
+        false
+      }
+    })
+    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1))
+    submitRequest.properties.clear()
+    submitRequest.properties.putAll(userConfig)
+    submitRequest.properties.putAll(defaultConfig)
+  }
 
 }

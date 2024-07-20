@@ -19,12 +19,15 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 
 import lombok.Data;
 
@@ -140,6 +143,25 @@ public class AlertTemplate implements Serializable {
             .build();
     }
 
+    public static AlertTemplate of(SparkApplication application, SparkAppStateEnum appState) {
+        return new AlertTemplateBuilder()
+            .setDuration(application.getStartTime(), application.getEndTime())
+            .setJobName(application.getJobName())
+            .setLink(application.getSparkExecutionMode(), application.getJobId())
+            .setStartTime(application.getStartTime())
+            .setEndTime(application.getEndTime())
+            .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
+            .setRestartIndex(application.getRestartCount())
+            .setTotalRestart(application.getRestartSize())
+            .setType(1)
+            .setTitle(
+                String.format(
+                    "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))
+            .setSubject(
+                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(), appState))
+            .setStatus(appState.name())
+            .build();
+    }
     private static class AlertTemplateBuilder {
 
         private final AlertTemplate alertTemplate = new AlertTemplate();
@@ -209,6 +231,17 @@ public class AlertTemplate implements Serializable {
 
         public AlertTemplateBuilder setLink(FlinkExecutionMode mode, String appId) {
             if (FlinkExecutionMode.isYarnMode(mode)) {
+                String format = "%s/proxy/%s/";
+                String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
+                alertTemplate.setLink(url);
+            } else {
+                alertTemplate.setLink(null);
+            }
+            return this;
+        }
+
+        public AlertTemplateBuilder setLink(SparkExecutionMode mode, String appId) {
+            if (SparkExecutionMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
                 String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
                 alertTemplate.setLink(url);

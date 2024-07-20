@@ -19,7 +19,7 @@ package org.apache.streampark.spark.client.proxy
 
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{ConfigKeys, SparkVersion}
-import org.apache.streampark.common.util.{ClassLoaderUtils, Logger}
+import org.apache.streampark.common.util.{ChildFirstClassLoader, ClassLoaderObjectInputStream, ClassLoaderUtils, Logger}
 import org.apache.streampark.common.util.ImplicitsUtils._
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, ObjectOutputStream}
@@ -33,35 +33,45 @@ object SparkShimsProxy extends Logger {
 
   private[this] val SHIMS_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
-  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE =
-    MutableMap[String, ClassLoader]()
+  private[this] val VERIFY_SQL_CLASS_LOADER_CACHE = MutableMap[String, ClassLoader]()
 
-  private[this] val INCLUDE_PATTERN: Pattern =
-    Pattern.compile(
-      "(streampark-shaded-jackson-)(.*).jar",
-      Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+  private[this] val INCLUDE_PATTERN: Pattern = Pattern.compile("(streampark-shaded-jackson-)(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
   private[this] def getSparkShimsResourcePattern(sparkLargeVersion: String) =
     Pattern.compile(
       s"spark-(.*)-$sparkLargeVersion(.*).jar",
       Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
 
+  private[this] lazy val SPARK_JAR_PATTERN = Pattern.compile("spark-(.*).jar", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+
   private[this] lazy val SPARK_SHIMS_PREFIX = "streampark-spark-shims_spark"
 
+  private[this] lazy val PARENT_FIRST_PATTERNS = List(
+    "java.",
+    "javax.xml",
+    "org.slf4j",
+    "org.apache.log4j",
+    "org.apache.logging",
+    "org.apache.commons.logging",
+    "ch.qos.logback",
+    "org.xml",
+    "org.w3c",
+    "org.apache.hadoop")
+
   def proxy[T](sparkVersion: SparkVersion, func: ClassLoader => T): T = {
-    val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
+    val shimsClassLoader = getSparkShimsClassLoader(sparkVersion)
     ClassLoaderUtils
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   def proxy[T](sparkVersion: SparkVersion, func: JavaFunc[ClassLoader, T]): T = {
-    val shimsClassLoader = getSParkShimsClassLoader(sparkVersion)
+    val shimsClassLoader = getSparkShimsClassLoader(sparkVersion)
     ClassLoaderUtils
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
   // need to load all spark-table dependencies compatible with different versions
-  def getVerifySqlLibClassLoader(sparkVersion: SparkVersion): ClassLoader = {
+  private def getVerifySqlLibClassLoader(sparkVersion: SparkVersion): ClassLoader = {
     logInfo(s"Add verify sql lib,spark version: $sparkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
@@ -87,11 +97,17 @@ object SparkShimsProxy extends Logger {
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
-          getSparkShimsResourcePattern(sparkVersion.majorVersion))
+          PARENT_FIRST_PATTERNS,
+          jarName => loadJarFilter(jarName, sparkVersion))
       })
   }
 
-  def addShimsUrls(sparkVersion: SparkVersion, addShimUrl: File => Unit): Unit = {
+  private def loadJarFilter(jarName: String, sparkVersion: SparkVersion): Boolean = {
+    val childFirstPattern = getSparkShimsResourcePattern(sparkVersion.majorVersion)
+    SPARK_JAR_PATTERN.matcher(jarName).matches && !childFirstPattern.matcher(jarName).matches
+  }
+
+  private def addShimsUrls(sparkVersion: SparkVersion, addShimUrl: File => Unit): Unit = {
     val appHome = System.getProperty(ConfigKeys.KEY_APP_HOME)
     require(
       appHome != null,
@@ -134,14 +150,14 @@ object SparkShimsProxy extends Logger {
       .runAsClassLoader[T](shimsClassLoader, () => func(shimsClassLoader))
   }
 
-  private[this] def getSParkShimsClassLoader(sparkVersion: SparkVersion): ClassLoader = {
+  private[this] def getSparkShimsClassLoader(sparkVersion: SparkVersion): ClassLoader = {
     logInfo(s"add spark shims urls classloader,spark version: $sparkVersion")
 
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
         // 1) spark/lib
-        val libURL = getSparkHomeLib(sparkVersion.sparkHome, "jars", !_.getName.startsWith("log4j"))
-        val shimsUrls = ListBuffer[URL](libURL: _*)
+        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+        val shimsUrls = ListBuffer[URL](libUrl: _*)
 
         // 2) add all shims jar
         addShimsUrls(
@@ -155,7 +171,8 @@ object SparkShimsProxy extends Logger {
         new ChildFirstClassLoader(
           shimsUrls.toArray,
           Thread.currentThread().getContextClassLoader,
-          getSparkShimsResourcePattern(sparkVersion.majorVersion))
+          PARENT_FIRST_PATTERNS,
+          jarName => loadJarFilter(jarName, sparkVersion))
       })
   }
 
