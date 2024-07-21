@@ -26,27 +26,19 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.exception.ApplicationException;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
-import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.runner.EnvInitializer;
-import org.apache.streampark.console.core.service.FlinkClusterService;
-import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
-import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.core.conf.ParameterCli;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -97,93 +89,15 @@ public class SparkApplicationInfoServiceImpl
     private SparkEnvService sparkEnvService;
 
     @Autowired
-    private SavePointService savePointService;
-
-    @Autowired
     private EnvInitializer envInitializer;
-
-    @Autowired
-    private FlinkK8sWatcher k8SFlinkTrackMonitor;
-
-    @Autowired
-    private FlinkClusterService flinkClusterService;
-
-    @Autowired
-    private FlinkClusterWatcher flinkClusterWatcher;
 
     @Override
     public Map<String, Serializable> getDashboardDataMap(Long teamId) {
-        JobsOverview.Task overview = new JobsOverview.Task();
-        Integer totalJmMemory = 0;
-        Integer totalTmMemory = 0;
-        Integer totalTm = 0;
-        Integer totalSlot = 0;
-        Integer availableSlot = 0;
-        Integer runningJob = 0;
-
-        // stat metrics from other than kubernetes mode
-        for (Application app : FlinkAppHttpWatcher.getWatchingApps()) {
-            if (!teamId.equals(app.getTeamId())) {
-                continue;
-            }
-            if (app.getJmMemory() != null) {
-                totalJmMemory += app.getJmMemory();
-            }
-            if (app.getTmMemory() != null) {
-                totalTmMemory += app.getTmMemory() * (app.getTotalTM() == null ? 1 : app.getTotalTM());
-            }
-            if (app.getTotalTM() != null) {
-                totalTm += app.getTotalTM();
-            }
-            if (app.getTotalSlot() != null) {
-                totalSlot += app.getTotalSlot();
-            }
-            if (app.getAvailableSlot() != null) {
-                availableSlot += app.getAvailableSlot();
-            }
-            if (app.getState() == FlinkAppStateEnum.RUNNING.getValue()) {
-                runningJob++;
-            }
-            JobsOverview.Task task = app.getOverview();
-            if (task != null) {
-                overview.setTotal(overview.getTotal() + task.getTotal());
-                overview.setCreated(overview.getCreated() + task.getCreated());
-                overview.setScheduled(overview.getScheduled() + task.getScheduled());
-                overview.setDeploying(overview.getDeploying() + task.getDeploying());
-                overview.setRunning(overview.getRunning() + task.getRunning());
-                overview.setFinished(overview.getFinished() + task.getFinished());
-                overview.setCanceling(overview.getCanceling() + task.getCanceling());
-                overview.setCanceled(overview.getCanceled() + task.getCanceled());
-                overview.setFailed(overview.getFailed() + task.getFailed());
-                overview.setReconciling(overview.getReconciling() + task.getReconciling());
-            }
-        }
-
-        // merge metrics from flink kubernetes cluster
-        FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
-        if (k8sMetric != null) {
-            totalJmMemory += k8sMetric.totalJmMemory();
-            totalTmMemory += k8sMetric.totalTmMemory();
-            totalTm += k8sMetric.totalTm();
-            totalSlot += k8sMetric.totalSlot();
-            availableSlot += k8sMetric.availableSlot();
-            runningJob += k8sMetric.runningJob();
-            overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-            overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-            overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-            overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-            overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
-        }
 
         // result json
         Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
-        dashboardDataMap.put("task", overview);
-        dashboardDataMap.put("jmMemory", totalJmMemory);
-        dashboardDataMap.put("tmMemory", totalTmMemory);
-        dashboardDataMap.put("totalTM", totalTm);
-        dashboardDataMap.put("availableSlot", availableSlot);
-        dashboardDataMap.put("totalSlot", totalSlot);
-        dashboardDataMap.put("runningJob", runningJob);
+        // TODO: Tasks running metrics for presentation
+        // dashboardDataMap.put("metrics key", "metrics value");
 
         return dashboardDataMap;
     }
@@ -203,14 +117,6 @@ public class SparkApplicationInfoServiceImpl
             }
             envInitializer.checkSparkEnv(application.getStorageType(), sparkEnv);
             envInitializer.storageInitialize(application.getStorageType());
-
-            if (SparkExecutionMode.REMOTE == application.getSparkExecutionMode()) {
-                FlinkCluster flinkCluster = flinkClusterService.getById(application.getSparkClusterId());
-                boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
-                if (!conned) {
-                    throw new ApiAlertException("the target cluster is unavailable, please check!");
-                }
-            }
             return true;
         } catch (Exception e) {
             log.error(ExceptionUtils.stringifyException(e));
@@ -221,10 +127,10 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public boolean checkAlter(SparkApplication appParam) {
         Long appId = appParam.getId();
-        if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
+        if (SparkAppStateEnum.KILLED != appParam.getStateEnum()) {
             return false;
         }
-        long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
+        long cancelUserId = SparkAppHttpWatcher.getCanceledJobUserId(appId);
         long appUserId = appParam.getUserId();
         return cancelUserId != -1 && cancelUserId != appUserId;
     }
@@ -239,37 +145,6 @@ public class SparkApplicationInfoServiceImpl
     public boolean existsByUserId(Long userId) {
         return baseMapper.exists(
             new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getUserId, userId));
-    }
-
-    @Override
-    public boolean existsRunningByClusterId(Long clusterId) {
-        return baseMapper.existsRunningJobByClusterId(clusterId)
-            || FlinkAppHttpWatcher.getWatchingApps().stream()
-                .anyMatch(
-                    application -> clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppStateEnum.RUNNING == application
-                            .getStateEnum());
-    }
-
-    @Override
-    public boolean existsByClusterId(Long clusterId) {
-        return baseMapper.exists(
-            new LambdaQueryWrapper<SparkApplication>()
-                .eq(SparkApplication::getSparkClusterId, clusterId));
-    }
-
-    @Override
-    public Integer countByClusterId(Long clusterId) {
-        return baseMapper
-            .selectCount(
-                new LambdaQueryWrapper<SparkApplication>()
-                    .eq(SparkApplication::getSparkClusterId, clusterId))
-            .intValue();
-    }
-
-    @Override
-    public Integer countAffectedByClusterId(Long clusterId, String dbType) {
-        return baseMapper.countAffectedByClusterId(clusterId, dbType);
     }
 
     @Override

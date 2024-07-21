@@ -19,17 +19,13 @@ package org.apache.streampark.spark.client.bean
 
 import org.apache.streampark.common.conf.SparkVersion
 import org.apache.streampark.common.enums.SparkExecutionMode
+import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
 
-import java.util.{Map => JavaMap}
-
-case class CancelRequest(
+case class StopRequest(
     id: Long,
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    @Nullable properties: JavaMap[String, Any],
-    clusterId: String,
-    jobId: String,
-    withDrain: Boolean,
-    nativeFormat: Boolean)
+    @Nullable properties: JavaMap[String, String],
+    jobId: String)

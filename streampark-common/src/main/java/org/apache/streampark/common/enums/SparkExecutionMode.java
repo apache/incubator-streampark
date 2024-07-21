@@ -37,6 +37,7 @@ public enum SparkExecutionMode {
 
     /** yarn client */
     YARN_CLIENT(3, "yarn-client");
+
     private final Integer mode;
 
     private final String name;

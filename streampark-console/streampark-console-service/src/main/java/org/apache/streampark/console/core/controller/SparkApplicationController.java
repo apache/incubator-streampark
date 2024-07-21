@@ -24,12 +24,12 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
-import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
@@ -70,7 +70,7 @@ public class SparkApplicationController {
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private ApplicationLogService applicationLogService;
+    private SparkApplicationLogService applicationLogService;
 
     @Autowired
     private ResourceService resourceService;
@@ -153,8 +153,8 @@ public class SparkApplicationController {
 
     @PostMapping(value = "cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(SparkApplication app) throws Exception {
-        applicationActionService.cancel(app);
+    public RestResponse stop(SparkApplication app) throws Exception {
+        applicationActionService.stop(app);
         return RestResponse.success();
     }
 
@@ -208,7 +208,8 @@ public class SparkApplicationController {
         return RestResponse.success(backups);
     }
 
-    @PostMapping("option_log")
+
+    @PostMapping("opt_log")
     public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);

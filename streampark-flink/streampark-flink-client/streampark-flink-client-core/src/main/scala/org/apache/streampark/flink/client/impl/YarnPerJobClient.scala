@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.util.FlinkUtils
@@ -32,8 +33,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
-
-import scala.collection.convert.ImplicitConversions._
 
 /** yarn PerJob mode submit */
 object YarnPerJobClient extends YarnClientTrait {

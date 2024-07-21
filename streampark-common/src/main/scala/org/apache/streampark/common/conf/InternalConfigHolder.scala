@@ -19,14 +19,12 @@ package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.Constant
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 
 import javax.annotation.{Nonnull, Nullable}
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-
-import scala.collection.convert.ImplicitConversions._
 
 /**
  * Thread-safe configuration storage containers. All configurations will be automatically
@@ -123,7 +121,7 @@ object InternalConfigHolder extends Logger {
 
   /** Get keys of all registered ConfigOption. */
   @Nonnull
-  def keys(): util.Set[String] = {
+  def keys(): JavaSet[String] = {
     val map = new util.HashMap[String, InternalOption](confOptions.size())
     map.putAll(confOptions)
     map.keySet()

@@ -17,9 +17,9 @@
 
 package org.apache.streampark.common.util
 
-import java.util
+import org.apache.streampark.common.util.Implicits._
 
-import scala.collection.convert.ImplicitConversions._
+import java.util
 
 class CURLBuilder(val url: String) {
 

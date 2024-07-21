@@ -25,7 +25,7 @@ import org.asynchttpclient.{AsyncHttpClient, Dsl}
 
 import java.util.concurrent._
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.collection.mutable.ListBuffer
 
 case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, String])

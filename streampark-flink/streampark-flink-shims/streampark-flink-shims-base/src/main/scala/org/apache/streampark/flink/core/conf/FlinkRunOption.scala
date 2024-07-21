@@ -17,11 +17,12 @@
 
 package org.apache.streampark.flink.core.conf
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.commons.cli.{CommandLine, DefaultParser, Option, Options}
 
 import java.lang.{Boolean => JavaBoolean}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 /** Applies to all optional parameters under flink run */

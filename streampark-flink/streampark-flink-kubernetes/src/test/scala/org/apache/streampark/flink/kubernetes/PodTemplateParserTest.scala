@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import scala.collection.convert.ImplicitConversions._
 
 // scalastyle:off println
 class PodTemplateParserTest {
