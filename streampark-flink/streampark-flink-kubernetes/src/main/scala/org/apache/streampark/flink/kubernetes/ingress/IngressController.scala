@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient

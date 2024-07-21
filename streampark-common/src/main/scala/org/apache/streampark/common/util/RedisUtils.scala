@@ -17,10 +17,10 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
 
-import scala.collection.JavaConverters._
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 

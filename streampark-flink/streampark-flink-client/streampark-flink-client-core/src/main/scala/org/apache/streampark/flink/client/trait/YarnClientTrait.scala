@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.util.{AssertUtils, ExceptionUtils}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.api.common.JobID

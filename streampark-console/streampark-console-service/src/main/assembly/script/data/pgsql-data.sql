@@ -68,7 +68,7 @@ insert into "public"."t_menu" values (130200, 130000, 'setting.alarm', '/setting
 insert into "public"."t_menu" values (130300, 130000, 'setting.flinkHome', '/setting/flinkHome', 'setting/FlinkHome/index', null, 'desktop', '0', '1', 3, now(), now());
 insert into "public"."t_menu" values (130400, 130000, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', '1', 4, now(), now());
 insert into "public"."t_menu" values (130500, 130000, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', '1', 5, now(), now());
-insert into "public"."t_menu" values (130600, 130000, 'setting.yarnQueue', '/setting/yarnQueue', 'setting/yarnQueue/View', 'menu:view', 'bars', '0', '1', 6, now(), now());
+insert into "public"."t_menu" values (130600, 130000, 'setting.yarnQueue', '/setting/yarn-queue', 'setting/yarn-queue/View', 'menu:view', 'bars', '0', '1', 6, now(), now());
 insert into "public"."t_menu" values (110101, 110100, 'add', null, null, 'user:add', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110102, 110100, 'update', null, null, 'user:update', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110103, 110100, 'delete', null, null, 'user:delete', null, '1', '1', null, now(), now());
@@ -117,7 +117,7 @@ insert into "public"."t_menu" values (120218, 120200, 'sql delete', null, null, 
 insert into "public"."t_menu" values (120301, 120300, 'add', NULL, NULL, 'variable:add', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120302, 120300, 'update', NULL, NULL, 'variable:update', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120303, 120300, 'delete', NULL, NULL, 'variable:delete', NULL, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', '0', NULL, now(), now());
+insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/resource/variable/depend_apps', 'resource/variable/DependApps', 'variable:depend_apps', '', '0', '0', NULL, now(), now());
 insert into "public"."t_menu" values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', '1', NULL, now(), now());

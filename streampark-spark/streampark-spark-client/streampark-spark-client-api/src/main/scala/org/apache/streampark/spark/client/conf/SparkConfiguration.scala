@@ -17,6 +17,7 @@
 
 package org.apache.streampark.spark.client.conf
 
+<<<<<<< HEAD
 object SparkConfiguration {
   val defaultParameters = Map[String, Any](
     "spark.driver.cores" -> "1",
@@ -25,3 +26,6 @@ object SparkConfiguration {
     "spark.executor.memory" -> "1g")
 
 }
+=======
+object SparkConfiguration {}
+>>>>>>> dev

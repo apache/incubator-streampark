@@ -124,7 +124,8 @@ object YarnApplicationClient extends SparkClientTrait {
     logger.info(
       "[StreamPark][YarnApplicationClient] The task is executing, handle current state is {}, appid is {}",
       Array(sparkAppHandle.getState.toString, sparkAppHandle.getAppId))
-    SubmitResponse(null, null, sparkAppHandle.getAppId)
+    //SubmitResponse(null, null, sparkAppHandle.getAppId)
+    null
   }
 
   private def setDynamicProperties(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {

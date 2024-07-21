@@ -17,20 +17,21 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 
-import java.util.Date;
-
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_flink_gateway")
-public class FlinkGateWay {
+public class FlinkGateWay extends BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -45,7 +46,4 @@ public class FlinkGateWay {
     @NotBlank(message = "{required}")
     private String address;
 
-    private Date createTime;
-
-    private Date modifyTime;
 }

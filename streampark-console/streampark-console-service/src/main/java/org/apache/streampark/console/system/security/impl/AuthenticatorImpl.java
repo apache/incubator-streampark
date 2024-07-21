@@ -30,8 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
 public class AuthenticatorImpl implements Authenticator {
 
@@ -117,9 +115,6 @@ public class AuthenticatorImpl implements Authenticator {
 
     private User newUserCreate(LoginTypeEnum loginTypeEnum, String username) throws Exception {
         User newUser = new User();
-        Date date = new Date();
-        newUser.setCreateTime(date);
-        newUser.setModifyTime(date);
         newUser.setUsername(username);
         newUser.setNickName(username);
         newUser.setLoginType(loginTypeEnum);

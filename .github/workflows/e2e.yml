@@ -110,6 +110,12 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: ExternalLinkPageTest
+            class: org.apache.streampark.e2e.cases.ExternalLinkPageTest
+          - name: YarnQueueTest
+            class: org.apache.streampark.e2e.cases.YarnQueueTest
+          - name: TokenManagementTest
+            class: org.apache.streampark.e2e.cases.TokenManagementTest
           - name: UploadManagementTest
             class: org.apache.streampark.e2e.cases.UploadManagementTest
           - name: ProjectsManagementTest
@@ -124,6 +130,12 @@ jobs:
             class: org.apache.streampark.e2e.cases.TeamManagementTest
           - name: MemberManagementTest
             class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: Flink116OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnYarnClusterDeployTest
+          - name: Flink117OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnYarnClusterDeployTest
+          - name: Flink118OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnYarnClusterDeployTest
           - name: FlinkSQL116OnYarnTest
             class: org.apache.streampark.e2e.cases.FlinkSQL116OnYarnTest
           - name: FlinkSQL117OnYarnTest

@@ -23,9 +23,9 @@ import org.apache.streampark.common.util.ConfigUtils
 import org.apache.http.HttpHost
 
 import java.net.InetSocketAddress
-import java.util.{Map => JavaMap, Properties}
+import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object ES7SinkConfigOption {
 

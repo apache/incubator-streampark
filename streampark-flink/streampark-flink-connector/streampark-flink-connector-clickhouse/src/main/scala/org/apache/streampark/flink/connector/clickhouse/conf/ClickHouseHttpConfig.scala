@@ -23,7 +23,7 @@ import org.apache.streampark.common.Constant
 import java.util.{Base64, Properties}
 import java.util.concurrent.ThreadLocalRandom
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 /**
  * Flink sink for Clickhouse database. Powered by Async Http Client.

@@ -275,8 +275,6 @@ public class SparkApplicationManageServiceImpl
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
-        appParam.setCreateTime(new Date());
-        appParam.setModifyTime(new Date());
         appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
 
         boolean success = validateQueueIfNeeded(appParam);
@@ -362,8 +360,6 @@ public class SparkApplicationManageServiceImpl
         newApp.setState(FlinkAppStateEnum.ADDED.getValue());
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());
-        newApp.setCreateTime(new Date());
-        newApp.setModifyTime(new Date());
         newApp.setHotParams(oldApp.getHotParams());
 
         newApp.setJar(oldApp.getJar());
@@ -465,7 +461,6 @@ public class SparkApplicationManageServiceImpl
         application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
         // changes to the following parameters do not affect running tasks
-        application.setModifyTime(new Date());
         application.setDescription(appParam.getDescription());
         application.setAlertId(appParam.getAlertId());
         application.setRestartSize(appParam.getRestartSize());

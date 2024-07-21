@@ -222,12 +222,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public boolean checkEnv(Application appParam) throws ApplicationException {
         Application application = getById(appParam.getId());
         try {
-            FlinkEnv flinkEnv;
-            if (application.getVersionId() != null) {
-                flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
-            } else {
-                flinkEnv = flinkEnvService.getDefault();
-            }
+            FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());
             if (flinkEnv == null) {
                 return false;
             }

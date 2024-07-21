@@ -274,6 +274,7 @@ export const renderFlinkCluster = (clusters, { model, field }: RenderCallbackPar
       placeholder={t('flink.app.flinkCluster')}
       value={model[field]}
       onChange={(value: any) => (model[field] = value)}
+      codeField={field}
     >
       {clusters.map((item) => {
         return (

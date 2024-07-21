@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.ConfigUtils
 
 import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object DorisSinkConfigOption {
   val DORIS_SINK_PREFIX = "doris.sink"

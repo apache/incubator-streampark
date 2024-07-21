@@ -30,8 +30,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 /**
  * Kubernetes native application mode submit.
- * @deprecated
- *   Please use [[KubernetesApplicationClientV2]] instead.
  */
 object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
 

@@ -31,7 +31,7 @@ import java.util.concurrent.{CompletableFuture, Executors, ExecutorService, Time
 import java.util.function.{Consumer, Supplier}
 
 import scala.annotation.meta.param
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object HBaseRequest {
 

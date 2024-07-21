@@ -18,22 +18,22 @@
 package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.Constant;
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import java.io.Serializable;
-import java.util.Date;
-
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_variable")
-public class Variable implements Serializable {
+public class Variable extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -59,10 +59,6 @@ public class Variable implements Serializable {
     private Long teamId;
 
     private Boolean desensitization;
-
-    private Date createTime;
-
-    private Date modifyTime;
 
     public void dataMasking() {
         if (desensitization) {

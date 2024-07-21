@@ -20,7 +20,7 @@ import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.ConfigKeys
 
 import java.util.Properties
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object DorisConfig {
 
