@@ -25,6 +25,7 @@ import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -208,8 +209,8 @@ public class SparkApplicationController {
     }
 
     @PostMapping("opt_log")
-    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
-        IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
+    public RestResponse optionlog(SparkApplicationLog applicationLog, RestRequest request) {
+        IPage<SparkApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 
