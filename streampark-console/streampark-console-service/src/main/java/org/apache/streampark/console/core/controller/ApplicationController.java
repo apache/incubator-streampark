@@ -56,6 +56,7 @@ import java.util.Map;
 @Slf4j
 @Validated
 @RestController
+@OpenAPI
 @RequestMapping("flink/app")
 public class ApplicationController {
 
@@ -151,7 +152,7 @@ public class ApplicationController {
         return RestResponse.success(stateEnum.get());
     }
 
-    @OpenAPI({
+    @OpenAPI(param = {
             @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
             @OpenAPI.Param(name = "id", description = "start app id", required = true, type = Long.class),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
@@ -160,14 +161,14 @@ public class ApplicationController {
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class)
     })
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "start")
+    @PostMapping
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
         applicationActionService.start(app, false);
         return RestResponse.success(true);
     }
 
-    @OpenAPI({
+    @OpenAPI(param = {
             @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
             @OpenAPI.Param(name = "id", description = "cancel app id", required = true, type = Long.class),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),

@@ -24,10 +24,17 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 @Component
 public class SpringContextUtils implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
+
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+        return applicationContext.getBeansWithAnnotation(annotationType);
+    }
 
     @Override
     public synchronized void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {

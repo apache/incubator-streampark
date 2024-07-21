@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,28 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { defHttp } from '/@/utils/http/axios';
 
-package org.apache.streampark.console.core.annotation;
+enum Api {
+  CURL = '/openapi/curl',
+  SCHEMA = '/openapi/schema',
+}
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OpenAPI {
-
-    Param[] param() default {};
-
-    @interface Param {
-
-        String name();
-
-        String description();
-
-        boolean required();
-
-        Class<?> type();
-    }
+/**
+ * check token
+ * @param data
+ * @returns {Promise<number>}
+ */
+export function fetchApiSchema(data) {
+  return defHttp.post<number>({ url: Api.SCHEMA, data });
+}
+/**
+ * copyCurl
+ * @param data
+ * @returns {Promise<string>}
+ */
+export function fetchCopyCurl(data): Promise<string> {
+  return defHttp.post<string>({ url: Api.CURL, data });
 }

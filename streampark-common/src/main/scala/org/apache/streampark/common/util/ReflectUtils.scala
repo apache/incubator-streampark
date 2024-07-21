@@ -17,9 +17,12 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.commons.lang3.StringUtils
 
-import java.lang.reflect.{Field, Modifier}
+import java.lang.annotation.Annotation
+import java.lang.reflect.{Field, Method, Modifier}
 import java.util.Objects
 
 import scala.util.{Failure, Success, Try}
@@ -101,6 +104,10 @@ object ReflectUtils extends Logger {
         || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
       field.setAccessible(true)
     }
+  }
+
+  def getMethodByAnnotation(beanClass: Class[_], annotClazz: Class[_ <: Annotation]): JavaList[Method] = {
+    beanClass.getDeclaredMethods.filter(_.getDeclaredAnnotation(annotClazz) != null).toList
   }
 
 }

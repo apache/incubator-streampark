@@ -15,27 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.annotation;
+package org.apache.streampark.console.core.bean;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import lombok.Getter;
+import lombok.Setter;
 
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OpenAPI {
+import java.util.List;
 
-    Param[] param() default {};
+@Getter
+@Setter
+public class OpenAPISchema {
 
-    @interface Param {
+    private String url;
 
-        String name();
+    private List<Param> Param;
 
-        String description();
+    @Getter
+    @Setter
+    public static class Param {
 
-        boolean required();
+        private String name;
 
-        Class<?> type();
+        private String type;
+
+        private boolean required;
+
+        private String description;
     }
 }

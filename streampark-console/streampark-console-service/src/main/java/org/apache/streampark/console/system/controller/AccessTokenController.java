@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -94,42 +93,5 @@ public class AccessTokenController {
     public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.removeById(tokenId);
         return RestResponse.success(res);
-    }
-
-    /**
-     * copy cURL, hardcode now, there is no need for configuration here, because there are several
-     * fixed interfaces
-     */
-    @PostMapping(value = "curl")
-    public RestResponse copyRestApiCurl(
-                                        @NotBlank(message = "{required}") String appId,
-                                        @NotBlank(message = "{required}") String baseUrl,
-                                        @NotBlank(message = "{required}") String path) {
-        String resultCURL = null;
-        CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
-
-        curlBuilder
-            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-            .addHeader(
-                "Authorization",
-                accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
-
-        if ("/flink/app/start".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("allowNonRestored", "false")
-                .addFormData("savePoint", "")
-                .addFormData("savePointed", "false")
-                .addFormData("id", appId)
-                .build();
-        } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("id", appId)
-                .addFormData("savePointed", "false")
-                .addFormData("drain", "false")
-                .addFormData("nativeFormat", "false")
-                .addFormData("savePoint", "")
-                .build();
-        }
-        return RestResponse.success(resultCURL);
     }
 }

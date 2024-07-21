@@ -37,7 +37,8 @@
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
-  import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
+  import { fetchCheckToken } from '/@/api/system/token';
+  import { fetchCopyCurl } from '/@/api/system/openapi';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { baseUrl } from '/@/api';
   import { fetchListVer } from '/@/api/flink/config';
@@ -105,19 +106,6 @@
             () => [
               h(Icon, { icon: 'ant-design:copy-outlined' }),
               t('flink.app.detail.copyCancelcURL'),
-            ],
-          ),
-          h(
-            Button,
-            {
-              type: 'link',
-              shape: 'round',
-              class: 'mx-3px px-5px',
-              onClick: () => handleDocPage(),
-            },
-            () => [
-              h(Icon, { icon: 'ant-design:link-outlined' }),
-              t('flink.app.detail.apiDocCenter'),
             ],
           ),
         ],
