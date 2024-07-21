@@ -83,7 +83,7 @@ public class VariableController {
         return RestResponse.success(variableList);
     }
 
-    @PostMapping("dependApps")
+    @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
     public RestResponse dependApps(RestRequest restRequest, Variable variable) {
         IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
@@ -104,7 +104,7 @@ public class VariableController {
         return RestResponse.success();
     }
 
-    @PostMapping("showOriginal")
+    @PostMapping("show_original")
     @RequiresPermissions("variable:show_original")
     public RestResponse showOriginal(@RequestParam Long id) {
         Variable v = this.variableService.getById(id);

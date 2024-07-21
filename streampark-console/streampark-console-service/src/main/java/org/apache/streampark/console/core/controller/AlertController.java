@@ -79,15 +79,15 @@ public class AlertController {
         return RestResponse.success(AlertConfigParams.of(alertConfig));
     }
 
-    @PostMapping(value = "/list")
-    public RestResponse alertConfigsPaginationList(
-                                                   @RequestBody AlertConfigParams params, RestRequest request) {
+    @PostMapping(value = "/page")
+    public RestResponse pageAlertConfig(
+                                        @RequestBody AlertConfigParams params, RestRequest request) {
         IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
         return RestResponse.success(page);
     }
 
-    @PostMapping(value = "/listWithOutPage")
-    public RestResponse alertConfigsList() {
+    @PostMapping(value = "/list")
+    public RestResponse listAlertConfig() {
         List<AlertConfig> page = alertConfigService.list();
         return RestResponse.success(page);
     }

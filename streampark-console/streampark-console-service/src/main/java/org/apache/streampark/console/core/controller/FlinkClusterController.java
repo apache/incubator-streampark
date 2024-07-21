@@ -48,7 +48,7 @@ public class FlinkClusterController {
     @Autowired
     private ServiceHelper serviceHelper;
 
-    @PostMapping("availableList")
+    @PostMapping("alive")
     public RestResponse listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
         return RestResponse.success(flinkClusters);
@@ -60,7 +60,7 @@ public class FlinkClusterController {
         return RestResponse.success(flinkClusters);
     }
 
-    @PostMapping("remoteUrl")
+    @PostMapping("remote_url")
     public RestResponse remoteUrl(Long id) {
         FlinkCluster cluster = flinkClusterService.getById(id);
         return RestResponse.success(cluster.getAddress());

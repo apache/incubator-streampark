@@ -133,7 +133,7 @@ public class SparkApplicationController {
         return RestResponse.success();
     }
 
-    @PostMapping(value = "check_start")
+    @PostMapping(value = "check/start")
     @RequiresPermissions("app:start")
     public RestResponse checkStart(SparkApplication app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
@@ -184,13 +184,13 @@ public class SparkApplicationController {
         return RestResponse.success(yarnName);
     }
 
-    @PostMapping("checkName")
+    @PostMapping("check/name")
     public RestResponse checkName(SparkApplication app) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(app);
         return RestResponse.success(exists.get());
     }
 
-    @PostMapping("readConf")
+    @PostMapping("read_conf")
     public RestResponse readConf(SparkApplication app) throws IOException {
         String config = applicationInfoService.readConf(app.getConfig());
         return RestResponse.success(config);
@@ -208,13 +208,13 @@ public class SparkApplicationController {
         return RestResponse.success(backups);
     }
 
-    @PostMapping("optionlog")
+    @PostMapping("option_log")
     public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 
-    @PostMapping("deleteOperationLog")
+    @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
     public RestResponse deleteOperationLog(Long id) {
         Boolean deleted = applicationLogService.removeById(id);
@@ -228,13 +228,13 @@ public class SparkApplicationController {
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("deletebak")
+    @PostMapping("delete/bak")
     public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("checkjar")
+    @PostMapping("check/jar")
     public RestResponse checkjar(String jar) {
         File file = new File(jar);
         try {
@@ -252,7 +252,7 @@ public class SparkApplicationController {
         return RestResponse.success(uploadPath);
     }
 
-    @PostMapping("verifySchema")
+    @PostMapping("verify_schema")
     public RestResponse verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();

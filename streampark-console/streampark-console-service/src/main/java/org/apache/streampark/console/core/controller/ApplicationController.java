@@ -144,7 +144,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "check_start")
+    @PostMapping(value = "check/start")
     @RequiresPermissions("app:start")
     public RestResponse checkStart(Application app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
@@ -204,7 +204,7 @@ public class ApplicationController {
         return RestResponse.success(yarnName);
     }
 
-    @PostMapping("check_name")
+    @PostMapping("check/name")
     @Permission(app = "#app.id", team = "#app.teamId")
     public RestResponse checkName(Application app) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(app);
@@ -231,7 +231,7 @@ public class ApplicationController {
         return RestResponse.success(backups);
     }
 
-    @PostMapping("option_log")
+    @PostMapping("opt_log")
     @Permission(app = "#log.appId", team = "#log.teamId")
     public RestResponse log(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
@@ -239,7 +239,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#log.appId", team = "#log.teamId")
-    @PostMapping("delete_log")
+    @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
     public RestResponse deleteLog(Long id) {
         Boolean deleted = applicationLogService.removeById(id);
@@ -255,13 +255,13 @@ public class ApplicationController {
     }
 
     @Permission(app = "#backUp.appId")
-    @PostMapping("delete_bak")
-    public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
+    @PostMapping("delete/backup")
+    public RestResponse deleteBackup(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("check_jar")
+    @PostMapping("check/jar")
     public RestResponse checkjar(String jar) throws IOException {
         Utils.requireCheckJarFile(new File(jar).toURI().toURL());
         return RestResponse.success(true);
@@ -296,7 +296,7 @@ public class ApplicationController {
         return restResponse;
     }
 
-    @PostMapping("check_savepoint_path")
+    @PostMapping("check/savepoint_path")
     @Permission(app = "#app.id", team = "#app.teamId")
     public RestResponse checkSavepointPath(Application app) throws Exception {
         String error = applicationInfoService.checkSavepointPath(app);
