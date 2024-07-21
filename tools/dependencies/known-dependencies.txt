@@ -191,7 +191,6 @@ kerby-config-1.0.1.jar
 kerby-pkix-1.0.1.jar
 kerby-util-1.0.1.jar
 kerby-xdr-1.0.1.jar
-knife4j-core-4.0.0.jar
 kotlin-stdlib-1.6.21.jar
 kotlin-stdlib-common-1.6.21.jar
 kotlin-stdlib-jdk7-1.6.21.jar
@@ -389,7 +388,6 @@ undertow-servlet-2.2.24.Final.jar
 undertow-websockets-jsr-2.2.24.Final.jar
 univocity-parsers-2.9.1.jar
 unused-1.0.0.jar
-webjars-locator-core-0.50.jar
 wildfly-client-config-1.0.1.Final.jar
 wildfly-common-1.5.4.Final.jar
 woodstox-core-5.0.3.jar
