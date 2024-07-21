@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.annotation.PostConstruct;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,14 +43,25 @@ public class OpenAPIComponent {
 
     private final Map<String, OpenAPISchema> schemas = new HashMap<>();
 
-    @PostConstruct
-    public void initialize() throws Exception {
+    public OpenAPISchema getOpenAPISchema(String url) {
+        url = ("/" + url).replaceAll("/+", "/").replaceAll("/$", "");
+        if (schemas.isEmpty()) {
+            try {
+                initOpenAPISchema();
+            } catch (Exception e) {
+                log.error("InitOpenAPISchema failed", e);
+            }
+        }
+        return schemas.get(url);
+    }
+
+    public synchronized void initOpenAPISchema() throws Exception {
         Map<String, Object> beans = SpringContextUtils.getBeansWithAnnotation(OpenAPI.class);
         for (Object value : beans.values()) {
             Class<?> clazz = Class.forName(value.getClass().getName().replaceAll("\\$.*$", ""));
             RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
             String basePath = requestMapping.value()[0];
-            List<Method> methodList = ReflectUtils.getMethodByAnnotation(clazz, OpenAPI.class);
+            List<Method> methodList = ReflectUtils.getMethodsByAnnotation(clazz, OpenAPI.class);
 
             for (Method method : methodList) {
                 String[] subUriPath = getMethodUriPath(method);
@@ -63,11 +72,11 @@ public class OpenAPIComponent {
                 }
                 restUrl = restUrl.replaceAll("/+", "/").replaceAll("/$", "");
 
-                List<OpenAPISchema.Param> paramList = new ArrayList<>();
+                List<OpenAPISchema.Schema> paramList = new ArrayList<>();
                 OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
                 OpenAPI.Param[] params = openAPI.param();
                 for (OpenAPI.Param param : params) {
-                    OpenAPISchema.Param paramDetail = new OpenAPISchema.Param();
+                    OpenAPISchema.Schema paramDetail = new OpenAPISchema.Schema();
                     paramDetail.setName(param.name());
                     paramDetail.setType(param.type().getName());
                     paramDetail.setRequired(param.required());
@@ -76,13 +85,15 @@ public class OpenAPIComponent {
                 }
                 OpenAPISchema detail = new OpenAPISchema();
                 detail.setUrl(restUrl);
-                detail.setParam(paramList);
+                detail.setSchema(paramList);
                 schemas.put(restUrl, detail);
             }
         }
     }
 
     private String[] getMethodUriPath(Method method) {
+        method.setAccessible(true);
+
         GetMapping getMapping = method.getDeclaredAnnotation(GetMapping.class);
         if (getMapping != null) {
             return getMapping.value();
@@ -108,10 +119,5 @@ public class OpenAPIComponent {
             return putMapping.value();
         }
         return null;
-    }
-
-    public OpenAPISchema getOpenAPISchema(String url) {
-        url = ("/" + url).replaceAll("/+", "/").replaceAll("/$", "");
-        return schemas.get(url);
     }
 }

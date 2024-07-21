@@ -32,10 +32,6 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-        return applicationContext.getBeansWithAnnotation(annotationType);
-    }
-
     @Override
     public synchronized void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
         SpringContextUtils.applicationContext = applicationContext;
@@ -63,5 +59,9 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     public static Class<?> getType(String name) {
         return applicationContext.getType(name);
+    }
+
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+        return applicationContext.getBeansWithAnnotation(annotationType);
     }
 }

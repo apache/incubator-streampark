@@ -20,9 +20,9 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ProjectService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.system.entity.Team;
@@ -66,7 +66,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     private VariableService variableService;
 
     @Autowired
-    private ServiceHelper serviceHelper;
+    private ServiceComponent serviceComponent;
 
     @Override
     public IPage<Team> getPage(Team team, RestRequest request) {
@@ -94,7 +94,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public void removeById(Long teamId) {
-        log.info("{} Proceed delete team[Id={}]", serviceHelper.getLoginUser().getUsername(), teamId);
+        log.info("{} Proceed delete team[Id={}]", serviceComponent.getLoginUser().getUsername(), teamId);
         Team team = this.getById(teamId);
 
         ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);

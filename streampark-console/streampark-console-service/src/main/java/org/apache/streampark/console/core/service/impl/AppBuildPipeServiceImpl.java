@@ -31,6 +31,7 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.DockerConfig;
+import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
@@ -53,7 +54,6 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -132,7 +132,7 @@ public class AppBuildPipeServiceImpl
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private ServiceHelper serviceHelper;
+    private ServiceComponent serviceComponent;
 
     @Autowired
     private SettingService settingService;
@@ -351,7 +351,7 @@ public class AppBuildPipeServiceImpl
 
                     } else {
                         Message message = new Message(
-                            serviceHelper.getUserId(),
+                            serviceComponent.getUserId(),
                             app.getId(),
                             app.getJobName().concat(" release failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -415,7 +415,7 @@ public class AppBuildPipeServiceImpl
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setUserId(serviceHelper.getUserId());
+        applicationLog.setUserId(serviceComponent.getUserId());
         return applicationLog;
     }
 
@@ -594,7 +594,7 @@ public class AppBuildPipeServiceImpl
             case PYFLINK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
-                String sqlDistJar = serviceHelper.getFlinkSqlClientJar(flinkEnv);
+                String sqlDistJar = serviceComponent.getFlinkSqlClientJar(flinkEnv);
                 if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);

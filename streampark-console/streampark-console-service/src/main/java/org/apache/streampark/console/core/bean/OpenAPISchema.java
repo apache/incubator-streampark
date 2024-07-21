@@ -28,11 +28,11 @@ public class OpenAPISchema {
 
     private String url;
 
-    private List<Param> Param;
+    private List<Schema> schema;
 
     @Getter
     @Setter
-    public static class Param {
+    public static class Schema {
 
         private String name;
 

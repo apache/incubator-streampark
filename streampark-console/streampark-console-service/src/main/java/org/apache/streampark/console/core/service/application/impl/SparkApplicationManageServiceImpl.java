@@ -27,6 +27,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
+import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
@@ -45,7 +46,6 @@ import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
@@ -115,7 +115,7 @@ public class SparkApplicationManageServiceImpl
     private SettingService settingService;
 
     @Autowired
-    private ServiceHelper serviceHelper;
+    private ServiceComponent serviceComponent;
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
@@ -271,7 +271,7 @@ public class SparkApplicationManageServiceImpl
     public boolean create(SparkApplication appParam) {
         ApiAlertException.throwIfNull(
             appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-        appParam.setUserId(serviceHelper.getUserId());
+        appParam.setUserId(serviceComponent.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -356,7 +356,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setResourceFrom(oldApp.getResourceFrom());
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
-        newApp.setUserId(serviceHelper.getUserId());
+        newApp.setUserId(serviceComponent.getUserId());
         newApp.setState(FlinkAppStateEnum.ADDED.getValue());
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());
