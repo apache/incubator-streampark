@@ -43,7 +43,7 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
     if (matcher.matches()) {
       matcher.group(1)
     } else {
-      "2.12"
+      throw new IllegalArgumentException(s"[StreamPark] can not found scala version in $sparkCoreJar")
     }
   }
 
