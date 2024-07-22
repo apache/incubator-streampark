@@ -20,15 +20,14 @@ package org.apache.streampark.common.util
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.fs.LfsOperator
+import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 import java.io.File
 import java.nio.charset.StandardCharsets
-import java.util.{Collections, Map => JavaMap, Optional}
+import java.util.{Collections, Optional}
 
-import scala.collection.JavaConverters._
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 

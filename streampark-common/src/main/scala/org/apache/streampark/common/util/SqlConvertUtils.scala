@@ -17,12 +17,13 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import java.util
 import java.util.Scanner
 import java.util.regex.Pattern
 
 import scala.annotation.tailrec
-import scala.collection.convert.ImplicitConversions._
 
 object SqlConvertUtils extends Logger {
 

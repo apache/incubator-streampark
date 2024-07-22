@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes.watcher
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes._
 import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
@@ -42,7 +43,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.{ScheduledFuture, TimeUnit}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.concurrent.duration.DurationLong
 import scala.language.postfixOps

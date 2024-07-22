@@ -18,12 +18,11 @@
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Implicits._
 
 import com.mongodb._
 
 import java.util.Properties
-
-import scala.collection.convert.ImplicitConversions._
 
 object MongoConfig {
 

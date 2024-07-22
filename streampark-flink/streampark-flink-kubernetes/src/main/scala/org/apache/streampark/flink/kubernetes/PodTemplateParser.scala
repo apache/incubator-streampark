@@ -17,14 +17,14 @@
 
 package org.apache.streampark.flink.kubernetes
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
 
 import java.util
-import java.util.{List => JavaList, Map => JavaMap}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.Try
 import scala.util.control.Breaks.{break, breakable}
 

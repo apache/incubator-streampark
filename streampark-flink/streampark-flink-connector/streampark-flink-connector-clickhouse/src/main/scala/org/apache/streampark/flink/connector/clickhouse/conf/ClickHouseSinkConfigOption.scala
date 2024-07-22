@@ -25,7 +25,7 @@ import org.asynchttpclient.config.AsyncHttpClientConfigDefaults
 
 import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object ClickHouseSinkConfigOption {
 

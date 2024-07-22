@@ -21,6 +21,7 @@ import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{InternalConfigHolder, Workspace}
 import org.apache.streampark.common.conf.CommonConfig.{MAVEN_AUTH_PASSWORD, MAVEN_AUTH_USER, MAVEN_REMOTE_URL}
 import org.apache.streampark.common.util.{AssertUtils, Logger, Utils}
+import org.apache.streampark.common.util.Implicits._
 
 import com.google.common.collect.Lists
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
@@ -44,9 +45,7 @@ import javax.annotation.{Nonnull, Nullable}
 
 import java.io.File
 import java.util
-import java.util.{List => JavaList, Set => JavaSet}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 

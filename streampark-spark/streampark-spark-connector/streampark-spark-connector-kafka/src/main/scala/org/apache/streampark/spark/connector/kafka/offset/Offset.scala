@@ -17,6 +17,7 @@
 
 package org.apache.streampark.spark.connector.kafka.offset
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 
 import org.apache.kafka.common.TopicPartition
@@ -24,7 +25,6 @@ import org.apache.spark.SparkConf
 
 import java.util.Properties
 
-import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Try
 

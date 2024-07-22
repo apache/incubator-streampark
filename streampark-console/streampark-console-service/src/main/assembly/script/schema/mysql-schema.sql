@@ -632,4 +632,23 @@ create table `t_spark_app` (
   index `inx_team` (`team_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
+
+-- ----------------------------
+-- table structure for t_spark_log
+-- ----------------------------
+drop table if exists `t_spark_log`;
+create table `t_spark_log` (
+  `id` bigint not null auto_increment,
+  `app_id` bigint default null,
+  `spark_app_id` varchar(64) collate utf8mb4_general_ci default null,
+  `track_url` varchar(255) collate utf8mb4_general_ci default null,
+  `success` tinyint default null,
+  `exception` text collate utf8mb4_general_ci,
+  `option_time` datetime default null,
+  `option_name` tinyint default null,
+  `user_id` bigint default null,
+  primary key (`id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
 set foreign_key_checks = 1;

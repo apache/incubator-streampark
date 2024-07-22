@@ -19,6 +19,7 @@ package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.enums.FlinkExecutionMode
 import org.apache.streampark.common.util.{Logger, Utils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
@@ -27,7 +28,6 @@ import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
-import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
@@ -37,8 +37,6 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 import org.apache.flink.kubernetes.kubeclient.{FlinkKubeClient, FlinkKubeClientFactory}
 
 import java.io.File
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Kubernetes native session mode submit. */
 object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Logger {

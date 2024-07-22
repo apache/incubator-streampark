@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
@@ -24,7 +26,6 @@ import org.apache.zookeeper.CreateMode
 
 import java.nio.charset.StandardCharsets
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 object ZooKeeperUtils {

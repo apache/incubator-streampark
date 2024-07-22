@@ -17,13 +17,13 @@
 
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.util.Implicits.JavaList
+
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._
 import org.apache.flink.table.catalog.CatalogDescriptor
 import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.resource.ResourceUri
-
-import java.util.{List => JavaList}
 
 class TableContext(override val parameter: ParameterTool, private val tableEnv: TableEnvironment)
   extends FlinkTableTrait(parameter, tableEnv) {

@@ -18,14 +18,13 @@
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Implicits._
 
 import redis.clients.jedis.{Jedis, Protocol}
 import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 
 import java.net.URI
 import java.util.Properties
-
-import scala.collection.convert.ImplicitConversions._
 
 /**
  * RedisEndpoint represents a redis connection endpoint info: host, port, auth password db number,

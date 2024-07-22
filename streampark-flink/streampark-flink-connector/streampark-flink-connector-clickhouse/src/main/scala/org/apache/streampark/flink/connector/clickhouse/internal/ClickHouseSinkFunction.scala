@@ -34,7 +34,7 @@ import java.util
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicLong
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.util.Try
 
 class ClickHouseSinkFunction[T](apiType: ApiType = ApiType.scala, config: Properties)

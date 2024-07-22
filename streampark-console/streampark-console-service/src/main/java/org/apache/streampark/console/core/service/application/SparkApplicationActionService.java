@@ -54,12 +54,12 @@ public interface SparkApplicationActionService extends IService<SparkApplication
     void revoke(Long appId) throws ApplicationException;
 
     /**
-     * Cancels the given application. Throws an exception if cancellation fails.
+     * Stop the given application. Throws an exception if stop fails.
      *
-     * @param appParam the application to be canceled
-     * @throws Exception if cancellation fails
+     * @param appParam the application to be stopped
+     * @throws Exception if stop fails
      */
-    void cancel(SparkApplication appParam) throws Exception;
+    void stop(SparkApplication appParam) throws Exception;
 
     /**
      * Forces the given application to stop.

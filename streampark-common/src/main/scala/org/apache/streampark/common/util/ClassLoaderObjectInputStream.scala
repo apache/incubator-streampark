@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.proxy
+package org.apache.streampark.common.util
 
 import java.io.{InputStream, IOException, ObjectInputStream, ObjectStreamClass}
 import java.lang.reflect.Proxy

@@ -18,6 +18,7 @@
 package org.apache.streampark.common.util
 
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.util.Implicits._
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
@@ -26,7 +27,6 @@ import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try

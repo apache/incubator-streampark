@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 
 import java.io._
 import java.net.URL
@@ -29,7 +29,6 @@ import java.util
 import java.util.Scanner
 import java.util.stream.Collectors
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 object FileUtils {
@@ -114,7 +113,7 @@ object FileUtils {
     filename.drop(filename.lastIndexOf("."))
   }
 
-  def listFileAsURL(dirPath: String): util.List[URL] = {
+  def listFileAsURL(dirPath: String): JavaList[URL] = {
     new File(dirPath) match {
       case x if x.exists() && x.isDirectory =>
         val files = x.listFiles()
