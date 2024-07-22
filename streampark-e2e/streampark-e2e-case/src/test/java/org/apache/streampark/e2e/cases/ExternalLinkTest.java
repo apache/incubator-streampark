@@ -32,7 +32,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
-public class ExternalLinkPageTest {
+public class ExternalLinkTest {
 
     private static RemoteWebDriver browser;
 

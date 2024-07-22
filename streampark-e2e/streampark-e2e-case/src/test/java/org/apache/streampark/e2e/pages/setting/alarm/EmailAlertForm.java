@@ -15,22 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.e2e.pages.setting.entity;
+package org.apache.streampark.e2e.pages.setting.alarm;
 
 import lombok.Getter;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
 
 @Getter
-public enum AlarmPageAlertType {
+public class EmailAlertForm extends CommonForm {
 
-    EMAIL("E-mail"),
-    DINGTALK("Ding Talk"),
-    WECHAT("WeChat"),
-    LARK("Lark"),
-    SMS("SMS"),;
+    private WebDriver driver;
 
-    private final String value;
+    @FindBy(id = "form_item_alertEmail")
+    private WebElement inputEmail;
 
-    AlarmPageAlertType(String value) {
-        this.value = value;
+    public EmailAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
+        super(alertTypeDetailForm);
+
+        this.driver = alertTypeDetailForm.driver();
+    }
+
+    public EmailAlertForm email(String email) {
+        WebElementDeleteAndInput(inputEmail, email);
+        return this;
     }
 }

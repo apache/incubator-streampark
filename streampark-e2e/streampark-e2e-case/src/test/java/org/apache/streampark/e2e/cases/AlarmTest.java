@@ -19,12 +19,10 @@ package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.setting.AlarmPage;
+import org.apache.streampark.e2e.pages.setting.alarm.AlarmPage;
 import org.apache.streampark.e2e.pages.setting.SettingPage;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageAlertType;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageEmailSetting;
-import org.apache.streampark.e2e.pages.setting.entity.AlarmPageWeChatSetting;
-import org.apache.streampark.e2e.pages.setting.entity.FaultAlertSetting;
+import org.apache.streampark.e2e.pages.setting.alarm.AlertTypeDetailForm;
+import org.apache.streampark.e2e.pages.setting.alarm.EmailAlertForm;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -48,7 +46,13 @@ public class AlarmTest {
 
     private static final String newAlarmName = "new_alarm";
 
-    private static FaultAlertSetting faultAlertSetting;
+    private static final String editAlarmName = "edit_alarm";
+
+    private static final String newEmail = "new@streampark.com";
+
+    private static final String editEmail = "edit@streampark.com";
+
+    private static final AlertTypeDetailForm.AlertTypeEnum alertType = AlertTypeDetailForm.AlertTypeEnum.EMAIL;
 
     @BeforeAll
     public static void setup() {
@@ -56,16 +60,18 @@ public class AlarmTest {
             .login(userName, password, teamName)
             .goToNav(SettingPage.class)
             .goToTab(AlarmPage.class);
-
-        faultAlertSetting = new AlarmPageEmailSetting("test@test.com");
     }
 
     @Test
     @Order(10)
-    void testCreateAlarm() {
+    public void testCreateEmailAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
-        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlertSetting);
+        alarmPage.createAlarm()
+            .<EmailAlertForm>addAlertType(alertType)
+            .email(newEmail)
+            .alertName(newAlarmName)
+            .submit();
 
         Awaitility.await()
             .untilAsserted(
@@ -73,55 +79,67 @@ public class AlarmTest {
                     .as("Alarm list should contain newly-created alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlarmPageAlertType.EMAIL.value())));
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc())));
     }
 
     @Test
     @Order(20)
-    void testCreateDuplicateAlarm() {
+    public void testCreateDuplicateEmailAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
-        alarmPage.createAlarm(newAlarmName, AlarmPageAlertType.EMAIL.value(), faultAlertSetting);
+        EmailAlertForm emailAlertForm = alarmPage.createAlarm()
+            .addAlertType(alertType);
 
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(alarmPage.errorMessageList())
-                    .as("Alert Name Duplicated Error message should be displayed")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(
-                        "Alert Name must be unique. The alert name already exists")));
-
-        alarmPage.createAlarmForm().buttonCancel().click();
-    }
-
-    @Test
-    @Order(30)
-    void testEditAlarm() {
-        final AlarmPage alarmPage = new AlarmPage(browser);
-        faultAlertSetting = new AlarmPageWeChatSetting().token("wechat_token");
-        alarmPage.editAlarm(newAlarmName, AlarmPageAlertType.WECHAT.value(), faultAlertSetting);
+        emailAlertForm.email(newEmail)
+            .alertName(newAlarmName)
+            .submit();
 
         Awaitility.await()
             .untilAsserted(
                 () -> assertThat(alarmPage.alarmList())
-                    .as("Alarm list should contain newly-edited alarm")
+                    .as("Alarm list should contain newly-created alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlarmPageAlertType.EMAIL.value()))
-                    .anyMatch(it -> it.contains(AlarmPageAlertType.WECHAT.value())));
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc())));
+        emailAlertForm.cancel();
+    }
+
+    @Test
+    @Order(20)
+    public void testEditEmailAlarm() {
+        final AlarmPage alarmPage = new AlarmPage(browser);
+
+        alarmPage.editAlarm(newAlarmName)
+            // this step will cancel alertType click status.
+            .<EmailAlertForm>addAlertType(alertType)
+            .parent()
+            // click again to recover.
+            .<EmailAlertForm>addAlertType(alertType)
+            .email(editEmail)
+            .alertName(editAlarmName)
+            .submit();
+
+        Awaitility.await()
+            .untilAsserted(
+                () -> assertThat(alarmPage.alarmList())
+                    .as("Alarm list should contain edited alarm")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(editAlarmName))
+                    .anyMatch(it -> it.contains(editEmail)));
     }
 
     @Test
     @Order(40)
-    void testDeleteAlarm() {
+    public void testDeleteEmailAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
-        alarmPage.deleteAlarm(newAlarmName);
+
+        alarmPage.deleteAlarm(editAlarmName);
 
         Awaitility.await()
             .untilAsserted(
                 () -> assertThat(alarmPage.alarmList())
-                    .as(String.format("Alarm list shouldn't contain alarm witch named %s", newAlarmName))
+                    .as(String.format("Alarm list shouldn't contain alarm witch named %s", editAlarmName))
                     .extracting(WebElement::getText)
-                    .noneMatch(it -> it.contains(newAlarmName)));
+                    .noneMatch(it -> it.contains(editAlarmName)));
     }
 }
