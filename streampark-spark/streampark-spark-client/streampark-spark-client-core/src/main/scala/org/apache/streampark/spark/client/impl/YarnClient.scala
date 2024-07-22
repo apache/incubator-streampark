@@ -26,15 +26,26 @@ import org.apache.streampark.spark.client.bean._
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.{ConcurrentHashMap, CountDownLatch}
 
 import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
 object YarnClient extends SparkClientTrait {
 
+  private lazy val sparkHandles = new ConcurrentHashMap[String, SparkAppHandle]()
+
   override def doStop(stopRequest: StopRequest): StopResponse = {
-    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
+    sparkHandles.get(stopRequest.jobId) match {
+      case handle: SparkAppHandle =>
+        handle.kill()
+        logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is stopped successfully.")
+        StopResponse(null)
+      case null =>
+        logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is not existed.")
+        HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
+        StopResponse(null)
+    }
     null
   }
 
@@ -53,6 +64,7 @@ object YarnClient extends SparkClientTrait {
         logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
+        sparkHandles += handle.getAppId -> handle
         SubmitResponse(handle.getAppId, submitRequest.properties)
       case Failure(e) => throw e
     }
