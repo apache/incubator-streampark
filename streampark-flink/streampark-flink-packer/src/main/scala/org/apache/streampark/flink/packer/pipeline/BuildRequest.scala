@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
-import org.apache.streampark.common.enums.{FlinkDevelopmentMode, FlinkExecutionMode}
+import org.apache.streampark.common.enums.{FlinkDevelopmentMode, FlinkExecutionMode, SparkDevelopmentMode}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
 import org.apache.streampark.flink.packer.maven.DependencyInfo
@@ -128,6 +128,6 @@ case class SparkYarnApplicationBuildRequest(
     mainClass: String,
     localWorkspace: String,
     yarnProvidedPath: String,
-    developmentMode: FlinkDevelopmentMode,
+    developmentMode: SparkDevelopmentMode,
     dependencyInfo: DependencyInfo)
   extends BuildParam

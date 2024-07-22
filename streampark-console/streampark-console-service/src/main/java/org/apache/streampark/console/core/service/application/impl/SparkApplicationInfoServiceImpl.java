@@ -55,7 +55,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -196,7 +195,7 @@ public class SparkApplicationInfoServiceImpl
             return AppExistsStateEnum.INVALID;
         }
         if (SparkExecutionMode.isYarnMode(application.getExecutionMode())) {
-            boolean exists = !getYarnAppReport(application.getJobName()).isEmpty();
+            boolean exists = !getYarnAppReport(application.getAppName()).isEmpty();
             return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
         }
         // todo on k8s check...
@@ -244,15 +243,15 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public AppExistsStateEnum checkExists(SparkApplication appParam) {
 
-        if (!checkJobName(appParam.getJobName())) {
+        if (!checkJobName(appParam.getAppName())) {
             return AppExistsStateEnum.INVALID;
         }
 
-        boolean existsByJobName = this.existsByJobName(appParam.getJobName());
+        boolean existsByJobName = this.existsByAppName(appParam.getAppName());
 
         if (appParam.getId() != null) {
             SparkApplication app = getById(appParam.getId());
-            if (app.getJobName().equals(appParam.getJobName())) {
+            if (app.getAppName().equals(appParam.getAppName())) {
                 return AppExistsStateEnum.NO;
             }
 
@@ -264,7 +263,7 @@ public class SparkApplicationInfoServiceImpl
             if (FlinkAppStateEnum.isEndState(app.getState())) {
                 // check whether jobName exists on yarn
                 if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                    && YarnUtils.isContains(appParam.getJobName())) {
+                    && YarnUtils.isContains(appParam.getAppName())) {
                     return AppExistsStateEnum.IN_YARN;
                 }
             }
@@ -275,16 +274,16 @@ public class SparkApplicationInfoServiceImpl
 
             // check whether jobName exists on yarn
             if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                && YarnUtils.isContains(appParam.getJobName())) {
+                && YarnUtils.isContains(appParam.getAppName())) {
                 return AppExistsStateEnum.IN_YARN;
             }
         }
         return AppExistsStateEnum.NO;
     }
 
-    private boolean existsByJobName(String jobName) {
+    private boolean existsByAppName(String jobName) {
         return baseMapper.exists(
-            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getAppName, jobName));
     }
 
     @Override
@@ -301,37 +300,6 @@ public class SparkApplicationInfoServiceImpl
             jarFile = new File(appParam.getJar());
         }
         return Utils.getJarManClass(jarFile);
-    }
-
-    @Override
-    public String checkSavepointPath(SparkApplication appParam) throws Exception {
-        String savepointPath = appParam.getSavePoint();
-        if (StringUtils.isBlank(savepointPath)) {
-            // savepointPath = savePointService.getSavePointPath(appParam);
-        }
-
-        if (StringUtils.isNotBlank(savepointPath)) {
-            final URI uri = URI.create(savepointPath);
-            final String scheme = uri.getScheme();
-            final String pathPart = uri.getPath();
-            String error = null;
-            if (scheme == null) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
-            } else if (pathPart == null) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-            } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " Cannot use the root directory for checkpoints.";
-            }
-            return error;
-        } else {
-            return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
-        }
     }
 
     private Boolean checkJobName(String jobName) {

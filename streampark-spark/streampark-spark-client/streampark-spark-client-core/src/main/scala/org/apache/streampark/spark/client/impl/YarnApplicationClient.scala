@@ -23,12 +23,13 @@ import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
-import org.apache.streampark.spark.client.conf.SparkConfiguration
 
 import org.apache.commons.collections.MapUtils
+import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
+import java.util.{Map => JavaMap}
 import java.util.concurrent.{CountDownLatch, Executors, ExecutorService}
 
 /** yarn application mode submit */
@@ -39,7 +40,7 @@ object YarnApplicationClient extends SparkClientTrait {
   private[this] lazy val workspace = Workspace.remote
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
-    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
+    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.appId))
     null
   }
 
@@ -73,8 +74,8 @@ object YarnApplicationClient extends SparkClientTrait {
           .sparkLib + "/*.jar")
       .setVerbose(true)
 
-    import scala.collection.JavaConverters._
-    setDynamicProperties(launcher, submitRequest.properties.asScala.toMap)
+    setYarnQueue(launcher, submitRequest.extraParameter)
+    // setSparkConfiguration(launcher, submitRequest.properties)
 
     // TODO: Adds command line arguments for the application.
     // launcher.addAppArgs()
@@ -124,20 +125,28 @@ object YarnApplicationClient extends SparkClientTrait {
     logger.info(
       "[StreamPark][YarnApplicationClient] The task is executing, handle current state is {}, appid is {}",
       Array(sparkAppHandle.getState.toString, sparkAppHandle.getAppId))
-    //SubmitResponse(null, null, sparkAppHandle.getAppId)
-    null
+    SubmitResponse(sparkAppHandle.getAppId)
   }
 
-  private def setDynamicProperties(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {
-    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start configuration.")
-    val finalProperties: Map[String, Any] = SparkConfiguration.defaultParameters ++ properties
-    for ((k, v) <- finalProperties) {
-      if (k.startsWith("spark.")) {
-        sparkLauncher.setConf(k, v.toString)
-      } else {
-        logger.info("[StreamPark][YarnApplicationClient] \"{}\" doesn't start with \"spark.\". Skip it.", k)
-      }
-    }
+//  private def setSparkConfiguration(sparkLauncher: SparkLauncher, properties: Map[String, Any]): Unit = {
+//    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start configuration.")
+//    val finalProperties: Map[String, Any] = SparkConfiguration.defaultParameters ++ properties
+//    for ((k, v) <- finalProperties) {
+//      if (k.startsWith("spark.")) {
+//        sparkLauncher.setConf(k, v.toString)
+//      } else {
+//        logger.info("[StreamPark][YarnApplicationClient] \"{}\" doesn't start with \"spark.\". Skip it.", k)
+//      }
+//    }
+//  }
+
+  private def setYarnQueue(sparkLauncher: SparkLauncher, map: JavaMap[String, Any]): Unit = {
+    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start setting yarn queue.")
+    Option(map.get("yarnQueueName")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(sparkLauncher.setConf("spark.yarn.queue", _))
+    Option(map.get("yarnQueueLabel")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(_ => {
+      sparkLauncher.setConf("spark.yarn.am.nodeLabelExpression", _)
+      sparkLauncher.setConf("spark.yarn.executor.nodeLabelExpression", _)
+    })
   }
 
 }

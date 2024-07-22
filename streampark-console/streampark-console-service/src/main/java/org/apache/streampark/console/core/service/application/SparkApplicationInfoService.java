@@ -46,15 +46,6 @@ public interface SparkApplicationInfoService extends IService<SparkApplication> 
     boolean checkEnv(SparkApplication appParam) throws ApplicationException;
 
     /**
-     * Checks the savepoint path for the given application.
-     *
-     * @param appParam the application to check the savepoint path for
-     * @return the check message
-     * @throws Exception if an error occurs while checking the savepoint path
-     */
-    String checkSavepointPath(SparkApplication appParam) throws Exception;
-
-    /**
      * Checks if the given application meets the required alterations.
      *
      * @param appParam The application to be checked.

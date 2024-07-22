@@ -146,8 +146,8 @@ public class AlertTemplate implements Serializable {
     public static AlertTemplate of(SparkApplication application, SparkAppStateEnum appState) {
         return new AlertTemplateBuilder()
             .setDuration(application.getStartTime(), application.getEndTime())
-            .setJobName(application.getJobName())
-            .setLink(application.getSparkExecutionMode(), application.getJobId())
+            .setJobName(application.getAppName())
+            .setLink(application.getSparkExecutionMode(), application.getAppId())
             .setStartTime(application.getStartTime())
             .setEndTime(application.getEndTime())
             .setRestart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -156,9 +156,9 @@ public class AlertTemplate implements Serializable {
             .setType(1)
             .setTitle(
                 String.format(
-                    "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))
+                    "%s %s %s", ALERT_TITLE_PREFIX, application.getAppName(), appState.name()))
             .setSubject(
-                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(), appState))
+                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getAppName(), appState))
             .setStatus(appState.name())
             .build();
     }

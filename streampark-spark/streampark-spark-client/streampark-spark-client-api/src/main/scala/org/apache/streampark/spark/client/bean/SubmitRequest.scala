@@ -44,7 +44,7 @@ case class SubmitRequest(
     appName: String,
     appConf: String,
     applicationType: ApplicationType,
-    args: String,
+    appArgs: String,
     @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
@@ -60,7 +60,7 @@ case class SubmitRequest(
 
   lazy val appMain: String = this.developmentMode match {
     case SparkDevelopmentMode.SPARK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case SparkDevelopmentMode.CUSTOM_CODE => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
     case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }
 

@@ -37,7 +37,7 @@ trait SparkClientTrait extends Logger {
          |    execMode         : ${submitRequest.executionMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    properties       : ${submitRequest.properties.mkString(" ")}
-         |    args             : ${submitRequest.args}
+         |    appArgs          : ${submitRequest.appArgs}
          |    appConf          : ${submitRequest.appConf}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
@@ -66,7 +66,7 @@ trait SparkClientTrait extends Logger {
          |----------------------------------------- spark job stop ----------------------------------
          |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
          |     sparkVersion      : ${stopRequest.sparkVersion.version}
-         |     jobId             : ${stopRequest.jobId}
+         |     appId             : ${stopRequest.appId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 

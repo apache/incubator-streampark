@@ -51,7 +51,6 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -73,7 +72,6 @@ import javax.annotation.PostConstruct;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -215,19 +213,8 @@ public class SparkApplicationManageServiceImpl
             return null;
         }
         Page<SparkApplication> page = MybatisPager.getPage(request);
-
-        if (ArrayUtils.isNotEmpty(appParam.getStateArray())
-            && Arrays.stream(appParam.getStateArray())
-                .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-            Integer[] newArray = ArrayUtils.insert(
-                appParam.getStateArray().length,
-                appParam.getStateArray(),
-                FlinkAppStateEnum.POS_TERMINATED.getValue());
-            appParam.setStateArray(newArray);
-        }
         this.baseMapper.selectPage(page, appParam);
         List<SparkApplication> records = page.getRecords();
-        long now = System.currentTimeMillis();
 
         List<Long> appIds = records.stream().map(SparkApplication::getId).collect(Collectors.toList());
         Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
@@ -275,14 +262,15 @@ public class SparkApplicationManageServiceImpl
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
-        appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
+        appParam.setCreateTime(new Date());
+        appParam.setModifyTime(new Date());
 
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
             success,
             String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+        appParam.resolveYarnQueue();
 
-        appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
             String jarPath = String.format(
                 "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
@@ -309,64 +297,58 @@ public class SparkApplicationManageServiceImpl
         }
     }
 
-    private boolean existsByJobName(String jobName) {
+    private boolean existsByAppName(String jobName) {
         return baseMapper.exists(
-            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getAppName, jobName));
     }
 
     @SuppressWarnings("checkstyle:WhitespaceAround")
     @Override
     @SneakyThrows
     public Long copy(SparkApplication appParam) {
-        boolean existsByJobName = this.existsByJobName(appParam.getJobName());
+        boolean existsByAppName = this.existsByAppName(appParam.getAppName());
         ApiAlertException.throwIfFalse(
-            !existsByJobName,
+            !existsByAppName,
             "[StreamPark] Application names can't be repeated, copy application failed.");
 
         SparkApplication oldApp = getById(appParam.getId());
         SparkApplication newApp = new SparkApplication();
-        String jobName = appParam.getJobName();
 
-        newApp.setJobName(jobName);
-        newApp.setClusterId(jobName);
-        newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : oldApp.getArgs());
-        newApp.setVersionId(oldApp.getVersionId());
-
-        newApp.setSparkClusterId(oldApp.getSparkClusterId());
-        newApp.setRestartSize(oldApp.getRestartSize());
+        newApp.setTeamId(oldApp.getTeamId());
         newApp.setJobType(oldApp.getJobType());
-        newApp.setOptions(oldApp.getOptions());
-        newApp.setDynamicProperties(oldApp.getDynamicProperties());
-        newApp.setResolveOrder(oldApp.getResolveOrder());
-        newApp.setExecutionMode(oldApp.getExecutionMode());
-        newApp.setSparkImage(oldApp.getSparkImage());
-        newApp.setK8sNamespace(oldApp.getK8sNamespace());
-        newApp.setK8sRestExposedType(oldApp.getK8sRestExposedType());
-        newApp.setK8sPodTemplate(oldApp.getK8sPodTemplate());
-        newApp.setK8sJmPodTemplate(oldApp.getK8sJmPodTemplate());
-        newApp.setK8sTmPodTemplate(oldApp.getK8sTmPodTemplate());
-        newApp.setK8sHadoopIntegration(oldApp.getK8sHadoopIntegration());
-        newApp.setDescription(oldApp.getDescription());
-        newApp.setAlertId(oldApp.getAlertId());
-        newApp.setCpFailureAction(oldApp.getCpFailureAction());
-        newApp.setCpFailureRateInterval(oldApp.getCpFailureRateInterval());
-        newApp.setCpMaxFailureInterval(oldApp.getCpMaxFailureInterval());
-        newApp.setMainClass(oldApp.getMainClass());
         newApp.setAppType(oldApp.getAppType());
+        newApp.setVersionId(oldApp.getVersionId());
+        newApp.setAppName(appParam.getAppName());
+        newApp.setExecutionMode(oldApp.getExecutionMode());
         newApp.setResourceFrom(oldApp.getResourceFrom());
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
-        newApp.setUserId(serviceHelper.getUserId());
-        newApp.setState(FlinkAppStateEnum.ADDED.getValue());
-        newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
-        newApp.setOptionState(OptionStateEnum.NONE.getValue());
-        newApp.setHotParams(oldApp.getHotParams());
-
+        newApp.setMainClass(oldApp.getMainClass());
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
-        newApp.setTags(oldApp.getTags());
-        newApp.setTeamId(oldApp.getTeamId());
+        newApp.setAppConf(oldApp.getAppConf());
+        // TODO：这里需要判断吗
+        newApp.setAppArgs(appParam.getAppArgs() != null ? appParam.getAppArgs() : oldApp.getAppArgs());
+        newApp.setYarnQueue(oldApp.getYarnQueue());
+        newApp.resolveYarnQueue();
+        newApp.setK8sMasterUrl(oldApp.getK8sMasterUrl());
+        newApp.setK8sContainerImage(oldApp.getK8sContainerImage());
+        newApp.setK8sImagePullPolicy(oldApp.getK8sImagePullPolicy());
+        newApp.setK8sServiceAccount(oldApp.getK8sServiceAccount());
+        newApp.setK8sNamespace(oldApp.getK8sNamespace());
+
         newApp.setHadoopUser(oldApp.getHadoopUser());
+        newApp.setRestartSize(oldApp.getRestartSize());
+        newApp.setState(FlinkAppStateEnum.ADDED.getValue());
+        newApp.setOptions(oldApp.getOptions());
+        newApp.setOptionState(OptionStateEnum.NONE.getValue());
+        newApp.setUserId(serviceHelper.getUserId());
+        newApp.setDescription(oldApp.getDescription());
+        newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
+        newApp.setAlertId(oldApp.getAlertId());
+        newApp.setCreateTime(new Date());
+        newApp.setModifyTime(new Date());
+        newApp.setTags(oldApp.getTags());
 
         boolean saved = save(newApp);
         if (saved) {
@@ -392,7 +374,7 @@ public class SparkApplicationManageServiceImpl
             return newApp.getId();
         } else {
             throw new ApiAlertException(
-                "create application from copy failed, copy source app: " + oldApp.getJobName());
+                "create application from copy failed, copy source app: " + oldApp.getAppName());
         }
     }
 
@@ -443,39 +425,32 @@ public class SparkApplicationManageServiceImpl
 
         appParam.setJobType(application.getJobType());
         // changes to the following parameters need to be re-release to take effect
-        application.setJobName(appParam.getJobName());
         application.setVersionId(appParam.getVersionId());
-        application.setArgs(appParam.getArgs());
-        application.setOptions(appParam.getOptions());
-        application.setDynamicProperties(appParam.getDynamicProperties());
-        application.setResolveOrder(appParam.getResolveOrder());
+        application.setAppName(appParam.getAppName());
         application.setExecutionMode(appParam.getExecutionMode());
-        application.setClusterId(appParam.getClusterId());
-        application.setSparkImage(appParam.getSparkImage());
+        application.setAppConf(appParam.getAppConf());
+        application.setAppArgs(appParam.getAppArgs());
+        application.setOptions(appParam.getOptions());
+
+        application.setYarnQueue(appParam.getYarnQueue());
+        application.resolveYarnQueue();
+
+        application.setK8sMasterUrl(appParam.getK8sMasterUrl());
+        application.setK8sContainerImage(appParam.getK8sContainerImage());
+        application.setK8sImagePullPolicy(appParam.getK8sImagePullPolicy());
+        application.setK8sServiceAccount(appParam.getK8sServiceAccount());
         application.setK8sNamespace(appParam.getK8sNamespace());
-        application.updateHotParams(appParam);
-        application.setK8sRestExposedType(appParam.getK8sRestExposedType());
-        application.setK8sPodTemplate(appParam.getK8sPodTemplate());
-        application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
-        application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
-        application.setK8sHadoopIntegration(appParam.getK8sHadoopIntegration());
 
         // changes to the following parameters do not affect running tasks
         application.setDescription(appParam.getDescription());
         application.setAlertId(appParam.getAlertId());
         application.setRestartSize(appParam.getRestartSize());
-        application.setCpFailureAction(appParam.getCpFailureAction());
-        application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
-        application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
         application.setTags(appParam.getTags());
 
         switch (appParam.getSparkExecutionMode()) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 application.setHadoopUser(appParam.getHadoopUser());
-                break;
-            case REMOTE:
-                application.setSparkClusterId(appParam.getSparkClusterId());
                 break;
             default:
                 break;
@@ -658,7 +633,7 @@ public class SparkApplicationManageServiceImpl
             }
         }
 
-        application.setYarnQueueByHotParams();
+        application.resolveYarnQueue();
 
         return application;
     }
@@ -692,7 +667,7 @@ public class SparkApplicationManageServiceImpl
             return true;
         }
 
-        oldApp.setYarnQueueByHotParams();
+        oldApp.resolveYarnQueue();
         if (SparkExecutionMode.isYarnMode(newApp.getSparkExecutionMode())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;

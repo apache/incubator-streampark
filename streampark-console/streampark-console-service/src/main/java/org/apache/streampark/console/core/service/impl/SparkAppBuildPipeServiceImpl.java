@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.SparkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
@@ -318,7 +318,7 @@ public class SparkAppBuildPipeServiceImpl
                         Message message = new Message(
                             serviceHelper.getUserId(),
                             app.getId(),
-                            app.getJobName().concat(" release failed"),
+                            app.getAppName().concat(" release failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
                             NoticeTypeEnum.EXCEPTION);
                         messageService.push(message);
@@ -353,7 +353,7 @@ public class SparkAppBuildPipeServiceImpl
     private void checkBuildEnv(Long appId, boolean forceBuild) {
         SparkApplication app = applicationManageService.getById(appId);
 
-        // 1) check flink version
+        // 1) check spark version
         SparkEnv env = sparkEnvService.getById(app.getVersionId());
         boolean checkVersion = env.getSparkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
@@ -362,7 +362,7 @@ public class SparkAppBuildPipeServiceImpl
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
         ApiAlertException.throwIfFalse(
-            envOk, "Check flink env failed, please check the flink version of this job");
+            envOk, "Check spark env failed, please check the flink version of this job");
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
@@ -389,13 +389,13 @@ public class SparkAppBuildPipeServiceImpl
             case YARN_CLIENT:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                if (FlinkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
-                    && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
+                if (SparkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
+                    && ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
                 SparkYarnApplicationBuildRequest yarnAppRequest = new SparkYarnApplicationBuildRequest(
-                    app.getJobName(),
+                    app.getAppName(),
                     mainClass,
                     localWorkspace,
                     yarnProvidedPath,
@@ -423,9 +423,9 @@ public class SparkAppBuildPipeServiceImpl
                             "[StreamPark] unsupported ApplicationType of custom code: "
                                 + app.getApplicationType());
                 }
-            case PYFLINK:
+            case PYSPARK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
-            case FLINK_SQL:
+            case SPARK_SQL:
                 String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
                 if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();

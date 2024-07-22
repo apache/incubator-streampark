@@ -23,6 +23,7 @@ import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
 
+import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
@@ -34,7 +35,7 @@ import scala.util.{Failure, Success, Try}
 object YarnClient extends SparkClientTrait {
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
-    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
+    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.appId))
     null
   }
 
@@ -53,7 +54,7 @@ object YarnClient extends SparkClientTrait {
         logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
-        SubmitResponse(handle.getAppId, submitRequest.properties)
+        SubmitResponse(handle.getAppId)
       case Failure(e) => throw e
     }
   }
@@ -72,7 +73,7 @@ object YarnClient extends SparkClientTrait {
         if (SparkAppHandle.State.FAILED == handle.getState) {
           logger.error("Task run failure stateChanged :{}", handle.getState.toString)
         }
-        if (handle.getState.isFinal) {
+        if (handle.getAppId != null && submitFinished.getCount != 0) {
           submitFinished.countDown()
         }
       }
@@ -113,6 +114,18 @@ object YarnClient extends SparkClientTrait {
     if (submitRequest.hasExtra("sql")) {
       sparkLauncher.addAppArgs("--sql", submitRequest.getExtra("sql").toString)
     }
+
+    // 3) set
+    setYarnQueue(sparkLauncher, submitRequest.extraParameter)
+  }
+
+  private def setYarnQueue(sparkLauncher: SparkLauncher, map: JavaMap[String, Any]): Unit = {
+    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start setting yarn queue.")
+    Option(map.get("yarnQueueName")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(sparkLauncher.setConf("spark.yarn.queue", _))
+    Option(map.get("yarnQueueLabel")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(_ => {
+      sparkLauncher.setConf("spark.yarn.am.nodeLabelExpression", _)
+      sparkLauncher.setConf("spark.yarn.executor.nodeLabelExpression", _)
+    })
   }
 
 }

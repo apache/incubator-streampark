@@ -37,6 +37,8 @@ object PropertiesUtils extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
+  private[this] lazy val SPARK_PROPERTY_COMPLEX_PATTERN = Pattern.compile("[\"'](.*?)[\"']")
+
   private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
@@ -380,4 +382,35 @@ object PropertiesUtils extends Logger {
     new JavaHashMap[String, JavaMap[String, String]](map)
   }
 
+  /** extract spark configuration from sparkApplication.appConf */
+  @Nonnull def extractSparkConfAsJava(properties: String): JavaMap[String, String] =
+    new JavaHashMap[String, String](extractSparkConf(properties))
+
+  @Nonnull def extractSparkConf(properties: String): Map[String, String] = {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    else {
+      val map = mutable.Map[String, String]()
+      properties.split("(\\s)*(--conf|-c)(\\s)+") match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = PROPERTY_PATTERN.matcher(x)
+              if (p.matches) {
+                val k = p.group(1).trim
+                val v = p.group(2).trim
+                val q = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(v)
+                if (q.matches()) {
+                  map += k -> q.group(1).trim
+                } else {
+                  map += k -> v
+                }
+              }
+
+            }
+          })
+        case _ =>
+      }
+      map.toMap
+    }
+  }
 }
