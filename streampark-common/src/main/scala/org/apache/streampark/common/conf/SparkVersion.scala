@@ -20,6 +20,8 @@ package org.apache.streampark.common.conf
 import org.apache.streampark.common.util.{CommandUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
 
+import org.apache.commons.lang3.StringUtils
+
 import java.io.File
 import java.net.URL
 import java.util.function.Consumer
@@ -36,7 +38,14 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
 
   private[this] lazy val SPARK_SCALA_VERSION_PATTERN = Pattern.compile("^spark-core_(.*)-[0-9].*.jar$")
 
-  lazy val scalaVersion: String = SPARK_SCALA_VERSION_PATTERN.matcher(sparkCoreJar.getName).group(1)
+  lazy val scalaVersion: String = {
+    val matcher = SPARK_SCALA_VERSION_PATTERN.matcher(sparkCoreJar.getName)
+    if (matcher.matches()) {
+      matcher.group(1)
+    } else {
+      "2.12"
+    }
+  }
 
   lazy val sparkCoreJar: File = {
     val distJar = sparkLib.listFiles().filter(_.getName.matches("spark-core.*\\.jar"))
@@ -98,7 +107,7 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
         override def accept(out: String): Unit = {
           buffer.append(out).append("\n")
           val matcher = SPARK_VERSION_PATTERN.matcher(out)
-          if (matcher.find) {
+          if (matcher.find && StringUtils.isBlank(sparkVersion)) {
             sparkVersion = matcher.group(2)
           }
         }

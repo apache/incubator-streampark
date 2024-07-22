@@ -72,7 +72,7 @@ object YarnClient extends SparkClientTrait {
         if (SparkAppHandle.State.FAILED == handle.getState) {
           logger.error("Task run failure stateChanged :{}", handle.getState.toString)
         }
-        if (handle.getState.isFinal) {
+        if (handle.getAppId != null && submitFinished.getCount != 0) {
           submitFinished.countDown()
         }
       }
