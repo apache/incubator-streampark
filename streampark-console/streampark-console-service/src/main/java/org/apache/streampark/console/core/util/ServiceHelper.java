@@ -15,59 +15,42 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.component;
+package org.apache.streampark.console.core.util;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.SparkEnv;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
-import org.apache.streampark.flink.kubernetes.ingress.IngressController;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@Component
-public class ServiceComponent {
+public class ServiceHelper {
 
-    @Autowired
-    private SettingService settingService;
+    private static String flinkSqlClientJar = null;
 
-    @Autowired
-    private UserService userService;
+    private static String sparkSqlClientJar = null;
 
-    private String flinkSqlClientJar = null;
-
-    private String sparkSqlClientJar = null;
-
-    public User getLoginUser() {
+    public static User getLoginUser() {
         String token = (String) SecurityUtils.getSubject().getPrincipal();
         Long userId = JWTUtil.getUserId(token);
         if (userId == null) {
             throw new AuthenticationException("Unauthorized");
         }
-        return userService.getById(userId);
+        return SpringContextUtils.getBean(UserService.class).getById(userId);
     }
 
-    public Long getUserId() {
+    public static Long getUserId() {
         User user = getLoginUser();
         if (user != null) {
             return user.getUserId();
@@ -75,7 +58,7 @@ public class ServiceComponent {
         return null;
     }
 
-    public String getFlinkSqlClientJar(FlinkEnv flinkEnv) {
+    public static String getFlinkSqlClientJar(FlinkEnv flinkEnv) {
         if (flinkSqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
             ApiAlertException.throwIfFalse(
@@ -99,7 +82,7 @@ public class ServiceComponent {
         return flinkSqlClientJar;
     }
 
-    public String getSparkSqlClientJar(SparkEnv sparkEnv) {
+    public static String getSparkSqlClientJar(SparkEnv sparkEnv) {
         if (sparkSqlClientJar == null) {
             File localClient = WebUtils.getAppClientDir();
             ApiAlertException.throwIfFalse(
@@ -122,26 +105,5 @@ public class ServiceComponent {
             sparkSqlClientJar = jars.get(0);
         }
         return sparkSqlClientJar;
-    }
-
-    public String rollViewLog(String path, int offset, int limit) {
-        try {
-            File file = new File(path);
-            if (file.exists() && file.isFile()) {
-                try (Stream<String> stream = Files.lines(Paths.get(path))) {
-                    return stream.skip(offset).limit(limit).collect(Collectors.joining("\r\n"));
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            throw new ApiDetailException("roll view log error: " + e);
-        }
-    }
-
-    public void configureIngress(String clusterId, String namespace) throws KubernetesClientException {
-        String domainName = settingService.getIngressModeDefault();
-        if (StringUtils.isNotBlank(domainName)) {
-            IngressController.configureIngress(domainName, clusterId, namespace);
-        }
     }
 }

@@ -52,8 +52,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.isValid;
+import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
+import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.isValid;
 
 @Slf4j
 @Service

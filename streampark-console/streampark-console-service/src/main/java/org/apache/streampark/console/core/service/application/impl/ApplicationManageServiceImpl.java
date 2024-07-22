@@ -29,7 +29,6 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -54,6 +53,7 @@ import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
@@ -124,9 +124,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Autowired
     private SettingService settingService;
-
-    @Autowired
-    private ServiceComponent serviceComponent;
 
     @Autowired
     private FlinkK8sWatcher k8SFlinkTrackMonitor;
@@ -324,7 +321,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     public boolean create(Application appParam) {
         ApiAlertException.throwIfNull(
             appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-        appParam.setUserId(serviceComponent.getUserId());
+        appParam.setUserId(ServiceHelper.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -415,7 +412,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         newApp.setResourceFrom(persist.getResourceFrom());
         newApp.setProjectId(persist.getProjectId());
         newApp.setModule(persist.getModule());
-        newApp.setUserId(serviceComponent.getUserId());
+        newApp.setUserId(ServiceHelper.getUserId());
         newApp.setState(FlinkAppStateEnum.ADDED.getValue());
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());

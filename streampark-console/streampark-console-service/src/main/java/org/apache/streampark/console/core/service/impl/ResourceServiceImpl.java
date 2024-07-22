@@ -32,7 +32,6 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.console.core.bean.MavenPom;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
@@ -41,6 +40,7 @@ import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
 
@@ -99,9 +99,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     private ApplicationManageService applicationManageService;
 
     @Autowired
-    private ServiceComponent serviceComponent;
-
-    @Autowired
     private FlinkSqlService flinkSqlService;
 
     @Override
@@ -154,7 +151,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             transferTeamResource(resource.getTeamId(), upFile);
         }
 
-        resource.setCreatorId(serviceComponent.getUserId());
+        resource.setCreatorId(ServiceHelper.getUserId());
         this.save(resource);
     }
 

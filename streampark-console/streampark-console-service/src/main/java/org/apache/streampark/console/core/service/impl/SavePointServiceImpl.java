@@ -25,7 +25,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
@@ -42,6 +41,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
@@ -107,9 +107,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
-
-    @Autowired
-    private ServiceComponent commonService;
 
     @Qualifier("triggerSavepointExecutor")
     @Autowired
@@ -196,7 +193,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         applicationLog.setJobManagerUrl(application.getJobManagerUrl());
         applicationLog.setOptionTime(new Date());
         applicationLog.setYarnAppId(application.getClusterId());
-        applicationLog.setUserId(commonService.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;
     }
 

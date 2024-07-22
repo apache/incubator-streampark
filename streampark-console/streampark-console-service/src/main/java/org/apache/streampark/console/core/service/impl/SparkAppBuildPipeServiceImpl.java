@@ -30,7 +30,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -45,17 +44,16 @@ import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -111,15 +109,6 @@ public class SparkAppBuildPipeServiceImpl
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private ApplicationBackUpService backUpService;
-
-    @Autowired
-    private ServiceComponent serviceComponent;
-
-    @Autowired
-    private SettingService settingService;
-
-    @Autowired
     private MessageService messageService;
 
     @Autowired
@@ -161,7 +150,7 @@ public class SparkAppBuildPipeServiceImpl
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setUserId(serviceComponent.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
 
         // check if you need to go through the build process (if the jar and pom have changed,
         // you need to go through the build process, if other common parameters are modified,
@@ -316,7 +305,7 @@ public class SparkAppBuildPipeServiceImpl
 
                     } else {
                         Message message = new Message(
-                            serviceComponent.getUserId(),
+                            ServiceHelper.getUserId(),
                             app.getId(),
                             app.getJobName().concat(" release failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -426,7 +415,7 @@ public class SparkAppBuildPipeServiceImpl
             case PYFLINK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
-                String sqlDistJar = serviceComponent.getSparkSqlClientJar(sparkEnv);
+                String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
                 if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);

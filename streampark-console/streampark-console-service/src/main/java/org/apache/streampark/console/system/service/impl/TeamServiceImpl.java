@@ -20,11 +20,11 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.TeamMapper;
@@ -65,9 +65,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     @Autowired
     private VariableService variableService;
 
-    @Autowired
-    private ServiceComponent serviceComponent;
-
     @Override
     public IPage<Team> getPage(Team team, RestRequest request) {
         Page<Team> page = MybatisPager.getPage(request);
@@ -94,7 +91,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public void removeById(Long teamId) {
-        log.info("{} Proceed delete team[Id={}]", serviceComponent.getLoginUser().getUsername(), teamId);
+        log.info("{} Proceed delete team[Id={}]", ServiceHelper.getLoginUser().getUsername(), teamId);
         Team team = this.getById(teamId);
 
         ApiAlertException.throwIfNull(team, "The team[Id=%s] doesn't exist.", teamId);

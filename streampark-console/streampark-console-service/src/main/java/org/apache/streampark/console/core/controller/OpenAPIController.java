@@ -21,7 +21,7 @@ import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.component.OpenAPIComponent;
-import org.apache.streampark.console.core.component.ServiceComponent;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +43,6 @@ public class OpenAPIController {
     private AccessTokenService accessTokenService;
 
     @Autowired
-    private ServiceComponent serviceComponent;
-
-    @Autowired
     private OpenAPIComponent openAPIComponent;
 
     /**
@@ -63,7 +60,7 @@ public class OpenAPIController {
             .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
             .addHeader(
                 "Authorization",
-                accessTokenService.getByUserId(serviceComponent.getUserId()).getToken());
+                accessTokenService.getByUserId(ServiceHelper.getUserId()).getToken());
 
         if ("/flink/app/start".equalsIgnoreCase(path)) {
             resultCURL = curlBuilder

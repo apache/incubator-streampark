@@ -33,7 +33,7 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
-import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
+import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 

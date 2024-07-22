@@ -21,10 +21,10 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
-import org.apache.streampark.console.core.component.ServiceComponent;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
@@ -55,10 +55,10 @@ public class StreamParkAspect {
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
-    @Autowired
-    private ServiceComponent serviceComponent;
+
     @Autowired
     private MemberService memberService;
+
     @Autowired
     private ApplicationManageService applicationManageService;
 
@@ -105,7 +105,7 @@ public class StreamParkAspect {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
-        User currentUser = serviceComponent.getLoginUser();
+        User currentUser = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
         boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
