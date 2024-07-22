@@ -19,10 +19,13 @@ package org.apache.streampark.e2e.cases;
 
 import org.apache.streampark.e2e.core.StreamPark;
 import org.apache.streampark.e2e.pages.LoginPage;
-import org.apache.streampark.e2e.pages.setting.alarm.AlarmPage;
 import org.apache.streampark.e2e.pages.setting.SettingPage;
+import org.apache.streampark.e2e.pages.setting.alarm.AlarmPage;
 import org.apache.streampark.e2e.pages.setting.alarm.AlertTypeDetailForm;
+import org.apache.streampark.e2e.pages.setting.alarm.DingTalkAlertForm;
 import org.apache.streampark.e2e.pages.setting.alarm.EmailAlertForm;
+import org.apache.streampark.e2e.pages.setting.alarm.LarkAlertForm;
+import org.apache.streampark.e2e.pages.setting.alarm.WeChatAlertForm;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -44,15 +47,11 @@ public class AlarmTest {
 
     private static final String teamName = "default";
 
+    private static final String newEmail = "new@streampark.com";
+
     private static final String newAlarmName = "new_alarm";
 
     private static final String editAlarmName = "edit_alarm";
-
-    private static final String newEmail = "new@streampark.com";
-
-    private static final String editEmail = "edit@streampark.com";
-
-    private static final AlertTypeDetailForm.AlertTypeEnum alertType = AlertTypeDetailForm.AlertTypeEnum.EMAIL;
 
     @BeforeAll
     public static void setup() {
@@ -64,13 +63,40 @@ public class AlarmTest {
 
     @Test
     @Order(10)
-    public void testCreateEmailAlarm() {
+    public void testCreateAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
+
+        final String dingTalkURL = "";
+        final String dingTalkToken = "dingTalkToken";
+        final String dingTalkSecretToken = "dingTalkSecretToken";
+        final String dingTalkReceiveUser = "dingTalkUser";
+
+        final String wechatToken = "wechatToken";
+
+        final String larkToken = "larkToken";
+        final String larkSecretToken = "larkSecretToken";
 
         alarmPage.createAlarm()
-            .<EmailAlertForm>addAlertType(alertType)
+            .<EmailAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.EMAIL)
             .email(newEmail)
             .alertName(newAlarmName)
+            .parent()
+            .<DingTalkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.DINGTALK)
+            .url(dingTalkURL)
+            .token(dingTalkToken)
+            .secretEnable()
+            .secretToken(dingTalkSecretToken)
+            .effectToAllUsers()
+            .receiveUser(dingTalkReceiveUser)
+            .parent()
+            .<WeChatAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.WECHAT)
+            .token(wechatToken)
+            .parent()
+            .<LarkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.LARK)
+            .token(larkToken)
+            .secretEnable()
+            .secretToken(larkSecretToken)
+            .effectToAllUsers()
             .submit();
 
         Awaitility.await()
@@ -79,43 +105,22 @@ public class AlarmTest {
                     .as("Alarm list should contain newly-created alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc())));
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc()))
+                    .anyMatch(it -> it.contains(newEmail))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc()))
+                    .anyMatch(it -> it.contains(dingTalkReceiveUser)));
     }
 
     @Test
     @Order(20)
-    public void testCreateDuplicateEmailAlarm() {
-        final AlarmPage alarmPage = new AlarmPage(browser);
-
-        EmailAlertForm emailAlertForm = alarmPage.createAlarm()
-            .addAlertType(alertType);
-
-        emailAlertForm.email(newEmail)
-            .alertName(newAlarmName)
-            .submit();
-
-        Awaitility.await()
-            .untilAsserted(
-                () -> assertThat(alarmPage.alarmList())
-                    .as("Alarm list should contain newly-created alarm")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc())));
-        emailAlertForm.cancel();
-    }
-
-    @Test
-    @Order(20)
-    public void testEditEmailAlarm() {
+    public void testEditAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
         alarmPage.editAlarm(newAlarmName)
-            // this step will cancel alertType click status.
-            .<EmailAlertForm>addAlertType(alertType)
-            .parent()
-            // click again to recover.
-            .<EmailAlertForm>addAlertType(alertType)
-            .email(editEmail)
+            // this step will cancel E-mail type click status.
+            .<EmailAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.EMAIL)
             .alertName(editAlarmName)
             .submit();
 
@@ -125,12 +130,16 @@ public class AlarmTest {
                     .as("Alarm list should contain edited alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editAlarmName))
-                    .anyMatch(it -> it.contains(editEmail)));
+                    .noneMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc()))
+                    .noneMatch(it -> it.contains(newEmail)));
     }
 
     @Test
-    @Order(40)
-    public void testDeleteEmailAlarm() {
+    @Order(30)
+    public void testDeleteAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
         alarmPage.deleteAlarm(editAlarmName);

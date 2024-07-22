@@ -54,22 +54,35 @@ public class AlertTypeDetailForm {
         btnAlertTypeDropdown.click();
         switch (alertTypeEnum) {
             case EMAIL:
-                new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-                    .until(ExpectedConditions.visibilityOfAllElements(selectAlertType()));
-                selectAlertType.stream()
-                    .filter(e -> e.getText().equals(alertTypeEnum.desc()))
-                    .findFirst()
-                    .orElseThrow(
-                        () -> new RuntimeException(
-                            String.format("No %s in alertType dropdown list", alertTypeEnum.desc())))
-                    .click();
+                selectByAlertType(alertTypeEnum.desc());
                 return (T) new EmailAlertForm(this);
-
+            case DINGTALK:
+                selectByAlertType(alertTypeEnum.desc());
+                return (T) new DingTalkAlertForm(this);
+            case WECHAT:
+                selectByAlertType(alertTypeEnum.desc());
+                return (T) new WeChatAlertForm(this);
+            case SMS:
+                // ignore.
+            case LARK:
+                selectByAlertType(alertTypeEnum.desc());
+                return (T) new LarkAlertForm(this);
             default:
                 throw new UnsupportedOperationException(
                     String.format("Unsupported alert type %s", alertTypeEnum.desc()));
         }
+    }
 
+    private void selectByAlertType(String alertType) {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(selectAlertType()));
+        selectAlertType.stream()
+            .filter(e -> e.getText().equals(alertType))
+            .findFirst()
+            .orElseThrow(
+                () -> new RuntimeException(
+                    String.format("No %s in alertType dropdown list", alertType)))
+            .click();
     }
 
     @Getter
