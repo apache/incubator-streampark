@@ -76,22 +76,23 @@ public class AlarmTest {
         final String larkToken = "larkToken";
         final String larkSecretToken = "larkSecretToken";
 
-        alarmPage.createAlarm()
+        AlertTypeDetailForm alertTypeDetailForm = alarmPage.createAlarm();
+        alertTypeDetailForm
             .<EmailAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.EMAIL)
             .email(newEmail)
-            .alertName(newAlarmName)
-            .parent()
+            .alertName(newAlarmName);
+        alertTypeDetailForm
             .<DingTalkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.DINGTALK)
             .url(dingTalkURL)
             .token(dingTalkToken)
             .secretEnable()
             .secretToken(dingTalkSecretToken)
             .effectToAllUsers()
-            .receiveUser(dingTalkReceiveUser)
-            .parent()
+            .receiveUser(dingTalkReceiveUser);
+        alertTypeDetailForm
             .<WeChatAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.WECHAT)
-            .token(wechatToken)
-            .parent()
+            .token(wechatToken);
+        alertTypeDetailForm
             .<LarkAlertForm>addAlertType(AlertTypeDetailForm.AlertTypeEnum.LARK)
             .token(larkToken)
             .secretEnable()
