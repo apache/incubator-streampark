@@ -25,13 +25,13 @@ import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -138,7 +138,7 @@ public class FlinkClusterWatcher {
                     InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
             cluster.setClusterState(state.getState());
             cluster.setEndTime(new Date());
-            alertService.alert(cluster.getAlertId(), AlertTemplate.of(cluster, state));
+            alertService.alert(cluster.getAlertId(), AlertTemplateUtils.createAlertTemplate(cluster, state));
         }
     }
 
