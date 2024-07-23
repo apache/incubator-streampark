@@ -36,17 +36,29 @@ object YarnClient extends SparkClientTrait {
   private lazy val sparkHandles = new ConcurrentHashMap[String, SparkAppHandle]()
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
-    sparkHandles.get(stopRequest.jobId) match {
-      case handle: SparkAppHandle =>
-        handle.kill()
-        logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is stopped successfully.")
-        StopResponse(null)
-      case null =>
-        logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is not existed.")
-        HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
-        StopResponse(null)
+    val sparkAppHandle = sparkHandles.remove(stopRequest.jobId)
+    if (sparkAppHandle != null) {
+      Try(sparkAppHandle.kill()) match {
+        case Success(_) =>
+          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is stopped successfully.")
+          StopResponse(null)
+        case Failure(e) =>
+          logger.error("[StreamPark][Spark][YarnClient] sparkAppHandle kill failed. Try kill by yarn", e)
+          yarnKill(stopRequest.jobId)
+          StopResponse(null)
+      }
+    } else {
+      logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.jobId} is not existed. Try kill by yarn")
+      yarnKill(stopRequest.jobId)
+      StopResponse(null)
     }
-    null
+  }
+
+  private def yarnKill(appId: String): Unit = {
+    Try(HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(appId))) match {
+      case Success(_) => logger.info(s"[StreamPark][Spark][YarnClient] spark job: $appId is killed by yarn successfully.")
+      case Failure(e) => throw e
+    }
   }
 
   override def setConfig(submitRequest: SubmitRequest): Unit = {}
