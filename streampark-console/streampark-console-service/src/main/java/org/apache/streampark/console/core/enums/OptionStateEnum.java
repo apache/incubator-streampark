@@ -44,7 +44,7 @@ public enum OptionStateEnum {
         this.value = value;
     }
 
-    public static OptionStateEnum of(Integer state) {
+    public static OptionStateEnum getState(Integer state) {
         return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }
