@@ -39,7 +39,6 @@ if [[ ${have_tty} -eq 1 ]]; then
   GREEN=$(printf '\033[32m')
   YELLOW=$(printf '\033[33m')
   BLUE=$(printf '\033[34m')
-  BOLD=$(printf '\033[1m')
   RESET=$(printf '\033[0m')
 else
   PRIMARY=""
@@ -47,7 +46,6 @@ else
   GREEN=""
   YELLOW=""
   BLUE=""
-  BOLD=""
   RESET=""
 fi
 
@@ -100,15 +98,15 @@ fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
-  [ -n "$JAVA_HOME" ] &&
+  [[ -n "$JAVA_HOME" ]] &&
     JAVA_HOME=$(cygpath --unix "$JAVA_HOME")
-  [ -n "$CLASSPATH" ] &&
+  [[ -n "$CLASSPATH" ]] &&
     CLASSPATH=$(cygpath --path --unix "$CLASSPATH")
 fi
 
 # For Mingw, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] &&
+  [[ -n "$JAVA_HOME" ]] && [[ -d "$JAVA_HOME" ]] &&
     JAVA_HOME="$(cd "$JAVA_HOME" || (echo "cannot cd into $JAVA_HOME."; exit 1); pwd)"
 fi
 

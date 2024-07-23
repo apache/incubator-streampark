@@ -161,7 +161,7 @@ public class ApplicationController {
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class)
     })
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping
+    @PostMapping(value = "start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
         applicationActionService.start(app, false);
