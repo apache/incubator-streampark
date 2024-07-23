@@ -348,7 +348,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public FlinkAppStateEnum getStateEnum() {
-        return FlinkAppStateEnum.of(state);
+        return FlinkAppStateEnum.getState(state);
     }
 
     @JsonIgnore

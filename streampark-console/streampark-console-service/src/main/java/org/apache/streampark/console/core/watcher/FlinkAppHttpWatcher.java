@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.StateChangeEvent;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
@@ -52,6 +53,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -314,7 +316,7 @@ public class FlinkAppHttpWatcher {
 
         if (optional.isPresent()) {
             JobsOverview.Job jobOverview = optional.get();
-            FlinkAppStateEnum currentState = FlinkAppStateEnum.of(jobOverview.getState());
+            FlinkAppStateEnum currentState = FlinkAppStateEnum.getState(jobOverview.getState());
 
             if (!FlinkAppStateEnum.OTHER.equals(currentState)) {
                 try {
@@ -454,7 +456,7 @@ public class FlinkAppHttpWatcher {
         }
 
         StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
-        StateChangeEvent nowEvent = StateChangeEvent.of(application);
+        StateChangeEvent nowEvent = createStateChangeEvent(application);
         if (!nowEvent.equals(event)) {
             PREVIOUS_STATUS.put(appId, nowEvent);
             applicationManageService.persistMetrics(application);
@@ -546,7 +548,7 @@ public class FlinkAppHttpWatcher {
                 YarnAppInfo yarnAppInfo = httpYarnAppInfo(application);
                 if (yarnAppInfo != null) {
                     String state = yarnAppInfo.getApp().getFinalStatus();
-                    flinkAppState = FlinkAppStateEnum.of(state);
+                    flinkAppState = FlinkAppStateEnum.getState(state);
                 }
             } finally {
                 if (StopFromEnum.NONE.equals(stopFrom)) {
@@ -575,7 +577,7 @@ public class FlinkAppHttpWatcher {
             } else {
                 try {
                     String state = yarnAppInfo.getApp().getFinalStatus();
-                    FlinkAppStateEnum flinkAppState = FlinkAppStateEnum.of(state);
+                    FlinkAppStateEnum flinkAppState = FlinkAppStateEnum.getState(state);
                     if (FlinkAppStateEnum.OTHER.equals(flinkAppState)) {
                         return;
                     }
@@ -617,7 +619,7 @@ public class FlinkAppHttpWatcher {
     }
 
     private void doAlert(Application application, FlinkAppStateEnum flinkAppState) {
-        AlertTemplate alertTemplate = AlertTemplate.of(application, flinkAppState);
+        AlertTemplate alertTemplate = AlertTemplateUtils.createAlertTemplate(application, flinkAppState);
         alertService.alert(application.getAlertId(), alertTemplate);
     }
 
@@ -836,45 +838,13 @@ public class FlinkAppHttpWatcher {
         R call(T e) throws Exception;
     }
 
-    @Getter
-    @Setter
-    static class StateChangeEvent {
-
-        private Long id;
-        private String jobId;
-        private FlinkAppStateEnum appState;
-        private OptionStateEnum optionState;
-        private String jobManagerUrl;
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || getClass() != object.getClass()) {
-                return false;
-            }
-            StateChangeEvent that = (StateChangeEvent) object;
-            return Objects.equals(id, that.id)
-                && Objects.equals(jobId, that.jobId)
-                && Objects.equals(appState, that.appState)
-                && Objects.equals(optionState, that.optionState)
-                && Objects.equals(jobManagerUrl, that.jobManagerUrl);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, jobId, appState, optionState, jobManagerUrl);
-        }
-
-        public static StateChangeEvent of(Application application) {
-            StateChangeEvent event = new StateChangeEvent();
-            event.setId(application.getId());
-            event.setOptionState(OptionStateEnum.of(application.getOptionState()));
-            event.setAppState(application.getStateEnum());
-            event.setJobId(application.getJobId());
-            event.setJobManagerUrl(application.getJobManagerUrl());
-            return event;
-        }
+    public static StateChangeEvent createStateChangeEvent(Application application) {
+        StateChangeEvent event = new StateChangeEvent();
+        event.setId(application.getId());
+        event.setOptionState(OptionStateEnum.getState(application.getOptionState()));
+        event.setAppState(application.getStateEnum());
+        event.setJobId(application.getJobId());
+        event.setJobManagerUrl(application.getJobManagerUrl());
+        return event;
     }
 }

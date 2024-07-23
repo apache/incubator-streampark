@@ -42,6 +42,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -138,7 +139,7 @@ public class FlinkClusterWatcher {
                     InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
             cluster.setClusterState(state.getState());
             cluster.setEndTime(new Date());
-            alertService.alert(cluster.getAlertId(), AlertTemplate.of(cluster, state));
+            alertService.alert(cluster.getAlertId(), AlertTemplateUtils.createAlertTemplate(cluster, state));
         }
     }
 
