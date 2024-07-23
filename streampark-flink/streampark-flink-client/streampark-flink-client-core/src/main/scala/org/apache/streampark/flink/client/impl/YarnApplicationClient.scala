@@ -66,8 +66,7 @@ object YarnApplicationClient extends YarnClientTrait {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
         submitRequest.hdfsWorkspace.flinkPlugins,
-        submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins)
+        submitRequest.hdfsWorkspace.appJars)
       submitRequest.developmentMode match {
         case FlinkDevelopmentMode.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
