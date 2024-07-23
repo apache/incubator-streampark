@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.hc.core5.util.Timeout;
@@ -41,7 +42,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;

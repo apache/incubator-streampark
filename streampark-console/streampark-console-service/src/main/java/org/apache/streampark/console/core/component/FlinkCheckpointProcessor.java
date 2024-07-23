@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.component;
 
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
 import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
@@ -135,7 +134,8 @@ public class FlinkCheckpointProcessor {
         switch (failoverStrategyEnum) {
             case ALERT:
                 alertService.alert(
-                    application.getAlertId(), AlertTemplateUtils.createAlertTemplate(application, CheckPointStatusEnum.FAILED));
+                    application.getAlertId(),
+                    AlertTemplateUtils.createAlertTemplate(application, CheckPointStatusEnum.FAILED));
                 break;
             case RESTART:
                 try {

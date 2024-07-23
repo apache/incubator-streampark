@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.utils;
 
-import lombok.experimental.UtilityClass;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
@@ -29,8 +28,11 @@ import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 
+import lombok.experimental.UtilityClass;
+
 @UtilityClass
 public class AlertTemplateUtils {
+
     private static final String ALERT_SUBJECT_PREFIX = "StreamPark Alert:";
 
     private static final String ALERT_TITLE_PREFIX = "Notify:";

@@ -17,10 +17,11 @@
 
 package org.apache.streampark.console.core.entity;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
@@ -55,13 +56,4 @@ public class StateChangeEvent {
         return Objects.hash(id, jobId, appState, optionState, jobManagerUrl);
     }
 
-//    public static StateChangeEvent of(Application application) {
-//        StateChangeEvent event = new StateChangeEvent();
-//        event.setId(application.getId());
-//        event.setOptionState(OptionStateEnum.getState(application.getOptionState()));
-//        event.setAppState(application.getStateEnum());
-//        event.setJobId(application.getJobId());
-//        event.setJobManagerUrl(application.getJobManagerUrl());
-//        return event;
-//    }
 }

@@ -17,12 +17,13 @@
 
 package org.apache.streampark.console.core.bean;
 
-import lombok.Builder;
-import lombok.Data;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
+
+import lombok.Builder;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -70,9 +71,9 @@ public class AlertTemplate implements Serializable {
 
         public AlertTemplateBuilder endTime(Date endTime) {
             this.endTime = DateUtils.format(
-                    endTime == null ? new Date() : endTime,
-                    DateUtils.fullFormat(),
-                    TimeZone.getDefault());
+                endTime == null ? new Date() : endTime,
+                DateUtils.fullFormat(),
+                TimeZone.getDefault());
             return this;
         }
 
