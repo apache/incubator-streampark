@@ -27,16 +27,39 @@ import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.{ConcurrentHashMap, CountDownLatch}
 
 import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
 object YarnClient extends SparkClientTrait {
 
+  private lazy val sparkHandles = new ConcurrentHashMap[String, SparkAppHandle]()
+
   override def doStop(stopRequest: StopRequest): StopResponse = {
-    HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.appId))
-    null
+    val sparkAppHandle = sparkHandles.remove(stopRequest.appId)
+    if (sparkAppHandle != null) {
+      Try(sparkAppHandle.kill()) match {
+        case Success(_) =>
+          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.appId} is stopped successfully.")
+          StopResponse(null)
+        case Failure(e) =>
+          logger.error("[StreamPark][Spark][YarnClient] sparkAppHandle kill failed. Try kill by yarn", e)
+          yarnKill(stopRequest.appId)
+          StopResponse(null)
+      }
+    } else {
+      logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.appId} is not existed. Try kill by yarn")
+      yarnKill(stopRequest.appId)
+      StopResponse(null)
+    }
+  }
+
+  private def yarnKill(appId: String): Unit = {
+    Try(HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(appId))) match {
+      case Success(_) => logger.info(s"[StreamPark][Spark][YarnClient] spark job: $appId is killed by yarn successfully.")
+      case Failure(e) => throw e
+    }
   }
 
   override def setConfig(submitRequest: SubmitRequest): Unit = {}
@@ -54,6 +77,7 @@ object YarnClient extends SparkClientTrait {
         logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
+        sparkHandles += handle.getAppId -> handle
         SubmitResponse(handle.getAppId)
       case Failure(e) => throw e
     }
