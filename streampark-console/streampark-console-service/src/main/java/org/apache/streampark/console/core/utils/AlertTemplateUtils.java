@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.enums.AlertTypeEnum;
 import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
@@ -49,7 +50,7 @@ public class AlertTemplateUtils {
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())
             .restartIndex(application.getRestartCount())
             .totalRestart(application.getRestartSize())
-            .type(1)
+            .type(AlertTypeEnum.EMAIL.getCode())
             .title(
                 String.format(
                     "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(),
@@ -67,7 +68,7 @@ public class AlertTemplateUtils {
             .jobName(application.getJobName())
             .link(application.getFlinkExecutionMode(), application.getClusterId())
             .startTime(application.getStartTime())
-            .type(2)
+            .type(AlertTypeEnum.DING_TALK.getCode())
             .cpFailureRateInterval(
                 DateUtils.toDuration(application.getCpFailureRateInterval() * 1000 * 60))
             .cpMaxFailureInterval(application.getCpMaxFailureInterval())
@@ -104,7 +105,7 @@ public class AlertTemplateUtils {
 
     public static AlertTemplate createAlertTemplate(AlertProbeMsg alertProbeMsg) {
         return AlertTemplate.builder()
-            .type(4)
+            .type(AlertTypeEnum.WE_COM.getCode())
             .user(alertProbeMsg.getUser())
             .probeJobs(alertProbeMsg.getProbeJobs())
             .failedJobs(alertProbeMsg.getFailedJobs())
@@ -125,7 +126,7 @@ public class AlertTemplateUtils {
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())
             .restartIndex(application.getRestartCount())
             .totalRestart(application.getRestartSize())
-            .type(1)
+            .type(AlertTypeEnum.EMAIL.getCode())
             .title(
                 String.format(
                     "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))

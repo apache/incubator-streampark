@@ -86,17 +86,16 @@ public class AlertTemplate implements Serializable {
             } else {
                 duration = end.getTime() - start.getTime();
             }
-            this.duration(DateUtils.toDuration(duration));
+            this.duration = DateUtils.toDuration(duration);
             return this;
         }
 
         public AlertTemplateBuilder link(FlinkExecutionMode mode, String appId) {
             if (FlinkExecutionMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
-                String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
-                this.link(url);
+                this.link = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
             } else {
-                this.link(null);
+                this.link = null;
             }
             return this;
         }
@@ -104,10 +103,9 @@ public class AlertTemplate implements Serializable {
         public AlertTemplateBuilder link(SparkExecutionMode mode, String appId) {
             if (SparkExecutionMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
-                String url = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
-                this.link(url);
+                this.link = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
             } else {
-                this.link(null);
+                this.link = null;
             }
             return this;
         }
