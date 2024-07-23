@@ -405,7 +405,6 @@ object PropertiesUtils extends Logger {
                   map += k -> v
                 }
               }
-
             }
           })
         case _ =>
