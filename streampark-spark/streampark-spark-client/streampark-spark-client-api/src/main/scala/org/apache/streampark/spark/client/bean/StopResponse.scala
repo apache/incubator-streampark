@@ -17,4 +17,4 @@
 
 package org.apache.streampark.spark.client.bean
 
-case class StopResponse(savePointDir: String)
+case class StopResponse(savePoint: String)

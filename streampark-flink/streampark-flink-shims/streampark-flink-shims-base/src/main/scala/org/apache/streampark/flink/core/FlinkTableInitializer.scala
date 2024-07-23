@@ -21,6 +21,7 @@ import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.{ApiType, PlannerType}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.core.EnhancerImplicit._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
@@ -33,7 +34,6 @@ import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import java.io.File
 
 import scala.collection.{mutable, Map}
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 private[flink] object FlinkTableInitializer {

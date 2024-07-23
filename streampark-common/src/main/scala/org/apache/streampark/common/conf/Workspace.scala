@@ -19,7 +19,7 @@ package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.enums.StorageType
 import org.apache.streampark.common.util.{HdfsUtils, SystemPropertyUtils}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 
 import java.net.URI
 

@@ -31,10 +31,10 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExe
 import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink
 import org.elasticsearch.action.ActionRequest
 
-import java.util.{Map => JavaMap, Properties}
+import java.util.Properties
 
 import scala.annotation.meta.param
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 
 object ES5Sink {
 

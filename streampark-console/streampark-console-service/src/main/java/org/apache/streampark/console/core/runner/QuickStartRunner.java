@@ -37,7 +37,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Order
@@ -64,7 +63,8 @@ public class QuickStartRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        Map<String, HashMap<String, String>> map = PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
+
+        Map<String, Map<String, String>> map = PropertiesUtils.extractMultipleArgumentsAsJava(args.getSourceArgs());
 
         Map<String, String> quickstart = map.get("quickstart");
 

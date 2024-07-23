@@ -18,17 +18,17 @@
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
+import org.apache.streampark.common.util.Implicits._
 
 import java.io.File
-import java.net.{URL => NetURL}
+import java.net.URL
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param flinkHome actual flink home that must be a readable local path */
-class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logger {
+class FlinkVersion(val flinkHome: String) extends Serializable with Logger {
 
   private[this] lazy val FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$")
 
@@ -63,7 +63,7 @@ class FlinkVersion(val flinkHome: String) extends java.io.Serializable with Logg
     lib
   }
 
-  lazy val flinkLibs: List[NetURL] = flinkLib.listFiles().map(_.toURI.toURL).toList
+  lazy val flinkLibs: List[URL] = flinkLib.listFiles().map(_.toURI.toURL).toList
 
   lazy val version: String = {
     val cmd = List(

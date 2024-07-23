@@ -21,7 +21,7 @@ import org.apache.streampark.common.util.{Logger, ThreadUtils}
 
 import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.collection.mutable.ListBuffer
 
 case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {

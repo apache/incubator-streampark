@@ -17,19 +17,19 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.util.ImplicitsUtils.AutoCloseImplicits
+import org.apache.streampark.common.util.Implicits._
+import org.apache.streampark.common.util.Implicits.AutoCloseImplicits
 
 import org.apache.commons.lang3.StringUtils
 
 import java.io._
 import java.net.{HttpURLConnection, URL}
 import java.time.{Duration, LocalDateTime}
-import java.util.{jar, Collection => JavaCollection, Map => JavaMap, Properties, UUID}
+import java.util.{jar, Properties, UUID}
 import java.util.concurrent.locks.LockSupport
 import java.util.jar.{JarFile, JarInputStream}
 
 import scala.annotation.tailrec
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object Utils extends Logger {

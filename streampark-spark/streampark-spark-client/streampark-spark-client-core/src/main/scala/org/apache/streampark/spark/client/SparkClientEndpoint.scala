@@ -26,15 +26,15 @@ import org.apache.streampark.spark.client.impl._
 object SparkClientEndpoint {
 
   private[this] val clients: Map[SparkExecutionMode, SparkClientTrait] = Map(
-    YARN_CLUSTER -> YarnApplicationClient,
-    YARN_CLIENT -> YarnApplicationClient)
+    YARN_CLUSTER -> YarnClient,
+    YARN_CLIENT -> YarnClient)
 
   def submit(submitRequest: SubmitRequest): SubmitResponse = {
     clients.get(submitRequest.executionMode) match {
       case Some(client) => client.submit(submitRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${submitRequest.executionMode} submit ")
+          s"Unsupported ${submitRequest.executionMode} spark submit.")
     }
   }
 
@@ -43,7 +43,7 @@ object SparkClientEndpoint {
       case Some(client) => client.stop(stopRequest)
       case _ =>
         throw new UnsupportedOperationException(
-          s"Unsupported ${stopRequest.executionMode} stop ")
+          s"Unsupported ${stopRequest.executionMode} spark stop.")
     }
   }
 

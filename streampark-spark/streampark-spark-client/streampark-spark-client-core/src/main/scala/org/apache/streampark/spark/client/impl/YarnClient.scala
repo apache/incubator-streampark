@@ -19,20 +19,19 @@ package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.enums.SparkExecutionMode
 import org.apache.streampark.common.util.HadoopUtils
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
 
-import org.apache.commons.collections.MapUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
 import java.util.concurrent.CountDownLatch
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
-object YarnApplicationClient extends SparkClientTrait {
+object YarnClient extends SparkClientTrait {
 
   override def doStop(stopRequest: StopRequest): StopResponse = {
     HadoopUtils.yarnClient.killApplication(ApplicationId.fromString(stopRequest.jobId))
@@ -51,16 +50,16 @@ object YarnApplicationClient extends SparkClientTrait {
     // 3) launch
     Try(launch(launcher)) match {
       case Success(handle: SparkAppHandle) =>
-        logger.info(s"[StreamPark][YarnApplicationClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
+        logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
-        SubmitResponse(null, null, handle.getAppId)
+        SubmitResponse(handle.getAppId, submitRequest.properties)
       case Failure(e) => throw e
     }
   }
 
   private def launch(sparkLauncher: SparkLauncher): SparkAppHandle = {
-    logger.info("[StreamPark][YarnApplicationClient] The spark task start")
+    logger.info("[StreamPark][Spark][YarnClient] The spark job starting")
     val submitFinished: CountDownLatch = new CountDownLatch(1)
     val sparkAppHandle = sparkLauncher.startApplication(new SparkAppHandle.Listener() {
       override def infoChanged(sparkAppHandle: SparkAppHandle): Unit = {}
@@ -96,26 +95,23 @@ object YarnApplicationClient extends SparkClientTrait {
       .setDeployMode(submitRequest.executionMode match {
         case SparkExecutionMode.YARN_CLIENT => "client"
         case SparkExecutionMode.YARN_CLUSTER => "cluster"
-        case _ =>
-          throw new UnsupportedOperationException(
-            "[StreamPark][YarnApplicationClient] Yarn mode only support \"client\" and \"cluster\".")
+        case _ => throw new IllegalArgumentException("[StreamPark][Spark] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".")
       })
   }
 
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {
-    logger.info("[StreamPark][SparkClient][YarnApplicationClient] set spark configuration.")
+    logger.info("[StreamPark][Spark][YarnClient] set spark configuration.")
     // 1) set spark conf
     submitRequest.properties.foreach(prop => {
       val k = prop._1
-      val v = prop._2.toString
+      val v = prop._2
       logInfo(s"| $k  : $v")
       sparkLauncher.setConf(k, v)
     })
 
     // 2) appArgs...
-    if (MapUtils.isNotEmpty(submitRequest.extraParameter) && submitRequest.extraParameter
-        .containsKey("sql")) {
-      sparkLauncher.addAppArgs("--sql", submitRequest.extraParameter.get("sql").toString)
+    if (submitRequest.hasExtra("sql")) {
+      sparkLauncher.addAppArgs("--sql", submitRequest.getExtra("sql").toString)
     }
   }
 
