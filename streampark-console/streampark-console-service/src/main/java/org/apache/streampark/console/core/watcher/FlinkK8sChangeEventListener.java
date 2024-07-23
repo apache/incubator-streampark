@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
@@ -26,6 +25,7 @@ import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
@@ -104,7 +104,8 @@ public class FlinkK8sChangeEventListener {
             || FlinkAppStateEnum.LOST == state
             || FlinkAppStateEnum.RESTARTING == state
             || FlinkAppStateEnum.FINISHED == state) {
-            executor.execute(() -> alertService.alert(app.getAlertId(), AlertTemplate.of(app, state)));
+            executor.execute(
+                () -> alertService.alert(app.getAlertId(), AlertTemplateUtils.createAlertTemplate(app, state)));
         }
     }
 

@@ -109,7 +109,7 @@ public enum FlinkAppStateEnum {
         this.value = value;
     }
 
-    public static FlinkAppStateEnum of(Integer state) {
+    public static FlinkAppStateEnum getState(Integer state) {
         for (FlinkAppStateEnum appState : values()) {
             if (appState.value == state) {
                 return appState;
@@ -118,7 +118,7 @@ public enum FlinkAppStateEnum {
         return FlinkAppStateEnum.OTHER;
     }
 
-    public static FlinkAppStateEnum of(String name) {
+    public static FlinkAppStateEnum getState(String name) {
         for (FlinkAppStateEnum appState : values()) {
             if (appState.name().equals(name)) {
                 return appState;
@@ -128,7 +128,7 @@ public enum FlinkAppStateEnum {
     }
 
     public static boolean isEndState(Integer appState) {
-        FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.of(appState);
+        FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.getState(appState);
         return FlinkAppStateEnum.CANCELED == flinkAppStateEnum
             || FlinkAppStateEnum.FAILED == flinkAppStateEnum
             || FlinkAppStateEnum.KILLED == flinkAppStateEnum
@@ -139,7 +139,7 @@ public enum FlinkAppStateEnum {
     }
 
     public static boolean isLost(Integer appState) {
-        FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.of(appState);
+        FlinkAppStateEnum flinkAppStateEnum = FlinkAppStateEnum.getState(appState);
         return FlinkAppStateEnum.LOST == flinkAppStateEnum;
     }
 
@@ -154,7 +154,7 @@ public enum FlinkAppStateEnum {
             if (FlinkJobState.K8S_INITIALIZING() == flinkJobState) {
                 return INITIALIZING;
             }
-            return of(flinkJobState.toString());
+            return getState(flinkJobState.toString());
         }
 
         /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */
