@@ -168,12 +168,6 @@ public class EnvInitializer implements ApplicationRunner {
       fsOperator.mkdirs(appJars);
     }
 
-    String appPlugins = workspace.APP_PLUGINS();
-    if (!fsOperator.exists(appPlugins)) {
-      log.info(mkdirLog, appPlugins);
-      fsOperator.mkdirs(appPlugins);
-    }
-
     // 2. upload jar.
     // 2.1) upload client jar
     File client = WebUtils.getAppClientDir();

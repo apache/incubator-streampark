@@ -19,14 +19,13 @@ package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.DevelopmentMode
-import org.apache.streampark.common.util.{HdfsUtils, Utils}
+import org.apache.streampark.common.util.HdfsUtils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
@@ -63,8 +62,7 @@ object YarnApplicationClient extends YarnClientTrait {
     val providedLibs = {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
-        submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins
+        submitRequest.hdfsWorkspace.appJars
       )
       val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
       if (HdfsUtils.exists(jobLib)) {

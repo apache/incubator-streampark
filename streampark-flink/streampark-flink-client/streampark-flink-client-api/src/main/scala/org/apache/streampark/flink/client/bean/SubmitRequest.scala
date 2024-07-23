@@ -159,8 +159,7 @@ case class SubmitRequest(
       flinkLib = s"$flinkHdfsHome/lib",
       flinkPlugins = s"$flinkHdfsHome/plugins",
       flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome),
-      appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS
+      appJars = workspace.APP_JARS
     )
   }
 
@@ -201,7 +200,6 @@ case class SubmitRequest(
  * @param flinkLib
  * @param flinkPlugins
  * @param appJars
- * @param appPlugins
  */
 case class HdfsWorkspace(
     flinkName: String,
@@ -209,5 +207,4 @@ case class HdfsWorkspace(
     flinkDistJar: String,
     flinkLib: String,
     flinkPlugins: String,
-    appJars: String,
-    appPlugins: String)
+    appJars: String)

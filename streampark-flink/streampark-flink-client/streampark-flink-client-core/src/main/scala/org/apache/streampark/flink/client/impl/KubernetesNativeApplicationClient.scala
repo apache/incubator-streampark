@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.enums.ExecutionMode
-import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
@@ -26,9 +25,7 @@ import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
 import com.google.common.collect.Lists
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
-import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 /** kubernetes native application mode submit */
