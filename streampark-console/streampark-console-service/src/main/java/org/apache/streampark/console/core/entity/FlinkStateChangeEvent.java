@@ -27,7 +27,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public class StateChangeEvent {
+public class FlinkStateChangeEvent {
 
     private Long id;
     private String jobId;
@@ -43,7 +43,7 @@ public class StateChangeEvent {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        StateChangeEvent that = (StateChangeEvent) object;
+        FlinkStateChangeEvent that = (FlinkStateChangeEvent) object;
         return Objects.equals(id, that.id)
             && Objects.equals(jobId, that.jobId)
             && Objects.equals(appState, that.appState)

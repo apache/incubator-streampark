@@ -26,7 +26,7 @@ import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
-import org.apache.streampark.console.core.entity.StateChangeEvent;
+import org.apache.streampark.console.core.entity.FlinkStateChangeEvent;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
@@ -151,7 +151,7 @@ public class FlinkAppHttpWatcher {
     private static final Cache<Long, Byte> CANCELING_CACHE = Caffeine.newBuilder()
         .expireAfterWrite(10, TimeUnit.SECONDS).build();
 
-    private static final Cache<Long, StateChangeEvent> PREVIOUS_STATUS = Caffeine.newBuilder()
+    private static final Cache<Long, FlinkStateChangeEvent> PREVIOUS_STATUS = Caffeine.newBuilder()
         .expireAfterWrite(24, TimeUnit.HOURS).build();
 
     /**
@@ -452,8 +452,8 @@ public class FlinkAppHttpWatcher {
             WATCHING_APPS.put(appId, application);
         }
 
-        StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
-        StateChangeEvent nowEvent = createStateChangeEvent(application);
+        FlinkStateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
+        FlinkStateChangeEvent nowEvent = createStateChangeEvent(application);
         if (!nowEvent.equals(event)) {
             PREVIOUS_STATUS.put(appId, nowEvent);
             applicationManageService.persistMetrics(application);
@@ -629,7 +629,7 @@ public class FlinkAppHttpWatcher {
 
     public void cleanSavepoint(Application application) {
         application.setOptionState(OptionStateEnum.NONE.getValue());
-        StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
+        FlinkStateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
         if (event != null && event.getOptionState() == OptionStateEnum.SAVEPOINTING) {
             doPersistMetrics(application, false);
         }
@@ -665,7 +665,7 @@ public class FlinkAppHttpWatcher {
         SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
 
         // update to PREVIOUS_STATUS
-        StateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
+        FlinkStateChangeEvent event = PREVIOUS_STATUS.getIfPresent(appId);
         if (event != null) {
             event.setOptionState(OptionStateEnum.SAVEPOINTING);
             PREVIOUS_STATUS.put(appId, event);
@@ -835,8 +835,8 @@ public class FlinkAppHttpWatcher {
         R call(T e) throws Exception;
     }
 
-    public static StateChangeEvent createStateChangeEvent(Application application) {
-        StateChangeEvent event = new StateChangeEvent();
+    public static FlinkStateChangeEvent createStateChangeEvent(Application application) {
+        FlinkStateChangeEvent event = new FlinkStateChangeEvent();
         event.setId(application.getId());
         event.setOptionState(OptionStateEnum.getState(application.getOptionState()));
         event.setAppState(application.getStateEnum());
