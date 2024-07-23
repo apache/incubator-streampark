@@ -22,8 +22,10 @@ import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -31,6 +33,8 @@ import java.util.TimeZone;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AlertTemplate implements Serializable {
 
     private String title;
@@ -105,8 +109,7 @@ public class AlertTemplate implements Serializable {
         }
 
         public AlertTemplateBuilder restart(Boolean needRestartOnFailed, Integer restartCount) {
-            boolean needRestart = needRestartOnFailed && restartCount > 0;
-            this.restart(needRestart);
+            this.restart = needRestartOnFailed && restartCount > 0;
             return this;
         }
 
