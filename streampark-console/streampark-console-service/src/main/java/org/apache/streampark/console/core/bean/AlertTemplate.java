@@ -56,12 +56,6 @@ public class AlertTemplate implements Serializable {
     private Integer lostJobs;
     private Integer cancelledJobs;
 
-    private static final String ALERT_SUBJECT_PREFIX = "StreamPark Alert:";
-
-    private static final String ALERT_TITLE_PREFIX = "Notify:";
-
-    private static final String PROBE = "PROBE";
-
     public static class AlertTemplateBuilder {
 
         public AlertTemplateBuilder startTime(Date startTime) {
