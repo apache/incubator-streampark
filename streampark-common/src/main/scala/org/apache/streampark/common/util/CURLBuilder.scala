@@ -23,11 +23,9 @@ import java.util
 
 class CURLBuilder(val url: String) {
 
-  private[this] val headers: util.Map[String, String] =
-    new util.HashMap[String, String]
+  private[this] val headers: util.Map[String, String] = new JavaHashMap[String, String]
 
-  private[this] val formData: util.Map[String, String] =
-    new util.HashMap[String, String]
+  private[this] val formData: util.Map[String, String] = new JavaHashMap[String, String]
 
   def addHeader(k: String, v: String): CURLBuilder = {
     this.headers.put(k, v)

@@ -17,12 +17,18 @@
 
 package org.apache.streampark.console.core.component;
 
+import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.common.util.ReflectUtils;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.controller.OpenAPIController;
+import org.apache.streampark.console.core.util.ServiceHelper;
+import org.apache.streampark.console.system.service.AccessTokenService;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +46,9 @@ import java.util.Map;
 @Slf4j
 @Component
 public class OpenAPIComponent {
+
+    @Autowired
+    private AccessTokenService accessTokenService;
 
     private final Map<String, OpenAPISchema> schemas = new HashMap<>();
 
@@ -119,4 +128,33 @@ public class OpenAPIComponent {
         return null;
     }
 
+    public String getOpenApiCUrl(String baseUrl, Long appId, Long teamId, String name) {
+        OpenAPISchema schema = this.getOpenAPISchema(name);
+        if (schema == null) {
+            throw new UnsupportedOperationException("Unsupported OpenAPI: " + name);
+        }
+        String url = schema.getUrl();
+        if (StringUtils.isNoneBlank(baseUrl)) {
+            url = baseUrl + url;
+        }
+        CURLBuilder curlBuilder = new CURLBuilder(url);
+        curlBuilder
+            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            .addHeader(
+                "Authorization",
+                accessTokenService.getByUserId(ServiceHelper.getUserId()).getToken());
+
+        schema.getSchema().forEach(c -> {
+            if (c.isRequired()) {
+                if (c.getName().equals("appId")) {
+                    curlBuilder.addFormData(c.getName(), appId);
+                } else if (c.getName().equals("teamId")) {
+                    curlBuilder.addFormData(c.getName(), teamId);
+                }
+            } else {
+                curlBuilder.addFormData(c.getName(), "");
+            }
+        });
+        return curlBuilder.build();
+    }
 }
