@@ -78,7 +78,7 @@ public class ConfigController {
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("sysHadoopConf")
+    @PostMapping("sys_hadoop_conf")
     @RequiresPermissions("app:create")
     public RestResponse getSystemHadoopConfig() {
         Map<String, Map<String, String>> result = ImmutableMap.of(

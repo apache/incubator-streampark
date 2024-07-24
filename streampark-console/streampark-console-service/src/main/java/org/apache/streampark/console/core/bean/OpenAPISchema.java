@@ -15,10 +15,39 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.core.bean;
 
-/** Interface document constants */
-public class ApiDocConstant {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 
-    public static final String OPENAPI_TAG = "OpenAPI";
+import java.util.List;
+
+@Getter
+@Setter
+public class OpenAPISchema {
+
+    private String url;
+
+    private List<Schema> header;
+
+    private List<Schema> schema;
+
+    @Getter
+    @Setter
+    public static class Schema {
+
+        private String name;
+
+        private String type;
+
+        private boolean required;
+
+        private String description;
+
+        private String defaultValue;
+
+        @JsonIgnore
+        private String bindFor;
+    }
 }

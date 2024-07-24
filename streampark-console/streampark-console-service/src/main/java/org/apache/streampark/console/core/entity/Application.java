@@ -33,7 +33,7 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
-import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
+import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
@@ -49,6 +49,7 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -109,6 +110,7 @@ public class Application implements Serializable {
 
     @Getter
     private String ingressTemplate;
+    @Setter
     private String defaultModeIngress;
 
     /** flink-hadoop integration on flink-k8s mode */
@@ -258,10 +260,6 @@ public class Application implements Serializable {
     private transient Integer buildStatus;
 
     private transient AppControl appControl;
-
-    public void setDefaultModeIngress(String defaultModeIngress) {
-        this.defaultModeIngress = defaultModeIngress;
-    }
 
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constant.DEFAULT : k8sNamespace;
@@ -616,4 +614,5 @@ public class Application implements Serializable {
         public static final SFunction<Application, Integer> EXECUTION_MODE = Application::getExecutionMode;
         public static final SFunction<Application, String> JOB_MANAGER_URL = Application::getJobManagerUrl;
     }
+
 }

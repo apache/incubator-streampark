@@ -25,7 +25,7 @@ import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
+import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CoreOptions;

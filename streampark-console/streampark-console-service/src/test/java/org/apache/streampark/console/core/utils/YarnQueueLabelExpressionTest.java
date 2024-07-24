@@ -18,11 +18,12 @@
 package org.apache.streampark.console.core.utils;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
 
 import org.junit.jupiter.api.Test;
 
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
-import static org.apache.streampark.console.core.utils.YarnQueueLabelExpression.isValid;
+import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
+import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.isValid;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
