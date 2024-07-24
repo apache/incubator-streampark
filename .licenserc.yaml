@@ -106,24 +106,6 @@ dependency:
       license: Apache-2.0
     - name: com.github.docker-java:docker-java-transport-httpclient5
       license: Apache-2.0
-    - name: com.github.xiaoymin:knife4j-annotations
-      license: Apache-2.0
-    - name: com.github.xiaoymin:knife4j-core
-      license: Apache-2.0
-    - name: com.github.xiaoymin:knife4j-spring
-      license: Apache-2.0
-    - name: com.github.xiaoymin:knife4j-spring-boot-autoconfigure
-      license: Apache-2.0
-    - name: com.github.xiaoymin:knife4j-spring-ui
-      license: Apache-2.0
-    - name: io.swagger.core.v3:swagger-annotations
-      license: Apache-2.0
-    - name: io.swagger.core.v3:swagger-models
-      license: Apache-2.0
-    - name: io.swagger:swagger-annotations
-      license: Apache-2.0
-    - name: io.swagger:swagger-models
-      license: Apache-2.0
     - name: com.google.code.gson:gson
       license: Apache-2.0
     - name: com.google.guava:listenablefuture

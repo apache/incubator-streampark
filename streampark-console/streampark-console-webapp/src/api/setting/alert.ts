@@ -24,8 +24,8 @@ enum ALERT_APi {
   EXISTS = '/flink/alert/exists',
   UPDATE = '/flink/alert/update',
   GET = '/flink/alert/get',
+  PAGE = '/flink/alert/page',
   LIST = '/flink/alert/list',
-  LIST_WITHOUTPAGE = '/flink/alert/listWithOutPage',
   DELETE = '/flink/alert/delete',
   SEND = '/flink/alert/send',
 }
@@ -34,7 +34,7 @@ enum ALERT_APi {
  * @returns {Promise<AlertSetting[]>}
  */
 export function fetchAlertSetting(): Promise<AlertSetting[]> {
-  return defHttp.post({ url: ALERT_APi.LIST_WITHOUTPAGE });
+  return defHttp.post({ url: ALERT_APi.LIST });
 }
 /**
  * Test alert settings

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.utils;
+package org.apache.streampark.console.core.util;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.console.base.exception.ApiAlertException;

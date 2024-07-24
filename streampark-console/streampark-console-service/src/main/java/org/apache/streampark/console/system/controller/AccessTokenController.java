@@ -17,12 +17,11 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
-import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
@@ -46,9 +45,6 @@ public class AccessTokenController {
     @Autowired
     private AccessTokenService accessTokenService;
 
-    @Autowired
-    private ServiceHelper serviceHelper;
-
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(
@@ -59,7 +55,7 @@ public class AccessTokenController {
 
     @PostMapping(value = "check")
     public RestResponse verifyToken() {
-        Long userId = serviceHelper.getUserId();
+        Long userId = ServiceHelper.getUserId();
         RestResponse restResponse = RestResponse.success();
         if (userId != null) {
             AccessToken accessToken = accessTokenService.getByUserId(userId);
@@ -94,42 +90,5 @@ public class AccessTokenController {
     public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.removeById(tokenId);
         return RestResponse.success(res);
-    }
-
-    /**
-     * copy cURL, hardcode now, there is no need for configuration here, because there are several
-     * fixed interfaces
-     */
-    @PostMapping(value = "curl")
-    public RestResponse copyRestApiCurl(
-                                        @NotBlank(message = "{required}") String appId,
-                                        @NotBlank(message = "{required}") String baseUrl,
-                                        @NotBlank(message = "{required}") String path) {
-        String resultCURL = null;
-        CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
-
-        curlBuilder
-            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-            .addHeader(
-                "Authorization",
-                accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
-
-        if ("/flink/app/start".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("allowNonRestored", "false")
-                .addFormData("savePoint", "")
-                .addFormData("savePointed", "false")
-                .addFormData("id", appId)
-                .build();
-        } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("id", appId)
-                .addFormData("savePointed", "false")
-                .addFormData("drain", "false")
-                .addFormData("nativeFormat", "false")
-                .addFormData("savePoint", "")
-                .build();
-        }
-        return RestResponse.success(resultCURL);
     }
 }
