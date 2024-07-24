@@ -252,6 +252,7 @@ public class FlinkAppHttpWatcher {
           } else if (DateUtils.toSecondDuration(lostTime, new Date()) >= 30) {
             savePointService.expire(application.getId());
             application.setState(FlinkAppState.LOST.getValue());
+            WATCHING_APPS.remove(application.getId());
             LOST_CACHE.invalidate(application.getId());
           }
         } else {
