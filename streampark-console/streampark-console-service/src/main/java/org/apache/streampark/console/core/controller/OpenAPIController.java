@@ -73,7 +73,7 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "savePoint", description = "savepoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class),
     })
-    @Permission(app = "#app.id", team = "#app.teamId")
+    @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping(value = "app/cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(Application app) throws Exception {
