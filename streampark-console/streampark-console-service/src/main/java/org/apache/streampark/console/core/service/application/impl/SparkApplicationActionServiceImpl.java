@@ -64,7 +64,6 @@ import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.hadoop.service.Service.STATE;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -278,7 +277,6 @@ public class SparkApplicationActionServiceImpl
         // 2) update app state to starting...
         starting(application);
 
-        String jobId = new JobID().toHexString();
         SparkApplicationLog applicationLog = new SparkApplicationLog();
         applicationLog.setOptionName(SparkOperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
@@ -316,13 +314,12 @@ public class SparkApplicationActionServiceImpl
         SubmitRequest submitRequest = new SubmitRequest(
             sparkEnv.getSparkVersion(),
             SparkExecutionMode.of(application.getExecutionMode()),
-            PropertiesUtils.extractSparkConfAsJava(application.getAppConf()),
             sparkEnv.getSparkConf(),
             SparkDevelopmentMode.valueOf(application.getJobType()),
             application.getId(),
-            jobId,
             application.getAppName(),
             appConf,
+            PropertiesUtils.extractSparkPropertiesAsJava(application.getAppProperties()),
             application.getApplicationType(),
             applicationArgs,
             application.getHadoopUser(),

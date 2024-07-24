@@ -31,7 +31,7 @@
         <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
         <result column="jar" jdbcType="VARCHAR" property="jar"/>
         <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
-        <result column="app_conf" jdbcType="LONGVARCHAR" property="appConf"/>
+        <result column="app_properties" jdbcType="LONGVARCHAR" property="appProperties"/>
         <result column="app_args" jdbcType="LONGVARCHAR" property="appArgs"/>
         <result column="app_id" jdbcType="VARCHAR" property="appId"/>
         <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
@@ -59,9 +59,17 @@
         <result column="end_time" jdbcType="DATE" property="endTime"/>
         <result column="duration" jdbcType="BIGINT" property="duration"/>
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
+        <result column="driver_cores" jdbcType="BIGINT" property="driverCores"/>
+        <result column="driver_memory" jdbcType="BIGINT" property="driverMemory"/>
+        <result column="executor_cores" jdbcType="BIGINT" property="executorCores"/>
+        <result column="executor_memory" jdbcType="BIGINT" property="executorMemory"/>
+        <result column="executor_max_nums" jdbcType="BIGINT" property="executorMaxNums"/>
+        <result column="num_tasks" jdbcType="BIGINT" property="numTasks"/>
+        <result column="num_completed_tasks" jdbcType="BIGINT" property="numCompletedTasks"/>
+        <result column="num_stages" jdbcType="BIGINT" property="numStages"/>
+        <result column="num_completed_stages" jdbcType="BIGINT" property="numCompletedStages"/>
         <result column="used_memory" jdbcType="BIGINT" property="usedMemory"/>
-        <result column="max_memory" jdbcType="BIGINT" property="maxMemory"/>
-        <result column="total_cores" jdbcType="BIGINT" property="totalCores"/>
+        <result column="used_v_cores" jdbcType="BIGINT" property="usedVCores"/>
 
     </resultMap>
 
@@ -196,19 +204,31 @@
             </if>
             <choose>
                 <when test="@org.apache.streampark.console.core.enums.SparkAppStateEnum@isEndState(app.state)">
+                    num_tasks=null,
+                    num_completed_tasks=null,
+                    num_stages=null,
+                    num_completed_stages=null,
                     used_memory=null,
-                    max_memory=null,
-                    total_cores=null,
+                    used_v_cores=null,
                 </when>
                 <otherwise>
+                    <if test="app.numTasks != null">
+                        num_tasks=#{app.numTasks},
+                    </if>
+                    <if test="app.numCompletedTasks != null">
+                        num_completed_tasks=#{app.numCompletedTasks},
+                    </if>
+                    <if test="app.numStages != null">
+                        num_stages=#{app.numStages},
+                    </if>
+                    <if test="app.numCompletedStages != null">
+                        num_completed_stages=#{app.numCompletedStages},
+                    </if>
                     <if test="app.usedMemory != null">
                         used_memory=#{app.usedMemory},
                     </if>
-                    <if test="app.maxMemory != null">
-                        max_memory=#{app.maxMemory},
-                    </if>
-                    <if test="app.totalCores != null">
-                        total_cores=#{app.totalCores},
+                    <if test="app.usedVCores != null">
+                        used_v_cores=#{app.usedVCores},
                     </if>
                 </otherwise>
             </choose>

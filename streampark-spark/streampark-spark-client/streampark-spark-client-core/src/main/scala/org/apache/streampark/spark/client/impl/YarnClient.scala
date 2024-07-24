@@ -90,7 +90,7 @@ object YarnClient extends SparkClientTrait {
       override def infoChanged(sparkAppHandle: SparkAppHandle): Unit = {}
       override def stateChanged(handle: SparkAppHandle): Unit = {
         if (handle.getAppId != null) {
-          logger.info("{} stateChanged :{}", Array(handle.getAppId, handle.getState.toString))
+          logger.info(s"${handle.getAppId} stateChanged : ${handle.getState.toString}")
         } else {
           logger.info("stateChanged :{}", handle.getState.toString)
         }
@@ -120,14 +120,15 @@ object YarnClient extends SparkClientTrait {
       .setDeployMode(submitRequest.executionMode match {
         case SparkExecutionMode.YARN_CLIENT => "client"
         case SparkExecutionMode.YARN_CLUSTER => "cluster"
-        case _ => throw new IllegalArgumentException("[StreamPark][Spark] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".")
+        case _ =>
+          throw new IllegalArgumentException("[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".")
       })
   }
 
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {
     logger.info("[StreamPark][Spark][YarnClient] set spark configuration.")
     // 1) set spark conf
-    submitRequest.properties.foreach(prop => {
+    submitRequest.sparkProperties.foreach(prop => {
       val k = prop._1
       val v = prop._2
       logInfo(s"| $k  : $v")
@@ -144,7 +145,7 @@ object YarnClient extends SparkClientTrait {
   }
 
   private def setYarnQueue(sparkLauncher: SparkLauncher, map: JavaMap[String, Any]): Unit = {
-    logger.info("[StreamPark][YarnApplicationClient] Spark launcher start setting yarn queue.")
+    logger.info("[StreamPark][Spark][YarnClient] Spark launcher start setting yarn queue.")
     Option(map.get("yarnQueueName")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(sparkLauncher.setConf("spark.yarn.queue", _))
     Option(map.get("yarnQueueLabel")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(_ => {
       sparkLauncher.setConf("spark.yarn.am.nodeLabelExpression", _)

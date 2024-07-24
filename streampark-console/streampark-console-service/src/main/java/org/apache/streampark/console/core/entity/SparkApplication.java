@@ -32,7 +32,7 @@ import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
-import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.utils.YarnQueueLabelExpression;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
@@ -100,7 +100,7 @@ public class SparkApplication extends BaseEntity {
      * Arbitrary Spark configuration property in key=value format
      * e.g. "spark.driver.cores=1"
      */
-    private String appConf;
+    private String appProperties;
 
     /** Arguments passed to the main method of your main class */
     private String appArgs;
@@ -179,18 +179,24 @@ public class SparkApplication extends BaseEntity {
     private String tags;
 
     /** resource */
-    private Long usedMemory;
-    private Long maxMemory;
-    private Long totalCores;
+    private Long driverCores;
+    private Long driverMemory;
+    private Long executorCores;
+    private Long executorMemory;
+    private Long executorMaxNums;
 
     /** running job */
-    private transient JobsOverview.Task overview;
+    private Long numTasks;
+    private Long numCompletedTasks;
+    private Long numStages;
+    private Long numCompletedStages;
+    private Long usedMemory;
+    private Long usedVCores;
 
     private transient String teamResource;
     private transient String dependency;
     private transient Long sqlId;
     private transient String sparkSql;
-
     private transient Integer[] stateArray;
     private transient Integer[] jobTypeArray;
     private transient Boolean backUp = false;
@@ -446,6 +452,14 @@ public class SparkApplication extends BaseEntity {
     private boolean needFillYarnQueueLabel(SparkExecutionMode mode) {
         return SparkExecutionMode.YARN_CLUSTER == mode || SparkExecutionMode.YARN_CLIENT == mode;
     }
+    private void fillRunningMetrics(SparkApplicationSummary summary) {
+        this.setNumTasks(summary.getNumTasks());
+        this.setNumCompletedTasks(summary.getNumCompletedTasks());
+        this.setNumStages(summary.getNumStages());
+        this.setNumCompletedStages(summary.getNumCompletedStages());
+        this.setUsedMemory(summary.getUsedMemory());
+        this.setUsedVCores(summary.getUsedVCores());
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -470,9 +484,6 @@ public class SparkApplication extends BaseEntity {
         public static final SFunction<SparkApplication, Date> START_TIME = SparkApplication::getStartTime;
         public static final SFunction<SparkApplication, Date> END_TIME = SparkApplication::getEndTime;
         public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;
-        public static final SFunction<SparkApplication, Long> USED_MEMORY = SparkApplication::getUsedMemory;
-        public static final SFunction<SparkApplication, Long> MAX_MEMORY = SparkApplication::getMaxMemory;
-        public static final SFunction<SparkApplication, Long> TOTAL_CORES = SparkApplication::getTotalCores;
         public static final SFunction<SparkApplication, Integer> STATE = SparkApplication::getState;
         public static final SFunction<SparkApplication, String> OPTIONS = SparkApplication::getOptions;
         public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getExecutionMode;

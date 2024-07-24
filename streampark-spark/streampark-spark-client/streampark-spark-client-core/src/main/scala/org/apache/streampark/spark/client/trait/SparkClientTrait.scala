@@ -36,9 +36,9 @@ trait SparkClientTrait extends Logger {
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
-         |    properties       : ${submitRequest.properties.mkString(" ")}
          |    appArgs          : ${submitRequest.appArgs}
          |    appConf          : ${submitRequest.appConf}
+         |    properties       : ${submitRequest.sparkProperties.mkString(",")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
@@ -81,7 +81,7 @@ trait SparkClientTrait extends Logger {
 
   private def prepareConfig(submitRequest: SubmitRequest): Unit = {
     // 1) set default config
-    val userConfig = submitRequest.properties.filter(c => {
+    val userConfig = submitRequest.sparkProperties.filter(c => {
       val k = c._1
       if (k.startsWith("spark.")) {
         true
@@ -91,9 +91,9 @@ trait SparkClientTrait extends Logger {
       }
     })
     val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1))
-    submitRequest.properties.clear()
-    submitRequest.properties.putAll(userConfig)
-    submitRequest.properties.putAll(defaultConfig)
+    submitRequest.sparkProperties.clear()
+    submitRequest.sparkProperties.putAll(userConfig)
+    submitRequest.sparkProperties.putAll(defaultConfig)
   }
 
 }

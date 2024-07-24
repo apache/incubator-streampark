@@ -36,13 +36,12 @@ import java.nio.file.Files
 case class SubmitRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    properties: JavaMap[String, String],
     sparkYaml: String,
     developmentMode: SparkDevelopmentMode,
     id: Long,
-    jobId: String,
     appName: String,
     appConf: String,
+    sparkProperties: JavaMap[String, String],
     applicationType: ApplicationType,
     appArgs: String,
     @Nullable hadoopUser: String,
@@ -53,7 +52,8 @@ case class SubmitRequest(
     "spark.driver.cores" -> "1",
     "spark.driver.memory" -> "1g",
     "spark.executor.cores" -> "1",
-    "spark.executor.memory" -> "1g")
+    "spark.executor.memory" -> "1g",
+    "spark.executor.instances" -> "2")
 
   private[this] lazy val appProperties: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
@@ -78,9 +78,9 @@ case class SubmitRequest(
     }
   }
 
-  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(properties) && properties.containsKey(key)
+  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(sparkProperties) && sparkProperties.containsKey(key)
 
-  def getProp(key: String): Any = properties.get(key)
+  def getProp(key: String): Any = sparkProperties.get(key)
 
   def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
 

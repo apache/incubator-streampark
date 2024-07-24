@@ -326,7 +326,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setMainClass(oldApp.getMainClass());
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
-        newApp.setAppConf(oldApp.getAppConf());
+        newApp.setAppProperties(oldApp.getAppProperties());
         // TODO：这里需要判断吗
         newApp.setAppArgs(appParam.getAppArgs() != null ? appParam.getAppArgs() : oldApp.getAppArgs());
         newApp.setYarnQueue(oldApp.getYarnQueue());
@@ -428,7 +428,7 @@ public class SparkApplicationManageServiceImpl
         application.setVersionId(appParam.getVersionId());
         application.setAppName(appParam.getAppName());
         application.setExecutionMode(appParam.getExecutionMode());
-        application.setAppConf(appParam.getAppConf());
+        application.setAppProperties(appParam.getAppProperties());
         application.setAppArgs(appParam.getAppArgs());
         application.setOptions(appParam.getOptions());
 
