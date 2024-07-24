@@ -15,36 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.e2e.pages.setting.alarm;
 
 import lombok.Getter;
+import org.openqa.selenium.WebDriver;
 
-import java.util.Arrays;
-
-/** Option status */
 @Getter
-public enum OptionStateEnum {
+public class SMSAlertForm extends CommonForm {
 
-    /** Application which is currently action: none. */
-    NONE(0),
-    /** Application which is currently action: releasing. */
-    RELEASING(1),
-    /** Application which is currently action: cancelling. */
-    CANCELLING(2),
+    private WebDriver driver;
 
-    /** Application which is currently action: starting. */
-    STARTING(3),
+    public SMSAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
+        super(alertTypeDetailForm);
 
-    /** Application which is currently action: savepointing. */
-    SAVEPOINTING(4);
-
-    private final int value;
-
-    OptionStateEnum(int value) {
-        this.value = value;
-    }
-
-    public static OptionStateEnum getState(Integer state) {
-        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+        this.driver = alertTypeDetailForm.driver();
     }
 }
