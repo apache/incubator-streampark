@@ -576,6 +576,11 @@ public class Application implements Serializable {
         return FlinkExecutionMode.YARN_PER_JOB == mode || FlinkExecutionMode.YARN_APPLICATION == mode;
     }
 
+    private void setAppId(Long appId) {
+        this.appId = appId;
+        this.id = appId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

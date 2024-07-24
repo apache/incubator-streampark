@@ -87,8 +87,7 @@ public class ProjectController {
     @Permission(team = "#teamId")
     public RestResponse buildLog(
                                  Long id,
-                                 @RequestParam(value = "startOffset", required = false) Long startOffset,
-                                 Long teamId) {
+                                 @RequestParam(value = "startOffset", required = false) Long startOffset) {
         return projectService.getBuildLog(id, startOffset);
     }
 

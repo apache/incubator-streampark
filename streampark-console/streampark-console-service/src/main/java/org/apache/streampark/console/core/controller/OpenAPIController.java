@@ -27,7 +27,6 @@ import org.apache.streampark.console.core.service.application.ApplicationActionS
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
 
-@Slf4j
 @Validated
 @RestController
 @RequestMapping("openapi")
@@ -59,8 +57,7 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping(value = "app/start")
     @RequiresPermissions("app:start")
-    public RestResponse start(Application app) throws Exception {
-        app.setId(app.getAppId());
+    public RestResponse flinkStart(Application app) throws Exception {
         applicationActionService.start(app, false);
         return RestResponse.success(true);
     }
@@ -76,16 +73,14 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping(value = "app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(Application app) throws Exception {
-        app.setId(app.getAppId());
+    public RestResponse flinkCancel(Application app) throws Exception {
         applicationActionService.cancel(app);
         return RestResponse.success();
     }
 
     @PostMapping(value = "curl")
-    public RestResponse copyOpenApiCurl(
-                                        @NotBlank(message = "{required}") String baseUrl,
-                                        @NotBlank(message = "{required}") Long appId,
+    public RestResponse copyOpenApiCurl(String baseUrl,
+                                        Long appId,
                                         @NotBlank(message = "{required}") Long teamId,
                                         @NotBlank(message = "{required}") String name) {
         String url = openAPIComponent.getOpenApiCUrl(baseUrl, appId, teamId, name);
