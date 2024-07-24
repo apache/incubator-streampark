@@ -45,6 +45,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
@@ -599,6 +600,25 @@ public class Application implements Serializable {
 
     public boolean isKubernetesModeJob() {
         return FlinkExecutionMode.isKubernetesMode(this.getFlinkExecutionMode());
+    }
+
+    public static class SFunc {
+
+        public static final SFunction<Application, Long> ID = Application::getId;
+        public static final SFunction<Application, String> JOB_ID = Application::getJobId;
+        public static final SFunction<Application, Date> START_TIME = Application::getStartTime;
+        public static final SFunction<Application, Date> END_TIME = Application::getEndTime;
+        public static final SFunction<Application, Long> DURATION = Application::getDuration;
+        public static final SFunction<Application, Integer> TOTAL_TASK = Application::getTotalTask;
+        public static final SFunction<Application, Integer> TOTAL_TM = Application::getTotalTM;
+        public static final SFunction<Application, Integer> TOTAL_SLOT = Application::getTotalSlot;
+        public static final SFunction<Application, Integer> JM_MEMORY = Application::getJmMemory;
+        public static final SFunction<Application, Integer> TM_MEMORY = Application::getTmMemory;
+        public static final SFunction<Application, Integer> STATE = Application::getState;
+        public static final SFunction<Application, String> OPTIONS = Application::getOptions;
+        public static final SFunction<Application, Integer> AVAILABLE_SLOT = Application::getAvailableSlot;
+        public static final SFunction<Application, Integer> EXECUTION_MODE = Application::getExecutionMode;
+        public static final SFunction<Application, String> JOB_MANAGER_URL = Application::getJobManagerUrl;
     }
 
 }
