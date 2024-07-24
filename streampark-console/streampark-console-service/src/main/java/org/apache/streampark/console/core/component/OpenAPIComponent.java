@@ -52,7 +52,7 @@ public class OpenAPIComponent {
 
     private final Map<String, OpenAPISchema> schemas = new HashMap<>();
 
-    public OpenAPISchema getOpenAPISchema(String name) {
+    public synchronized OpenAPISchema getOpenAPISchema(String name) {
         if (schemas.isEmpty()) {
             try {
                 initOpenAPISchema();
@@ -63,7 +63,7 @@ public class OpenAPIComponent {
         return schemas.get(name);
     }
 
-    public synchronized void initOpenAPISchema() {
+    private void initOpenAPISchema() {
         Class<?> clazz = OpenAPIController.class;
         RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
         String basePath = requestMapping.value()[0];
@@ -78,24 +78,39 @@ public class OpenAPIComponent {
             }
             restUrl = restUrl.replaceAll("/+", "/").replaceAll("/$", "");
 
-            List<OpenAPISchema.Schema> paramList = new ArrayList<>();
+            List<OpenAPISchema.Schema> headerList = new ArrayList<>();
             OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
-            OpenAPI.Param[] params = openAPI.param();
-            String name = openAPI.name();
-
-            for (OpenAPI.Param param : params) {
-                OpenAPISchema.Schema paramDetail = new OpenAPISchema.Schema();
-                paramDetail.setName(param.name());
-                paramDetail.setType(param.type().getName());
-                paramDetail.setRequired(param.required());
-                paramDetail.setDescription(param.description());
-                paramList.add(paramDetail);
+            for (OpenAPI.Param header : openAPI.header()) {
+                headerList.add(paramToSchema(header));
             }
+
+            List<OpenAPISchema.Schema> paramList = new ArrayList<>();
+            for (OpenAPI.Param param : openAPI.param()) {
+                paramList.add(paramToSchema(param));
+            }
+
             OpenAPISchema detail = new OpenAPISchema();
             detail.setUrl(restUrl);
             detail.setSchema(paramList);
-            schemas.put(name, detail);
+            detail.setHeader(headerList);
+
+            schemas.put(openAPI.name(), detail);
         }
+    }
+
+    private OpenAPISchema.Schema paramToSchema(OpenAPI.Param param) {
+        OpenAPISchema.Schema schema = new OpenAPISchema.Schema();
+        schema.setName(param.name());
+        if (StringUtils.isBlank(param.bindFor())) {
+            schema.setBindFor(param.name());
+        } else {
+            schema.setBindFor(param.bindFor());
+        }
+        schema.setType(param.type().getName());
+        schema.setRequired(param.required());
+        schema.setDescription(param.description());
+        schema.setDefaultValue(param.defaultValue());
+        return schema;
     }
 
     private String[] getMethodUriPath(Method method) {
@@ -133,6 +148,7 @@ public class OpenAPIComponent {
         if (schema == null) {
             throw new UnsupportedOperationException("Unsupported OpenAPI: " + name);
         }
+
         String url = schema.getUrl();
         if (StringUtils.isNoneBlank(baseUrl)) {
             url = baseUrl + url;
@@ -146,13 +162,13 @@ public class OpenAPIComponent {
 
         schema.getSchema().forEach(c -> {
             if (c.isRequired()) {
-                if (c.getName().equals("appId")) {
+                if ("appId".equals(c.getBindFor())) {
                     curlBuilder.addFormData(c.getName(), appId);
-                } else if (c.getName().equals("teamId")) {
+                } else if ("teamId".equals(c.getBindFor())) {
                     curlBuilder.addFormData(c.getName(), teamId);
                 }
             } else {
-                curlBuilder.addFormData(c.getName(), "");
+                curlBuilder.addFormData(c.getName(), c.getDefaultValue());
             }
         });
         return curlBuilder.build();

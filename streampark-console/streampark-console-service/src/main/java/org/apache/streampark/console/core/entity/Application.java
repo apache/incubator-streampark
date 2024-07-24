@@ -252,7 +252,6 @@ public class Application implements Serializable {
     private transient String backUpDescription;
     private transient String yarnQueue;
     private transient String serviceAccount;
-    private transient Long appId;
 
     /** Flink Web UI Url */
     private transient String flinkRestUrl;
@@ -575,11 +574,6 @@ public class Application implements Serializable {
 
     private boolean needFillYarnQueueLabel(FlinkExecutionMode mode) {
         return FlinkExecutionMode.YARN_PER_JOB == mode || FlinkExecutionMode.YARN_APPLICATION == mode;
-    }
-
-    private void setAppId(Long appId) {
-        this.appId = appId;
-        this.id = appId;
     }
 
     @Override

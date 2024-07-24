@@ -46,39 +46,41 @@ public class OpenAPIController {
     @Autowired
     private ApplicationActionService applicationActionService;
 
-    @OpenAPI(name = "flinkStart", param = {
-            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
-            @OpenAPI.Param(name = "appId", description = "current flink application id", required = true, type = Long.class),
+    @OpenAPI(name = "flinkStart", header = {
+            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class)
+    }, param = {
+            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "restored app from the savepoint or latest checkpoint", required = false, type = String.class),
+            @OpenAPI.Param(name = "savePointed", description = "restored app from the savepoint or latest checkpoint", required = false, type = String.class, defaultValue = "false"),
             @OpenAPI.Param(name = "savePoint", description = "savepoint or checkpoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class)
+            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class, defaultValue = "false")
     })
     @Permission(app = "#app.appId", team = "#app.teamId")
-    @PostMapping(value = "app/start")
+    @PostMapping("app/start")
     @RequiresPermissions("app:start")
     public RestResponse flinkStart(Application app) throws Exception {
         applicationActionService.start(app, false);
         return RestResponse.success(true);
     }
 
-    @OpenAPI(name = "flinkCancel", param = {
-            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
-            @OpenAPI.Param(name = "appId", description = "current flink application id", required = true, type = Long.class),
+    @OpenAPI(name = "flinkCancel", header = {
+            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class)
+    }, param = {
+            @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "trigger savepoint before taking stopping", required = false, type = boolean.class),
+            @OpenAPI.Param(name = "savePointed", description = "trigger savepoint before taking stopping", required = false, type = boolean.class, defaultValue = "false"),
             @OpenAPI.Param(name = "savePoint", description = "savepoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class),
+            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class, defaultValue = "false"),
     })
     @Permission(app = "#app.appId", team = "#app.teamId")
-    @PostMapping(value = "app/cancel")
+    @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse flinkCancel(Application app) throws Exception {
         applicationActionService.cancel(app);
         return RestResponse.success();
     }
 
-    @PostMapping(value = "curl")
+    @PostMapping("curl")
     public RestResponse copyOpenApiCurl(String baseUrl,
                                         Long appId,
                                         @NotBlank(message = "{required}") Long teamId,
@@ -87,7 +89,7 @@ public class OpenAPIController {
         return RestResponse.success(url);
     }
 
-    @PostMapping(value = "schema")
+    @PostMapping("schema")
     public RestResponse schema(@NotBlank(message = "{required}") String name) {
         OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(name);
         return RestResponse.success(openAPISchema);

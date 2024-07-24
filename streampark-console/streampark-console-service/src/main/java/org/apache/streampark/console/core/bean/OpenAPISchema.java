@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +28,8 @@ import java.util.List;
 public class OpenAPISchema {
 
     private String url;
+
+    private List<Schema> header;
 
     private List<Schema> schema;
 
@@ -41,5 +44,10 @@ public class OpenAPISchema {
         private boolean required;
 
         private String description;
+
+        private String defaultValue;
+
+        @JsonIgnore
+        private String bindFor;
     }
 }

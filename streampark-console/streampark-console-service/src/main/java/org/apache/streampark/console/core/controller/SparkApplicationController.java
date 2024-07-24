@@ -89,7 +89,7 @@ public class SparkApplicationController {
         return RestResponse.success(saved);
     }
 
-    @PostMapping(value = "copy")
+    @PostMapping("copy")
     @RequiresPermissions("app:copy")
     public RestResponse copy(SparkApplication app) throws IOException {
         applicationManageService.copy(app);
@@ -133,14 +133,14 @@ public class SparkApplicationController {
         return RestResponse.success();
     }
 
-    @PostMapping(value = "check/start")
+    @PostMapping("check/start")
     @RequiresPermissions("app:start")
     public RestResponse checkStart(SparkApplication app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
         return RestResponse.success(stateEnum.get());
     }
 
-    @PostMapping(value = "start")
+    @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(SparkApplication app) {
         try {
@@ -151,7 +151,7 @@ public class SparkApplicationController {
         }
     }
 
-    @PostMapping(value = "cancel")
+    @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse stop(SparkApplication app) throws Exception {
         applicationActionService.stop(app);

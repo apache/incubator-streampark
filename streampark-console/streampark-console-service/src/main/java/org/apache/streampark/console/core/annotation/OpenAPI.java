@@ -28,6 +28,8 @@ public @interface OpenAPI {
 
     String name() default "";
 
+    Param[] header() default {};
+
     Param[] param() default {};
 
     @interface Param {
@@ -39,5 +41,10 @@ public @interface OpenAPI {
         boolean required();
 
         Class<?> type();
+
+        String defaultValue() default "";
+
+        String bindFor() default "";
     }
+
 }

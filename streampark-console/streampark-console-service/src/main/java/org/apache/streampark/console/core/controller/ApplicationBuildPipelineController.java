@@ -48,7 +48,7 @@ public class ApplicationBuildPipelineController {
     private AppBuildPipeService appBuildPipeService;
 
     @Permission(app = "#appId")
-    @PostMapping(value = "build")
+    @PostMapping("build")
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);

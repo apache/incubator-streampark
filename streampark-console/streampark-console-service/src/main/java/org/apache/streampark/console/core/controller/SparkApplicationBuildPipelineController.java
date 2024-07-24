@@ -51,7 +51,7 @@ public class SparkApplicationBuildPipelineController {
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
-    @PostMapping(value = "build")
+    @PostMapping("build")
     @RequiresPermissions("app:create")
     @Permission(app = "#appId")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {

@@ -93,7 +93,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "copy")
+    @PostMapping("copy")
     @RequiresPermissions("app:copy")
     public RestResponse copy(Application app) throws IOException {
         applicationManageService.copy(app);
@@ -143,7 +143,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "check/start")
+    @PostMapping("check/start")
     @RequiresPermissions("app:start")
     public RestResponse checkStart(Application app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
@@ -151,7 +151,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "start")
+    @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
         applicationActionService.start(app, false);
@@ -159,7 +159,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
-    @PostMapping(value = "cancel")
+    @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse cancel(Application app) throws Exception {
         applicationActionService.cancel(app);
@@ -290,7 +290,7 @@ public class ApplicationController {
     }
 
     @Permission(app = "#id")
-    @PostMapping(value = "k8s_log")
+    @PostMapping("k8s_log")
     public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
         String resp = applicationInfoService.k8sStartLog(id, offset, limit);
         return RestResponse.success(resp);

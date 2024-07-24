@@ -55,19 +55,19 @@ public class AlertController {
 
     private final AlertService alertService;
 
-    @PostMapping(value = "/add")
+    @PostMapping("/add")
     public RestResponse createAlertConfig(@RequestBody AlertConfigParams params) {
         boolean save = alertConfigService.save(AlertConfig.of(params));
         return RestResponse.success(save);
     }
 
-    @PostMapping(value = "/exists")
+    @PostMapping("/exists")
     public RestResponse verifyAlertConfig(@RequestBody AlertConfigParams params) {
         boolean exist = alertConfigService.exist(AlertConfig.of(params));
         return RestResponse.success(exist);
     }
 
-    @PostMapping(value = "/update")
+    @PostMapping("/update")
     public RestResponse updateAlertConfig(@RequestBody AlertConfigParams params) {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
         return RestResponse.success(update);
@@ -79,14 +79,14 @@ public class AlertController {
         return RestResponse.success(AlertConfigParams.of(alertConfig));
     }
 
-    @PostMapping(value = "/page")
+    @PostMapping("/page")
     public RestResponse pageAlertConfig(
                                         @RequestBody AlertConfigParams params, RestRequest request) {
         IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
         return RestResponse.success(page);
     }
 
-    @PostMapping(value = "/list")
+    @PostMapping("/list")
     public RestResponse listAlertConfig() {
         List<AlertConfig> page = alertConfigService.list();
         return RestResponse.success(page);
