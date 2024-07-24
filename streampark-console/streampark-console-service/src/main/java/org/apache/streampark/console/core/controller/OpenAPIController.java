@@ -82,10 +82,6 @@ public class OpenAPIController {
         return RestResponse.success();
     }
 
-    /**
-     * copy cURL, hardcode now, there is no need for configuration here, because there are several
-     * fixed interfaces
-     */
     @PostMapping(value = "curl")
     public RestResponse copyOpenApiCurl(
                                         @NotBlank(message = "{required}") String baseUrl,
