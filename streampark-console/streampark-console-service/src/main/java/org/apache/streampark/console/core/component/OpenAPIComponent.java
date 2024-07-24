@@ -18,9 +18,9 @@
 package org.apache.streampark.console.core.component;
 
 import org.apache.streampark.common.util.ReflectUtils;
-import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
+import org.apache.streampark.console.core.controller.OpenAPIController;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,8 +43,7 @@ public class OpenAPIComponent {
 
     private final Map<String, OpenAPISchema> schemas = new HashMap<>();
 
-    public OpenAPISchema getOpenAPISchema(String url) {
-        url = ("/" + url).replaceAll("/+", "/").replaceAll("/$", "");
+    public OpenAPISchema getOpenAPISchema(String name) {
         if (schemas.isEmpty()) {
             try {
                 initOpenAPISchema();
@@ -52,42 +51,41 @@ public class OpenAPIComponent {
                 log.error("InitOpenAPISchema failed", e);
             }
         }
-        return schemas.get(url);
+        return schemas.get(name);
     }
 
-    public synchronized void initOpenAPISchema() throws Exception {
-        Map<String, Object> beans = SpringContextUtils.getBeansWithAnnotation(OpenAPI.class);
-        for (Object value : beans.values()) {
-            Class<?> clazz = Class.forName(value.getClass().getName().replaceAll("\\$.*$", ""));
-            RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
-            String basePath = requestMapping.value()[0];
-            List<Method> methodList = ReflectUtils.getMethodsByAnnotation(clazz, OpenAPI.class);
+    public synchronized void initOpenAPISchema() {
+        Class<?> clazz = OpenAPIController.class;
+        RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
+        String basePath = requestMapping.value()[0];
+        List<Method> methodList = ReflectUtils.getMethodsByAnnotation(clazz, OpenAPI.class);
 
-            for (Method method : methodList) {
-                String[] subUriPath = getMethodUriPath(method);
-                String subPath = (subUriPath != null && subUriPath.length > 0) ? subUriPath[0] : "";
-                String restUrl = "/" + basePath;
-                if (subPath != null) {
-                    restUrl += "/" + subPath;
-                }
-                restUrl = restUrl.replaceAll("/+", "/").replaceAll("/$", "");
-
-                List<OpenAPISchema.Schema> paramList = new ArrayList<>();
-                OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
-                OpenAPI.Param[] params = openAPI.param();
-                for (OpenAPI.Param param : params) {
-                    OpenAPISchema.Schema paramDetail = new OpenAPISchema.Schema();
-                    paramDetail.setName(param.name());
-                    paramDetail.setType(param.type().getName());
-                    paramDetail.setRequired(param.required());
-                    paramDetail.setDescription(param.description());
-                    paramList.add(paramDetail);
-                }
-                OpenAPISchema detail = new OpenAPISchema();
-                detail.setUrl(restUrl);
-                detail.setSchema(paramList);
-                schemas.put(restUrl, detail);
+        for (Method method : methodList) {
+            String[] subUriPath = getMethodUriPath(method);
+            String subPath = (subUriPath != null && subUriPath.length > 0) ? subUriPath[0] : "";
+            String restUrl = "/" + basePath;
+            if (subPath != null) {
+                restUrl += "/" + subPath;
             }
+            restUrl = restUrl.replaceAll("/+", "/").replaceAll("/$", "");
+
+            List<OpenAPISchema.Schema> paramList = new ArrayList<>();
+            OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
+            OpenAPI.Param[] params = openAPI.param();
+            String name = openAPI.name();
+
+            for (OpenAPI.Param param : params) {
+                OpenAPISchema.Schema paramDetail = new OpenAPISchema.Schema();
+                paramDetail.setName(param.name());
+                paramDetail.setType(param.type().getName());
+                paramDetail.setRequired(param.required());
+                paramDetail.setDescription(param.description());
+                paramList.add(paramDetail);
+            }
+            OpenAPISchema detail = new OpenAPISchema();
+            detail.setUrl(restUrl);
+            detail.setSchema(paramList);
+            schemas.put(name, detail);
         }
     }
 
@@ -120,4 +118,5 @@ public class OpenAPIComponent {
         }
         return null;
     }
+
 }

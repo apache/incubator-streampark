@@ -34,8 +34,8 @@ class CURLBuilder(val url: String) {
     this
   }
 
-  def addFormData(k: String, v: String): CURLBuilder = {
-    this.formData.put(k, v)
+  def addFormData(k: String, v: java.io.Serializable): CURLBuilder = {
+    this.formData.put(k, v.toString)
     this
   }
 
@@ -45,7 +45,7 @@ class CURLBuilder(val url: String) {
     cURL.append(String.format("'%s' \\\n", url))
     headers.keySet.foreach(h => cURL.append(String.format("-H \'%s: %s\' \\\n", h, headers.get(h))))
     formData.foreach(k =>
-      cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", k, formData.get(k))))
+      cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", k._1, k._2)))
     cURL.append("-i")
     cURL.toString
   }

@@ -19,10 +19,17 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.annotation.OpenAPI;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.component.OpenAPIComponent;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.service.AccessTokenService;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,51 +47,98 @@ import javax.validation.constraints.NotBlank;
 public class OpenAPIController {
 
     @Autowired
-    private AccessTokenService accessTokenService;
+    private OpenAPIComponent openAPIComponent;
 
     @Autowired
-    private OpenAPIComponent openAPIComponent;
+    private ApplicationActionService applicationActionService;
+
+    @Autowired
+    private AccessTokenService accessTokenService;
+
+    @OpenAPI(name = "flinkStart", param = {
+            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
+            @OpenAPI.Param(name = "id", description = "start app id", required = true, type = Long.class),
+            @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
+            @OpenAPI.Param(name = "savePointed", description = "restored app from the savepoint or latest checkpoint", required = false, type = String.class),
+            @OpenAPI.Param(name = "savePoint", description = "savepoint or checkpoint path", required = false, type = String.class),
+            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class)
+    })
+    @Permission(app = "#app.id", team = "#app.teamId")
+    @PostMapping(value = "app/start")
+    @RequiresPermissions("app:start")
+    public RestResponse start(Application app) throws Exception {
+        applicationActionService.start(app, false);
+        return RestResponse.success(true);
+    }
+
+    @OpenAPI(name = "flinkCancel", param = {
+            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
+            @OpenAPI.Param(name = "id", description = "cancel app id", required = true, type = Long.class),
+            @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
+            @OpenAPI.Param(name = "savePointed", description = "trigger savepoint before taking stopping", required = false, type = boolean.class),
+            @OpenAPI.Param(name = "savePoint", description = "savepoint path", required = false, type = String.class),
+            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class),
+    })
+    @Permission(app = "#app.id", team = "#app.teamId")
+    @PostMapping(value = "app/cancel")
+    @RequiresPermissions("app:cancel")
+    public RestResponse cancel(Application app) throws Exception {
+        applicationActionService.cancel(app);
+        return RestResponse.success();
+    }
 
     /**
      * copy cURL, hardcode now, there is no need for configuration here, because there are several
      * fixed interfaces
      */
     @PostMapping(value = "curl")
-    public RestResponse copyRestApiCurl(
-                                        @NotBlank(message = "{required}") String appId,
+    public RestResponse copyOpenApiCurl(
                                         @NotBlank(message = "{required}") String baseUrl,
-                                        @NotBlank(message = "{required}") String path) {
+                                        @NotBlank(message = "{required}") Long appId,
+                                        @NotBlank(message = "{required}") Long teamId,
+                                        @NotBlank(message = "{required}") String name) {
+        String url = getOpenApiCUrl(baseUrl, appId, teamId, name);
+        return RestResponse.success(url);
+    }
+
+    @PostMapping(value = "schema")
+    public RestResponse schema(@NotBlank(message = "{required}") String name) {
+        OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(name);
+        return RestResponse.success(openAPISchema);
+    }
+
+    private String getOpenApiCUrl(String baseUrl, Long appId, Long teamId, String name) {
         String resultCURL = null;
-        CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
+        OpenAPISchema schema = openAPIComponent.getOpenAPISchema(name);
+        String url = schema.getUrl();
+        if (StringUtils.isNoneBlank(baseUrl)) {
+            url = baseUrl + url;
+        }
+        CURLBuilder curlBuilder = new CURLBuilder(url);
         curlBuilder
             .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
             .addHeader(
                 "Authorization",
                 accessTokenService.getByUserId(ServiceHelper.getUserId()).getToken());
 
-        if ("/flink/app/start".equalsIgnoreCase(path)) {
+        if ("flinkStart".equalsIgnoreCase(name)) {
             resultCURL = curlBuilder
+                .addFormData("id", appId)
+                .addFormData("teamId", teamId)
+                .addFormData("savePointed", "false")
+                .addFormData("savePoint", "")
                 .addFormData("allowNonRestored", "false")
-                .addFormData("savePoint", "")
-                .addFormData("savePointed", "false")
-                .addFormData("id", appId)
                 .build();
-        } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
+        } else if ("flinkCancel".equalsIgnoreCase(name)) {
             resultCURL = curlBuilder
                 .addFormData("id", appId)
+                .addFormData("teamId", teamId)
                 .addFormData("savePointed", "false")
-                .addFormData("drain", "false")
-                .addFormData("nativeFormat", "false")
                 .addFormData("savePoint", "")
+                .addFormData("drain", "false")
                 .build();
         }
-        return RestResponse.success(resultCURL);
-    }
-
-    @PostMapping(value = "schema")
-    public RestResponse schema(@NotBlank(message = "{required}") String url) {
-        OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(url);
-        return RestResponse.success(openAPISchema);
+        return resultCURL;
     }
 
 }

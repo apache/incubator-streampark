@@ -75,6 +75,7 @@
       ...(getDescSchema() as any),
       {
         field: 'resetApi',
+        span: 2,
         label: h('div', null, [
           t('flink.app.detail.resetApi'),
           h(Tooltip, { title: t('flink.app.detail.resetApiToolTip'), placement: 'top' }, () =>
@@ -86,27 +87,21 @@
             Button,
             {
               type: 'primary',
-              shape: 'round',
+              size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('/flink/app/start'),
+              onClick: () => handleCopyCurl('flinkStart'),
             },
-            () => [
-              h(Icon, { icon: 'ant-design:copy-outlined' }),
-              t('flink.app.detail.copyStartcURL'),
-            ],
+            () => [t('flink.app.detail.copyStartcURL')],
           ),
           h(
             Button,
             {
               type: 'primary',
-              shape: 'round',
+              size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('/flink/app/cancel'),
+              onClick: () => handleCopyCurl('flinkCancel'),
             },
-            () => [
-              h(Icon, { icon: 'ant-design:copy-outlined' }),
-              t('flink.app.detail.copyCancelcURL'),
-            ],
+            () => [t('flink.app.detail.copyCancelcURL')],
           ),
         ],
       },
@@ -145,9 +140,9 @@
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)
       ) {
-        handleYarn();
+        await handleYarn();
       }
-      handleDetailTabs();
+      await handleDetailTabs();
     }
     Object.assign(app, res);
   }
@@ -176,7 +171,7 @@
   }
 
   /* copyCurl */
-  async function handleCopyCurl(urlPath) {
+  async function handleCopyCurl(name) {
     const resp = await fetchCheckToken({});
     const result = parseInt(resp);
     if (result === 0) {
@@ -195,19 +190,13 @@
       });
     } else {
       const res = await fetchCopyCurl({
-        appId: app.id,
         baseUrl: baseUrl(),
-        path: urlPath,
+        appId: app.id,
+        name: name,
       });
       copy(res);
       createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
     }
-  }
-
-  /* Documentation page */
-  function handleDocPage() {
-    const res = window.origin + '/doc.html';
-    window.open(res);
   }
 
   async function getExternalLinks() {
@@ -258,7 +247,6 @@
     <Description @register="registerDescription" />
     <Divider class="mt-20px -mb-17px" />
     <DetailTab :app="app" :tabConf="detailTabs" />
-
     <Mergely @register="registerConfDrawer" :readOnly="true" />
   </PageWrapper>
 </template>

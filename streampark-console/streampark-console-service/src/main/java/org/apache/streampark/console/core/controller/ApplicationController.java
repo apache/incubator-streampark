@@ -23,7 +23,6 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
-import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -56,7 +55,6 @@ import java.util.Map;
 @Slf4j
 @Validated
 @RestController
-@OpenAPI
 @RequestMapping("flink/app")
 public class ApplicationController {
 
@@ -152,14 +150,6 @@ public class ApplicationController {
         return RestResponse.success(stateEnum.get());
     }
 
-    @OpenAPI(param = {
-            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
-            @OpenAPI.Param(name = "id", description = "start app id", required = true, type = Long.class),
-            @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "restored app from the savepoint or latest checkpoint", required = false, type = String.class),
-            @OpenAPI.Param(name = "savePoint", description = "savepoint or checkpoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class)
-    })
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping(value = "start")
     @RequiresPermissions("app:start")
@@ -168,14 +158,6 @@ public class ApplicationController {
         return RestResponse.success(true);
     }
 
-    @OpenAPI(param = {
-            @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class),
-            @OpenAPI.Param(name = "id", description = "cancel app id", required = true, type = Long.class),
-            @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "trigger savepoint before taking stopping", required = false, type = boolean.class),
-            @OpenAPI.Param(name = "savePoint", description = "savepoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class)
-    })
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping(value = "cancel")
     @RequiresPermissions("app:cancel")
