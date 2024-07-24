@@ -19,6 +19,7 @@ package org.apache.streampark.e2e.pages.setting;
 
 import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
+import org.apache.streampark.e2e.pages.setting.alarm.AlarmPage;
 
 import lombok.Getter;
 import org.openqa.selenium.WebElement;
@@ -35,6 +36,9 @@ public class SettingPage extends NavBarPage implements NavBarPage.NavBarItem {
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'External Link')]//..")
     private WebElement menuExternalLinkManagement;
+
+    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Alarms')]//..")
+    private WebElement menuAlarmManagement;
 
     public SettingPage(RemoteWebDriver driver) {
         super(driver);
@@ -53,6 +57,13 @@ public class SettingPage extends NavBarPage implements NavBarPage.NavBarItem {
                 .until(ExpectedConditions.elementToBeClickable(menuExternalLinkManagement));
             menuExternalLinkManagement.click();
             return tab.cast(new ExternalLinkPage(driver));
+        }
+
+        if (tab == AlarmPage.class) {
+            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+                .until(ExpectedConditions.elementToBeClickable(menuAlarmManagement));
+            menuAlarmManagement.click();
+            return tab.cast(new AlarmPage(driver));
         }
 
         throw new UnsupportedOperationException("Unknown tab: " + tab.getName());

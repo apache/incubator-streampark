@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.hc.core5.util.Timeout;
@@ -383,7 +384,7 @@ public class SparkAppHttpWatcher {
      * @param appState spark application state
      */
     private void doAlert(SparkApplication application, SparkAppStateEnum appState) {
-        AlertTemplate alertTemplate = AlertTemplate.of(application, appState);
+        AlertTemplate alertTemplate = AlertTemplateUtils.createAlertTemplate(application, appState);
         alertService.alert(application.getAlertId(), alertTemplate);
     }
 }

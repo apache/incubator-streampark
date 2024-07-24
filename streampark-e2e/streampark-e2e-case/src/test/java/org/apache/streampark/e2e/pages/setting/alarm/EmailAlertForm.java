@@ -15,36 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.e2e.pages.setting.alarm;
 
 import lombok.Getter;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
-import java.util.Arrays;
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
 
-/** Option status */
 @Getter
-public enum OptionStateEnum {
+public class EmailAlertForm extends CommonForm {
 
-    /** Application which is currently action: none. */
-    NONE(0),
-    /** Application which is currently action: releasing. */
-    RELEASING(1),
-    /** Application which is currently action: cancelling. */
-    CANCELLING(2),
+    private WebDriver driver;
 
-    /** Application which is currently action: starting. */
-    STARTING(3),
+    @FindBy(id = "form_item_alertEmail")
+    private WebElement inputEmail;
 
-    /** Application which is currently action: savepointing. */
-    SAVEPOINTING(4);
+    public EmailAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
+        super(alertTypeDetailForm);
 
-    private final int value;
-
-    OptionStateEnum(int value) {
-        this.value = value;
+        this.driver = alertTypeDetailForm.driver();
     }
 
-    public static OptionStateEnum getState(Integer state) {
-        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    public EmailAlertForm email(String email) {
+        WebElementDeleteAndInput(inputEmail, email);
+        return this;
     }
 }
