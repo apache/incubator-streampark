@@ -125,4 +125,12 @@ export default {
     dragText: '请按住滑块拖动',
     successText: '验证通过',
   },
+  openApi: {
+    param: '参数名',
+    defaultValue: '默认值',
+    required: '必填',
+    type: '类型',
+    description: '说明',
+    empty: '该请求暂无该类型数据',
+  },
 };

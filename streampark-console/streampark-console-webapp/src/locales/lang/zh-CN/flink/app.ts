@@ -110,6 +110,7 @@ export default {
     compare: '比较',
     compareSelectTips: '请选择目标板本',
     resetApi: 'Open API',
+    copyCurl: '复制 CURL',
     resetApiToolTip: 'OPEN API，第三方系统可轻松对接 StreamPark',
     copyStartcURL: '作业启动',
     copyCancelcURL: '作业停止',
