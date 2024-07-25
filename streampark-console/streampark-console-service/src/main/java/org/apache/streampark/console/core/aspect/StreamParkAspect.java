@@ -53,6 +53,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -103,7 +104,8 @@ public class StreamParkAspect {
         if (isApi != null && isApi) {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
-                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+                HttpServletRequest request =
+                    ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
                 String url = request.getRequestURI();
                 if (openapiWhitelist.contains(url)) {
                     log.info("request by openapi white-list: {} ", url);
