@@ -77,7 +77,7 @@ export default defineComponent({
         <BasicModal
           width={900}
           onRegister={registerModal}
-          title="OpenApi"
+          title={t('flink.app.detail.apiTitle')}
           minHeight={400}
           okText={t('flink.app.detail.copyCurl')}
           onOk={handleCopyCurl}
