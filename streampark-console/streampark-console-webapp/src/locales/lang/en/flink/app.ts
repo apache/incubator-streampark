@@ -117,10 +117,11 @@ export default {
     compare: 'Compare',
     compareSelectTips: 'Please select the target version',
     resetApi: 'Rest Api',
+    copyCurl: 'Copy Curl',
     resetApiToolTip:
       'Rest API external call interface,other third-party systems easy to access StreamPark',
-    copyStartcURL: 'Copy Start cURL',
-    copyCancelcURL: 'Copy Cancel cURL',
+    copyStartcURL: 'Start cURL',
+    copyCancelcURL: 'Cancel cURL',
     apiDocCenter: 'Api Doc Center',
     nullAccessToken: 'access token is null,please contact the administrator to add.',
     invalidAccessToken: 'access token is invalid,please contact the administrator.',
