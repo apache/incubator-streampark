@@ -191,10 +191,10 @@ export default defineComponent({
       <>
         <Skeleton loading={fetchLoading.value} active>
           <div class="flex-none flex-shrink-0 ">
-            <div class="min-w-[12rem] flex min-h-9 flex-1 whitespace-nowrap rounded border dark:border-[#1f1f1f] border-[#f3f4f6]">
+            <div class="min-w-[12rem] flex min-h-9 flex-1 whitespace-nowrap rounded border dark:border-[#303030] border-[#f3f4f6]">
               {renderRequestMethod()}
               <div
-                class="flex flex-1 items-center text-[#111827] whitespace-nowrap rounded-r border-l border-[#f3f4f6] bg-[#f9fafb] dark:bg-[#1c1c1e] dark:border-[#1f1f1f] transition "
+                class="flex flex-1 items-center text-[#111827] whitespace-nowrap rounded-r border-l border-[#f3f4f6] bg-[#f9fafb] dark:bg-[#1c1c1e] dark:text-[#fff] dark:border-[#303030] transition "
                 style="padding-left:10px"
               >
                 {requestRef.value.url}
