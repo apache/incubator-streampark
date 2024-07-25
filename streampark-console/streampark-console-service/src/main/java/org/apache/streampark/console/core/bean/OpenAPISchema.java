@@ -29,6 +29,8 @@ public class OpenAPISchema {
 
     private String url;
 
+    private String method;
+
     private List<Schema> header;
 
     private List<Schema> schema;
