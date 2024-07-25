@@ -26,8 +26,8 @@ enum Api {
  * @param data
  * @returns {Promise<number>}
  */
-export function fetchApiSchema(data) {
-  return defHttp.post<number>({ url: Api.SCHEMA, data });
+export function fetchApiSchema(data: { name: string }) {
+  return defHttp.post({ url: Api.SCHEMA, data });
 }
 /**
  * copyCurl

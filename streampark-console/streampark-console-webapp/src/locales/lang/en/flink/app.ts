@@ -119,6 +119,8 @@ export default {
     compare: 'Compare',
     compareSelectTips: 'Please select the target version',
     resetApi: 'Rest Api',
+    copyCurl: 'Copy Curl',
+    apiTitle: 'Api Detail',
     resetApiToolTip:
       'Rest API external call interface,other third-party systems easy to access StreamPark',
     copyStartcURL: 'App Start',
