@@ -23,6 +23,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchCopyCurl } from '/@/api/system/openapi';
 import { baseUrl } from '/@/api';
 import { useClipboard } from '@vueuse/core';
+import { SvgIcon } from '/@/components/Icon';
 
 export default defineComponent({
   name: 'RequestModal',
@@ -77,10 +78,19 @@ export default defineComponent({
         <BasicModal
           width={900}
           onRegister={registerModal}
-          title={t('flink.app.detail.apiTitle')}
           minHeight={400}
           okText={t('flink.app.detail.copyCurl')}
           onOk={handleCopyCurl}
+          v-slots={{
+            title: () => (
+              <>
+                <div class="flex items-center">
+                  <SvgIcon name="api" size={24}></SvgIcon>
+                  <div class="pl-6px">{t('flink.app.detail.apiTitle')}</div>
+                </div>
+              </>
+            ),
+          }}
         >
           {currentRef.value.name && <OpenApi name={currentRef.value.name}></OpenApi>}
         </BasicModal>

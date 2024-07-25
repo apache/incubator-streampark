@@ -174,7 +174,9 @@ export default defineComponent({
                 <div
                   id="method"
                   class="flex w-20 rounded-l bg-[#f9fafb] dark:bg-[#1c1c1e] px-4 py-2 font-semibold justify-center transition"
-                  style={'color: ' + darkMode ? currentMethod.lightColor : currentMethod.darkColor}
+                  style={{
+                    color: darkMode ? currentMethod.lightColor : currentMethod.darkColor,
+                  }}
                 >
                   {requestRef.value.method.toLocaleUpperCase()}
                 </div>
@@ -189,7 +191,7 @@ export default defineComponent({
       <>
         <Skeleton loading={fetchLoading.value} active>
           <div class="flex-none flex-shrink-0 ">
-            <div class="min-w-[12rem] flex h-9 flex-1 whitespace-nowrap rounded border dark:border-[#1f1f1f] border-[#f3f4f6]">
+            <div class="min-w-[12rem] flex min-h-9 flex-1 whitespace-nowrap rounded border dark:border-[#1f1f1f] border-[#f3f4f6]">
               {renderRequestMethod()}
               <div
                 class="flex flex-1 items-center text-[#111827] whitespace-nowrap rounded-r border-l border-[#f3f4f6] bg-[#f9fafb] dark:bg-[#1c1c1e] dark:border-[#1f1f1f] transition "
