@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PermissionScope {
+public @interface Permission {
 
     String user() default "";
 

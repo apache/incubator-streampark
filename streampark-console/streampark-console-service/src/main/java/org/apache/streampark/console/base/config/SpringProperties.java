@@ -170,9 +170,6 @@ public class SpringProperties {
         config.put("spring.servlet.multipart.max-file-size", "-1");
         config.put("spring.servlet.multipart.max-request-size", "-1");
 
-        // swagger-ui
-        config.put("springdoc.api-docs.enabled", "true");
-
         // metrics
         config.put("management.health.ldap.enabled", "false");
         return config;

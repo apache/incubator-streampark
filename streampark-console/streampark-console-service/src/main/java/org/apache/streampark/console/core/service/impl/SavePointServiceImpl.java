@@ -40,8 +40,8 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
@@ -107,9 +107,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
-
-    @Autowired
-    private ServiceHelper commonService;
 
     @Qualifier("triggerSavepointExecutor")
     @Autowired
@@ -196,7 +193,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         applicationLog.setJobManagerUrl(application.getJobManagerUrl());
         applicationLog.setOptionTime(new Date());
         applicationLog.setYarnAppId(application.getClusterId());
-        applicationLog.setUserId(commonService.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;
     }
 

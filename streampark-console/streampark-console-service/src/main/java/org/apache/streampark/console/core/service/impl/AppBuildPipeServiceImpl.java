@@ -53,11 +53,11 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.maven.Artifact;
@@ -132,9 +132,6 @@ public class AppBuildPipeServiceImpl
 
     @Autowired
     private ApplicationBackUpService backUpService;
-
-    @Autowired
-    private ServiceHelper serviceHelper;
 
     @Autowired
     private SettingService settingService;
@@ -353,7 +350,7 @@ public class AppBuildPipeServiceImpl
 
                     } else {
                         Message message = new Message(
-                            serviceHelper.getUserId(),
+                            ServiceHelper.getUserId(),
                             app.getId(),
                             app.getJobName().concat(" release failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -417,7 +414,7 @@ public class AppBuildPipeServiceImpl
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setUserId(serviceHelper.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
         return applicationLog;
     }
 
@@ -599,7 +596,7 @@ public class AppBuildPipeServiceImpl
             case PYFLINK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
-                String sqlDistJar = serviceHelper.getFlinkSqlClientJar(flinkEnv);
+                String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
                 if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);

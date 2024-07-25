@@ -41,8 +41,6 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
 
-        <knife4j-openapi3.version>4.0.0</knife4j-openapi3.version>
-        <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
         <commons-compress.version>1.21</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
         <shiro.version>1.10.0</shiro.version>
@@ -404,25 +402,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <!-- openapi -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc-openapi-ui.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-            <version>${knife4j-openapi3.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springdoc</groupId>
-                    <artifactId>springdoc-openapi-webflux-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!--Test dependencies start.-->

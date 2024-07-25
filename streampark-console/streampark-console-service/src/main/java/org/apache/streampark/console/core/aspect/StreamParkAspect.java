@@ -19,13 +19,14 @@ package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.enums.MessageStatus;
+import org.apache.streampark.console.base.enums.MessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
@@ -61,10 +62,10 @@ public class StreamParkAspect {
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
-    @Autowired
-    private ServiceHelper serviceHelper;
+
     @Autowired
     private MemberService memberService;
+
     @Autowired
     private ApplicationManageService applicationManageService;
 
@@ -102,36 +103,36 @@ public class StreamParkAspect {
         return target;
     }
 
-    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
     public void permissionAction() {
     }
 
     @Around("permissionAction()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        PermissionScope permissionScope = methodSignature.getMethod().getAnnotation(PermissionScope.class);
+        Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
-        User currentUser = serviceHelper.getLoginUser();
+        User currentUser = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, MessageStatus.SYSTEM_USER_NOT_LOGIN);
 
         boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 
         if (!isAdmin) {
             // 1) check userId
-            Long userId = getId(joinPoint, methodSignature, permissionScope.user());
+            Long userId = getId(joinPoint, methodSignature, permission.user());
             ApiAlertException.throwIfTrue(
                 userId != null && !currentUser.getUserId().equals(userId),
                 SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH);
 
             // 2) check team
-            Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
+            Long teamId = getId(joinPoint, methodSignature, permission.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(member == null, SYSTEM_PERMISSION_TEAM_NO_PERMISSION);
             }
 
             // 3) check app
-            Long appId = getId(joinPoint, methodSignature, permissionScope.app());
+            Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
                 Application app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, FLINk_APP_IS_NULL);

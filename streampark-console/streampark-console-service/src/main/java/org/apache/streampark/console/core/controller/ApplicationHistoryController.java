@@ -42,21 +42,21 @@ public class ApplicationHistoryController {
     @Autowired
     private ApplicationInfoService applicationInfoService;
 
-    @PostMapping("uploadJars")
+    @PostMapping("upload_jars")
     @RequiresPermissions("app:create")
     public RestResponse listUploadJars() {
         List<String> jars = applicationInfoService.listHistoryUploadJars();
         return RestResponse.success(jars);
     }
 
-    @PostMapping("k8sNamespaces")
+    @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")
     public RestResponse listK8sNamespace() {
         List<String> namespaces = applicationInfoService.listRecentK8sNamespace();
         return RestResponse.success(namespaces);
     }
 
-    @PostMapping("sessionClusterIds")
+    @PostMapping("session_cluster_ids")
     @RequiresPermissions("app:create")
     public RestResponse listSessionClusterId(int executionMode) {
         List<String> clusterIds;
@@ -73,28 +73,28 @@ public class ApplicationHistoryController {
         return RestResponse.success(clusterIds);
     }
 
-    @PostMapping("flinkBaseImages")
+    @PostMapping("flink_base_images")
     @RequiresPermissions("app:create")
     public RestResponse listFlinkBaseImage() {
         List<String> images = applicationInfoService.listRecentFlinkBaseImage();
         return RestResponse.success(images);
     }
 
-    @PostMapping("flinkPodTemplates")
+    @PostMapping("flink_pod_templates")
     @RequiresPermissions("app:create")
     public RestResponse listPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sPodTemplate();
         return RestResponse.success(templates);
     }
 
-    @PostMapping("flinkJmPodTemplates")
+    @PostMapping("flink_jm_pod_templates")
     @RequiresPermissions("app:create")
     public RestResponse listJmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sJmPodTemplate();
         return RestResponse.success(templates);
     }
 
-    @PostMapping("flinkTmPodTemplates")
+    @PostMapping("flink_tm_pod_templates")
     @RequiresPermissions("app:create")
     public RestResponse listTmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sTmPodTemplate();

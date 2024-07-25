@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -76,7 +76,7 @@ public class MemberController {
     }
 
     @PostMapping("post")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:add")
     public RestResponse create(@Valid Member member) {
         this.memberService.createMember(member);
@@ -84,7 +84,7 @@ public class MemberController {
     }
 
     @DeleteMapping("delete")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:delete")
     public RestResponse delete(Member member) {
         this.memberService.remove(member.getId());
@@ -92,7 +92,7 @@ public class MemberController {
     }
 
     @PutMapping("update")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:update")
     public RestResponse update(Member member) {
         this.memberService.updateMember(member);
