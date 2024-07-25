@@ -63,18 +63,20 @@ public class EnvironmentPage extends NavBarPage implements SettingPage.Tab {
     @FindBy(xpath = "//button[contains(@class, 'swal2-confirm') and contains(@class, 'swal2-styled') and text()='OK']")
     private WebElement errorMessageConfirmButton;
 
-    public EnvironmentDetailForm createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum envSettingTypeEnum) {
+    public EnvironmentDetailForm createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum envSettingTypeEnum) throws InterruptedException {
         waitForPageLoading();
         switch (envSettingTypeEnum) {
             case Docker:
                 new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                     .until(ExpectedConditions.elementToBeClickable(btnCreateDockerSetting));
                 btnCreateDockerSetting.click();
+                Thread.sleep(5000);
                 break;
             case Email:
                 new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
                     .until(ExpectedConditions.elementToBeClickable(btnCreateEmailSetting));
                 btnCreateEmailSetting.click();
+                Thread.sleep(5000);
                 break;
             default:
                 // ignore

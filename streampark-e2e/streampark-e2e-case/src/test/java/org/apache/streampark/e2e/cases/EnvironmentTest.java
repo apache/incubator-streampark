@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
@@ -72,7 +72,8 @@ public class EnvironmentTest {
     final String emailUser = "email_password";
     final String emailPassword = "email_password";
 
-    final @BeforeAll public static void setup() {
+    @BeforeAll
+    public static void setup() {
         new LoginPage(browser)
             .login(userName, password, teamName)
             .goToNav(SettingPage.class)
@@ -81,7 +82,7 @@ public class EnvironmentTest {
 
     @Test
     @Order(10)
-    public void testCreateEnvironment() {
+    public void testCreateEnvironment() throws InterruptedException {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
         environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Maven)
@@ -108,7 +109,7 @@ public class EnvironmentTest {
 
     @Test
     @Order(20)
-    public void testCreateEmailSettingFailedWithAuth() {
+    public void testCreateEmailSettingFailedWithAuth() throws InterruptedException {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
         EmailSettingForm emailSettingForm =
@@ -134,17 +135,14 @@ public class EnvironmentTest {
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(environmentPage.errorMessageConfirmButton()));
-        environmentPage.errorMessageConfirmButton().click();
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
         emailSettingForm.cancel();
     }
 
     @Test
     @Order(130)
-    public void testCreateDockerSettingFailed() {
+    public void testCreateDockerSettingFailed() throws InterruptedException {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
-
         DockerSettingForm dockerSettingForm =
             environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Docker)
                 .<DockerSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Docker)
@@ -168,9 +166,7 @@ public class EnvironmentTest {
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(environmentPage.errorMessageConfirmButton()));
-        environmentPage.errorMessageConfirmButton().click();
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
         dockerSettingForm.cancel();
     }
 }
