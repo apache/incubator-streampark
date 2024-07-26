@@ -40,10 +40,11 @@ case class SubmitRequest(
     developmentMode: SparkDevelopmentMode,
     id: Long,
     appName: String,
+    mainClass: String,
     appConf: String,
-    sparkProperties: JavaMap[String, String],
+    appProperties: JavaMap[String, String],
+    appArgs: JavaList[String],
     applicationType: ApplicationType,
-    appArgs: String,
     @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
@@ -55,19 +56,13 @@ case class SubmitRequest(
     "spark.executor.memory" -> "1g",
     "spark.executor.instances" -> "2")
 
-  private[this] lazy val appProperties: Map[String, String] = getParameterMap(
+  lazy val sparkParameterMap: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
     case SparkDevelopmentMode.SPARK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => mainClass
     case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
-  }
-
-  lazy val effectiveAppName: String = if (this.appName == null) {
-    appProperties(KEY_FLINK_APP_NAME)
-  } else {
-    this.appName
   }
 
   lazy val userJarPath: String = {
@@ -77,10 +72,6 @@ case class SubmitRequest(
         buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
     }
   }
-
-  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(sparkProperties) && sparkProperties.containsKey(key)
-
-  def getProp(key: String): Any = sparkProperties.get(key)
 
   def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
 
@@ -164,11 +155,11 @@ case class SubmitRequest(
       case _ =>
         if (this.buildResult == null) {
           throw new Exception(
-            s"[spark-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
+            s"[spark-submit] current job: $appName was not yet built, buildResult is empty")
         }
         if (!this.buildResult.pass) {
           throw new Exception(
-            s"[spark-submit] current job ${this.effectiveAppName} build failed, please check")
+            s"[spark-submit] current job $appName build failed, please check")
         }
     }
   }

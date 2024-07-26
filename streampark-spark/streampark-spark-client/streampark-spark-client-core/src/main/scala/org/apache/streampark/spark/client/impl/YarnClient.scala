@@ -23,7 +23,6 @@ import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
 
-import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
@@ -74,7 +73,7 @@ object YarnClient extends SparkClientTrait {
     // 3) launch
     Try(launch(launcher)) match {
       case Success(handle: SparkAppHandle) =>
-        logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.effectiveAppName} is submit successful, " +
+        logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.appName} is submit successful, " +
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
         sparkHandles += handle.getAppId -> handle
@@ -111,7 +110,7 @@ object YarnClient extends SparkClientTrait {
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
       .setAppResource(submitRequest.userJarPath)
       .setMainClass(submitRequest.appMain)
-      .setAppName(submitRequest.effectiveAppName)
+      .setAppName(submitRequest.appName)
       .setConf(
         "spark.yarn.jars",
         submitRequest.hdfsWorkspace.sparkLib + "/*.jar")
@@ -128,29 +127,29 @@ object YarnClient extends SparkClientTrait {
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {
     logger.info("[StreamPark][Spark][YarnClient] set spark configuration.")
     // 1) set spark conf
-    submitRequest.sparkProperties.foreach(prop => {
+    submitRequest.appProperties.foreach(prop => {
       val k = prop._1
       val v = prop._2
       logInfo(s"| $k  : $v")
       sparkLauncher.setConf(k, v)
     })
 
-    // 2) appArgs...
+    // 2) set spark args
+    submitRequest.appArgs.foreach(sparkLauncher.addAppArgs(_))
     if (submitRequest.hasExtra("sql")) {
       sparkLauncher.addAppArgs("--sql", submitRequest.getExtra("sql").toString)
     }
-
-    // 3) set
-    setYarnQueue(sparkLauncher, submitRequest.extraParameter)
   }
 
-  private def setYarnQueue(sparkLauncher: SparkLauncher, map: JavaMap[String, Any]): Unit = {
+  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
     logger.info("[StreamPark][Spark][YarnClient] Spark launcher start setting yarn queue.")
-    Option(map.get("yarnQueueName")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(sparkLauncher.setConf("spark.yarn.queue", _))
-    Option(map.get("yarnQueueLabel")).map(_.asInstanceOf[String]).filter(StringUtils.isNotBlank).foreach(_ => {
-      sparkLauncher.setConf("spark.yarn.am.nodeLabelExpression", _)
-      sparkLauncher.setConf("spark.yarn.executor.nodeLabelExpression", _)
-    })
+    if(submitRequest.hasExtra("yarnQueueName")){
+      submitRequest.appProperties.put("spark.yarn.queue", submitRequest.getExtra("yarnQueueName").asInstanceOf[String])
+    }
+    if(submitRequest.hasExtra("yarnQueueLabel")){
+      submitRequest.appProperties.put("spark.yarn.am.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+      submitRequest.appProperties.put("spark.yarn.executor.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+    }
   }
 
 }

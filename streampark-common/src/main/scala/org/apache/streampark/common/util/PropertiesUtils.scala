@@ -382,7 +382,7 @@ object PropertiesUtils extends Logger {
     new JavaHashMap[String, JavaMap[String, String]](map)
   }
 
-  /** extract spark configuration from sparkApplication.dynamicProperties */
+  /** extract spark configuration from sparkApplication.appProperties */
   @Nonnull def extractSparkPropertiesAsJava(properties: String): JavaMap[String, String] =
     new JavaHashMap[String, String](extractSparkProperties(properties))
 
@@ -403,6 +403,27 @@ object PropertiesUtils extends Logger {
         case _ =>
       }
       map.toMap
+    }
+  }
+
+  /** extract spark configuration from sparkApplication.appArgs */
+  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] =
+    new JavaArrayList[String](extractSparkArguments(arguments))
+
+  @Nonnull def extractSparkArguments(arguments: String): List[String] = {
+    if (StringUtils.isEmpty(arguments)) List.empty[String]
+    else {
+      val list = List[String]()
+      arguments.split("\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?") match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              list :+ x
+            }
+          })
+        case _ =>
+      }
+      list
     }
   }
 }

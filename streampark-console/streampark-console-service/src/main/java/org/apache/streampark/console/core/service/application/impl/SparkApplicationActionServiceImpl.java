@@ -318,10 +318,11 @@ public class SparkApplicationActionServiceImpl
             SparkDevelopmentMode.valueOf(application.getJobType()),
             application.getId(),
             application.getAppName(),
+            application.getMainClass(),
             appConf,
             PropertiesUtils.extractSparkPropertiesAsJava(application.getAppProperties()),
+            PropertiesUtils.extractSparkArgumentsAsJava(application.getAppArgs()),
             application.getApplicationType(),
-            applicationArgs,
             application.getHadoopUser(),
             buildResult,
             extraParameter);
