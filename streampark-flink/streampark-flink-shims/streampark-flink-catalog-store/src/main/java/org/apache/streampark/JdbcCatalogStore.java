@@ -70,13 +70,10 @@ public class JdbcCatalogStore extends AbstractCatalogStore {
     public void close() {
         closeResultSetAndStatement();
         try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            jdbcConnectionProvider.close();
+        } catch (Exception e) {
+            throw new CatalogException(e);
         }
-        connection = null;
         super.close();
     }
 
