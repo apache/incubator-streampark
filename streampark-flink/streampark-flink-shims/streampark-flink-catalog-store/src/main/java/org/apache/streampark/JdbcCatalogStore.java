@@ -101,13 +101,14 @@ public class JdbcCatalogStore extends AbstractCatalogStore {
     public void removeCatalog(String catalogName, boolean ignoreIfNotExists) throws CatalogException {
         checkOpenState();
         try {
-            statement.executeUpdate(
-                String.format("delete from %s where catalog_name=%s", this.catalogTableName, catalogName));
+            int effectRow = statement.executeUpdate(
+                String.format("delete from %s where catalog_name='%s'", this.catalogTableName, catalogName));
+
+            if (effectRow == 0 && !ignoreIfNotExists) {
+                throw new CatalogException(String.format("Remove catalog %s failed!", catalogName));
+            }
         } catch (SQLException e) {
             LOG.error("Remove catalog {} failed!", catalogName, e);
-            if (ignoreIfNotExists && e.getErrorCode() == 1054) {
-                return;
-            }
             throw new CatalogException(String.format("Remove catalog %s failed!", catalogName));
         }
     }
@@ -118,7 +119,7 @@ public class JdbcCatalogStore extends AbstractCatalogStore {
         try {
             resultSet = statement
                 .executeQuery(
-                    String.format("select * from %s where catalog_name=%s", this.catalogTableName, catalogName));
+                    String.format("select * from %s where catalog_name='%s'", this.catalogTableName, catalogName));
             while (resultSet.next()) {
                 return Optional.of(CatalogDescriptor.of(catalogName,
                     Configuration.fromMap(JacksonUtils.read(resultSet.getString("configuration"), Map.class))));
@@ -148,7 +149,8 @@ public class JdbcCatalogStore extends AbstractCatalogStore {
     public boolean contains(String catalogName) throws CatalogException {
         checkOpenState();
         try {
-            resultSet = statement.executeQuery(String.format("select * from %s;", this.catalogTableName));
+            resultSet = statement.executeQuery(
+                String.format("select * from %s where catalog_name='%s';", this.catalogTableName, catalogName));
             while (resultSet.next()) {
                 resultSet.getString("catalog_name");
                 return true;
