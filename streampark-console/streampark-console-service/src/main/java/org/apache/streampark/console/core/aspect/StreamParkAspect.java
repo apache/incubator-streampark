@@ -20,11 +20,11 @@ package org.apache.streampark.console.core.aspect;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
@@ -42,11 +42,20 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -55,16 +64,34 @@ public class StreamParkAspect {
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
-    @Autowired
-    private ServiceHelper serviceHelper;
+
     @Autowired
     private MemberService memberService;
+
     @Autowired
     private ApplicationManageService applicationManageService;
 
+    private final Set<String> openapiWhitelist = new HashSet<>();
+
+    @PostConstruct
+    public void initOpenapiWhitelist() {
+        String whiteLists = SpringProperties.getProperty("streampark.openapi.white-list");
+        if (StringUtils.isNotBlank(whiteLists)) {
+            String[] whiteList = whiteLists.trim().split("\\s");
+            for (String order : whiteList) {
+                if (StringUtils.isNotBlank(order)) {
+                    if (!order.startsWith("/")) {
+                        order = "/" + order;
+                    }
+                    openapiWhitelist.add(order);
+                }
+            }
+        }
+    }
+
     @Pointcut("execution(public"
         + " org.apache.streampark.console.base.domain.RestResponse"
-        + " org.apache.streampark.console.*.controller.*.*(..))")
+        + " org.apache.streampark.console.core.controller.*.*(..))")
     public void openAPI() {
     }
 
@@ -77,7 +104,14 @@ public class StreamParkAspect {
         if (isApi != null && isApi) {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
-                throw new ApiAlertException("current api unsupported!");
+                HttpServletRequest request =
+                    ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+                String url = request.getRequestURI();
+                if (openapiWhitelist.contains(url)) {
+                    log.info("request by openapi white-list: {} ", url);
+                } else {
+                    throw new ApiAlertException("current api unsupported!");
+                }
             }
         }
         return (RestResponse) joinPoint.proceed();
@@ -96,29 +130,29 @@ public class StreamParkAspect {
         return target;
     }
 
-    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.PermissionScope)")
+    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
     public void permissionAction() {
     }
 
     @Around("permissionAction()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        PermissionScope permissionScope = methodSignature.getMethod().getAnnotation(PermissionScope.class);
+        Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
-        User currentUser = serviceHelper.getLoginUser();
+        User currentUser = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
 
         boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 
         if (!isAdmin) {
             // 1) check userId
-            Long userId = getId(joinPoint, methodSignature, permissionScope.user());
+            Long userId = getId(joinPoint, methodSignature, permission.user());
             ApiAlertException.throwIfTrue(
                 userId != null && !currentUser.getUserId().equals(userId),
                 "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
             // 2) check team
-            Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
+            Long teamId = getId(joinPoint, methodSignature, permission.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(
@@ -127,7 +161,7 @@ public class StreamParkAspect {
             }
 
             // 3) check app
-            Long appId = getId(joinPoint, methodSignature, permissionScope.app());
+            Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
                 Application app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");

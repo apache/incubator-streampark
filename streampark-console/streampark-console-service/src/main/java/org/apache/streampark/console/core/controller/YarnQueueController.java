@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/yarnQueue")
+@RequestMapping("yarn/queue")
 public class YarnQueueController {
 
     @Autowired

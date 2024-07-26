@@ -23,7 +23,7 @@ enum CONFIG_API {
   LIST = '/flink/conf/list',
   HISTORY = '/flink/conf/history',
   DELETE = '/flink/conf/delete',
-  SYS_HADOOP_CONF = '/flink/conf/sysHadoopConf',
+  SYS_HADOOP_CONF = '/flink/conf/sys_hadoop_conf',
 }
 
 export function fetchGetVer(data: { id: string }) {

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
@@ -47,8 +47,8 @@ public class ApplicationBuildPipelineController {
     @Autowired
     private AppBuildPipeService appBuildPipeService;
 
-    @PermissionScope(app = "#appId")
-    @PostMapping(value = "build")
+    @Permission(app = "#appId")
+    @PostMapping("build")
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
@@ -62,7 +62,7 @@ public class ApplicationBuildPipelineController {
      * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
      */
     @PostMapping("/detail")
-    @PermissionScope(app = "#appId")
+    @Permission(app = "#appId")
     @RequiresPermissions("app:view")
     public RestResponse getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>(0);

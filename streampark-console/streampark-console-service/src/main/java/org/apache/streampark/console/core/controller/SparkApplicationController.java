@@ -89,7 +89,7 @@ public class SparkApplicationController {
         return RestResponse.success(saved);
     }
 
-    @PostMapping(value = "copy")
+    @PostMapping("copy")
     @RequiresPermissions("app:copy")
     public RestResponse copy(SparkApplication app) throws IOException {
         applicationManageService.copy(app);
@@ -133,14 +133,14 @@ public class SparkApplicationController {
         return RestResponse.success();
     }
 
-    @PostMapping(value = "check_start")
+    @PostMapping("check/start")
     @RequiresPermissions("app:start")
     public RestResponse checkStart(SparkApplication app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
         return RestResponse.success(stateEnum.get());
     }
 
-    @PostMapping(value = "start")
+    @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(SparkApplication app) {
         try {
@@ -151,7 +151,7 @@ public class SparkApplicationController {
         }
     }
 
-    @PostMapping(value = "cancel")
+    @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
     public RestResponse stop(SparkApplication app) throws Exception {
         applicationActionService.stop(app);
@@ -184,13 +184,13 @@ public class SparkApplicationController {
         return RestResponse.success(yarnName);
     }
 
-    @PostMapping("checkName")
+    @PostMapping("check/name")
     public RestResponse checkName(SparkApplication app) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(app);
         return RestResponse.success(exists.get());
     }
 
-    @PostMapping("readConf")
+    @PostMapping("read_conf")
     public RestResponse readConf(SparkApplication app) throws IOException {
         String config = applicationInfoService.readConf(app.getConfig());
         return RestResponse.success(config);
@@ -208,13 +208,13 @@ public class SparkApplicationController {
         return RestResponse.success(backups);
     }
 
-    @PostMapping("optionlog")
+    @PostMapping("opt_log")
     public RestResponse optionlog(SparkApplicationLog applicationLog, RestRequest request) {
         IPage<SparkApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 
-    @PostMapping("deleteOperationLog")
+    @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
     public RestResponse deleteOperationLog(Long id) {
         Boolean deleted = applicationLogService.removeById(id);
@@ -228,13 +228,13 @@ public class SparkApplicationController {
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("deletebak")
+    @PostMapping("delete/bak")
     public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
         return RestResponse.success(deleted);
     }
 
-    @PostMapping("checkjar")
+    @PostMapping("check/jar")
     public RestResponse checkjar(String jar) {
         File file = new File(jar);
         try {
@@ -252,7 +252,7 @@ public class SparkApplicationController {
         return RestResponse.success(uploadPath);
     }
 
-    @PostMapping("verifySchema")
+    @PostMapping("verify_schema")
     public RestResponse verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();

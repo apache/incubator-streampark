@@ -24,7 +24,6 @@ enum Api {
   AddToken = '/token/create',
   DeleteToken = '/token/delete',
   CHECK = 'token/check',
-  CURL = '/token/curl',
 }
 /**
  * get token list
@@ -68,12 +67,4 @@ export function fetchTokenDelete(data?: { tokenId: string }) {
  */
 export function fetchCheckToken(data) {
   return defHttp.post<number>({ url: Api.CHECK, data });
-}
-/**
- * copyCurl
- * @param data
- * @returns {Promise<string>}
- */
-export function fetchCopyCurl(data): Promise<string> {
-  return defHttp.post<string>({ url: Api.CURL, data });
 }

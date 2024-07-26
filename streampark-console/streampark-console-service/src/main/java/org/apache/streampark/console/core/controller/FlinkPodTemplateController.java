@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @RequestMapping("flink/podtmpl")
 public class FlinkPodTemplateController {
 
-    @PostMapping("sysHosts")
+    @PostMapping("sys_hosts")
     public RestResponse getHosts() {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
@@ -57,7 +57,7 @@ public class FlinkPodTemplateController {
     }
 
     /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
-    @PostMapping("compHostAlias")
+    @PostMapping("comp_host_alias")
     public RestResponse completeHostAlias(String hosts, String podTemplate) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
@@ -78,7 +78,7 @@ public class FlinkPodTemplateController {
             .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
     }
 
-    @PostMapping("extractHostAlias")
+    @PostMapping("extract_host_alias")
     public RestResponse extractHostAlias(String podTemplate) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
         List<String> friendlyHosts = hosts.entrySet().stream()
@@ -88,7 +88,7 @@ public class FlinkPodTemplateController {
     }
 
     /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
-    @PostMapping("previewHostAlias")
+    @PostMapping("preview_host_alias")
     public RestResponse previewHostAlias(String hosts) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);

@@ -485,7 +485,7 @@ stop() {
 
   kill -9 "$PID"
 
-  while [ $SLEEP -ge 0 ]; do
+  while [[ $SLEEP -ge 0 ]]; do
     # shellcheck disable=SC2046
     # shellcheck disable=SC2006
     kill -0 "$PID" >/dev/null 2>&1

@@ -17,11 +17,11 @@
 import { defHttp } from '/@/utils/http/axios';
 
 enum PODTEMPLATE_API {
-  SYS_HOSTS = '/flink/podtmpl/sysHosts',
+  SYS_HOSTS = '/flink/podtmpl/sys_hosts',
   INIT = '/flink/podtmpl/init',
-  COMP_HOST_ALIAS = '/flink/podtmpl/compHostAlias',
-  EXTRACT_HOST_ALIAS = '/flink/podtmpl/extractHostAlias',
-  PREVIEW_HOST_ALIAS = '/flink/podtmpl/previewHostAlias',
+  COMP_HOST_ALIAS = '/flink/podtmpl/comp_host_alias',
+  EXTRACT_HOST_ALIAS = '/flink/podtmpl/extract_host_alias',
+  PREVIEW_HOST_ALIAS = '/flink/podtmpl/preview_host_alias',
 }
 
 export function fetchSysHosts(data) {

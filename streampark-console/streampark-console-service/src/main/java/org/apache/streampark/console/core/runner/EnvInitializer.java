@@ -128,13 +128,12 @@ public class EnvInitializer implements ApplicationRunner {
         // 1. prepare workspace dir
         prepareWorkspace(storageType, fsOperator, workspace);
         // 2. upload jar.
+
         // 2.1) upload client jar
         uploadClientJar(workspace, fsOperator);
-        // 2.2) upload plugin jar.
-        uploadPluginJar(workspace, fsOperator);
-        // 2.3) upload shims jar
+        // 2.2) upload shims jar
         uploadShimsJar(workspace, fsOperator);
-        // 2.4) create maven local repository dir
+        // 2.3) create maven local repository dir
         createMvnLocalRepoDir();
 
         initialized.add(storageType);
@@ -194,17 +193,6 @@ public class EnvInitializer implements ApplicationRunner {
                 log.info("load shims:{} to {}", file.getName(), shimsPath);
                 fsOperator.upload(file.getAbsolutePath(), shimsPath);
             }
-        }
-    }
-
-    private void uploadPluginJar(Workspace workspace, FsOperator fsOperator) {
-        String appPlugins = workspace.APP_PLUGINS();
-        fsOperator.mkCleanDirs(appPlugins);
-
-        File plugins = WebUtils.getAppPluginsDir();
-        for (File file : plugins.listFiles(fileFilter)) {
-            log.info("load plugin:{} to {}", file.getName(), appPlugins);
-            fsOperator.upload(file.getAbsolutePath(), appPlugins);
         }
     }
 

@@ -27,9 +27,9 @@ import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,9 +71,6 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    @Autowired
-    private ServiceHelper serviceHelper;
-
     @Override
     public void createVariable(Variable variable) {
 
@@ -81,7 +78,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
             this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
             "The variable code already exists.");
 
-        variable.setCreatorId(serviceHelper.getUserId());
+        variable.setCreatorId(ServiceHelper.getUserId());
         this.save(variable);
     }
 

@@ -14,47 +14,39 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
+<script setup lang="ts" name="ApplicationDetail">
   import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
-  export default defineComponent({
-    name: 'ApplicationDetail',
-  });
-</script>
-<script setup lang="ts" name="ApplicationDetail">
+  import { useModal } from '/@/components/Modal';
   import { PageWrapper } from '/@/components/Page';
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
   import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
-  import { useIntervalFn, useClipboard } from '@vueuse/core';
+  import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
-  import { fetchCheckToken, fetchCopyCurl } from '/@/api/system/token';
-  import { useMessage } from '/@/hooks/web/useMessage';
-  import { baseUrl } from '/@/api';
   import { fetchListVer } from '/@/api/flink/config';
-  import { fetchSavePonitHistory } from '/@/api/flink/savepoint';
+  import { fetchSavePointHistory } from '/@/api/flink/savepoint';
   import Mergely from './components/Mergely.vue';
   import DetailTab from './components/AppDetail/DetailTab.vue';
+  import RequestModal from './components/RequestModal';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
 
+  defineOptions({
+    name: 'ApplicationDetail',
+  });
   const route = useRoute();
   const router = useRouter();
 
-  const { Swal, createMessage } = useMessage();
-  const { copy } = useClipboard({
-    legacy: true,
-  });
   const { t } = useI18n();
 
   const yarn = ref('');
@@ -74,6 +66,7 @@
       ...(getDescSchema() as any),
       {
         field: 'resetApi',
+        span: 2,
         label: h('div', null, [
           t('flink.app.detail.resetApi'),
           h(Tooltip, { title: t('flink.app.detail.resetApiToolTip'), placement: 'top' }, () =>
@@ -85,40 +78,30 @@
             Button,
             {
               type: 'primary',
-              shape: 'round',
+              size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('/flink/app/start'),
+              onClick: () =>
+                openApiModal(true, {
+                  name: 'flinkStart',
+                  app,
+                }),
             },
-            () => [
-              h(Icon, { icon: 'ant-design:copy-outlined' }),
-              t('flink.app.detail.copyStartcURL'),
-            ],
+            () => [t('flink.app.detail.copyStartcURL')],
           ),
           h(
             Button,
             {
               type: 'primary',
-              shape: 'round',
+              size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('/flink/app/cancel'),
+              onClick: () => {
+                openApiModal(true, {
+                  name: 'flinkCancel',
+                  app,
+                });
+              },
             },
-            () => [
-              h(Icon, { icon: 'ant-design:copy-outlined' }),
-              t('flink.app.detail.copyCancelcURL'),
-            ],
-          ),
-          h(
-            Button,
-            {
-              type: 'link',
-              shape: 'round',
-              class: 'mx-3px px-5px',
-              onClick: () => handleDocPage(),
-            },
-            () => [
-              h(Icon, { icon: 'ant-design:link-outlined' }),
-              t('flink.app.detail.apiDocCenter'),
-            ],
+            () => [t('flink.app.detail.copyCancelcURL')],
           ),
         ],
       },
@@ -129,6 +112,7 @@
   });
 
   const [registerConfDrawer] = useDrawer();
+  const [registerOpenApi, { openModal: openApiModal }] = useModal();
 
   /* Flink Web UI */
   function handleFlinkView() {
@@ -157,9 +141,9 @@
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)
       ) {
-        handleYarn();
+        await handleYarn();
       }
-      handleDetailTabs();
+      await handleDetailTabs();
     }
     Object.assign(app, res);
   }
@@ -172,7 +156,7 @@
     };
 
     const confList = await fetchListVer(commonParams);
-    const pointHistory = await fetchSavePonitHistory(commonParams);
+    const pointHistory = await fetchSavePointHistory(commonParams);
     const backupList = await fetchBackUps(commonParams);
     const optionList = await fetchOptionLog(commonParams);
 
@@ -185,41 +169,6 @@
   /* Get yarn data */
   async function handleYarn() {
     yarn.value = await fetchYarn();
-  }
-
-  /* copyCurl */
-  async function handleCopyCurl(urlPath) {
-    const resp = await fetchCheckToken({});
-    const result = parseInt(resp);
-    if (result === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: t('flink.app.detail.nullAccessToken'),
-        showConfirmButton: true,
-        timer: 3500,
-      });
-    } else if (result === 1) {
-      Swal.fire({
-        icon: 'error',
-        title: t('flink.app.detail.invalidAccessToken'),
-        showConfirmButton: true,
-        timer: 3500,
-      });
-    } else {
-      const res = await fetchCopyCurl({
-        appId: app.id,
-        baseUrl: baseUrl(),
-        path: urlPath,
-      });
-      copy(res);
-      createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
-    }
-  }
-
-  /* Documentation page */
-  function handleDocPage() {
-    const res = window.origin + '/doc.html';
-    window.open(res);
   }
 
   async function getExternalLinks() {
@@ -270,8 +219,8 @@
     <Description @register="registerDescription" />
     <Divider class="mt-20px -mb-17px" />
     <DetailTab :app="app" :tabConf="detailTabs" />
-
     <Mergely @register="registerConfDrawer" :readOnly="true" />
+    <RequestModal @register="registerOpenApi" />
   </PageWrapper>
 </template>
 <style lang="less">

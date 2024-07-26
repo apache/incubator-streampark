@@ -15,10 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.core.annotation;
 
-/** Interface document constants */
-public class ApiDocConstant {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public static final String OPENAPI_TAG = "OpenAPI";
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Permission {
+
+    String user() default "";
+
+    String team() default "";
+
+    String app() default "";
 }
