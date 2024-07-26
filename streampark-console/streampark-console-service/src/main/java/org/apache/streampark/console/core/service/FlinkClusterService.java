@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -41,9 +40,8 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
      * Check the flink cluster status
      *
      * @param flinkCluster FlinkCluster To be check
-     * @return The response value
      */
-    ResponseResult check(FlinkCluster flinkCluster);
+    void check(FlinkCluster flinkCluster);
 
     /**
      * Create flink cluster

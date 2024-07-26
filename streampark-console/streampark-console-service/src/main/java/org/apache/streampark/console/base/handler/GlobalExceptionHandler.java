@@ -53,21 +53,21 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponse handelUnauthenticatedException(UnauthenticatedException e) {
         log.error("Unauthenticated.", e);
-        return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Unauthenticated.");
+        return RestResponse.error(ResponseCode.CODE_UNAUTHORIZED, "Unauthenticated.");
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponse handelUnauthenticatedException(AuthenticationException e) {
         log.error("Permission denied.", e);
-        return RestResponse.fail(ResponseCode.CODE_UNAUTHORIZED, "Permission denied.");
+        return RestResponse.error(ResponseCode.CODE_UNAUTHORIZED, "Permission denied.");
     }
 
     @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponse handleException(AbstractApiException e) {
         log.error("api exception:", e);
-        return RestResponse.fail(e.getResponseCode(), e.getMessage());
+        return RestResponse.error(e.getResponseCode(), e.getMessage());
     }
 
     @ExceptionHandler(value = Exception.class)
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
     @Order(value = Ordered.HIGHEST_PRECEDENCE)
     public RestResponse handleException(Exception e) {
         log.error("internal server error:", e);
-        return RestResponse.fail(
+        return RestResponse.error(
             ResponseCode.CODE_FAIL, "internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+        return RestResponse.error(ResponseCode.CODE_FAIL, message.toString());
     }
 
     /**
@@ -116,6 +116,6 @@ public class GlobalExceptionHandler {
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return RestResponse.fail(ResponseCode.CODE_FAIL, message.toString());
+        return RestResponse.error(ResponseCode.CODE_FAIL, message.toString());
     }
 }

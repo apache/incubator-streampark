@@ -100,9 +100,8 @@
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
   import { fetchUserTeam } from '/@/api/system/member';
-  import { LoginResultModel } from '/@/api/system/model/userModel';
-  import { Result } from '/#/axios';
   import { PageEnum } from '/@/enums/pageEnum';
+  import {ResultEnum} from "/@/enums/httpEnum";
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
@@ -155,44 +154,34 @@
     }
   }
 
-  async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
-    const { data } = await signin(
-      {
-        password: loginFormValue.password,
-        username: loginFormValue.account,
-        loginType: LoginTypeEnum[loginType.value],
-      },
-      'none',
-    );
-    return data;
-  }
-
   async function handleLoginAction(loginFormValue: LoginForm) {
     try {
       loading.value = true;
       try {
-        const { code, data } = await handleLoginRequest(loginFormValue);
-        if (code != null) {
-          if (code == 0 || code == 1) {
-            const message =
-              'SignIn failed,' +
-              (code === 0 ? ' authentication error' : ' current User is locked.');
-            createMessage.error(message);
-            return;
-          } else if (code == 403) {
-            userId.value = data as unknown as string;
-            const teamList = await fetchUserTeam({ userId: userId.value });
-            userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
+        const { data } = await signin(
+          {
+            password: loginFormValue.password,
+            username: loginFormValue.account,
+            loginType: LoginTypeEnum[loginType.value],
+          },
+          'none',
+        );
+        if (data.code !== ResultEnum.SUCCESS) {
+          if (data.code === 403) {
+            userId.value = data.data as unknown as string;
+            const teamList = await fetchUserTeam({userId: userId.value});
+            userStore.setTeamList(teamList.map((i) => ({label: i.teamName, value: i.id})));
             modelVisible.value = true;
             return;
           } else {
-            console.log(data);
+            createMessage.error(data.message);
+            return;
           }
         }
-        userStore.setData(data);
+        userStore.setData(data.data);
         let successText = t('sys.login.loginSuccessDesc');
-        if (data?.user) {
-          const { lastTeamId, nickName } = data.user;
+        if (data.data?.user) {
+          const { lastTeamId, nickName } = data.data.user;
           // The lastTeamId of user as the current teamId.
           userStore.teamId = lastTeamId || '';
           sessionStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);

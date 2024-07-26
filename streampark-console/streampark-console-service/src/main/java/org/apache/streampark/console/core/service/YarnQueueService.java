@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -41,9 +40,8 @@ public interface YarnQueueService extends IService<YarnQueue> {
      * Check the correctness of yarnQueue
      *
      * @param yarnQueue YarnQueue
-     * @return ResponseResult
      */
-    ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue);
+    void checkYarnQueue(YarnQueue yarnQueue);
 
     /**
      * Create a YarnQueue by entering parameters

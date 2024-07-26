@@ -52,6 +52,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -100,10 +101,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
-            project.getName());
+        LambdaQueryWrapper<Project> queryWrapper =
+            new LambdaQueryWrapper<Project>().eq(Project::getName, project.getName());
         long count = count(queryWrapper);
-        RestResponse response = RestResponse.success();
 
         ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
         if (StringUtils.isNotBlank(project.getPassword())) {
@@ -120,9 +120,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         boolean status = save(project);
 
         if (status) {
-            return response.message("Add project successfully").data(true);
+            return RestResponse.success("Add project successfully", true);
         }
-        return response.message("Add project failed").data(false);
+        return RestResponse.success("Add project failed", false);
     }
 
     @Override
@@ -383,7 +383,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return RestResponse.success().data(errorMsg);
+            return RestResponse.success(errorMsg);
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
@@ -402,14 +402,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            return RestResponse.success()
-                .data(new String(fileContent, StandardCharsets.UTF_8))
-                .put("offset", endOffset)
-                .put("readFinished", readFinished);
+            return RestResponse.success(ImmutableMap.<String, String>builder()
+                .put("fileContent", new String(fileContent, StandardCharsets.UTF_8))
+                .put("offset", String.valueOf(endOffset))
+                .put("readFinished", String.valueOf(readFinished))
+                .build());
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
+            return RestResponse.error(ResponseCode.CODE_FAIL, error + e.getMessage());
         }
     }
 

@@ -281,7 +281,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             case CONNECTOR:
                 return checkConnector(resourceParam);
         }
-        return RestResponse.success().data(ImmutableMap.of(STATE, 0));
+        return RestResponse.success(ImmutableMap.of(STATE, 0));
     }
 
     private RestResponse checkConnector(Resource resourceParam) throws JsonProcessingException {
@@ -327,13 +327,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(
                 new RuntimeException("resource name different with FactoryIdentifier"), 5);
         }
-        return RestResponse.success()
-            .data(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
+        return RestResponse.success(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
     }
 
     private static RestResponse buildExceptResponse(Exception e, int code) {
-        return RestResponse.success()
-            .data(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
+        return RestResponse.success(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
     }
 
     private RestResponse checkFlinkApp(Resource resourceParam) {
@@ -350,14 +348,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
-            return RestResponse.success().data(resp);
+            return RestResponse.success(resp);
         }
         String mainClass = Utils.getJarManClass(jarFile);
         if (mainClass == null) {
             // main class is null
             return buildExceptResponse(new RuntimeException("main class is null"), 2);
         }
-        return RestResponse.success().data(resp);
+        return RestResponse.success(resp);
     }
 
     private boolean existsFlinkConnector(Long id, String connectorId) {

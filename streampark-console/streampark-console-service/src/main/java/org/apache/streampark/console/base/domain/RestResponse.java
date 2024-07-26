@@ -17,60 +17,91 @@
 
 package org.apache.streampark.console.base.domain;
 
-import org.slf4j.helpers.MessageFormatter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RestResponse<T> {
 
-import java.util.HashMap;
+    private Integer code;
 
-public class RestResponse extends HashMap<String, Object> {
+    private String message;
 
-    public static final String STATUS_SUCCESS = "success";
-    public static final String STATUS_FAIL = "error";
-    public static final String STATUS_KEY = "status";
-    public static final String CODE_KEY = "code";
-    public static final String MESSAGE_KEY = "message";
-    public static final String DATA_KEY = "data";
+    private T data;
 
-    private static final long serialVersionUID = 1L;
-
-    public static RestResponse success(Object data) {
-        RestResponse resp = success();
-        resp.put(DATA_KEY, data);
-        return resp;
+    /**
+    * return success.
+    *
+    * @return {@linkplain RestResponse}
+    */
+    public static RestResponse<Object> success() {
+        return success("");
     }
 
-    public static RestResponse success() {
-        RestResponse resp = new RestResponse();
-        resp.put(STATUS_KEY, STATUS_SUCCESS);
-        resp.put(CODE_KEY, ResponseCode.CODE_SUCCESS);
-        return resp;
+    /**
+    * return success.
+    *
+    * @param msg msg
+    * @return {@linkplain RestResponse}
+    */
+    public static RestResponse<Object> success(final String msg) {
+        return success(msg, null);
     }
 
-    public static RestResponse fail(Long code, String format, Object... args) {
-        String message = MessageFormatter.arrayFormat(format, args).getMessage();
-        RestResponse resp = new RestResponse();
-        resp.put(STATUS_KEY, STATUS_FAIL);
-        resp.put(MESSAGE_KEY, message);
-        resp.put(CODE_KEY, code);
-        resp.put(DATA_KEY, null);
-        return resp;
+    /**
+    * return success.
+    *
+    * @param data this is result data.
+    * @return {@linkplain RestResponse}
+    */
+    public static <T> RestResponse<T> success(final T data) {
+        return success(null, data);
     }
 
-    public RestResponse message(String message) {
-        this.put(MESSAGE_KEY, message);
-        return this;
+    /**
+    * return success.
+    *
+    * @param msg this ext msg.
+    * @param data this is result data.
+    * @return {@linkplain RestResponse}
+    */
+    public static <T> RestResponse<T> success(final String msg, final T data) {
+        return new RestResponse<>(ResponseCode.CODE_SUCCESS, msg, data);
     }
 
-    public RestResponse data(Object data) {
-        this.put(DATA_KEY, data);
-        return this;
+    /**
+    * return error.
+    *
+    * @param msg error msg
+    * @return {@linkplain RestResponse}
+    */
+    public static RestResponse<Object> error(final String msg) {
+        return error(ResponseCode.CODE_FAIL, msg);
     }
 
-    @NotNull
-    @Override
-    public RestResponse put(String key, Object value) {
-        super.put(key, value);
-        return this;
+    /**
+    * return error.
+    *
+    * @param code error code
+    * @param msg error msg
+    * @return {@linkplain RestResponse}
+    */
+    public static RestResponse<Object> error(final int code, final String msg) {
+        return new RestResponse<>(code, msg, null);
+    }
+
+    /**
+    * return error.
+    *
+    * @param code error code
+    * @param msg error msg
+    * @param data this is result data.
+    * @return {@linkplain RestResponse}
+    */
+    public static <T> RestResponse<T> error(final int code, final String msg, final T data) {
+        return new RestResponse<>(code, msg, data);
     }
 }

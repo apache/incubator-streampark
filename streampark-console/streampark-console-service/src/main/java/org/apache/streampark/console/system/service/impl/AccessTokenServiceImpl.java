@@ -56,12 +56,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse create(Long userId, String description) {
         User user = userService.getById(userId);
         if (user == null) {
-            return RestResponse.success().put("code", 0).message("user not available");
+            return RestResponse.error("User not available");
         }
         AccessToken existAccessToken = baseMapper.selectByUserId(user.getUserId());
         if (existAccessToken != null) {
-            return RestResponse.success().put("code", 0)
-                .message(String.format("user %s already has a token", user.getUsername()));
+            return RestResponse.error(String.format("user %s already has a token", user.getUsername()));
         }
         String token = WebUtils.encryptToken(
             JWTUtil.sign(
@@ -77,7 +76,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
-        return RestResponse.success().data(accessToken);
+        return RestResponse.success(accessToken);
     }
 
     @Override
@@ -99,11 +98,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     public RestResponse toggleToken(Long tokenId) {
         AccessToken tokenInfo = baseMapper.selectById(tokenId);
         if (tokenInfo == null) {
-            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
+            return RestResponse.error(ResponseCode.CODE_FAIL_ALERT, "accessToken could not be found!");
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return RestResponse.fail(
+            return RestResponse.error(
                 ResponseCode.CODE_FAIL_ALERT,
                 "user status is locked, could not operate this accessToken!");
         }

@@ -49,6 +49,7 @@
     fetchVariableInfo,
   } from '/@/api/resource/variable';
   import { VariableListRecord } from '/@/api/resource/variable/model/variableModel';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const emit = defineEmits(['success', 'register']);
 
@@ -74,7 +75,7 @@
         const { data } = await fetchCheckVariableCode({
           variableCode: value,
         });
-        if (data.status !== 'success') {
+        if (data.code !== ResultEnum.SUCCESS) {
           setValidateStatus('error');
           setHelp(data.message);
           return Promise.reject();

@@ -34,6 +34,7 @@
   } from '/@/api/setting/yarnQueue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { renderYarnQueueLabel } from './useYarnQueueRender';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   export default defineComponent({
     name: 'YarnQueueDrawer',
@@ -63,19 +64,10 @@
                     };
                     if (unref(isUpdate)) Object.assign(params, { id: model?.id });
                     const res = await fetchCheckYarnQueue(params);
-                    if (res.status === 0) {
+                    if (res.code === ResultEnum.SUCCESS)  {
                       return Promise.resolve();
                     } else {
-                      switch (res.status) {
-                        case 1:
-                          return Promise.reject(t('setting.yarnQueue.checkResult.existedHint'));
-                        case 2:
-                          return Promise.reject(
-                            t('setting.yarnQueue.checkResult.invalidFormatHint'),
-                          );
-                        case 3:
-                          return Promise.reject(t('setting.yarnQueue.checkResult.emptyHint'));
-                      }
+                      return Promise.reject(res.message);
                     }
                   },
                   trigger: 'blur',

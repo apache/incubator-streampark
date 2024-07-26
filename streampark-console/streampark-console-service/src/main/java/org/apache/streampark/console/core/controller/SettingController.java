@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.bean.DockerConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.service.SettingService;
@@ -78,8 +77,8 @@ public class SettingController {
     @PostMapping("check/docker")
     @RequiresPermissions("setting:view")
     public RestResponse checkDocker(DockerConfig dockerConfig) {
-        ResponseResult result = settingService.checkDocker(dockerConfig);
-        return RestResponse.success(result);
+        settingService.checkDocker(dockerConfig);
+        return RestResponse.success(true);
     }
 
     @PostMapping("update/docker")
@@ -99,8 +98,8 @@ public class SettingController {
     @PostMapping("check/email")
     @RequiresPermissions("setting:view")
     public RestResponse checkEmail(SenderEmail senderEmail) {
-        ResponseResult result = settingService.checkEmail(senderEmail);
-        return RestResponse.success(result);
+        settingService.checkEmail(senderEmail);
+        return RestResponse.success(true);
     }
 
     @PostMapping("update/email")

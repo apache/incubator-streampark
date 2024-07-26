@@ -127,7 +127,7 @@ public class UserController {
     public RestResponse initTeam(Long teamId, Long userId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
+            return RestResponse.error(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
         }
         userService.setLastTeam(teamId, userId);
         return RestResponse.success();
@@ -137,7 +137,8 @@ public class UserController {
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
+            return RestResponse.error(
+                ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
         }
         User user = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
@@ -148,7 +149,7 @@ public class UserController {
         user.dataMasking();
 
         Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
-        return new RestResponse().data(infoMap);
+        return RestResponse.success(infoMap);
     }
 
     @PostMapping("appOwners")

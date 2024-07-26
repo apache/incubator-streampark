@@ -147,7 +147,7 @@ public class SparkApplicationController {
             applicationActionService.start(app, false);
             return RestResponse.success(true);
         } catch (Exception e) {
-            return RestResponse.success(false).message(e.getMessage());
+            return RestResponse.success(e.getMessage(), false);
         }
     }
 
@@ -241,7 +241,7 @@ public class SparkApplicationController {
             Utils.requireCheckJarFile(file.toURI().toURL());
             return RestResponse.success(true);
         } catch (IOException e) {
-            return RestResponse.success(file).message(e.getLocalizedMessage());
+            return RestResponse.success(e.getLocalizedMessage());
         }
     }
 
@@ -269,7 +269,7 @@ public class SparkApplicationController {
             error = "Cannot use the root directory for checkpoints.";
         }
         if (error != null) {
-            restResponse = RestResponse.success(false).message(error);
+            restResponse = RestResponse.success(error, false);
         }
         return restResponse;
     }

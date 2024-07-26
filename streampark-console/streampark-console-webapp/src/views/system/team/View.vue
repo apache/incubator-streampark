@@ -62,6 +62,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import {ResultEnum} from "/@/enums/httpEnum";
   export default defineComponent({
     name: 'Team',
     components: { BasicTable, TeamDrawer, TableAction, Icon },
@@ -107,7 +108,7 @@
       /* Delete the organization */
       async function handleDelete(record: Recordable) {
         const { data } = await fetchTeamDelete({ id: record.id });
-        if (data.status === 'success') {
+        if (data.code === ResultEnum.SUCCESS) {
           createMessage.success(`${t('system.team.deleteTeam')} ${t('system.team.success')}`);
           reload();
         } else {

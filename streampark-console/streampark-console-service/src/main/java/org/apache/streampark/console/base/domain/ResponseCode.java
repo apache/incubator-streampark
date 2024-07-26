@@ -17,17 +17,17 @@
 
 package org.apache.streampark.console.base.domain;
 
-public interface ResponseCode {
+public class ResponseCode {
 
-    Long CODE_SUCCESS = 200L;
+    public static final int CODE_SUCCESS = 200;
 
-    Long CODE_FAIL = 500L;
+    public static final int CODE_FAIL = 500;
 
-    Long CODE_UNAUTHORIZED = 401L;
+    public static final int CODE_UNAUTHORIZED = 401;
 
-    Long CODE_FORBIDDEN = 403L;
+    public static final int CODE_FORBIDDEN = 403;
 
-    Long CODE_FAIL_ALERT = 501L;
+    public static final int CODE_FAIL_ALERT = 501;
 
-    Long CODE_FAIL_DETAIL = 502L;
+    public static final int CODE_FAIL_DETAIL = 502;
 }
