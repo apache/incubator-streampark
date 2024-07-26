@@ -22,7 +22,6 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.ApiAccess;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
@@ -141,7 +140,6 @@ public class ApplicationController {
     return RestResponse.success(stateEnum.get());
   }
 
-  @ApiAccess
   @PermissionScope(app = "#app.id", team = "#app.teamId")
   @PostMapping(value = "start")
   @RequiresPermissions("app:start")

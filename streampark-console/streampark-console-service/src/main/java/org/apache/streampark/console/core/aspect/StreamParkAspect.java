@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.ApiAccess;
+import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserType;
@@ -72,8 +72,8 @@ public class StreamParkAspect {
     Boolean isApi =
         (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
     if (isApi != null && isApi) {
-      ApiAccess apiAccess = methodSignature.getMethod().getAnnotation(ApiAccess.class);
-      if (apiAccess == null) {
+      OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
+      if (openAPI == null) {
         throw new ApiAlertException("current api unsupported!");
       }
     }

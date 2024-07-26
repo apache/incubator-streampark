@@ -19,9 +19,11 @@ package org.apache.streampark.common.util
 
 import org.apache.commons.lang3.StringUtils
 
-import java.lang.reflect.{Field, Modifier}
+import java.lang.annotation.Annotation
+import java.lang.reflect.{Field, Method, Modifier}
 import java.util.Objects
 
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object ReflectUtils extends Logger {
@@ -40,7 +42,10 @@ object ReflectUtils extends Logger {
    */
   @throws[SecurityException]
   def getField(beanClass: Class[_], name: String): Field = {
-    Try(beanClass.getDeclaredFields.filter(f => Objects.equals(name, f.getName)).head)
+    Try(
+      beanClass.getDeclaredFields
+        .filter(f => Objects.equals(name, f.getName))
+        .head)
       .getOrElse(null)
   }
 
@@ -50,8 +55,9 @@ object ReflectUtils extends Logger {
   }
 
   def getFieldValue(obj: Any, field: Field): Any = {
-    if (obj == null || field == null) null
-    else {
+    if (obj == null || field == null) {
+      null
+    } else {
       field.setAccessible(true)
       field.get(obj) match {
         case Success(v) => v
@@ -62,11 +68,11 @@ object ReflectUtils extends Logger {
 
   def setFieldValue(obj: Any, fieldName: String, value: Any): Unit = {
     val field = getAccessibleField(obj, fieldName)
-    if (field == null)
+    if (field == null) {
       throw new IllegalArgumentException(
         "Could not find field [" + fieldName + "] on target [" + obj + "]")
-    try
-      field.set(obj, value)
+    }
+    try field.set(obj, value)
     catch {
       case e: IllegalAccessException =>
         logError("Failed to assign to the element.", e)
@@ -99,6 +105,12 @@ object ReflectUtils extends Logger {
     ) {
       field.setAccessible(true)
     }
+  }
+
+  def getMethodsByAnnotation(
+      beanClass: Class[_],
+      annotClazz: Class[_ <: Annotation]): java.util.List[Method] = {
+    beanClass.getDeclaredMethods.filter(_.getDeclaredAnnotation(annotClazz) != null).toList.asJava
   }
 
 }
