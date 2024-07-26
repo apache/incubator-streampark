@@ -64,7 +64,7 @@
                     };
                     if (unref(isUpdate)) Object.assign(params, { id: model?.id });
                     const res = await fetchCheckYarnQueue(params);
-                    if (res.code === ResultEnum.SUCCESS)  {
+                    if (res)  {
                       return Promise.resolve();
                     } else {
                       return Promise.reject(res.message);

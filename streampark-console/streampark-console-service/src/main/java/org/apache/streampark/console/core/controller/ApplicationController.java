@@ -275,7 +275,7 @@ public class ApplicationController {
             error = "Cannot use the root directory for checkpoints.";
         }
         if (error != null) {
-            restResponse = RestResponse.error(ResponseCode.CODE_FAIL,error,false);
+            restResponse = RestResponse.error(ResponseCode.CODE_FAIL, error, false);
         }
         return restResponse;
     }
@@ -287,7 +287,7 @@ public class ApplicationController {
         if (error == null) {
             return RestResponse.success(true);
         }
-        return RestResponse.error(ResponseCode.CODE_FAIL,error,false);
+        return RestResponse.error(ResponseCode.CODE_FAIL, error, false);
     }
 
     @Permission(app = "#id")
