@@ -19,7 +19,7 @@ import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
 import { handleAppBuildStatueText } from '../utils';
 import { fetchCheckName, fetchCopy, fetchAbort, fetchMapping } from '/@/api/flink/app/app';
 import { fetchBuild, fetchBuildDetail } from '/@/api/flink/app/flinkBuild';
-import { fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+import { fetchSavePointHistory } from '/@/api/flink/app/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
 import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
@@ -122,7 +122,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       Swal.fire('Failed', 'please set flink version first.', 'error');
     } else {
       if (!optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE) {
-        const resp = await fetchSavePonitHistory({
+        const resp = await fetchSavePointHistory({
           appId: app.id,
           pageNum: 1,
           pageSize: 9999,

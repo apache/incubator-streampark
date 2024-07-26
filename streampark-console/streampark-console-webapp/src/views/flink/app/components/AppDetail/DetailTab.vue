@@ -39,7 +39,7 @@
   import { getMonacoOptions } from '../../data';
   import { useRoute } from 'vue-router';
   import { fetchGetVer, fetchListVer, fetchRemoveConf } from '/@/api/flink/config';
-  import { fetchRemoveSavePoint, fetchSavePonitHistory } from '/@/api/flink/app/savepoint';
+  import { fetchRemoveSavePoint, fetchSavePointHistory } from '/@/api/flink/app/savepoint';
 
   import {
     fetchBackUps,
@@ -136,7 +136,7 @@
   );
 
   const [registerSavePointTable, { reload: reloadSavePoint }] = useTable({
-    api: fetchSavePonitHistory,
+    api: fetchSavePointHistory,
     columns: getSavePointColumns(),
     ...tableCommonConf,
   });

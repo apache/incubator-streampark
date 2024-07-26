@@ -16,32 +16,24 @@
  */
 import { defHttp } from '/@/utils/http/axios';
 
-enum SAVE_POINT_API {
-  LATEST = '/flink/savepoint/latest',
-  HISTORY = '/flink/savepoint/history',
-  DELETE = '/flink/savepoint/delete',
-  TRIGGER = '/flink/savepoint/trigger',
-}
-
-export function fetchSavePointHistory(data: Recordable) {
-  return defHttp.post({ url: SAVE_POINT_API.HISTORY, data });
-}
-/**
- * delete
- * @param data id
- * @returns {Promise<boolean>}
- */
-export function fetchRemoveSavePoint(data: { appId: any; id: any }): Promise<boolean> {
-  return defHttp.post({
-    url: SAVE_POINT_API.DELETE,
-    data,
-  });
+enum Api {
+  CURL = '/openapi/curl',
+  SCHEMA = '/openapi/schema',
 }
 
 /**
- * Trigger a savepoint manually.
- * @param data app id & optional savepoint path.
+ * check token
+ * @param data
+ * @returns {Promise<number>}
  */
-export function trigger(data: { appId: string | number; savepointPath: string | null }) {
-  return defHttp.post({ url: SAVE_POINT_API.TRIGGER, data });
+export function fetchApiSchema(data: { name: string }) {
+  return defHttp.post({ url: Api.SCHEMA, data });
+}
+/**
+ * copyCurl
+ * @param data
+ * @returns {Promise<string>}
+ */
+export function fetchCopyCurl(data): Promise<string> {
+  return defHttp.post<string>({ url: Api.CURL, data });
 }
