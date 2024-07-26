@@ -101,10 +101,17 @@ public class ShiroRealm extends AuthorizingRealm {
           || !accessToken.getToken().equals(WebUtils.encryptToken(credential))) {
         throw new AuthenticationException("the openapi authorization token is invalid");
       }
-      if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
+
+      if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
         throw new AuthenticationException(
-            "the openapi authorization token has been disabled, please contact the administrator");
+            "the openapi authorization token is disabled, please contact the administrator");
       }
+
+      if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
+        throw new AuthenticationException(
+            "the user [" + username + "] has been locked, please contact the administrator");
+      }
+
       SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
     }
 

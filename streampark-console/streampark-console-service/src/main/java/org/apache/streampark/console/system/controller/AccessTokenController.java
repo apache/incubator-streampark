@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.AccessTokenState;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -62,17 +63,13 @@ public class AccessTokenController {
   public RestResponse verifyToken() {
     Long userId = serviceHelper.getUserId();
     RestResponse restResponse = RestResponse.success();
-    if (userId != null) {
-      AccessToken accessToken = accessTokenService.getByUserId(userId);
-      if (accessToken == null) {
-        restResponse.data(AccessTokenState.NULL.get());
-      } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
-        restResponse.data(AccessTokenState.INVALID.get());
-      } else {
-        restResponse.data(AccessTokenState.OK.get());
-      }
-    } else {
-      restResponse.data(AccessTokenState.INVALID.get());
+    AccessToken accessToken = accessTokenService.getByUserId(userId);
+    if (accessToken == null) {
+      restResponse.data(AccessTokenState.NULL.get());
+    } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
+      restResponse.data(AccessTokenState.INVALID_TOKEN.get());
+    } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
+      restResponse.data(AccessTokenState.LOCKED_USER.get());
     }
     return restResponse;
   }

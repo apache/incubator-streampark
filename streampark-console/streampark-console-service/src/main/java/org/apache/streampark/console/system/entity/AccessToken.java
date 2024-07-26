@@ -63,9 +63,6 @@ public class AccessToken implements Serializable {
 
   private transient String userStatus;
 
-  /** token final status, 1: available, 0: unavailable */
-  private transient Integer finalStatus;
-
   public AccessToken setStatus(Integer status) {
     this.status = status;
     return this;

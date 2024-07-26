@@ -25,10 +25,13 @@ public enum AccessTokenState implements Serializable {
   NULL(0),
 
   /** invalid token */
-  INVALID(1),
+  INVALID_TOKEN(1),
 
-  /** effect token */
-  OK(2);
+  /** locked user */
+  LOCKED_USER(2),
+
+  /** ok */
+  OK(3);
 
   private final int value;
 

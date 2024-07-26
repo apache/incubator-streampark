@@ -52,14 +52,14 @@ export const columns: BasicColumn[] = [
   },
   {
     title: t('system.token.table.status'),
-    dataIndex: 'userStatus',
+    dataIndex: 'finalStatus',
     width: 100,
     customRender: ({ record }) => {
       if (!Reflect.has(record, 'pendingStatus')) {
         record.pendingStatus = false;
       }
       return h(Switch, {
-        checked: record.userStatus === StatusEnum.On,
+        checked: record.status == StatusEnum.On,
         checkedChildren: 'on',
         unCheckedChildren: 'off',
         loading: record.pendingStatus,
@@ -67,10 +67,9 @@ export const columns: BasicColumn[] = [
           record.pendingStatus = true;
           const newStatus = checked ? StatusEnum.On : StatusEnum.Off;
           const { createMessage } = useMessage();
-
           fetTokenStatusToggle({ tokenId: record.id })
             .then(() => {
-              record.userStatus = newStatus;
+              record.status = newStatus;
               createMessage.success(`success`);
             })
             .finally(() => {

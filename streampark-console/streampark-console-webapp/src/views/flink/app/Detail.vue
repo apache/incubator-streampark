@@ -102,24 +102,6 @@
             },
             () => [t('flink.app.detail.copyCancelcURL')],
           ),
-          h(
-            Button,
-            {
-              type: 'link',
-              shape: 'round',
-              class: 'mx-3px px-5px',
-              onClick: () => {
-                openApiModal(true, {
-                  name: 'flinkCancel',
-                  app,
-                });
-              },
-            },
-            () => [
-              h(Icon, { icon: 'ant-design:link-outlined' }),
-              t('flink.app.detail.apiDocCenter'),
-            ],
-          ),
         ],
       },
     ],
@@ -158,9 +140,9 @@
           ExecModeEnum.YARN_APPLICATION,
         ].includes(res.executionMode)
       ) {
-        handleYarn();
+        await handleYarn();
       }
-      handleDetailTabs();
+      await handleDetailTabs();
     }
     Object.assign(app, res);
   }

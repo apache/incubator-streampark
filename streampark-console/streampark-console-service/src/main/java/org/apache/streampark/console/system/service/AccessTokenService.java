@@ -33,8 +33,6 @@ public interface AccessTokenService extends IService<AccessToken> {
 
   IPage<AccessToken> page(AccessToken tokenParam, RestRequest request);
 
-  boolean checkTokenEffective(Long userId, String token);
-
   RestResponse toggleToken(Long tokenId);
 
   AccessToken getByUserId(Long userId);
