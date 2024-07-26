@@ -21,8 +21,9 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
-import org.apache.streampark.console.core.util.ServiceHelper;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -44,6 +45,8 @@ public class AccessTokenController {
 
     @Autowired
     private AccessTokenService accessTokenService;
+    @Autowired
+    private ServiceHelper serviceHelper;
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
@@ -55,19 +58,15 @@ public class AccessTokenController {
 
     @PostMapping(value = "check")
     public RestResponse verifyToken() {
-        Long userId = ServiceHelper.getUserId();
+        Long userId = serviceHelper.getUserId();
         RestResponse restResponse = RestResponse.success();
-        if (userId != null) {
-            AccessToken accessToken = accessTokenService.getByUserId(userId);
-            if (accessToken == null) {
-                restResponse.data(AccessTokenStateEnum.NULL.get());
-            } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
-                restResponse.data(AccessTokenStateEnum.INVALID.get());
-            } else {
-                restResponse.data(AccessTokenStateEnum.OK.get());
-            }
-        } else {
-            restResponse.data(AccessTokenStateEnum.INVALID.get());
+        AccessToken accessToken = accessTokenService.getByUserId(userId);
+        if (accessToken == null) {
+            restResponse.data(AccessTokenStateEnum.NULL.get());
+        } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
+            restResponse.data(AccessTokenStateEnum.INVALID_TOKEN.get());
+        } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
+            restResponse.data(AccessTokenStateEnum.LOCKED_USER.get());
         }
         return restResponse;
     }

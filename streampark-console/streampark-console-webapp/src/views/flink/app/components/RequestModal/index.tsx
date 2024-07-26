@@ -30,7 +30,7 @@ export default defineComponent({
   emits: ['register'],
   setup() {
     const currentRef = ref<Recordable>({});
-    const [registerModal, { closeModal, changeOkLoading }] = useModalInner(async (data) => {
+    const [registerModal, { changeOkLoading }] = useModalInner(async (data) => {
       currentRef.value = data;
     });
     const { Swal, createMessage } = useMessage();
@@ -48,14 +48,18 @@ export default defineComponent({
             icon: 'error',
             title: t('flink.app.detail.nullAccessToken'),
             showConfirmButton: true,
-            timer: 3500,
           });
         } else if (result === 1) {
           Swal.fire({
             icon: 'error',
             title: t('flink.app.detail.invalidAccessToken'),
             showConfirmButton: true,
-            timer: 3500,
+          });
+        } else if (result === 2) {
+          Swal.fire({
+            icon: 'error',
+            title: t('flink.app.detail.invalidTokenUser'),
+            showConfirmButton: true,
           });
         } else {
           const res = await fetchCopyCurl({
@@ -63,9 +67,8 @@ export default defineComponent({
             appId: currentRef.value.app.id,
             name: currentRef.value.name,
           });
-          copy(res);
+          await copy(res);
           createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
-          closeModal();
         }
       } catch (error) {
         console.log(error);
@@ -76,9 +79,10 @@ export default defineComponent({
     return () => (
       <>
         <BasicModal
-          width={900}
+          width={800}
           onRegister={registerModal}
-          minHeight={400}
+          minHeight={500}
+          showCancelBtn={false}
           okText={t('flink.app.detail.copyCurl')}
           onOk={handleCopyCurl}
           v-slots={{

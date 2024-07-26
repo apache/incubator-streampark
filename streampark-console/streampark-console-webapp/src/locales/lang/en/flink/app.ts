@@ -127,7 +127,8 @@ export default {
     copyCancelcURL: 'App Cancel',
     apiDocCenter: 'Api Doc Center',
     nullAccessToken: 'access token is null,please contact the administrator to add.',
-    invalidAccessToken: 'access token is invalid,please contact the administrator.',
+    invalidAccessToken: 'access token is invalid, please contact the administrator.',
+    invalidTokenUser: 'current user is locked, please contact the administrator ',
     detailTab: {
       detailTabName: {
         option: 'Option',

@@ -116,8 +116,9 @@ export default {
     copyStartcURL: '作业启动',
     copyCancelcURL: '作业停止',
     apiDocCenter: 'Api文档',
-    nullAccessToken: '访问令牌为空，请联系管理员添加.',
-    invalidAccessToken: '访问令牌无效，请联系管理员。',
+    nullAccessToken: '访问令牌为空，请联系管理员添加',
+    invalidAccessToken: '访问令牌无效，请联系管理员',
+    invalidTokenUser: '当前用户已被锁定，请联系管理员',
     detailTab: {
       detailTabName: {
         option: '选项',
