@@ -77,7 +77,7 @@
             Button,
             {
               type: 'primary',
-              shape: 'round',
+              size: 'small',
               class: 'mx-3px px-5px',
               onClick: () =>
                 openApiModal(true, {
