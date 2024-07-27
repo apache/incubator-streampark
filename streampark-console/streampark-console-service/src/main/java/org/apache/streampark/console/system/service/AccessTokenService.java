@@ -48,15 +48,6 @@ public interface AccessTokenService extends IService<AccessToken> {
     IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request);
 
     /**
-     * Check whether the incoming token is valid
-     *
-     * @param userId User id
-     * @param token 被Checked token
-     * @return Whether the token is valid
-     */
-    boolean checkTokenEffective(Long userId, String token);
-
-    /**
      * Update information in token
      *
      * @param tokenId AccessToken id

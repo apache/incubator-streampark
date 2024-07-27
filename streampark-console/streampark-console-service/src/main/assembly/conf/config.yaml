@@ -64,8 +64,6 @@ streampark:
         http-auth: 'simple'  # default simple, or kerberos
     # flink on yarn or spark on yarn, HADOOP_USER_NAME
     hadoop-user-name: hdfs
-    # openapi whitelist,
-    openapi.white-list:
 
 # flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
 security:
