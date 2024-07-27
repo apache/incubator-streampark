@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Validated
 @RestController
@@ -83,7 +84,7 @@ public class OpenAPIController {
     @PostMapping("curl")
     public RestResponse copyOpenApiCurl(String baseUrl,
                                         Long appId,
-                                        @NotBlank(message = "{required}") Long teamId,
+                                        @NotNull(message = "{required}") Long teamId,
                                         @NotBlank(message = "{required}") String name) {
         String url = openAPIComponent.getOpenApiCUrl(baseUrl, appId, teamId, name);
         return RestResponse.success(url);

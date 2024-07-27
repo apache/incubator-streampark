@@ -66,7 +66,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             JWTUtil.sign(
                 user.getUserId(), user.getUsername(), user.getSalt(),
                 AuthenticationType.OPENAPI));
-        JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
+        JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME, AuthenticationType.SIGN.get());
 
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(jwtToken.getToken());
@@ -86,12 +86,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         List<AccessToken> records = page.getRecords();
         page.setRecords(records);
         return page;
-    }
-
-    @Override
-    public boolean checkTokenEffective(Long userId, String token) {
-        AccessToken res = baseMapper.selectByUserToken(userId, token);
-        return res != null && AccessToken.STATUS_ENABLE.equals(res.getFinalStatus());
     }
 
     @Override

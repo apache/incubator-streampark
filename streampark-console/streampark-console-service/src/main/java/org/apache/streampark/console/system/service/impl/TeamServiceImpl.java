@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.service.impl;
 
+import org.apache.streampark.console.base.domain.Constant;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -140,5 +141,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             return this.list();
         }
         return baseMapper.selectTeamsByUserId(userId);
+    }
+
+    @Override
+    public Team getSysDefaultTeam() {
+        return getById(Constant.DEFAULT_TEAM_ID);
     }
 }

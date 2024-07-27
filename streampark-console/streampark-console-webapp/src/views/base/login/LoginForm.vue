@@ -158,30 +158,22 @@
     try {
       loading.value = true;
       try {
-        const { data } = await signin(
-          {
-            password: loginFormValue.password,
-            username: loginFormValue.account,
-            loginType: LoginTypeEnum[loginType.value],
-          },
-          'none',
-        );
-        if (data.code !== ResultEnum.SUCCESS) {
-          if (data.code === 403) {
-            userId.value = data.data as unknown as string;
-            const teamList = await fetchUserTeam({userId: userId.value});
-            userStore.setTeamList(teamList.map((i) => ({label: i.teamName, value: i.id})));
-            modelVisible.value = true;
+        const { code, data } = await handleLoginRequest(loginFormValue);
+        if (code != null) {
+          if (code == 0 || code == 1) {
+            const message =
+              'SignIn failed,' +
+              (code === 0 ? ' authentication error' : ' current User is locked.');
+            createMessage.error(message);
             return;
           } else {
-            createMessage.error(data.message);
-            return;
+            console.log(data);
           }
         }
-        userStore.setData(data.data);
+        userStore.setData(data);
         let successText = t('sys.login.loginSuccessDesc');
-        if (data.data?.user) {
-          const { lastTeamId, nickName } = data.data.user;
+        if (data?.user) {
+          const { lastTeamId, nickName } = data.user;
           // The lastTeamId of user as the current teamId.
           userStore.teamId = lastTeamId || '';
           sessionStorage.setItem(APP_TEAMID_KEY_, userStore.teamId);

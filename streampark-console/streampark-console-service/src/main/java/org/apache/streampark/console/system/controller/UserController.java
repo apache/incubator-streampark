@@ -123,17 +123,8 @@ public class UserController {
         return RestResponse.success(newPass);
     }
 
-    @PostMapping("initTeam")
-    public RestResponse initTeam(Long teamId, Long userId) {
-        Team team = teamService.getById(teamId);
-        if (team == null) {
-            return RestResponse.error(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
-        }
-        userService.setLastTeam(teamId, userId);
-        return RestResponse.success();
-    }
 
-    @PostMapping("setTeam")
+    @PostMapping("set_team")
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
