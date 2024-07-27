@@ -123,7 +123,6 @@ public class UserController {
         return RestResponse.success(newPass);
     }
 
-
     @PostMapping("set_team")
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
