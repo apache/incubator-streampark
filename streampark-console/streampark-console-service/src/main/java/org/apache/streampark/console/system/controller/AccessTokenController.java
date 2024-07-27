@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
-import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
@@ -44,8 +44,6 @@ public class AccessTokenController {
 
     @Autowired
     private AccessTokenService accessTokenService;
-    @Autowired
-    private ServiceHelper serviceHelper;
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
@@ -57,7 +55,7 @@ public class AccessTokenController {
 
     @PostMapping(value = "check")
     public RestResponse verifyToken() {
-        Long userId = serviceHelper.getUserId();
+        Long userId = ServiceHelper.getUserId();
         RestResponse restResponse = RestResponse.success();
         AccessToken accessToken = accessTokenService.getByUserId(userId);
         if (accessToken == null) {
