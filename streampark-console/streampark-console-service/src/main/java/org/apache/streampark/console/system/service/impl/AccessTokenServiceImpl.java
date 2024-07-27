@@ -67,7 +67,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             JWTUtil.sign(
                 user.getUserId(), user.getUsername(), user.getSalt(),
                 AuthenticationType.OPENAPI));
-        JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME);
+        JWTToken jwtToken = new JWTToken(token, AccessToken.DEFAULT_EXPIRE_TIME, AuthenticationType.SIGN.get());
 
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(jwtToken.getToken());
