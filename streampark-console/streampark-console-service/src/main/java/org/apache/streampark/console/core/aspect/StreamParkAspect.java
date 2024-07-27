@@ -42,7 +42,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -51,11 +50,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -70,24 +65,6 @@ public class StreamParkAspect {
 
     @Autowired
     private ApplicationManageService applicationManageService;
-
-    private final Set<String> openapiWhitelist = new HashSet<>();
-
-    @PostConstruct
-    public void initOpenapiWhitelist() {
-        String whiteLists = SpringProperties.getProperty("streampark.openapi.white-list");
-        if (StringUtils.isNotBlank(whiteLists)) {
-            String[] whiteList = whiteLists.trim().split("\\s");
-            for (String order : whiteList) {
-                if (StringUtils.isNotBlank(order)) {
-                    if (!order.startsWith("/")) {
-                        order = "/" + order;
-                    }
-                    openapiWhitelist.add(order);
-                }
-            }
-        }
-    }
 
     @Pointcut("execution(public"
         + " org.apache.streampark.console.base.domain.RestResponse"
@@ -107,11 +84,7 @@ public class StreamParkAspect {
                 HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
                 String url = request.getRequestURI();
-                if (openapiWhitelist.contains(url)) {
-                    log.info("request by openapi white-list: {} ", url);
-                } else {
-                    throw new ApiAlertException("current api unsupported!");
-                }
+                throw new ApiAlertException("openapi unsupported: " + url);
             }
         }
         return (RestResponse) joinPoint.proceed();
