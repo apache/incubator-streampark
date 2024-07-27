@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -51,7 +50,7 @@ public class AccessTokenController {
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(
-                                    @NotBlank(message = "{required}") Long userId,
+                                    @NotNull(message = "{required}") Long userId,
                                     @RequestParam(required = false) String description) throws InternalException {
         return accessTokenService.create(userId, description);
     }
@@ -86,7 +85,7 @@ public class AccessTokenController {
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
+    public RestResponse deleteToken(@NotNull(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.removeById(tokenId);
         return RestResponse.success(res);
     }
