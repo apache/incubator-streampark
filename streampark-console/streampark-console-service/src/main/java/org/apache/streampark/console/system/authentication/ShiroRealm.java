@@ -109,9 +109,10 @@ public class ShiroRealm extends AuthorizingRealm {
 
       if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
         throw new AuthenticationException(
-            "the user [" + username + "] has been locked, please contact the administrator");
+            "the user ["
+                + user.getUsername()
+                + "] has been locked, please contact the administrator");
       }
-
       SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
     }
 

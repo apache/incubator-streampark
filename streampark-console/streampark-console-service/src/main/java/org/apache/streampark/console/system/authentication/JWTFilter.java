@@ -25,7 +25,6 @@ import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
@@ -37,8 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 
   private static final String TOKEN = "Authorization";
-
-  private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
   @Override
   protected boolean isAccessAllowed(
@@ -62,9 +59,11 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
     String token = httpServletRequest.getHeader(TOKEN);
     AuthenticationType type = JWTUtil.getAuthType(WebUtils.decryptToken(token));
+
     if (type == null) {
       return false;
     }
+
     if (type == AuthenticationType.OPENAPI) {
       JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
       try {

@@ -88,7 +88,7 @@ public class JWTUtil {
    */
   public static String sign(
       Long userId, String userName, String secret, AuthenticationType authType) {
-    Long second = getTTLOfSecond() * 1000;
+    long second = getTTLOfSecond() * 1000;
     Long ttl = System.currentTimeMillis() + second;
     return sign(userId, userName, secret, authType, ttl);
   }
@@ -116,7 +116,7 @@ public class JWTUtil {
   public static Long getTTLOfSecond() {
     if (ttlOfSecond == null) {
       String ttl = System.getProperty("server.session.ttl", "24h").trim();
-      String regexp = "^\\d+(s|m|h|d)$";
+      String regexp = "^\\d+([smhd])$";
       Pattern pattern = Pattern.compile(regexp);
       if (!pattern.matcher(ttl).matches()) {
         throw new IllegalArgumentException(
@@ -124,7 +124,7 @@ public class JWTUtil {
       }
       String unit = ttl.substring(ttl.length() - 1);
       String time = ttl.substring(0, ttl.length() - 1);
-      Long second = Long.parseLong(time);
+      long second = Long.parseLong(time);
       switch (unit) {
         case "m":
           return ttlOfSecond = second * 60;

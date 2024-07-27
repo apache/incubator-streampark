@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.enums;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public enum AuthenticationType {
   SIGN(1),
@@ -35,6 +36,9 @@ public enum AuthenticationType {
   }
 
   public static AuthenticationType of(Integer value) {
-    return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    return Arrays.stream(values())
+        .filter((x) -> Objects.equals(x.value, value))
+        .findFirst()
+        .orElse(null);
   }
 }
