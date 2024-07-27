@@ -127,13 +127,6 @@ public interface UserService extends IService<User> {
     void clearLastTeam(Long teamId);
 
     /**
-     * Populate team information for users
-     *
-     * @param user User
-     */
-    void fillInTeam(User user);
-
-    /**
      * List all Users by team id
      *
      * @param teamId team id
