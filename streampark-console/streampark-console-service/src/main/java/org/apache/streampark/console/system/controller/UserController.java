@@ -91,8 +91,8 @@ public class UserController {
   }
 
   @RequiresPermissions("token:add")
-  @PostMapping("getNoTokenUser")
-  public RestResponse getNoTokenUser() {
+  @PostMapping("get_no_token_user")
+  public RestResponse noTokenUser() {
     List<User> userList = this.userService.getNoTokenUser();
     return RestResponse.success(userList);
   }
@@ -118,17 +118,7 @@ public class UserController {
     return RestResponse.success(newPass);
   }
 
-  @PostMapping("initTeam")
-  public RestResponse initTeam(Long teamId, Long userId) {
-    Team team = teamService.getById(teamId);
-    if (team == null) {
-      return RestResponse.fail("teamId is invalid", ResponseCode.CODE_FAIL_ALERT);
-    }
-    userService.setLastTeam(teamId, userId);
-    return RestResponse.success();
-  }
-
-  @PostMapping("setTeam")
+  @PostMapping("set_team")
   public RestResponse setTeam(Long teamId) {
     Team team = teamService.getById(teamId);
     if (team == null) {
@@ -146,7 +136,7 @@ public class UserController {
     return new RestResponse().data(infoMap);
   }
 
-  @PostMapping("appOwners")
+  @PostMapping("app_owners")
   public RestResponse appOwners(Long teamId) {
     List<User> userList = userService.findByAppOwner(teamId);
     userList.forEach(User::dataMasking);

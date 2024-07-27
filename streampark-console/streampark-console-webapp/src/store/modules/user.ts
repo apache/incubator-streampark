@@ -12,7 +12,7 @@ import {
   USER_INFO_KEY,
 } from '/@/enums/cacheEnum';
 import { getAuthCache, setAuthCache } from '/@/utils/auth';
-import { doLogout, fetchInitUserTeam, fetchSetUserTeam } from '/@/api/system/user';
+import { doLogout, fetchSetUserTeam } from '/@/api/system/user';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { router } from '/@/router';
@@ -135,20 +135,16 @@ export const useUserStore = defineStore({
       try {
         const { refreshMenu } = usePermission();
         // The userId passed in is the binding operation at login
-        if (data.userId) {
-          await fetchInitUserTeam(data as { teamId: string; userId: string });
-        } else {
-          const resp = await fetchSetUserTeam(data);
-          const { permissions, roles = [], user } = resp;
-          this.setUserInfo(user);
-          this.setRoleList(roles as RoleEnum[]);
-          this.setPermissions(permissions);
-        }
+        const { permissions, roles = [], user } = await fetchSetUserTeam(data);
+        this.setUserInfo(user as UserInfo);
+        this.setRoleList(roles as RoleEnum[]);
+        this.setPermissions(permissions);
+
         // If it returns success, it will be stored in the local cache
         this.teamId = data.teamId;
         sessionStorage.setItem(APP_TEAMID_KEY_, data.teamId);
         localStorage.setItem(APP_TEAMID_KEY_, data.teamId);
-        if (!data.userId) refreshMenu(unref(router.currentRoute)?.path);
+        await refreshMenu(unref(router.currentRoute)?.path);
         return Promise.resolve(true);
       } catch (error) {
         return Promise.reject(error);

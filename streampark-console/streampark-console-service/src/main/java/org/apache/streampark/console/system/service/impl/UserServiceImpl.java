@@ -31,7 +31,6 @@ import org.apache.streampark.console.system.service.MenuService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -102,6 +101,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     String salt = ShaHashUtils.getRandomSalt();
     String password = ShaHashUtils.encrypt(salt, user.getPassword());
     user.setSalt(salt);
+    // default team
+    user.setLastTeamId(teamService.getSysDefaultTeam().getId());
     user.setPassword(password);
     save(user);
   }
@@ -201,21 +202,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Override
   public void clearLastTeam(Long teamId) {
     this.baseMapper.clearLastTeamByTeamId(teamId);
-  }
-
-  @Override
-  public void setDefaultTeam(User user) {
-    if (user.getLastTeamId() == null) {
-      List<Team> teams = memberService.findUserTeams(user.getUserId());
-      if (CollectionUtils.isEmpty(teams)) {
-        throw new ApiAlertException(
-            "The current user not belong to any team, please contact the administrator!");
-      } else if (teams.size() == 1) {
-        Team team = teams.get(0);
-        user.setLastTeamId(team.getId());
-        this.baseMapper.updateById(user);
-      }
-    }
   }
 
   @Override

@@ -34,16 +34,15 @@ enum Api {
   GetUserInfo = '/getUserInfo',
   GetPermCode = '/getPermCode',
   UserList = '/user/list',
-  NoTokenUsers = '/user/getNoTokenUser',
+  NoTokenUsers = '/user/get_no_token_user',
   UserUpdate = '/user/update',
   UserAdd = '/user/post',
   UserDelete = '/user/delete',
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
-  SET_TEAM = '/user/setTeam',
-  INIT_TEAM = '/user/initTeam',
-  APP_OWNERS = '/user/appOwners',
+  SET_TEAM = '/user/set_team',
+  APP_OWNERS = '/user/app_owners',
 }
 
 /**
@@ -132,13 +131,6 @@ export function fetchUserPasswordUpdate(data: {
 export function fetchAppOwners(data: Recordable): Promise<Array<UserInfo>> {
   return defHttp.post({
     url: Api.APP_OWNERS,
-    data,
-  });
-}
-
-export function fetchInitUserTeam(data: { userId: string; teamId: string }) {
-  return defHttp.post({
-    url: Api.INIT_TEAM,
     data,
   });
 }

@@ -111,8 +111,6 @@ public interface UserService extends IService<User> {
 
   void clearLastTeam(Long teamId);
 
-  void setDefaultTeam(User user);
-
   List<User> findByAppOwner(Long teamId);
 
   Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);

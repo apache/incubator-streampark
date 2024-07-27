@@ -244,11 +244,11 @@ insert into "public"."t_setting" values (14, 'docker.register.namespace', null, 
 insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
 
 -- ----------------------------
--- Records of t_user
--- ----------------------------
-insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, null, '1', now(), now(), null, 0, null, null);
-
--- ----------------------------
 -- Records of t_member
 -- ----------------------------
 insert into "public"."t_member" values (100000, 100000, 100000, 100001, now(), now());
+
+-- ----------------------------
+-- Records of t_user
+-- ----------------------------
+insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(), null, 0, null, null);

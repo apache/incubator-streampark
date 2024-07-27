@@ -18,7 +18,6 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
@@ -38,8 +37,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
@@ -56,8 +53,6 @@ public class PassportController {
 
   @PostMapping("signin")
   public RestResponse signin(
-      HttpServletRequest request,
-      HttpServletResponse response,
       @NotBlank(message = "{required}") String username,
       @NotBlank(message = "{required}") String password,
       @NotBlank(message = "{required}") String loginType)
@@ -75,14 +70,6 @@ public class PassportController {
 
     if (User.STATUS_LOCK.equals(user.getStatus())) {
       return RestResponse.success().put("code", 1);
-    }
-
-    // set team
-    userService.setDefaultTeam(user);
-
-    // no team.
-    if (user.getLastTeamId() == null) {
-      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
     }
 
     this.userService.updateLoginTime(username);

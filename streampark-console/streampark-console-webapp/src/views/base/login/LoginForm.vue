@@ -92,7 +92,6 @@
   import { loginApi } from '/@/api/system/user';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
-  import { fetchUserTeam } from '/@/api/system/member';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
   const FormItem = Form.Item;
@@ -164,12 +163,6 @@
               'SignIn failed,' +
               (code === 0 ? ' authentication error' : ' current User is locked.');
             createMessage.error(message);
-            return;
-          } else if (code == 403) {
-            userId.value = data as unknown as string;
-            const teamList = await fetchUserTeam({ userId: userId.value });
-            userStore.setTeamList(teamList.map((i) => ({ label: i.teamName, value: i.id })));
-            modelVisible.value = true;
             return;
           } else {
             console.log(data);

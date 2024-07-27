@@ -37,5 +37,7 @@ public interface TeamService extends IService<Team> {
 
   void updateTeam(Team team);
 
+  Team getSysDefaultTeam();
+
   List<Team> findUserTeams(Long userId);
 }
