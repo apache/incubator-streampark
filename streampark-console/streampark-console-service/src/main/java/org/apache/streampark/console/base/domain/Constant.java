@@ -31,5 +31,5 @@ public class Constant {
 
     public static final String APP_DETAIL_MENU_ID = "100018";
 
-    public static final Long DEFAULT_TEAM_ID = 10000L;
+    public static final Long DEFAULT_TEAM_ID = 100000L;
 }
