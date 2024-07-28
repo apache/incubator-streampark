@@ -64,7 +64,7 @@ public class AccessTokenController {
         } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
             return RestResponse.success(AccessTokenStateEnum.LOCKED_USER.get());
         }
-        return RestResponse.success();
+        return RestResponse.success(AccessTokenStateEnum.OK.get());
     }
 
     @PostMapping(value = "list")
