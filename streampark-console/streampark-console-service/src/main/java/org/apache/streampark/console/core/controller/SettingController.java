@@ -76,7 +76,7 @@ public class SettingController {
 
     @PostMapping("check/docker")
     @RequiresPermissions("setting:view")
-    public Result<?> checkDocker(DockerConfig dockerConfig) {
+    public Result<Void> checkDocker(DockerConfig dockerConfig) {
         return settingService.checkDocker(dockerConfig);
     }
 
@@ -96,7 +96,7 @@ public class SettingController {
 
     @PostMapping("check/email")
     @RequiresPermissions("setting:view")
-    public Result<?> checkEmail(SenderEmail senderEmail) {
+    public Result<Void> checkEmail(SenderEmail senderEmail) {
         return settingService.checkEmail(senderEmail);
     }
 

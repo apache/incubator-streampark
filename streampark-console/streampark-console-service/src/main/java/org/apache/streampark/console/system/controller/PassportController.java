@@ -79,23 +79,23 @@ public class PassportController {
     }
 
     @PostMapping("signin")
-    public Result<?> signin(
-                            @NotBlank(message = "{required}") String username,
-                            @NotBlank(message = "{required}") String password,
-                            @NotBlank(message = "{required}") String loginType) throws Exception {
+    public Result<Map<String, Object>> signin(
+                                              @NotBlank(message = "{required}") String username,
+                                              @NotBlank(message = "{required}") String password,
+                                              @NotBlank(message = "{required}") String loginType) throws Exception {
 
         if (StringUtils.isEmpty(username)) {
-            return Result.fail(null, 0);
+            return Result.fail(0);
         }
 
         User user = authenticator.authenticate(username, password, loginType);
 
         if (user == null) {
-            return Result.fail(null, 0);
+            return Result.fail(0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return Result.fail(null, 0);
+            return Result.fail(0);
         }
 
         this.userService.updateLoginTime(username);

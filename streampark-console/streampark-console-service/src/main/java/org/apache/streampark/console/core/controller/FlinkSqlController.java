@@ -65,7 +65,7 @@ public class FlinkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public Result<?> verify(String sql, Long versionId, Long teamId) {
+    public Result<Map<String, Integer>> verify(String sql, Long versionId, Long teamId) {
         sql = variableService.replaceVariable(teamId, sql);
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
 
@@ -83,7 +83,7 @@ public class FlinkSqlController {
             }
             return Result.fail(exception, map);
         }
-        return Result.success(true);
+        return Result.success(null);
     }
 
     @PostMapping("list")

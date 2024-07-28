@@ -35,6 +35,7 @@
   import { format } from '../FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFullContent } from '/@/hooks/event/useFullscreen';
+  import {ResultEnum} from "/@/enums/httpEnum";
   const ButtonGroup = Button.Group;
   const { t } = useI18n();
 
@@ -84,8 +85,7 @@
           sql: props.value,
           versionId: props.versionId,
         });
-        const success = data.data === true || data.data === 'true';
-        if (success) {
+        if (data.code === ResultEnum.SUCCESS) {
           verifyRes.verified = true;
           verifyRes.errorMsg = '';
           syntaxError();

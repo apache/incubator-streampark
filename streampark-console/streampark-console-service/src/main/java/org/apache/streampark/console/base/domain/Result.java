@@ -78,6 +78,10 @@ public class Result<T> {
         return fail(null, data, ResponseCode.CODE_FAILED);
     }
 
+    public static <T> Result<T> fail(final int code) {
+        return fail(null, null, code);
+    }
+
     /**
      * return error.
      *

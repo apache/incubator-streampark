@@ -123,10 +123,10 @@ public class UserController {
     }
 
     @PostMapping("set_team")
-    public Result<?> setTeam(Long teamId) {
+    public Result<Map<String, Object>> setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
-            return Result.fail("TeamId is invalid, set team failed.");
+            return Result.fail("TeamId is invalid, set team failed.", null);
         }
         User user = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");

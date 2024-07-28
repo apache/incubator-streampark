@@ -102,7 +102,7 @@ public interface SettingService extends IService<Setting> {
      * @param dockerConfig Docker config to be checked
      * @return Server response value
      */
-    Result<?> checkDocker(DockerConfig dockerConfig);
+    Result<Void> checkDocker(DockerConfig dockerConfig);
 
     /**
      * update docker config
@@ -126,7 +126,7 @@ public interface SettingService extends IService<Setting> {
      * @param senderEmail email config to be checked
      * @return Server response value
      */
-    Result<?> checkEmail(SenderEmail senderEmail);
+    Result<Void> checkEmail(SenderEmail senderEmail);
 
     /**
      * update docker config

@@ -143,7 +143,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public Result<?> checkDocker(DockerConfig dockerConfig) {
+    public Result<Void> checkDocker(DockerConfig dockerConfig) {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
             .withRegistryUrl(dockerConfig.getAddress())
             .build();
@@ -163,7 +163,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             }
         } catch (Exception e) {
             if (e.getMessage().contains("LastErrorException")) {
-                return Result.fail(null, null, 400);
+                return Result.fail(400);
             } else if (e.getMessage().contains("Status 401")) {
                 return Result.fail(
                     "Failed to validate Docker registry, unauthorized: incorrect username or password ");
@@ -213,7 +213,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public Result<?> checkEmail(SenderEmail senderEmail) {
+    public Result<Void> checkEmail(SenderEmail senderEmail) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         if (senderEmail.isSsl()) {

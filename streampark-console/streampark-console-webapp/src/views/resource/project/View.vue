@@ -83,6 +83,7 @@
   import { useModal } from '/@/components/Modal';
   import LogModal from './components/LogModal.vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   export default defineComponent({
     name: 'ProjectView',
@@ -139,8 +140,13 @@
           pageSize: pageInfo.pageSize,
         }).then((res) => {
           loading.value = false;
-          pageInfo.total = Number(res.total);
-          projectDataSource.value = res.records;
+          if (resp.code === ResultEnum.SUCCESS) {
+            pageInfo.total = Number(res.total);
+            projectDataSource.value = res.records;
+          } else {
+            pageInfo.total = 0;
+            projectDataSource.value = [];
+          }
         });
       }
 

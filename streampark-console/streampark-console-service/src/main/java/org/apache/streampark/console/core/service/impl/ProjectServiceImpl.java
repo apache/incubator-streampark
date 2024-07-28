@@ -371,12 +371,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public Result<?> getBuildLog(Long id, Long startOffset) {
+    public Result<Map<String, String>> getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return Result.fail(errorMsg);
+            return Result.fail(errorMsg, null);
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
@@ -403,7 +403,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return Result.fail(error + e.getMessage());
+            return Result.fail(error + e.getMessage(), null);
         }
     }
 

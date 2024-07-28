@@ -31,6 +31,7 @@
   import { settingFormSchema } from './config';
   import { SvgIcon } from '/@/components/Icon';
   import Swal from 'sweetalert2';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const emit = defineEmits(['success', 'register']);
   const { t } = useI18n();
@@ -119,7 +120,7 @@
       }
       if (type.value === 'email') {
         const resp = await fetchVerifyEmail(formData);
-        if (resp.code === 200) {
+        if (resp.code === ResultEnum.SUCCESS) {
           await fetchEmailUpdate(formData);
         } else {
           Swal.fire({

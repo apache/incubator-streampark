@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,16 +85,16 @@ public class ProjectController {
     @PostMapping("build_log")
     @RequiresPermissions("project:build")
     @Permission(team = "#teamId")
-    public Result<?> buildLog(Long id, Long startOffset) {
+    public Result<Map<String, String>> buildLog(Long id, Long startOffset) {
         return projectService.getBuildLog(id, startOffset);
     }
 
     @PostMapping("list")
     @RequiresPermissions("project:view")
     @Permission(team = "#project.teamId")
-    public Result<?> list(Project project, RestRequest restRequest) {
+    public Result<IPage<Project>> list(Project project, RestRequest restRequest) {
         if (project.getTeamId() == null) {
-            return Result.success(Collections.emptyList());
+            return Result.fail("teamId must be not null", null);
         }
         IPage<Project> page = projectService.getPage(project, restRequest);
         return Result.success(page);
