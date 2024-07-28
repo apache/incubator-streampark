@@ -246,6 +246,8 @@ export const useProject = () => {
         prvkeyPath: values.prvkeyPath || null,
         id: route?.query?.id || null,
       });
+      debugger;
+      console.log(res);
       if (res === 0) {
         if (branchList.value.length === 0) {
           await handleBranches(values);

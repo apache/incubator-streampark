@@ -176,8 +176,8 @@
 
   async function handleDelete() {
     try {
-      const { data } = await deleteProject({ id: props.item.id });
-      if (data.data) {
+      const resp = await deleteProject({ id: props.item.id });
+      if (resp.data) {
         Swal.fire({
           icon: 'success',
           title: t('flink.project.operationTips.deleteProjectSuccessMessage'),

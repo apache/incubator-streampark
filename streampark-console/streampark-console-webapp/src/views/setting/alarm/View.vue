@@ -136,8 +136,8 @@
   /* delete configuration */
   async function handleDeleteAlertConf(item: AlertSetting) {
     try {
-      const { data } = await fetchAlertDelete({ id: item.id });
-      if (data.data) {
+      const resp = await fetchAlertDelete({ id: item.id });
+      if (resp.data) {
         Swal.fire({
           icon: 'success',
           title: 'Delete Alert Config  successful!',
@@ -147,7 +147,7 @@
       } else {
         Swal.fire(
           'Failed delete AlertConfig',
-          data['message'].replaceAll(/\[StreamPark]/g, ''),
+          resp.message.replaceAll(/\[StreamPark]/g, ''),
           'error',
         );
       }
