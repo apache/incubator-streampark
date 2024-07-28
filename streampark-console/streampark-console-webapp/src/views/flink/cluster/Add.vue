@@ -50,7 +50,7 @@
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
         const res = await fetchCheckCluster(params);
-        const status = parseInt(res.status);
+        const status = parseInt(res.data);
         if (status === 0) {
           const resp = await fetchCreateCluster(params);
           if (resp) {
@@ -71,7 +71,7 @@
             );
           }
         } else {
-          Swal.fire('Failed', res.msg, 'error');
+          Swal.fire('Failed', res.message, 'error');
         }
       }
     } catch (error) {

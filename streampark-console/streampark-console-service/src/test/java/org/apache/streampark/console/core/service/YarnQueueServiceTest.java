@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
@@ -113,15 +113,15 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for error format with non-empty.
         YarnQueue yarnQueue = mockYarnQueue(1L, "queue@");
-        ResponseResult<String> result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(2);
-        assertThat(result.getMsg()).isEqualTo(ERR_FORMAT_HINTS);
+        Result<Integer> result = yarnQueueService.checkYarnQueue(yarnQueue);
+        assertThat(result.getData()).isEqualTo(2);
+        assertThat(result.getMessage()).isEqualTo(ERR_FORMAT_HINTS);
 
         // Test for error format with empty.
         yarnQueue.setQueueLabel("");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(3);
-        assertThat(result.getMsg()).isEqualTo(QUEUE_EMPTY_HINT);
+        assertThat(result.getData()).isEqualTo(3);
+        assertThat(result.getMessage()).isEqualTo(QUEUE_EMPTY_HINT);
 
         // Test for existed
         yarnQueue.setQueueLabel("queue1@label1");
@@ -130,25 +130,25 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         // QueueLabel not updated
         yarnQueue.setQueueLabel("queue1@label1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
+        assertThat(result.getData()).isEqualTo(0);
 
         // QueueLabel updated
         yarnQueue.setQueueLabel("queue2@label1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
+        assertThat(result.getData()).isEqualTo(0);
 
         // new record but same QueueLabel
         yarnQueue.setId(null);
         yarnQueue.setQueueLabel("queue1@label1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(1);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
+        assertThat(result.getData()).isEqualTo(1);
+        assertThat(result.getMessage()).isEqualTo(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
 
         // Test for normal cases.
         yarnQueue.setQueueLabel("q1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_AVAILABLE_HINT);
+        assertThat(result.getData()).isEqualTo(0);
+        assertThat(result.getMessage()).isEqualTo(YarnQueueServiceImpl.QUEUE_AVAILABLE_HINT);
     }
 
     /**

@@ -28,6 +28,7 @@
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';
   import { useTimeoutFn } from '@vueuse/shared';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const { t } = useI18n();
 
@@ -62,15 +63,15 @@
         id: project.id,
         startOffset,
       });
-      if (data.readFinished === false) {
-        showRefresh.value = true;
-        start();
-      } else {
-        showRefresh.value = false;
-      }
-      logTime.value = formatToDateTime(new Date());
-      if (data.data) {
-        setContent(data.data);
+      if (data.code == ResultEnum.SUCCESS) {
+        if (data.readFinished === false) {
+          showRefresh.value = true;
+          start();
+        } else {
+          showRefresh.value = false;
+        }
+        logTime.value = formatToDateTime(new Date());
+        await setContent(data.data.fileContent);
         handleRevealLine();
       }
     } catch (error) {

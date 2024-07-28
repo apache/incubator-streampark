@@ -35,7 +35,6 @@ public interface ProjectService extends IService<Project> {
      * Create a new instance.
      *
      * @param project Project to be created
-     * @return RestResponse
      */
     boolean create(Project project);
 
@@ -94,7 +93,6 @@ public interface ProjectService extends IService<Project> {
      *
      * @param id Project id
      * @param startOffset startOffset
-     * @return RestResponse
      */
     Result<?> getBuildLog(Long id, Long startOffset);
 

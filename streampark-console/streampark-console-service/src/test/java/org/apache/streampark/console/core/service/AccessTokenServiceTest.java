@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -45,12 +45,12 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     void testCrudToken() throws Exception {
         Long mockUserId = 100000L;
         String expireTime = "9999-01-01 00:00:00";
-        RestResponse restResponse = accessTokenService.create(mockUserId, "");
+        Result<AccessToken> restResponse = accessTokenService.create(mockUserId, "");
         Assertions.assertNotNull(restResponse);
-        Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
+        Assertions.assertInstanceOf(AccessToken.class, restResponse.getData());
 
         // verify
-        AccessToken accessToken = (AccessToken) restResponse.get(RestResponse.DATA_KEY);
+        AccessToken accessToken = restResponse.getData();
         LOG.info(accessToken.getToken());
         JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
         LOG.info(jwtToken.getToken());
@@ -73,9 +73,9 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
 
         // toggle
         Long tokenId = accessToken.getId();
-        RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
+        Result<Void> toggleTokenResp = accessTokenService.toggleToken(tokenId);
         Assertions.assertNotNull(toggleTokenResp);
-        Assertions.assertTrue((Boolean) toggleTokenResp.get(RestResponse.DATA_KEY));
+        Assertions.assertEquals(200, (int) toggleTokenResp.getCode());
 
         // get
         AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);

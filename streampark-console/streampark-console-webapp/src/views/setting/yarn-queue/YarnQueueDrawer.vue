@@ -63,7 +63,7 @@
                     };
                     if (unref(isUpdate)) Object.assign(params, { id: model?.id });
                     const res = await fetchCheckYarnQueue(params);
-                    if (res.status === 0) {
+                    if (res.data === 0) {
                       return Promise.resolve();
                     } else {
                       switch (res.status) {

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
@@ -52,27 +52,27 @@ public class SavePointController {
 
     @PostMapping("history")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public RestResponse history(SavePoint sp, RestRequest request) {
+    public Result<IPage<SavePoint>> history(SavePoint sp, RestRequest request) {
         IPage<SavePoint> page = savePointService.getPage(sp, request);
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public RestResponse delete(SavePoint sp) throws InternalException {
+    public Result<Boolean> delete(SavePoint sp) throws InternalException {
         SavePoint savePoint = savePointService.getById(sp.getId());
         Application application = applicationManageService.getById(savePoint.getAppId());
         Boolean deleted = savePointService.remove(sp.getId(), application);
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @PostMapping("trigger")
     @Permission(app = "#savePoint.appId", team = "#savePoint.teamId")
     @RequiresPermissions("savepoint:trigger")
-    public RestResponse trigger(
-                                Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
+    public Result<Boolean> trigger(
+                                   Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
         savePointService.trigger(appId, savepointPath, nativeFormat);
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 }

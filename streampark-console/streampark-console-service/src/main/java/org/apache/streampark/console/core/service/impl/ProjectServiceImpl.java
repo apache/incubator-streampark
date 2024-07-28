@@ -25,7 +25,6 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
@@ -52,6 +51,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,7 +62,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -104,8 +103,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
             project.getName());
         long count = count(queryWrapper);
-        RestResponse response = RestResponse.success();
-
         ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
         if (StringUtils.isNotBlank(project.getPassword())) {
             String salt = ShaHashUtils.getRandomSalt();
@@ -389,7 +386,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (startOffset == null && isBuilding) {
             startOffset = 0L;
         }
-
         try {
             long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
@@ -399,11 +395,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            Map<String, Serializable> info = new HashMap<>();
-            info.put("content", new String(fileContent, StandardCharsets.UTF_8));
-            info.put("offset", endOffset);
-            info.put("readFinished", readFinished);
-            return Result.success(info);
+            return Result.success(ImmutableMap.<String, String>builder()
+                .put("fileContent", new String(fileContent, StandardCharsets.UTF_8))
+                .put("offset", String.valueOf(endOffset))
+                .put("readFinished", String.valueOf(readFinished))
+                .build());
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);

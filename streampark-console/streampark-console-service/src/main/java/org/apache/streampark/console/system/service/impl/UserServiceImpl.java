@@ -20,7 +20,7 @@ package org.apache.streampark.console.system.service.impl;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -125,15 +125,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponse updateUser(User user) {
+    public Result<Map<String, Boolean>> updateUser(User user) {
         User existsUser = getById(user.getUserId());
         user.setLoginType(null);
         user.setPassword(null);
         if (needTransferResource(existsUser, user)) {
-            return RestResponse.success(Collections.singletonMap("needTransferResource", true));
+            return Result.success(Collections.singletonMap("needTransferResource", true));
         }
         updateById(user);
-        return RestResponse.success();
+        return Result.success(Collections.emptyMap());
     }
 
     private boolean needTransferResource(User existsUser, User user) {
@@ -228,13 +228,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResponse getLoginUserInfo(User user) {
+    public Result<Map<String, Object>> getLoginUserInfo(User user) {
         if (user == null) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 0);
+            return Result.fail(null, null, 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 1);
+            return Result.fail(null, null, 0);
         }
 
         updateLoginTime(user.getUsername());
@@ -247,7 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-        return RestResponse.success(userInfo);
+        return Result.success(userInfo);
     }
 
     @Override

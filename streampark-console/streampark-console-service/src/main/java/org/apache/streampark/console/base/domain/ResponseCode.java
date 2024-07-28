@@ -19,15 +19,13 @@ package org.apache.streampark.console.base.domain;
 
 public interface ResponseCode {
 
-    Long CODE_SUCCESS = 200L;
+    int CODE_SUCCESS = 200;
 
-    Long CODE_FAIL = 500L;
+    int CODE_FAILED = 500;
 
-    Long CODE_UNAUTHORIZED = 401L;
+    int CODE_UNAUTHORIZED = 401;
 
-    Long CODE_FORBIDDEN = 403L;
+    int CODE_FAIL_ALERT = 501;
 
-    Long CODE_FAIL_ALERT = 501L;
-
-    Long CODE_FAIL_DETAIL = 502L;
+    int CODE_FAIL_DETAIL = 502;
 }

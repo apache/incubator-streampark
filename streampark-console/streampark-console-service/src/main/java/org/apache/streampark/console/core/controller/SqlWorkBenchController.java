@@ -20,6 +20,11 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.gateway.OperationHandle;
+import org.apache.streampark.gateway.results.Column;
+import org.apache.streampark.gateway.results.GatewayInfo;
+import org.apache.streampark.gateway.results.OperationInfo;
+import org.apache.streampark.gateway.results.ResultQueryCondition;
+import org.apache.streampark.gateway.results.ResultSet;
 import org.apache.streampark.gateway.session.SessionHandle;
 
 import lombok.extern.slf4j.Slf4j;

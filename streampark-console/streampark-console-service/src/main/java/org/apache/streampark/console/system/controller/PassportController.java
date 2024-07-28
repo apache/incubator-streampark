@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
@@ -66,7 +66,7 @@ public class PassportController {
     private Boolean ldapEnable;
 
     @PostMapping("signtype")
-    public RestResponse type() {
+    public Result<List<String>> type() {
         List<String> types = new ArrayList<>();
         types.add(LoginTypeEnum.PASSWORD.name().toLowerCase());
         if (ssoEnable) {
@@ -75,27 +75,27 @@ public class PassportController {
         if (ldapEnable) {
             types.add(LoginTypeEnum.LDAP.name().toLowerCase());
         }
-        return RestResponse.success(types);
+        return Result.success(types);
     }
 
     @PostMapping("signin")
-    public RestResponse signin(
-                               @NotBlank(message = "{required}") String username,
-                               @NotBlank(message = "{required}") String password,
-                               @NotBlank(message = "{required}") String loginType) throws Exception {
+    public Result<?> signin(
+                            @NotBlank(message = "{required}") String username,
+                            @NotBlank(message = "{required}") String password,
+                            @NotBlank(message = "{required}") String loginType) throws Exception {
 
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
+            return Result.fail(null, 0);
         }
 
         User user = authenticator.authenticate(username, password, loginType);
 
         if (user == null) {
-            return RestResponse.success().put("code", 0);
+            return Result.fail(null, 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
+            return Result.fail(null, 0);
         }
 
         this.userService.updateLoginTime(username);
@@ -116,12 +116,12 @@ public class PassportController {
         Map<String, Object> userInfo =
             userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
 
-        return new RestResponse().data(userInfo);
+        return Result.success(userInfo);
     }
 
     @PostMapping("signout")
-    public RestResponse signout() {
+    public Result<Void> signout() {
         SecurityUtils.getSubject().logout();
-        return new RestResponse();
+        return Result.success();
     }
 }

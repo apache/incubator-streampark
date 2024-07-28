@@ -61,7 +61,7 @@ public class Result<T> {
      * @return {@linkplain Result}
      */
     public static <T> Result<T> success(final T data, final String message) {
-        return new Result<T>(200, message, data, Constant.STATUS_SUCCESS);
+        return new Result<T>(ResponseCode.CODE_SUCCESS, message, data, Constant.STATUS_SUCCESS);
     }
 
     /**
@@ -71,11 +71,11 @@ public class Result<T> {
      * @return {@linkplain Result}
      */
     public static Result<Void> fail(final String message) {
-        return fail(message, 500);
+        return fail(message, ResponseCode.CODE_FAILED);
     }
 
     public static <T> Result<T> fail(final T data) {
-        return fail(null, data, 500);
+        return fail(null, data, ResponseCode.CODE_FAILED);
     }
 
     /**
@@ -90,7 +90,7 @@ public class Result<T> {
     }
 
     public static <T> Result<T> fail(final String message, final T data) {
-        return fail(message, data, 500);
+        return fail(message, data, ResponseCode.CODE_FAILED);
     }
 
     /**

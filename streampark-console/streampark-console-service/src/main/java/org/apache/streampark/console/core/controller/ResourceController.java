@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.service.ResourceService;
@@ -39,7 +38,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -52,13 +53,13 @@ public class ResourceController {
 
     @PostMapping("add")
     @RequiresPermissions("resource:add")
-    public RestResponse addResource(@Valid Resource resource) throws Exception {
+    public Result<Void> addResource(@Valid Resource resource) throws Exception {
         this.resourceService.addResource(resource);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("check")
-    public RestResponse checkResource(@Valid Resource resource) throws Exception {
+    public Result<Map<String, Serializable>> checkResource(@Valid Resource resource) throws Exception {
         return this.resourceService.checkResource(resource);
     }
 

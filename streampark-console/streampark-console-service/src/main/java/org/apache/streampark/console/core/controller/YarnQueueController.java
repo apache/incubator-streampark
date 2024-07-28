@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.Result;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
@@ -47,7 +46,7 @@ public class YarnQueueController {
      *
      * @param restRequest page request information.
      * @param yarnQueue optional fields used to search.
-     * @return RestResponse with IPage<{@link YarnQueue}> object.
+     * @return Result with IPage<{@link YarnQueue}> object.
      */
     @PostMapping("list")
     public Result<IPage<YarnQueue>> list(RestRequest restRequest, YarnQueue yarnQueue) {
@@ -56,8 +55,8 @@ public class YarnQueueController {
     }
 
     @PostMapping("check")
-    public Result<ResponseResult<String>> check(YarnQueue yarnQueue) {
-        return Result.success(yarnQueueService.checkYarnQueue(yarnQueue));
+    public Result<Integer> check(YarnQueue yarnQueue) {
+        return yarnQueueService.checkYarnQueue(yarnQueue);
     }
 
     @PostMapping("create")

@@ -68,7 +68,7 @@
           id: cluster.id,
         });
         const res = await fetchCheckCluster(params);
-        const status = parseInt(res.status);
+        const status = parseInt(res.data);
         if (status === 0) {
           fetchUpdateCluster(params);
           Swal.fire({
@@ -81,7 +81,7 @@
           });
           go('/flink/cluster');
         } else {
-          Swal.fire('Failed', res.msg, 'error');
+          Swal.fire('Failed', res.message, 'error');
         }
       }
     } catch (error) {

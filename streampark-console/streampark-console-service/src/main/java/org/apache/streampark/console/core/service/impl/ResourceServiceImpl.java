@@ -23,7 +23,7 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -273,7 +273,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
+    public Result<Map<String, Serializable>> checkResource(Resource resourceParam) throws JsonProcessingException {
         ResourceTypeEnum type = resourceParam.getResourceType();
         switch (type) {
             case FLINK_APP:
@@ -281,10 +281,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             case CONNECTOR:
                 return checkConnector(resourceParam);
         }
-        return RestResponse.success(ImmutableMap.of(STATE, 0));
+        return Result.success(ImmutableMap.of(STATE, 0));
     }
 
-    private RestResponse checkConnector(Resource resourceParam) throws JsonProcessingException {
+    private Result<Map<String, Serializable>> checkConnector(Resource resourceParam) throws JsonProcessingException {
         // 1) get connector jar
         FlinkConnector connectorResource;
         List<File> jars;
@@ -327,16 +327,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(
                 new RuntimeException("resource name different with FactoryIdentifier"), 5);
         }
-        return RestResponse.success()
-            .data(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
+        return Result.success(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
     }
 
-    private static RestResponse buildExceptResponse(Exception e, int code) {
-        return RestResponse.success()
-            .data(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
+    private static Result<Map<String, Serializable>> buildExceptResponse(Exception e, int code) {
+        return Result.success(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
     }
 
-    private RestResponse checkFlinkApp(Resource resourceParam) {
+    private Result<Map<String, Serializable>> checkFlinkApp(Resource resourceParam) {
         // check main.
         File jarFile;
         try {
@@ -350,14 +348,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
-            return RestResponse.success(resp);
+            return Result.success(resp);
         }
         String mainClass = Utils.getJarManClass(jarFile);
         if (mainClass == null) {
             // main class is null
             return buildExceptResponse(new RuntimeException("main class is null"), 2);
         }
-        return RestResponse.success(resp);
+        return Result.success(resp);
     }
 
     private boolean existsFlinkConnector(Long id, String connectorId) {

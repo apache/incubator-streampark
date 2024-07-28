@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.service.TeamService;
 
@@ -47,35 +47,35 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping("list")
-    public RestResponse teamList(RestRequest restRequest, Team team) {
+    public Result<IPage<Team>> teamList(RestRequest restRequest, Team team) {
         IPage<Team> teamList = teamService.getPage(team, restRequest);
-        return RestResponse.success(teamList);
+        return Result.success(teamList);
     }
 
     @PostMapping("check/name")
-    public RestResponse checkTeamName(@NotBlank(message = "{required}") String teamName) {
+    public Result<Boolean> checkTeamName(@NotBlank(message = "{required}") String teamName) {
         Team result = this.teamService.getByName(teamName);
-        return RestResponse.success(result == null);
+        return Result.success(result == null);
     }
 
     @PostMapping("post")
     @RequiresPermissions("team:add")
-    public RestResponse addTeam(@Valid Team team) {
+    public Result<Void> addTeam(@Valid Team team) {
         this.teamService.createTeam(team);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("team:delete")
-    public RestResponse deleteTeam(Team team) {
+    public Result<Void> deleteTeam(Team team) {
         this.teamService.removeById(team.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("team:update")
-    public RestResponse updateTeam(Team team) {
+    public Result<Void> updateTeam(Team team) {
         this.teamService.updateTeam(team);
-        return RestResponse.success();
+        return Result.success();
     }
 }

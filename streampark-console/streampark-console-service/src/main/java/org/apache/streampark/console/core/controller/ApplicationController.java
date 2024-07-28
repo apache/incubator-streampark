@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
@@ -116,25 +115,11 @@ public class ApplicationController {
         return Result.success(dashboardMap);
     }
 
-    @PostMapping("dashboard1")
-    @Permission(team = "#teamId")
-    public RestResponse dashboard1(Long teamId) {
-        Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
-        return RestResponse.success(dashboardMap);
-    }
-
     @PostMapping("list")
     @Permission(team = "#app.teamId")
     @RequiresPermissions("app:view")
     public Result<IPage<Application>> list(Application app, RestRequest request) {
         return Result.success(applicationManageService.page(app, request));
-    }
-
-    @PostMapping("list1")
-    @Permission(team = "#app.teamId")
-    @RequiresPermissions("app:view")
-    public RestResponse list1(Application app, RestRequest request) {
-        return RestResponse.success(applicationManageService.page(app, request));
     }
 
     @AppUpdated
@@ -271,11 +256,10 @@ public class ApplicationController {
     }
 
     @PostMapping("verify_schema")
-    public RestResponse verifySchema(String path) {
+    public Result<Boolean> verifySchema(String path) {
         final URI uri = URI.create(path);
         final String scheme = uri.getScheme();
         final String pathPart = uri.getPath();
-        RestResponse restResponse = RestResponse.success(true);
         String error = null;
         if (scheme == null) {
             error =
@@ -287,9 +271,9 @@ public class ApplicationController {
             error = "Cannot use the root directory for checkpoints.";
         }
         if (error != null) {
-            restResponse = RestResponse.success(false).message(error);
+            return Result.success(false, error);
         }
-        return restResponse;
+        return Result.success(true);
     }
 
     @PostMapping("check/savepoint_path")

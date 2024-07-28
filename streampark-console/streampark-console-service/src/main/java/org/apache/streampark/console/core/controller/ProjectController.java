@@ -83,13 +83,10 @@ public class ProjectController {
         return Result.success();
     }
 
-    // TODO.. testing...
     @PostMapping("build_log")
     @RequiresPermissions("project:build")
     @Permission(team = "#teamId")
-    public Result<?> buildLog(
-                              Long id,
-                              @RequestParam(value = "startOffset", required = false) Long startOffset) {
+    public Result<?> buildLog(Long id, Long startOffset) {
         return projectService.getBuildLog(id, startOffset);
     }
 

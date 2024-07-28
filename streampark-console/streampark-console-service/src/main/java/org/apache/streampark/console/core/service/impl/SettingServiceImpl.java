@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
@@ -143,14 +143,12 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public ResponseResult checkDocker(DockerConfig dockerConfig) {
+    public Result<?> checkDocker(DockerConfig dockerConfig) {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
             .withRegistryUrl(dockerConfig.getAddress())
             .build();
 
         DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
-
-        ResponseResult result = new ResponseResult();
 
         try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
             AuthConfig authConfig = new AuthConfig()
@@ -159,25 +157,20 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 .withRegistryAddress(dockerConfig.getAddress());
             AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
             if (response.getStatus().equals("Login Succeeded")) {
-                result.setStatus(200);
+                return Result.success();
             } else {
-                result.setStatus(500);
-                result.setMsg("docker login failed, status: " + response.getStatus());
+                return Result.fail("docker login failed, status: " + response.getStatus());
             }
         } catch (Exception e) {
             if (e.getMessage().contains("LastErrorException")) {
-                result.setStatus(400);
+                return Result.fail(null, null, 400);
             } else if (e.getMessage().contains("Status 401")) {
-                result.setStatus(500);
-                result.setMsg(
+                return Result.fail(
                     "Failed to validate Docker registry, unauthorized: incorrect username or password ");
             } else {
-                result.setStatus(500);
-                result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
+                return Result.fail("Failed to validate Docker registry, error: " + e.getMessage());
             }
-            log.warn("Failed to validate Docker registry, error:", e);
         }
-        return result;
     }
 
     @Override
@@ -220,8 +213,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public ResponseResult checkEmail(SenderEmail senderEmail) {
-        ResponseResult result = new ResponseResult();
+    public Result<?> checkEmail(SenderEmail senderEmail) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         if (senderEmail.isSsl()) {
@@ -236,12 +228,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             transport.connect(
                 senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
             transport.close();
-            result.setStatus(200);
+            return Result.success();
         } catch (MessagingException e) {
-            result.setStatus(500);
-            result.setMsg("connect to target mail server failed: " + e.getMessage());
+            return Result.fail("connect to target mail server failed: " + e.getMessage());
         }
-        return result;
     }
 
     @Override

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
@@ -52,50 +52,50 @@ public class MemberController {
     private MemberService memberService;
 
     @PostMapping("list")
-    public RestResponse memberList(RestRequest restRequest, Member member) {
+    public Result<IPage<Member>> memberList(RestRequest restRequest, Member member) {
         IPage<Member> userList = memberService.getPage(member, restRequest);
-        return RestResponse.success(userList);
+        return Result.success(userList);
     }
 
     @PostMapping("candidateUsers")
-    public RestResponse candidateUsers(Long teamId) {
+    public Result<List<User>> candidateUsers(Long teamId) {
         List<User> userList = memberService.listUsersNotInTeam(teamId);
-        return RestResponse.success(userList);
+        return Result.success(userList);
     }
 
     @PostMapping("teams")
-    public RestResponse listTeams(Long userId) {
+    public Result<List<Team>> listTeams(Long userId) {
         List<Team> teamList = memberService.listTeamsByUserId(userId);
-        return RestResponse.success(teamList);
+        return Result.success(teamList);
     }
 
     @PostMapping("check/user")
-    public RestResponse check(@NotNull(message = "{required}") Long teamId, String userName) {
+    public Result<Boolean> check(@NotNull(message = "{required}") Long teamId, String userName) {
         Member result = this.memberService.getByTeamIdUserName(teamId, userName);
-        return RestResponse.success(result == null);
+        return Result.success(result == null);
     }
 
     @PostMapping("post")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:add")
-    public RestResponse create(@Valid Member member) {
+    public Result<Void> create(@Valid Member member) {
         this.memberService.createMember(member);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @DeleteMapping("delete")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:delete")
-    public RestResponse delete(Member member) {
+    public Result<Void> delete(Member member) {
         this.memberService.remove(member.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PutMapping("update")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:update")
-    public RestResponse update(Member member) {
+    public Result<Void> update(Member member) {
         this.memberService.updateMember(member);
-        return RestResponse.success();
+        return Result.success();
     }
 }

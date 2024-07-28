@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -26,7 +26,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public interface ResourceService extends IService<Resource> {
 
@@ -93,5 +95,5 @@ public interface ResourceService extends IService<Resource> {
 
     String upload(MultipartFile file) throws IOException;
 
-    RestResponse checkResource(Resource resource) throws Exception;
+    Result<Map<String, Serializable>> checkResource(Resource resource) throws Exception;
 }
