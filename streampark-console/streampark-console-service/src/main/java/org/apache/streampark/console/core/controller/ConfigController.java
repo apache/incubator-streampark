@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
@@ -48,42 +48,42 @@ public class ConfigController {
     private ApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
-    public RestResponse get(Long id) {
+    public Result<ApplicationConfig> get(Long id) {
         ApplicationConfig config = applicationConfigService.get(id);
-        return RestResponse.success(config);
+        return Result.success(config);
     }
 
     @PostMapping("template")
-    public RestResponse template() {
+    public Result<String> template() {
         String config = applicationConfigService.readTemplate();
-        return RestResponse.success(config);
+        return Result.success(config);
     }
 
     @PostMapping("list")
-    public RestResponse list(ApplicationConfig config, RestRequest request) {
+    public Result<IPage<ApplicationConfig>> list(ApplicationConfig config, RestRequest request) {
         IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     @PostMapping("history")
-    public RestResponse history(Application application) {
+    public Result<List<ApplicationConfig>> history(Application application) {
         List<ApplicationConfig> history = applicationConfigService.list(application.getId());
-        return RestResponse.success(history);
+        return Result.success(history);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("conf:delete")
-    public RestResponse delete(Long id) {
+    public Result<Boolean> delete(Long id) {
         Boolean deleted = applicationConfigService.removeById(id);
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @PostMapping("sys_hadoop_conf")
     @RequiresPermissions("app:create")
-    public RestResponse getSystemHadoopConfig() {
+    public Result<Map<String, Map<String, String>>> getSystemHadoopConfig() {
         Map<String, Map<String, String>> result = ImmutableMap.of(
             "hadoop", HadoopConfigUtils.readSystemHadoopConf(),
             "hive", HadoopConfigUtils.readSystemHiveConf());
-        return RestResponse.success(result);
+        return Result.success(result);
     }
 }

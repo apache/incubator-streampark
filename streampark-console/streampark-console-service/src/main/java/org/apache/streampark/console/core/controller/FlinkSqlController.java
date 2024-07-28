@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -41,7 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -63,69 +65,67 @@ public class FlinkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public RestResponse verify(String sql, Long versionId, Long teamId) {
+    public Result<?> verify(String sql, Long versionId, Long teamId) {
         sql = variableService.replaceVariable(teamId, sql);
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
+
+        Map<String, Integer> map = new HashMap<>();
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line
             String exception = flinkSqlValidationResult.exception();
-            RestResponse response = RestResponse.success()
-                .data(false)
-                .message(exception)
-                .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
-                .put(START, flinkSqlValidationResult.lineStart())
-                .put(END, flinkSqlValidationResult.lineEnd());
+            map.put(TYPE, flinkSqlValidationResult.failedType().getFailedType());
+            map.put(START, flinkSqlValidationResult.lineStart());
+            map.put(END, flinkSqlValidationResult.lineEnd());
 
             if (flinkSqlValidationResult.errorLine() > 0) {
-                response
-                    .put(START, flinkSqlValidationResult.errorLine())
-                    .put(END, flinkSqlValidationResult.errorLine() + 1);
+                map.put(START, flinkSqlValidationResult.errorLine());
+                map.put(END, flinkSqlValidationResult.errorLine() + 1);
             }
-            return response;
+            return Result.fail(exception, map);
         }
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @PostMapping("list")
     @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
-    public RestResponse list(FlinkSql flinkSql, RestRequest request) {
+    public Result<IPage<FlinkSql>> list(FlinkSql flinkSql, RestRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(flinkSql.getAppId(), request);
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
-    public RestResponse delete(FlinkSql flinkSql) {
+    public Result<Boolean> delete(FlinkSql flinkSql) {
         Boolean deleted = flinkSqlService.removeById(flinkSql.getSql());
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @PostMapping("get")
     @Permission(app = "#appId", team = "#teamId")
-    public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
+    public Result<FlinkSql[]> get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
             appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
         String[] array = id.split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();
         if (array.length == 1) {
-            return RestResponse.success(flinkSql1);
+            return Result.success(new FlinkSql[]{flinkSql1});
         }
         FlinkSql flinkSql2 = flinkSqlService.getById(array[1]);
         flinkSql2.base64Encode();
-        return RestResponse.success(new FlinkSql[]{flinkSql1, flinkSql2});
+        return Result.success(new FlinkSql[]{flinkSql1, flinkSql2});
     }
 
     @PostMapping("history")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse history(Application app) {
+    public Result<List<FlinkSql>> history(Application app) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(app.getId());
-        return RestResponse.success(sqlList);
+        return Result.success(sqlList);
     }
 
     @PostMapping("sql_complete")
-    public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
-        return RestResponse.success().put("word", sqlComplete.getComplete(sql));
+    public Result<List<String>> getSqlComplete(@NotNull(message = "{required}") String sql) {
+        return Result.success(sqlComplete.getComplete(sql));
     }
 }

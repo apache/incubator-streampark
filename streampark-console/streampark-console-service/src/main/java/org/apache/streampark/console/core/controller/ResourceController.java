@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.service.ResourceService;
 
@@ -62,35 +63,35 @@ public class ResourceController {
     }
 
     @PostMapping("page")
-    public RestResponse page(RestRequest restRequest, Resource resource) {
+    public Result<IPage<Resource>> page(RestRequest restRequest, Resource resource) {
         IPage<Resource> page = resourceService.getPage(resource, restRequest);
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     @PutMapping("update")
     @RequiresPermissions("resource:update")
-    public RestResponse updateResource(@Valid Resource resource) {
+    public Result<Void> updateResource(@Valid Resource resource) {
         resourceService.updateResource(resource);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("resource:delete")
-    public RestResponse deleteResource(@Valid Resource resource) {
+    public Result<Void> deleteResource(@Valid Resource resource) {
         this.resourceService.remove(resource.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("list")
-    public RestResponse listResource(@RequestParam Long teamId) {
+    public Result<List<Resource>> listResource(@RequestParam Long teamId) {
         List<Resource> resourceList = resourceService.listByTeamId(teamId);
-        return RestResponse.success(resourceList);
+        return Result.success(resourceList);
     }
 
     @PostMapping("upload")
     @RequiresPermissions("resource:add")
-    public RestResponse upload(MultipartFile file) throws Exception {
+    public Result<String> upload(MultipartFile file) throws Exception {
         String uploadPath = resourceService.upload(file);
-        return RestResponse.success(uploadPath);
+        return Result.success(uploadPath);
     }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.FlinkGateWay;
 import org.apache.streampark.console.core.enums.GatewayTypeEnum;
 import org.apache.streampark.console.core.service.FlinkGateWayService;
@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
@@ -47,44 +49,44 @@ public class FlinkGateWayController {
     private final FlinkGateWayService flinkGatewayService;
 
     @GetMapping("list")
-    public RestResponse list() {
-        return RestResponse.success(flinkGatewayService.list());
+    public Result<List<FlinkGateWay>> list() {
+        return Result.success(flinkGatewayService.list());
     }
 
     @PostMapping("create")
-    public RestResponse create(@RequestBody FlinkGateWay flinkGateWay) {
+    public Result<Void> create(@RequestBody FlinkGateWay flinkGateWay) {
         flinkGatewayService.create(flinkGateWay);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @GetMapping("check/name")
-    public RestResponse checkName(
-                                  @NotNull(message = "The Gateway name cannot be null") @RequestParam("name") String name) {
-        return RestResponse.success(flinkGatewayService.existsByGatewayName(name));
+    public Result<Boolean> checkName(
+                                     @NotNull(message = "The Gateway name cannot be null") @RequestParam("name") String name) {
+        return Result.success(flinkGatewayService.existsByGatewayName(name));
     }
 
     @GetMapping("check/address")
-    public RestResponse checkAddress(
-                                     @NotNull(message = "The Gateway address cannot be null") @RequestParam("address") String address) throws Exception {
+    public Result<GatewayTypeEnum> checkAddress(
+                                                @NotNull(message = "The Gateway address cannot be null") @RequestParam("address") String address) throws Exception {
         GatewayTypeEnum gatewayVersion = flinkGatewayService.getGatewayVersion(address);
-        return RestResponse.success(gatewayVersion);
+        return Result.success(gatewayVersion);
     }
 
     @PutMapping("update")
-    public RestResponse update(@RequestBody FlinkGateWay flinkGateWay) {
+    public Result<Void> update(@RequestBody FlinkGateWay flinkGateWay) {
         flinkGatewayService.update(flinkGateWay);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @GetMapping("get/{id}")
-    public RestResponse get(@PathVariable Long id) {
-        return RestResponse.success(flinkGatewayService.getById(id));
+    public Result<FlinkGateWay> get(@PathVariable Long id) {
+        return Result.success(flinkGatewayService.getById(id));
     }
 
     @DeleteMapping("delete")
-    public RestResponse delete(
+    public Result<Void> delete(
                                @NotNull(message = "The Gateway id cannot be null") @RequestParam("id") Long id) {
         flinkGatewayService.removeById(id);
-        return RestResponse.success();
+        return Result.success();
     }
 }

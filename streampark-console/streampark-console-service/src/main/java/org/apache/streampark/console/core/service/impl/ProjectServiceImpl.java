@@ -24,9 +24,9 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -62,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -99,7 +100,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private Long maxProjectBuildNum;
 
     @Override
-    public RestResponse create(Project project) {
+    public boolean create(Project project) {
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
             project.getName());
         long count = count(queryWrapper);
@@ -117,12 +118,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 throw new ApiAlertException("Project github/gitlab password decrypt failed");
             }
         }
-        boolean status = save(project);
-
-        if (status) {
-            return response.message("Add project successfully").data(true);
-        }
-        return response.message("Add project failed").data(false);
+        return save(project);
     }
 
     @Override
@@ -378,12 +374,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public RestResponse getBuildLog(Long id, Long startOffset) {
+    public Result<?> getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return RestResponse.success().data(errorMsg);
+            return Result.fail(errorMsg);
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
@@ -393,6 +389,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (startOffset == null && isBuilding) {
             startOffset = 0L;
         }
+
         try {
             long maxSize = MemorySize.parse(InternalConfigHolder.get(CommonConfig.READ_LOG_MAX_SIZE())).getBytes();
             if (startOffset == null) {
@@ -402,14 +399,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            return RestResponse.success()
-                .data(new String(fileContent, StandardCharsets.UTF_8))
-                .put("offset", endOffset)
-                .put("readFinished", readFinished);
+            Map<String, Serializable> info = new HashMap<>();
+            info.put("content", new String(fileContent, StandardCharsets.UTF_8));
+            info.put("offset", endOffset);
+            info.put("readFinished", readFinished);
+            return Result.success(info);
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return RestResponse.fail(ResponseCode.CODE_FAIL, error + e.getMessage());
+            return Result.fail(error + e.getMessage());
         }
     }
 

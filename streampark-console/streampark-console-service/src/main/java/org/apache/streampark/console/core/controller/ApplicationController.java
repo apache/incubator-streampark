@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -79,39 +80,45 @@ public class ApplicationController {
     @PostMapping("get")
     @Permission(app = "#app.id")
     @RequiresPermissions("app:detail")
-    public RestResponse get(Application app) {
+    public Result<Application> get(Application app) {
         Application application = applicationManageService.getApp(app.getId());
-        return RestResponse.success(application);
+        return Result.success(application);
     }
 
     @Permission(team = "#app.teamId")
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public RestResponse create(Application app) throws IOException {
-        boolean saved = applicationManageService.create(app);
-        return RestResponse.success(saved);
+    public Result<Boolean> create(Application app) throws IOException {
+        return Result.success(applicationManageService.create(app));
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public RestResponse copy(Application app) throws IOException {
+    public Result<Void> copy(Application app) throws IOException {
         applicationManageService.copy(app);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @AppUpdated
     @Permission(app = "#app.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public RestResponse update(Application app) {
+    public Result<Void> update(Application app) {
         applicationManageService.update(app);
-        return RestResponse.success(true);
+        return Result.success();
     }
 
     @PostMapping("dashboard")
     @Permission(team = "#teamId")
-    public RestResponse dashboard(Long teamId) {
+    public Result<Map<String, Serializable>> dashboard(Long teamId) {
+        Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
+        return Result.success(dashboardMap);
+    }
+
+    @PostMapping("dashboard1")
+    @Permission(team = "#teamId")
+    public RestResponse dashboard1(Long teamId) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
         return RestResponse.success(dashboardMap);
     }
@@ -119,142 +126,148 @@ public class ApplicationController {
     @PostMapping("list")
     @Permission(team = "#app.teamId")
     @RequiresPermissions("app:view")
-    public RestResponse list(Application app, RestRequest request) {
-        IPage<Application> applicationList = applicationManageService.page(app, request);
-        return RestResponse.success(applicationList);
+    public Result<IPage<Application>> list(Application app, RestRequest request) {
+        return Result.success(applicationManageService.page(app, request));
+    }
+
+    @PostMapping("list1")
+    @Permission(team = "#app.teamId")
+    @RequiresPermissions("app:view")
+    public RestResponse list1(Application app, RestRequest request) {
+        return RestResponse.success(applicationManageService.page(app, request));
     }
 
     @AppUpdated
     @PostMapping("mapping")
     @Permission(app = "#app.id")
     @RequiresPermissions("app:mapping")
-    public RestResponse mapping(Application app) {
+    public Result<Boolean> mapping(Application app) {
         boolean flag = applicationManageService.mapping(app);
-        return RestResponse.success(flag);
+        return Result.success(flag);
     }
 
     @AppUpdated
     @Permission(app = "#app.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public RestResponse revoke(Application app) {
+    public Result<Void> revoke(Application app) {
         applicationActionService.revoke(app.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public RestResponse checkStart(Application app) {
+    public Result<Integer> checkStart(Application app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
-        return RestResponse.success(stateEnum.get());
+        return Result.success(stateEnum.get());
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public RestResponse start(Application app) throws Exception {
+    public Result<Boolean> start(Application app) throws Exception {
         applicationActionService.start(app, false);
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse cancel(Application app) throws Exception {
+    public Result<Void> cancel(Application app) throws Exception {
         applicationActionService.cancel(app);
-        return RestResponse.success();
+        return Result.success();
     }
 
     /** force stop(stop normal start or in progress) */
     @Permission(app = "#app.id")
     @PostMapping("abort")
     @RequiresPermissions("app:cancel")
-    public RestResponse abort(Application app) {
+    public Result<Void> abort(Application app) {
         applicationActionService.abort(app.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("yarn")
-    public RestResponse yarn() {
-        return RestResponse.success(YarnUtils.getRMWebAppProxyURL());
+    public Result<String> yarn() {
+        return Result.success(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse yarnName(Application app) {
+    public Result<String> yarnName(Application app) {
         String yarnName = applicationInfoService.getYarnName(app.getConfig());
-        return RestResponse.success(yarnName);
+        return Result.success(yarnName);
     }
 
     @PostMapping("check/name")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse checkName(Application app) {
+    public Result<Integer> checkName(Application app) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(app);
-        return RestResponse.success(exists.get());
+        return Result.success(exists.get());
     }
 
     @PostMapping("read_conf")
-    public RestResponse readConf(Application app) throws IOException {
+    public Result<String> readConf(Application app) throws IOException {
         String config = applicationInfoService.readConf(app.getConfig());
-        return RestResponse.success(config);
+        return Result.success(config);
     }
 
     @PostMapping("main")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse getMain(Application application) {
+    public Result<String> getMain(Application application) {
         String mainClass = applicationInfoService.getMain(application);
-        return RestResponse.success(mainClass);
+        return Result.success(mainClass);
     }
 
     @PostMapping("backups")
     @Permission(app = "#backUp.appId", team = "#backUp.teamId")
-    public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
+    public Result<IPage<ApplicationBackUp>> backups(ApplicationBackUp backUp, RestRequest request) {
         IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
-        return RestResponse.success(backups);
+        return Result.success(backups);
     }
 
     @PostMapping("opt_log")
     @Permission(app = "#log.appId", team = "#log.teamId")
-    public RestResponse log(ApplicationLog applicationLog, RestRequest request) {
+    public Result<IPage<ApplicationLog>> log(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
-        return RestResponse.success(applicationList);
+        return Result.success(applicationList);
     }
 
     @Permission(app = "#log.appId", team = "#log.teamId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponse deleteLog(Long id) {
+    public Result<Boolean> deleteLog(Long id) {
         Boolean deleted = applicationLogService.removeById(id);
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @Permission(app = "#app.id", team = "#app.teamId")
     @PostMapping("delete")
     @RequiresPermissions("app:delete")
-    public RestResponse delete(Application app) throws InternalException {
+    public Result<Boolean> delete(Application app) throws InternalException {
         Boolean deleted = applicationManageService.remove(app.getId());
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @Permission(app = "#backUp.appId")
     @PostMapping("delete/backup")
-    public RestResponse deleteBackup(ApplicationBackUp backUp) throws InternalException {
+    public Result<Boolean> deleteBackup(ApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
-        return RestResponse.success(deleted);
+        return Result.success(deleted);
     }
 
     @PostMapping("check/jar")
-    public RestResponse checkjar(String jar) throws IOException {
+    public Result<Boolean> checkjar(String jar) throws IOException {
         Utils.requireCheckJarFile(new File(jar).toURI().toURL());
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws Exception {
+    public Result<String> upload(MultipartFile file) throws Exception {
         String uploadPath = resourceService.upload(file);
-        return RestResponse.success(uploadPath);
+        return Result.success(uploadPath);
     }
 
     @PostMapping("verify_schema")
@@ -281,18 +294,18 @@ public class ApplicationController {
 
     @PostMapping("check/savepoint_path")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse checkSavepointPath(Application app) throws Exception {
+    public Result<Boolean> checkSavepointPath(Application app) throws Exception {
         String error = applicationInfoService.checkSavepointPath(app);
         if (error == null) {
-            return RestResponse.success(true);
+            return Result.success(true);
         }
-        return RestResponse.success(false).message(error);
+        return Result.success(false, error);
     }
 
     @Permission(app = "#id")
     @PostMapping("k8s_log")
-    public RestResponse k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
+    public Result<String> k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
         String resp = applicationInfoService.k8sStartLog(id, offset, limit);
-        return RestResponse.success(resp);
+        return Result.success(resp);
     }
 }

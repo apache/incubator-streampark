@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
@@ -37,7 +37,7 @@ public interface ProjectService extends IService<Project> {
      * @param project Project to be created
      * @return RestResponse
      */
-    RestResponse create(Project project);
+    boolean create(Project project);
 
     /**
      * Update the given Project
@@ -96,7 +96,7 @@ public interface ProjectService extends IService<Project> {
      * @param startOffset startOffset
      * @return RestResponse
      */
-    RestResponse getBuildLog(Long id, Long startOffset);
+    Result<?> getBuildLog(Long id, Long startOffset);
 
     /**
      * List all modules of the specified project

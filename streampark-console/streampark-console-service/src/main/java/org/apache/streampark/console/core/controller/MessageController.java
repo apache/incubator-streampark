@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.service.MessageService;
@@ -41,14 +41,14 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("notice")
-    public RestResponse notice(Integer type, RestRequest request) {
+    public Result<IPage<Message>> notice(Integer type, RestRequest request) {
         NoticeTypeEnum noticeTypeEnum = NoticeTypeEnum.of(type);
         IPage<Message> pages = messageService.getUnReadPage(noticeTypeEnum, request);
-        return RestResponse.success(pages);
+        return Result.success(pages);
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Long id) {
-        return RestResponse.success(messageService.removeById(id));
+    public Result<Boolean> delete(Long id) {
+        return Result.success(messageService.removeById(id));
     }
 }

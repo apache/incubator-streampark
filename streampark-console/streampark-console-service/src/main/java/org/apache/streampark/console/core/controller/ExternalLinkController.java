@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.ExternalLink;
 import org.apache.streampark.console.core.service.ExternalLinkService;
 
@@ -49,38 +49,38 @@ public class ExternalLinkController {
 
     @PostMapping("/list")
     @RequiresPermissions("externalLink:view")
-    public RestResponse list() {
+    public Result<List<ExternalLink>> list() {
         List<ExternalLink> externalLink = externalLinkService.list();
-        return RestResponse.success(externalLink);
+        return Result.success(externalLink);
     }
 
     @PostMapping("/render")
-    public RestResponse render(
-                               @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
+    public Result<List<ExternalLink>> render(
+                                             @NotNull(message = "The flink app id cannot be null") @RequestParam("appId") Long appId) {
         List<ExternalLink> renderedExternalLink = externalLinkService.render(appId);
-        return RestResponse.success(renderedExternalLink);
+        return Result.success(renderedExternalLink);
     }
 
     @PostMapping("/create")
     @RequiresPermissions("externalLink:create")
-    public RestResponse create(@Valid ExternalLink externalLink) {
+    public Result<Void> create(@Valid ExternalLink externalLink) {
         externalLinkService.create(externalLink);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("/update")
     @RequiresPermissions("externalLink:update")
-    public RestResponse update(@Valid ExternalLink externalLink) {
+    public Result<Void> update(@Valid ExternalLink externalLink) {
         AssertUtils.notNull(externalLink.getId(), "The link id cannot be null");
         externalLinkService.update(externalLink);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @DeleteMapping("/delete")
     @RequiresPermissions("externalLink:delete")
-    public RestResponse delete(
+    public Result<Void> delete(
                                @NotNull(message = "The link id cannot be null") @RequestParam("id") Long id) {
         externalLinkService.removeById(id);
-        return RestResponse.success();
+        return Result.success();
     }
 }

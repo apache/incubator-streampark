@@ -47,7 +47,7 @@ const transform: AxiosTransform = {
     const { code, data: result, message } = data;
 
     // TODO The backend returns data in a uniform format code，data, message
-    const hasSuccess = (data && !Reflect.has(data, 'code')) || code === ResultEnum.SUCCESS;
+    const hasSuccess = (data && !Reflect.has(data, 'code')) || code == ResultEnum.SUCCESS;
     if (hasSuccess) {
       return result;
     }

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -44,21 +44,21 @@ public class ApplicationHistoryController {
 
     @PostMapping("upload_jars")
     @RequiresPermissions("app:create")
-    public RestResponse listUploadJars() {
+    public Result<List<String>> listUploadJars() {
         List<String> jars = applicationInfoService.listHistoryUploadJars();
-        return RestResponse.success(jars);
+        return Result.success(jars);
     }
 
     @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")
-    public RestResponse listK8sNamespace() {
+    public Result<List<String>> listK8sNamespace() {
         List<String> namespaces = applicationInfoService.listRecentK8sNamespace();
-        return RestResponse.success(namespaces);
+        return Result.success(namespaces);
     }
 
     @PostMapping("session_cluster_ids")
     @RequiresPermissions("app:create")
-    public RestResponse listSessionClusterId(int executionMode) {
+    public Result<List<String>> listSessionClusterId(int executionMode) {
         List<String> clusterIds;
         switch (FlinkExecutionMode.of(executionMode)) {
             case KUBERNETES_NATIVE_SESSION:
@@ -70,34 +70,34 @@ public class ApplicationHistoryController {
                 clusterIds = new ArrayList<>(0);
                 break;
         }
-        return RestResponse.success(clusterIds);
+        return Result.success(clusterIds);
     }
 
     @PostMapping("flink_base_images")
     @RequiresPermissions("app:create")
-    public RestResponse listFlinkBaseImage() {
+    public Result<List<String>> listFlinkBaseImage() {
         List<String> images = applicationInfoService.listRecentFlinkBaseImage();
-        return RestResponse.success(images);
+        return Result.success(images);
     }
 
     @PostMapping("flink_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponse listPodTemplate() {
+    public Result<List<String>> listPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sPodTemplate();
-        return RestResponse.success(templates);
+        return Result.success(templates);
     }
 
     @PostMapping("flink_jm_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponse listJmPodTemplate() {
+    public Result<List<String>> listJmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sJmPodTemplate();
-        return RestResponse.success(templates);
+        return Result.success(templates);
     }
 
     @PostMapping("flink_tm_pod_templates")
     @RequiresPermissions("app:create")
-    public RestResponse listTmPodTemplate() {
+    public Result<List<String>> listTmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sTmPodTemplate();
-        return RestResponse.success(templates);
+        return Result.success(templates);
     }
 }

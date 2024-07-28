@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
@@ -59,9 +59,9 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponse flinkStart(Application app) throws Exception {
+    public Result<Boolean> flinkStart(Application app) throws Exception {
         applicationActionService.start(app, false);
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @OpenAPI(name = "flinkCancel", header = {
@@ -76,24 +76,24 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse flinkCancel(Application app) throws Exception {
+    public Result<Void> flinkCancel(Application app) throws Exception {
         applicationActionService.cancel(app);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("curl")
-    public RestResponse copyOpenApiCurl(String baseUrl,
-                                        Long appId,
-                                        @NotNull(message = "{required}") Long teamId,
-                                        @NotBlank(message = "{required}") String name) {
+    public Result<String> copyOpenApiCurl(String baseUrl,
+                                          Long appId,
+                                          @NotNull(message = "{required}") Long teamId,
+                                          @NotBlank(message = "{required}") String name) {
         String url = openAPIComponent.getOpenApiCUrl(baseUrl, appId, teamId, name);
-        return RestResponse.success(url);
+        return Result.success(url);
     }
 
     @PostMapping("schema")
-    public RestResponse schema(@NotBlank(message = "{required}") String name) {
+    public Result<OpenAPISchema> schema(@NotBlank(message = "{required}") String name) {
         OpenAPISchema openAPISchema = openAPIComponent.getOpenAPISchema(name);
-        return RestResponse.success(openAPISchema);
+        return Result.success(openAPISchema);
     }
 
 }

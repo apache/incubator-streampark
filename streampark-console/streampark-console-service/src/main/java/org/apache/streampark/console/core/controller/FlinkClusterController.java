@@ -18,9 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -46,69 +45,68 @@ public class FlinkClusterController {
     private FlinkClusterService flinkClusterService;
 
     @PostMapping("alive")
-    public RestResponse listAvailableCluster() {
+    public Result<List<FlinkCluster>> listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
-        return RestResponse.success(flinkClusters);
+        return Result.success(flinkClusters);
     }
 
     @PostMapping("list")
-    public RestResponse list() {
+    public Result<List<FlinkCluster>> list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
-        return RestResponse.success(flinkClusters);
+        return Result.success(flinkClusters);
     }
 
     @PostMapping("remote_url")
-    public RestResponse remoteUrl(Long id) {
+    public Result<String> remoteUrl(Long id) {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return RestResponse.success(cluster.getAddress());
+        return Result.success(cluster.getAddress());
     }
 
     @PostMapping("check")
-    public RestResponse check(FlinkCluster cluster) {
-        ResponseResult checkResult = flinkClusterService.check(cluster);
-        return RestResponse.success(checkResult);
+    public Result<Integer> check(FlinkCluster cluster) {
+        return flinkClusterService.check(cluster);
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
-    public RestResponse create(FlinkCluster cluster) {
+    public Result<Boolean> create(FlinkCluster cluster) {
         Long userId = ServiceHelper.getUserId();
         Boolean success = flinkClusterService.create(cluster, userId);
-        return RestResponse.success(success);
+        return Result.success(success);
     }
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
-    public RestResponse update(FlinkCluster cluster) {
+    public Result<Void> update(FlinkCluster cluster) {
         flinkClusterService.update(cluster);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("get")
-    public RestResponse get(Long id) throws InternalException {
+    public Result<FlinkCluster> get(Long id) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return RestResponse.success(cluster);
+        return Result.success(cluster);
     }
 
     @PostMapping("start")
-    public RestResponse start(FlinkCluster cluster) {
+    public Result<Void> start(FlinkCluster cluster) {
         flinkClusterService.updateClusterState(cluster.getId(), ClusterState.STARTING);
         flinkClusterService.start(cluster);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("shutdown")
-    public RestResponse shutdown(FlinkCluster cluster) {
+    public Result<Void> shutdown(FlinkCluster cluster) {
         if (flinkClusterService.allowShutdownCluster(cluster)) {
             flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
             flinkClusterService.shutdown(cluster);
         }
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("delete")
-    public RestResponse delete(FlinkCluster cluster) {
+    public Result<Void> delete(FlinkCluster cluster) {
         flinkClusterService.remove(cluster.getId());
-        return RestResponse.success();
+        return Result.success();
     }
 }

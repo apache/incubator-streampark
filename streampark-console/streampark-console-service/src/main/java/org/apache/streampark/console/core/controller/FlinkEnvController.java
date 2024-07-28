@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -41,57 +41,57 @@ public class FlinkEnvController {
     private FlinkEnvService flinkEnvService;
 
     @PostMapping("list")
-    public RestResponse list() {
+    public Result<List<FlinkEnv>> list() {
         List<FlinkEnv> flinkEnvList = flinkEnvService.list();
-        return RestResponse.success(flinkEnvList);
+        return Result.success(flinkEnvList);
     }
 
     @PostMapping("check")
-    public RestResponse check(FlinkEnv version) {
+    public Result<Integer> check(FlinkEnv version) {
         FlinkEnvCheckEnum checkResp = flinkEnvService.check(version);
-        return RestResponse.success(checkResp.getCode());
+        return Result.success(checkResp.getCode());
     }
 
     @PostMapping("create")
-    public RestResponse create(FlinkEnv version) throws Exception {
+    public Result<Boolean> create(FlinkEnv version) throws Exception {
         flinkEnvService.create(version);
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @PostMapping("get")
-    public RestResponse get(Long id) throws Exception {
+    public Result<FlinkEnv> get(Long id) throws Exception {
         FlinkEnv flinkEnv = flinkEnvService.getById(id);
         flinkEnv.unzipFlinkConf();
-        return RestResponse.success(flinkEnv);
+        return Result.success(flinkEnv);
     }
 
     @PostMapping("sync")
-    public RestResponse sync(Long id) throws Exception {
+    public Result<Void> sync(Long id) throws Exception {
         flinkEnvService.syncConf(id);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("update")
-    public RestResponse update(FlinkEnv version) {
+    public Result<Boolean> update(FlinkEnv version) {
         flinkEnvService.update(version);
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Long id) {
+    public Result<Void> delete(Long id) {
         flinkEnvService.removeById(id);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("validity")
-    public RestResponse validity(FlinkEnv version) {
+    public Result<Boolean> validity(FlinkEnv version) {
         flinkEnvService.validity(version.getId());
-        return RestResponse.success(true);
+        return Result.success(true);
     }
 
     @PostMapping("default")
-    public RestResponse setDefault(Long id) {
+    public Result<Void> setDefault(Long id) {
         flinkEnvService.setDefault(id);
-        return RestResponse.success();
+        return Result.success();
     }
 }

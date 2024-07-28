@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
@@ -55,50 +55,49 @@ public class AlertController {
     private final AlertService alertService;
 
     @PostMapping("/add")
-    public RestResponse createAlertConfig(@RequestBody AlertConfigParams params) {
+    public Result<Boolean> createAlertConfig(@RequestBody AlertConfigParams params) {
         boolean save = alertConfigService.save(AlertConfig.of(params));
-        return RestResponse.success(save);
+        return Result.success(save);
     }
 
     @PostMapping("/exists")
-    public RestResponse verifyAlertConfig(@RequestBody AlertConfigParams params) {
+    public Result<Boolean> verifyAlertConfig(@RequestBody AlertConfigParams params) {
         boolean exist = alertConfigService.exist(AlertConfig.of(params));
-        return RestResponse.success(exist);
+        return Result.success(exist);
     }
 
     @PostMapping("/update")
-    public RestResponse updateAlertConfig(@RequestBody AlertConfigParams params) {
+    public Result<Boolean> updateAlertConfig(@RequestBody AlertConfigParams params) {
         boolean update = alertConfigService.updateById(AlertConfig.of(params));
-        return RestResponse.success(update);
+        return Result.success(update);
     }
 
     @PostMapping("/get")
-    public RestResponse getAlertConfig(@RequestBody AlertConfigParams params) {
+    public Result<AlertConfigParams> getAlertConfig(@RequestBody AlertConfigParams params) {
         AlertConfig alertConfig = alertConfigService.getById(params.getId());
-        return RestResponse.success(AlertConfigParams.of(alertConfig));
+        return Result.success(AlertConfigParams.of(alertConfig));
     }
 
     @PostMapping("/page")
-    public RestResponse pageAlertConfig(
-                                        @RequestBody AlertConfigParams params, RestRequest request) {
+    public Result<IPage<AlertConfigParams>> pageAlertConfig(
+                                                            @RequestBody AlertConfigParams params,
+                                                            RestRequest request) {
         IPage<AlertConfigParams> page = alertConfigService.page(params.getUserId(), request);
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     @PostMapping("/list")
-    public RestResponse listAlertConfig() {
-        List<AlertConfig> page = alertConfigService.list();
-        return RestResponse.success(page);
+    public Result<List<AlertConfig>> listAlertConfig() {
+        return Result.success(alertConfigService.list());
     }
 
     @DeleteMapping("/delete")
-    public RestResponse deleteAlertConfig(@NotNull(message = "{required}") Long id) {
-        boolean result = alertConfigService.removeById(id);
-        return RestResponse.success(result);
+    public Result<Boolean> deleteAlertConfig(@NotNull(message = "{required}") Long id) {
+        return Result.success(alertConfigService.removeById(id));
     }
 
     @PostMapping("/send")
-    public RestResponse sendAlert(Long id) throws AlertException {
+    public Result<Void> sendAlert(Long id) throws AlertException {
         AlertTemplate alertTemplate = new AlertTemplate();
         alertTemplate.setTitle("Notify: StreamPark alert job for test");
         alertTemplate.setJobName("StreamPark alert job for test");
@@ -111,6 +110,7 @@ public class AlertController {
             DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
         alertTemplate.setDuration("");
-        return RestResponse.success(alertService.alert(id, alertTemplate));
+        alertService.alert(id, alertTemplate);
+        return Result.success();
     }
 }

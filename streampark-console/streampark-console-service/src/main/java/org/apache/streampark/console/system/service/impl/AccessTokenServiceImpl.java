@@ -77,7 +77,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
-        return RestResponse.success().data(accessToken);
+        return RestResponse.success(accessToken);
     }
 
     @Override

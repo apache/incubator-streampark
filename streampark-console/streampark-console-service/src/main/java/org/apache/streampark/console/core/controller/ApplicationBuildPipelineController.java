@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
@@ -50,9 +50,9 @@ public class ApplicationBuildPipelineController {
     @Permission(app = "#appId")
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
+    public Result<Boolean> buildApplication(Long appId, boolean forceBuild) throws Exception {
         boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-        return RestResponse.success(actionResult);
+        return Result.success(actionResult);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ApplicationBuildPipelineController {
     @PostMapping("/detail")
     @Permission(app = "#appId")
     @RequiresPermissions("app:view")
-    public RestResponse getBuildProgressDetail(Long appId) {
+    public Result<Map<String, Object>> getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
@@ -74,6 +74,6 @@ public class ApplicationBuildPipelineController {
             DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
             details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
         }
-        return RestResponse.success(details);
+        return Result.success(details);
     }
 }

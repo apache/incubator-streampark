@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -98,23 +98,23 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public ResponseResult check(FlinkCluster cluster) {
-        ResponseResult result = new ResponseResult();
-        result.setStatus(0);
+    public Result<Integer> check(FlinkCluster cluster) {
+        Result<Integer> result = new Result<>();
+        result.setData(0);
 
         // 1) Check name if already exists
         Boolean existsByClusterName = this.existsByClusterName(cluster.getClusterName(), cluster.getId());
         if (existsByClusterName) {
-            result.setMsg("ClusterName already exists, please check!");
-            result.setStatus(1);
+            result.setMessage("ClusterName already exists, please check!");
+            result.setData(1);
             return result;
         }
 
         // 2) Check target-cluster if already exists
         String clusterId = cluster.getClusterId();
         if (StringUtils.isNotBlank(clusterId) && this.existsByClusterId(clusterId, cluster.getId())) {
-            result.setMsg("The clusterId " + clusterId + " already exists,please check!");
-            result.setStatus(2);
+            result.setMessage("The clusterId " + clusterId + " already exists,please check!");
+            result.setData(2);
             return result;
         }
 
@@ -122,15 +122,15 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         if (FlinkExecutionMode.isRemoteMode(cluster.getFlinkExecutionModeEnum())
             && cluster.getClusterId() != null
             && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
-            result.setMsg("The remote cluster connection failed, please check!");
-            result.setStatus(3);
+            result.setMessage("The remote cluster connection failed, please check!");
+            result.setData(3);
             return result;
         }
         if (FlinkExecutionMode.isYarnMode(cluster.getFlinkExecutionModeEnum())
             && cluster.getClusterId() != null
             && !flinkClusterWatcher.verifyClusterConnection(cluster)) {
-            result.setMsg("The flink cluster connection failed, please check!");
-            result.setStatus(4);
+            result.setMessage("The flink cluster connection failed, please check!");
+            result.setData(4);
             return result;
         }
 

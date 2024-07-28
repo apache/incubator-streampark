@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
@@ -59,12 +59,12 @@ public class VariableController {
      */
     @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public RestResponse page(RestRequest restRequest, Variable variable) {
+    public Result<IPage<Variable>> page(RestRequest restRequest, Variable variable) {
         IPage<Variable> page = variableService.getPage(variable, restRequest);
         for (Variable v : page.getRecords()) {
             v.dataMasking();
         }
-        return RestResponse.success(page);
+        return Result.success(page);
     }
 
     /**
@@ -75,54 +75,54 @@ public class VariableController {
      * @return
      */
     @PostMapping("list")
-    public RestResponse variableList(@RequestParam Long teamId, String keyword) {
+    public Result<List<Variable>> variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
         for (Variable v : variableList) {
             v.dataMasking();
         }
-        return RestResponse.success(variableList);
+        return Result.success(variableList);
     }
 
     @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
-    public RestResponse dependApps(RestRequest restRequest, Variable variable) {
+    public Result<IPage<Application>> dependApps(RestRequest restRequest, Variable variable) {
         IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
-        return RestResponse.success(dependApps);
+        return Result.success(dependApps);
     }
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public RestResponse addVariable(@Valid Variable variable) {
+    public Result<Void> addVariable(@Valid Variable variable) {
         this.variableService.createVariable(variable);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public RestResponse updateVariable(@Valid Variable variable) {
+    public Result<Void> updateVariable(@Valid Variable variable) {
         variableService.updateVariable(variable);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("show_original")
     @RequiresPermissions("variable:show_original")
-    public RestResponse showOriginal(@RequestParam Long id) {
+    public Result<Variable> showOriginal(@RequestParam Long id) {
         Variable v = this.variableService.getById(id);
-        return RestResponse.success(v);
+        return Result.success(v);
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public RestResponse deleteVariable(@Valid Variable variable) {
+    public Result<Void> deleteVariable(@Valid Variable variable) {
         this.variableService.remove(variable);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("check/code")
-    public RestResponse checkVariableCode(
-                                          @RequestParam Long teamId,
-                                          @NotBlank(message = "{required}") String variableCode) {
+    public Result<Boolean> checkVariableCode(
+                                             @RequestParam Long teamId,
+                                             @NotBlank(message = "{required}") String variableCode) {
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
-        return RestResponse.success(result);
+        return Result.success(result);
     }
 }

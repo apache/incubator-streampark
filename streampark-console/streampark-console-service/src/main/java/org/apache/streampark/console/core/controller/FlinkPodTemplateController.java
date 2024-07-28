@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.HostsUtils;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
 import org.apache.streampark.flink.kubernetes.PodTemplateParser;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,26 +42,26 @@ import java.util.stream.Collectors;
 public class FlinkPodTemplateController {
 
     @PostMapping("sys_hosts")
-    public RestResponse getHosts() {
+    public Result<List<String>> getHosts() {
         // hostname -> ipv4
         Map<String, String> hostMap = HostsUtils.getSystemHostsAsJava(true);
         List<String> friendlyHosts = hostMap.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
             .collect(Collectors.toList());
-        return RestResponse.success(friendlyHosts);
+        return Result.success(friendlyHosts);
     }
 
     @PostMapping("init")
-    public RestResponse getInitContent() {
-        return RestResponse.success(PodTemplateParser.getInitPodTemplateContent());
+    public Result<String> getInitContent() {
+        return Result.success(PodTemplateParser.getInitPodTemplateContent());
     }
 
     /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("comp_host_alias")
-    public RestResponse completeHostAlias(String hosts, String podTemplate) {
+    public Result<String> completeHostAlias(String hosts, String podTemplate) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String completedPodTemplate = PodTemplateParser.completeHostAliasSpec(hostMap, podTemplate);
-        return RestResponse.success(completedPodTemplate);
+        return Result.success(completedPodTemplate);
     }
 
     private Map<String, String> covertHostsParamToMap(String hosts) {
@@ -79,19 +79,19 @@ public class FlinkPodTemplateController {
     }
 
     @PostMapping("extract_host_alias")
-    public RestResponse extractHostAlias(String podTemplate) {
+    public Result<List<String>> extractHostAlias(String podTemplate) {
         Map<String, String> hosts = PodTemplateParser.extractHostAliasMap(podTemplate);
         List<String> friendlyHosts = hosts.entrySet().stream()
             .map(e -> e.getKey() + ":" + e.getValue())
             .collect(Collectors.toList());
-        return RestResponse.success(friendlyHosts);
+        return Result.success(friendlyHosts);
     }
 
     /** @param hosts hostname:ipv4,hostname:ipv4,hostname:ipv4... */
     @PostMapping("preview_host_alias")
-    public RestResponse previewHostAlias(String hosts) {
+    public Result<String> previewHostAlias(String hosts) {
         Map<String, String> hostMap = covertHostsParamToMap(hosts);
         String podTemplate = PodTemplateParser.previewHostAliasSpec(hostMap);
-        return RestResponse.success(podTemplate);
+        return Result.success(podTemplate);
     }
 }

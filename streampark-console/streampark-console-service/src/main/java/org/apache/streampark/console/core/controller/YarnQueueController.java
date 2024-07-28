@@ -18,7 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
@@ -49,33 +50,33 @@ public class YarnQueueController {
      * @return RestResponse with IPage<{@link YarnQueue}> object.
      */
     @PostMapping("list")
-    public RestResponse list(RestRequest restRequest, YarnQueue yarnQueue) {
+    public Result<IPage<YarnQueue>> list(RestRequest restRequest, YarnQueue yarnQueue) {
         IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
-        return RestResponse.success(queuePage);
+        return Result.success(queuePage);
     }
 
     @PostMapping("check")
-    public RestResponse check(YarnQueue yarnQueue) {
-        return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
+    public Result<ResponseResult<String>> check(YarnQueue yarnQueue) {
+        return Result.success(yarnQueueService.checkYarnQueue(yarnQueue));
     }
 
     @PostMapping("create")
     @RequiresPermissions("yarnQueue:create")
-    public RestResponse create(YarnQueue yarnQueue) {
-        return RestResponse.success(yarnQueueService.createYarnQueue(yarnQueue));
+    public Result<Boolean> create(YarnQueue yarnQueue) {
+        return Result.success(yarnQueueService.createYarnQueue(yarnQueue));
     }
 
     @PostMapping("update")
     @RequiresPermissions("yarnQueue:update")
-    public RestResponse update(YarnQueue yarnQueue) {
+    public Result<Void> update(YarnQueue yarnQueue) {
         yarnQueueService.updateYarnQueue(yarnQueue);
-        return RestResponse.success();
+        return Result.success();
     }
 
     @PostMapping("delete")
     @RequiresPermissions("yarnQueue:delete")
-    public RestResponse delete(YarnQueue yarnQueue) {
+    public Result<Void> delete(YarnQueue yarnQueue) {
         yarnQueueService.remove(yarnQueue);
-        return RestResponse.success();
+        return Result.success();
     }
 }
