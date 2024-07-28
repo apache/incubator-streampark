@@ -65,6 +65,8 @@ streampark:
   project:
     # Number of projects allowed to be running at the same time , If there is no limit, -1 can be configured
     max-build: 16
+  #openapi white-list, You can define multiple openAPI, separated by spaces(" ") or comma(,).
+  openapi.white-list:
 
 # flink on yarn or spark on yarn, when the hadoop cluster enable kerberos authentication, it is necessary to set Kerberos authentication parameters.
 security:

@@ -42,11 +42,20 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.SpringProperties;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -58,15 +67,33 @@ public class StreamParkAspect {
   @Autowired private MemberService memberService;
   @Autowired private ApplicationService applicationService;
 
+  private final Set<String> openapiWhitelist = new HashSet<>();
+
+  @PostConstruct
+  public void initOpenapiWhitelist() {
+    String whiteLists = SpringProperties.getProperty("streampark.openapi.white-list");
+    if (StringUtils.isNotBlank(whiteLists)) {
+      String[] whiteList = whiteLists.trim().split("\\s|,");
+      for (String order : whiteList) {
+        if (StringUtils.isNotBlank(order)) {
+          if (!order.startsWith("/")) {
+            order = "/" + order;
+          }
+          openapiWhitelist.add(order);
+        }
+      }
+    }
+  }
+
   @Pointcut(
       "execution(public"
           + " org.apache.streampark.console.base.domain.RestResponse"
-          + " org.apache.streampark.console.*.controller.*.*(..))")
-  public void apiAccess() {}
+          + " org.apache.streampark.console.core.controller.*.*(..))")
+  public void openAPI() {}
 
   @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-  @Around(value = "apiAccess()")
-  public RestResponse apiAccess(ProceedingJoinPoint joinPoint) throws Throwable {
+  @Around(value = "openAPI()")
+  public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     log.debug("restResponse aspect, method:{}", methodSignature.getName());
     Boolean isApi =
@@ -74,7 +101,14 @@ public class StreamParkAspect {
     if (isApi != null && isApi) {
       OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
       if (openAPI == null) {
-        throw new ApiAlertException("current api unsupported!");
+        HttpServletRequest request =
+            ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String url = request.getRequestURI();
+        if (openapiWhitelist.contains(url)) {
+          log.info("request by openapi white-list: {} ", url);
+        } else {
+          throw new ApiAlertException("current api unsupported: " + url);
+        }
       }
     }
     return (RestResponse) joinPoint.proceed();
