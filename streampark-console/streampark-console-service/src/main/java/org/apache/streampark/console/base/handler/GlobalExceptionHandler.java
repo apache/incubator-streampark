@@ -53,21 +53,21 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Result<Void> handelUnauthenticatedException(UnauthenticatedException e) {
         log.error("Unauthenticated.", e);
-        return Result.fail("Unauthenticated.", null, ResponseCode.CODE_UNAUTHORIZED);
+        return Result.fail("Unauthenticated.", ResponseCode.CODE_UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Result<Void> handelUnauthenticatedException(AuthenticationException e) {
         log.error("Permission denied.", e);
-        return Result.fail("Permission denied.", null, ResponseCode.CODE_UNAUTHORIZED);
+        return Result.fail("Permission denied.", ResponseCode.CODE_UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Void> handleException(AbstractApiException e) {
         log.error("api exception:", e);
-        return Result.fail(e.getMessage(), null, e.getResponseCode());
+        return Result.fail(e.getMessage(), e.getResponseCode());
     }
 
     @ExceptionHandler(value = Exception.class)
