@@ -99,9 +99,9 @@
   import { signin, fetchSignType } from '/@/api/system/passport';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
-  import { fetchUserTeam } from '/@/api/system/member';
   import { PageEnum } from '/@/enums/pageEnum';
-  import {ResultEnum} from "/@/enums/httpEnum";
+  import { LoginResultModel } from '/@/api/system/model/userModel';
+  import { Result } from '/#/axios';
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 
@@ -152,6 +152,18 @@
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async function handleLoginRequest(loginFormValue: LoginForm): Promise<Result<LoginResultModel>> {
+    const { data } = await signin(
+      {
+        password: loginFormValue.password,
+        username: loginFormValue.account,
+        loginType: LoginTypeEnum[loginType.value],
+      },
+      'none',
+    );
+    return data;
   }
 
   async function handleLoginAction(loginFormValue: LoginForm) {
