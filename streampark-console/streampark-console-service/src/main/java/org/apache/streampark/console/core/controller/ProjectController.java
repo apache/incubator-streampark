@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -52,108 +52,108 @@ public class ProjectController {
     @PostMapping("create")
     @Permission(team = "#project.teamId")
     @RequiresPermissions("project:create")
-    public Result<Boolean> create(Project project) {
+    public Response<Boolean> create(Project project) {
         ApiAlertException.throwIfNull(
             project.getTeamId(), "The teamId can't be null. Create team failed.");
         boolean success = projectService.create(project);
-        return Result.success(success);
+        return Response.success(success);
     }
 
     @AppUpdated
     @PostMapping("update")
     @RequiresPermissions("project:update")
     @Permission(team = "#project.teamId")
-    public Result<Boolean> update(Project project) {
+    public Response<Boolean> update(Project project) {
         boolean update = projectService.update(project);
-        return Result.success(update);
+        return Response.success(update);
     }
 
     @PostMapping("get")
     @Permission(team = "#project.teamId")
-    public Result<Project> get(Project project) {
-        return Result.success(projectService.getById(project.getId()));
+    public Response<Project> get(Project project) {
+        return Response.success(projectService.getById(project.getId()));
     }
 
     @PostMapping("build")
     @RequiresPermissions("project:build")
     @Permission(team = "#project.teamId")
-    public Result<Void> build(Project project) throws Exception {
+    public Response<Void> build(Project project) throws Exception {
         projectService.build(project.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("build_log")
     @RequiresPermissions("project:build")
     @Permission(team = "#teamId")
-    public Result<Map<String, String>> buildLog(Long id, Long startOffset) {
+    public Response<Map<String, String>> buildLog(Long id, Long startOffset) {
         return projectService.getBuildLog(id, startOffset);
     }
 
     @PostMapping("list")
     @RequiresPermissions("project:view")
     @Permission(team = "#project.teamId")
-    public Result<IPage<Project>> list(Project project, RestRequest restRequest) {
+    public Response<IPage<Project>> list(Project project, PageRequest pageRequest) {
         if (project.getTeamId() == null) {
-            return Result.fail("teamId must be not null", null);
+            return Response.fail("teamId must be not null", null);
         }
-        IPage<Project> page = projectService.getPage(project, restRequest);
-        return Result.success(page);
+        IPage<Project> page = projectService.getPage(project, pageRequest);
+        return Response.success(page);
     }
 
     @PostMapping("branches")
     @Permission(team = "#project.teamId")
-    public Result<List<String>> branches(Project project) {
+    public Response<List<String>> branches(Project project) {
         List<String> branches = project.getAllBranches();
-        return Result.success(branches);
+        return Response.success(branches);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     @Permission(team = "#project.teamId")
-    public Result<Boolean> delete(Project project) {
+    public Response<Boolean> delete(Project project) {
         Boolean deleted = projectService.removeById(project.getId());
-        return Result.success(deleted);
+        return Response.success(deleted);
     }
 
     @PostMapping("git_check")
     @Permission(team = "#project.teamId")
-    public Result<Integer> gitCheck(Project project) {
+    public Response<Integer> gitCheck(Project project) {
         GitAuthorizedErrorEnum error = project.gitCheck();
-        return Result.success(error.getType());
+        return Response.success(error.getType());
     }
 
     @PostMapping("exists")
     @Permission(team = "#project.teamId")
-    public Result<Boolean> exists(Project project) {
+    public Response<Boolean> exists(Project project) {
         boolean exists = projectService.exists(project);
-        return Result.success(exists);
+        return Response.success(exists);
     }
 
     @PostMapping("modules")
     @Permission(team = "#project.teamId")
-    public Result<List<String>> modules(Project project) {
+    public Response<List<String>> modules(Project project) {
         List<String> result = projectService.listModules(project.getId());
-        return Result.success(result);
+        return Response.success(result);
     }
 
     @PostMapping("jars")
     @Permission(team = "#project.teamId")
-    public Result<List<String>> jars(Project project) {
+    public Response<List<String>> jars(Project project) {
         List<String> result = projectService.listJars(project);
-        return Result.success(result);
+        return Response.success(result);
     }
 
     @PostMapping("list_conf")
     @Permission(team = "#project.teamId")
-    public Result<List<Map<String, Object>>> listConf(Project project) {
+    public Response<?> listConf(Project project) {
         List<Map<String, Object>> list = projectService.listConf(project);
-        return Result.success(list);
+        return Response.success(list);
     }
 
     @PostMapping("select")
     @Permission(team = "#teamId")
-    public Result<List<Project>> select(@RequestParam Long teamId) {
+    public Response<List<Project>> select(@RequestParam Long teamId) {
         List<Project> list = projectService.listByTeamId(teamId);
-        return Result.success(list);
+        return Response.success(list);
     }
 }

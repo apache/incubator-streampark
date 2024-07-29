@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.console.base.domain.router.RouterTree;
-import org.apache.streampark.console.base.domain.router.VueRouter;
+import org.apache.streampark.console.base.bean.router.RouterTree;
+import org.apache.streampark.console.base.bean.router.VueRouter;
 
 import java.util.ArrayList;
 import java.util.List;

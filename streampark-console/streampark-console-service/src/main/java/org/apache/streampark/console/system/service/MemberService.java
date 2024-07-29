@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -54,10 +54,10 @@ public interface MemberService extends IService<Member> {
      * Retrieves a page of {@link Member} objects based on the provided parameters.
      *
      * @param member The {@link Member} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link Member} objects.
      */
-    IPage<Member> getPage(Member member, RestRequest request);
+    IPage<Member> getPage(Member member, PageRequest request);
 
     /**
      * List all users who are not in the team with the passed team id

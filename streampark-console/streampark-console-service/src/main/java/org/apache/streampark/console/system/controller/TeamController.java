@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.service.TeamService;
 
@@ -47,35 +47,35 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping("list")
-    public Result<IPage<Team>> teamList(RestRequest restRequest, Team team) {
-        IPage<Team> teamList = teamService.getPage(team, restRequest);
-        return Result.success(teamList);
+    public Response<IPage<Team>> teamList(PageRequest pageRequest, Team team) {
+        IPage<Team> teamList = teamService.getPage(team, pageRequest);
+        return Response.success(teamList);
     }
 
     @PostMapping("check/name")
-    public Result<Boolean> checkTeamName(@NotBlank(message = "{required}") String teamName) {
+    public Response<Boolean> checkTeamName(@NotBlank(message = "{required}") String teamName) {
         Team result = this.teamService.getByName(teamName);
-        return Result.success(result == null);
+        return Response.success(result == null);
     }
 
     @PostMapping("post")
     @RequiresPermissions("team:add")
-    public Result<Void> addTeam(@Valid Team team) {
+    public Response<Void> addTeam(@Valid Team team) {
         this.teamService.createTeam(team);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("team:delete")
-    public Result<Void> deleteTeam(Team team) {
+    public Response<Void> deleteTeam(Team team) {
         this.teamService.removeById(team.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("team:update")
-    public Result<Void> updateTeam(Team team) {
+    public Response<Void> updateTeam(Team team) {
         this.teamService.updateTeam(team);
-        return Result.success();
+        return Response.success();
     }
 }

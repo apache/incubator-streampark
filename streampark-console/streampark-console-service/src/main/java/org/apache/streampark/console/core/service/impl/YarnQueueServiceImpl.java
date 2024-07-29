@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -75,7 +75,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     private FlinkClusterService flinkClusterService;
 
     @Override
-    public IPage<YarnQueue> getPage(YarnQueue yarnQueue, RestRequest request) {
+    public IPage<YarnQueue> getPage(YarnQueue yarnQueue, PageRequest request) {
         AssertUtils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
         AssertUtils.notNull(
             yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
@@ -89,31 +89,31 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
      * is invalid, 3 The queue name and label is empty.
      */
     @Override
-    public Result<Integer> checkYarnQueue(YarnQueue yarnQueue) {
+    public Response<Integer> checkYarnQueue(YarnQueue yarnQueue) {
 
         AssertUtils.notNull(yarnQueue, "Yarn queue mustn't be empty.");
         AssertUtils.notNull(yarnQueue.getTeamId(), "Team id mustn't be null.");
 
         if (StringUtils.isBlank(yarnQueue.getQueueLabel())) {
-            return Result.success(3, QUEUE_EMPTY_HINT);
+            return Response.success(3, QUEUE_EMPTY_HINT);
         }
 
         boolean valid = isValid(yarnQueue.getQueueLabel());
         if (!valid) {
-            return Result.success(2, ERR_FORMAT_HINTS);
+            return Response.success(2, ERR_FORMAT_HINTS);
         }
 
         boolean existed = this.baseMapper.existsByQueueLabel(yarnQueue);
 
         if (existed) {
-            return Result.success(1, QUEUE_EXISTED_IN_TEAM_HINT);
+            return Response.success(1, QUEUE_EXISTED_IN_TEAM_HINT);
         }
-        return Result.success(0);
+        return Response.success(0);
     }
 
     @Override
     public boolean createYarnQueue(YarnQueue yarnQueue) {
-        Result<Integer> result = checkYarnQueue(yarnQueue);
+        Response<Integer> result = checkYarnQueue(yarnQueue);
         ApiAlertException.throwIfFalse(result.getData() == 0, result.getMessage());
         return save(yarnQueue);
     }

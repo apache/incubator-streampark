@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.annotation.AppUpdated;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
@@ -63,136 +63,136 @@ public class SparkApplicationController {
 
     @PostMapping("get")
     @RequiresPermissions("app:detail")
-    public Result<SparkApplication> get(SparkApplication app) {
+    public Response<SparkApplication> get(SparkApplication app) {
         SparkApplication application = applicationManageService.getApp(app.getId());
-        return Result.success(application);
+        return Response.success(application);
     }
 
     @PostMapping("create")
     @RequiresPermissions("app:create")
-    public Result<Boolean> create(SparkApplication app) throws IOException {
+    public Response<Boolean> create(SparkApplication app) throws IOException {
         boolean saved = applicationManageService.create(app);
-        return Result.success(saved);
+        return Response.success(saved);
     }
 
     @PostMapping("copy")
     @RequiresPermissions("app:copy")
-    public Result<Void> copy(SparkApplication app) throws IOException {
+    public Response<Void> copy(SparkApplication app) throws IOException {
         applicationManageService.copy(app);
-        return Result.success();
+        return Response.success();
     }
 
     @AppUpdated
     @PostMapping("update")
     @RequiresPermissions("app:update")
-    public Result<Boolean> update(SparkApplication app) {
+    public Response<Boolean> update(SparkApplication app) {
         applicationManageService.update(app);
-        return Result.success(true);
+        return Response.success(true);
     }
 
     @PostMapping("dashboard")
-    public Result<Map<String, Serializable>> dashboard(Long teamId) {
+    public Response<Map<String, Serializable>> dashboard(Long teamId) {
         Map<String, Serializable> dashboardMap = applicationInfoService.getDashboardDataMap(teamId);
-        return Result.success(dashboardMap);
+        return Response.success(dashboardMap);
     }
 
     @PostMapping("list")
     @RequiresPermissions("app:view")
-    public Result<IPage<SparkApplication>> list(SparkApplication app, RestRequest request) {
+    public Response<IPage<SparkApplication>> list(SparkApplication app, PageRequest request) {
         IPage<SparkApplication> applicationList = applicationManageService.page(app, request);
-        return Result.success(applicationList);
+        return Response.success(applicationList);
     }
 
     @AppUpdated
     @PostMapping("mapping")
     @RequiresPermissions("app:mapping")
-    public Result<Boolean> mapping(SparkApplication app) {
+    public Response<Boolean> mapping(SparkApplication app) {
         boolean flag = applicationManageService.mapping(app);
-        return Result.success(flag);
+        return Response.success(flag);
     }
 
     @AppUpdated
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
-    public Result<Void> revoke(SparkApplication app) {
+    public Response<Void> revoke(SparkApplication app) {
         applicationActionService.revoke(app.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("check/start")
     @RequiresPermissions("app:start")
-    public Result<Integer> checkStart(SparkApplication app) {
+    public Response<Integer> checkStart(SparkApplication app) {
         AppExistsStateEnum stateEnum = applicationInfoService.checkStart(app.getId());
-        return Result.success(stateEnum.get());
+        return Response.success(stateEnum.get());
     }
 
     @PostMapping("start")
     @RequiresPermissions("app:start")
-    public Result<Boolean> start(SparkApplication app) {
+    public Response<Boolean> start(SparkApplication app) {
         try {
             applicationActionService.start(app, false);
-            return Result.success(true);
+            return Response.success(true);
         } catch (Exception e) {
-            return Result.success(false, e.getMessage());
+            return Response.success(false, e.getMessage());
         }
     }
 
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public Result<Void> stop(SparkApplication app) throws Exception {
+    public Response<Void> stop(SparkApplication app) throws Exception {
         applicationActionService.stop(app);
-        return Result.success();
+        return Response.success();
     }
 
     @AppUpdated
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
-    public Result<Boolean> clean(SparkApplication app) {
+    public Response<Boolean> clean(SparkApplication app) {
         applicationManageService.clean(app);
-        return Result.success(true);
+        return Response.success(true);
     }
 
     @PostMapping("forcedStop")
     @RequiresPermissions("app:cancel")
-    public Result<Void> forcedStop(SparkApplication app) {
+    public Response<Void> forcedStop(SparkApplication app) {
         applicationActionService.forcedStop(app.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("yarn")
-    public Result<String> yarn() {
-        return Result.success(YarnUtils.getRMWebAppProxyURL());
+    public Response<String> yarn() {
+        return Response.success(YarnUtils.getRMWebAppProxyURL());
     }
 
     @PostMapping("name")
-    public Result<String> yarnName(SparkApplication app) {
+    public Response<String> yarnName(SparkApplication app) {
         String yarnName = applicationInfoService.getYarnName(app.getConfig());
-        return Result.success(yarnName);
+        return Response.success(yarnName);
     }
 
     @PostMapping("check/name")
-    public Result<Integer> checkName(SparkApplication app) {
+    public Response<Integer> checkName(SparkApplication app) {
         AppExistsStateEnum exists = applicationInfoService.checkExists(app);
-        return Result.success(exists.get());
+        return Response.success(exists.get());
     }
 
     @PostMapping("read_conf")
-    public Result<String> readConf(SparkApplication app) throws IOException {
+    public Response<String> readConf(SparkApplication app) throws IOException {
         String config = applicationInfoService.readConf(app.getConfig());
-        return Result.success(config);
+        return Response.success(config);
     }
 
     @PostMapping("main")
-    public Result<String> getMain(SparkApplication application) {
+    public Response<String> getMain(SparkApplication application) {
         String mainClass = applicationInfoService.getMain(application);
-        return Result.success(mainClass);
+        return Response.success(mainClass);
     }
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public Result<String> upload(MultipartFile file) throws Exception {
+    public Response<String> upload(MultipartFile file) throws Exception {
         String uploadPath = resourceService.upload(file);
-        return Result.success(uploadPath);
+        return Response.success(uploadPath);
     }
 
 }

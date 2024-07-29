@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.common.enums.SparkExecutionMode;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.SparkApplication;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -41,7 +41,7 @@ public interface SparkApplicationManageService extends IService<SparkApplication
      * @param request The REST request object containing additional parameters or headers.
      * @return A page of Application objects based on the provided parameters.
      */
-    IPage<SparkApplication> page(SparkApplication appParam, RestRequest request);
+    IPage<SparkApplication> page(SparkApplication appParam, PageRequest request);
 
     /**
      * Creates a new application.

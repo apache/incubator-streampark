@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -65,7 +65,7 @@ public class FlinkSqlController {
     private SqlCompleteService sqlComplete;
 
     @PostMapping("verify")
-    public Result<Map<String, Integer>> verify(String sql, Long versionId, Long teamId) {
+    public Response<Map<String, Integer>> verify(String sql, Long versionId, Long teamId) {
         sql = variableService.replaceVariable(teamId, sql);
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
 
@@ -81,51 +81,51 @@ public class FlinkSqlController {
                 map.put(START, flinkSqlValidationResult.errorLine());
                 map.put(END, flinkSqlValidationResult.errorLine() + 1);
             }
-            return Result.fail(exception, map);
+            return Response.fail(exception, map);
         }
-        return Result.success(null);
+        return Response.success(null);
     }
 
     @PostMapping("list")
     @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
-    public Result<IPage<FlinkSql>> list(FlinkSql flinkSql, RestRequest request) {
+    public Response<IPage<FlinkSql>> list(FlinkSql flinkSql, PageRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(flinkSql.getAppId(), request);
-        return Result.success(page);
+        return Response.success(page);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
     @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
-    public Result<Boolean> delete(FlinkSql flinkSql) {
+    public Response<Boolean> delete(FlinkSql flinkSql) {
         Boolean deleted = flinkSqlService.removeById(flinkSql.getSql());
-        return Result.success(deleted);
+        return Response.success(deleted);
     }
 
     @PostMapping("get")
     @Permission(app = "#appId", team = "#teamId")
-    public Result<FlinkSql[]> get(Long appId, Long teamId, String id) throws InternalException {
+    public Response<FlinkSql[]> get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
             appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
         String[] array = id.split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();
         if (array.length == 1) {
-            return Result.success(new FlinkSql[]{flinkSql1});
+            return Response.success(new FlinkSql[]{flinkSql1});
         }
         FlinkSql flinkSql2 = flinkSqlService.getById(array[1]);
         flinkSql2.base64Encode();
-        return Result.success(new FlinkSql[]{flinkSql1, flinkSql2});
+        return Response.success(new FlinkSql[]{flinkSql1, flinkSql2});
     }
 
     @PostMapping("history")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public Result<List<FlinkSql>> history(Application app) {
+    public Response<List<FlinkSql>> history(Application app) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(app.getId());
-        return Result.success(sqlList);
+        return Response.success(sqlList);
     }
 
     @PostMapping("sql_complete")
-    public Result<List<String>> getSqlComplete(@NotNull(message = "{required}") String sql) {
-        return Result.success(sqlComplete.getComplete(sql));
+    public Response<List<String>> getSqlComplete(@NotNull(message = "{required}") String sql) {
+        return Response.success(sqlComplete.getComplete(sql));
     }
 }

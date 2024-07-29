@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.SenderEmail;
@@ -143,7 +143,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public Result<Void> checkDocker(DockerConfig dockerConfig) {
+    public Response<Void> checkDocker(DockerConfig dockerConfig) {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
             .withRegistryUrl(dockerConfig.getAddress())
             .build();
@@ -157,18 +157,18 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 .withRegistryAddress(dockerConfig.getAddress());
             AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
             if (response.getStatus().equals("Login Succeeded")) {
-                return Result.success();
+                return Response.success();
             } else {
-                return Result.fail("docker login failed, status: " + response.getStatus());
+                return Response.fail("docker login failed, status: " + response.getStatus());
             }
         } catch (Exception e) {
             if (e.getMessage().contains("LastErrorException")) {
-                return Result.fail(400);
+                return Response.fail(400);
             } else if (e.getMessage().contains("Status 401")) {
-                return Result.fail(
+                return Response.fail(
                     "Failed to validate Docker registry, unauthorized: incorrect username or password ");
             } else {
-                return Result.fail("Failed to validate Docker registry, error: " + e.getMessage());
+                return Response.fail("Failed to validate Docker registry, error: " + e.getMessage());
             }
         }
     }
@@ -213,7 +213,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public Result<Void> checkEmail(SenderEmail senderEmail) {
+    public Response<Void> checkEmail(SenderEmail senderEmail) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         if (senderEmail.isSsl()) {
@@ -228,9 +228,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             transport.connect(
                 senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
             transport.close();
-            return Result.success();
+            return Response.success();
         } catch (MessagingException e) {
-            return Result.fail("connect to target mail server failed: " + e.getMessage());
+            return Response.fail("connect to target mail server failed: " + e.getMessage());
         }
     }
 

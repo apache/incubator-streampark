@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationConfig;
 
@@ -100,7 +100,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
      * @return an IPage containing the ApplicationConfig objects that match the filter criteria
      *     specified in the config object, limited by the settings in the request object
      */
-    IPage<ApplicationConfig> getPage(ApplicationConfig config, RestRequest request);
+    IPage<ApplicationConfig> getPage(ApplicationConfig config, PageRequest request);
 
     /**
      * Retrieves the history of application configurations for a given application.

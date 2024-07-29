@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.SenderEmail;
@@ -102,7 +102,7 @@ public interface SettingService extends IService<Setting> {
      * @param dockerConfig Docker config to be checked
      * @return Server response value
      */
-    Result<Void> checkDocker(DockerConfig dockerConfig);
+    Response<Void> checkDocker(DockerConfig dockerConfig);
 
     /**
      * update docker config
@@ -126,7 +126,7 @@ public interface SettingService extends IService<Setting> {
      * @param senderEmail email config to be checked
      * @return Server response value
      */
-    Result<Void> checkEmail(SenderEmail senderEmail);
+    Response<Void> checkEmail(SenderEmail senderEmail);
 
     /**
      * update docker config

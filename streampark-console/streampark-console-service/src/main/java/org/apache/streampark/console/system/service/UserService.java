@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.entity.User;
 
@@ -45,10 +45,10 @@ public interface UserService extends IService<User> {
      * find uer detail, contains basic info, role, department
      *
      * @param user user
-     * @param restRequest queryRequest
+     * @param pageRequest queryRequest
      * @return IPage
      */
-    IPage<User> getPage(User user, RestRequest restRequest);
+    IPage<User> getPage(User user, PageRequest pageRequest);
 
     /**
      * update login time
@@ -70,7 +70,7 @@ public interface UserService extends IService<User> {
      * @param user user
      * @return
      */
-    Result<?> updateUser(User user) throws Exception;
+    Response<?> updateUser(User user) throws Exception;
 
     /**
      * update password
@@ -157,7 +157,7 @@ public interface UserService extends IService<User> {
      *
      * @param user User
      */
-    Result<Map<String, Object>> getLoginUserInfo(User user);
+    Response<Map<String, Object>> getLoginUserInfo(User user);
 
     void deleteUser(Long userId);
 }

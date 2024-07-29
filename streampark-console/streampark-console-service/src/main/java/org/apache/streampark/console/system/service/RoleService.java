@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.system.entity.Role;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -29,10 +29,10 @@ public interface RoleService extends IService<Role> {
      * Retrieves a page of {@link Role} objects based on the provided parameters.
      *
      * @param role The {@link Role} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link Role} objects.
      */
-    IPage<Role> getPage(Role role, RestRequest request);
+    IPage<Role> getPage(Role role, PageRequest request);
 
     /**
      * Get the Role by role name

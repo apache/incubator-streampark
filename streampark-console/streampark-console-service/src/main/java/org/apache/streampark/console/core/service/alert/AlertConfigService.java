@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
@@ -32,10 +32,10 @@ public interface AlertConfigService extends IService<AlertConfig> {
      * Retrieves a page of {@link AlertConfigParams} objects based on the provided parameters.
      *
      * @param userId user id.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link AlertConfigParams} objects.
      */
-    IPage<AlertConfigParams> page(Long userId, RestRequest request);
+    IPage<AlertConfigParams> page(Long userId, PageRequest request);
 
     /**
      * check whether the relevant alarm configuration exists

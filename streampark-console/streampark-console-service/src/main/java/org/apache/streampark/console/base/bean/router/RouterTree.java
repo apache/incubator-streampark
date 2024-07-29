@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain.router;
+package org.apache.streampark.console.base.bean.router;
 
 import org.apache.streampark.console.system.entity.Menu;
 

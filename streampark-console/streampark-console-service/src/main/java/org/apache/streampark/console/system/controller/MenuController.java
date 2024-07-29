@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.Result;
-import org.apache.streampark.console.base.domain.router.VueRouter;
+import org.apache.streampark.console.base.bean.Response;
+import org.apache.streampark.console.base.bean.router.VueRouter;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Menu;
 import org.apache.streampark.console.system.service.MenuService;
@@ -45,16 +45,16 @@ public class MenuController {
     private MenuService menuService;
 
     @PostMapping("router")
-    public Result<List<VueRouter<Menu>>> getUserRouters(Long teamId) {
+    public Response<List<VueRouter<Menu>>> getUserRouters(Long teamId) {
         // TODO The teamId is required, get routers should be called after choose teamId.
         List<VueRouter<Menu>> routers = this.menuService.listRouters(ServiceHelper.getUserId(), teamId);
-        return Result.success(routers);
+        return Response.success(routers);
     }
 
     @PostMapping("list")
     @RequiresPermissions("menu:view")
-    public Result<Map<String, Object>> menuList(Menu menu) {
+    public Response<?> menuList(Menu menu) {
         Map<String, Object> menuMap = this.menuService.listMenuMap(menu);
-        return Result.success(menuMap);
+        return Response.success(menuMap);
     }
 }

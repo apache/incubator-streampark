@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -86,7 +86,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         queryParams.setTeamId(targetTeamId);
 
         queryParams.setTeamId(targetTeamId);
-        RestRequest request = new RestRequest();
+        PageRequest request = new PageRequest();
         request.setPageSize(5);
         request.setPageNum(1);
         request.setSortField("create_time");
@@ -113,7 +113,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for error format with non-empty.
         YarnQueue yarnQueue = mockYarnQueue(1L, "queue@");
-        Result<Integer> result = yarnQueueService.checkYarnQueue(yarnQueue);
+        Response<Integer> result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getData()).isEqualTo(2);
         assertThat(result.getMessage()).isEqualTo(ERR_FORMAT_HINTS);
 

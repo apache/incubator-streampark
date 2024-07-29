@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -45,68 +45,68 @@ public class FlinkClusterController {
     private FlinkClusterService flinkClusterService;
 
     @PostMapping("alive")
-    public Result<List<FlinkCluster>> listAvailableCluster() {
+    public Response<List<FlinkCluster>> listAvailableCluster() {
         List<FlinkCluster> flinkClusters = flinkClusterService.listAvailableCluster();
-        return Result.success(flinkClusters);
+        return Response.success(flinkClusters);
     }
 
     @PostMapping("list")
-    public Result<List<FlinkCluster>> list() {
+    public Response<List<FlinkCluster>> list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
-        return Result.success(flinkClusters);
+        return Response.success(flinkClusters);
     }
 
     @PostMapping("remote_url")
-    public Result<String> remoteUrl(Long id) {
+    public Response<String> remoteUrl(Long id) {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return Result.success(cluster.getAddress());
+        return Response.success(cluster.getAddress());
     }
 
     @PostMapping("check")
-    public Result<Integer> check(FlinkCluster cluster) {
+    public Response<Integer> check(FlinkCluster cluster) {
         return flinkClusterService.check(cluster);
     }
 
     @PostMapping("create")
     @RequiresPermissions("cluster:create")
-    public Result<Boolean> create(FlinkCluster cluster) {
+    public Response<Boolean> create(FlinkCluster cluster) {
         Long userId = ServiceHelper.getUserId();
         Boolean success = flinkClusterService.create(cluster, userId);
-        return Result.success(success);
+        return Response.success(success);
     }
 
     @PostMapping("update")
     @RequiresPermissions("cluster:update")
-    public Result<Void> update(FlinkCluster cluster) {
+    public Response<Void> update(FlinkCluster cluster) {
         flinkClusterService.update(cluster);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("get")
-    public Result<FlinkCluster> get(Long id) throws InternalException {
+    public Response<FlinkCluster> get(Long id) throws InternalException {
         FlinkCluster cluster = flinkClusterService.getById(id);
-        return Result.success(cluster);
+        return Response.success(cluster);
     }
 
     @PostMapping("start")
-    public Result<Void> start(FlinkCluster cluster) {
+    public Response<Void> start(FlinkCluster cluster) {
         flinkClusterService.updateClusterState(cluster.getId(), ClusterState.STARTING);
         flinkClusterService.start(cluster);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("shutdown")
-    public Result<Void> shutdown(FlinkCluster cluster) {
+    public Response<Void> shutdown(FlinkCluster cluster) {
         if (flinkClusterService.allowShutdownCluster(cluster)) {
             flinkClusterService.updateClusterState(cluster.getId(), ClusterState.CANCELLING);
             flinkClusterService.shutdown(cluster);
         }
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("delete")
-    public Result<Void> delete(FlinkCluster cluster) {
+    public Response<Void> delete(FlinkCluster cluster) {
         flinkClusterService.remove(cluster.getId());
-        return Result.success();
+        return Response.success();
     }
 }

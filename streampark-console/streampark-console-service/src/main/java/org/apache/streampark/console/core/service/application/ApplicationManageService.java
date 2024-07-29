@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.Application;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -41,7 +41,7 @@ public interface ApplicationManageService extends IService<Application> {
      * @param request The REST request object containing additional parameters or headers.
      * @return A page of Application objects based on the provided parameters.
      */
-    IPage<Application> page(Application appParam, RestRequest request);
+    IPage<Application> page(Application appParam, PageRequest request);
 
     /**
      * Creates a new application.

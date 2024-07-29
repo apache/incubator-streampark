@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.console.base.domain.Constant;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.Constant;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Role;
@@ -62,7 +62,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     private RoleMenuService roleMenuService;
 
     @Override
-    public IPage<Role> getPage(Role role, RestRequest request) {
+    public IPage<Role> getPage(Role role, PageRequest request) {
         Page<Role> page = MybatisPager.getPage(request);
         return this.baseMapper.selectPage(page, role);
     }

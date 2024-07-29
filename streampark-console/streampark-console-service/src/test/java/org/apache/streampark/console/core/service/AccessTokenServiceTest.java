@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
@@ -45,7 +45,7 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     void testCrudToken() throws Exception {
         Long mockUserId = 100000L;
         String expireTime = "9999-01-01 00:00:00";
-        Result<AccessToken> restResponse = accessTokenService.create(mockUserId, "");
+        Response<AccessToken> restResponse = accessTokenService.create(mockUserId, "");
         Assertions.assertNotNull(restResponse);
         Assertions.assertInstanceOf(AccessToken.class, restResponse.getData());
 
@@ -64,16 +64,16 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
         // list
         AccessToken mockToken1 = new AccessToken();
         mockToken1.setUserId(100000L);
-        IPage<AccessToken> tokens1 = accessTokenService.getPage(mockToken1, new RestRequest());
+        IPage<AccessToken> tokens1 = accessTokenService.getPage(mockToken1, new PageRequest());
         Assertions.assertEquals(1, tokens1.getRecords().size());
         AccessToken mockToken2 = new AccessToken();
         mockToken2.setUserId(100001L);
-        IPage<AccessToken> tokens2 = accessTokenService.getPage(mockToken2, new RestRequest());
+        IPage<AccessToken> tokens2 = accessTokenService.getPage(mockToken2, new PageRequest());
         Assertions.assertTrue(tokens2.getRecords().isEmpty());
 
         // toggle
         Long tokenId = accessToken.getId();
-        Result<Void> toggleTokenResp = accessTokenService.toggleToken(tokenId);
+        Response<Void> toggleTokenResp = accessTokenService.toggleToken(tokenId);
         Assertions.assertNotNull(toggleTokenResp);
         Assertions.assertEquals(200, (int) toggleTokenResp.getCode());
 

@@ -24,8 +24,8 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -205,7 +205,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public IPage<Project> getPage(Project project, RestRequest request) {
+    public IPage<Project> getPage(Project project, PageRequest request) {
         Page<Project> page = MybatisPager.getPage(request);
         return this.baseMapper.selectPage(page, project);
     }
@@ -371,12 +371,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public Result<Map<String, String>> getBuildLog(Long id, Long startOffset) {
+    public Response<Map<String, String>> getBuildLog(Long id, Long startOffset) {
         File logFile = Paths.get(getBuildLogPath(id)).toFile();
         if (!logFile.exists()) {
             String errorMsg = String.format("Build log file(fileName=%s) not found, please build first.", logFile);
             log.warn(errorMsg);
-            return Result.fail(errorMsg, null);
+            return Response.fail(errorMsg, null);
         }
         boolean isBuilding = this.getById(id).getBuildState() == 0;
         byte[] fileContent;
@@ -395,7 +395,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 endOffset = startOffset + fileContent.length;
                 readFinished = logFile.length() == endOffset && !isBuilding;
             }
-            return Result.success(ImmutableMap.<String, String>builder()
+            return Response.success(ImmutableMap.<String, String>builder()
                 .put("fileContent", new String(fileContent, StandardCharsets.UTF_8))
                 .put("offset", String.valueOf(endOffset))
                 .put("readFinished", String.valueOf(readFinished))
@@ -403,7 +403,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         } catch (IOException e) {
             String error = String.format("Read build log file(fileName=%s) caused an exception: ", logFile);
             log.error(error, e);
-            return Result.fail(error + e.getMessage(), null);
+            return Response.fail(error + e.getMessage(), null);
         }
     }
 

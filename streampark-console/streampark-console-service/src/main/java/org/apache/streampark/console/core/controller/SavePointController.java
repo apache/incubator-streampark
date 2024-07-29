@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
@@ -52,27 +52,27 @@ public class SavePointController {
 
     @PostMapping("history")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public Result<IPage<SavePoint>> history(SavePoint sp, RestRequest request) {
+    public Response<IPage<SavePoint>> history(SavePoint sp, PageRequest request) {
         IPage<SavePoint> page = savePointService.getPage(sp, request);
-        return Result.success(page);
+        return Response.success(page);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public Result<Boolean> delete(SavePoint sp) throws InternalException {
+    public Response<Boolean> delete(SavePoint sp) throws InternalException {
         SavePoint savePoint = savePointService.getById(sp.getId());
         Application application = applicationManageService.getById(savePoint.getAppId());
         Boolean deleted = savePointService.remove(sp.getId(), application);
-        return Result.success(deleted);
+        return Response.success(deleted);
     }
 
     @PostMapping("trigger")
     @Permission(app = "#savePoint.appId", team = "#savePoint.teamId")
     @RequiresPermissions("savepoint:trigger")
-    public Result<Boolean> trigger(
-                                   Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
+    public Response<Boolean> trigger(
+                                     Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
         savePointService.trigger(appId, savepointPath, nativeFormat);
-        return Result.success(true);
+        return Response.success(true);
     }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.service.SqlWorkBenchService;
 import org.apache.streampark.gateway.OperationHandle;
 import org.apache.streampark.gateway.results.Column;
@@ -53,8 +53,8 @@ public class SqlWorkBenchController {
     // -------------------------------------------------------------------------------------------
     // Validation API
     // -------------------------------------------------------------------------------------------
-    public Result<Boolean> check(@PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
-        return Result.success(sqlWorkBenchService.check(flinkGatewayId, flinkClusterId));
+    public Response<Boolean> check(@PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
+        return Response.success(sqlWorkBenchService.check(flinkGatewayId, flinkClusterId));
     }
 
     // -------------------------------------------------------------------------------------------
@@ -62,8 +62,8 @@ public class SqlWorkBenchController {
     // -------------------------------------------------------------------------------------------
 
     @GetMapping("getGatewayInfo")
-    public Result<GatewayInfo> getGatewayInfo(@PathVariable Long flinkGatewayId) {
-        return Result.success(sqlWorkBenchService.getGatewayInfo(flinkGatewayId));
+    public Response<GatewayInfo> getGatewayInfo(@PathVariable Long flinkGatewayId) {
+        return Response.success(sqlWorkBenchService.getGatewayInfo(flinkGatewayId));
     }
 
     // -------------------------------------------------------------------------------------------
@@ -71,24 +71,24 @@ public class SqlWorkBenchController {
     // -------------------------------------------------------------------------------------------
 
     @PostMapping("/{flinkClusterId}/sessions")
-    public Result<SessionHandle> openSession(
-                                             @PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
+    public Response<SessionHandle> openSession(
+                                               @PathVariable Long flinkGatewayId, @PathVariable Long flinkClusterId) {
         SessionHandle sessionHandle = sqlWorkBenchService.openSession(flinkGatewayId, flinkClusterId);
-        return Result.success(sessionHandle);
+        return Response.success(sessionHandle);
     }
 
     @PostMapping("sessions/{sessionHandle}/heartbeat")
-    public Result<Void> heartbeat(
-                                  @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
+    public Response<Void> heartbeat(
+                                    @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
         sqlWorkBenchService.heartbeat(flinkGatewayId, sessionHandle);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("sessions/{sessionHandle}")
-    public Result<Void> closeSession(
-                                     @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
+    public Response<Void> closeSession(
+                                       @PathVariable Long flinkGatewayId, @PathVariable String sessionHandle) {
         sqlWorkBenchService.closeSession(flinkGatewayId, sessionHandle);
-        return Result.success();
+        return Response.success();
     }
 
     // -------------------------------------------------------------------------------------------
@@ -96,38 +96,38 @@ public class SqlWorkBenchController {
     // -------------------------------------------------------------------------------------------
 
     @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/cancel")
-    public Result<Void> cancelOperation(
-                                        @PathVariable Long flinkGatewayId,
-                                        @PathVariable String sessionHandle,
-                                        @PathVariable String operationHandle) {
+    public Response<Void> cancelOperation(
+                                          @PathVariable Long flinkGatewayId,
+                                          @PathVariable String sessionHandle,
+                                          @PathVariable String operationHandle) {
         sqlWorkBenchService.cancelOperation(flinkGatewayId, sessionHandle, operationHandle);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("sessions/{sessionHandle}/operations/{operationHandle}/close")
-    public Result<Void> closeOperation(
-                                       @PathVariable Long flinkGatewayId,
-                                       @PathVariable String sessionHandle,
-                                       @PathVariable String operationHandle) {
+    public Response<Void> closeOperation(
+                                         @PathVariable Long flinkGatewayId,
+                                         @PathVariable String sessionHandle,
+                                         @PathVariable String operationHandle) {
         sqlWorkBenchService.closeOperation(flinkGatewayId, sessionHandle, operationHandle);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/info")
-    public Result<OperationInfo> getOperationInfo(
-                                                  @PathVariable Long flinkGatewayId,
-                                                  @PathVariable String sessionHandle,
-                                                  @PathVariable String operationHandle) {
-        return Result.success(
+    public Response<OperationInfo> getOperationInfo(
+                                                    @PathVariable Long flinkGatewayId,
+                                                    @PathVariable String sessionHandle,
+                                                    @PathVariable String operationHandle) {
+        return Response.success(
             sqlWorkBenchService.getOperationInfo(flinkGatewayId, sessionHandle, operationHandle));
     }
 
     @PostMapping("sessions/{sessionHandle}/operations/{operationHandle}/resultSchema")
-    public Result<Column> getOperationResultSchema(
-                                                   @PathVariable Long flinkGatewayId,
-                                                   @PathVariable String sessionHandle,
-                                                   @PathVariable String operationHandle) {
-        return Result.success(
+    public Response<Column> getOperationResultSchema(
+                                                     @PathVariable Long flinkGatewayId,
+                                                     @PathVariable String sessionHandle,
+                                                     @PathVariable String operationHandle) {
+        return Response.success(
             sqlWorkBenchService.getOperationResultSchema(
                 flinkGatewayId, sessionHandle, operationHandle));
     }
@@ -137,21 +137,21 @@ public class SqlWorkBenchController {
     // -------------------------------------------------------------------------------------------
 
     @PostMapping("sessions/{sessionHandle}/statements")
-    public Result<OperationHandle> executeStatement(
-                                                    @PathVariable Long flinkGatewayId,
-                                                    @PathVariable String sessionHandle,
-                                                    @RequestParam String statement) {
-        return Result.success(
+    public Response<OperationHandle> executeStatement(
+                                                      @PathVariable Long flinkGatewayId,
+                                                      @PathVariable String sessionHandle,
+                                                      @RequestParam String statement) {
+        return Response.success(
             sqlWorkBenchService.executeStatement(flinkGatewayId, sessionHandle, statement));
     }
 
     @PostMapping("sessions/{sessionHandle}/statements/{operationHandle}/info")
-    public Result<ResultSet> fetchResults(
-                                          @PathVariable Long flinkGatewayId,
-                                          @PathVariable String sessionHandle,
-                                          @PathVariable String operationHandle,
-                                          @RequestBody ResultQueryCondition resultQueryCondition) {
-        return Result.success(
+    public Response<ResultSet> fetchResults(
+                                            @PathVariable Long flinkGatewayId,
+                                            @PathVariable String sessionHandle,
+                                            @PathVariable String operationHandle,
+                                            @RequestBody ResultQueryCondition resultQueryCondition) {
+        return Response.success(
             sqlWorkBenchService.fetchResults(
                 flinkGatewayId, sessionHandle, operationHandle, resultQueryCondition));
     }

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
@@ -52,14 +52,14 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     private UserService userService;
 
     @Override
-    public Result<AccessToken> create(Long userId, String description) {
+    public Response<AccessToken> create(Long userId, String description) {
         User user = userService.getById(userId);
         if (user == null) {
-            return Result.fail("user not available", null, 0);
+            return Response.fail("user not available", null, 0);
         }
         AccessToken existAccessToken = baseMapper.selectByUserId(user.getUserId());
         if (existAccessToken != null) {
-            return Result.fail(String.format("user %s already has a token", user.getUsername()), null, 0);
+            return Response.fail(String.format("user %s already has a token", user.getUsername()), null, 0);
         }
         String token = WebUtils.encryptToken(
             JWTUtil.sign(
@@ -75,11 +75,11 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         accessToken.setStatus(AccessToken.STATUS_ENABLE);
 
         this.save(accessToken);
-        return Result.success(accessToken);
+        return Response.success(accessToken);
     }
 
     @Override
-    public IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request) {
+    public IPage<AccessToken> getPage(AccessToken tokenParam, PageRequest request) {
         Page<AccessToken> page = MybatisPager.getPage(request);
         this.baseMapper.selectPage(page, tokenParam);
         List<AccessToken> records = page.getRecords();
@@ -88,14 +88,14 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
     }
 
     @Override
-    public Result<Void> toggleToken(Long tokenId) {
+    public Response<Void> toggleToken(Long tokenId) {
         AccessToken tokenInfo = baseMapper.selectById(tokenId);
         if (tokenInfo == null) {
-            return Result.fail("accessToken could not be found!");
+            return Response.fail("accessToken could not be found!");
         }
 
         if (User.STATUS_LOCK.equals(tokenInfo.getUserStatus())) {
-            return Result.fail("user status is locked, could not operate this accessToken!");
+            return Response.fail("user status is locked, could not operate this accessToken!");
         }
 
         Integer status = tokenInfo.getStatus().equals(AccessToken.STATUS_ENABLE)
@@ -106,7 +106,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
         updateObj.setStatus(status);
         updateObj.setId(tokenId);
         this.updateById(updateObj);
-        return Result.success();
+        return Response.success();
     }
 
     @Override

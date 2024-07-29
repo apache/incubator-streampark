@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.system.entity.AccessToken;
 
@@ -35,23 +35,23 @@ public interface AccessTokenService extends IService<AccessToken> {
      * @param description more description
      * @throws InternalException
      */
-    Result<AccessToken> create(Long userId, String description) throws InternalException;
+    Response<AccessToken> create(Long userId, String description) throws InternalException;
 
     /**
      * Retrieves a page of {@link AccessToken} objects based on the provided parameters.
      *
      * @param tokenParam The {@link AccessToken} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link AccessToken} objects.
      */
-    IPage<AccessToken> getPage(AccessToken tokenParam, RestRequest request);
+    IPage<AccessToken> getPage(AccessToken tokenParam, PageRequest request);
 
     /**
      * Update information in token
      *
      * @param tokenId AccessToken id
      */
-    Result<Void> toggleToken(Long tokenId);
+    Response<Void> toggleToken(Long tokenId);
 
     /**
      * Get the corresponding AccessToken based on the user ID

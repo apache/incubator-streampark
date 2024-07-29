@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.alert.impl;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
@@ -52,7 +52,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     private ApplicationInfoService applicationInfoService;
 
     @Override
-    public IPage<AlertConfigParams> page(Long userId, RestRequest request) {
+    public IPage<AlertConfigParams> page(Long userId, PageRequest request) {
         // build query conditions
         LambdaQueryWrapper<AlertConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(userId != null, AlertConfig::getUserId, userId);

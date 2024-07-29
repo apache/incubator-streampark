@@ -23,7 +23,7 @@ import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ObjectUtils;
@@ -241,7 +241,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     }
 
     @Override
-    public IPage<Application> page(Application appParam, RestRequest request) {
+    public IPage<Application> page(Application appParam, PageRequest request) {
         if (appParam.getTeamId() == null) {
             return null;
         }

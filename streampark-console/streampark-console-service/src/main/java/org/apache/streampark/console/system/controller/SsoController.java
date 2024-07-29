@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.entity.User;
@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Controller
@@ -68,7 +67,7 @@ public class SsoController {
 
     @GetMapping("token")
     @ResponseBody
-    public Result<Map<String, Object>> token() throws Exception {
+    public Response<?> token() throws Exception {
         // Check SSO enable status
         ApiAlertException.throwIfTrue(
             !ssoEnable,

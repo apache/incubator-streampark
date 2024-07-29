@@ -19,8 +19,8 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
@@ -93,7 +93,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public IPage<User> getPage(User user, RestRequest request) {
+    public IPage<User> getPage(User user, PageRequest request) {
         Page<User> page = MybatisPager.getPage(request);
         IPage<User> resPage = this.baseMapper.selectPage(page, user);
         AssertUtils.notNull(resPage);
@@ -125,15 +125,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Result<Map<String, Boolean>> updateUser(User user) {
+    public Response<Map<String, Boolean>> updateUser(User user) {
         User existsUser = getById(user.getUserId());
         user.setLoginType(null);
         user.setPassword(null);
         if (needTransferResource(existsUser, user)) {
-            return Result.success(Collections.singletonMap("needTransferResource", true));
+            return Response.success(Collections.singletonMap("needTransferResource", true));
         }
         updateById(user);
-        return Result.success(Collections.emptyMap());
+        return Response.success(Collections.emptyMap());
     }
 
     private boolean needTransferResource(User existsUser, User user) {
@@ -228,13 +228,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Result<Map<String, Object>> getLoginUserInfo(User user) {
+    public Response<Map<String, Object>> getLoginUserInfo(User user) {
         if (user == null) {
-            return Result.fail(null, null, 0);
+            return Response.fail(null, null, 0);
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return Result.fail(null, null, 0);
+            return Response.fail(null, null, 0);
         }
 
         updateLoginTime(user.getUsername());
@@ -247,7 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
-        return Result.success(userInfo);
+        return Response.success(userInfo);
     }
 
     @Override

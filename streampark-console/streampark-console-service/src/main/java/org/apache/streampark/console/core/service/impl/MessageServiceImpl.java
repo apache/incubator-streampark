@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
@@ -48,7 +48,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     }
 
     @Override
-    public IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request) {
+    public IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, PageRequest request) {
         Page<Message> page = MybatisPager.getPage(request);
         LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<Message>()
             .eq(Message::getIsRead, false)

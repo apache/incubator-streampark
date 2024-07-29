@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.mapper.SparkApplicationLogMapper;
@@ -40,7 +40,7 @@ public class SparkApplicationLogServiceImpl extends ServiceImpl<SparkApplication
         SparkApplicationLogService {
 
     @Override
-    public IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, RestRequest request) {
+    public IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, PageRequest request) {
         request.setSortField("option_time");
         Page<SparkApplicationLog> page = MybatisPager.getPage(request);
         LambdaQueryWrapper<SparkApplicationLog> queryWrapper = new LambdaQueryWrapper<SparkApplicationLog>()

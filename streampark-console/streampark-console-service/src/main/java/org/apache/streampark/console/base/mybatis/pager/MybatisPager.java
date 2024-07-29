@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.base.mybatis.pager;
 
-import org.apache.streampark.console.base.domain.Constant;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.Constant;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.util.WebUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +31,7 @@ import java.util.List;
 
 public final class MybatisPager<T> {
 
-    public static <T> Page<T> getPage(RestRequest request) {
+    public static <T> Page<T> getPage(PageRequest request) {
         boolean invalid = request.getSortField().trim().split("\\s+").length > 1;
         if (invalid) {
             throw new IllegalArgumentException(

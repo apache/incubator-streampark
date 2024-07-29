@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.YarnQueueService;
 
@@ -44,38 +44,38 @@ public class YarnQueueController {
     /**
      * * List the queues in the specified team by the paging & optional search hint message.
      *
-     * @param restRequest page request information.
+     * @param pageRequest page request information.
      * @param yarnQueue optional fields used to search.
      * @return Result with IPage<{@link YarnQueue}> object.
      */
     @PostMapping("list")
-    public Result<IPage<YarnQueue>> list(RestRequest restRequest, YarnQueue yarnQueue) {
-        IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, restRequest);
-        return Result.success(queuePage);
+    public Response<IPage<YarnQueue>> list(PageRequest pageRequest, YarnQueue yarnQueue) {
+        IPage<YarnQueue> queuePage = yarnQueueService.getPage(yarnQueue, pageRequest);
+        return Response.success(queuePage);
     }
 
     @PostMapping("check")
-    public Result<Integer> check(YarnQueue yarnQueue) {
+    public Response<Integer> check(YarnQueue yarnQueue) {
         return yarnQueueService.checkYarnQueue(yarnQueue);
     }
 
     @PostMapping("create")
     @RequiresPermissions("yarnQueue:create")
-    public Result<Boolean> create(YarnQueue yarnQueue) {
-        return Result.success(yarnQueueService.createYarnQueue(yarnQueue));
+    public Response<Boolean> create(YarnQueue yarnQueue) {
+        return Response.success(yarnQueueService.createYarnQueue(yarnQueue));
     }
 
     @PostMapping("update")
     @RequiresPermissions("yarnQueue:update")
-    public Result<Void> update(YarnQueue yarnQueue) {
+    public Response<Void> update(YarnQueue yarnQueue) {
         yarnQueueService.updateYarnQueue(yarnQueue);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("delete")
     @RequiresPermissions("yarnQueue:delete")
-    public Result<Void> delete(YarnQueue yarnQueue) {
+    public Response<Void> delete(YarnQueue yarnQueue) {
         yarnQueueService.remove(yarnQueue);
-        return Result.success();
+        return Response.success();
     }
 }

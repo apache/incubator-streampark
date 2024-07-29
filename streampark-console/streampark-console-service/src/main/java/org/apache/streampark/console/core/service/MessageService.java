@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 
@@ -39,8 +39,8 @@ public interface MessageService extends IService<Message> {
      *
      * @param noticeTypeEnum request request The {@link NoticeTypeEnum} object used for pagination and
      *     sorting.
-     * @param request request request The {@link RestRequest} object used for pagination and sorting.
+     * @param request request request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link Message} objects.
      */
-    IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, RestRequest request);
+    IPage<Message> getUnReadPage(NoticeTypeEnum noticeTypeEnum, PageRequest request);
 }

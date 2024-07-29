@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.console.base.domain.router.RouterMeta;
-import org.apache.streampark.console.base.domain.router.RouterTree;
-import org.apache.streampark.console.base.domain.router.VueRouter;
+import org.apache.streampark.console.base.bean.router.RouterMeta;
+import org.apache.streampark.console.base.bean.router.RouterTree;
+import org.apache.streampark.console.base.bean.router.VueRouter;
 import org.apache.streampark.console.base.util.VueRouterUtils;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.system.entity.Menu;

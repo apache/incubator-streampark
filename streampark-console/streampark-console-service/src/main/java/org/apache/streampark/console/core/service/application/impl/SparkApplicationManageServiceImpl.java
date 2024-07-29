@@ -22,7 +22,7 @@ import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
@@ -207,7 +207,7 @@ public class SparkApplicationManageServiceImpl
     }
 
     @Override
-    public IPage<SparkApplication> page(SparkApplication appParam, RestRequest request) {
+    public IPage<SparkApplication> page(SparkApplication appParam, PageRequest request) {
         if (appParam.getTeamId() == null) {
             return null;
         }

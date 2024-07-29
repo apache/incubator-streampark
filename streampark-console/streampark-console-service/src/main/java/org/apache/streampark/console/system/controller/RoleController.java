@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.RoleMenu;
 import org.apache.streampark.console.system.service.RoleMenuService;
@@ -55,44 +55,44 @@ public class RoleController {
 
     @PostMapping("list")
     @RequiresPermissions("role:view")
-    public Result<IPage<Role>> roleList(RestRequest restRequest, Role role) {
-        IPage<Role> roleList = roleService.getPage(role, restRequest);
-        return Result.success(roleList);
+    public Response<IPage<Role>> roleList(PageRequest pageRequest, Role role) {
+        IPage<Role> roleList = roleService.getPage(role, pageRequest);
+        return Response.success(roleList);
     }
 
     @PostMapping("check/name")
-    public Result<Boolean> checkRoleName(@NotBlank(message = "{required}") String roleName) {
+    public Response<Boolean> checkRoleName(@NotBlank(message = "{required}") String roleName) {
         Role result = this.roleService.getByName(roleName);
-        return Result.success(result == null);
+        return Response.success(result == null);
     }
 
     @PostMapping("menu")
-    public Result<List<String>> getRoleMenus(@NotBlank(message = "{required}") String roleId) {
+    public Response<List<String>> getRoleMenus(@NotBlank(message = "{required}") String roleId) {
         List<RoleMenu> roleMenuList = this.roleMenuService.listByRoleId(roleId);
         List<String> menuIdList = roleMenuList.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
-        return Result.success(menuIdList);
+        return Response.success(menuIdList);
     }
 
     @PostMapping("post")
     @RequiresPermissions("role:add")
-    public Result<Void> addRole(@Valid Role role) {
+    public Response<Void> addRole(@Valid Role role) {
         this.roleService.createRole(role);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public Result<Void> deleteRole(Long roleId) {
+    public Response<Void> deleteRole(Long roleId) {
         this.roleService.removeById(roleId);
-        return Result.success();
+        return Response.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public Result<Void> updateRole(Role role) throws Exception {
+    public Response<Void> updateRole(Role role) throws Exception {
         this.roleService.updateRole(role);
-        return Result.success();
+        return Response.success();
     }
 }

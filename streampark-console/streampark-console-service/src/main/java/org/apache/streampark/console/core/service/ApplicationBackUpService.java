@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -50,10 +50,10 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
      * Retrieves a page of {@link ApplicationBackUp} objects based on the provided parameters.
      *
      * @param bakParam The {@link ApplicationBackUp} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link ApplicationBackUp} objects.
      */
-    IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request);
+    IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, PageRequest request);
 
     /**
      * Rolls back the changes made by the specified application backup.

@@ -22,8 +22,8 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -102,7 +102,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     private FlinkSqlService flinkSqlService;
 
     @Override
-    public IPage<Resource> getPage(Resource resource, RestRequest request) {
+    public IPage<Resource> getPage(Resource resource, PageRequest request) {
         if (resource.getTeamId() == null) {
             return null;
         }
@@ -273,7 +273,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public Result<Map<String, Serializable>> checkResource(Resource resourceParam) throws JsonProcessingException {
+    public Response<Map<String, Serializable>> checkResource(Resource resourceParam) throws JsonProcessingException {
         ResourceTypeEnum type = resourceParam.getResourceType();
         switch (type) {
             case FLINK_APP:
@@ -281,10 +281,10 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             case CONNECTOR:
                 return checkConnector(resourceParam);
         }
-        return Result.success(ImmutableMap.of(STATE, 0));
+        return Response.success(ImmutableMap.of(STATE, 0));
     }
 
-    private Result<Map<String, Serializable>> checkConnector(Resource resourceParam) throws JsonProcessingException {
+    private Response<Map<String, Serializable>> checkConnector(Resource resourceParam) throws JsonProcessingException {
         // 1) get connector jar
         FlinkConnector connectorResource;
         List<File> jars;
@@ -327,14 +327,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(
                 new RuntimeException("resource name different with FactoryIdentifier"), 5);
         }
-        return Result.success(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
+        return Response.success(ImmutableMap.of(STATE, 0, "connector", JacksonUtils.write(connectorResource)));
     }
 
-    private static Result<Map<String, Serializable>> buildExceptResponse(Exception e, int code) {
-        return Result.success(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
+    private static Response<Map<String, Serializable>> buildExceptResponse(Exception e, int code) {
+        return Response.success(ImmutableMap.of(STATE, code, EXCEPTION, ExceptionUtils.stringifyException(e)));
     }
 
-    private Result<Map<String, Serializable>> checkFlinkApp(Resource resourceParam) {
+    private Response<Map<String, Serializable>> checkFlinkApp(Resource resourceParam) {
         // check main.
         File jarFile;
         try {
@@ -348,14 +348,14 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
-            return Result.success(resp);
+            return Response.success(resp);
         }
         String mainClass = Utils.getJarManClass(jarFile);
         if (mainClass == null) {
             // main class is null
             return buildExceptResponse(new RuntimeException("main class is null"), 2);
         }
-        return Result.success(resp);
+        return Response.success(resp);
     }
 
     private boolean existsFlinkConnector(Long id, String connectorId) {

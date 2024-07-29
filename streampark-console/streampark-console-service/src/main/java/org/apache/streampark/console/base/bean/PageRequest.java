@@ -15,27 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain.router;
+package org.apache.streampark.console.base.bean;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
 
-/** Vue Router Meta */
 @Data
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class RouterMeta implements Serializable {
+public class PageRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Boolean closeable;
+    private int pageSize = 10;
 
-    private Boolean hidden;
+    private int pageNum = 1;
 
-    private Boolean keepAlive;
+    private String sortField = Constant.DEFAULT_SORT_FIELD;
 
-    private String icon;
+    private String sortOrder = Constant.ORDER_DESC;
 }

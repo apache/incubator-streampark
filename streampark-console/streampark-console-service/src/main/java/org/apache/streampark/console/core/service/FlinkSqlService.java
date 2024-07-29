@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
@@ -128,8 +128,8 @@ public interface FlinkSqlService extends IService<FlinkSql> {
      * Retrieves a page of {@link FlinkSql} objects based on the provided parameters.
      *
      * @param appId Application id
-     * @param request request The {@link RestRequest} object used for pagination and sorting.
+     * @param request request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link FlinkSql} objects.
      */
-    IPage<FlinkSql> getPage(Long appId, RestRequest request);
+    IPage<FlinkSql> getPage(Long appId, PageRequest request);
 }

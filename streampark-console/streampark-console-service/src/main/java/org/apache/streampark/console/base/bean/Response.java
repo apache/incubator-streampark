@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.base.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Result<T> {
+public class Response<T> {
 
     private Integer code;
 
@@ -32,14 +32,12 @@ public class Result<T> {
 
     private T data;
 
-    private String status;
-
     /**
      * return success.
      *
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static Result<Void> success() {
+    public static Response<Void> success() {
         return success(null);
     }
 
@@ -47,9 +45,9 @@ public class Result<T> {
      * return success.
      *
      * @param data this is result data.
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static <T> Result<T> success(final T data) {
+    public static <T> Response<T> success(final T data) {
         return success(data, null);
     }
 
@@ -58,27 +56,27 @@ public class Result<T> {
      *
      * @param message this ext msg.
      * @param data this is result data.
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static <T> Result<T> success(final T data, final String message) {
-        return new Result<T>(ResponseCode.CODE_SUCCESS, message, data, Constant.STATUS_SUCCESS);
+    public static <T> Response<T> success(final T data, final String message) {
+        return new Response<T>(ResponseCode.CODE_SUCCESS, message, data);
     }
 
     /**
      * return error.
      *
      * @param message error msg
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static Result<Void> fail(final String message) {
+    public static Response<Void> fail(final String message) {
         return fail(message, ResponseCode.CODE_FAILED);
     }
 
-    public static <T> Result<T> fail(final T data) {
+    public static <T> Response<T> fail(final T data) {
         return fail(null, data, ResponseCode.CODE_FAILED);
     }
 
-    public static <T> Result<T> fail(final int code) {
+    public static <T> Response<T> fail(final int code) {
         return fail(null, null, code);
     }
 
@@ -87,13 +85,13 @@ public class Result<T> {
      *
      * @param code error code
      * @param message error message
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static Result<Void> fail(final String message, final int code) {
+    public static Response<Void> fail(final String message, final int code) {
         return fail(message, null, code);
     }
 
-    public static <T> Result<T> fail(final String message, final T data) {
+    public static <T> Response<T> fail(final String message, final T data) {
         return fail(message, data, ResponseCode.CODE_FAILED);
     }
 
@@ -103,9 +101,9 @@ public class Result<T> {
      * @param code error code
      * @param message error message
      * @param data this is result data.
-     * @return {@linkplain Result}
+     * @return {@linkplain Response}
      */
-    public static <T> Result<T> fail(final String message, final T data, final int code) {
-        return new Result<T>(code, message, data, Constant.STATUS_FAIL);
+    public static <T> Response<T> fail(final String message, final T data, final int code) {
+        return new Response<T>(code, message, data);
     }
 }

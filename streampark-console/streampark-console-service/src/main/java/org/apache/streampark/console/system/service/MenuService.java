@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.router.VueRouter;
+import org.apache.streampark.console.base.bean.router.VueRouter;
 import org.apache.streampark.console.system.entity.Menu;
 
 import com.baomidou.mybatisplus.extension.service.IService;

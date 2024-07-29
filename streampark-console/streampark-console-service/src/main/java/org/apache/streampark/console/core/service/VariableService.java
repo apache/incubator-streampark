@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 
@@ -32,10 +32,10 @@ public interface VariableService extends IService<Variable> {
      * Find variables based on the given variable and query request.
      *
      * @param variable The variable to search for.
-     * @param restRequest The query request containing search filters and pagination options.
+     * @param pageRequest The query request containing search filters and pagination options.
      * @return An IPage object containing the found Variable objects matching the search criteria.
      */
-    IPage<Variable> getPage(Variable variable, RestRequest restRequest);
+    IPage<Variable> getPage(Variable variable, PageRequest pageRequest);
 
     /**
      * Retrieves a list of variables based on the team ID.
@@ -102,7 +102,7 @@ public interface VariableService extends IService<Variable> {
      * @param request The REST request containing additional parameters for retrieving the page.
      * @return An instance of IPage<Application> containing the dependent applications.
      */
-    IPage<Application> getDependAppsPage(Variable variable, RestRequest request);
+    IPage<Application> getDependAppsPage(Variable variable, PageRequest request);
 
     /**
      * Updates the given variable.

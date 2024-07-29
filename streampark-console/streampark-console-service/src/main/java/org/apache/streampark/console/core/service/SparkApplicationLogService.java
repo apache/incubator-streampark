@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -30,10 +30,10 @@ public interface SparkApplicationLogService extends IService<SparkApplicationLog
      * Retrieves a page of {@link SparkApplicationLog} objects based on the provided parameters.
      *
      * @param sparkApplicationLog The {@link SparkApplicationLog} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link SparkApplicationLog} objects.
      */
-    IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, RestRequest request);
+    IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, PageRequest request);
 
     /**
      * remove application log by application id

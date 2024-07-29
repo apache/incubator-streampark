@@ -18,8 +18,8 @@
 package org.apache.streampark.console.base.handler;
 
 import org.apache.streampark.common.util.ExceptionUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
+import org.apache.streampark.console.base.bean.ResponseCode;
 import org.apache.streampark.console.base.exception.AbstractApiException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,31 +51,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = UnauthenticatedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Result<Void> handelUnauthenticatedException(UnauthenticatedException e) {
+    public Response<Void> handelUnauthenticatedException(UnauthenticatedException e) {
         log.error("Unauthenticated.", e);
-        return Result.fail("Unauthenticated.", ResponseCode.CODE_UNAUTHORIZED);
+        return Response.fail("Unauthenticated.", ResponseCode.CODE_UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Result<Void> handelUnauthenticatedException(AuthenticationException e) {
+    public Response<Void> handelUnauthenticatedException(AuthenticationException e) {
         log.error("Permission denied.", e);
-        return Result.fail("Permission denied.", ResponseCode.CODE_UNAUTHORIZED);
+        return Response.fail("Permission denied.", ResponseCode.CODE_UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = AbstractApiException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<Void> handleException(AbstractApiException e) {
+    public Response<Void> handleException(AbstractApiException e) {
         log.error("api exception:", e);
-        return Result.fail(e.getMessage(), e.getResponseCode());
+        return Response.fail(e.getMessage(), e.getResponseCode());
     }
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order(value = Ordered.HIGHEST_PRECEDENCE)
-    public Result<Void> handleException(Exception e) {
+    public Response<Void> handleException(Exception e) {
         log.error("internal server error:", e);
-        return Result.fail("internal server error: " + ExceptionUtils.stringifyException(e));
+        return Response.fail("internal server error: " + ExceptionUtils.stringifyException(e));
     }
 
     /**
@@ -86,7 +86,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Result<Void> validExceptionHandler(BindException e) {
+    public Response<Void> validExceptionHandler(BindException e) {
         log.error("bind exception:", e);
         StringBuilder message = new StringBuilder();
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
             message.append(error.getField()).append(error.getDefaultMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return Result.fail(message.toString());
+        return Response.fail(message.toString());
     }
 
     /**
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Result<Void> handleConstraintViolationException(ConstraintViolationException e) {
+    public Response<Void> handleConstraintViolationException(ConstraintViolationException e) {
         log.error("constraint violation exception:", e);
         StringBuilder message = new StringBuilder();
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
@@ -115,6 +115,6 @@ public class GlobalExceptionHandler {
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
-        return Result.fail(message.toString());
+        return Response.fail(message.toString());
     }
 }

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -68,7 +68,7 @@ public class ApplicationBackUpServiceImpl
     private FlinkSqlService flinkSqlService;
 
     @Override
-    public IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, RestRequest request) {
+    public IPage<ApplicationBackUp> getPage(ApplicationBackUp bakParam, PageRequest request) {
         Page<ApplicationBackUp> page = MybatisPager.getPage(request);
         LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new LambdaQueryWrapper<ApplicationBackUp>()
             .eq(ApplicationBackUp::getAppId, bakParam.getAppId());

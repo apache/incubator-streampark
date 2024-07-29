@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
@@ -75,7 +75,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public IPage<Member> getPage(Member member, RestRequest request) {
+    public IPage<Member> getPage(Member member, PageRequest request) {
         ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
         Page<Member> page = MybatisPager.getPage(request);
         return baseMapper.selectPage(page, member);

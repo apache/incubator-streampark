@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.system.entity.Team;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,10 +31,10 @@ public interface TeamService extends IService<Team> {
      * Retrieves a page of {@link Team} objects based on the provided parameters.
      *
      * @param team The {@link Team} object containing the search criteria.
-     * @param request The {@link RestRequest} object used for pagination and sorting.
+     * @param request The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link Team} objects.
      */
-    IPage<Team> getPage(Team team, RestRequest request);
+    IPage<Team> getPage(Team team, PageRequest request);
 
     /**
      * Get the Team by team name

@@ -15,22 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.base.bean;
 
-import lombok.Data;
+public interface ResponseCode {
 
-import java.io.Serializable;
+    int CODE_SUCCESS = 200;
 
-@Data
-public class RestRequest implements Serializable {
+    int CODE_FAILED = 500;
 
-    private static final long serialVersionUID = 1L;
+    int CODE_UNAUTHORIZED = 401;
 
-    private int pageSize = 10;
+    int CODE_FAIL_ALERT = 501;
 
-    private int pageNum = 1;
-
-    private String sortField = Constant.DEFAULT_SORT_FIELD;
-
-    private String sortOrder = Constant.ORDER_DESC;
+    int CODE_FAIL_DETAIL = 502;
 }

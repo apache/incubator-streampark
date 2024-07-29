@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,10 +32,10 @@ public interface YarnQueueService extends IService<YarnQueue> {
      * Retrieves a page of {@link YarnQueue} objects based on the provided parameters.
      *
      * @param yarnQueue The {@link YarnQueue} object containing the search criteria.
-     * @param restRequest The {@link RestRequest} object used for pagination and sorting.
+     * @param pageRequest The {@link PageRequest} object used for pagination and sorting.
      * @return An {@link IPage} containing the retrieved {@link YarnQueue} objects.
      */
-    IPage<YarnQueue> getPage(YarnQueue yarnQueue, RestRequest restRequest);
+    IPage<YarnQueue> getPage(YarnQueue yarnQueue, PageRequest pageRequest);
 
     /**
      * Check the correctness of yarnQueue
@@ -43,7 +43,7 @@ public interface YarnQueueService extends IService<YarnQueue> {
      * @param yarnQueue YarnQueue
      * @return ResponseResult
      */
-    Result<Integer> checkYarnQueue(YarnQueue yarnQueue);
+    Response<Integer> checkYarnQueue(YarnQueue yarnQueue);
 
     /**
      * Create a YarnQueue by entering parameters

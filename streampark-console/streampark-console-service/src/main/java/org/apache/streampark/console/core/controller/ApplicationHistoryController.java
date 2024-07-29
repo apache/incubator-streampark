@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -44,21 +44,21 @@ public class ApplicationHistoryController {
 
     @PostMapping("upload_jars")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listUploadJars() {
+    public Response<List<String>> listUploadJars() {
         List<String> jars = applicationInfoService.listHistoryUploadJars();
-        return Result.success(jars);
+        return Response.success(jars);
     }
 
     @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listK8sNamespace() {
+    public Response<List<String>> listK8sNamespace() {
         List<String> namespaces = applicationInfoService.listRecentK8sNamespace();
-        return Result.success(namespaces);
+        return Response.success(namespaces);
     }
 
     @PostMapping("session_cluster_ids")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listSessionClusterId(int executionMode) {
+    public Response<List<String>> listSessionClusterId(int executionMode) {
         List<String> clusterIds;
         switch (FlinkExecutionMode.of(executionMode)) {
             case KUBERNETES_NATIVE_SESSION:
@@ -70,34 +70,34 @@ public class ApplicationHistoryController {
                 clusterIds = new ArrayList<>(0);
                 break;
         }
-        return Result.success(clusterIds);
+        return Response.success(clusterIds);
     }
 
     @PostMapping("flink_base_images")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listFlinkBaseImage() {
+    public Response<List<String>> listFlinkBaseImage() {
         List<String> images = applicationInfoService.listRecentFlinkBaseImage();
-        return Result.success(images);
+        return Response.success(images);
     }
 
     @PostMapping("flink_pod_templates")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listPodTemplate() {
+    public Response<List<String>> listPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sPodTemplate();
-        return Result.success(templates);
+        return Response.success(templates);
     }
 
     @PostMapping("flink_jm_pod_templates")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listJmPodTemplate() {
+    public Response<List<String>> listJmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sJmPodTemplate();
-        return Result.success(templates);
+        return Response.success(templates);
     }
 
     @PostMapping("flink_tm_pod_templates")
     @RequiresPermissions("app:create")
-    public Result<List<String>> listTmPodTemplate() {
+    public Response<List<String>> listTmPodTemplate() {
         List<String> templates = applicationInfoService.listRecentK8sTmPodTemplate();
-        return Result.success(templates);
+        return Response.success(templates);
     }
 }

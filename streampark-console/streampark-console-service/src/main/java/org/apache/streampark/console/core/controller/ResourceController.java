@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.service.ResourceService;
 
@@ -38,9 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Validated
@@ -53,46 +51,46 @@ public class ResourceController {
 
     @PostMapping("add")
     @RequiresPermissions("resource:add")
-    public Result<Void> addResource(@Valid Resource resource) throws Exception {
+    public Response<Void> addResource(@Valid Resource resource) throws Exception {
         this.resourceService.addResource(resource);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("check")
-    public Result<Map<String, Serializable>> checkResource(@Valid Resource resource) throws Exception {
+    public Response<?> checkResource(@Valid Resource resource) throws Exception {
         return this.resourceService.checkResource(resource);
     }
 
     @PostMapping("page")
-    public Result<IPage<Resource>> page(RestRequest restRequest, Resource resource) {
-        IPage<Resource> page = resourceService.getPage(resource, restRequest);
-        return Result.success(page);
+    public Response<IPage<Resource>> page(PageRequest pageRequest, Resource resource) {
+        IPage<Resource> page = resourceService.getPage(resource, pageRequest);
+        return Response.success(page);
     }
 
     @PutMapping("update")
     @RequiresPermissions("resource:update")
-    public Result<Void> updateResource(@Valid Resource resource) {
+    public Response<Void> updateResource(@Valid Resource resource) {
         resourceService.updateResource(resource);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("resource:delete")
-    public Result<Void> deleteResource(@Valid Resource resource) {
+    public Response<Void> deleteResource(@Valid Resource resource) {
         this.resourceService.remove(resource.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("list")
-    public Result<List<Resource>> listResource(@RequestParam Long teamId) {
+    public Response<List<Resource>> listResource(@RequestParam Long teamId) {
         List<Resource> resourceList = resourceService.listByTeamId(teamId);
-        return Result.success(resourceList);
+        return Response.success(resourceList);
     }
 
     @PostMapping("upload")
     @RequiresPermissions("resource:add")
-    public Result<String> upload(MultipartFile file) throws Exception {
+    public Response<String> upload(MultipartFile file) throws Exception {
         String uploadPath = resourceService.upload(file);
-        return Result.success(uploadPath);
+        return Response.success(uploadPath);
     }
 }

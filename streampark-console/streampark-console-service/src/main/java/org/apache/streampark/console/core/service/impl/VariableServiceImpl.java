@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.DeflaterUtils;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.Application;
@@ -90,7 +90,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     }
 
     @Override
-    public IPage<Variable> getPage(Variable variable, RestRequest request) {
+    public IPage<Variable> getPage(Variable variable, PageRequest request) {
         if (variable.getTeamId() == null) {
             return null;
         }
@@ -99,7 +99,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     }
 
     @Override
-    public IPage<Application> getDependAppsPage(Variable variable, RestRequest request) {
+    public IPage<Application> getDependAppsPage(Variable variable, PageRequest request) {
         List<Application> applications = getDependApplicationsByCode(variable);
 
         IPage<Application> page = new Page<>();

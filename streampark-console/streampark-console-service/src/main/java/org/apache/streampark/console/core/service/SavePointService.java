@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SavePoint;
@@ -71,7 +71,7 @@ public interface SavePointService extends IService<SavePoint> {
      * @param request The RestRequest object containing additional request parameters.
      * @return An instance of IPage<SavePoint> representing the page of SavePoint objects.
      */
-    IPage<SavePoint> getPage(SavePoint savePoint, RestRequest request);
+    IPage<SavePoint> getPage(SavePoint savePoint, PageRequest request);
 
     /**
      * Removes all savepoints for the specified application.

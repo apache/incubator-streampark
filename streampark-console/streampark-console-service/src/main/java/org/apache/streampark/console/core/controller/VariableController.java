@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
@@ -53,18 +53,18 @@ public class VariableController {
     /**
      * Get variable list by page.
      *
-     * @param restRequest
+     * @param pageRequest
      * @param variable
      * @return
      */
     @PostMapping("page")
     @RequiresPermissions("variable:view")
-    public Result<IPage<Variable>> page(RestRequest restRequest, Variable variable) {
-        IPage<Variable> page = variableService.getPage(variable, restRequest);
+    public Response<IPage<Variable>> page(PageRequest pageRequest, Variable variable) {
+        IPage<Variable> page = variableService.getPage(variable, pageRequest);
         for (Variable v : page.getRecords()) {
             v.dataMasking();
         }
-        return Result.success(page);
+        return Response.success(page);
     }
 
     /**
@@ -75,54 +75,54 @@ public class VariableController {
      * @return
      */
     @PostMapping("list")
-    public Result<List<Variable>> variableList(@RequestParam Long teamId, String keyword) {
+    public Response<List<Variable>> variableList(@RequestParam Long teamId, String keyword) {
         List<Variable> variableList = variableService.listByTeamId(teamId, keyword);
         for (Variable v : variableList) {
             v.dataMasking();
         }
-        return Result.success(variableList);
+        return Response.success(variableList);
     }
 
     @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
-    public Result<IPage<Application>> dependApps(RestRequest restRequest, Variable variable) {
-        IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
-        return Result.success(dependApps);
+    public Response<IPage<Application>> dependApps(PageRequest pageRequest, Variable variable) {
+        IPage<Application> dependApps = variableService.getDependAppsPage(variable, pageRequest);
+        return Response.success(dependApps);
     }
 
     @PostMapping("post")
     @RequiresPermissions("variable:add")
-    public Result<Void> addVariable(@Valid Variable variable) {
+    public Response<Void> addVariable(@Valid Variable variable) {
         this.variableService.createVariable(variable);
-        return Result.success();
+        return Response.success();
     }
 
     @PutMapping("update")
     @RequiresPermissions("variable:update")
-    public Result<Void> updateVariable(@Valid Variable variable) {
+    public Response<Void> updateVariable(@Valid Variable variable) {
         variableService.updateVariable(variable);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("show_original")
     @RequiresPermissions("variable:show_original")
-    public Result<Variable> showOriginal(@RequestParam Long id) {
+    public Response<Variable> showOriginal(@RequestParam Long id) {
         Variable v = this.variableService.getById(id);
-        return Result.success(v);
+        return Response.success(v);
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("variable:delete")
-    public Result<Void> deleteVariable(@Valid Variable variable) {
+    public Response<Void> deleteVariable(@Valid Variable variable) {
         this.variableService.remove(variable);
-        return Result.success();
+        return Response.success();
     }
 
     @PostMapping("check/code")
-    public Result<Boolean> checkVariableCode(
-                                             @RequestParam Long teamId,
-                                             @NotBlank(message = "{required}") String variableCode) {
+    public Response<Boolean> checkVariableCode(
+                                               @RequestParam Long teamId,
+                                               @NotBlank(message = "{required}") String variableCode) {
         boolean result = this.variableService.findByVariableCode(teamId, variableCode) == null;
-        return Result.success(result);
+        return Response.success(result);
     }
 }

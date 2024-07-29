@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
@@ -58,11 +58,11 @@ public interface ProjectService extends IService<Project> {
      * Retrieves a page of {@link Project} objects based on the provided parameters.
      *
      * @param project @param applicationLog The {@link Project} object containing the search criteria.
-     * @param restRequest @param request The {@link RestRequest} object used for pagination and
+     * @param pageRequest @param request The {@link PageRequest} object used for pagination and
      *     sorting.
      * @return An {@link IPage} containing the retrieved {@link Project} objects.
      */
-    IPage<Project> getPage(Project project, RestRequest restRequest);
+    IPage<Project> getPage(Project project, PageRequest pageRequest);
 
     /**
      * Check whether the corresponding project exists through team id
@@ -94,7 +94,7 @@ public interface ProjectService extends IService<Project> {
      * @param id Project id
      * @param startOffset startOffset
      */
-    Result<Map<String, String>> getBuildLog(Long id, Long startOffset);
+    Response<Map<String, String>> getBuildLog(Long id, Long startOffset);
 
     /**
      * List all modules of the specified project

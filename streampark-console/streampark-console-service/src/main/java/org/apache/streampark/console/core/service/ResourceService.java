@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -36,10 +36,10 @@ public interface ResourceService extends IService<Resource> {
      * list resource
      *
      * @param resource resource
-     * @param restRequest queryRequest
+     * @param pageRequest queryRequest
      * @return IPage
      */
-    IPage<Resource> getPage(Resource resource, RestRequest restRequest);
+    IPage<Resource> getPage(Resource resource, PageRequest pageRequest);
 
     /**
      * check resource exists by user id
@@ -95,5 +95,5 @@ public interface ResourceService extends IService<Resource> {
 
     String upload(MultipartFile file) throws IOException;
 
-    Result<Map<String, Serializable>> checkResource(Resource resource) throws Exception;
+    Response<Map<String, Serializable>> checkResource(Resource resource) throws Exception;
 }

@@ -15,17 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.console.base.bean.router;
 
-public interface ResponseCode {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-    int CODE_SUCCESS = 200;
+import java.io.Serializable;
 
-    int CODE_FAILED = 500;
+/** Vue Router Meta */
+@Data
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class RouterMeta implements Serializable {
 
-    int CODE_UNAUTHORIZED = 401;
+    private static final long serialVersionUID = 1L;
 
-    int CODE_FAIL_ALERT = 501;
+    private Boolean closeable;
 
-    int CODE_FAIL_DETAIL = 502;
+    private Boolean hidden;
+
+    private Boolean keepAlive;
+
+    private String icon;
 }

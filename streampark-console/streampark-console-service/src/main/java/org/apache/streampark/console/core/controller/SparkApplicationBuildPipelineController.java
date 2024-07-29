@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
@@ -54,12 +54,12 @@ public class SparkApplicationBuildPipelineController {
     @PostMapping("build")
     @RequiresPermissions("app:create")
     @Permission(app = "#appId")
-    public Result<Boolean> buildApplication(Long appId, boolean forceBuild) {
+    public Response<Boolean> buildApplication(Long appId, boolean forceBuild) {
         try {
             boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-            return Result.success(actionResult);
+            return Response.success(actionResult);
         } catch (Exception e) {
-            return Result.success(false, e.getMessage());
+            return Response.success(false, e.getMessage());
         }
     }
 
@@ -72,10 +72,10 @@ public class SparkApplicationBuildPipelineController {
     @PostMapping("/detail")
     @RequiresPermissions("app:view")
     @Permission(app = "#appId")
-    public Result<Map<String, Object>> getBuildProgressDetail(Long appId) {
+    public Response<Map<String, Object>> getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>(0);
         Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
         details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
-        return Result.success(details);
+        return Response.success(details);
     }
 }

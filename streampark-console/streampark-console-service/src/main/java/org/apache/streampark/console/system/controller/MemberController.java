@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
@@ -52,50 +52,50 @@ public class MemberController {
     private MemberService memberService;
 
     @PostMapping("list")
-    public Result<IPage<Member>> memberList(RestRequest restRequest, Member member) {
-        IPage<Member> userList = memberService.getPage(member, restRequest);
-        return Result.success(userList);
+    public Response<IPage<Member>> memberList(PageRequest pageRequest, Member member) {
+        IPage<Member> userList = memberService.getPage(member, pageRequest);
+        return Response.success(userList);
     }
 
     @PostMapping("candidateUsers")
-    public Result<List<User>> candidateUsers(Long teamId) {
+    public Response<List<User>> candidateUsers(Long teamId) {
         List<User> userList = memberService.listUsersNotInTeam(teamId);
-        return Result.success(userList);
+        return Response.success(userList);
     }
 
     @PostMapping("teams")
-    public Result<List<Team>> listTeams(Long userId) {
+    public Response<List<Team>> listTeams(Long userId) {
         List<Team> teamList = memberService.listTeamsByUserId(userId);
-        return Result.success(teamList);
+        return Response.success(teamList);
     }
 
     @PostMapping("check/user")
-    public Result<Boolean> check(@NotNull(message = "{required}") Long teamId, String userName) {
+    public Response<Boolean> check(@NotNull(message = "{required}") Long teamId, String userName) {
         Member result = this.memberService.getByTeamIdUserName(teamId, userName);
-        return Result.success(result == null);
+        return Response.success(result == null);
     }
 
     @PostMapping("post")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:add")
-    public Result<Void> create(@Valid Member member) {
+    public Response<Void> create(@Valid Member member) {
         this.memberService.createMember(member);
-        return Result.success();
+        return Response.success();
     }
 
     @DeleteMapping("delete")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:delete")
-    public Result<Void> delete(Member member) {
+    public Response<Void> delete(Member member) {
         this.memberService.remove(member.getId());
-        return Result.success();
+        return Response.success();
     }
 
     @PutMapping("update")
     @Permission(team = "#member.teamId")
     @RequiresPermissions("member:update")
-    public Result<Void> update(Member member) {
+    public Response<Void> update(Member member) {
         this.memberService.updateMember(member);
-        return Result.success();
+        return Response.success();
     }
 }

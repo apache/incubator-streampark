@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -98,8 +98,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     }
 
     @Override
-    public Result<Integer> check(FlinkCluster cluster) {
-        Result<Integer> result = new Result<>();
+    public Response<Integer> check(FlinkCluster cluster) {
+        Response<Integer> result = new Response<>();
         result.setData(0);
 
         // 1) Check name if already exists

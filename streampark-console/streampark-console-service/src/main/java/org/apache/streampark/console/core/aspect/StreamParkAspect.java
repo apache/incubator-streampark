@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.aspect;
 
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -67,14 +67,14 @@ public class StreamParkAspect {
     private ApplicationManageService applicationManageService;
 
     @Pointcut("execution(public"
-        + " org.apache.streampark.console.base.domain.Result"
+        + " org.apache.streampark.console.base.bean.Response"
         + " org.apache.streampark.console.core.controller.*.*(..))")
     public void openAPI() {
     }
 
     @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
     @Around(value = "openAPI()")
-    public Result<?> openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Response<?> openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("restResponse aspect, method:{}", methodSignature.getName());
         Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
@@ -87,7 +87,7 @@ public class StreamParkAspect {
                 throw new ApiAlertException("openapi unsupported: " + url);
             }
         }
-        return (Result<?>) joinPoint.proceed();
+        return (Response<?>) joinPoint.proceed();
     }
 
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
@@ -108,7 +108,7 @@ public class StreamParkAspect {
     }
 
     @Around("permissionAction()")
-    public Result<?> permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Response<?> permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
@@ -147,7 +147,7 @@ public class StreamParkAspect {
             }
         }
 
-        return (Result<?>) joinPoint.proceed();
+        return (Response<?>) joinPoint.proceed();
     }
 
     private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {

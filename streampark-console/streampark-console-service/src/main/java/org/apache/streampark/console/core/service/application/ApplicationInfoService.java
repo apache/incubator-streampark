@@ -26,7 +26,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -159,7 +158,7 @@ public interface ApplicationInfoService extends IService<Application> {
      * @param teamId the ID of the team
      * @return a map containing the dashboard data
      */
-    Map<String, Serializable> getDashboardDataMap(Long teamId);
+    Map<String, Object> getDashboardDataMap(Long teamId);
 
     /**
      * Retrieves the Kubernetes start log for a specific ID with an optional offset and limit.

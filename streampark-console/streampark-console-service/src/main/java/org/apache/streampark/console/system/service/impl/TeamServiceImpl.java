@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.console.base.domain.Constant;
-import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.bean.Constant;
+import org.apache.streampark.console.base.bean.PageRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
@@ -67,7 +67,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     private VariableService variableService;
 
     @Override
-    public IPage<Team> getPage(Team team, RestRequest request) {
+    public IPage<Team> getPage(Team team, PageRequest request) {
         Page<Team> page = MybatisPager.getPage(request);
         return this.baseMapper.selectPage(page, team);
     }

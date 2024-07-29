@@ -67,7 +67,6 @@ import javax.annotation.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
@@ -120,7 +119,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
 
     @Override
-    public Map<String, Serializable> getDashboardDataMap(Long teamId) {
+    public Map<String, Object> getDashboardDataMap(Long teamId) {
         JobsOverview.Task overview = new JobsOverview.Task();
         Integer totalJmMemory = 0;
         Integer totalTmMemory = 0;
@@ -198,15 +197,15 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     }
 
     @Nonnull
-    private Map<String, Serializable> constructDashboardMap(
-                                                            JobsOverview.Task overview,
-                                                            Integer totalJmMemory,
-                                                            Integer totalTmMemory,
-                                                            Integer totalTm,
-                                                            Integer availableSlot,
-                                                            Integer totalSlot,
-                                                            Integer runningJob) {
-        Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
+    private Map<String, Object> constructDashboardMap(
+                                                      JobsOverview.Task overview,
+                                                      Integer totalJmMemory,
+                                                      Integer totalTmMemory,
+                                                      Integer totalTm,
+                                                      Integer availableSlot,
+                                                      Integer totalSlot,
+                                                      Integer runningJob) {
+        Map<String, Object> dashboardDataMap = new HashMap<>(8);
         dashboardDataMap.put("task", overview);
         dashboardDataMap.put("jmMemory", totalJmMemory);
         dashboardDataMap.put("tmMemory", totalTmMemory);

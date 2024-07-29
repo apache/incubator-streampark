@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
@@ -96,7 +96,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         senderEmail.setFrom("XXXXXXXX@163.com");
         senderEmail.setSsl(false);
         senderEmail.setPort(25);
-        Result<?> result = settingService.checkEmail(senderEmail);
+        Response<?> result = settingService.checkEmail(senderEmail);
         Assertions.assertEquals(result.getStatus(), 200);
     }
 
@@ -111,7 +111,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         dockerConfig.setPassword(password);
         dockerConfig.setNamespace("streampark");
 
-        Result result = settingService.checkDocker(dockerConfig);
+        Response result = settingService.checkDocker(dockerConfig);
         Assertions.assertEquals(result.getStatus(), 200);
     }
 

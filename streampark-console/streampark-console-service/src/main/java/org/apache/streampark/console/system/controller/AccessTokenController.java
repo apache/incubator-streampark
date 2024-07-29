@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.domain.Result;
+import org.apache.streampark.console.base.bean.PageRequest;
+import org.apache.streampark.console.base.bean.Response;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -47,43 +47,43 @@ public class AccessTokenController {
 
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
-    public Result<AccessToken> createToken(
-                                           @NotNull(message = "{required}") Long userId,
-                                           @RequestParam(required = false) String description) throws InternalException {
+    public Response<AccessToken> createToken(
+                                             @NotNull(message = "{required}") Long userId,
+                                             @RequestParam(required = false) String description) throws InternalException {
         return accessTokenService.create(userId, description);
     }
 
     @PostMapping(value = "check")
-    public Result<Integer> verifyToken() {
+    public Response<Integer> verifyToken() {
         Long userId = ServiceHelper.getUserId();
         AccessToken accessToken = accessTokenService.getByUserId(userId);
         if (accessToken == null) {
-            return Result.success(AccessTokenStateEnum.NULL.get());
+            return Response.success(AccessTokenStateEnum.NULL.get());
         } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
-            return Result.success(AccessTokenStateEnum.INVALID_TOKEN.get());
+            return Response.success(AccessTokenStateEnum.INVALID_TOKEN.get());
         } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
-            return Result.success(AccessTokenStateEnum.LOCKED_USER.get());
+            return Response.success(AccessTokenStateEnum.LOCKED_USER.get());
         }
-        return Result.success(AccessTokenStateEnum.OK.get());
+        return Response.success(AccessTokenStateEnum.OK.get());
     }
 
     @PostMapping(value = "list")
     @RequiresPermissions("token:view")
-    public Result<IPage<AccessToken>> tokensList(RestRequest restRequest, AccessToken accessToken) {
-        IPage<AccessToken> accessTokens = accessTokenService.getPage(accessToken, restRequest);
-        return Result.success(accessTokens);
+    public Response<IPage<AccessToken>> tokensList(PageRequest pageRequest, AccessToken accessToken) {
+        IPage<AccessToken> accessTokens = accessTokenService.getPage(accessToken, pageRequest);
+        return Response.success(accessTokens);
     }
 
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
-    public Result<Void> toggleToken(@NotNull(message = "{required}") Long tokenId) {
+    public Response<Void> toggleToken(@NotNull(message = "{required}") Long tokenId) {
         return accessTokenService.toggleToken(tokenId);
     }
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public Result<Boolean> deleteToken(@NotNull(message = "{required}") Long tokenId) {
+    public Response<Boolean> deleteToken(@NotNull(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.removeById(tokenId);
-        return Result.success(res);
+        return Response.success(res);
     }
 }
