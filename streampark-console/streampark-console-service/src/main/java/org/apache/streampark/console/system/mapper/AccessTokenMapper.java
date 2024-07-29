@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.console.system.mapper;
 
 import org.apache.streampark.console.system.entity.AccessToken;

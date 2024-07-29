@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.spark.connector.kafka.source
 
 import org.apache.streampark.spark.connector.kafka.offset.KafkaClient
