@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.streampark.console.base.exception;
 
 /** This exception is thrown when there is an error in the file type */

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.streampark.flink.core
 
 class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)

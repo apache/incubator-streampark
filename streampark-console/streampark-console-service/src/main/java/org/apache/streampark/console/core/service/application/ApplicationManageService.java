@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;

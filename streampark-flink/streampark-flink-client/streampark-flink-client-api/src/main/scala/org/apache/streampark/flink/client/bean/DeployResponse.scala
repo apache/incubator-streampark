@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.streampark.flink.client.bean
 
 case class DeployResponse(address: String = null, clusterId: String = null, error: Throwable = null)

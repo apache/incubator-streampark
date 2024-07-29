@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.streampark.flink.core.test
 
 import org.apache.streampark.flink.core.{FlinkSqlValidationResult, FlinkSqlValidator}
