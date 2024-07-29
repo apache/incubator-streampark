@@ -68,7 +68,6 @@ public class SsoController {
     @GetMapping("token")
     @ResponseBody
     public RestResponse token() throws Exception {
-
         // Check SSO enable status
         ApiAlertException.throwIfTrue(
             !ssoEnable,
