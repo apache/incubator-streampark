@@ -77,7 +77,7 @@ span.anticon:not(.app-iconify) {
 }
 
 .app-bar,
-.streampark-basic-title {
+div:not(.ant-modal-title)>.streampark-basic-title {
   background-color: @background-color-base;
   height: 100%;
   font-size: 14px !important;
@@ -88,4 +88,9 @@ span.anticon:not(.app-iconify) {
 
 .ant-card-body>.streampark-basic-title {
   display: table !important;
+}
+
+[data-theme="dark"] .ant-divider-horizontal.ant-divider-with-text::before,
+[data-theme="dark"] .ant-divider-horizontal.ant-divider-with-text::after {
+  border-top-color: inherit !important;
 }

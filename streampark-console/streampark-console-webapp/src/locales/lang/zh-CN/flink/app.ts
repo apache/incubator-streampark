@@ -110,12 +110,15 @@ export default {
     compare: '比较',
     compareSelectTips: '请选择目标板本',
     resetApi: 'Open API',
+    copyCurl: '复制 CURL',
+    apiTitle: 'Api 详情',
     resetApiToolTip: 'OPEN API，第三方系统可轻松对接 StreamPark',
     copyStartcURL: '作业启动',
     copyCancelcURL: '作业停止',
     apiDocCenter: 'Api文档',
-    nullAccessToken: '访问令牌为空，请联系管理员添加.',
-    invalidAccessToken: '访问令牌无效，请联系管理员。',
+    nullAccessToken: '访问令牌不存在，请联系管理员添加',
+    invalidAccessToken: '访问令牌无效，请联系管理员',
+    invalidTokenUser: '当前用户已被锁定，请联系管理员',
     detailTab: {
       detailTabName: {
         option: '选项',

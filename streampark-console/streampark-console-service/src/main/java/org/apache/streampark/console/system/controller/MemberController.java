@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -70,7 +70,7 @@ public class MemberController {
     }
 
     @PostMapping("check/user")
-    public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
+    public RestResponse check(@NotNull(message = "{required}") Long teamId, String userName) {
         Member result = this.memberService.getByTeamIdUserName(teamId, userName);
         return RestResponse.success(result == null);
     }

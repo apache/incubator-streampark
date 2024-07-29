@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -33,14 +32,13 @@ import org.apache.streampark.console.core.service.application.ApplicationInfoSer
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
-import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -87,6 +85,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private TeamService teamService;
+
     @Override
     public User getByUsername(String username) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
@@ -118,6 +119,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String salt = ShaHashUtils.getRandomSalt();
             String password = ShaHashUtils.encrypt(salt, user.getPassword());
             user.setSalt(salt);
+            // default team
+            user.setLastTeamId(teamService.getSysDefaultTeam().getId());
             user.setPassword(password);
         }
         save(user);
@@ -216,23 +219,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void fillInTeam(User user) {
-        if (user.getLastTeamId() == null) {
-            List<Team> teams = memberService.listTeamsByUserId(user.getUserId());
-
-            ApiAlertException.throwIfTrue(
-                CollectionUtils.isEmpty(teams),
-                SYSTEM_USER_NOT_BELONG_TEAM_LOGIN);
-
-            if (teams.size() == 1) {
-                Team team = teams.get(0);
-                user.setLastTeamId(team.getId());
-                this.baseMapper.updateById(user);
-            }
-        }
-    }
-
-    @Override
     public List<User> listByTeamId(Long teamId) {
         return baseMapper.selectUsersByAppOwner(teamId);
     }
@@ -252,15 +238,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (User.STATUS_LOCK.equals(user.getStatus())) {
             return RestResponse.success().put(RestResponse.CODE_KEY, 1);
         }
-        // set team
-        fillInTeam(user);
-
-        // no team.
-        if (user.getLastTeamId() == null) {
-            return RestResponse.success()
-                .data(user.getUserId())
-                .put(RestResponse.CODE_KEY, ResponseCode.CODE_FORBIDDEN);
-        }
 
         updateLoginTime(user.getUsername());
         String token = WebUtils.encryptToken(
@@ -268,7 +245,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.getUserId(), user.getUsername(), user.getSalt(), AuthenticationType.SIGN));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String expireTimeStr = DateUtils.formatFullTime(expireTime);
-        JWTToken jwtToken = new JWTToken(token, expireTimeStr);
+        JWTToken jwtToken = new JWTToken(token, expireTimeStr, AuthenticationType.SIGN.get());
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         Map<String, Object> userInfo = generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);

@@ -119,13 +119,16 @@ export default {
     compare: 'Compare',
     compareSelectTips: 'Please select the target version',
     resetApi: 'Rest Api',
+    copyCurl: 'Copy Curl',
+    apiTitle: 'Api Detail',
     resetApiToolTip:
       'Rest API external call interface,other third-party systems easy to access StreamPark',
     copyStartcURL: 'App Start',
     copyCancelcURL: 'App Cancel',
     apiDocCenter: 'Api Doc Center',
-    nullAccessToken: 'access token is null,please contact the administrator to add.',
-    invalidAccessToken: 'access token is invalid,please contact the administrator.',
+    nullAccessToken: "The current user's token not exist, please contact the administrator to add",
+    invalidAccessToken: 'The token is invalid, please contact the administrator',
+    invalidTokenUser: 'The user is locked, please contact the administrator',
     detailTab: {
       detailTabName: {
         option: 'Option',

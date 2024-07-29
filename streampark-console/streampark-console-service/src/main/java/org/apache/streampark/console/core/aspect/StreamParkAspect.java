@@ -49,6 +49,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINk_APP_IS_NULL;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
@@ -71,7 +75,7 @@ public class StreamParkAspect {
 
     @Pointcut("execution(public"
         + " org.apache.streampark.console.base.domain.RestResponse"
-        + " org.apache.streampark.console.*.controller.*.*(..))")
+        + " org.apache.streampark.console.core.controller.*.*(..))")
     public void openAPI() {
     }
 
@@ -84,7 +88,10 @@ public class StreamParkAspect {
         if (isApi != null && isApi) {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
-                throw new ApiAlertException("current api unsupported!");
+                HttpServletRequest request =
+                    ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+                String url = request.getRequestURI();
+                throw new ApiAlertException("openapi unsupported: " + url);
             }
         }
         return (RestResponse) joinPoint.proceed();

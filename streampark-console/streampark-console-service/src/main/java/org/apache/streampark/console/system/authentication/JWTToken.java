@@ -33,13 +33,16 @@ public class JWTToken implements AuthenticationToken {
 
     private String expireAt;
 
+    private int signType;
+
     public JWTToken(String token) {
         this.token = token;
     }
 
-    public JWTToken(String token, String expireAt) {
+    public JWTToken(String token, String expireAt, int signType) {
         this.token = token;
         this.expireAt = expireAt;
+        this.signType = signType;
     }
 
     @Override
