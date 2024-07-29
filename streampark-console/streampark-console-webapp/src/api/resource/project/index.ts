@@ -94,8 +94,8 @@ export function buildLog(data: Recordable): Promise<AxiosResponse<any>> {
   return defHttp.post({ url: Api.BUILD_LOG, data }, { isReturnNativeResponse: true });
 }
 
-export function deleteProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({ url: Api.DELETE, data }, { isReturnNativeResponse: true });
+export function deleteProject(data: Recordable): Promise<boolean> {
+  return defHttp.post({ url: Api.DELETE, data });
 }
 
 export function modules(data: Recordable) {

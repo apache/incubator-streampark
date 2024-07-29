@@ -78,7 +78,7 @@ export function fetchCheckCluster(data: Recordable) {
   return defHttp.post({
     url: FLINK_API.CHECK,
     data,
-  });
+  }, { isReturnNativeResponse: true });
 }
 
 export function fetchCreateCluster(data: Recordable) {
@@ -87,6 +87,7 @@ export function fetchCreateCluster(data: Recordable) {
     data,
   });
 }
+
 export function fetchUpdateCluster(data: Recordable) {
   return defHttp.post({
     url: FLINK_API.UPDATE,

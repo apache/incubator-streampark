@@ -102,14 +102,13 @@
       changeOkLoading(false);
     }
     // Detection environment
-    const { data: resp } = await fetchCheckEnv({
+    const resp = await fetchCheckEnv({
       id: versionId.value,
       flinkName: formValue.flinkName,
       flinkHome: formValue.flinkHome,
     });
-    const checkResp = parseInt(resp.data);
-    if (checkResp !== FlinkEnvCheckEnum.OK) {
-      switch (checkResp) {
+    if (resp !== FlinkEnvCheckEnum.OK) {
+      switch (resp) {
         case FlinkEnvCheckEnum.INVALID_PATH:
           Swal.fire(
             'Failed',

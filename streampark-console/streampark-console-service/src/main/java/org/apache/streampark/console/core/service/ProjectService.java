@@ -94,7 +94,7 @@ public interface ProjectService extends IService<Project> {
      * @param id Project id
      * @param startOffset startOffset
      */
-    Response<Map<String, String>> getBuildLog(Long id, Long startOffset);
+    Response<Map<String, Object>> getBuildLog(Long id, Long startOffset);
 
     /**
      * List all modules of the specified project

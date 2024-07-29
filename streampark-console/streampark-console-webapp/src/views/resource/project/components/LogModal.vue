@@ -59,20 +59,20 @@
 
   async function refreshLog() {
     try {
-      const resp = await buildLog({
+      const { data } = await buildLog({
         id: project.id,
         startOffset,
       });
-      if (resp.code === ResultEnum.SUCCESS) {
-        const data = resp.data;
-        if (data.readFinished === false) {
+      if (data.code === ResultEnum.SUCCESS) {
+        const resp = data.data;
+        if (resp.readFinished == false) {
           showRefresh.value = true;
           start();
         } else {
           showRefresh.value = false;
         }
         logTime.value = formatToDateTime(new Date());
-        await setContent(data.fileContent);
+        await setContent(resp.fileContent);
         handleRevealLine();
       }
     } catch (error) {

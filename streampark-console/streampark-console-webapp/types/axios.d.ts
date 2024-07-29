@@ -32,9 +32,9 @@ export interface RetryRequest {
   count: number;
   waitTime: number;
 }
+
 export interface Result<T = any> {
-  code: string | number;
-  status: 'success' | 'error' | 'warning';
+  code: number;
   message: string;
   data: T;
 }

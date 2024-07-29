@@ -133,20 +133,17 @@
       }
 
       function queryData(showLoading = true) {
-        if (showLoading) loading.value = true;
+        if (showLoading) {
+          loading.value = true;
+        }
         getList({
           ...queryParams,
           pageNum: pageInfo.currentPage,
           pageSize: pageInfo.pageSize,
-        }).then((res) => {
+        }).then((resp) => {
           loading.value = false;
-          if (resp.code === ResultEnum.SUCCESS) {
-            pageInfo.total = Number(res.total);
-            projectDataSource.value = res.records;
-          } else {
-            pageInfo.total = 0;
-            projectDataSource.value = [];
-          }
+          pageInfo.total = Number(resp.total);
+          projectDataSource.value = resp.records || [];
         });
       }
 

@@ -62,11 +62,11 @@
                       queueLabel: value,
                     };
                     if (unref(isUpdate)) Object.assign(params, { id: model?.id });
-                    const res = await fetchCheckYarnQueue(params);
-                    if (res.data === 0) {
+                    const resp = await fetchCheckYarnQueue(params);
+                    if (resp === 0) {
                       return Promise.resolve();
                     } else {
-                      switch (res.status) {
+                      switch (resp) {
                         case 1:
                           return Promise.reject(t('setting.yarnQueue.checkResult.existedHint'));
                         case 2:

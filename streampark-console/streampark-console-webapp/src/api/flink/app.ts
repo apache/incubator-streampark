@@ -226,6 +226,6 @@ export function fetchName(data: { config: string }) {
   return defHttp.post({ url: APP_API.NAME, data });
 }
 
-export function fetchCheckStart(data): Promise<AxiosResponse<number>> {
-  return defHttp.post({ url: APP_API.CHECK_START, data }, { isReturnNativeResponse: true });
+export function fetchCheckStart(data): Promise<number> {
+  return defHttp.post({ url: APP_API.CHECK_START, data });
 }

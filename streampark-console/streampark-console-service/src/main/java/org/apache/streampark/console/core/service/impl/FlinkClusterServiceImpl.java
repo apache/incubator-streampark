@@ -99,8 +99,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public Response<Integer> check(FlinkCluster cluster) {
-        Response<Integer> result = new Response<>();
-        result.setData(0);
+        Response<Integer> result = Response.success(0);
 
         // 1) Check name if already exists
         Boolean existsByClusterName = this.existsByClusterName(cluster.getClusterName(), cluster.getId());

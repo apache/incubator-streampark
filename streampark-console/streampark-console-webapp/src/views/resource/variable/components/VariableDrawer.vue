@@ -72,14 +72,14 @@
         setValidateStatus('error');
         setHelp(t('flink.variable.form.regExp'));
       } else {
-        const resp = await fetchCheckVariableCode({
+        const { data } = await fetchCheckVariableCode({
           variableCode: value,
         });
-        if (resp.code === ResultEnum.ERROR) {
+        if (data.code === ResultEnum.ERROR) {
           setValidateStatus('error');
-          setHelp(resp.message);
+          setHelp(data.message);
           return Promise.reject();
-        } else if (resp.data) {
+        } else if (data.data) {
           setValidateStatus('success');
           setHelp('');
           return Promise.resolve();

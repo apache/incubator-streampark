@@ -115,7 +115,7 @@
     const resp = await fetchCheckStart({
       id: receiveData.application.id,
     });
-    if (resp.data.data === AppExistsEnum.IN_YARN) {
+    if (resp === AppExistsEnum.IN_YARN) {
       await fetchAbort({
         id: receiveData.application.id,
       });

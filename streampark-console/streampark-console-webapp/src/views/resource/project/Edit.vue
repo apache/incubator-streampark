@@ -57,7 +57,7 @@
   async function handleEditAction(values: Recordable) {
     try {
       handleCheckRebuild(values);
-      const resp = await updateProject({
+      const { data } = await updateProject({
         id: route.query.id,
         name: values.name,
         url: values.url,
@@ -72,11 +72,11 @@
         description: values.description,
         buildState: buildState.value,
       });
-      if (resp.data) {
+      if (data.data) {
         router.go(-1);
         createMessage.success('update successfully');
       } else {
-        createErrorSwal('Project update failed ..>﹏<.. <br><br>' + resp.message);
+        createErrorSwal('Project update failed ..>﹏<.. <br><br>' + data.message);
       }
     } catch (error: any) {
       if (error?.data?.message) {

@@ -238,7 +238,7 @@ export const useProject = () => {
   async function handleSubmit(values: Recordable, FetchAction: (v: Recordable) => Promise<void>) {
     submitLoading.value = true;
     try {
-      const res = await gitCheck({
+      const resp = await gitCheck({
         url: values.url,
         branches: values.branches,
         userName: values.userName || null,
@@ -246,9 +246,7 @@ export const useProject = () => {
         prvkeyPath: values.prvkeyPath || null,
         id: route?.query?.id || null,
       });
-      debugger;
-      console.log(res);
-      if (res === 0) {
+      if (resp === 0) {
         if (branchList.value.length === 0) {
           await handleBranches(values);
         }
@@ -263,7 +261,7 @@ export const useProject = () => {
         }
       } else {
         createErrorSwal(
-          res === 1
+          resp === 1
             ? t('flink.project.operationTips.notAuthorizedMessage')
             : t('flink.project.operationTips.authenticationErrorMessage'),
         );

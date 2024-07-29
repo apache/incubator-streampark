@@ -97,7 +97,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         senderEmail.setSsl(false);
         senderEmail.setPort(25);
         Response<?> result = settingService.checkEmail(senderEmail);
-        Assertions.assertEquals(result.getStatus(), 200);
+        Assertions.assertEquals(result.getData(), 200);
     }
 
     @Test
@@ -112,7 +112,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         dockerConfig.setNamespace("streampark");
 
         Response result = settingService.checkDocker(dockerConfig);
-        Assertions.assertEquals(result.getStatus(), 200);
+        Assertions.assertEquals(result.getData(), 200);
     }
 
     @Test

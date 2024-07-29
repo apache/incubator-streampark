@@ -47,6 +47,7 @@
   import { useDrawer } from '/@/components/Drawer';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
@@ -57,10 +58,11 @@
   const flinks = ref<FlinkEnv[]>([]);
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
+
   /* Edit button */
   async function handleEditFlink(item: FlinkEnv) {
-    const resp = await fetchValidity(item.id);
-    if (resp.data.code == 200) {
+    const { data } = await fetchValidity(item.id);
+    if (data.code == 200) {
       versionId.value = item.id;
       openFlinkModal(true, {
         versionId: item.id,
@@ -79,8 +81,8 @@
 
   /* delete flink home */
   async function handleDelete(item: FlinkEnv) {
-    const resp = await fetchFlinkEnvRemove(item.id);
-    if (resp.data.code == 200) {
+    const { data } = await fetchFlinkEnvRemove(item.id);
+    if (data.code === ResultEnum.SUCCESS) {
       await getFlinkSetting();
       createMessage.success('The current flink home is removed.');
     }

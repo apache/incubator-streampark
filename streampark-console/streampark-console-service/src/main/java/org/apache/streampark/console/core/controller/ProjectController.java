@@ -85,7 +85,7 @@ public class ProjectController {
     @PostMapping("build_log")
     @RequiresPermissions("project:build")
     @Permission(team = "#teamId")
-    public Response<Map<String, String>> buildLog(Long id, Long startOffset) {
+    public Response<Map<String, Object>> buildLog(Long id, Long startOffset) {
         return projectService.getBuildLog(id, startOffset);
     }
 

@@ -135,12 +135,12 @@
       async function handleReset(record: Recordable) {
         const hide = createMessage.loading('reseting');
         try {
-          const resp = await resetPassword({ username: record.username });
-          if (resp.data.code == 200) {
+          const { data } = await resetPassword({ username: record.username });
+          if (data.code == 200) {
             Swal.fire({
               icon: 'success',
               title: t('system.user.resetSucceeded'),
-              text: t('system.user.newPasswordTip') + resp.data.data,
+              text: t('system.user.newPasswordTip') + data.data,
             });
           }
         } catch (error) {

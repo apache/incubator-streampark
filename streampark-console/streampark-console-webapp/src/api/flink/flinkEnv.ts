@@ -94,8 +94,8 @@ export function fetchCheckEnv(data: {
   id: string | null;
   flinkName: string;
   flinkHome: string;
-}): Promise<AxiosResponse<Result<number>>> {
-  return defHttp.post({ url: FLINK_API.CHECK, data }, { isReturnNativeResponse: true });
+}): Promise<number> {
+  return defHttp.post({ url: FLINK_API.CHECK, data });
 }
 
 /**
