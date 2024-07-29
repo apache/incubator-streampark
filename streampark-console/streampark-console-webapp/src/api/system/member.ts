@@ -93,5 +93,5 @@ export function fetchCheckUserName(data: { username: string }): Promise<boolean>
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchMemberDelete(data: { id: string }): Promise<AxiosResponse<Result>> {
-  return defHttp.delete({ url: MEMBER_API.DELETE, data }, { isReturnNativeResponse: true });
+  return defHttp.delete({ url: MEMBER_API.DELETE, data }, { onlyData: false });
 }

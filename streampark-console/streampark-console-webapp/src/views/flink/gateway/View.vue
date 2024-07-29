@@ -104,8 +104,8 @@
       }
 
       async function handleDelete(record: Recordable) {
-        const res = await fetchGatewayDelete(record.id);
-        if (res) {
+        const resp = await fetchGatewayDelete(record.id);
+        if (resp) {
           createMessage.success(t('setting.flinkGateway.operation.deleteSuccess'));
           reload();
         } else {

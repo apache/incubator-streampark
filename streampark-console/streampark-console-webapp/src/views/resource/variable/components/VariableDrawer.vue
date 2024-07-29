@@ -49,7 +49,7 @@
     fetchVariableInfo,
   } from '/@/api/resource/variable';
   import { VariableListRecord } from '/@/api/resource/variable/model/variableModel';
-  import {ResultEnum} from "/@/enums/httpEnum";
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const emit = defineEmits(['success', 'register']);
 
@@ -72,14 +72,14 @@
         setValidateStatus('error');
         setHelp(t('flink.variable.form.regExp'));
       } else {
-        const { data } = await fetchCheckVariableCode({
+        const { data, code } = await fetchCheckVariableCode({
           variableCode: value,
         });
-        if (data.code === ResultEnum.ERROR) {
+        if (code === ResultEnum.ERROR) {
           setValidateStatus('error');
-          setHelp(data.message);
+          setHelp(message);
           return Promise.reject();
-        } else if (data.data) {
+        } else if (data) {
           setValidateStatus('success');
           setHelp('');
           return Promise.resolve();

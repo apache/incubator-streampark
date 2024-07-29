@@ -83,7 +83,6 @@
   import { useModal } from '/@/components/Modal';
   import LogModal from './components/LogModal.vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
-  import {ResultEnum} from "/@/enums/httpEnum";
 
   export default defineComponent({
     name: 'ProjectView',

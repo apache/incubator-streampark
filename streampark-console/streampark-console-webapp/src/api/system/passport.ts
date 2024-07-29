@@ -35,10 +35,7 @@ export function signin(
   data: LoginParams,
   mode: ErrorMessageMode = 'modal',
 ): Promise<AxiosResponse<Result<LoginResultModel>>> {
-  return defHttp.post(
-    { url: Api.SIGN_IN, data },
-    { isReturnNativeResponse: true, errorMessageMode: mode },
-  );
+  return defHttp.post({ url: Api.SIGN_IN, data }, { onlyData: false, errorMessageMode: mode });
 }
 
 export function signout() {

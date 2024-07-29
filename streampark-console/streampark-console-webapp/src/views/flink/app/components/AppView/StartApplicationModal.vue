@@ -135,13 +135,13 @@
       const savePointed = formValue.startSavePointed;
       const savePointPath = savePointed ? formValue['startSavePoint'] : null;
       handleReset();
-      const { data } = await fetchStart({
+      const { data, message } = await fetchStart({
         id: receiveData.application.id,
         savePointed,
         savePoint: savePointPath,
         allowNonRestored: formValue.allowNonRestoredState || false,
       });
-      if (data.data) {
+      if (data) {
         Swal.fire({
           icon: 'success',
           title: t('flink.app.operation.starting'),
@@ -162,7 +162,7 @@
           width: exceptionPropWidth(),
           html:
             '<pre class="api-exception"> startup failed, ' +
-            data.message.replaceAll(/\[StreamPark]/g, '') +
+            message.replaceAll(/\[StreamPark]/g, '') +
             '</pre>',
           showCancelButton: true,
           confirmButtonColor: '#55BDDDFF',

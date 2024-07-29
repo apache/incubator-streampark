@@ -127,25 +127,25 @@ export function fetchUpload(params): Promise<string> {
 
 /**
  * create
- * @param params Create parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data creation was successful message: error message
+ * @param data
  */
 export function fetchCreate(data: CreateParams): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: APP_API.CREATE, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: APP_API.CREATE, data }, { onlyData: false });
 }
 /**
  * update
- * @param params update parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data update is successful message: error message
+ * @param data
  */
-export function fetchUpdate(data): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: APP_API.UPDATE, data }, { isReturnNativeResponse: true });
+export function fetchUpdate(data): Promise<boolean> {
+  return defHttp.post({ url: APP_API.UPDATE, data });
 }
 
 /**
  * Get application information by id
- * @param params get parameters
  * @returns {Promise<AxiosResponse<Result>>} Whether the data get is successful message: error message
+ * @param data
  */
 export function fetchGet(data: { id: string }): Promise<any> {
   return defHttp.post({ url: APP_API.GET, data });
@@ -172,14 +172,11 @@ export function fetchAbort(data: { id: string }): Promise<boolean> {
 }
 
 export function fetchStart(data): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: APP_API.START, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: APP_API.START, data }, { onlyData: false });
 }
 
-export function fetchCopy(data): Promise<AxiosResponse<any>> {
-  return defHttp.post(
-    { url: APP_API.COPY, data },
-    { isReturnNativeResponse: true, errorMessageMode: 'none' },
-  );
+export function fetchCopy(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: APP_API.COPY, data }, { onlyData: false, errorMessageMode: 'none' });
 }
 /**
  * mapping
@@ -192,25 +189,22 @@ export function fetchMapping(data): Promise<boolean> {
 
 /**
  * log
- * @param params
  * @returns {Promise<AxiosResponse<any>>}
+ * @param data
  */
-export function fetchK8sStartLog(data): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: APP_API.K8S_LOG, data }, { isReturnNativeResponse: true });
+export function fetchK8sStartLog(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: APP_API.K8S_LOG, data }, { onlyData: false });
 }
 /**
  * SavepointPath
- * @param {Object} data app Id
+ * @param {Object} data appId
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchCheckSavepointPath(data: {
   id?: string;
   savePoint?: string;
 }): Promise<AxiosResponse<Result>> {
-  return defHttp.post(
-    { url: APP_API.CHECK_SAVEPOINT_PATH, data },
-    { isReturnNativeResponse: true },
-  );
+  return defHttp.post({ url: APP_API.CHECK_SAVEPOINT_PATH, data }, { onlyData: false });
 }
 
 /**

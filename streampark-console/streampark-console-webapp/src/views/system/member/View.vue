@@ -78,6 +78,7 @@
   import { getRoleListByPage } from '/@/api/base/system';
   import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
   import Icon from '/@/components/Icon';
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
@@ -154,8 +155,8 @@
 
   /* Delete members */
   async function handleDelete(record: Recordable) {
-    const { data } = await fetchMemberDelete({ id: record.id });
-    if (data.status === 'success') {
+    const { code } = await fetchMemberDelete({ id: record.id });
+    if (code === ResultEnum.SUCCESS) {
       createMessage.success(t('system.member.deleteMember') + t('system.member.success'));
       reload();
     } else {

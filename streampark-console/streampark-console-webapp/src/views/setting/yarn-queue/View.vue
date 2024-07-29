@@ -66,6 +66,7 @@
   import { fetchYarnQueueList, fetchYarnQueueDelete } from '/@/api/setting/yarnQueue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   export default defineComponent({
     name: 'YarnQueue',
@@ -111,12 +112,12 @@
 
       /* Delete the organization */
       async function handleDelete(record: Recordable) {
-        const { data } = await fetchYarnQueueDelete({ id: record.id });
-        if (data.status === 'success') {
+        const { code } = await fetchYarnQueueDelete({ id: record.id });
+        if (code === ResultEnum.SUCCESS) {
           createMessage.success(
             `${t('setting.yarnQueue.deleteYarnQueue')} ${t('setting.yarnQueue.success')}`,
           );
-          reload();
+          await reload();
         } else {
           createMessage.error(`${t('setting.yarnQueue.deleteYarnQueue')} ${t('common.failed')}`);
         }

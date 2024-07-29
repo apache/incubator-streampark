@@ -6,10 +6,10 @@ export interface RequestOptions {
   // Format request parameter time
   formatDate?: boolean;
   // Whether to process the request result
-  isTransformResponse?: boolean;
+  onlyData?: boolean;
   // Whether to return native response headers
   // For example: use this attribute when you need to get the response headers
-  isReturnNativeResponse?: boolean;
+  nativeResponse?: boolean;
   // Whether to join url
   joinPrefix?: boolean;
   // Interface address, use the default apiUrl if you leave it blank

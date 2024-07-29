@@ -69,7 +69,7 @@ export function fetchBranches(data: Recordable): Promise<string[]> {
 }
 
 export function createProject(data: Recordable): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: Api.CREATE, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: Api.CREATE, data }, { onlyData: false });
 }
 
 export function getDetail(data: Recordable) {
@@ -79,8 +79,8 @@ export function getDetail(data: Recordable) {
   });
 }
 
-export function updateProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({ url: Api.UPDATE, data }, { isReturnNativeResponse: true });
+export function updateProject(data: Recordable): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: Api.UPDATE, data }, { onlyData: false });
 }
 
 export function buildProject(data: Recordable): Promise<boolean> {
@@ -90,8 +90,8 @@ export function buildProject(data: Recordable): Promise<boolean> {
   });
 }
 
-export function buildLog(data: Recordable): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: Api.BUILD_LOG, data }, { isReturnNativeResponse: true });
+export function buildLog(data: Recordable): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: Api.BUILD_LOG, data }, { onlyData: false });
 }
 
 export function deleteProject(data: Recordable): Promise<boolean> {

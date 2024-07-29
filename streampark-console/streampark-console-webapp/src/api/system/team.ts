@@ -58,8 +58,5 @@ export function fetchTeamUpdate(data: TeamParam): Promise<boolean | undefined> {
  * @param params
  */
 export function fetchTeamDelete(params: { id: string }): Promise<AxiosResponse<Result>> {
-  return defHttp.delete(
-    { url: Api.DELETE, params },
-    { isReturnNativeResponse: true, errorMessageMode: 'none' },
-  );
+  return defHttp.delete({ url: Api.DELETE, params }, { onlyData: false, errorMessageMode: 'none' });
 }

@@ -130,14 +130,14 @@
       changeOkLoading(true);
       const formValue = await validate();
       if (externalLinkId.value) {
-        const { data } = await fetchExternalLinkUpdate({
+        const { code, message } = await fetchExternalLinkUpdate({
           id: externalLinkId.value,
           badgeLabel: formValue.badgeLabel,
           badgeColor: formValue.badgeColor,
           badgeName: formValue.badgeName,
           linkUrl: formValue.linkUrl,
         });
-        if (data.code === ResultEnum.SUCCESS) {
+        if (code === ResultEnum.SUCCESS) {
           Swal.fire({
             icon: 'success',
             title: t('setting.externalLink.operateMessage.updateLinkSuccessful'),
@@ -148,12 +148,12 @@
           Swal.fire({
             icon: 'error',
             title: t('setting.externalLink.operateMessage.updateLinkFailed'),
-            text: data['message'].replaceAll(/\[StreamPark]/g, ''),
+            text: message.replaceAll(/\[StreamPark]/g, ''),
           });
         }
       } else {
-        const { data } = await fetchExternalLinkCreate(formValue);
-        if (data.code === ResultEnum.SUCCESS) {
+        const { code, message } = await fetchExternalLinkCreate(formValue);
+        if (code === ResultEnum.SUCCESS) {
           Swal.fire({
             icon: 'success',
             title: t('setting.externalLink.operateMessage.createLinkSuccessful'),
@@ -163,7 +163,7 @@
         } else {
           Swal.fire({
             title: t('setting.externalLink.operateMessage.createLinkFailed'),
-            text: data['message'].replaceAll(/\[StreamPark]/g, ''),
+            text: message.replaceAll(/\[StreamPark]/g, ''),
             icon: 'error',
           });
         }

@@ -67,7 +67,7 @@ export function fetchUpdateVariable(data: VariableParam): Promise<boolean | unde
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchVariableDelete(data: VariableDeleteParam): Promise<AxiosResponse<Result>> {
-  return defHttp.delete({ url: VARIABLE_API.DELETE, data }, { isReturnNativeResponse: true });
+  return defHttp.delete({ url: VARIABLE_API.DELETE, data }, { onlyData: false });
 }
 
 /**
@@ -78,7 +78,7 @@ export function fetchVariableDelete(data: VariableDeleteParam): Promise<AxiosRes
 export function fetchCheckVariableCode(data: {
   variableCode: string;
 }): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: VARIABLE_API.CHECK_CODE, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: VARIABLE_API.CHECK_CODE, data }, { onlyData: false });
 }
 
 /**

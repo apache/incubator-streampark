@@ -29,17 +29,17 @@ const transform: AxiosTransform = {
   /**
    * @description: Process request data. If the data is not in the expected format, an error can be thrown directly
    */
-  transformRequestHook: (res: AxiosResponse<Result>, options: RequestOptions) => {
+  transformRequestHook: (resp: AxiosResponse<Result>, options: RequestOptions) => {
     const { t } = useI18n();
-    const { isTransformResponse, isReturnNativeResponse } = options;
+    const { onlyData, nativeResponse } = options;
     //Whether to return native response headers This property is used when you need to get a response header
-    if (isReturnNativeResponse) {
-      return res;
+    if (nativeResponse) {
+      return resp;
     }
-    if (!isTransformResponse) {
-      return res.data;
+    if (!onlyData) {
+      return resp.data;
     }
-    const { data } = res;
+    const { data } = resp;
     if (!data) {
       // return '[HTTP] Request has no return value';
       throw new Error(t('sys.api.apiRequestFailed'));
@@ -218,9 +218,9 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
           // By default, prefix is added to the URL
           joinPrefix: true,
           // Whether to return native response headers This property is used when you need to get a response header
-          isReturnNativeResponse: false,
+          nativeResponse: false,
           // The returned data needs to be processed
-          isTransformResponse: true,
+          onlyData: true,
           // Add parameters to url when posting a request
           joinParamsToUrl: false,
           // Format the submission parameter time

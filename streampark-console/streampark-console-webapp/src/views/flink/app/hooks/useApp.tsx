@@ -25,6 +25,7 @@ import { SvgIcon } from '/@/components/Icon';
 import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
+import { ResultEnum } from '/@/enums/httpEnum';
 
 export const useFlinkApplication = (openStartModal: Fn) => {
   const { t } = useI18n();
@@ -58,14 +59,14 @@ export const useFlinkApplication = (openStartModal: Fn) => {
 
   /* Release App */
   async function handleReleaseApp(app: Recordable, force: boolean) {
-    const { data } = await fetchBuild({
+    const { data, message: msg } = await fetchBuild({
       appId: app.id,
       forceBuild: force,
     });
-    if (!data.data) {
-      let message = data.message || '';
+    if (!data) {
+      let message = msg || '';
       if (!message) {
-        message = t('flink.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
+        message = t('flink.app.release.releaseFail') + msg.replaceAll(/\[StreamPark]/g, '');
       }
       Swal.fire('Failed', message, 'error');
     } else {
@@ -258,15 +259,13 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         //2) check name
         const params = { jobName: copyAppName };
         const resp = await fetchCheckName(params);
-        const code = parseInt(resp);
-        if (code === 0) {
+        if (resp === 0) {
           try {
-            const { data } = await fetchCopy({
+            const { code } = await fetchCopy({
               id: item.id,
               jobName: copyAppName,
             });
-            const status = data.status || 'error';
-            if (status === 'success') {
+            if (code === ResultEnum.SUCCESS) {
               Swal.fire({
                 icon: 'success',
                 title: 'copy successful',
@@ -277,19 +276,19 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             if (error?.response?.data?.message) {
               createMessage.error(
                 error.response.data.message
-                  .replaceAll(/\[StreamPark\]/g, '')
-                  .replaceAll(/\[StreamPark\]/g, '') || 'copy failed',
+                  .replaceAll(/\[StreamPark]/g, '')
+                  .replaceAll(/\[StreamPark]/g, '') || 'copy failed',
               );
             }
             return Promise.reject('copy application error');
           }
         } else {
           validateStatus.value = 'error';
-          if (code === 1) {
+          if (resp === 1) {
             help = t('flink.app.addAppTips.appNameNotUniqueMessage');
-          } else if (code === 2) {
+          } else if (resp === 2) {
             help = t('flink.app.addAppTips.appNameExistsInYarnMessage');
-          } else if (code === 3) {
+          } else if (resp === 3) {
             help = t('flink.app.addAppTips.appNameExistsInK8sMessage');
           } else {
             help = t('flink.app.addAppTips.appNameNotValid');

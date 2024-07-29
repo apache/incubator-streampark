@@ -35,7 +35,7 @@
   import { format } from '../FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFullContent } from '/@/hooks/event/useFullscreen';
-  import {ResultEnum} from "/@/enums/httpEnum";
+  import { ResultEnum } from '/@/enums/httpEnum';
   const ButtonGroup = Button.Group;
   const { t } = useI18n();
 
@@ -81,11 +81,11 @@
       return false;
     } else {
       try {
-        const { data } = await fetchFlinkSqlVerify({
+        const { data, code } = await fetchFlinkSqlVerify({
           sql: props.value,
           versionId: props.versionId,
         });
-        if (data.code === ResultEnum.SUCCESS) {
+        if (code === ResultEnum.SUCCESS) {
           verifyRes.verified = true;
           verifyRes.errorMsg = '';
           syntaxError();

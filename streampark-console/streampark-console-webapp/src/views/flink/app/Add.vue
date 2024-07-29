@@ -293,7 +293,7 @@
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
     Object.assign(param, { socketId });
-    const { data } = await fetchCreate(param as CreateParams);
+    const { data, message } = await fetchCreate(param as CreateParams);
     submitLoading.value = false;
     if (data.data) {
       go('/flink/app');

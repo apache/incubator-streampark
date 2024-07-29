@@ -29,6 +29,7 @@
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';
   import { useTimeoutFn } from '@vueuse/shared';
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const { t } = useI18n();
   const logTime = ref<string>('');
@@ -63,14 +64,13 @@
   async function refreshLog() {
     try {
       getLogLoading.value = true;
-      const { data } = await fetchK8sStartLog({
+      const { data, code } = await fetchK8sStartLog({
         id: app.id,
         offset: offset,
         limit: 100,
       });
-      const status = data.status || 'error';
-      if (status === 'success') {
-        if (data.data) {
+      if (code === ResultEnum.SUCCESS) {
+        if (data.data != '') {
           logContent += data.data;
           setContent(logContent);
           handleRevealLine();

@@ -66,8 +66,8 @@
         Object.assign(params, {
           id: cluster.id,
         });
-        const { data } = await fetchCheckCluster(params);
-        if (data.data === 0) {
+        const { data, message } = await fetchCheckCluster(params);
+        if (data === 0) {
           await fetchUpdateCluster(params);
           Swal.fire({
             icon: 'success',
@@ -79,7 +79,7 @@
           });
           go('/flink/cluster');
         } else {
-          Swal.fire('Failed', data.message, 'error');
+          Swal.fire('Failed', message, 'error');
         }
       }
     } catch (error) {

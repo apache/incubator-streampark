@@ -66,8 +66,8 @@ export function addUser(data: Recordable) {
   return defHttp.post({ url: Api.UserAdd, data });
 }
 
-export function resetPassword(data): Promise<AxiosResponse<Result<string>>> {
-  return defHttp.put({ url: Api.ResetPassword, data }, { isReturnNativeResponse: true });
+export function resetPassword(data): Promise<AxiosResponse<Result>> {
+  return defHttp.put({ url: Api.ResetPassword, data }, { onlyData: false });
 }
 
 export function checkUserName(data) {

@@ -43,25 +43,22 @@ export function fetchFlinkCluster() {
  * flink cluster start
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchClusterStart(id: string): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: FLINK_API.START, data: { id } }, { isReturnNativeResponse: true });
+export function fetchClusterStart(id: string): Promise<any> {
+  return defHttp.post({ url: FLINK_API.START, data: { id } });
 }
 /**
  * flink cluster remove
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchClusterRemove(id: string): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: FLINK_API.DELETE, data: { id } }, { isReturnNativeResponse: true });
+export function fetchClusterRemove(id: string): Promise<any> {
+  return defHttp.post({ url: FLINK_API.DELETE, data: { id } });
 }
 /**
  * flink cluster shutdown
  * @returns  {Promise<AxiosResponse<Result>>}
  */
-export function fetchClusterShutdown(id: string): Promise<AxiosResponse<Result>> {
-  return defHttp.post<AxiosResponse<Result>>(
-    { url: FLINK_API.SHUTDOWN, data: { id } },
-    { isReturnNativeResponse: true },
-  );
+export function fetchClusterShutdown(id: string): Promise<any> {
+  return defHttp.post<AxiosResponse<Result>>({ url: FLINK_API.SHUTDOWN, data: { id } });
 }
 /**
  * flink cluster shutdown
@@ -74,11 +71,14 @@ export function fetchRemoteURL(id: string): Promise<string> {
   });
 }
 
-export function fetchCheckCluster(data: Recordable) {
-  return defHttp.post({
-    url: FLINK_API.CHECK,
-    data,
-  }, { isReturnNativeResponse: true });
+export function fetchCheckCluster(data: Recordable): Promise<AxiosResponse<Result>> {
+  return defHttp.post(
+    {
+      url: FLINK_API.CHECK,
+      data,
+    },
+    { onlyData: false },
+  );
 }
 
 export function fetchCreateCluster(data: Recordable) {

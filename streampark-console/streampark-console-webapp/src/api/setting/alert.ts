@@ -45,12 +45,10 @@ export function fetchSendAlert(data: { id: string }): Promise<boolean> {
 }
 /**
  * Delete alert settings
- * @returns {Promise<boolean|undefined>}
+ * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchAlertDelete(data: {
-  id: string;
-}): Promise<AxiosResponse<Result<boolean | undefined>>> {
-  return defHttp.delete({ url: ALERT_APi.DELETE, data }, { isReturnNativeResponse: true });
+export function fetchAlertDelete(data: { id: string }): Promise<AxiosResponse<Result>> {
+  return defHttp.delete({ url: ALERT_APi.DELETE, data }, { onlyData: false });
 }
 /**
  * Alarm name test
@@ -65,14 +63,14 @@ export function fetchExistsAlert(data: { alertName: string }): Promise<boolean> 
  * @param {AlertCreate} data
  * @returns {Promise<AxiosResponse<Result<boolean>>>}
  */
-export function fetchAlertAdd(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.postJson({ url: ALERT_APi.ADD, data }, { isReturnNativeResponse: true });
+export function fetchAlertAdd(data: AlertCreate): Promise<AxiosResponse<Result>> {
+  return defHttp.postJson({ url: ALERT_APi.ADD, data }, { onlyData: false });
 }
 /**
  * Update alert settings
- * @param {AlertCreate} params
  * @returns {Promise<boolean>}
+ * @param data
  */
-export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { isReturnNativeResponse: true });
+export function fetchAlertUpdate(data: AlertCreate): Promise<AxiosResponse<Result>> {
+  return defHttp.postJson({ url: ALERT_APi.UPDATE, data }, { onlyData: false });
 }

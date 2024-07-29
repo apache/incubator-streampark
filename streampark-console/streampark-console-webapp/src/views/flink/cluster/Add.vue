@@ -49,8 +49,8 @@
       changeLoading(true);
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
-        const { data } = await fetchCheckCluster(params);
-        if (data.data === 0) {
+        const { data, message } = await fetchCheckCluster(params);
+        if (data === 0) {
           const resp = await fetchCreateCluster(params);
           if (resp) {
             await Swal.fire({
@@ -70,7 +70,7 @@
             );
           }
         } else {
-          Swal.fire('Failed', data.message, 'error');
+          Swal.fire('Failed', message, 'error');
         }
       }
     } catch (error) {

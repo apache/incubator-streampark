@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
+import { Result } from '/#/axios';
 
 enum FLINK_SQL_API {
   VERIFY = '/flink/sql/verify',
@@ -25,8 +25,8 @@ enum FLINK_SQL_API {
   HISTORY = '/flink/sql/history',
 }
 
-export function fetchFlinkSqlVerify(data): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: FLINK_SQL_API.VERIFY, data }, { isReturnNativeResponse: true });
+export function fetchFlinkSqlVerify(data): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: FLINK_SQL_API.VERIFY, data }, { onlyData: false });
 }
 
 export function fetchFlinkSql(data) {

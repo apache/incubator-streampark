@@ -135,28 +135,28 @@
       let success = false;
       // create
       if (versionId.value == null) {
-        const { data } = await fetchFlinkCreate(formValue);
-        if (data.data) {
+        const { data, message: msg } = await fetchFlinkCreate(formValue);
+        if (data) {
           success = true;
           message = formValue.flinkName.concat(
             t('setting.flinkHome.operateMessage.createFlinkHomeSuccessful'),
           );
         } else {
-          message = data.message;
+          message = msg;
         }
       } else {
         // update
-        const { data } = await fetchFlinkUpdate({
+        const { data, message: msg } = await fetchFlinkUpdate({
           id: versionId.value,
           ...formValue,
         });
-        if (data.data) {
+        if (data) {
           message = formValue.flinkName.concat(
             t('setting.flinkHome.operateMessage.updateFlinkHomeSuccessful'),
           );
           success = true;
         } else {
-          message = data.message;
+          message = msg;
         }
       }
       if (success) {

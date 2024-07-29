@@ -28,7 +28,7 @@
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';
   import { useTimeoutFn } from '@vueuse/shared';
-  import {ResultEnum} from "/@/enums/httpEnum";
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const { t } = useI18n();
 
@@ -59,20 +59,19 @@
 
   async function refreshLog() {
     try {
-      const { data } = await buildLog({
+      const { data, code } = await buildLog({
         id: project.id,
         startOffset,
       });
-      if (data.code === ResultEnum.SUCCESS) {
-        const resp = data.data;
-        if (resp.readFinished == false) {
+      if (code === ResultEnum.SUCCESS) {
+        if (data.readFinished == false) {
           showRefresh.value = true;
           start();
         } else {
           showRefresh.value = false;
         }
         logTime.value = formatToDateTime(new Date());
-        await setContent(resp.fileContent);
+        await setContent(data.fileContent);
         handleRevealLine();
       }
     } catch (error) {

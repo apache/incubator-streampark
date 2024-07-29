@@ -31,7 +31,7 @@
   import { settingFormSchema } from './config';
   import { SvgIcon } from '/@/components/Icon';
   import Swal from 'sweetalert2';
-  import {ResultEnum} from "/@/enums/httpEnum";
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const emit = defineEmits(['success', 'register']);
   const { t } = useI18n();

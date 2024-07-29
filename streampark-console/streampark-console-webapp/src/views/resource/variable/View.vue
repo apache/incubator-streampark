@@ -43,7 +43,8 @@
                 icon: 'icon-park-outline:mind-mapping',
                 tooltip: t('flink.variable.table.depend'),
                 auth: 'variable:depend_apps',
-                onClick: () => router.push('/resource/variable/depend_apps?id=' + record.variableCode),
+                onClick: () =>
+                  router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
                 icon: 'ant-design:delete-outlined',
@@ -82,6 +83,7 @@
   import { fetchVariableDelete, fetchVariableList } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
+  import { ResultEnum } from '/@/enums/httpEnum';
 
   const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
@@ -139,13 +141,13 @@
   }
   /* Delete the organization */
   async function handleDelete(record: Recordable) {
-    const { data } = await fetchVariableDelete({
+    const { code } = await fetchVariableDelete({
       id: record.id,
       teamId: record.teamId,
       variableCode: record.variableCode,
       variableValue: record.variableValue,
     });
-    if (data.status === 'success') {
+    if (code === ResultEnum.SUCCESS) {
       createMessage.success(t('flink.variable.deleteVariable') + t('flink.variable.success'));
       reload();
     } else {

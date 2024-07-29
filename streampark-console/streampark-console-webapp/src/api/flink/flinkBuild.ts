@@ -16,6 +16,7 @@
  */
 import { AxiosResponse } from 'axios';
 import { defHttp } from '/@/utils/http/axios';
+import { Result } from '/#/axios';
 
 enum BUILD_API {
   BUILD = '/flink/pipe/build',
@@ -25,8 +26,8 @@ enum BUILD_API {
 export function fetchBuild(data: {
   appId: string;
   forceBuild: boolean;
-}): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: BUILD_API.BUILD, data }, { isReturnNativeResponse: true });
+}): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: BUILD_API.BUILD, data }, { onlyData: false });
 }
 /**
  * Get build details

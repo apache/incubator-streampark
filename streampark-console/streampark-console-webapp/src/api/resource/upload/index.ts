@@ -68,7 +68,7 @@ export function fetchUpdateResource(data: ResourceParam): Promise<boolean | unde
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchResourceDelete(data: ResourceDeleteParam): Promise<AxiosResponse<Result>> {
-  return defHttp.delete({ url: RESOURCE_API.DELETE, data }, { isReturnNativeResponse: true });
+  return defHttp.delete({ url: RESOURCE_API.DELETE, data }, { onlyData: false });
 }
 
 /**

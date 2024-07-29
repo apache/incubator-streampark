@@ -75,13 +75,13 @@ export function fetchFlinkInfo(id: string): Promise<FlinkEnv> {
  * @param {String} id
  * @returns {Promise<Boolean>}
  */
-export function fetchFlinkEnvRemove(id: string): Promise<AxiosResponse<Result<boolean>>> {
+export function fetchFlinkEnvRemove(id: string): Promise<AxiosResponse<Result>> {
   return defHttp.post(
     {
       url: FLINK_API.DELETE,
       data: { id },
     },
-    { isReturnNativeResponse: true },
+    { onlyData: false },
   );
 }
 
@@ -103,14 +103,11 @@ export function fetchCheckEnv(data: {
  * @param {String} id
  * @returns {Promise<Boolean>}
  */
-export function fetchValidity(id: string): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post(
-    {
-      url: FLINK_API.VALIDITY,
-      data: { id },
-    },
-    { isReturnNativeResponse: true },
-  );
+export function fetchValidity(id: string): Promise<boolean> {
+  return defHttp.post({
+    url: FLINK_API.VALIDITY,
+    data: { id },
+  });
 }
 
 /**
@@ -119,7 +116,7 @@ export function fetchValidity(id: string): Promise<AxiosResponse<Result<boolean>
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchFlinkCreate(data: FlinkCreate): Promise<AxiosResponse<Result>> {
-  return defHttp.post({ url: FLINK_API.CREATE, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: FLINK_API.CREATE, data }, { onlyData: false });
 }
 
 /**
@@ -128,10 +125,7 @@ export function fetchFlinkCreate(data: FlinkCreate): Promise<AxiosResponse<Resul
  * @param data
  */
 export function fetchFlinkUpdate(data: FlinkCreate): Promise<AxiosResponse<Result>> {
-  return defHttp.post<AxiosResponse<Result>>(
-    { url: FLINK_API.UPDATE, data },
-    { isReturnNativeResponse: true },
-  );
+  return defHttp.post({ url: FLINK_API.UPDATE, data }, { onlyData: false });
 }
 
 /**

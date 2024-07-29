@@ -49,7 +49,7 @@ export function fetchYarnQueueDelete(data: Recordable): Promise<AxiosResponse<Re
       url: YARN_QUEUE_API.DELETE,
       data,
     },
-    { isReturnNativeResponse: true },
+    { onlyData: false },
   );
 }
 

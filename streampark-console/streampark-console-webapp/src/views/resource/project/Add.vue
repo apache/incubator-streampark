@@ -38,7 +38,7 @@
   /* Create project */
   async function handleCreateAction(values: Recordable) {
     try {
-      const { data } = await createProject({
+      const { data, message } = await createProject({
         name: values.name,
         url: values.url,
         repository: values.repository,
@@ -51,11 +51,11 @@
         buildArgs: values.buildArgs,
         description: values.description,
       });
-      if (data.data) {
+      if (data) {
         createMessage.success('created successfully');
         router.go(-1);
       } else {
-        Swal.fire('Failed', 'Project save failed ..>﹏<.. <br><br>' + data.message, 'error');
+        Swal.fire('Failed', 'Project save failed ..>﹏<.. <br><br>' + message, 'error');
       }
     } catch (error: any) {
       if (error?.data?.message) {

@@ -39,10 +39,8 @@ export function fetchExternalLink(): Promise<ExternalLink[]> {
  * @param {ExternalLink} data
  * @returns {Promise<AxiosResponse<Result<ExternalLink>>>}
  */
-export function fetchExternalLinkCreate(
-  data: ExternalLink,
-): Promise<AxiosResponse<Result<ExternalLink>>> {
-  return defHttp.post({ url: EXTERNAL_LINK_API.CREATE, data }, { isReturnNativeResponse: true });
+export function fetchExternalLinkCreate(data: ExternalLink): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: EXTERNAL_LINK_API.CREATE, data }, { onlyData: false });
 }
 
 /**
@@ -50,10 +48,8 @@ export function fetchExternalLinkCreate(
  * @param {ExternalLink} data
  * @returns {Promise<AxiosResponse<Result<ExternalLink>>>}
  */
-export function fetchExternalLinkUpdate(
-  data: ExternalLink,
-): Promise<AxiosResponse<Result<ExternalLink>>> {
-  return defHttp.post({ url: EXTERNAL_LINK_API.UPDATE, data }, { isReturnNativeResponse: true });
+export function fetchExternalLinkUpdate(data: ExternalLink): Promise<AxiosResponse<Result>> {
+  return defHttp.post({ url: EXTERNAL_LINK_API.UPDATE, data }, { onlyData: true });
 }
 
 /**
@@ -61,14 +57,11 @@ export function fetchExternalLinkUpdate(
  * @returns {Promise<AxiosResponse<Result>>}
  */
 export function fetchExternalLinkDelete(id: string): Promise<AxiosResponse<Result>> {
-  return defHttp.delete(
-    { url: EXTERNAL_LINK_API.DELETE, data: { id } },
-    { isReturnNativeResponse: true },
-  );
+  return defHttp.delete({ url: EXTERNAL_LINK_API.DELETE, data: { id } });
 }
 
 export function fetchAppExternalLink(data: {
   appId: string;
 }): Promise<AxiosResponse<Result<ExternalLink[]>>> {
-  return defHttp.post({ url: EXTERNAL_LINK_API.RENDER, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: EXTERNAL_LINK_API.RENDER, data });
 }

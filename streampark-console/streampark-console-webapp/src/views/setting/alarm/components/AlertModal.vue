@@ -147,11 +147,11 @@
             'error',
           );
         } else {
-          const { data } = await fetchAlertAdd(param);
-          if (!data.data) {
+          const { data, message } = await fetchAlertAdd(param);
+          if (!data) {
             Swal.fire(
               t('setting.alarm.fail.title'),
-              data.message.replaceAll(/\[StreamPark]/g, ''),
+              message.replaceAll(/\[StreamPark]/g, ''),
               'error',
             );
           } else {
@@ -165,11 +165,11 @@
         }
       } else {
         //update
-        const { data } = await fetchAlertUpdate(param);
-        if (!data.data) {
+        const { data, message } = await fetchAlertUpdate(param);
+        if (!data) {
           Swal.fire(
             t('setting.alarm.fail.update'),
-            data.message.replaceAll(/\[StreamPark]/g, ''),
+            message.replaceAll(/\[StreamPark]/g, ''),
             'error',
           );
         } else {

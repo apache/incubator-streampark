@@ -16,7 +16,6 @@
  */
 
 import { defHttp } from '/@/utils/http/axios';
-import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
 
 enum GATEWAY_API {
@@ -42,11 +41,8 @@ export function fetchGatewayList() {
  * fetch gateway remove result.
  * @returns {Promise<AxiosResponse<Result>>}
  */
-export function fetchGatewayDelete(id: string): Promise<AxiosResponse<Result>> {
-  return defHttp.delete(
-    { url: GATEWAY_API.DELETE, data: { id } },
-    { isReturnNativeResponse: true },
-  );
+export function fetchGatewayDelete(id: string): Promise<AxiosResponse<boolean>> {
+  return defHttp.delete({ url: GATEWAY_API.DELETE, data: { id } });
 }
 
 export function fetchGatewayCreate(data: Recordable) {
