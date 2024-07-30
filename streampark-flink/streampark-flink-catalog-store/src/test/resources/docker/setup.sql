@@ -32,7 +32,7 @@ USE flink-test;
 create table t_mysql_catalog (
    `id` bigint NOT NULL AUTO_INCREMENT,
    `catalog_name` varchar(255) NOT NULL,
-   `configuration` JSON,
+   `configuration` text,
    `create_time` datetime DEFAULT NULL,
    `update_time` datetime DEFAULT NULL,
    PRIMARY KEY (`id`) USING BTREE,

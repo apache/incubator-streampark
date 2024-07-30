@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark;
+package org.apache.streampark.catalog;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.type.TypeReference;

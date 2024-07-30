@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark;
+package org.apache.streampark.catalog;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;

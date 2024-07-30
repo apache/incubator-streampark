@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.connections;
+package org.apache.streampark.catalog.connections;
 
 import org.apache.flink.annotation.PublicEvolving;
 

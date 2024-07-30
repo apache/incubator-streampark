@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.mysql;
+package org.apache.streampark.catalog.mysql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

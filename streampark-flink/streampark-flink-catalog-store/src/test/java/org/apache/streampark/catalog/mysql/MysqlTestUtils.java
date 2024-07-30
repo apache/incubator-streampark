@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.mysql;
+package org.apache.streampark.catalog.mysql;
 
 import java.util.ArrayList;
 import java.util.Iterator;

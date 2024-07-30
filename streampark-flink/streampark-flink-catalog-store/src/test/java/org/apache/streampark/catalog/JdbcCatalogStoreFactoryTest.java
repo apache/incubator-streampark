@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.streampark;
+package org.apache.streampark.catalog;
 
-import org.apache.streampark.mysql.MysqlBaseITCASE;
+import org.apache.streampark.catalog.mysql.MysqlBaseITCASE;
 
 import org.apache.flink.table.catalog.CatalogStore;
 import org.apache.flink.table.factories.CatalogStoreFactory;

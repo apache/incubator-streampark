@@ -15,34 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark;
+package org.apache.streampark.catalog;
 
-import org.apache.streampark.connections.JdbcConnectionOptions;
-import org.apache.streampark.connections.JdbcConnectionProvider;
-import org.apache.streampark.connections.SimpleJdbcConnectionProvider;
+import org.apache.streampark.catalog.connections.JdbcConnectionOptions;
+import org.apache.streampark.catalog.connections.JdbcConnectionProvider;
+import org.apache.streampark.catalog.connections.SimpleJdbcConnectionProvider;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.table.catalog.CatalogStore;
-import org.apache.flink.table.catalog.exceptions.CatalogException;
 import org.apache.flink.table.factories.CatalogStoreFactory;
 import org.apache.flink.table.factories.FactoryUtil;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.apache.flink.table.factories.FactoryUtil.createCatalogStoreFactoryHelper;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.DRIVER;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.IDENTIFIER;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.MAX_RETRY_TIMEOUT;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.PASSWORD;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.TABLE_NAME;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.URL;
-import static org.apache.streampark.JdbcCatalogStoreFactoryOptions.USERNAME;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.DRIVER;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.IDENTIFIER;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.MAX_RETRY_TIMEOUT;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.PASSWORD;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.TABLE_NAME;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.URL;
+import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.USERNAME;
 
 /**
  *  Catalog Store Factory for Jdbc.
@@ -58,7 +57,7 @@ public class JdbcCatalogStoreFactory implements CatalogStoreFactory {
     }
 
     @Override
-    public void open(Context context) throws CatalogException {
+    public void open(Context context) {
         FactoryUtil.FactoryHelper<CatalogStoreFactory> factoryHelper =
             createCatalogStoreFactoryHelper(this, context);
         factoryHelper.validate();
@@ -75,7 +74,7 @@ public class JdbcCatalogStoreFactory implements CatalogStoreFactory {
         this.jdbcConnectionProvider = new SimpleJdbcConnectionProvider(jdbcConnectionOptions);
     }
     @Override
-    public void close() throws CatalogException {
+    public void close() {
         this.jdbcConnectionProvider.closeConnection();
     }
 

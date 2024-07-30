@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.streampark;
+package org.apache.streampark.catalog;
 
-import org.apache.streampark.connections.JdbcConnectionOptions;
-import org.apache.streampark.connections.JdbcConnectionProvider;
-import org.apache.streampark.connections.SimpleJdbcConnectionProvider;
-import org.apache.streampark.mysql.MysqlBaseITCASE;
+import org.apache.streampark.catalog.connections.JdbcConnectionOptions;
+import org.apache.streampark.catalog.connections.JdbcConnectionProvider;
+import org.apache.streampark.catalog.connections.SimpleJdbcConnectionProvider;
+import org.apache.streampark.catalog.mysql.MysqlBaseITCASE;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.table.catalog.CatalogDescriptor;
