@@ -28,7 +28,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Status setting service */
+/** System setting service */
 public interface SettingService extends IService<Setting> {
 
     Map<String, Setting> SETTINGS = new ConcurrentHashMap<>();
