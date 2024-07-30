@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import org.apache.streampark.console.base.spi.Status;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

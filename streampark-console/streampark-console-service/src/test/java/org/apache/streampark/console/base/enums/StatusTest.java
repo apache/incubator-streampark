@@ -17,8 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import org.apache.streampark.console.base.spi.Status;
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
