@@ -37,7 +37,7 @@ import javax.naming.ldap.LdapContext;
 
 import java.util.Properties;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_LDAP_NOT_ENABLE;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_LDAP_NOT_ENABLE;
 
 @Component
 @Configuration

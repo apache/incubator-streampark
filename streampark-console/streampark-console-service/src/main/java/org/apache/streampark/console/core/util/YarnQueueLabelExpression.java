@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_FORMAT;
 
 /** Util class for parsing and checking Yarn queue & Label */
 public class YarnQueueLabelExpression {

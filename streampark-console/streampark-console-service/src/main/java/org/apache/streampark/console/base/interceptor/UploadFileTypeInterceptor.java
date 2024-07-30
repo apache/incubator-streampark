@@ -37,8 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.HANDLER_UPLOAD_FILE_IS_NULL_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.HANDLER_UPLOAD_FILE_TYPE_ILLEGAL_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.HANDLER_UPLOAD_FILE_IS_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.HANDLER_UPLOAD_FILE_TYPE_ILLEGAL_ERROR;
 
 /**
  * An interceptor used to handle file uploads

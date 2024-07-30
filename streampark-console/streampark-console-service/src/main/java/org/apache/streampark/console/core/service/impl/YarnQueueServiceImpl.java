@@ -20,7 +20,8 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.enums.MessageStatus;
+import org.apache.streampark.console.base.enums.UserMessageStatus;
+import org.apache.streampark.console.base.enums.YarnMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -54,17 +55,17 @@ import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
 import static org.apache.streampark.console.base.enums.CommonStatus.FLINK_CLUSTERS;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_ID_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_AVAILABLE;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_FORMAT;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_QUERY_PARAMS_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_QUERY_PARAMS_TEAM_ID_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_USED_FORMAT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_ID_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_AVAILABLE;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_EXIST;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_QUERY_PARAMS_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_QUERY_PARAMS_TEAM_ID_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_USED_FORMAT;
 import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.isValid;
 
 @Slf4j
@@ -131,7 +132,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public boolean createYarnQueue(YarnQueue yarnQueue) {
         ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
 
-        MessageStatus status = null;
+        YarnMessageStatus status = null;
         switch (checkResponse.getStatus()) {
             case 1:
                 status = YARN_QUEUE_LABEL_EXIST;

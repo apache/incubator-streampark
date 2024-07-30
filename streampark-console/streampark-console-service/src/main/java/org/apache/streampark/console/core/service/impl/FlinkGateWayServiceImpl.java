@@ -37,8 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_GATEWAY_GET_VERSION_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_GATEWAY_NAME_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_GATEWAY_GET_VERSION_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_GATEWAY_NAME_EXIST;
 
 @Slf4j
 @Service

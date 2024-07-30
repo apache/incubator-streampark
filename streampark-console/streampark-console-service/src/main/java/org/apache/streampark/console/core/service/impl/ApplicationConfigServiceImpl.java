@@ -49,7 +49,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_CONFIG_FILE_TYPE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_CONFIG_FILE_TYPE_ILLEGALLY;
 
 @Slf4j
 @Service

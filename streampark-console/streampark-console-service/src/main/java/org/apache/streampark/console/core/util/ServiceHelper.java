@@ -35,9 +35,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_SQL_CLIENT_JAR_MULTIPLE_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_SQL_CLIENT_JAR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_SQL_CLIENT_JAR_MULTIPLE_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_SQL_CLIENT_JAR_NOT_EXIST;
 
 public class ServiceHelper {
 

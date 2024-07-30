@@ -18,7 +18,7 @@
 package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
-import org.apache.streampark.console.base.enums.Status;
+import org.apache.streampark.console.base.spi.Status;
 
 import org.bouncycastle.util.Arrays;
 

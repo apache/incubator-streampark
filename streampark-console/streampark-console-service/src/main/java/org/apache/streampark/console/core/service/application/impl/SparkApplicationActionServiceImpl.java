@@ -96,14 +96,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 import static org.apache.hadoop.service.Service.STATE.STARTED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_REPEAT_START_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_YARN_CLUSTER_STATE_CHECK;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_EXECUTE_MODE_NOT_EXISTS_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_ID_NOT_EXISTS_REVOKE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_PY_FLINK_FILE_IS_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_PY_FLINK_FILE_TYPE_ILLEGALLY;
-import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_VERSION_NOT_FOUND;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_ACTION_REPEAT_START_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_ACTION_YARN_CLUSTER_STATE_CHECK;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_EXECUTE_MODE_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_ID_NOT_EXISTS_REVOKE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_PY_FLINK_FILE_IS_NULL;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_PY_FLINK_FILE_TYPE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.SparkMessageStatus.SPARK_ENV_VERSION_NOT_FOUND;
 
 @Slf4j
 @Service

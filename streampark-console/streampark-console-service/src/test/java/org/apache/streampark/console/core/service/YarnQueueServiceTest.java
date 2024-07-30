@@ -39,11 +39,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
 import static org.apache.streampark.console.base.enums.CommonStatus.FLINK_CLUSTERS;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_ID_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_FORMAT;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_USED_FORMAT;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_ID_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_USED_FORMAT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;

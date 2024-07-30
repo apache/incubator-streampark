@@ -41,8 +41,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SSO_CONFIG_PRINCIPAL_NAME_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.SSO_SINGLE_SIGN_NOT_AVAILABLE;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SSO_CONFIG_PRINCIPAL_NAME_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SSO_SINGLE_SIGN_NOT_AVAILABLE;
 
 @Slf4j
 @Controller

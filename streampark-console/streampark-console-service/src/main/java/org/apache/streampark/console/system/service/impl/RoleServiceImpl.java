@@ -46,8 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_ROLE_EXIST_USED_DELETE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_ROLE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_EXIST_USED_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_NOT_EXIST;
 
 @Slf4j
 @Service

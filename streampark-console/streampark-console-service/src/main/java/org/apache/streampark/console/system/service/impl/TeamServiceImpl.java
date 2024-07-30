@@ -48,11 +48,11 @@ import java.util.List;
 import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
 import static org.apache.streampark.console.base.enums.CommonStatus.PROJECT;
 import static org.apache.streampark.console.base.enums.CommonStatus.VARIABLE;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ALREADY_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_NAME_CAN_NOT_CHANGE;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ALREADY_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_NAME_CAN_NOT_CHANGE;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_ID_NOT_EXIST;
 
 @Slf4j
 @Service

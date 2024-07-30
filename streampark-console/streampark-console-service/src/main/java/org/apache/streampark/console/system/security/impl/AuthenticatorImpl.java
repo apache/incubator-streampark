@@ -30,11 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ALLOW_LOGIN_TYPE;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_PASSWORD_INCORRECT;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_ALLOW_LOGIN_TYPE;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_PASSWORD_INCORRECT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_NOT_EXIST;
 
 @Component
 public class AuthenticatorImpl implements Authenticator {

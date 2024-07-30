@@ -63,17 +63,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_EXECUTE_MODE_OPERATION_DISABLE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_QUEUE_LABEL_IN_DATABASE_ILLEGALLY;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_CLOSE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_DELETE_RUNNING_CLUSTER_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_DEPLOY_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_EXIST_APP_DELETE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_EXIST_RUN_TASK_CLOSE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_ID_EMPTY_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_NOT_RUNNING;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_SHUTDOWN_RESPONSE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_EXECUTE_MODE_OPERATION_DISABLE_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_QUEUE_LABEL_IN_DATABASE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_CLOSE_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_DELETE_RUNNING_CLUSTER_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_DEPLOY_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_EXIST_APP_DELETE_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_EXIST_RUN_TASK_CLOSE_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_ID_EMPTY_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_NOT_RUNNING;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_SHUTDOWN_RESPONSE_FAILED;
 
 @Slf4j
 @Service

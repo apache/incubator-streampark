@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.enums;
+package org.apache.streampark.console.base.spi;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 

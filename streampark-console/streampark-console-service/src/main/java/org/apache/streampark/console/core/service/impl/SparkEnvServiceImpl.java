@@ -37,8 +37,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_HOME_IS_DEFAULT_SET;
-import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_HOME_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.SparkMessageStatus.SPARK_ENV_HOME_IS_DEFAULT_SET;
+import static org.apache.streampark.console.base.enums.SparkMessageStatus.SPARK_ENV_HOME_NULL_ERROR;
 
 @Slf4j
 @Service

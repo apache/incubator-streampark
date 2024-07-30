@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE;
 
 @Data
 @TableName("t_flink_env")

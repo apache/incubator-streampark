@@ -52,11 +52,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_ALREADY_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_CODE_MODIFY_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_EXIST_USE;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_ID_NULL_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.VariableMessageStatus.SYSTEM_VARIABLE_ALREADY_EXIST;
+import static org.apache.streampark.console.base.enums.VariableMessageStatus.SYSTEM_VARIABLE_CODE_MODIFY_FAILED;
+import static org.apache.streampark.console.base.enums.VariableMessageStatus.SYSTEM_VARIABLE_EXIST_USE;
+import static org.apache.streampark.console.base.enums.VariableMessageStatus.SYSTEM_VARIABLE_ID_NULL_FAILED;
+import static org.apache.streampark.console.base.enums.VariableMessageStatus.SYSTEM_VARIABLE_NOT_EXIST;
 
 @Slf4j
 @Service

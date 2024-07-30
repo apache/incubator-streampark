@@ -41,7 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
 
 @Slf4j
 @Validated

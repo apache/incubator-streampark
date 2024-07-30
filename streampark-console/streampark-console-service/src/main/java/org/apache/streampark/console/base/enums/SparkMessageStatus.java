@@ -22,21 +22,18 @@ import org.apache.streampark.console.base.spi.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
-public enum CommonStatus implements Status {
+@AllArgsConstructor
+public enum SparkMessageStatus implements Status {
 
-    SUCCESS(0, "success", "成功"),
-    UNKNOWN_ERROR(1, "unknown error: {0}", "未知错误: {0}"),
-
-    PROJECT(10, "Project", "项目"),
-    TEAM(11, "Team", "团队"),
-    VARIABLE(12, "Variable", "变量"),
-    APPLICATION(13, "Application", "应用程序"),
-    FLINK_CLUSTERS(14, "Flink Clusters", "Flink集群"),
+    SPARK_ENV_HOME_NULL_ERROR(10710, "The spark home does not exist, please check.",
+        "Spark Home不存在，请查验。"),
+    SPARK_ENV_HOME_IS_DEFAULT_SET(10720, "The spark home is set as default, please change it first.",
+        "Spark Home 设置为默认设置，请先更改"),
+    SPARK_ENV_VERSION_NOT_FOUND(10730, "[StreamPark] can no found spark {0} version",
+        "[StreamPark] 无法找到Spark {0} 版本"),
 
     ;
-
     private final int code;
     private final String enMsg;
     private final String zhMsg;

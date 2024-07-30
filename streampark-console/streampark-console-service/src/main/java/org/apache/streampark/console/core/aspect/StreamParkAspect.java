@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.enums.MessageStatus;
+import org.apache.streampark.console.base.enums.UserMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -53,12 +53,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.API_NOT_SUPPORT;
 import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.API_NOT_SUPPORT;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINk_APP_IS_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_TEAM_NO_PERMISSION;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_TEAM_NO_PERMISSION;
 
 @Slf4j
 @Component
@@ -121,7 +120,7 @@ public class StreamParkAspect {
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
         User currentUser = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(currentUser, MessageStatus.SYSTEM_USER_NOT_LOGIN);
+        ApiAlertException.throwIfNull(currentUser, UserMessageStatus.SYSTEM_USER_NOT_LOGIN);
 
         boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 

@@ -46,7 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_SQL_BACKUP_IS_NULL_ROLLBACK_FAILED;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_SQL_BACKUP_IS_NULL_ROLLBACK_FAILED;
 
 @Slf4j
 @Service

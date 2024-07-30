@@ -83,9 +83,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_ID_NOT_EXISTS_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_EXECUTION_MODE_ILLEGALLY;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_UNAVAILABLE;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_ID_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_JOB_EXECUTION_MODE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_CLUSTER_UNAVAILABLE;
 
 @Slf4j
 @Service

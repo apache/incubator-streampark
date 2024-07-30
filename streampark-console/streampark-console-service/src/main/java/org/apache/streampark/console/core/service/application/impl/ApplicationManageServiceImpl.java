@@ -91,13 +91,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_CREATE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_FLINK_CLUSTER_NOT_RUNNING_UPDATE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_NAME_REPEAT_COPY_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY;
 import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_CREATE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_FLINK_CLUSTER_NOT_RUNNING_UPDATE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_NAME_REPEAT_COPY_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_SQL_IS_NULL_UPDATE_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_SQL_IS_NULL_UPDATE_FAILED;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
 
 @Slf4j
 @Service

@@ -22,21 +22,16 @@ import org.apache.streampark.console.base.spi.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
-public enum CommonStatus implements Status {
+@AllArgsConstructor
+public enum VariableMessageStatus implements Status {
 
-    SUCCESS(0, "success", "成功"),
-    UNKNOWN_ERROR(1, "unknown error: {0}", "未知错误: {0}"),
-
-    PROJECT(10, "Project", "项目"),
-    TEAM(11, "Team", "团队"),
-    VARIABLE(12, "Variable", "变量"),
-    APPLICATION(13, "Application", "应用程序"),
-    FLINK_CLUSTERS(14, "Flink Clusters", "Flink集群"),
-
+    SYSTEM_VARIABLE_ID_NULL_FAILED(10110, "The variable id cannot be null.", "变量Id不能为空"),
+    SYSTEM_VARIABLE_NOT_EXIST(10120, "The variable does not exist.", "变量不存在"),
+    SYSTEM_VARIABLE_EXIST_USE(10130, "The variable is actually used.", "该变量实际上是在用的"),
+    SYSTEM_VARIABLE_ALREADY_EXIST(10140, "The variable code already exists", "变量代码已存在"),
+    SYSTEM_VARIABLE_CODE_MODIFY_FAILED(10150, "The variable code cannot be updated.", "变量代码无法更新"),
     ;
-
     private final int code;
     private final String enMsg;
     private final String zhMsg;

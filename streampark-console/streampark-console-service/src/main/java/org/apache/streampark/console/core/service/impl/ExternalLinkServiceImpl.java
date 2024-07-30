@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_NOT_EXISTS_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.EXTERNAL_LINK_PARAM_EXISTING_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.EXTERNAL_LINK_PARAM_EXISTING_ERROR;
 
 @Slf4j
 @Service

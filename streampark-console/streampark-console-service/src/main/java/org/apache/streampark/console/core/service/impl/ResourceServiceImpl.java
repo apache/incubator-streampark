@@ -24,7 +24,7 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.enums.MessageStatus;
+import org.apache.streampark.console.base.enums.ResourceMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -86,15 +86,15 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_CONNECTOR_NULL_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_APP_JAR_EMPTY_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_JAR_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_MULTI_FILE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NAME_MODIFY_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NAME_NULL_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NOT_EXIST_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_POM_JAR_EMPTY;
-import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_STILL_USE_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_CONNECTOR_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_FLINK_APP_JAR_EMPTY_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_FLINK_JAR_NULL;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_MULTI_FILE_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NAME_MODIFY_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NAME_NULL_FAILED;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NOT_EXIST_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_POM_JAR_EMPTY;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_STILL_USE_DELETE_ERROR;
 
 @Slf4j
 @Service
@@ -151,7 +151,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         ApiAlertException.throwIfNotNull(
             this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
-            MessageStatus.RESOURCE_ALREADY_ERROR,
+            ResourceMessageStatus.RESOURCE_ALREADY_ERROR,
             resource.getResourceName());
 
         if (!jars.isEmpty()) {

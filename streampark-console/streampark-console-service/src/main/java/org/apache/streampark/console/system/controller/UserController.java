@@ -48,7 +48,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_CURRENT_LOGIN_NULL_SET_TEAM_FAILED;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_CURRENT_LOGIN_NULL_SET_TEAM_FAILED;
 
 @Slf4j
 @Validated

@@ -91,11 +91,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_BUILD_RESOURCE_GROUP_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_IS_INVALID;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_BUILD_RESOURCE_GROUP_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_JOB_IS_INVALID;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service

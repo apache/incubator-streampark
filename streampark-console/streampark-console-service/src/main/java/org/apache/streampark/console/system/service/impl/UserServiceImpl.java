@@ -63,9 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ID_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_OLD_PASSWORD_INCORRECT_UPDATE_PASSWORD_FAILED;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_UPDATE_PASSWORD_FAILED;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_OLD_PASSWORD_INCORRECT_UPDATE_PASSWORD_FAILED;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_UPDATE_PASSWORD_FAILED;
 
 @Slf4j
 @Service

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.system.service.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.enums.MessageStatus;
+import org.apache.streampark.console.base.enums.UserMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
@@ -43,13 +43,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.MEMBER_ID_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.MEMBER_TEAM_ID_CHANGE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.MEMBER_USER_ID_CHANGE_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_ROLE_ID_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_CANNOT_NULL;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_TEAM_ID_CHANGE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_USER_ID_CHANGE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_CANNOT_NULL;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_NOT_EXIST;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -134,7 +134,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         ApiAlertException.throwIfNull(team, SYSTEM_TEAM_ID_NOT_EXIST, member.getTeamId());
         ApiAlertException.throwIfNotNull(
             findByUserId(member.getTeamId(), user.getUserId()),
-            MessageStatus.MEMBER_USER_TEAM_ALREADY_ERROR,
+            UserMessageStatus.MEMBER_USER_TEAM_ALREADY_ERROR,
             member.getUserName(),
             team.getTeamName());
 
