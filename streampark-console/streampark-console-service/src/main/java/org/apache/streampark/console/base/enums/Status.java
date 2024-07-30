@@ -21,28 +21,23 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;
 
-public enum Status {
+public interface Status {
 
-    PROJECT(2, "Project", "项目"),
-    TEAM(2, "Team", "团队"),
-    VARIABLES(1, "Variables", "变量"),
-    ;
+    /** get status code */
+    int getCode();
 
-    private final int code;
-    private final String enMsg;
-    private final String zhMsg;
+    /** get english message */
+    String getEnMsg();
 
-    Status(int code, String enMsg, String zhMsg) {
-        this.code = code;
-        this.enMsg = enMsg;
-        this.zhMsg = zhMsg;
-    }
+    /** get chinese message */
+    String getZhMsg();
 
-    public String getMsg() {
+    /** get internationalization message */
+    default String getMessage() {
         if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage())) {
-            return this.zhMsg;
+            return getZhMsg();
         } else {
-            return this.enMsg;
+            return getEnMsg();
         }
     }
 }
