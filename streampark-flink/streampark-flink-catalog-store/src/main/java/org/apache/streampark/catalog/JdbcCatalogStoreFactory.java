@@ -27,9 +27,6 @@ import org.apache.flink.table.catalog.CatalogStore;
 import org.apache.flink.table.factories.CatalogStoreFactory;
 import org.apache.flink.table.factories.FactoryUtil;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,14 +40,12 @@ import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.TABLE
 import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.URL;
 import static org.apache.streampark.catalog.JdbcCatalogStoreFactoryOptions.USERNAME;
 
-/**
- *  Catalog Store Factory for Jdbc.
- */
+/** Catalog Store Factory for Jdbc. */
 public class JdbcCatalogStoreFactory implements CatalogStoreFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JdbcCatalogStoreFactory.class);
     private JdbcConnectionProvider jdbcConnectionProvider;
     private transient String catalogTableName;
+
     @Override
     public CatalogStore createCatalogStore() {
         return new JdbcCatalogStore(jdbcConnectionProvider, this.catalogTableName);
@@ -63,16 +58,19 @@ public class JdbcCatalogStoreFactory implements CatalogStoreFactory {
         factoryHelper.validate();
 
         ReadableConfig options = factoryHelper.getOptions();
-        JdbcConnectionOptions jdbcConnectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-            .withUrl(options.get(URL))
-            .withDriverName(options.get(DRIVER))
-            .withUsername(options.get(USERNAME))
-            .withPassword(options.get(PASSWORD))
-            .withConnectionCheckTimeoutSeconds(options.get(MAX_RETRY_TIMEOUT)).build();
+        JdbcConnectionOptions jdbcConnectionOptions =
+            new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                .withUrl(options.get(URL))
+                .withDriverName(options.get(DRIVER))
+                .withUsername(options.get(USERNAME))
+                .withPassword(options.get(PASSWORD))
+                .withConnectionCheckTimeoutSeconds(options.get(MAX_RETRY_TIMEOUT))
+                .build();
 
         this.catalogTableName = options.get(TABLE_NAME);
         this.jdbcConnectionProvider = new SimpleJdbcConnectionProvider(jdbcConnectionOptions);
     }
+
     @Override
     public void close() {
         this.jdbcConnectionProvider.closeConnection();
