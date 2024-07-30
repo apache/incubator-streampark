@@ -19,7 +19,7 @@ package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
-import org.apache.streampark.console.base.enums.UserMessageStatus;
+import org.apache.streampark.console.base.spi.Status;
 
 import java.text.MessageFormat;
 
@@ -37,7 +37,7 @@ public class ApiDetailException extends AbstractApiException {
         super(ExceptionUtils.stringifyException(cause), ResponseCode.CODE_FAIL_DETAIL);
     }
 
-    public ApiDetailException(UserMessageStatus status, Throwable cause, Object... args) {
+    public ApiDetailException(Status status, Throwable cause, Object... args) {
         super(MessageFormat.format(status.getMessage(), ExceptionUtils.stringifyException(cause), args),
             ResponseCode.CODE_FAIL_DETAIL);
     }

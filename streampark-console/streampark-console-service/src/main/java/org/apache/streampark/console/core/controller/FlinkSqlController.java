@@ -43,6 +43,8 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINk_SQL_APPID_OR_TEAM_ID_IS_NULL;
+
 @Slf4j
 @Validated
 @RestController

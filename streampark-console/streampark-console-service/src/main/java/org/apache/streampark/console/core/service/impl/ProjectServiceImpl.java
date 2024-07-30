@@ -83,7 +83,7 @@ import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJ
 import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_NAME_EXIST;
 import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_RUNNING_BUILDING_EXCEED_LIMIT;
 import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_TEAM_ID_MODIFY_ERROR;
-import static org.apache.streampark.console.base.enums.ProjectProjectMessageStatus.PROJECT_BUILDING_STATE;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_BUILDING_STATE;
 
 @Slf4j
 @Service

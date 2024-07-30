@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.API_NOT_SUPPORT;
 import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINk_APP_IS_NULL;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_TEAM_NO_PERMISSION;
