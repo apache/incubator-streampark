@@ -64,12 +64,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-common</artifactId>
-            <version>1.19.0</version>
-            <scope>compile</scope>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>
