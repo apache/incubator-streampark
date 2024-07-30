@@ -17,13 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import com.google.auto.service.AutoService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-@AutoService(Status.class)
 public enum MessageStatus implements Status {
 
     SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS(10000, "user {0} can only sign in with [{1}]", "用户{0}只能使用 [{1}] 登录"),
@@ -106,7 +99,8 @@ public enum MessageStatus implements Status {
         "[StreamPark] 文件或目录 [{0}] 不存在，请检查"),
     FLINK_ENV_FLINK_VERSION_NOT_FOUND(10460, "[StreamPark] can no found flink {0} version",
         "[StreamPark] 无法找到Flink {0} 版本"),
-    FLINK_ENV_FLINK_VERSION_UNSUPPORT(10470, "[StreamPark] Unsupported flink version: {0}", "[StreamPark] 不支持的Flink版本：{0}"),
+    FLINK_ENV_FLINK_VERSION_UNSUPPORT(10470, "[StreamPark] Unsupported flink version: {0}",
+        "[StreamPark] 不支持的Flink版本：{0}"),
     FLINK_ENV_HOME_NOT_EXIST(10480, "The flink home does not exist, please check.", "Flink Home 不存在，请检查"),
     FLINK_ENV_HOME_EXIST_CLUSTER_USE(10490, "The flink home is still in use by some flink cluster, please check.",
         "Flink Home 还在被一些Flink集群使用 请检查"),
@@ -155,8 +149,10 @@ public enum MessageStatus implements Status {
     FLINK_GATEWAY_GET_VERSION_FAILED(10670, "get gateway version failed", "获取网关版本失败"),
 
     FLINk_APP_IS_NULL(10671, "Invalid operation, application is null.", "操作无效，应用程序为空"),
-    FLINk_SQL_APPID_OR_TEAM_ID_IS_NULL(10680, "Permission denied, appId and teamId cannot be null.", "权限被拒绝，应用Id和团队Id不能为空"),
-    FLINK_SQL_IS_NULL_UPDATE_FAILED(10690, "Flink sql is null, update flink sql job failed.", "FlinkSql为空，更新FlinkSQL作业失败"),
+    FLINk_SQL_APPID_OR_TEAM_ID_IS_NULL(10680, "Permission denied, appId and teamId cannot be null.",
+        "权限被拒绝，应用Id和团队Id不能为空"),
+    FLINK_SQL_IS_NULL_UPDATE_FAILED(10690, "Flink sql is null, update flink sql job failed.",
+        "FlinkSql为空，更新FlinkSQL作业失败"),
     FLINK_SQL_BACKUP_IS_NULL_ROLLBACK_FAILED(10700, "Application backup can't be null. Rollback flink sql failed.",
         "应用程序备份不能为为空，回滚FlinkSql失败"),
 
@@ -190,25 +186,31 @@ public enum MessageStatus implements Status {
 
     APP_CREATE_FAILED(10860, "create application failed.", "创建应用程序失败"),
     APP_ID_NOT_EXISTS_ERROR(10870, "The application id={0} can't be found.", "找不到应用程序 id={0}"),
-    APP_ID_NOT_EXISTS_REVOKE_FAILED(10880, "The application id={0} can't be found, revoke failed.", "找不到应用程序 id={0}, 撤销失败"),
+    APP_ID_NOT_EXISTS_REVOKE_FAILED(10880, "The application id={0} can't be found, revoke failed.",
+        "找不到应用程序 id={0}, 撤销失败"),
     APP_EXECUTE_MODE_NOT_EXISTS_ERROR(10890, "ExecutionMode can't be null.", "执行模式不能为空"),
-    APP_EXECUTE_MODE_OPERATION_DISABLE_ERROR(10900, "The FlinkExecutionMode [{0}] can't [{1}]!", "Flink执行模式[{0}]无法{1}！"),
+    APP_EXECUTE_MODE_OPERATION_DISABLE_ERROR(10900, "The FlinkExecutionMode [{0}] can't [{1}]!",
+        "Flink执行模式[{0}]无法{1}！"),
     APP_NOT_EXISTS_ERROR(10920, "[StreamPark] {0} The application cannot be started repeatedly.",
         "[StreamPark] {0} 应用程序无法重复启动。"),
     APP_ACTION_REPEAT_START_ERROR(10930, "[StreamPark] {0} The application cannot be started repeatedly.",
         "[StreamPark] {0} 应用程序无法重复启动。"),
-    APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR(10940, "[StreamPark] The same task name is already running in the yarn queue",
+    APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR(10940,
+        "[StreamPark] The same task name is already running in the yarn queue",
         "[StreamPark] 相同的任务名称已在Yarn队列中运行"),
     APP_ACTION_YARN_CLUSTER_STATE_CHECK(10950, "[StreamPark] The yarn cluster service state is {0}, please check it",
         "[StreamPark] Yarn 集群服务状态为 {0}，请检查一下"),
     APP_CONFIG_FILE_TYPE_ILLEGALLY(10960, "application' config error. must be (.properties|.yaml|.yml |.conf)",
         "应用程序配置错误，必须是（.properties.yaml|.YML|.conf）"),
 
-    APP_JOB_IS_INVALID(10970, "The job is invalid, or the job cannot be built while it is running", "作业无效，或者在作业运行时无法生成作业"),
+    APP_JOB_IS_INVALID(10970, "The job is invalid, or the job cannot be built while it is running",
+        "作业无效，或者在作业运行时无法生成作业"),
     APP_JOB_EXECUTION_MODE_ILLEGALLY(10980, "Job executionMode must be kubernetes-session|kubernetes-application.",
         "Job 执行模式必须是 Kubernetes-session 或 Kubernetes-application"),
-    APP_PY_FLINK_FILE_IS_NULL(10990, "pyflink file can't be null, start application failed.", "PyFlink 文件不能为空，启动应用程序失败"),
-    APP_PY_FLINK_FILE_TYPE_ILLEGALLY(101000, "pyflink format error, must be a \".py\" suffix, start application failed.",
+    APP_PY_FLINK_FILE_IS_NULL(10990, "pyflink file can't be null, start application failed.",
+        "PyFlink 文件不能为空，启动应用程序失败"),
+    APP_PY_FLINK_FILE_TYPE_ILLEGALLY(101000,
+        "pyflink format error, must be a \".py\" suffix, start application failed.",
         "PyFlink格式错误，必须是 \".py\" 后缀，启动应用程序失败"),
 
     APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY(101010,
@@ -233,10 +235,12 @@ public enum MessageStatus implements Status {
 
     PROJECT_MODULE_NULL_ERROR(101070, "Project module can't be null, please check.", "项目模块不能为空，请检查"),
     PROJECT_NAME_EXIST(101080, "project name already exists", "项目名称已存在"),
-    PROJECT_GIT_PASSWORD_DECRYPT_FAILED(101090, "Project Github/Gitlab password decrypt failed", "项目 Github/Gitlab 密码解密失败"),
+    PROJECT_GIT_PASSWORD_DECRYPT_FAILED(101090, "Project Github/Gitlab password decrypt failed",
+        "项目 Github/Gitlab 密码解密失败"),
     PROJECT_TEAM_ID_MODIFY_ERROR(101100, "TeamId can't be changed", "无法更改TeamId"),
     PROJECT_BUILDING_STATE(101110, "The project is being built", "该项目正在建设中"),
-    PROJECT_RUNNING_BUILDING_EXCEED_LIMIT(101120, "The number of running Build projects exceeds the maximum number: {0}",
+    PROJECT_RUNNING_BUILDING_EXCEED_LIMIT(101120,
+        "The number of running Build projects exceeds the maximum number: {0}",
         "正在运行的Build项目数超过最大数量: {0}"),
 
     SSO_SINGLE_SIGN_NOT_AVAILABLE(101130,
@@ -249,4 +253,24 @@ public enum MessageStatus implements Status {
     private final String enMsg;
     private final String zhMsg;
 
+    MessageStatus(int code, String enMsg, String zhMsg) {
+        this.code = code;
+        this.enMsg = enMsg;
+        this.zhMsg = zhMsg;
+    }
+
+    @Override
+    public int getCode() {
+        return this.code;
+    }
+
+    @Override
+    public String getEnMsg() {
+        return this.enMsg;
+    }
+
+    @Override
+    public String getZhMsg() {
+        return this.zhMsg;
+    }
 }

@@ -17,13 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import com.google.auto.service.AutoService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-@AutoService(Status.class)
 public enum CommonStatus implements Status {
 
     SUCCESS(0, "success", "成功"),
@@ -40,4 +33,25 @@ public enum CommonStatus implements Status {
     private final int code;
     private final String enMsg;
     private final String zhMsg;
+
+    CommonStatus(int code, String enMsg, String zhMsg) {
+        this.code = code;
+        this.enMsg = enMsg;
+        this.zhMsg = zhMsg;
+    }
+
+    @Override
+    public int getCode() {
+        return this.code;
+    }
+
+    @Override
+    public String getEnMsg() {
+        return this.enMsg;
+    }
+
+    @Override
+    public String getZhMsg() {
+        return this.zhMsg;
+    }
 }
