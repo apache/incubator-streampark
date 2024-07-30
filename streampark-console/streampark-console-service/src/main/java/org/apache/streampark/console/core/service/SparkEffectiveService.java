@@ -15,25 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.service;
 
-import lombok.Getter;
+import org.apache.streampark.console.core.entity.SparkEffective;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
-@Getter
-public enum EffectiveTypeEnum {
+import com.baomidou.mybatisplus.extension.service.IService;
 
-    /** config */
-    CONFIG(1),
-    /** FLINKSQL */
-    FLINKSQL(2),
-    /** spark config */
-    SPARKCONFIG(3),
-    /** SPARKSQL */
-    SPARKSQL(4);
+public interface SparkEffectiveService extends IService<SparkEffective> {
 
-    private final int type;
+    void remove(Long appId, EffectiveTypeEnum config);
 
-    EffectiveTypeEnum(int value) {
-        this.type = value;
-    }
+    SparkEffective get(Long appId, EffectiveTypeEnum config);
+
+    void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id);
+
+    void removeByAppId(Long appId);
 }

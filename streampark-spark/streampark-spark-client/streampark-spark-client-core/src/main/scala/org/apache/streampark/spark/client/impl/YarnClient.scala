@@ -140,16 +140,4 @@ object YarnClient extends SparkClientTrait {
       sparkLauncher.addAppArgs("--sql", submitRequest.getExtra("sql").toString)
     }
   }
-
-  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
-    logger.info("[StreamPark][Spark][YarnClient] Spark launcher start setting yarn queue.")
-    if(submitRequest.hasExtra("yarnQueueName")){
-      submitRequest.appProperties.put("spark.yarn.queue", submitRequest.getExtra("yarnQueueName").asInstanceOf[String])
-    }
-    if(submitRequest.hasExtra("yarnQueueLabel")){
-      submitRequest.appProperties.put("spark.yarn.am.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
-      submitRequest.appProperties.put("spark.yarn.executor.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
-    }
-  }
-
 }

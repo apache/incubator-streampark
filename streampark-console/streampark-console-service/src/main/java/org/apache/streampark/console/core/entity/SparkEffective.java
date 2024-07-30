@@ -15,25 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.entity;
 
-import lombok.Getter;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
-@Getter
-public enum EffectiveTypeEnum {
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-    /** config */
-    CONFIG(1),
-    /** FLINKSQL */
-    FLINKSQL(2),
-    /** spark config */
-    SPARKCONFIG(3),
-    /** SPARKSQL */
-    SPARKSQL(4);
+import java.util.Date;
 
-    private final int type;
+@Data
+@TableName("t_spark_effective")
+@Slf4j
+public class SparkEffective {
 
-    EffectiveTypeEnum(int value) {
-        this.type = value;
-    }
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    private Long appId;
+    /**
+     * 1) config <br>
+     * 2) spark Sql<br>
+     */
+    private Integer targetType;
+
+    private Long targetId;
+    private Date createTime;
+
+    private transient EffectiveTypeEnum effectiveType;
 }

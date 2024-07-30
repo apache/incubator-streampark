@@ -26,6 +26,7 @@ import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
@@ -55,6 +56,8 @@ public class StreamParkAspect {
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
+    @Autowired
+    private SparkAppHttpWatcher sparkAppHttpWatcher;
     @Autowired
     private ServiceHelper serviceHelper;
     @Autowired
@@ -93,6 +96,7 @@ public class StreamParkAspect {
         log.debug("appUpdated aspect, method:{}", methodSignature.getName());
         Object target = joinPoint.proceed();
         flinkAppHttpWatcher.init();
+        sparkAppHttpWatcher.init();
         return target;
     }
 

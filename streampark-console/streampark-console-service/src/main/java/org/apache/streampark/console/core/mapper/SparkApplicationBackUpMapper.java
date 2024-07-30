@@ -15,25 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.mapper;
 
-import lombok.Getter;
+import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
 
-@Getter
-public enum EffectiveTypeEnum {
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-    /** config */
-    CONFIG(1),
-    /** FLINKSQL */
-    FLINKSQL(2),
-    /** spark config */
-    SPARKCONFIG(3),
-    /** SPARKSQL */
-    SPARKSQL(4);
-
-    private final int type;
-
-    EffectiveTypeEnum(int value) {
-        this.type = value;
-    }
+public interface SparkApplicationBackUpMapper extends BaseMapper<SparkApplicationBackUp> {
 }

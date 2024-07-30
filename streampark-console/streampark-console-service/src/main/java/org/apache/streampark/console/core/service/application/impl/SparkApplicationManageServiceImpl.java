@@ -27,10 +27,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
-import org.apache.streampark.console.core.entity.ApplicationConfig;
-import org.apache.streampark.console.core.entity.FlinkSql;
-import org.apache.streampark.console.core.entity.Resource;
-import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
@@ -39,14 +35,14 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
-import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.EffectiveService;
-import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.SparkApplicationConfigService;
+import org.apache.streampark.console.core.service.SparkEffectiveService;
+import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
@@ -98,16 +94,16 @@ public class SparkApplicationManageServiceImpl
     private ApplicationBackUpService backUpService;
 
     @Autowired
-    private ApplicationConfigService configService;
+    private SparkApplicationConfigService configService;
 
     @Autowired
     private ApplicationLogService applicationLogService;
 
     @Autowired
-    private FlinkSqlService flinkSqlService;
+    private SparkSqlService sparkSqlService;
 
     @Autowired
-    private EffectiveService effectiveService;
+    private SparkEffectiveService effectiveService;
 
     @Autowired
     private SettingService settingService;
@@ -131,17 +127,17 @@ public class SparkApplicationManageServiceImpl
 
     @Override
     public void toEffective(SparkApplication appParam) {
+        SparkApplicationConfig config = configService.getLatest(appParam.getId());
         // set latest to Effective
-        ApplicationConfig config = configService.getLatest(appParam.getId());
         if (config != null) {
             this.configService.toEffective(appParam.getId(), config.getId());
         }
         if (appParam.isSparkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getCandidate(appParam.getId(), null);
-            if (flinkSql != null) {
-                flinkSqlService.toEffective(appParam.getId(), flinkSql.getId());
+            SparkSql sparkSql = sparkSqlService.getCandidate(appParam.getId(), null);
+            if (sparkSql != null) {
+                sparkSqlService.toEffective(appParam.getId(), sparkSql.getId());
                 // clean candidate
-                flinkSqlService.cleanCandidate(flinkSql.getId());
+                sparkSqlService.cleanCandidate(sparkSql.getId());
             }
         }
     }
@@ -164,7 +160,7 @@ public class SparkApplicationManageServiceImpl
         SparkApplication application = getById(appId);
 
         // 1) remove flink sql
-        flinkSqlService.removeByAppId(application.getId());
+        sparkSqlService.removeByAppId(application.getId());
 
         // 2) remove log
         applicationLogService.removeByAppId(application.getId());
@@ -285,8 +281,8 @@ public class SparkApplicationManageServiceImpl
 
         if (save(appParam)) {
             if (appParam.isSparkSqlJob()) {
-                FlinkSql flinkSql = new FlinkSql(appParam);
-                flinkSqlService.create(flinkSql);
+                SparkSql sparkSql = new SparkSql(appParam);
+                sparkSqlService.create(sparkSql);
             }
             if (appParam.getConfig() != null) {
                 // configService.create(appParam, true);
@@ -353,16 +349,16 @@ public class SparkApplicationManageServiceImpl
         boolean saved = save(newApp);
         if (saved) {
             if (newApp.isSparkSqlJob()) {
-                FlinkSql copyFlinkSql = flinkSqlService.getLatestFlinkSql(appParam.getId(), true);
-                newApp.setSparkSql(copyFlinkSql.getSql());
-                newApp.setTeamResource(copyFlinkSql.getTeamResource());
-                newApp.setDependency(copyFlinkSql.getDependency());
-                FlinkSql flinkSql = new FlinkSql(newApp);
-                flinkSqlService.create(flinkSql);
+                SparkSql copySparkSql = sparkSqlService.getLatestSparkSql(appParam.getId(), true);
+                newApp.setSparkSql(copySparkSql.getSql());
+                newApp.setTeamResource(copySparkSql.getTeamResource());
+                newApp.setDependency(copySparkSql.getDependency());
+                SparkSql sparkSql = new SparkSql(newApp);
+                sparkSqlService.create(sparkSql);
             }
-            ApplicationConfig copyConfig = configService.getEffective(appParam.getId());
+            SparkApplicationConfig copyConfig = configService.getEffective(appParam.getId());
             if (copyConfig != null) {
-                ApplicationConfig config = new ApplicationConfig();
+                SparkApplicationConfig config = new SparkApplicationConfig();
                 config.setAppId(newApp.getId());
                 config.setFormat(copyConfig.getFormat());
                 config.setContent(copyConfig.getContent());
@@ -456,9 +452,9 @@ public class SparkApplicationManageServiceImpl
                 break;
         }
 
-        // Flink Sql job...
+        // Spark Sql job...
         if (application.isSparkSqlJob()) {
-            updateFlinkSqlJob(application, appParam);
+            updateSparkSqlJob(application, appParam);
             return true;
         }
 
@@ -481,59 +477,59 @@ public class SparkApplicationManageServiceImpl
      * @param application
      * @param appParam
      */
-    private void updateFlinkSqlJob(SparkApplication application, SparkApplication appParam) {
-        FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-        if (effectiveFlinkSql == null) {
-            effectiveFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
-            flinkSqlService.removeById(effectiveFlinkSql.getId());
-            FlinkSql sql = new FlinkSql(appParam);
-            flinkSqlService.create(sql);
+    private void updateSparkSqlJob(SparkApplication application, SparkApplication appParam) {
+        SparkSql effectiveSparkSql = sparkSqlService.getEffective(application.getId(), true);
+        if (effectiveSparkSql == null) {
+            effectiveSparkSql = sparkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+            sparkSqlService.removeById(effectiveSparkSql.getId());
+            SparkSql sql = new SparkSql(appParam);
+            sparkSqlService.create(sql);
             application.setBuild(true);
         } else {
             // get previous flink sql and decode
-            FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
+            SparkSql copySourceSparkSql = sparkSqlService.getById(appParam.getSqlId());
             ApiAlertException.throwIfNull(
-                copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
-            copySourceFlinkSql.decode();
+                copySourceSparkSql, "Flink sql is null, update flink sql job failed.");
+            copySourceSparkSql.decode();
 
             // get submit flink sql
-            FlinkSql targetFlinkSql = new FlinkSql(appParam);
+            SparkSql targetFlinkSql = new SparkSql(appParam);
 
             // judge sql and dependency has changed
-            ChangeTypeEnum changeTypeEnum = copySourceFlinkSql.checkChange(targetFlinkSql);
+            ChangeTypeEnum changeTypeEnum = copySourceSparkSql.checkChange(targetFlinkSql);
 
             log.info("updateFlinkSqlJob changeTypeEnum: {}", changeTypeEnum);
 
             // if has been changed
             if (changeTypeEnum.hasChanged()) {
                 // check if there is a candidate version for the newly added record
-                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+                SparkSql newSparkSql = sparkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
                 // If the candidate version of the new record exists, it will be deleted directly,
                 // and only one candidate version will be retained. If the new candidate version is not
                 // effective,
                 // if it is edited again and the next record comes in, the previous candidate version will
                 // be deleted.
-                if (newFlinkSql != null) {
+                if (newSparkSql != null) {
                     // delete all records about candidates
-                    flinkSqlService.removeById(newFlinkSql.getId());
+                    sparkSqlService.removeById(newSparkSql.getId());
                 }
-                FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
+                SparkSql historySparkSql = sparkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
                 // remove candidate flags that already exist but are set as candidates
-                if (historyFlinkSql != null) {
-                    flinkSqlService.cleanCandidate(historyFlinkSql.getId());
+                if (historySparkSql != null) {
+                    sparkSqlService.cleanCandidate(historySparkSql.getId());
                 }
-                FlinkSql sql = new FlinkSql(appParam);
-                flinkSqlService.create(sql);
+                SparkSql sql = new SparkSql(appParam);
+                sparkSqlService.create(sql);
                 if (changeTypeEnum.isDependencyChanged()) {
                     application.setBuild(true);
                 }
             } else {
                 // judge version has changed
-                boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
+                boolean versionChanged = !effectiveSparkSql.getId().equals(appParam.getSqlId());
                 if (versionChanged) {
                     // sql and dependency not changed, but version changed, means that rollback to the version
                     CandidateTypeEnum type = CandidateTypeEnum.HISTORY;
-                    flinkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
+                    sparkSqlService.setCandidate(type, appParam.getId(), appParam.getSqlId());
                     application.setRelease(ReleaseStateEnum.NEED_ROLLBACK.get());
                     application.setBuild(true);
                 }
@@ -597,8 +593,8 @@ public class SparkApplicationManageServiceImpl
 
             // If the current task is not running, or the task has just been added,
             // directly set the candidate version to the official version
-            FlinkSql flinkSql = flinkSqlService.getEffective(appParam.getId(), false);
-            if (!appParam.isRunning() || flinkSql == null) {
+            SparkSql sparkSql = sparkSqlService.getEffective(appParam.getId(), false);
+            if (!appParam.isRunning() || sparkSql == null) {
                 this.toEffective(appParam);
             }
         }
@@ -614,18 +610,18 @@ public class SparkApplicationManageServiceImpl
     @Override
     public SparkApplication getApp(Long id) {
         SparkApplication application = this.baseMapper.selectApp(id);
-        ApplicationConfig config = configService.getEffective(id);
+        SparkApplicationConfig config = configService.getEffective(id);
         config = config == null ? configService.getLatest(id) : config;
         if (config != null) {
             config.setToApplication(application);
         }
         if (application.isSparkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
-            if (flinkSql == null) {
-                flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
-                flinkSql.setSql(DeflaterUtils.unzipString(flinkSql.getSql()));
+            SparkSql sparkSql = sparkSqlService.getEffective(application.getId(), true);
+            if (sparkSql == null) {
+                sparkSql = sparkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+                sparkSql.setSql(DeflaterUtils.unzipString(sparkSql.getSql()));
             }
-            flinkSql.setToApplication(application);
+            sparkSql.setToApplication(application);
         } else {
             if (application.isCICDJob()) {
                 String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());

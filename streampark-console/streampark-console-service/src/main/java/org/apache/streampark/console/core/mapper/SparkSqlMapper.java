@@ -15,25 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.mapper;
 
-import lombok.Getter;
+import org.apache.streampark.console.core.entity.SparkSql;
 
-@Getter
-public enum EffectiveTypeEnum {
+import org.apache.ibatis.annotations.Param;
 
-    /** config */
-    CONFIG(1),
-    /** FLINKSQL */
-    FLINKSQL(2),
-    /** spark config */
-    SPARKCONFIG(3),
-    /** SPARKSQL */
-    SPARKSQL(4);
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-    private final int type;
+import java.util.List;
 
-    EffectiveTypeEnum(int value) {
-        this.type = value;
-    }
+public interface SparkSqlMapper extends BaseMapper<SparkSql> {
+
+    SparkSql getEffective(@Param("appId") Long appId);
+
+    Integer getLatestVersion(@Param("appId") Long appId);
+
+    List<SparkSql> selectSqlsByTeamId(@Param("teamId") Long teamId);
 }

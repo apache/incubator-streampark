@@ -17,13 +17,10 @@
 
 package org.apache.streampark.spark.client.`trait`
 
-import org.apache.commons.lang.StringUtils
-import org.apache.spark.launcher.SparkLauncher
 import org.apache.streampark.common.enums.SparkExecutionMode
 import org.apache.streampark.common.util._
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.bean._
-import org.apache.streampark.spark.client.impl.YarnClient.logger
 
 import scala.util.{Failure, Success, Try}
 
@@ -94,20 +91,29 @@ trait SparkClientTrait extends Logger {
         false
       }
     })
-    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(
-      c => !userConfig.containsKey(c._1) && !submitRequest.sparkParameterMap.containsKey(c._1)
-    )
+    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1) && !submitRequest.sparkParameterMap.containsKey(c._1))
     submitRequest.appProperties.clear()
-    // 2) set yarn queue from
-    if(SparkExecutionMode.isYarnMode(submitRequest.executionMode)){
+    // 2) set yarn queue
+    if (SparkExecutionMode.isYarnMode(submitRequest.executionMode)) {
       setYarnQueue(submitRequest)
     }
-
-    // 2) set configuration from .yaml
+    // 3) set configuration from .yaml
     submitRequest.appProperties.putAll(submitRequest.sparkParameterMap)
-    // 3) set configuration from appProperties
+    // 4) set configuration from appProperties
     submitRequest.appProperties.putAll(userConfig)
-    // 4) set default configuration
+    // 5) set default configuration
     submitRequest.appProperties.putAll(defaultConfig)
   }
+
+  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
+    logger.info("[StreamPark][Spark][YarnClient] Spark launcher start setting yarn queue.")
+    if (submitRequest.hasExtra("yarnQueueName")) {
+      submitRequest.appProperties.put("spark.yarn.queue", submitRequest.getExtra("yarnQueueName").asInstanceOf[String])
+    }
+    if (submitRequest.hasExtra("yarnQueueLabel")) {
+      submitRequest.appProperties.put("spark.yarn.am.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+      submitRequest.appProperties.put("spark.yarn.executor.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+    }
+  }
+
 }

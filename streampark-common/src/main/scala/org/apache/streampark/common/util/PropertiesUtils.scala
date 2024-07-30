@@ -39,6 +39,10 @@ object PropertiesUtils extends Logger {
 
   private[this] lazy val SPARK_PROPERTY_COMPLEX_PATTERN = Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$")
 
+  // scalastyle:off
+  private[this] lazy val SPARK_ARGUMENT_REGEXP = "\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?"
+  // scalastyle:on
+
   private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
@@ -414,7 +418,7 @@ object PropertiesUtils extends Logger {
     if (StringUtils.isEmpty(arguments)) List.empty[String]
     else {
       val list = List[String]()
-      arguments.split("\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?") match {
+      arguments.split(SPARK_ARGUMENT_REGEXP) match {
         case d if Utils.isNotEmpty(d) =>
           d.foreach(x => {
             if (x.nonEmpty) {
