@@ -15,16 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.console.base.enums;
 
-/** This exception is thrown when there is an error in the file type */
-public class IllegalFileTypeException extends ApiAlertException {
+import com.google.auto.service.AutoService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public IllegalFileTypeException(String message) {
-        super(message);
-    }
+@Getter
+@AllArgsConstructor
+@AutoService(Status.class)
+public enum CommonStatus implements Status {
 
-    public IllegalFileTypeException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    SUCCESS(0, "success", "成功"),
+    UNKNOWN_ERROR(1, "unknown error: {0}", "未知错误: {0}"),
+
+    PROJECT(10, "Project", "项目"),
+    TEAM(11, "Team", "团队"),
+    VARIABLE(12, "Variable", "变量"),
+    APPLICATION(13, "Application", "应用程序"),
+    FLINK_CLUSTERS(14, "Flink Clusters", "Flink集群"),
+
+    ;
+
+    private final int code;
+    private final String enMsg;
+    private final String zhMsg;
 }
