@@ -42,10 +42,10 @@ public class DockerSettingForm extends CommonForm {
     @FindBy(xpath = "//input[@placeholder='Docker Password']")
     private WebElement inputPassword;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
+    @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Docker Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
     private WebElement buttonOk;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+    @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Docker Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
     private WebElement buttonCancel;
 
     DockerSettingForm(EnvironmentDetailForm environmentDetailForm) {

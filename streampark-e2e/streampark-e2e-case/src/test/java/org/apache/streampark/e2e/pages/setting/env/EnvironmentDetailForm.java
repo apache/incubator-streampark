@@ -17,9 +17,12 @@
 
 package org.apache.streampark.e2e.pages.setting.env;
 
+import org.apache.streampark.e2e.pages.common.Constants;
+
 import lombok.Getter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Getter
 public class EnvironmentDetailForm {
@@ -33,6 +36,7 @@ public class EnvironmentDetailForm {
 
     @SuppressWarnings("unchecked")
     public <T> T addSetting(EnvSettingTypeEnum envSettingTypeEnum) {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         switch (envSettingTypeEnum) {
             case Maven:
                 return (T) new MavenSettingForm(this);

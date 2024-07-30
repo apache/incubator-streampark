@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
 
-import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDelete;
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
 import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
 
 @Getter
@@ -46,16 +46,9 @@ public class IngressSettingForm extends CommonForm {
     }
 
     public IngressSettingForm domainAddress(String domainAddress) {
-        btnDomainAddressSetting.click();
+        WebElementClick(driver, btnDomainAddressSetting);
         WebElementDeleteAndInput(inputDomainAddress, domainAddress);
-        btnDomainAddressSetting.click();
-        return this;
-    }
-
-    public IngressSettingForm clear() {
-        btnDomainAddressSetting.click();
-        WebElementDelete(inputDomainAddress);
-        btnDomainAddressSetting.click();
+        WebElementClick(driver, btnDomainAddressSetting);
         return this;
     }
 }

@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
+
 @Getter
 public class EnvironmentPage extends NavBarPage implements SettingPage.Tab {
 
@@ -63,23 +65,21 @@ public class EnvironmentPage extends NavBarPage implements SettingPage.Tab {
     @FindBy(xpath = "//button[contains(@class, 'swal2-confirm') and contains(@class, 'swal2-styled') and text()='OK']")
     private WebElement errorMessageConfirmButton;
 
-    public EnvironmentDetailForm createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum envSettingTypeEnum) throws InterruptedException {
+    public EnvironmentDetailForm createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum envSettingTypeEnum) {
         waitForPageLoading();
         switch (envSettingTypeEnum) {
             case Docker:
-                new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-                    .until(ExpectedConditions.elementToBeClickable(btnCreateDockerSetting));
-                btnCreateDockerSetting.click();
-                Thread.sleep(5000);
+                WebElementClick(driver, btnCreateDockerSetting);
                 break;
             case Email:
-                new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-                    .until(ExpectedConditions.elementToBeClickable(btnCreateEmailSetting));
-                btnCreateEmailSetting.click();
-                Thread.sleep(5000);
+                WebElementClick(driver, btnCreateEmailSetting);
+                break;
+            case Maven:
+            case Ingress:
                 break;
             default:
-                // ignore
+                throw new UnsupportedOperationException(
+                    String.format("Unsupported environment type %s", envSettingTypeEnum.desc()));
         }
         return new EnvironmentDetailForm(driver);
     }

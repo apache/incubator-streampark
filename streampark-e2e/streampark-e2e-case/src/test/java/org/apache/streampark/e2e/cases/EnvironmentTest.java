@@ -39,7 +39,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
+@StreamPark(composeFiles = "docker/environment/docker-compose.yaml")
 public class EnvironmentTest {
 
     private static RemoteWebDriver browser;
@@ -82,7 +82,7 @@ public class EnvironmentTest {
 
     @Test
     @Order(10)
-    public void testCreateEnvironment() throws InterruptedException {
+    public void testCreateEnvironment() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
         environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Maven)
@@ -109,7 +109,7 @@ public class EnvironmentTest {
 
     @Test
     @Order(20)
-    public void testCreateEmailSettingFailedWithAuth() throws InterruptedException {
+    public void testCreateEmailSettingFailedWithAuth() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
         EmailSettingForm emailSettingForm =
@@ -140,8 +140,8 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(130)
-    public void testCreateDockerSettingFailed() throws InterruptedException {
+    @Order(30)
+    public void testCreateDockerSettingFailed() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
         DockerSettingForm dockerSettingForm =
             environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Docker)

@@ -23,6 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.FindBys;
 
+import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementClick;
 import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDeleteAndInput;
 
 @Getter
@@ -73,30 +74,30 @@ public class MavenSettingForm extends CommonForm {
     }
 
     public MavenSettingForm filePath(String filePath) {
-        btnSettingsFilePath.click();
+        WebElementClick(driver, btnSettingsFilePath);
         WebElementDeleteAndInput(inputSettingsFilePath, filePath);
-        btnSettingsFilePath.click();
+        WebElementClick(driver, btnSettingsFilePath);
         return this;
     }
 
     public MavenSettingForm centralRepository(String repository) {
-        btnCentralRepository.click();
+        WebElementClick(driver, btnCentralRepository);
         WebElementDeleteAndInput(inputCentralRepository, repository);
-        btnCentralRepository.click();
+        WebElementClick(driver, btnCentralRepository);
         return this;
     }
 
     public MavenSettingForm authUser(String user) {
-        btnAuthUser.click();
+        WebElementClick(driver, btnAuthUser);
         WebElementDeleteAndInput(inputAuthUser, user);
-        btnAuthUser.click();
+        WebElementClick(driver, btnAuthUser);
         return this;
     }
 
     public MavenSettingForm authPassword(String password) {
-        btnAuthPassword.click();
+        WebElementClick(driver, btnAuthPassword);
         WebElementDeleteAndInput(inputAuthPassword, password);
-        btnAuthPassword.click();
+        WebElementClick(driver, btnAuthPassword);
         return this;
     }
 }
