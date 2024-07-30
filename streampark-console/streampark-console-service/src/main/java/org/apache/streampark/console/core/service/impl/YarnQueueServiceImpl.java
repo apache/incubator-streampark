@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.enums.MessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
@@ -52,7 +52,19 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
+import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
+import static org.apache.streampark.console.base.enums.CommonStatus.FLINK_CLUSTERS;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_ID_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_AVAILABLE;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_QUERY_PARAMS_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_QUERY_PARAMS_TEAM_ID_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_USED_FORMAT;
 import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.isValid;
 
 @Slf4j
@@ -63,11 +75,6 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
         YarnQueueService {
 
     public static final String DEFAULT_QUEUE = "default";
-    public static final String QUEUE_USED_FORMAT = "Please remove the yarn queue for '%s' referenced it before '%s'.";
-    public static final String QUEUE_EXISTED_IN_TEAM_HINT =
-        "The queue label existed already. Try on a new queue label, please.";
-    public static final String QUEUE_EMPTY_HINT = "Yarn queue label mustn't be empty.";
-    public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
 
     @Autowired
     private ApplicationManageService applicationManageService;
@@ -76,9 +83,8 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
     @Override
     public IPage<YarnQueue> getPage(YarnQueue yarnQueue, RestRequest request) {
-        AssertUtils.notNull(yarnQueue, "Yarn queue query params mustn't be null.");
-        AssertUtils.notNull(
-            yarnQueue.getTeamId(), "Team id of yarn queue query params mustn't be null.");
+        ApiAlertException.throwIfNull(yarnQueue, YARN_QUEUE_QUERY_PARAMS_NULL);
+        ApiAlertException.throwIfNull(yarnQueue.getTeamId(), YARN_QUEUE_QUERY_PARAMS_TEAM_ID_NULL);
         Page<YarnQueue> page = MybatisPager.getPage(request);
         return this.baseMapper.selectPage(page, yarnQueue);
     }
@@ -91,21 +97,21 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     @Override
     public ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue) {
 
-        AssertUtils.notNull(yarnQueue, "Yarn queue mustn't be empty.");
-        AssertUtils.notNull(yarnQueue.getTeamId(), "Team id mustn't be null.");
+        ApiAlertException.throwIfNull(yarnQueue, YARN_QUEUE_NULL);
+        ApiAlertException.throwIfNull(yarnQueue.getTeamId(), SYSTEM_TEAM_ID_NULL_ERROR);
 
         ResponseResult<String> responseResult = new ResponseResult<>();
 
         if (StringUtils.isBlank(yarnQueue.getQueueLabel())) {
             responseResult.setStatus(3);
-            responseResult.setMsg(QUEUE_EMPTY_HINT);
+            responseResult.setMsg(YARN_QUEUE_LABEL_NULL.getMessage());
             return responseResult;
         }
 
         boolean valid = isValid(yarnQueue.getQueueLabel());
         if (!valid) {
             responseResult.setStatus(2);
-            responseResult.setMsg(ERR_FORMAT_HINTS);
+            responseResult.setMsg(YARN_QUEUE_LABEL_FORMAT.getMessage());
             return responseResult;
         }
 
@@ -113,18 +119,33 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
         if (existed) {
             responseResult.setStatus(1);
-            responseResult.setMsg(QUEUE_EXISTED_IN_TEAM_HINT);
+            responseResult.setMsg(YARN_QUEUE_LABEL_EXIST.getMessage());
             return responseResult;
         }
         responseResult.setStatus(0);
-        responseResult.setMsg("The queue label is available.");
+        responseResult.setMsg(YARN_QUEUE_LABEL_AVAILABLE.getMessage());
         return responseResult;
     }
 
     @Override
     public boolean createYarnQueue(YarnQueue yarnQueue) {
         ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
-        ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, checkResponse.getMsg());
+
+        MessageStatus status = null;
+        switch (checkResponse.getStatus()) {
+            case 1:
+                status = YARN_QUEUE_LABEL_EXIST;
+                break;
+            case 2:
+                status = YARN_QUEUE_LABEL_FORMAT;
+                break;
+            case 3:
+                status = YARN_QUEUE_LABEL_NULL;
+                break;
+            default:
+                status = YARN_QUEUE_LABEL_AVAILABLE;
+        }
+        ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, status);
         return save(yarnQueue);
     }
 
@@ -147,7 +168,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
         }
 
         // 3 update yarnQueue
-        ApiAlertException.throwIfFalse(isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
+        ApiAlertException.throwIfFalse(isValid(yarnQueue.getQueueLabel()), YARN_QUEUE_LABEL_FORMAT);
 
         checkNotReferencedByApplications(
             queueFromDB.getTeamId(), queueFromDB.getQueueLabel(), "updating");
@@ -176,19 +197,19 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
      * mode or yarn-perjob mode.
      *
      * @param executionModeEnum execution mode.
-     * @param queueLabel queueLabel expression.
+     * @param queueLabel        queueLabel expression.
      */
     @Override
     public void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel) {
         if (FlinkExecutionMode.isYarnMode(executionModeEnum)) {
-            ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
+            ApiAlertException.throwIfFalse(isValid(queueLabel, true), YARN_QUEUE_LABEL_FORMAT);
         }
     }
 
     @Override
     public void checkQueueLabel(SparkExecutionMode executionModeEnum, String queueLabel) {
         if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
-            ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
+            ApiAlertException.throwIfFalse(isValid(queueLabel, true), YARN_QUEUE_LABEL_FORMAT);
         }
     }
 
@@ -216,10 +237,10 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
 
     @VisibleForTesting
     public YarnQueue getYarnQueueByIdWithPreconditions(YarnQueue yarnQueue) {
-        AssertUtils.notNull(yarnQueue, "Yarn queue mustn't be null.");
-        AssertUtils.notNull(yarnQueue.getId(), "Yarn queue id mustn't be null.");
+        ApiAlertException.throwIfNull(yarnQueue, YARN_QUEUE_NULL);
+        ApiAlertException.throwIfNull(yarnQueue.getId(), YARN_QUEUE_ID_NULL);
         YarnQueue queueFromDB = getById(yarnQueue.getId());
-        ApiAlertException.throwIfNull(queueFromDB, "The queue doesn't exist.");
+        ApiAlertException.throwIfNull(queueFromDB, YARN_QUEUE_NOT_EXIST);
         return queueFromDB;
     }
 
@@ -233,7 +254,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
             CollectionUtils.isEmpty(clustersReferenceYarnQueueLabel),
-            String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
+            YARN_QUEUE_USED_FORMAT, FLINK_CLUSTERS, operation);
     }
 
     @VisibleForTesting
@@ -255,6 +276,6 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
             .collect(Collectors.toList());
         ApiAlertException.throwIfFalse(
             CollectionUtils.isEmpty(appsReferenceQueueLabel),
-            String.format(QUEUE_USED_FORMAT, "applications", operation));
+            YARN_QUEUE_USED_FORMAT, APPLICATION, operation);
     }
 }

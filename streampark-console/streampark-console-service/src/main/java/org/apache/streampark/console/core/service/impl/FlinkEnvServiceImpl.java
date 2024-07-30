@@ -38,6 +38,7 @@ import java.util.Date;
 
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_HOME_EXIST_APP_USE;
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_HOME_EXIST_CLUSTER_USE;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_HOME_IS_DEFAULT_SET;
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_HOME_NOT_EXIST;
 
 @Slf4j
@@ -106,7 +107,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         Long count = this.baseMapper.selectCount(null);
         ApiAlertException.throwIfFalse(
             !(count > 1 && flinkEnv.getIsDefault()),
-            "The flink home is set as default, please change it first.");
+            FLINK_ENV_HOME_IS_DEFAULT_SET);
 
         this.baseMapper.deleteById(id);
     }

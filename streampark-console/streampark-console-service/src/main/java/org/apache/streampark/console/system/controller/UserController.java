@@ -48,6 +48,8 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_CURRENT_LOGIN_NULL_SET_TEAM_FAILED;
+
 @Slf4j
 @Validated
 @RestController
@@ -130,7 +132,7 @@ public class UserController {
             return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "TeamId is invalid, set team failed.");
         }
         User user = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(user, "Current login user is null, set team failed.");
+        ApiAlertException.throwIfNull(user, SYSTEM_USER_CURRENT_LOGIN_NULL_SET_TEAM_FAILED);
         // 1) set the latest team
         userService.setLastTeam(teamId, user.getUserId());
 

@@ -38,7 +38,7 @@ public class ApiDetailException extends AbstractApiException {
     }
 
     public ApiDetailException(MessageStatus status, Throwable cause, Object... args) {
-        super(MessageFormat.format(status.getMsg(), ExceptionUtils.stringifyException(cause), args),
+        super(MessageFormat.format(status.getMessage(), ExceptionUtils.stringifyException(cause), args),
             ResponseCode.CODE_FAIL_DETAIL);
     }
 

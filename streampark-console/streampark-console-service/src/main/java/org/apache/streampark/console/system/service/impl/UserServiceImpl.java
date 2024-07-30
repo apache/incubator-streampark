@@ -63,7 +63,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_NOT_BELONG_TEAM_LOGIN;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_OLD_PASSWORD_INCORRECT_UPDATE_PASSWORD_FAILED;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_UPDATE_PASSWORD_FAILED;
 
 @Slf4j
 @Service
@@ -150,15 +152,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public void updatePassword(User userParam) {
         User user = getById(userParam.getUserId());
-        ApiAlertException.throwIfNull(user, "User is null. Update password failed.");
+        ApiAlertException.throwIfNull(user, SYSTEM_USER_ID_NOT_EXIST);
         ApiAlertException.throwIfFalse(
             user.getLoginType() == LoginTypeEnum.PASSWORD,
-            "Can only update password for user who sign in with PASSWORD");
+            SYSTEM_USER_UPDATE_PASSWORD_FAILED);
 
         String saltPassword = ShaHashUtils.encrypt(user.getSalt(), userParam.getOldPassword());
         ApiAlertException.throwIfFalse(
             StringUtils.equals(user.getPassword(), saltPassword),
-            "Old password error. Update password failed.");
+            SYSTEM_USER_OLD_PASSWORD_INCORRECT_UPDATE_PASSWORD_FAILED);
 
         String salt = ShaHashUtils.getRandomSalt();
         String password = ShaHashUtils.encrypt(salt, userParam.getPassword());

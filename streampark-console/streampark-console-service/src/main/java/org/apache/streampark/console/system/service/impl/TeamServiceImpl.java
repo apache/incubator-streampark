@@ -44,13 +44,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.APPLICATION;
-import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT;
+import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
+import static org.apache.streampark.console.base.enums.CommonStatus.PROJECT;
+import static org.apache.streampark.console.base.enums.CommonStatus.VARIABLE;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_ALREADY_EXIST;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_NAME_CAN_NOT_CHANGE;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_TEAM_NOT_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.VARIABLES;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ID_NOT_EXIST;
 
 @Slf4j
 @Service
@@ -89,9 +91,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         Team existedTeam = getByName(team.getTeamName());
         ApiAlertException.throwIfFalse(
             existedTeam == null,
-            String.format(
-                "Team name [%s] exists already. Create team failed. Please rename and try again.",
-                team.getTeamName()));
+            SYSTEM_TEAM_ALREADY_EXIST,
+            team.getTeamName());
         team.setId(null);
         this.save(team);
     }
@@ -107,19 +108,19 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
             applicationInfoService.existsByTeamId(teamId),
             SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
             team.getTeamName(),
-            APPLICATION.getMsg());
+            APPLICATION.getMessage());
 
         ApiAlertException.throwIfTrue(
             projectService.existsByTeamId(teamId),
             SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
             team.getTeamName(),
-            PROJECT.getMsg());
+            PROJECT.getMessage());
 
         ApiAlertException.throwIfTrue(
             variableService.existsByTeamId(teamId),
             SYSTEM_TEAM_EXIST_MODULE_USE_DELETE_ERROR,
             team.getTeamName(),
-            VARIABLES.getMsg());
+            VARIABLE.getMessage());
 
         memberService.removeByTeamId(teamId);
         userService.clearLastTeam(teamId);
@@ -128,23 +129,20 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
 
     @Override
     public void updateTeam(Team team) {
-        Team oldTeam = Optional.ofNullable(this.getById(team.getId()))
-            .orElseThrow(
-                () -> new IllegalArgumentException(
-                    String.format("Team id [id=%s] not found", team.getId())));
+        Team oldTeam = this.getById(team.getId());
+        ApiAlertException.throwIfNull(team, SYSTEM_TEAM_NOT_EXIST);
         ApiAlertException.throwIfFalse(
             oldTeam.getTeamName().equals(team.getTeamName()),
-            "Team name can't be changed. Update team failed.");
+            SYSTEM_TEAM_NAME_CAN_NOT_CHANGE);
         oldTeam.setDescription(team.getDescription());
         updateById(oldTeam);
     }
 
     @Override
     public List<Team> listByUserId(Long userId) {
-        User user = Optional.ofNullable(userService.getById(userId))
-            .orElseThrow(
-                () -> new ApiAlertException(
-                    String.format("The userId [%s] not found.", userId)));
+        User user = userService.getById(userId);
+        ApiAlertException.throwIfNull(user, SYSTEM_USER_ID_NOT_EXIST, userId);
+
         // Admin has the permission for all teams.
         if (UserTypeEnum.ADMIN == user.getUserType()) {
             return this.list();

@@ -19,7 +19,6 @@ package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.enums.MessageStatus;
-import org.apache.streampark.console.base.enums.MessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
@@ -54,6 +53,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.API_NOT_SUPPORT;
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINk_APP_IS_NULL;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH;
@@ -91,7 +92,7 @@ public class StreamParkAspect {
                 HttpServletRequest request =
                     ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
                 String url = request.getRequestURI();
-                throw new ApiAlertException("openapi unsupported: " + url);
+                ApiAlertException.throwException(API_NOT_SUPPORT, url);
             }
         }
         return (RestResponse) joinPoint.proceed();
@@ -174,7 +175,7 @@ public class StreamParkAspect {
         try {
             return Long.parseLong(value.toString());
         } catch (NumberFormatException e) {
-            throw new ApiAlertException(
+            return ApiAlertException.throwException(UNKNOWN_ERROR,
                 "Wrong use of annotation on method " + methodSignature.getName(), e);
         }
     }

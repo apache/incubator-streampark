@@ -52,8 +52,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLES_ALREADY_EXIST;
-import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLES_EXIST_USE;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_ALREADY_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_CODE_MODIFY_FAILED;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_EXIST_USE;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_ID_NULL_FAILED;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_VARIABLE_NOT_EXIST;
 
 @Slf4j
 @Service
@@ -79,7 +82,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
 
         ApiAlertException.throwIfTrue(
             this.findByVariableCode(variable.getTeamId(), variable.getVariableCode()) != null,
-            SYSTEM_VARIABLES_ALREADY_EXIST);
+            SYSTEM_VARIABLE_ALREADY_EXIST);
 
         variable.setCreatorId(ServiceHelper.getUserId());
         this.save(variable);
@@ -88,7 +91,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     @Override
     public void remove(Variable variable) {
         ApiAlertException.throwIfTrue(
-            isDependByApplications(variable), SYSTEM_VARIABLES_EXIST_USE);
+            isDependByApplications(variable), SYSTEM_VARIABLE_EXIST_USE);
         this.removeById(variable);
     }
 
@@ -122,12 +125,12 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     @Override
     public void updateVariable(Variable variable) {
         // region update variable
-        ApiAlertException.throwIfNull(variable.getId(), "The variable id cannot be null.");
+        ApiAlertException.throwIfNull(variable.getId(), SYSTEM_VARIABLE_ID_NULL_FAILED);
         Variable findVariable = this.baseMapper.selectById(variable.getId());
-        ApiAlertException.throwIfNull(findVariable, "The variable does not exist.");
+        ApiAlertException.throwIfNull(findVariable, SYSTEM_VARIABLE_NOT_EXIST);
         ApiAlertException.throwIfFalse(
             findVariable.getVariableCode().equals(variable.getVariableCode()),
-            "The variable code cannot be updated.");
+            SYSTEM_VARIABLE_CODE_MODIFY_FAILED);
         this.baseMapper.updateById(variable);
         // endregion
 

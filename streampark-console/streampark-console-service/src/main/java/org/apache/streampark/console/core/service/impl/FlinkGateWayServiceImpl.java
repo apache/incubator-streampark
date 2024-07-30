@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_GATEWAY_GET_VERSION_FAILED;
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_GATEWAY_NAME_EXIST;
 
 @Slf4j
@@ -87,6 +88,6 @@ public class FlinkGateWayServiceImpl extends ServiceImpl<FlinkGateWayMapper, Fli
         } catch (Exception e) {
             log.error("get gateway version failed", e);
         }
-        throw new ApiAlertException("get gateway version failed");
+        return ApiAlertException.throwException(FLINK_GATEWAY_GET_VERSION_FAILED);
     }
 }

@@ -111,7 +111,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_BUILD_RESOURCE_GROUP_FAILED;
 import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_IS_INVALID;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
 import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
@@ -286,10 +289,8 @@ public class AppBuildPipeServiceImpl
                             for (String jar : app.getDependencyObject().getJar()) {
                                 File localJar = new File(WebUtils.getAppTempDir(), jar);
                                 File uploadJar = new File(localUploads, jar);
-                                if (!localJar.exists() && !uploadJar.exists()) {
-                                    throw new ApiAlertException(
-                                        "Missing file: " + jar + ", please upload again");
-                                }
+                                ApiAlertException.throwIfTrue(!localJar.exists() && !uploadJar.exists(),
+                                    FLINK_ENV_FILE_OR_DIR_NOT_EXIST);
                                 if (localJar.exists()) {
                                     checkOrElseUploadJar(
                                         FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(),
@@ -428,16 +429,15 @@ public class AppBuildPipeServiceImpl
         Application app = applicationManageService.getById(appId);
 
         // 1) check flink version
-        String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";
         FlinkEnv env = flinkEnvService.getByIdOrDefault(app.getVersionId());
-        ApiAlertException.throwIfNull(env, checkEnvErrorMessage);
+        ApiAlertException.throwIfNull(env, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
         boolean checkVersion = env.getFlinkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
             checkVersion, FLINK_ENV_FLINK_VERSION_UNSUPPORT, env.getFlinkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
-        ApiAlertException.throwIfFalse(envOk, checkEnvErrorMessage);
+        ApiAlertException.throwIfFalse(envOk, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
@@ -723,7 +723,7 @@ public class AppBuildPipeServiceImpl
                                             resourceService.getById(
                                                 resourceIdInGroup)));
                             } catch (JsonProcessingException e) {
-                                throw new ApiAlertException("Parse resource group failed.", e);
+                                ApiAlertException.throwException(APP_BUILD_RESOURCE_GROUP_FAILED, e);
                             }
                         }
                     });

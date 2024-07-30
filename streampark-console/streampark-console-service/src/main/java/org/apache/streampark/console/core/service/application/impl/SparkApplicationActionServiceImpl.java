@@ -95,11 +95,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
+import static org.apache.hadoop.service.Service.STATE.STARTED;
 import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_REPEAT_START_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR;
-import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
-
-import static org.apache.hadoop.service.Service.STATE.STARTED;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ACTION_YARN_CLUSTER_STATE_CHECK;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_EXECUTE_MODE_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ID_NOT_EXISTS_REVOKE_FAILED;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_PY_FLINK_FILE_IS_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_PY_FLINK_FILE_TYPE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_VERSION_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -145,7 +149,7 @@ public class SparkApplicationActionServiceImpl
     public void revoke(Long appId) throws ApplicationException {
         SparkApplication application = getById(appId);
         ApiAlertException.throwIfNull(
-            application, String.format("The application id=%s not found, revoke failed.", appId));
+            application, APP_ID_NOT_EXISTS_REVOKE_FAILED, appId);
 
         // 1) delete files that have been published to workspace
         application.getFsOperator().delete(application.getAppHome());
@@ -261,7 +265,7 @@ public class SparkApplicationActionServiceImpl
             !application.isCanBeStart(), APP_ACTION_REPEAT_START_ERROR);
 
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
-        ApiAlertException.throwIfNull(sparkEnv, "[StreamPark] can no found spark version");
+        ApiAlertException.throwIfNull(sparkEnv, SPARK_ENV_VERSION_NOT_FOUND);
 
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
             checkYarnBeforeStart(application);
@@ -428,7 +432,7 @@ public class SparkApplicationActionServiceImpl
         ApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
         ApiAlertException.throwIfNull(
-            executionModeEnum, "ExecutionMode can't be null, start application failed.");
+            executionModeEnum, APP_EXECUTE_MODE_NOT_EXISTS_ERROR);
 
         String flinkUserJar = null;
         String appConf = null;
@@ -454,14 +458,14 @@ public class SparkApplicationActionServiceImpl
                 Resource resource = resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
-                    resource, "pyflink file can't be null, start application failed.");
+                    resource, APP_PY_FLINK_FILE_IS_NULL);
 
                 ApiAlertException.throwIfNull(
-                    resource.getFilePath(), "pyflink file can't be null, start application failed.");
+                    resource.getFilePath(), APP_PY_FLINK_FILE_IS_NULL);
 
                 ApiAlertException.throwIfFalse(
                     resource.getFilePath().endsWith(Constant.PYTHON_SUFFIX),
-                    "pyflink format error, must be a \".py\" suffix, start application failed.");
+                    APP_PY_FLINK_FILE_TYPE_ILLEGALLY);
 
                 flinkUserJar = resource.getFilePath();
                 break;
@@ -568,9 +572,9 @@ public class SparkApplicationActionServiceImpl
         STATE yarnState = HadoopUtils.yarnClient().getServiceState();
         ApiAlertException.throwIfFalse(
             yarnState == STARTED,
-            "[StreamPark] The yarn cluster service state is " + yarnState.name() + ", please check it");
+            APP_ACTION_YARN_CLUSTER_STATE_CHECK, yarnState.name());
         ApiAlertException.throwIfTrue(
             !applicationInfoService.getYarnAppReport(application.getJobName()).isEmpty(),
-            "[StreamPark] The same task name is already running in the yarn queue");
+            APP_ACTION_SAME_TASK_IN_ALREADY_RUN_ERROR);
     }
 }

@@ -86,10 +86,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_ENV_CONNECTOR_NULL_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_APP_JAR_EMPTY_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_FLINK_JAR_NULL;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_MULTI_FILE_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NAME_MODIFY_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NAME_NULL_FAILED;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_NOT_EXIST_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_POM_JAR_EMPTY;
 import static org.apache.streampark.console.base.enums.MessageStatus.RESOURCE_STILL_USE_DELETE_ERROR;
@@ -133,7 +135,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     @Override
     public void addResource(Resource resource) throws Exception {
         String resourceStr = resource.getResource();
-        ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
+        ApiAlertException.throwIfNull(resourceStr, RESOURCE_POM_JAR_EMPTY);
 
         // check
         Dependency dependency = Dependency.toDependency(resourceStr);
@@ -144,7 +146,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resource.getResourceType() == ResourceTypeEnum.CONNECTOR) {
             processConnectorResource(resource);
         } else {
-            ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
+            ApiAlertException.throwIfNull(resource.getResourceName(), RESOURCE_NAME_NULL_FAILED);
         }
 
         ApiAlertException.throwIfNotNull(
@@ -166,7 +168,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private static void processConnectorResource(Resource resource) throws JsonProcessingException {
         String connector = resource.getConnector();
-        ApiAlertException.throwIfNull(connector, "the flink connector is null.");
+        ApiAlertException.throwIfNull(connector, FLINK_ENV_CONNECTOR_NULL_ERROR);
         FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
         resource.setResourceName(connectorResource.getFactoryIdentifier());
         Optional.ofNullable(connectorResource.getRequiredOptions())
@@ -462,7 +464,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         File localJar = new File(resourcePath);
         File teamUploadJar = new File(teamUploads, localJar.getName());
         ApiAlertException.throwIfFalse(
-            localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
+            localJar.exists(), RESOURCE_NOT_EXIST_ERROR);
         FsOperator.lfs()
             .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
     }

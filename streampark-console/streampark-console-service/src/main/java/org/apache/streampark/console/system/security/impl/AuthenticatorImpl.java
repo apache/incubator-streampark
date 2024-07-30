@@ -31,7 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_ALLOW_LOGIN_TYPE;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_PASSWORD_INCORRECT;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS;
+import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT;
 import static org.apache.streampark.console.base.enums.MessageStatus.SYSTEM_USER_NOT_EXIST;
 
 @Component
@@ -47,7 +49,7 @@ public class AuthenticatorImpl implements Authenticator {
         LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
 
         ApiAlertException.throwIfNull(
-            loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
+            loginTypeEnum, SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT, loginType);
 
         switch (loginTypeEnum) {
             case PASSWORD:
@@ -57,8 +59,7 @@ public class AuthenticatorImpl implements Authenticator {
             case SSO:
                 return ssoAuthenticate(username);
             default:
-                throw new ApiAlertException(
-                    String.format("the login type [%s] is not supported.", loginType));
+                return ApiAlertException.throwException(SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT, loginType);
         }
     }
 
@@ -77,7 +78,7 @@ public class AuthenticatorImpl implements Authenticator {
         password = ShaHashUtils.encrypt(salt, password);
 
         ApiAlertException.throwIfFalse(
-            StringUtils.equals(user.getPassword(), password), "Incorrect password");
+            StringUtils.equals(user.getPassword(), password), SYSTEM_USER_LOGIN_PASSWORD_INCORRECT);
 
         return user;
     }

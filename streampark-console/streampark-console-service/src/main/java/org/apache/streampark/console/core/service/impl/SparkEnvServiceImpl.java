@@ -37,6 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_HOME_IS_DEFAULT_SET;
+import static org.apache.streampark.console.base.enums.MessageStatus.SPARK_ENV_HOME_NULL_ERROR;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -93,7 +96,7 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
         Long count = this.baseMapper.selectCount(null);
         ApiAlertException.throwIfFalse(
             !(count > 1 && sparkEnv.getIsDefault()),
-            "The spark home is set as default, please change it first.");
+            SPARK_ENV_HOME_IS_DEFAULT_SET);
 
         this.baseMapper.deleteById(id);
     }
@@ -150,7 +153,7 @@ public class SparkEnvServiceImpl extends ServiceImpl<SparkEnvMapper, SparkEnv>
     private void checkOrElseAlert(SparkEnv sparkEnv) {
 
         // 1.check exists
-        ApiAlertException.throwIfNull(sparkEnv, "The spark home does not exist, please check.");
+        ApiAlertException.throwIfNull(sparkEnv, SPARK_ENV_HOME_NULL_ERROR);
 
         // todo : To be developed
         // 2.check if it is being used by any spark cluster

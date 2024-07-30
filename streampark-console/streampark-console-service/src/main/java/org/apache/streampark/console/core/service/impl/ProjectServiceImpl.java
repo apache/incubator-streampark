@@ -80,6 +80,7 @@ import java.util.stream.Stream;
 
 import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_BUILDING_STATE;
 import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_GIT_PASSWORD_DECRYPT_FAILED;
+import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_MODULE_NULL_ERROR;
 import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_NAME_EXIST;
 import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_RUNNING_BUILDING_EXCEED_LIMIT;
 import static org.apache.streampark.console.base.enums.MessageStatus.PROJECT_TEAM_ID_MODIFY_ERROR;
@@ -119,7 +120,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 project.setSalt(salt);
                 project.setPassword(encrypt);
             } catch (Exception e) {
-                throw new ApiAlertException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
+                ApiAlertException.throwException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
             }
         }
         boolean status = save(project);
@@ -151,7 +152,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         project.setPassword(encrypt);
                         project.setSalt(salt);
                     } catch (Exception e) {
-                        throw new ApiAlertException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
+                        ApiAlertException.throwException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
                     }
                 }
             }
@@ -286,7 +287,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> listJars(Project project) {
         ApiAlertException.throwIfNull(
-            project.getModule(), "Project module can't be null, please check.");
+            project.getModule(), PROJECT_MODULE_NULL_ERROR);
         File projectModuleDir = new File(project.getDistHome(), project.getModule());
         return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
             .map(File::getName)

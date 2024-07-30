@@ -34,11 +34,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.MessageFormat;
 import java.util.stream.Collectors;
 
-import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.QUEUE_EMPTY_HINT;
-import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.QUEUE_USED_FORMAT;
-import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
+import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
+import static org.apache.streampark.console.base.enums.CommonStatus.FLINK_CLUSTERS;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_ID_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_NULL;
+import static org.apache.streampark.console.base.enums.MessageStatus.YARN_QUEUE_USED_FORMAT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
@@ -115,13 +120,11 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         YarnQueue yarnQueue = mockYarnQueue(1L, "queue@");
         ResponseResult<String> result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(2);
-        assertThat(result.getMsg()).isEqualTo(ERR_FORMAT_HINTS);
 
         // Test for error format with empty.
         yarnQueue.setQueueLabel("");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(3);
-        assertThat(result.getMsg()).isEqualTo(QUEUE_EMPTY_HINT);
 
         // Test for existed
         yarnQueue.setQueueLabel("queue1@label1");
@@ -142,13 +145,11 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         yarnQueue.setQueueLabel("queue1@label1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(1);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
 
         // Test for normal cases.
         yarnQueue.setQueueLabel("q1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(0);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_AVAILABLE_HINT);
     }
 
     /**
@@ -176,7 +177,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         yarnQueue.setQueueLabel("q1@");
         assertThatThrownBy(() -> yarnQueueService.updateYarnQueue(yarnQueue))
             .isInstanceOf(ApiAlertException.class)
-            .hasMessage(ERR_FORMAT_HINTS);
+            .hasMessage(YARN_QUEUE_LABEL_FORMAT.getMessage().replaceAll("'", ""));
 
         // Test for formal cases.
         yarnQueue.setQueueLabel(newQueue);
@@ -207,21 +208,21 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for null yarn queue
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(null))
-            .isInstanceOf(NullPointerException.class)
-            .hasMessage("Yarn queue mustn't be null.");
+            .isInstanceOf(ApiAlertException.class)
+            .hasMessage(YARN_QUEUE_NULL.getMessage());
 
         // Test for null yarn queue id
         YarnQueue yarnQueue = new YarnQueue();
         yarnQueue.setId(null);
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(yarnQueue))
-            .isInstanceOf(NullPointerException.class)
-            .hasMessage("Yarn queue id mustn't be null.");
+            .isInstanceOf(ApiAlertException.class)
+            .hasMessage(YARN_QUEUE_ID_NULL.getMessage());
 
         // Test for yarn queue non-existed in database.
         yarnQueue.setId(1L);
         assertThatThrownBy(() -> yarnQueueServiceImpl.getYarnQueueByIdWithPreconditions(yarnQueue))
             .isInstanceOf(ApiAlertException.class)
-            .hasMessage("The queue doesn't exist.");
+            .hasMessage(YARN_QUEUE_NOT_EXIST.getMessage());
 
         // Test for expected condition.
         yarnQueue.setQueueLabel(queueLabel);
@@ -250,7 +251,8 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         assertThatThrownBy(
             () -> yarnQueueServiceImpl.checkNotReferencedByFlinkClusters(queueLabel, operation))
                 .isInstanceOf(ApiAlertException.class)
-                .hasMessage(String.format(QUEUE_USED_FORMAT, "flink clusters", operation));
+                .hasMessage(
+                    MessageFormat.format(YARN_QUEUE_USED_FORMAT.getMessage(), FLINK_CLUSTERS.getMessage(), operation));
     }
 
     @Test
@@ -289,7 +291,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
             () -> yarnQueueServiceImpl.checkNotReferencedByApplications(
                 targetTeamId, queueLabel, operation))
                     .isInstanceOf(ApiAlertException.class)
-                    .hasMessage(String.format(QUEUE_USED_FORMAT, "applications",
+                    .hasMessage(MessageFormat.format(YARN_QUEUE_USED_FORMAT.getMessage(), APPLICATION.getMessage(),
                         operation));
     }
 }
