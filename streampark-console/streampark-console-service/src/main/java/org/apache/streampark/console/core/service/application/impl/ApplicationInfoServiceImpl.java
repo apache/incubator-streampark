@@ -83,6 +83,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.streampark.common.enums.StorageType.LFS;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_ID_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.MessageStatus.APP_JOB_EXECUTION_MODE_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.MessageStatus.FLINK_CLUSTER_UNAVAILABLE;
 
 @Slf4j
 @Service
@@ -233,9 +236,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
                 || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
-                if (!conned) {
-                    throw new ApiAlertException("the target cluster is unavailable, please check!");
-                }
+                ApiAlertException.throwIfFalse(conned, FLINK_CLUSTER_UNAVAILABLE);
             }
             return true;
         } catch (Exception e) {
@@ -386,10 +387,10 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     public String k8sStartLog(Long id, Integer offset, Integer limit) throws Exception {
         Application application = getById(id);
         ApiAlertException.throwIfNull(
-            application, String.format("The application id=%s can't be found.", id));
+            application, APP_ID_NOT_EXISTS_ERROR, id);
         ApiAlertException.throwIfFalse(
             FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
-            "Job executionMode must be kubernetes-session|kubernetes-application.");
+            APP_JOB_EXECUTION_MODE_ILLEGALLY);
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(
             () -> KubernetesDeploymentHelper.watchDeploymentLog(
