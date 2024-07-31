@@ -33,7 +33,6 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -84,6 +83,9 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.task.CheckpointProcessor;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -129,6 +131,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -230,6 +234,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
   @Autowired private CheckpointProcessor checkpointProcessor;
+
+  @Autowired private MemberService memberService;
 
   private final RestTemplate proxyRestTemplate;
 
@@ -2064,19 +2070,31 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return Tuple2.apply(k8sNamespace, clusterId);
   }
 
-  public Object proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException {
-    Application application = getById(appId);
+  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException {
+    ApiAlertException.throwIfTrue(appId == null, "Invalid operation, appId is null");
+
+    User currentUser = serviceHelper.getLoginUser();
+    Application app = getById(appId);
+    ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+    if (!currentUser.getUserId().equals(app.getUserId())) {
+      Member member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+      ApiAlertException.throwIfTrue(
+          member == null,
+          "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+    }
+
     String originalUrl =
         request.getRequestURI()
             + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-    String jobManagerUrl = application.getJobManagerUrl();
+    String jobManagerUrl = app.getJobManagerUrl();
     if (jobManagerUrl == null) {
-      return RestResponse.fail(
-          "The flink job manager url is not ready", ResponseCode.CODE_BAD_REQUEST);
+      ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+      builder.body("The flink job manager url is not ready");
+      return builder.build();
     }
 
-    String newUrl = jobManagerUrl + originalUrl.replace("/flink/app/flink-ui/" + appId, "");
+    String newUrl = jobManagerUrl + originalUrl.replace("/proxy/flink-ui/" + appId, "");
 
     HttpHeaders headers = new HttpHeaders();
     Enumeration<String> headerNames = request.getHeaderNames();

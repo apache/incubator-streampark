@@ -600,7 +600,7 @@ public class Application implements Serializable {
   }
 
   public String getFlinkRestUrl() {
-    return "/flink/app/flink-ui/" + id + "/";
+    return "/proxy/flink-ui/" + id + "/";
   }
 
   @Override
