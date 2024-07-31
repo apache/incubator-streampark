@@ -28,7 +28,10 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -131,4 +134,6 @@ public interface ApplicationService extends IService<Application> {
   List<ApplicationReport> getYARNApplication(String appName);
 
   RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception;
+
+  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException;
 }

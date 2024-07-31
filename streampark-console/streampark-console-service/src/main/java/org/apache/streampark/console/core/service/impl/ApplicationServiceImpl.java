@@ -83,6 +83,9 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.task.CheckpointProcessor;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -99,6 +102,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CoreOptions;
@@ -123,17 +127,29 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -144,6 +160,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,6 +235,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private CheckpointProcessor checkpointProcessor;
 
+  @Autowired private MemberService memberService;
+
+  private final RestTemplate proxyRestTemplate;
+
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors() * 4);
 
   private final ExecutorService bootstrapExecutor =
@@ -228,6 +249,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(),
           ThreadUtils.threadFactory("streampark-flink-app-bootstrap"));
+
+  @Autowired
+  public ApplicationServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+    this.proxyRestTemplate =
+        restTemplateBuilder
+            .errorHandler(
+                new DefaultResponseErrorHandler() {
+                  @Override
+                  public void handleError(@Nonnull ClientHttpResponse response) {
+                    // Ignore errors in the Flink Web UI itself, such as 404 errors.
+                  }
+                })
+            .build();
+  }
 
   @PostConstruct
   public void resetOptionState() {
@@ -2035,5 +2070,51 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         break;
     }
     return Tuple2.apply(k8sNamespace, clusterId);
+  }
+
+  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException {
+    ApiAlertException.throwIfTrue(appId == null, "Invalid operation, appId is null");
+
+    User currentUser = serviceHelper.getLoginUser();
+    Application app = getById(appId);
+    ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+    if (!currentUser.getUserId().equals(app.getUserId())) {
+      Member member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+      ApiAlertException.throwIfTrue(
+          member == null,
+          "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+    }
+
+    String originalUrl =
+        request.getRequestURI()
+            + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+    String jobManagerUrl = app.getJobManagerUrl();
+    if (jobManagerUrl == null) {
+      ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+      builder.body("The flink job manager url is not ready");
+      return builder.build();
+    }
+
+    String newUrl = jobManagerUrl + originalUrl.replace("/proxy/flink-ui/" + appId, "");
+
+    HttpHeaders headers = new HttpHeaders();
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String headerName = headerNames.nextElement();
+      headers.set(headerName, request.getHeader(headerName));
+    }
+
+    byte[] body = null;
+    if (request.getInputStream().available() > 0) {
+      InputStream inputStream = request.getInputStream();
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      IOUtils.copy(inputStream, byteArrayOutputStream);
+      body = byteArrayOutputStream.toByteArray();
+    }
+
+    HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
+    return proxyRestTemplate.exchange(
+        newUrl, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
   }
 }

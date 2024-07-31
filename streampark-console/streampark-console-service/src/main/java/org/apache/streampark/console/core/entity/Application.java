@@ -599,6 +599,10 @@ public class Application implements Serializable {
     return ExecutionMode.YARN_PER_JOB.equals(mode) || ExecutionMode.YARN_APPLICATION.equals(mode);
   }
 
+  public String getFlinkRestUrl() {
+    return "/proxy/flink-ui/" + id + "/";
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
