@@ -257,7 +257,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             .errorHandler(
                 new DefaultResponseErrorHandler() {
                   @Override
-                  public void handleError(@Nonnull ClientHttpResponse response) {}
+                  public void handleError(@Nonnull ClientHttpResponse response) {
+                    // Ignore errors in the Flink Web UI itself, such as 404 errors.
+                  }
                 })
             .build();
   }

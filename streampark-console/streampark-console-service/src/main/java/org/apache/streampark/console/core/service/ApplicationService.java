@@ -135,5 +135,5 @@ public interface ApplicationService extends IService<Application> {
 
   RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception;
 
-  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws Exception;
+  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException;
 }

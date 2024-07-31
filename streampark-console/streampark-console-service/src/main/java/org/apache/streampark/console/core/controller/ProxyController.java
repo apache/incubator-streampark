@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
+
 @Slf4j
 @Validated
 @RestController
@@ -42,7 +44,7 @@ public class ProxyController {
       value = "flink-ui/{id}/**",
       method = {RequestMethod.GET, RequestMethod.POST})
   public ResponseEntity<?> proxyRequest(HttpServletRequest request, @PathVariable("id") Long id)
-      throws Exception {
+      throws IOException {
     return applicationService.proxyFlinkUI(request, id);
   }
 }

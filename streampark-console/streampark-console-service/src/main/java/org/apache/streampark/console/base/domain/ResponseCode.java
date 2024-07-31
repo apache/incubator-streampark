@@ -21,8 +21,6 @@ public interface ResponseCode {
 
   Long CODE_SUCCESS = 200L;
 
-  Long CODE_BAD_REQUEST = 400L;
-
   Long CODE_UNAUTHORIZED = 401L;
 
   Long CODE_FORBIDDEN = 403L;
