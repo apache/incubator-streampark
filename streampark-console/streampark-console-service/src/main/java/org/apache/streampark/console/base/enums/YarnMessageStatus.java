@@ -17,11 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public enum YarnMessageStatus implements Status {
 
     SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS(10000, "user {0} can only sign in with [{1}]", "用户{0}只能使用 [{1}] 登录"),
@@ -100,4 +95,25 @@ public enum YarnMessageStatus implements Status {
     private final int code;
     private final String enMsg;
     private final String zhMsg;
+
+    YarnMessageStatus(int code, String enMsg, String zhMsg) {
+        this.code = code;
+        this.enMsg = enMsg;
+        this.zhMsg = zhMsg;
+    }
+
+    @Override
+    public int getCode() {
+        return this.code;
+    }
+
+    @Override
+    public String getEnMsg() {
+        return this.enMsg;
+    }
+
+    @Override
+    public String getZhMsg() {
+        return this.zhMsg;
+    }
 }

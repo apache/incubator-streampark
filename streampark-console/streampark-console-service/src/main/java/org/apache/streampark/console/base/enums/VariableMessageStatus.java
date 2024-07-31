@@ -17,11 +17,6 @@
 
 package org.apache.streampark.console.base.enums;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public enum VariableMessageStatus implements Status {
 
     SYSTEM_VARIABLE_ID_NULL_FAILED(10110, "The variable id cannot be null.", "变量Id不能为空"),
@@ -33,4 +28,25 @@ public enum VariableMessageStatus implements Status {
     private final int code;
     private final String enMsg;
     private final String zhMsg;
+
+    VariableMessageStatus(int code, String enMsg, String zhMsg) {
+        this.code = code;
+        this.enMsg = enMsg;
+        this.zhMsg = zhMsg;
+    }
+
+    @Override
+    public int getCode() {
+        return this.code;
+    }
+
+    @Override
+    public String getEnMsg() {
+        return this.enMsg;
+    }
+
+    @Override
+    public String getZhMsg() {
+        return this.zhMsg;
+    }
 }
