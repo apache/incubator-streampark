@@ -147,8 +147,6 @@
         <mockito-scala.version>1.17.14</mockito-scala.version>
         <assertj.version>3.23.1</assertj.version>
 
-        <auto-service.version>1.1.1</auto-service.version>
-
         <maven.scaladoc.skip>false</maven.scaladoc.skip>
         <maven.scalastyle.skip>false</maven.scalastyle.skip>
 
@@ -206,13 +204,6 @@
                         <artifactId>error_prone_annotations</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.auto.service</groupId>
-                <artifactId>auto-service</artifactId>
-                <version>${auto-service.version}</version>
-                <optional>true</optional>
             </dependency>
 
             <dependency>
@@ -682,13 +673,6 @@
                             <!-- Prevents recompilation due to missing package-info.class, see MCOMPILER-205 -->
                             <arg>-Xpkginfo:always</arg>
                         </compilerArgs>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>com.google.auto.service</groupId>
-                                <artifactId>auto-service</artifactId>
-                                <version>${auto-service.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
 
