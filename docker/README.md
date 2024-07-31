@@ -6,8 +6,8 @@ The latest image tag will be written to [docker-compose.yaml](./docker-compose.y
 ```yaml
 version: '3.8'
 services:
-    streampark-console:
-        image: apache/streampark:2.2.0
+    streampark:
+        image: apache/streampark:2.1.5
 ```
 
 ### 2. docker-compose up
