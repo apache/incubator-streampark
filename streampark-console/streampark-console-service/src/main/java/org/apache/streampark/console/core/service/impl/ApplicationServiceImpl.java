@@ -2085,18 +2085,39 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
     }
 
-    String originalUrl =
-        request.getRequestURI()
-            + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+    String url = null;
+    switch (app.getExecutionModeEnum()) {
+      case REMOTE:
+        FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
+        url = cluster.getAddress() + "/#/overview";
+        break;
+      case YARN_PER_JOB:
+      case YARN_APPLICATION:
+      case YARN_SESSION:
+        String yarnURL = YarnUtils.getRMWebAppProxyURL();
+        url = yarnURL + "/proxy/" + app.getClusterId() + "/";
+        break;
+      case KUBERNETES_NATIVE_APPLICATION:
+      case KUBERNETES_NATIVE_SESSION:
+        String originalUrl =
+            request.getRequestURI()
+                + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-    String jobManagerUrl = app.getJobManagerUrl();
-    if (jobManagerUrl == null) {
+        String jobManagerUrl = app.getJobManagerUrl();
+        if (jobManagerUrl == null) {
+          ResponseEntity.BodyBuilder builder =
+              ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+          builder.body("The flink job manager url is not ready");
+          return builder.build();
+        }
+        url = jobManagerUrl + originalUrl.replace("/proxy/flink-ui/" + appId, "");
+    }
+
+    if (url == null) {
       ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
       builder.body("The flink job manager url is not ready");
       return builder.build();
     }
-
-    String newUrl = jobManagerUrl + originalUrl.replace("/proxy/flink-ui/" + appId, "");
 
     HttpHeaders headers = new HttpHeaders();
     Enumeration<String> headerNames = request.getHeaderNames();
@@ -2115,6 +2136,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
     return proxyRestTemplate.exchange(
-        newUrl, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
+        url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
   }
 }
