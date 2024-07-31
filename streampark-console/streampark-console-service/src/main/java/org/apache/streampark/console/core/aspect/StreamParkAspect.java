@@ -96,7 +96,7 @@ public class StreamParkAspect {
   public void permissionAction() {}
 
   @Around("permissionAction()")
-  public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
+  public Object permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     PermissionScope permissionScope =
         methodSignature.getMethod().getAnnotation(PermissionScope.class);
@@ -136,7 +136,7 @@ public class StreamParkAspect {
       }
     }
 
-    return (RestResponse) joinPoint.proceed();
+    return joinPoint.proceed();
   }
 
   private Long getId(ProceedingJoinPoint joinPoint, MethodSignature methodSignature, String expr) {

@@ -33,6 +33,7 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -99,6 +100,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.CoreOptions;
@@ -123,17 +125,27 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -144,6 +156,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,6 +231,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Autowired private CheckpointProcessor checkpointProcessor;
 
+  private final RestTemplate proxyRestTemplate;
+
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors() * 4);
 
   private final ExecutorService bootstrapExecutor =
@@ -228,6 +243,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(),
           ThreadUtils.threadFactory("streampark-flink-app-bootstrap"));
+
+  @Autowired
+  public ApplicationServiceImpl(RestTemplateBuilder restTemplateBuilder) {
+    this.proxyRestTemplate =
+        restTemplateBuilder
+            .errorHandler(
+                new DefaultResponseErrorHandler() {
+                  @Override
+                  public void handleError(@Nonnull ClientHttpResponse response) {}
+                })
+            .build();
+  }
 
   @PostConstruct
   public void resetOptionState() {
@@ -2035,5 +2062,39 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         break;
     }
     return Tuple2.apply(k8sNamespace, clusterId);
+  }
+
+  public Object proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException {
+    Application application = getById(appId);
+    String originalUrl =
+        request.getRequestURI()
+            + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
+    String jobManagerUrl = application.getJobManagerUrl();
+    if (jobManagerUrl == null) {
+      return RestResponse.fail(
+          "The flink job manager url is not ready", ResponseCode.CODE_BAD_REQUEST);
+    }
+
+    String newUrl = jobManagerUrl + originalUrl.replace("/flink/app/flink-ui/" + appId, "");
+
+    HttpHeaders headers = new HttpHeaders();
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String headerName = headerNames.nextElement();
+      headers.set(headerName, request.getHeader(headerName));
+    }
+
+    byte[] body = null;
+    if (request.getInputStream().available() > 0) {
+      InputStream inputStream = request.getInputStream();
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      IOUtils.copy(inputStream, byteArrayOutputStream);
+      body = byteArrayOutputStream.toByteArray();
+    }
+
+    HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
+    return proxyRestTemplate.exchange(
+        newUrl, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
   }
 }

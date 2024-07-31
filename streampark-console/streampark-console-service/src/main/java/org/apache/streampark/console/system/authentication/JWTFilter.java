@@ -22,6 +22,7 @@ import org.apache.streampark.console.core.enums.AuthenticationType;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
+import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
   protected boolean isAccessAllowed(
       ServletRequest request, ServletResponse response, Object mappedValue)
       throws UnauthorizedException {
+    if (((ShiroHttpServletRequest) request).getRequestURI().startsWith("/flink/app/flink-ui/")) {
+      return true;
+    }
     if (isLoginAttempt(request, response)) {
       return executeLogin(request, response);
     }

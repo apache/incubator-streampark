@@ -30,6 +30,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -131,4 +133,6 @@ public interface ApplicationService extends IService<Application> {
   List<ApplicationReport> getYARNApplication(String appName);
 
   RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception;
+
+  Object proxyFlinkUI(HttpServletRequest request, Long appId) throws Exception;
 }
