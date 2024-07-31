@@ -27,11 +27,15 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
+import org.apache.streampark.console.core.entity.Resource;
+import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationConfig;
+import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
-import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -255,7 +259,7 @@ public class SparkApplicationManageServiceImpl
         ApiAlertException.throwIfNull(
             appParam.getTeamId(), "The teamId can't be null. Create application failed.");
         appParam.setUserId(serviceHelper.getUserId());
-        appParam.setState(FlinkAppStateEnum.ADDED.getValue());
+        appParam.setState(SparkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
         appParam.setCreateTime(new Date());
@@ -335,7 +339,7 @@ public class SparkApplicationManageServiceImpl
 
         newApp.setHadoopUser(oldApp.getHadoopUser());
         newApp.setRestartSize(oldApp.getRestartSize());
-        newApp.setState(FlinkAppStateEnum.ADDED.getValue());
+        newApp.setState(SparkAppStateEnum.ADDED.getValue());
         newApp.setOptions(oldApp.getOptions());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());
         newApp.setUserId(serviceHelper.getUserId());

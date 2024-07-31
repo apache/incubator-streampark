@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
-import org.apache.streampark.flink.core.FlinkSqlValidationResult;
+import org.apache.streampark.spark.core.util.SparkSqlValidationResult;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -111,10 +111,10 @@ public interface SparkSqlService extends IService<SparkSql> {
      * Verify whether the entered SQL is correct
      *
      * @param sql SQL
-     * @param versionId FlinkENV version id
-     * @return FlinkSqlValidationResult Check the correctness of SQL
+     * @param versionId SparkENV version id
+     * @return SparkSqlValidationResult Check the correctness of SQL
      */
-    FlinkSqlValidationResult verifySql(String sql, Long versionId);
+    SparkSqlValidationResult verifySql(String sql, Long versionId);
 
     /**
      * List all SparkSQL by each SparkSQL team id

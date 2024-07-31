@@ -19,9 +19,11 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
@@ -30,7 +32,8 @@ import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
-import org.apache.streampark.flink.core.FlinkSqlValidationResult;
+import org.apache.streampark.spark.client.proxy.SparkShimsProxy;
+import org.apache.streampark.spark.core.util.SparkSqlValidationResult;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -43,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +66,7 @@ public class SparkSqlServiceImpl extends ServiceImpl<SparkSqlMapper, SparkSql>
     @Autowired
     private SparkEnvService sparkEnvService;
 
-    private static final String FLINKSQL_VALIDATOR_CLASS = "org.apache.streampark.flink.core.FlinkSqlValidator";
+    private static final String SPARKSQL_VALIDATOR_CLASS = "org.apache.streampark.spark.core.util.SparkSqlValidator";
 
     @Override
     public SparkSql getEffective(Long appId, boolean decode) {
@@ -148,7 +152,7 @@ public class SparkSqlServiceImpl extends ServiceImpl<SparkSqlMapper, SparkSql>
 
     @Override
     public void toEffective(Long appId, Long sqlId) {
-        effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.FLINKSQL, sqlId);
+        effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.SPARKSQL, sqlId);
     }
 
     @Override
@@ -177,34 +181,33 @@ public class SparkSqlServiceImpl extends ServiceImpl<SparkSqlMapper, SparkSql>
             // rollback history sql
             backUpService.rollbackSparkSql(application, sql);
         } catch (Exception e) {
-            log.error("Backup and Roll back FlinkSql before start failed.");
+            log.error("Backup and Roll back SparkSql before start failed.");
             throw new RuntimeException(e.getMessage());
         }
     }
 
     @Override
-    public FlinkSqlValidationResult verifySql(String sql, Long versionId) {
-        return null;
-        // FlinkEnv flinkEnv = flinkEnvService.getById(versionId);
-        // return FlinkShimsProxy.proxyVerifySql(
-        // flinkEnv.getFlinkVersion(),
-        // classLoader -> {
-        // try {
-        // Class<?> clazz = classLoader.loadClass(FLINKSQL_VALIDATOR_CLASS);
-        // Method method = clazz.getDeclaredMethod("verifySql", String.class);
-        // method.setAccessible(true);
-        // Object result = method.invoke(null, sql);
-        // if (result == null) {
-        // return null;
-        // }
-        // return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
-        // } catch (Throwable e) {
-        // log.error(
-        // "verifySql invocationTargetException: {}",
-        // ExceptionUtils.stringifyException(e));
-        // }
-        // return null;
-        // });
+    public SparkSqlValidationResult verifySql(String sql, Long versionId) {
+        SparkEnv sparkEnv = sparkEnvService.getById(versionId);
+        return SparkShimsProxy.proxyVerifySql(
+            sparkEnv.getSparkVersion(),
+            classLoader -> {
+                try {
+                    Class<?> clazz = classLoader.loadClass(SPARKSQL_VALIDATOR_CLASS);
+                    Method method = clazz.getDeclaredMethod("verifySql", String.class);
+                    method.setAccessible(true);
+                    Object result = method.invoke(null, sql);
+                    if (result == null) {
+                        return null;
+                    }
+                    return SparkShimsProxy.getObject(this.getClass().getClassLoader(), result);
+                } catch (Throwable e) {
+                    log.error(
+                        "verifySql invocationTargetException: {}",
+                        ExceptionUtils.stringifyException(e));
+                }
+                return null;
+            });
     }
 
     @Override

@@ -302,8 +302,12 @@ public class SparkApplicationActionServiceImpl
         BuildResult buildResult = buildPipeline.getBuildResult();
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
             buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
-            extraParameter.put("yarnQueueName", application.getYarnQueueName());
-            extraParameter.put("yarnQueueLabel", application.getYarnQueueLabel());
+            if (StringUtils.isNotBlank(application.getYarnQueueName())) {
+                extraParameter.put("yarnQueueName", application.getYarnQueueName());
+            }
+            if (StringUtils.isNotBlank(application.getYarnQueueLabel())) {
+                extraParameter.put("yarnQueueLabel", application.getYarnQueueLabel());
+            }
         }
 
         // Get the args after placeholder replacement

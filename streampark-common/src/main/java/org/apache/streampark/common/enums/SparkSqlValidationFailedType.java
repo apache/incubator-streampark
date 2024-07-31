@@ -35,7 +35,10 @@ public enum SparkSqlValidationFailedType {
     UNSUPPORTED_SQL(4),
 
     /** Not at the end of ";" */
-    ENDS_WITH(5);
+    ENDS_WITH(5),
+
+    /** Class exception */
+    CLASS_ERROR(6);
 
     private final int failedType;
 
