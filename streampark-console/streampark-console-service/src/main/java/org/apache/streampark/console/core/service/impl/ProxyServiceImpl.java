@@ -128,7 +128,7 @@ public class ProxyServiceImpl implements ProxyService {
           return builder.build();
         }
         url = flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(app));
-        ;
+        break;
     }
 
     if (url == null) {
