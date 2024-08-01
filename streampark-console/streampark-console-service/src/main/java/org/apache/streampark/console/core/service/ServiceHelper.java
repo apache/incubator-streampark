@@ -53,7 +53,7 @@ public class ServiceHelper {
   private String sqlClientJar = null;
 
   public User getLoginUser() {
-    String token = (String) SecurityUtils.getSubject().getPrincipal();
+    String token = getAuthorization();
     Long userId = JWTUtil.getUserId(token);
     if (userId == null) {
       throw new AuthenticationException("Unauthorized");
@@ -115,5 +115,9 @@ public class ServiceHelper {
     if (StringUtils.isNotBlank(domainName)) {
       IngressController.configureIngress(domainName, clusterId, namespace);
     }
+  }
+
+  public String getAuthorization() {
+    return (String) SecurityUtils.getSubject().getPrincipal();
   }
 }

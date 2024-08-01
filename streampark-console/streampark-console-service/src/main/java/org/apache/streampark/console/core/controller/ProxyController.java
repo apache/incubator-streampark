@@ -17,15 +17,15 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.console.core.service.ApplicationService;
+import org.apache.streampark.console.core.service.ProxyService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,13 +38,23 @@ import java.io.IOException;
 @RequestMapping("proxy")
 public class ProxyController {
 
-  @Autowired private ApplicationService applicationService;
+  @Autowired private ProxyService proxyService;
 
-  @RequestMapping(
-      value = "flink-ui/{id}/**",
-      method = {RequestMethod.GET, RequestMethod.POST})
-  public ResponseEntity<?> proxyRequest(HttpServletRequest request, @PathVariable("id") Long id)
+  @GetMapping("flink-ui/{id}/**")
+  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, @PathVariable("id") Long id)
       throws IOException {
-    return applicationService.proxyFlinkUI(request, id);
+    return proxyService.proxyFlinkUI(request, id);
+  }
+
+  @GetMapping("job_manager/{id}/**")
+  public ResponseEntity<?> proxyJobManager(
+      HttpServletRequest request, @PathVariable("id") Long logId) throws IOException {
+    return proxyService.proxyJobManager(request, logId);
+  }
+
+  @GetMapping("yarn/{appId}/**")
+  public ResponseEntity<?> proxyURL(HttpServletRequest request, @PathVariable("appId") String appId)
+      throws IOException {
+    return proxyService.proxyYarn(request, appId);
   }
 }

@@ -46,7 +46,6 @@
     fetchOptionLog,
     fetchRemoveBackup,
     fetchDeleteOperationLog,
-    fetchYarn,
   } from '/@/api/flink/app/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
@@ -65,6 +64,7 @@
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
   import { OperationEnum } from '/@/enums/flinkEnum';
+  import { baseUrl } from '/@/api';
   const DescriptionItem = Descriptions.Item;
   const TabPane = Tabs.TabPane;
 
@@ -273,8 +273,11 @@
   }
 
   async function handleYarnUrl(yarnAppId: string) {
-    const res = await fetchYarn();
-    window.open(res + '/proxy/' + yarnAppId + '/');
+    window.open(baseUrl() + '/proxy/yarn/' + yarnAppId + '/');
+  }
+
+  async function handleViewJobManager(record: Recordable) {
+    window.open(baseUrl() + '/proxy/job_manager/' + record.id + '/');
   }
 
   function getSavePointAction(record: Recordable): ActionItem[] {
@@ -396,7 +399,7 @@
               </a>
             </template>
             <template v-if="column.dataIndex === 'jobManagerUrl'">
-              <a type="link" :href="record.jobManagerUrl" target="_blank">
+              <a type="link" target="_blank" @click="handleViewJobManager(record)">
                 {{ record.jobManagerUrl }}
               </a>
             </template>

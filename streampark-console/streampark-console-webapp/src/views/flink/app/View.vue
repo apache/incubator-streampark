@@ -67,7 +67,6 @@
   const appDashboardRef = ref<any>();
   const noData = ref<boolean>();
 
-  const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
   const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
   const { openSavepoint } = useSavepoint(handleOptionApp);
@@ -201,8 +200,7 @@
       [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(app.state) ||
       app['optionState'] === OptionStateEnum.SAVEPOINTING
     ) {
-      // yarn-per-job|yarn-session|yarn-application
-      await handleView(app, unref(yarn));
+      await handleView(app);
     }
   }
 
@@ -257,7 +255,6 @@
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
           <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
-
           <span
             class="link"
             :class="{

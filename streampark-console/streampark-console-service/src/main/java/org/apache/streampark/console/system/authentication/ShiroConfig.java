@@ -74,7 +74,7 @@ public class ShiroConfig {
     filterChainDefinitionMap.put("/*.less", "anon");
     filterChainDefinitionMap.put("/*.ico", "anon");
     filterChainDefinitionMap.put("/", "anon");
-    filterChainDefinitionMap.put("/proxy/flink-ui/**", "anon");
+    filterChainDefinitionMap.put("/proxy/**", "anon");
     filterChainDefinitionMap.put("/**", "jwt");
 
     shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
