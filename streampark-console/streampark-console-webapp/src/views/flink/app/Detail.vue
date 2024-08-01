@@ -115,7 +115,7 @@
 
   /* Flink Web UI */
   function handleFlinkView() {
-    handleView(app as any, unref(yarn));
+    handleView(app as any);
   }
 
   const { pause } = useIntervalFn(
