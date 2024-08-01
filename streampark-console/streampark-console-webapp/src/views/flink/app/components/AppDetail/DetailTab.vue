@@ -47,7 +47,7 @@
     fetchRemoveBackup,
     fetchDeleteOperationLog,
   } from '/@/api/flink/app/app';
-  import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
+  import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
   import CompareModal from './CompareModal.vue';
   import ExecOptionModal from './ExecOptionModal.vue';
