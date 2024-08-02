@@ -24,7 +24,6 @@ import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
@@ -33,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
-@Component
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 
   private static final String TOKEN = "Authorization";
