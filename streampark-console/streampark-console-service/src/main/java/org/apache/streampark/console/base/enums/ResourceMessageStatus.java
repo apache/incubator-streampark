@@ -17,6 +17,11 @@
 
 package org.apache.streampark.console.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum ResourceMessageStatus implements Status {
 
     RESOURCE_ALREADY_ERROR(10300, "the resource {0} already exists, please check.", "资源{0}已经存在，请检查"),
@@ -34,24 +39,4 @@ public enum ResourceMessageStatus implements Status {
     private final String enMsg;
     private final String zhMsg;
 
-    ResourceMessageStatus(int code, String enMsg, String zhMsg) {
-        this.code = code;
-        this.enMsg = enMsg;
-        this.zhMsg = zhMsg;
-    }
-
-    @Override
-    public int getCode() {
-        return this.code;
-    }
-
-    @Override
-    public String getEnMsg() {
-        return this.enMsg;
-    }
-
-    @Override
-    public String getZhMsg() {
-        return this.zhMsg;
-    }
 }
