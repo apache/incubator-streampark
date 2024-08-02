@@ -17,6 +17,11 @@
 
 package org.apache.streampark.console.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum FlinkMessageStatus implements Status {
 
     FLINK_ENV_SQL_CLIENT_JAR_NOT_EXIST(10430, "[StreamPark] can't found streampark-flink-sqlclient jar in {0}",
@@ -89,24 +94,4 @@ public enum FlinkMessageStatus implements Status {
     private final String enMsg;
     private final String zhMsg;
 
-    FlinkMessageStatus(int code, String enMsg, String zhMsg) {
-        this.code = code;
-        this.enMsg = enMsg;
-        this.zhMsg = zhMsg;
-    }
-
-    @Override
-    public int getCode() {
-        return this.code;
-    }
-
-    @Override
-    public String getEnMsg() {
-        return this.enMsg;
-    }
-
-    @Override
-    public String getZhMsg() {
-        return this.zhMsg;
-    }
 }

@@ -17,6 +17,11 @@
 
 package org.apache.streampark.console.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum SparkMessageStatus implements Status {
 
     SPARK_ENV_HOME_NULL_ERROR(10710, "The spark home does not exist, please check.",
@@ -31,24 +36,4 @@ public enum SparkMessageStatus implements Status {
     private final String enMsg;
     private final String zhMsg;
 
-    SparkMessageStatus(int code, String enMsg, String zhMsg) {
-        this.code = code;
-        this.enMsg = enMsg;
-        this.zhMsg = zhMsg;
-    }
-
-    @Override
-    public int getCode() {
-        return this.code;
-    }
-
-    @Override
-    public String getEnMsg() {
-        return this.enMsg;
-    }
-
-    @Override
-    public String getZhMsg() {
-        return this.zhMsg;
-    }
 }

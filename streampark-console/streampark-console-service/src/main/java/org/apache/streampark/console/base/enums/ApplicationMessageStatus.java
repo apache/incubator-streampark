@@ -17,6 +17,11 @@
 
 package org.apache.streampark.console.base.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum ApplicationMessageStatus implements Status {
 
     HANDLER_UPLOAD_FILE_IS_NULL_ERROR(10840, "File to upload can't be null. Upload file failed.", "要上传的文件不能为空，上传文件失败"),
@@ -79,24 +84,4 @@ public enum ApplicationMessageStatus implements Status {
     private final String enMsg;
     private final String zhMsg;
 
-    ApplicationMessageStatus(int code, String enMsg, String zhMsg) {
-        this.code = code;
-        this.enMsg = enMsg;
-        this.zhMsg = zhMsg;
-    }
-
-    @Override
-    public int getCode() {
-        return this.code;
-    }
-
-    @Override
-    public String getEnMsg() {
-        return this.enMsg;
-    }
-
-    @Override
-    public String getZhMsg() {
-        return this.zhMsg;
-    }
 }
