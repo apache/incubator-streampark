@@ -36,6 +36,11 @@ public class JWTUtil {
 
   private static Long ttlOfSecond;
 
+  private static final String JWT_USERID = "userId";
+  private static final String JWT_USERNAME = "userName";
+  private static final String JWT_TYPE = "type";
+  private static final String JWT_TIMESTAMP = "timestamp";
+
   /**
    * verify token
    *
@@ -45,7 +50,7 @@ public class JWTUtil {
   public static boolean verify(String token, String username, String secret) {
     try {
       Algorithm algorithm = Algorithm.HMAC256(secret);
-      JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
+      JWTVerifier verifier = JWT.require(algorithm).withClaim(JWT_USERNAME, username).build();
       verifier.verify(token);
       return true;
     } catch (Exception ignored) {
@@ -57,7 +62,7 @@ public class JWTUtil {
   public static String getUserName(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      return jwt.getClaim("userName").asString();
+      return jwt.getClaim(JWT_USERNAME).asString();
     } catch (Exception ignored) {
       return null;
     }
@@ -66,25 +71,33 @@ public class JWTUtil {
   public static Long getUserId(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      return jwt.getClaim("userId").asLong();
+      return jwt.getClaim(JWT_USERID).asLong();
     } catch (Exception ignored) {
       return null;
     }
   }
 
+  /**
+   * @param token
+   * @return
+   */
   public static Long getTimestamp(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      return jwt.getClaim("timestamp").asLong();
+      return jwt.getClaim(JWT_TIMESTAMP).asLong();
     } catch (Exception ignored) {
       return 0L;
     }
   }
 
+  /**
+   * @param token
+   * @return
+   */
   public static AuthenticationType getAuthType(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
-      int type = jwt.getClaim("type").asInt();
+      int type = jwt.getClaim(JWT_TYPE).asInt();
       return AuthenticationType.of(type);
     } catch (Exception ignored) {
       return null;
@@ -92,9 +105,10 @@ public class JWTUtil {
   }
 
   /**
-   * generate token
-   *
+   * @param user
+   * @param authType
    * @return
+   * @throws Exception
    */
   public static String sign(User user, AuthenticationType authType) throws Exception {
     long second = getTTLOfSecond() * 1000;
@@ -103,10 +117,11 @@ public class JWTUtil {
   }
 
   /**
-   * generate token
-   *
+   * @param user
+   * @param authType
    * @param expireTime
    * @return
+   * @throws Exception
    */
   public static String sign(User user, AuthenticationType authType, Long expireTime)
       throws Exception {
@@ -115,13 +130,13 @@ public class JWTUtil {
 
     JWTCreator.Builder builder =
         JWT.create()
-            .withClaim("userId", user.getUserId())
-            .withClaim("userName", user.getUsername())
-            .withClaim("type", authType.get())
+            .withClaim(JWT_USERID, user.getUserId())
+            .withClaim(JWT_USERNAME, user.getUsername())
+            .withClaim(JWT_TYPE, authType.get())
             .withExpiresAt(date);
 
     if (authType == AuthenticationType.SIGN) {
-      builder.withClaim("timestamp", System.currentTimeMillis());
+      builder.withClaim(JWT_TIMESTAMP, System.currentTimeMillis());
     }
 
     String token = builder.sign(algorithm);
