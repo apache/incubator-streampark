@@ -89,7 +89,7 @@ public class OpenAPIController {
   @RequiresPermissions("app:start")
   public RestResponse flinkStart(Application app) throws Exception {
     applicationService.start(app, false);
-    return RestResponse.success(true);
+    return RestResponse.success();
   }
 
   @OpenAPI(

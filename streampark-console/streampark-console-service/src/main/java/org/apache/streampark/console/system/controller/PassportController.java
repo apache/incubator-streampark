@@ -78,9 +78,9 @@ public class PassportController {
     String ttl = DateUtils.formatFullTime(expireTime);
 
     // generate UserInfo
-    JWTToken jwtToken = new JWTToken(token, ttl, AuthenticationType.SIGN.get());
     String userId = RandomStringUtils.randomAlphanumeric(20);
     user.setId(userId);
+    JWTToken jwtToken = new JWTToken(token, ttl);
     Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, jwtToken);
 
     return new RestResponse().data(userInfo);
