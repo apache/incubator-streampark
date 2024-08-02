@@ -35,7 +35,7 @@ class JWTTest extends SpringTestBase {
   @Test
   void testExpireTime() throws Exception {
     String userName = "black";
-    String ttl = "9999-01-01 00:00:00";
+    String ttl = "2022-09-01 00:00:00";
 
     User user = new User();
     user.setUserId(10000L);
