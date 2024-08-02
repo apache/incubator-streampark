@@ -17,9 +17,13 @@
 
 package org.apache.streampark.console.system.authentication;
 
+import org.apache.streampark.common.util.SystemPropertyUtils;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
+import org.apache.streampark.console.system.entity.User;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -44,6 +48,17 @@ public class JWTUtil {
       Algorithm algorithm = Algorithm.HMAC256(secret);
       JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
       verifier.verify(token);
+
+      AuthenticationType authType = getAuthType(token);
+      if (authType == null) {
+        return false;
+      }
+
+      if (authType == AuthenticationType.SIGN) {
+        Long timestamp = getTimestamp(token);
+        Long startTime = SystemPropertyUtils.getLong("streampark.start.timestamp", 0);
+        return timestamp > startTime;
+      }
       return true;
     } catch (Exception ignored) {
       return false;
@@ -69,6 +84,15 @@ public class JWTUtil {
     }
   }
 
+  public static Long getTimestamp(String token) {
+    try {
+      DecodedJWT jwt = JWT.decode(token);
+      return jwt.getClaim("timestamp").asLong();
+    } catch (Exception ignored) {
+      return 0L;
+    }
+  }
+
   public static AuthenticationType getAuthType(String token) {
     try {
       DecodedJWT jwt = JWT.decode(token);
@@ -82,35 +106,38 @@ public class JWTUtil {
   /**
    * generate token
    *
-   * @param userId
-   * @param userName
    * @return
    */
-  public static String sign(
-      Long userId, String userName, String secret, AuthenticationType authType) {
+  public static String sign(User user, AuthenticationType authType) throws Exception {
     long second = getTTLOfSecond() * 1000;
     Long ttl = System.currentTimeMillis() + second;
-    return sign(userId, userName, secret, authType, ttl);
+    return sign(user, authType, ttl);
   }
 
   /**
    * generate token
    *
-   * @param userId
-   * @param userName
    * @param expireTime
    * @return
    */
-  public static String sign(
-      Long userId, String userName, String secret, AuthenticationType authType, Long expireTime) {
+  public static String sign(User user, AuthenticationType authType, Long expireTime)
+      throws Exception {
     Date date = new Date(expireTime);
-    Algorithm algorithm = Algorithm.HMAC256(secret);
-    return JWT.create()
-        .withClaim("userId", userId)
-        .withClaim("userName", userName)
-        .withClaim("type", authType.get())
-        .withExpiresAt(date)
-        .sign(algorithm);
+    Algorithm algorithm = Algorithm.HMAC256(user.getSalt());
+
+    JWTCreator.Builder builder =
+        JWT.create()
+            .withClaim("userId", user.getUserId())
+            .withClaim("userName", user.getUsername())
+            .withClaim("type", authType.get())
+            .withExpiresAt(date);
+
+    if (authType == AuthenticationType.SIGN) {
+      builder.withClaim("timestamp", System.currentTimeMillis());
+    }
+
+    String token = builder.sign(algorithm);
+    return EncryptUtils.encrypt(token);
   }
 
   public static Long getTTLOfSecond() {

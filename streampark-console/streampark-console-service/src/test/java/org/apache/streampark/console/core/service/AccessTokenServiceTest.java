@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.SpringTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -49,7 +49,7 @@ public class AccessTokenServiceTest extends SpringTestBase {
     // verify
     AccessToken accessToken = (AccessToken) restResponse.get("data");
     LOG.info(accessToken.getToken());
-    JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
+    JWTToken jwtToken = new JWTToken(EncryptUtils.decrypt(accessToken.getToken()));
     LOG.info(jwtToken.getToken());
     String username = JWTUtil.getUserName(jwtToken.getToken());
     Assertions.assertNotNull(username);

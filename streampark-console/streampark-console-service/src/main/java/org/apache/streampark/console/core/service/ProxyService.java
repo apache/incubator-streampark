@@ -21,12 +21,10 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.io.IOException;
-
 public interface ProxyService {
-  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long id) throws IOException;
+  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long id) throws Exception;
 
-  ResponseEntity<?> proxyYarn(HttpServletRequest request, String url) throws IOException;
+  ResponseEntity<?> proxyYarn(HttpServletRequest request, String url) throws Exception;
 
-  ResponseEntity<?> proxyJobManager(HttpServletRequest request, Long logId) throws IOException;
+  ResponseEntity<?> proxyJobManager(HttpServletRequest request, Long logId) throws Exception;
 }

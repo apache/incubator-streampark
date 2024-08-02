@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.User;
@@ -97,9 +97,13 @@ public class ShiroRealm extends AuthorizingRealm {
     if (authType == AuthenticationType.OPENAPI) {
       // Check whether the token belongs to the api and whether the permission is valid
       AccessToken accessToken = accessTokenService.getByUserId(user.getUserId());
-      if (accessToken == null
-          || !accessToken.getToken().equals(WebUtils.encryptToken(credential))) {
-        throw new AuthenticationException("the openapi authorization token is invalid");
+      try {
+        String encryptToken = EncryptUtils.encrypt(credential);
+        if (accessToken == null || !accessToken.getToken().equals(encryptToken)) {
+          throw new AuthenticationException("the openapi authorization token is invalid");
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
 
       if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {

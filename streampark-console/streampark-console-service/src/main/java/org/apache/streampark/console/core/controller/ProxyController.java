@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.io.IOException;
-
 @Slf4j
 @Validated
 @RestController
@@ -42,19 +40,19 @@ public class ProxyController {
 
   @GetMapping("flink-ui/{id}/**")
   public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, @PathVariable("id") Long id)
-      throws IOException {
+      throws Exception {
     return proxyService.proxyFlinkUI(request, id);
   }
 
   @GetMapping("job_manager/{id}/**")
   public ResponseEntity<?> proxyJobManager(
-      HttpServletRequest request, @PathVariable("id") Long logId) throws IOException {
+      HttpServletRequest request, @PathVariable("id") Long logId) throws Exception {
     return proxyService.proxyJobManager(request, logId);
   }
 
   @GetMapping("yarn/{appId}/**")
   public ResponseEntity<?> proxyURL(HttpServletRequest request, @PathVariable("appId") String appId)
-      throws IOException {
+      throws Exception {
     return proxyService.proxyYarn(request, appId);
   }
 }

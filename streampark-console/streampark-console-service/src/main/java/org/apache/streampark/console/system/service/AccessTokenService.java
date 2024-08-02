@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.system.entity.AccessToken;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,7 +26,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface AccessTokenService extends IService<AccessToken> {
 
-  RestResponse create(Long userId, String description) throws InternalException;
+  RestResponse create(Long userId, String description) throws Exception;
 
   boolean deleteToken(Long id);
 

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -51,7 +51,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 
@@ -88,7 +87,7 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   @Override
-  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws IOException {
+  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws Exception {
     ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
     if (appId == null) {
       return builder.body("Invalid operation, appId is null");
@@ -140,7 +139,7 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   @Override
-  public ResponseEntity<?> proxyYarn(HttpServletRequest request, String appId) throws IOException {
+  public ResponseEntity<?> proxyYarn(HttpServletRequest request, String appId) throws Exception {
     String yarnURL = YarnUtils.getRMWebAppProxyURL();
     String url = yarnURL + "/proxy/" + appId + "/";
     url += getRequestURL(request).replace("/proxy/yarn/" + appId, "");
@@ -149,15 +148,14 @@ public class ProxyServiceImpl implements ProxyService {
 
   @Override
   public ResponseEntity<?> proxyJobManager(HttpServletRequest request, Long logId)
-      throws IOException {
+      throws Exception {
     ApplicationLog log = logService.getById(logId);
     String url = log.getJobManagerUrl();
     url += getRequestURL(request).replace("/proxy/job_manager/" + logId, "");
     return proxyRequest(request, url);
   }
 
-  private ResponseEntity<?> proxyRequest(HttpServletRequest request, String url)
-      throws IOException {
+  private ResponseEntity<?> proxyRequest(HttpServletRequest request, String url) throws Exception {
     HttpHeaders headers = new HttpHeaders();
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -167,7 +165,7 @@ public class ProxyServiceImpl implements ProxyService {
 
     String token = serviceHelper.getAuthorization();
     if (token != null) {
-      headers.set("Authorization", WebUtils.encryptToken(token));
+      headers.set("Authorization", EncryptUtils.encrypt(token));
     }
 
     byte[] body = null;
