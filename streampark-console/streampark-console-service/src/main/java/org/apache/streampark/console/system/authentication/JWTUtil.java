@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.User;
@@ -48,17 +47,6 @@ public class JWTUtil {
       Algorithm algorithm = Algorithm.HMAC256(secret);
       JWTVerifier verifier = JWT.require(algorithm).withClaim("userName", username).build();
       verifier.verify(token);
-
-      AuthenticationType authType = getAuthType(token);
-      if (authType == null) {
-        return false;
-      }
-
-      if (authType == AuthenticationType.SIGN) {
-        Long timestamp = getTimestamp(token);
-        Long startTime = SystemPropertyUtils.getLong("streampark.start.timestamp", 0);
-        return timestamp > startTime;
-      }
       return true;
     } catch (Exception ignored) {
       return false;

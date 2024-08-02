@@ -28,11 +28,11 @@ public interface AccessTokenService extends IService<AccessToken> {
 
   RestResponse create(Long userId, String description) throws Exception;
 
-  boolean deleteToken(Long id);
+  boolean delete(Long id);
 
   IPage<AccessToken> page(AccessToken tokenParam, RestRequest request);
 
-  RestResponse toggleToken(Long tokenId);
+  RestResponse toggle(Long tokenId);
 
   AccessToken getByUserId(Long userId);
 }

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -41,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 @Slf4j
 @Service
@@ -51,9 +49,6 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
 
   @Autowired private UserService userService;
 
-  private final Long OPENAPI_TTL =
-      DateUtils.getTime("9999-01-01 00:00:00", DateUtils.fullFormat(), TimeZone.getDefault());
-
   @Override
   public RestResponse create(Long userId, String description) throws Exception {
     User user = userService.getById(userId);
@@ -61,7 +56,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
       return RestResponse.success().put("code", 0).message("user not available");
     }
 
-    String token = JWTUtil.sign(user, AuthenticationType.OPENAPI, OPENAPI_TTL);
+    String token = JWTUtil.sign(user, AuthenticationType.OPENAPI, Long.MAX_VALUE);
     AccessToken accessToken = new AccessToken();
     accessToken.setToken(token);
     accessToken.setUserId(user.getUserId());
@@ -77,7 +72,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   }
 
   @Override
-  public boolean deleteToken(Long id) {
+  public boolean delete(Long id) {
     return this.removeById(id);
   }
 
@@ -91,7 +86,7 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
   }
 
   @Override
-  public RestResponse toggleToken(Long tokenId) {
+  public RestResponse toggle(Long tokenId) {
     AccessToken tokenInfo = baseMapper.getById(tokenId);
     if (tokenInfo == null) {
       return RestResponse.fail("accessToken could not be found!", ResponseCode.CODE_FAIL_ALERT);

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.authentication;
 
+import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -118,6 +119,12 @@ public class ShiroRealm extends AuthorizingRealm {
                 + "] has been locked, please contact the administrator");
       }
       SecurityUtils.getSubject().getSession().setAttribute(AccessToken.IS_API_TOKEN, true);
+    } else {
+      Long timestamp = JWTUtil.getTimestamp(credential);
+      Long startTime = SystemPropertyUtils.getLong("streampark.start.timestamp", 0);
+      if (timestamp < startTime) {
+        throw new AuthenticationException("the authorization token is expired");
+      }
     }
 
     return new SimpleAuthenticationInfo(credential, credential, "streampark_shiro_realm");

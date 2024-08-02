@@ -85,14 +85,14 @@ public class AccessTokenController {
   @PostMapping("toggle")
   @RequiresPermissions("token:add")
   public RestResponse toggleToken(@NotNull(message = "{required}") Long tokenId) {
-    return accessTokenService.toggleToken(tokenId);
+    return accessTokenService.toggle(tokenId);
   }
 
   /** delete token by id */
   @DeleteMapping(value = "delete")
   @RequiresPermissions("token:delete")
   public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
-    boolean res = accessTokenService.deleteToken(tokenId);
+    boolean res = accessTokenService.delete(tokenId);
     return RestResponse.success(res);
   }
 

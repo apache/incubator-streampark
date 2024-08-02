@@ -70,7 +70,7 @@ public class AccessTokenServiceTest extends SpringTestBase {
 
     // toggle
     Long tokenId = accessToken.getId();
-    RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
+    RestResponse toggleTokenResp = accessTokenService.toggle(tokenId);
     Assertions.assertNotNull(toggleTokenResp);
     Assertions.assertTrue((Boolean) toggleTokenResp.get("data"));
 
@@ -80,6 +80,6 @@ public class AccessTokenServiceTest extends SpringTestBase {
     Assertions.assertEquals(AccessToken.STATUS_DISABLE, afterToggle.getStatus());
 
     // delete
-    Assertions.assertTrue(accessTokenService.deleteToken(tokenId));
+    Assertions.assertTrue(accessTokenService.delete(tokenId));
   }
 }
