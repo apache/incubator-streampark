@@ -35,7 +35,7 @@ class JWTTest extends SpringTestBase {
   @Test
   void testExpireTime() throws Exception {
     String userName = "black";
-    String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
+    String ttl = "9999-01-01 00:00:00";
 
     User user = new User();
     user.setUserId(10000L);
@@ -45,11 +45,11 @@ class JWTTest extends SpringTestBase {
         JWTUtil.sign(
             user,
             AuthenticationType.SIGN,
-            DateUtils.getTime(DEFAULT_EXPIRE_TIME, DateUtils.fullFormat(), TimeZone.getDefault()));
+            DateUtils.getTime(ttl, DateUtils.fullFormat(), TimeZone.getDefault()));
     assert token != null;
     Date expiresAt = JWT.decode(EncryptUtils.decrypt(token)).getExpiresAt();
     String decodeExpireTime =
         DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
-    Assertions.assertEquals(DEFAULT_EXPIRE_TIME, decodeExpireTime);
+    Assertions.assertEquals(ttl, decodeExpireTime);
   }
 }
