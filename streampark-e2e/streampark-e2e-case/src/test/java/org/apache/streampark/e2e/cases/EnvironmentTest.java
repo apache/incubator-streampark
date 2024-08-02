@@ -67,8 +67,10 @@ public class EnvironmentTest {
 
     // email
     final String emailHost = "smtp.163.com";
+    final String editEmailHost = "postfix";
     final String emailPort = "25";
     final String emailAddress = "hello@163.com";
+    final String editEmailAddress = "hello@postfix.com";
     final String emailUser = "email_password";
     final String emailPassword = "email_password";
 
@@ -141,6 +143,31 @@ public class EnvironmentTest {
 
     @Test
     @Order(30)
+    public void testCreateEmailSettingSuccessful() {
+        final EnvironmentPage environmentPage = new EnvironmentPage(browser);
+
+        EmailSettingForm emailSettingForm =
+            environmentPage.createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
+                .<EmailSettingForm>addSetting(EnvironmentDetailForm.EnvSettingTypeEnum.Email)
+                .host(editEmailHost)
+                .port(emailPort)
+                .address(editEmailAddress)
+                .user(emailUser)
+                .password(emailPassword)
+                .ok();
+
+        emailSettingForm.buttonOk().click();
+
+        Awaitility.await()
+            .untilAsserted(
+                () -> assertThat(environmentPage.settingList())
+                    .as("Setting list should contain newly-created email setting")
+                    .extracting(WebElement::getText)
+                    .anyMatch(it -> it.contains(editEmailAddress)));
+    }
+
+    @Test
+    @Order(40)
     public void testCreateDockerSettingFailed() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
         DockerSettingForm dockerSettingForm =

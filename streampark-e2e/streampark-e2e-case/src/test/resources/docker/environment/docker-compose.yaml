@@ -16,6 +16,21 @@
 #
 
 services:
+  postfix:
+    image: boky/postfix
+    container_name: postfix
+    hostname: testmail
+    domainname: email.com
+    environment:
+      - maildomain=email.com
+      - smtp_user=admin:streampark
+      - ALLOW_EMPTY_SENDER_DOMAINS=true
+    ports:
+      - "25:25"
+    privileged: true
+    restart: unless-stopped
+    networks:
+      - e2e
   streampark:
     image: apache/streampark:ci-basic
     command: bash bin/streampark.sh start_docker
