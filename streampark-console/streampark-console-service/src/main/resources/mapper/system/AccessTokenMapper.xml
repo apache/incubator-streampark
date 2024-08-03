@@ -51,15 +51,6 @@
         where t1.user_id = #{userId}
     </select>
 
-    <select id="getByUserToken" resultType="org.apache.streampark.console.system.entity.AccessToken">
-        select
-        <include refid="Base_Column_List"/>
-        from t_user t2
-        join t_access_token t1 on t1.user_id = t2.user_id
-        where t1.user_id = #{userId}
-        and t1.token = #{accessToken,jdbcType=VARCHAR}
-    </select>
-
     <select id="getById" resultType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
