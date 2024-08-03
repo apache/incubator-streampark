@@ -34,36 +34,6 @@ public final class WebUtils {
   private WebUtils() {}
 
   /**
-   * token encrypt
-   *
-   * @param token token
-   * @return encrypt token
-   */
-  public static String encryptToken(String token) {
-    try {
-      return EncryptUtils.encrypt(token);
-    } catch (Exception e) {
-      log.info("token encrypt failed: ", e);
-      return null;
-    }
-  }
-
-  /**
-   * token decrypt
-   *
-   * @param encryptToken encryptToken
-   * @return decrypt token
-   */
-  public static String decryptToken(String encryptToken) {
-    try {
-      return EncryptUtils.decrypt(encryptToken);
-    } catch (Exception e) {
-      log.info("token decrypt failed: ", e);
-      return null;
-    }
-  }
-
-  /**
    * camel to underscore
    *
    * @param value value
@@ -106,15 +76,7 @@ public final class WebUtils {
     return getAppDir("lib");
   }
 
-  public static File getAppPluginsDir() {
-    return getAppDir("plugins");
-  }
-
   public static File getAppClientDir() {
     return getAppDir("client");
-  }
-
-  public static File getAppConfDir() {
-    return getAppDir("conf");
   }
 }

@@ -216,7 +216,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
    * @return UserInfo
    */
   @Override
-  public Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token) {
+  public Map<String, Object> generateFrontendUserInfo(User user, JWTToken token) {
     Map<String, Object> userInfo = new HashMap<>(8);
 
     // 1) token & expire
@@ -230,7 +230,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     userInfo.put("user", user);
 
     // 3) permissions
-    Set<String> permissions = this.getPermissions(user.getUserId(), teamId);
+    Set<String> permissions = this.getPermissions(user.getUserId(), user.getLastTeamId());
     userInfo.put("permissions", permissions);
 
     return userInfo;

@@ -35,7 +35,6 @@ import java.util.Date;
 public class AccessToken implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
   public static final String IS_API_TOKEN = "is_api_token";
 
   public static final Integer STATUS_ENABLE = 1;

@@ -20,7 +20,6 @@ package org.apache.streampark.console.system.controller;
 import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.AccessTokenState;
 import org.apache.streampark.console.core.service.ServiceHelper;
@@ -55,7 +54,7 @@ public class AccessTokenController {
   public RestResponse createToken(
       @NotBlank(message = "{required}") Long userId,
       @RequestParam(required = false) String description)
-      throws InternalException {
+      throws Exception {
     return accessTokenService.create(userId, description);
   }
 
@@ -86,14 +85,14 @@ public class AccessTokenController {
   @PostMapping("toggle")
   @RequiresPermissions("token:add")
   public RestResponse toggleToken(@NotNull(message = "{required}") Long tokenId) {
-    return accessTokenService.toggleToken(tokenId);
+    return accessTokenService.toggle(tokenId);
   }
 
   /** delete token by id */
   @DeleteMapping(value = "delete")
   @RequiresPermissions("token:delete")
   public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
-    boolean res = accessTokenService.deleteToken(tokenId);
+    boolean res = accessTokenService.delete(tokenId);
     return RestResponse.success(res);
   }
 
