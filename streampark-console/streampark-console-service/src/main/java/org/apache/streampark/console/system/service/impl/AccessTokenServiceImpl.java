@@ -57,6 +57,12 @@ public class AccessTokenServiceImpl extends ServiceImpl<AccessTokenMapper, Acces
             return RestResponse.success().put("code", 0).message("user not available");
         }
 
+        AccessToken existAccessToken = baseMapper.selectByUserId(user.getUserId());
+        if (existAccessToken != null) {
+            return RestResponse.success().put("code", 0)
+                .message(String.format("user %s already has a token", user.getUsername()));
+        }
+
         String token = JWTUtil.sign(user, AuthenticationType.OPENAPI, Long.MAX_VALUE);
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(token);
