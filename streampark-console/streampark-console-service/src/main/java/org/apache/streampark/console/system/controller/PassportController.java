@@ -19,7 +19,6 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -99,22 +98,16 @@ public class PassportController {
         }
 
         this.userService.updateLoginTime(username);
-        String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
+        String token = JWTUtil.sign(user, AuthenticationType.SIGN);
 
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String ttl = DateUtils.formatFullTime(expireTime);
 
-        // shiro login
-        JWTToken loginToken = new JWTToken(sign, ttl, AuthenticationType.SIGN.get());
-        SecurityUtils.getSubject().login(loginToken);
-
         // generate UserInfo
-        String token = WebUtils.encryptToken(sign);
-        JWTToken jwtToken = new JWTToken(token, ttl, AuthenticationType.SIGN.get());
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo =
-            userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+        JWTToken jwtToken = new JWTToken(token, ttl);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, jwtToken);
 
         return new RestResponse().data(userInfo);
     }
