@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
@@ -79,7 +80,7 @@ public class ApplicationController {
     @PostMapping("get")
     @Permission(app = "#app.id")
     @RequiresPermissions("app:detail")
-    public RestResponse get(Application app) {
+    public RestResponse<Application> get(Application app) {
         Application application = applicationManageService.getApp(app.getId());
         return RestResponse.success(application);
     }
@@ -274,7 +275,7 @@ public class ApplicationController {
             error = "Cannot use the root directory for checkpoints.";
         }
         if (error != null) {
-            restResponse = RestResponse.success(false).message(error);
+            restResponse = RestResponse.error(ResponseCode.CODE_FAIL, error, false);
         }
         return restResponse;
     }
@@ -286,7 +287,7 @@ public class ApplicationController {
         if (error == null) {
             return RestResponse.success(true);
         }
-        return RestResponse.success(false).message(error);
+        return RestResponse.error(ResponseCode.CODE_FAIL, error, false);
     }
 
     @Permission(app = "#id")

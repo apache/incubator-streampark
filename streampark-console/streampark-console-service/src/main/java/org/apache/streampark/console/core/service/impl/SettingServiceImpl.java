@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.AssertUtils;
+import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.bean.MavenConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
 import org.apache.streampark.console.core.mapper.SettingMapper;
@@ -143,41 +144,35 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public ResponseResult checkDocker(DockerConfig dockerConfig) {
+    public void checkDocker(DockerConfig dockerConfig) {
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
             .withRegistryUrl(dockerConfig.getAddress())
             .build();
 
         DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
 
-        ResponseResult result = new ResponseResult();
-
         try (DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
-            AuthConfig authConfig = new AuthConfig()
-                .withUsername(dockerConfig.getUsername())
-                .withPassword(dockerConfig.getPassword())
-                .withRegistryAddress(dockerConfig.getAddress());
+            AuthConfig authConfig =
+                new AuthConfig()
+                    .withUsername(dockerConfig.getUsername())
+                    .withPassword(dockerConfig.getPassword())
+                    .withRegistryAddress(dockerConfig.getAddress());
             AuthResponse response = dockerClient.authCmd().withAuthConfig(authConfig).exec();
-            if (response.getStatus().equals("Login Succeeded")) {
-                result.setStatus(200);
-            } else {
-                result.setStatus(500);
-                result.setMsg("docker login failed, status: " + response.getStatus());
-            }
+            AssertUtils.required(
+                response.getStatus().equals("Login Succeeded"),
+                "Docker login failed, status: " + response.getStatus());
         } catch (Exception e) {
+            log.warn("Failed to validate Docker registry.", e);
             if (e.getMessage().contains("LastErrorException")) {
-                result.setStatus(400);
+                throw new ApiAlertException(
+                    "Please check the Docker service is running and the address is correct.");
             } else if (e.getMessage().contains("Status 401")) {
-                result.setStatus(500);
-                result.setMsg(
+                throw new ApiAlertException(
                     "Failed to validate Docker registry, unauthorized: incorrect username or password ");
             } else {
-                result.setStatus(500);
-                result.setMsg("Failed to validate Docker registry, error: " + e.getMessage());
+                throw new ApiAlertException("Failed to validate Docker registry, error: " + e.getMessage());
             }
-            log.warn("Failed to validate Docker registry, error:", e);
         }
-        return result;
     }
 
     @Override
@@ -220,8 +215,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public ResponseResult checkEmail(SenderEmail senderEmail) {
-        ResponseResult result = new ResponseResult();
+    public void checkEmail(SenderEmail senderEmail) {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         if (senderEmail.isSsl()) {
@@ -236,12 +230,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             transport.connect(
                 senderEmail.getHost(), senderEmail.getUserName(), senderEmail.getPassword());
             transport.close();
-            result.setStatus(200);
         } catch (MessagingException e) {
-            result.setStatus(500);
-            result.setMsg("connect to target mail server failed: " + e.getMessage());
+            throw new ApiAlertException(
+                "Failed to validate email configuration, error: " + e.getMessage());
         }
-        return result;
     }
 
     @Override

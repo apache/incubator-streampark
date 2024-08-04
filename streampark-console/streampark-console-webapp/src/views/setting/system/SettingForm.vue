@@ -31,6 +31,7 @@
   import { settingFormSchema } from './config';
   import { SvgIcon } from '/@/components/Icon';
   import Swal from 'sweetalert2';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const emit = defineEmits(['success', 'register']);
   const { t } = useI18n();
@@ -93,38 +94,26 @@
       const formData = await validate();
       if (type.value === 'docker') {
         const resp = await fetchVerifyDocker(formData);
-        switch (resp.status) {
-          case 200:
-            await fetchDockerUpdate(formData);
-            break;
-          case 400:
-            Swal.fire({
-              icon: 'error',
-              title: t('setting.system.update.dockerNotStart'),
-              showConfirmButton: true,
-              timer: 3500,
-            });
-            return;
-          case 500:
-            Swal.fire({
-              icon: 'error',
-              title: resp.msg,
-              showConfirmButton: true,
-              timer: 3500,
-            });
-            return;
-          default:
-            break;
+        if (resp.code === ResultEnum.SUCCESS) {
+          await fetchDockerUpdate(formData);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: resp.message,
+            showConfirmButton: true,
+            timer: 3500,
+          });
+          return;
         }
       }
       if (type.value === 'email') {
         const resp = await fetchVerifyEmail(formData);
-        if (resp.status === 200) {
+        if (resp.code === ResultEnum.SUCCESS) {
           await fetchEmailUpdate(formData);
         } else {
           Swal.fire({
             icon: 'error',
-            title: resp.msg,
+            title: resp.message,
             showConfirmButton: true,
             timer: 3500,
           });

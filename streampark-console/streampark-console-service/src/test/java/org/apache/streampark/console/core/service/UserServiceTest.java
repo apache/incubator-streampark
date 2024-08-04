@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Map;
 
 /** org.apache.streampark.console.core.service.UserServiceTest. */
@@ -62,16 +60,10 @@ class UserServiceTest extends SpringUnitTestBase {
         userService.createUser(user);
         // lock user
         user.setStatus(User.STATUS_LOCK);
-        Map<String, Object> data = (Map<String, Object>) userService
-            .updateUser(user)
-            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
-        Assertions.assertNotEquals(true, data.get("needTransferResource"));
+        Assertions.assertNull(userService.updateUser(user).getData());
         // unlock user
         user.setStatus(User.STATUS_VALID);
-        Map<String, Object> data1 = (Map<String, Object>) userService
-            .updateUser(user)
-            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
-        Assertions.assertNotEquals(true, data1.get("needTransferResource"));
+        Assertions.assertNull(userService.updateUser(user).getData());
 
         Resource resource = new Resource();
         resource.setResourceName("test");
@@ -82,9 +74,7 @@ class UserServiceTest extends SpringUnitTestBase {
         resourceService.save(resource);
         // lock user when has resource
         user.setStatus(User.STATUS_LOCK);
-        Map<String, Object> data2 = (Map<String, Object>) userService
-            .updateUser(user)
-            .getOrDefault(RestResponse.DATA_KEY, Collections.emptyMap());
+        Map<String, Object> data2 = (Map<String, Object>) userService.updateUser(user).getData();
         Assertions.assertEquals(true, data2.get("needTransferResource"));
     }
 

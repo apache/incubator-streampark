@@ -25,6 +25,7 @@ import { SvgIcon } from '/@/components/Icon';
 import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
+import {ResultEnum} from "/@/enums/httpEnum";
 
 export const useFlinkApplication = (openStartModal: Fn) => {
   const { t } = useI18n();
@@ -265,8 +266,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
               id: item.id,
               jobName: copyAppName,
             });
-            const status = data.status || 'error';
-            if (status === 'success') {
+            if (data.code === ResultEnum.SUCCESS) {
               Swal.fire({
                 icon: 'success',
                 title: 'copy successful',

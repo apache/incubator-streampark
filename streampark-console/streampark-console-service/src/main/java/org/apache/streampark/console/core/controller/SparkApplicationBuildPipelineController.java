@@ -59,7 +59,7 @@ public class SparkApplicationBuildPipelineController {
             boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
             return RestResponse.success(actionResult);
         } catch (Exception e) {
-            return RestResponse.success(false).message(e.getMessage());
+            return RestResponse.success(e.getMessage(), false);
         }
     }
 

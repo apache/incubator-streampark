@@ -230,11 +230,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public RestResponse getLoginUserInfo(User user) {
         if (user == null) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 0);
+            return RestResponse.error("User is null.");
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put(RestResponse.CODE_KEY, 1);
+            return RestResponse.error("User is locked.");
         }
 
         updateLoginTime(user.getUsername());

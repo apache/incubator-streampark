@@ -99,10 +99,9 @@
   import { signin, fetchSignType } from '/@/api/system/passport';
   import { APP_TEAMID_KEY_ } from '/@/enums/cacheEnum';
   import TeamModal from './teamModal.vue';
-  import { fetchUserTeam } from '/@/api/system/member';
+  import { PageEnum } from '/@/enums/pageEnum';
   import { LoginResultModel } from '/@/api/system/model/userModel';
   import { Result } from '/#/axios';
-  import { PageEnum } from '/@/enums/pageEnum';
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
 

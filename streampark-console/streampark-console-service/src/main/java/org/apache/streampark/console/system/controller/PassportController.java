@@ -85,17 +85,17 @@ public class PassportController {
                                @NotBlank(message = "{required}") String loginType) throws Exception {
 
         if (StringUtils.isEmpty(username)) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.error("Username cannot be empty");
         }
 
         User user = authenticator.authenticate(username, password, loginType);
 
         if (user == null) {
-            return RestResponse.success().put("code", 0);
+            return RestResponse.error("Username or password is incorrect");
         }
 
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            return RestResponse.success().put("code", 1);
+            return RestResponse.error("User is locked");
         }
 
         this.userService.updateLoginTime(username);
@@ -116,12 +116,12 @@ public class PassportController {
         Map<String, Object> userInfo =
             userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
 
-        return new RestResponse().data(userInfo);
+        return RestResponse.success(userInfo);
     }
 
     @PostMapping("signout")
     public RestResponse signout() {
         SecurityUtils.getSubject().logout();
-        return new RestResponse();
+        return RestResponse.success();
     }
 }

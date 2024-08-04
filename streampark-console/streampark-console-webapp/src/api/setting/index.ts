@@ -74,7 +74,7 @@ export function fetchDockerConfig() {
 /**
  * verify docker setting info
  */
-export function fetchVerifyDocker(data: Recordable): Promise<boolean> {
+export function fetchVerifyDocker(data: Recordable) {
   return defHttp.post({
     url: SETTING_APi.CHECK_DOCKER,
     data,
@@ -84,7 +84,7 @@ export function fetchVerifyDocker(data: Recordable): Promise<boolean> {
 /**
  * verify docker setting info
  */
-export function fetchVerifyEmail(data: Recordable): Promise<boolean> {
+export function fetchVerifyEmail(data: Recordable) {
   return defHttp.post({
     url: SETTING_APi.CHECK_EMAIL,
     data,

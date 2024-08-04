@@ -38,6 +38,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAlertSetting } from '/@/api/setting/alert';
   import { AlertSetting } from '/@/api/setting/types/alert.type';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const go = useGo();
   const route = useRoute();
@@ -68,8 +69,7 @@
           id: cluster.id,
         });
         const res = await fetchCheckCluster(params);
-        const status = parseInt(res.status);
-        if (status === 0) {
+        if (res.code === ResultEnum.SUCCESS)  {
           fetchUpdateCluster(params);
           Swal.fire({
             icon: 'success',
@@ -81,7 +81,7 @@
           });
           go('/flink/cluster');
         } else {
-          Swal.fire('Failed', res.msg, 'error');
+          Swal.fire('Failed', res.message, 'error');
         }
       }
     } catch (error) {

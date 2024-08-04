@@ -29,6 +29,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useGo } from '/@/hooks/web/usePage';
   import { useClusterSetting } from './useClusterSetting';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const go = useGo();
   const { t } = useI18n();
@@ -50,8 +51,7 @@
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
         const res = await fetchCheckCluster(params);
-        const status = parseInt(res.status);
-        if (status === 0) {
+        if (res.code === ResultEnum.SUCCESS)  {
           const resp = await fetchCreateCluster(params);
           if (resp) {
             await Swal.fire({
@@ -71,7 +71,7 @@
             );
           }
         } else {
-          Swal.fire('Failed', res.msg, 'error');
+          Swal.fire('Failed', res.message, 'error');
         }
       }
     } catch (error) {

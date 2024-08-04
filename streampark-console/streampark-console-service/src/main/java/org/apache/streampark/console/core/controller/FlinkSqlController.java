@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -41,7 +42,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -68,20 +72,16 @@ public class FlinkSqlController {
         FlinkSqlValidationResult flinkSqlValidationResult = flinkSqlService.verifySql(sql, versionId);
         if (!flinkSqlValidationResult.success()) {
             // record error type, such as error sql, reason and error start/end line
-            String exception = flinkSqlValidationResult.exception();
-            RestResponse response = RestResponse.success()
-                .data(false)
-                .message(exception)
-                .put(TYPE, flinkSqlValidationResult.failedType().getFailedType())
-                .put(START, flinkSqlValidationResult.lineStart())
-                .put(END, flinkSqlValidationResult.lineEnd());
+            Map<String, Integer> errorDetails = new HashMap<>();
+            errorDetails.put(TYPE, flinkSqlValidationResult.failedType().getFailedType());
+            errorDetails.put(START, flinkSqlValidationResult.lineStart());
+            errorDetails.put(END, flinkSqlValidationResult.lineEnd());
 
             if (flinkSqlValidationResult.errorLine() > 0) {
-                response
-                    .put(START, flinkSqlValidationResult.errorLine())
-                    .put(END, flinkSqlValidationResult.errorLine() + 1);
+                errorDetails.put(START, flinkSqlValidationResult.errorLine());
+                errorDetails.put(END, flinkSqlValidationResult.errorLine() + 1);
             }
-            return response;
+            return RestResponse.error(ResponseCode.CODE_FAIL, flinkSqlValidationResult.exception(), errorDetails);
         }
         return RestResponse.success(true);
     }
@@ -126,6 +126,6 @@ public class FlinkSqlController {
 
     @PostMapping("sql_complete")
     public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
-        return RestResponse.success().put("word", sqlComplete.getComplete(sql));
+        return RestResponse.success(Collections.singletonMap("word", sqlComplete.getComplete(sql)));
     }
 }

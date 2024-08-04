@@ -21,7 +21,6 @@ import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
@@ -40,6 +39,7 @@ import static org.apache.streampark.console.core.service.impl.YarnQueueServiceIm
 import static org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl.QUEUE_USED_FORMAT;
 import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
@@ -113,15 +113,15 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // Test for error format with non-empty.
         YarnQueue yarnQueue = mockYarnQueue(1L, "queue@");
-        ResponseResult<String> result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(2);
-        assertThat(result.getMsg()).isEqualTo(ERR_FORMAT_HINTS);
+        assertThatThrownBy(() -> yarnQueueService.checkYarnQueue(yarnQueue))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(ERR_FORMAT_HINTS);
 
         // Test for error format with empty.
         yarnQueue.setQueueLabel("");
-        result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(3);
-        assertThat(result.getMsg()).isEqualTo(QUEUE_EMPTY_HINT);
+        assertThatThrownBy(() -> yarnQueueService.checkYarnQueue(yarnQueue))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(QUEUE_EMPTY_HINT);
 
         // Test for existed
         yarnQueue.setQueueLabel("queue1@label1");
@@ -129,26 +129,22 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
 
         // QueueLabel not updated
         yarnQueue.setQueueLabel("queue1@label1");
-        result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
+        assertThatNoException().isThrownBy(() -> yarnQueueService.checkYarnQueue(yarnQueue));
 
         // QueueLabel updated
         yarnQueue.setQueueLabel("queue2@label1");
-        result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
+        assertThatNoException().isThrownBy(() -> yarnQueueService.checkYarnQueue(yarnQueue));
 
         // new record but same QueueLabel
         yarnQueue.setId(null);
         yarnQueue.setQueueLabel("queue1@label1");
-        result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(1);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
+        assertThatThrownBy(() -> yarnQueueService.checkYarnQueue(yarnQueue))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(YarnQueueServiceImpl.QUEUE_EXISTED_IN_TEAM_HINT);
 
         // Test for normal cases.
         yarnQueue.setQueueLabel("q1");
-        result = yarnQueueService.checkYarnQueue(yarnQueue);
-        assertThat(result.getStatus()).isEqualTo(0);
-        assertThat(result.getMsg()).isEqualTo(YarnQueueServiceImpl.QUEUE_AVAILABLE_HINT);
+        yarnQueueService.checkYarnQueue(yarnQueue);
     }
 
     /**

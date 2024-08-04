@@ -19,13 +19,14 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.bean.DockerConfig;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Disabled("'ese test cases can't be runnable due to external service is not available.")
 class SettingServiceTest extends SpringUnitTestBase {
@@ -96,8 +97,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         senderEmail.setFrom("XXXXXXXX@163.com");
         senderEmail.setSsl(false);
         senderEmail.setPort(25);
-        ResponseResult result = settingService.checkEmail(senderEmail);
-        Assertions.assertEquals(result.getStatus(), 200);
+        assertDoesNotThrow(() -> settingService.checkEmail(senderEmail));
     }
 
     @Test
@@ -111,8 +111,7 @@ class SettingServiceTest extends SpringUnitTestBase {
         dockerConfig.setPassword(password);
         dockerConfig.setNamespace("streampark");
 
-        ResponseResult result = settingService.checkDocker(dockerConfig);
-        Assertions.assertEquals(result.getStatus(), 200);
+        assertDoesNotThrow(() -> settingService.checkDocker(dockerConfig));
     }
 
     @Test

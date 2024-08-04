@@ -56,16 +56,15 @@ public class AccessTokenController {
     @PostMapping(value = "check")
     public RestResponse verifyToken() {
         Long userId = ServiceHelper.getUserId();
-        RestResponse restResponse = RestResponse.success();
         AccessToken accessToken = accessTokenService.getByUserId(userId);
         if (accessToken == null) {
-            restResponse.data(AccessTokenStateEnum.NULL.get());
+            return RestResponse.success(AccessTokenStateEnum.NULL.get());
         } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
-            restResponse.data(AccessTokenStateEnum.INVALID_TOKEN.get());
+            return RestResponse.success(AccessTokenStateEnum.INVALID_TOKEN.get());
         } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
-            restResponse.data(AccessTokenStateEnum.LOCKED_USER.get());
+            return RestResponse.success(AccessTokenStateEnum.LOCKED_USER.get());
         }
-        return restResponse;
+        return RestResponse.success(AccessTokenStateEnum.OK.get());
     }
 
     @PostMapping(value = "list")

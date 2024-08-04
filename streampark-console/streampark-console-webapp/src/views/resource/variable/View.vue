@@ -82,6 +82,7 @@
   import { fetchVariableDelete, fetchVariableList } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
@@ -145,7 +146,7 @@
       variableCode: record.variableCode,
       variableValue: record.variableValue,
     });
-    if (data.status === 'success') {
+    if (data.code === ResultEnum.SUCCESS) {
       createMessage.success(t('flink.variable.deleteVariable') + t('flink.variable.success'));
       reload();
     } else {

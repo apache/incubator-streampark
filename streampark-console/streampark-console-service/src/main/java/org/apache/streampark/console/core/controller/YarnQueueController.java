@@ -56,7 +56,8 @@ public class YarnQueueController {
 
     @PostMapping("check")
     public RestResponse check(YarnQueue yarnQueue) {
-        return RestResponse.success(yarnQueueService.checkYarnQueue(yarnQueue));
+        yarnQueueService.checkYarnQueue(yarnQueue);
+        return RestResponse.success(true);
     }
 
     @PostMapping("create")

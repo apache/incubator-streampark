@@ -128,6 +128,7 @@
   import udxfSvg from '/@/assets/icons/fx.svg';
   import jarSvg from '/@/assets/icons/jar.svg';
   import groupSvg from '/@/assets/icons/group.svg';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const teamResource = ref<Array<any>>([]);
   const [registerDrawer, { openDrawer }] = useDrawer();
@@ -187,7 +188,7 @@
       teamId: record.teamId,
       resourceName: record.resourceName,
     });
-    if (data.status === 'success') {
+    if (data.code === ResultEnum.SUCCESS) {
       createMessage.success(t('flink.resource.deleteResource') + t('flink.resource.success'));
       await reload();
       updateTeamResource();

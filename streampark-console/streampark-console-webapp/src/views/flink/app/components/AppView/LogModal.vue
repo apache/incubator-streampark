@@ -29,6 +29,7 @@
   import { Icon } from '/@/components/Icon';
   import { formatToDateTime } from '/@/utils/dateUtil';
   import { useTimeoutFn } from '@vueuse/shared';
+  import {ResultEnum} from "/@/enums/httpEnum";
 
   const { t } = useI18n();
   const logTime = ref<string>('');
@@ -68,8 +69,7 @@
         offset: offset,
         limit: 100,
       });
-      const status = data.status || 'error';
-      if (status === 'success') {
+      if (data.code === ResultEnum.SUCCESS) {
         if (data.data) {
           logContent += data.data;
           setContent(logContent);

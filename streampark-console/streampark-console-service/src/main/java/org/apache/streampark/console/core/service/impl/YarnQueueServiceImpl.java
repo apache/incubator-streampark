@@ -23,7 +23,6 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -89,42 +88,19 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
      * is invalid, 3 The queue name and label is empty.
      */
     @Override
-    public ResponseResult<String> checkYarnQueue(YarnQueue yarnQueue) {
+    public void checkYarnQueue(YarnQueue yarnQueue) {
 
         AssertUtils.notNull(yarnQueue, "Yarn queue mustn't be empty.");
         AssertUtils.notNull(yarnQueue.getTeamId(), "Team id mustn't be null.");
-
-        ResponseResult<String> responseResult = new ResponseResult<>();
-
-        if (StringUtils.isBlank(yarnQueue.getQueueLabel())) {
-            responseResult.setStatus(3);
-            responseResult.setMsg(QUEUE_EMPTY_HINT);
-            return responseResult;
-        }
-
-        boolean valid = isValid(yarnQueue.getQueueLabel());
-        if (!valid) {
-            responseResult.setStatus(2);
-            responseResult.setMsg(ERR_FORMAT_HINTS);
-            return responseResult;
-        }
-
-        boolean existed = this.baseMapper.existsByQueueLabel(yarnQueue);
-
-        if (existed) {
-            responseResult.setStatus(1);
-            responseResult.setMsg(QUEUE_EXISTED_IN_TEAM_HINT);
-            return responseResult;
-        }
-        responseResult.setStatus(0);
-        responseResult.setMsg("The queue label is available.");
-        return responseResult;
+        AssertUtils.required(!StringUtils.isBlank(yarnQueue.getQueueLabel()), QUEUE_EMPTY_HINT);
+        AssertUtils.required(isValid(yarnQueue.getQueueLabel()), ERR_FORMAT_HINTS);
+        AssertUtils.required(
+            !this.baseMapper.existsByQueueLabel(yarnQueue), QUEUE_EXISTED_IN_TEAM_HINT);
     }
 
     @Override
     public boolean createYarnQueue(YarnQueue yarnQueue) {
-        ResponseResult<String> checkResponse = checkYarnQueue(yarnQueue);
-        ApiAlertException.throwIfFalse(checkResponse.getStatus() == 0, checkResponse.getMsg());
+        checkYarnQueue(yarnQueue);
         return save(yarnQueue);
     }
 
