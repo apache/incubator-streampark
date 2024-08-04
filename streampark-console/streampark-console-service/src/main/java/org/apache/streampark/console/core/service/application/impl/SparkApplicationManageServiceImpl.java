@@ -179,7 +179,7 @@ public class SparkApplicationManageServiceImpl
         // backUpService.remove(application);
 
         // 6) remove savepoint
-        // savePointService.remove(application);
+        // savepointService.remove(application);
 
         // 7) remove BuildPipeline
         appBuildPipeService.removeByAppId(application.getId());

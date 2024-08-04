@@ -36,7 +36,7 @@ import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.FlinkClusterService;
-import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -96,7 +96,7 @@ public class FlinkAppHttpWatcher {
     private FlinkClusterService flinkClusterService;
 
     @Autowired
-    private SavePointService savePointService;
+    private SavepointService savepointService;
 
     // track interval every 5 seconds
     public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -248,13 +248,13 @@ public class FlinkAppHttpWatcher {
             // non-mapping
             if (application.getState() != FlinkAppStateEnum.MAPPING.getValue()) {
                 log.error(
-                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint expired!");
+                    "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi and getFromYarnRestApi error,job failed,savepoint expired!");
                 if (StopFromEnum.NONE.equals(stopFrom)) {
                     Date lostTime = LOST_CACHE.getIfPresent(application.getId());
                     if (lostTime == null) {
                         LOST_CACHE.put(application.getId(), new Date());
                     } else if (DateUtils.toSecondDuration(lostTime, new Date()) >= 30) {
-                        savePointService.expire(application.getId());
+                        savepointService.expire(application.getId());
                         application.setState(FlinkAppStateEnum.LOST.getValue());
                         WATCHING_APPS.remove(application.getId());
                         LOST_CACHE.invalidate(application.getId());
@@ -329,7 +329,7 @@ public class FlinkAppHttpWatcher {
                 } catch (Exception e) {
                     log.error("get flink jobOverview error: {}", e.getMessage(), e);
                 }
-                // 3) savePoint obsolete check and NEED_START check
+                // 3) savepoint obsolete check and NEED_START check
                 OptionStateEnum optionState = OPTIONING.get(application.getId());
                 if (currentState.equals(FlinkAppStateEnum.RUNNING)) {
                     handleRunningState(application, optionState, currentState);
@@ -424,7 +424,7 @@ public class FlinkAppHttpWatcher {
             }
         }
 
-        // The current state is running, and there is a current task in the savePointCache,
+        // The current state is running, and there is a current task in the savepointCache,
         // indicating that the task is doing savepoint
         if (SAVEPOINT_CACHE.getIfPresent(appId) != null) {
             application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
@@ -491,8 +491,8 @@ public class FlinkAppHttpWatcher {
                 if (StopFromEnum.NONE.equals(stopFrom) || applicationInfoService.checkAlter(application)) {
                     if (StopFromEnum.NONE.equals(stopFrom)) {
                         log.info(
-                            "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job cancel is not form StreamPark,savePoint expired!");
-                        savePointService.expire(application.getId());
+                            "[StreamPark][FlinkAppHttpWatcher] getFromFlinkRestApi, job cancel is not form StreamPark,savepoint expired!");
+                        savepointService.expire(application.getId());
                     }
                     stopCanceledJob(application.getId());
                     doAlert(application, FlinkAppStateEnum.CANCELED);
@@ -551,8 +551,8 @@ public class FlinkAppHttpWatcher {
             } finally {
                 if (StopFromEnum.NONE.equals(stopFrom)) {
                     log.error(
-                        "[StreamPark][FlinkAppHttpWatcher] query previous state was canceling and stopFrom NotFound,savePoint expired!");
-                    savePointService.expire(application.getId());
+                        "[StreamPark][FlinkAppHttpWatcher] query previous state was canceling and stopFrom NotFound,savepoint expired!");
+                    savepointService.expire(application.getId());
                     if (flinkAppState == FlinkAppStateEnum.KILLED
                         || flinkAppState == FlinkAppStateEnum.FAILED) {
                         doAlert(application, flinkAppState);
@@ -582,8 +582,8 @@ public class FlinkAppHttpWatcher {
                     if (FlinkAppStateEnum.KILLED.equals(flinkAppState)) {
                         if (StopFromEnum.NONE.equals(stopFrom)) {
                             log.error(
-                                "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi,job was killed and stopFrom NotFound,savePoint expired!");
-                            savePointService.expire(application.getId());
+                                "[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi,job was killed and stopFrom NotFound,savepoint expired!");
+                            savepointService.expire(application.getId());
                         }
                         flinkAppState = FlinkAppStateEnum.CANCELED;
                         cleanSavepoint(application);
