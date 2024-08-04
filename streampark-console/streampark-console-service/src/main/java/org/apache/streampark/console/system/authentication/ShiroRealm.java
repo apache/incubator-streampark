@@ -127,7 +127,7 @@ public class ShiroRealm extends AuthorizingRealm {
 
         // Query user information by username
         User user = userService.getByUsername(username);
-        if (user == null || !JWTUtil.verify(credential, username, user.getSalt())) {
+        if (user == null || !JWTUtil.verify(credential, username, user.getPassword())) {
             throw new AuthenticationException("the authorization token verification failed.");
         }
 
