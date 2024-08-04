@@ -28,7 +28,7 @@ import java.util.Date;
 @Data
 @TableName("t_flink_savepoint")
 @Slf4j
-public class SavePoint {
+public class Savepoint {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -41,7 +41,7 @@ public class SavePoint {
 
     /**
      * 1) checkPoint <br>
-     * 2) savePoint
+     * 2) savepoint
      */
     private Integer type;
 

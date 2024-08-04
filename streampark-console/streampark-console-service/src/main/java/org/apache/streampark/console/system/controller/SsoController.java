@@ -89,7 +89,7 @@ public class SsoController {
         ApiAlertException.throwIfNull(
             principal.getName(), "Please configure the correct Principal Name Attribute");
 
-        User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+        User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO);
 
         return userService.getLoginUserInfo(user);
     }

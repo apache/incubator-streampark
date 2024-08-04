@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.AppUpdated;
+import org.apache.streampark.console.core.annotation.AppChangeEvent;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
@@ -100,7 +100,7 @@ public class ApplicationController {
         return RestResponse.success();
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @Permission(app = "#app.id")
     @PostMapping("update")
     @RequiresPermissions("app:update")
@@ -124,7 +124,7 @@ public class ApplicationController {
         return RestResponse.success(applicationList);
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @PostMapping("mapping")
     @Permission(app = "#app.id")
     @RequiresPermissions("app:mapping")
@@ -133,7 +133,7 @@ public class ApplicationController {
         return RestResponse.success(flag);
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @Permission(app = "#app.id")
     @PostMapping("revoke")
     @RequiresPermissions("app:release")

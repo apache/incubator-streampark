@@ -45,6 +45,7 @@ public @interface OpenAPI {
         String defaultValue() default "";
 
         String bindFor() default "";
+
     }
 
 }

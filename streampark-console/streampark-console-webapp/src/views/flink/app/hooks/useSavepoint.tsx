@@ -103,7 +103,7 @@ export const useSavepoint = (updateOption: Fn) => {
             if (unref(customSavepoint)) {
               submitLoading.value = true;
               const { data } = await fetchCheckSavepointPath({
-                savePoint: unref(customSavepoint),
+                savepointPath: unref(customSavepoint),
               });
               if (data.data === false) {
                 createErrorSwal('custom savepoint path is invalid, ' + data.message);

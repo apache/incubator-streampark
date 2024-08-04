@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.AppUpdated;
+import org.apache.streampark.console.core.annotation.AppChangeEvent;
 import org.apache.streampark.console.core.entity.ApplicationBackUp;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
@@ -96,7 +96,7 @@ public class SparkApplicationController {
         return RestResponse.success();
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @PostMapping("update")
     @RequiresPermissions("app:update")
     public RestResponse update(SparkApplication app) {
@@ -117,7 +117,7 @@ public class SparkApplicationController {
         return RestResponse.success(applicationList);
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @PostMapping("mapping")
     @RequiresPermissions("app:mapping")
     public RestResponse mapping(SparkApplication app) {
@@ -125,7 +125,7 @@ public class SparkApplicationController {
         return RestResponse.success(flag);
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @PostMapping("revoke")
     @RequiresPermissions("app:release")
     public RestResponse revoke(SparkApplication app) {
@@ -158,7 +158,7 @@ public class SparkApplicationController {
         return RestResponse.success();
     }
 
-    @AppUpdated
+    @AppChangeEvent
     @PostMapping("clean")
     @RequiresPermissions("app:clean")
     public RestResponse clean(SparkApplication app) {

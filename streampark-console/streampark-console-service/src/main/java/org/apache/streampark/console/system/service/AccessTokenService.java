@@ -36,7 +36,7 @@ public interface AccessTokenService extends IService<AccessToken> {
      * @return RestResponse
      * @throws InternalException
      */
-    RestResponse create(Long userId, String description) throws InternalException;
+    RestResponse create(Long userId, String description) throws Exception;
 
     /**
      * Retrieves a page of {@link AccessToken} objects based on the provided parameters.
@@ -53,7 +53,7 @@ public interface AccessTokenService extends IService<AccessToken> {
      * @param tokenId AccessToken id
      * @return RestResponse
      */
-    RestResponse toggleToken(Long tokenId);
+    RestResponse toggle(Long tokenId);
 
     /**
      * Get the corresponding AccessToken based on the user ID

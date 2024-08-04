@@ -19,11 +19,11 @@ package org.apache.streampark.console.core.component;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
 import org.apache.streampark.console.core.enums.FailoverStrategyEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
-import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
@@ -73,7 +73,7 @@ public class FlinkCheckpointProcessor {
     private AlertService alertService;
 
     @Autowired
-    private SavePointService savePointService;
+    private SavepointService savepointService;
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
@@ -172,8 +172,8 @@ public class FlinkCheckpointProcessor {
         return checkPointCache.get(
             cacheId,
             key -> {
-                SavePoint savePoint = savePointService.getLatest(appId);
-                return Optional.ofNullable(savePoint).map(SavePoint::getChkId).orElse(null);
+                Savepoint savepoint = savepointService.getLatest(appId);
+                return Optional.ofNullable(savepoint).map(Savepoint::getChkId).orElse(null);
             });
     }
 
@@ -184,15 +184,15 @@ public class FlinkCheckpointProcessor {
     }
 
     private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {
-        SavePoint savePoint = new SavePoint();
-        savePoint.setAppId(appId);
-        savePoint.setChkId(checkPoint.getId());
-        savePoint.setLatest(true);
-        savePoint.setType(checkPoint.getCheckPointType().get());
-        savePoint.setPath(checkPoint.getExternalPath());
-        savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-        savePoint.setCreateTime(new Date());
-        savePointService.save(savePoint);
+        Savepoint savepoint = new Savepoint();
+        savepoint.setAppId(appId);
+        savepoint.setChkId(checkPoint.getId());
+        savepoint.setLatest(true);
+        savepoint.setType(checkPoint.getCheckPointType().get());
+        savepoint.setPath(checkPoint.getExternalPath());
+        savepoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
+        savepoint.setCreateTime(new Date());
+        savepointService.save(savepoint);
     }
 
     public static class Counter {
