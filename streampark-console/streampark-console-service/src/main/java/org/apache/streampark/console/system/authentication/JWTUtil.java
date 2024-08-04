@@ -125,7 +125,7 @@ public class JWTUtil {
      */
     public static String sign(User user, AuthenticationType authType, Long expireTime) throws Exception {
         Date date = new Date(expireTime);
-        Algorithm algorithm = Algorithm.HMAC256(user.getSalt());
+        Algorithm algorithm = Algorithm.HMAC256(user.getPassword());
 
         JWTCreator.Builder builder =
             JWT.create()
