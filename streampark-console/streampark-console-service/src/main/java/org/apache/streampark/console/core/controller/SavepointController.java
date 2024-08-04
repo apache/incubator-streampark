@@ -22,9 +22,9 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 import org.apache.streampark.console.core.service.ApplicationService;
-import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SavepointService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -42,34 +42,34 @@ import javax.annotation.Nullable;
 @Validated
 @RestController
 @RequestMapping("flink/savepoint")
-public class SavePointController {
+public class SavepointController {
 
   @Autowired private ApplicationService applicationService;
 
-  @Autowired private SavePointService savePointService;
+  @Autowired private SavepointService savepointService;
 
   @PostMapping("history")
   @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
-  public RestResponse history(SavePoint sp, RestRequest request) {
-    IPage<SavePoint> page = savePointService.page(sp, request);
+  public RestResponse history(Savepoint sp, RestRequest request) {
+    IPage<Savepoint> page = savepointService.page(sp, request);
     return RestResponse.success(page);
   }
 
   @PostMapping("delete")
   @RequiresPermissions("savepoint:delete")
   @PermissionScope(app = "#sp.appId", team = "#sp.teamId")
-  public RestResponse delete(SavePoint sp) throws InternalException {
-    SavePoint savePoint = savePointService.getById(sp.getId());
-    Application application = applicationService.getById(savePoint.getAppId());
-    Boolean deleted = savePointService.delete(sp.getId(), application);
+  public RestResponse delete(Savepoint sp) throws InternalException {
+    Savepoint savepoint = savepointService.getById(sp.getId());
+    Application application = applicationService.getById(savepoint.getAppId());
+    Boolean deleted = savepointService.delete(sp.getId(), application);
     return RestResponse.success(deleted);
   }
 
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
-  @PermissionScope(app = "#savePoint.appId", team = "#savePoint.teamId")
-  public RestResponse trigger(SavePoint savePoint, @Nullable String savepointPath) {
-    savePointService.trigger(savePoint.getAppId(), savepointPath);
+  @PermissionScope(app = "#savepoint.appId", team = "#savepoint.teamId")
+  public RestResponse trigger(Savepoint savepoint, @Nullable String savepointPath) {
+    savepointService.trigger(savepoint.getAppId(), savepointPath);
     return RestResponse.success(true);
   }
 }

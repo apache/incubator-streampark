@@ -15,10 +15,43 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.mapper;
+package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.entity.SavePoint;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.util.Date;
 
-public interface SavePointMapper extends BaseMapper<SavePoint> {}
+@Getter
+@Setter
+@TableName("t_flink_savepoint")
+@Slf4j
+public class Savepoint {
+
+  @TableId(type = IdType.AUTO)
+  private Long id;
+
+  private Long appId;
+
+  private Long chkId;
+
+  private Boolean latest;
+
+  /**
+   * 1) checkpoint <br>
+   * 2) savepoint
+   */
+  private Integer type;
+
+  private String path;
+
+  private Date triggerTime;
+
+  private Date createTime;
+
+  private transient Long teamId;
+}

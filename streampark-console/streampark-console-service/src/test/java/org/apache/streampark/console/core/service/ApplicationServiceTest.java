@@ -86,7 +86,7 @@ class ApplicationServiceTest extends SpringTestBase {
     app.setK8sHadoopIntegration(false);
     app.setBackUp(false);
     app.setRestart(false);
-    app.setSavePointed(false);
+    app.setRestoreOrTriggerSavepoint(false);
     app.setDrain(false);
     app.setAllowNonRestored(false);
 
@@ -99,7 +99,7 @@ class ApplicationServiceTest extends SpringTestBase {
     Application application = new Application();
     application.setId(1304056220683497473L);
     application.setRestart(false);
-    application.setSavePointed(false);
+    application.setRestoreOrTriggerSavepoint(false);
     application.setAllowNonRestored(false);
 
     applicationService.start(application, false);

@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.aspect;
 
+import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.common.util.ReflectUtils;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.OpenAPI;
@@ -54,8 +56,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 @Slf4j
 @Component
@@ -89,25 +94,57 @@ public class StreamParkAspect {
       "execution(public"
           + " org.apache.streampark.console.base.domain.RestResponse"
           + " org.apache.streampark.console.core.controller.*.*(..))")
-  public void openAPI() {}
+  public void openAPIPointcut() {}
 
   @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-  @Around(value = "openAPI()")
+  @Around(value = "openAPIPointcut()")
   public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     log.debug("restResponse aspect, method:{}", methodSignature.getName());
     Boolean isApi =
         (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
     if (isApi != null && isApi) {
+      HttpServletRequest request =
+          ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
       OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
       if (openAPI == null) {
-        HttpServletRequest request =
-            ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String url = request.getRequestURI();
         if (openapiWhitelist.contains(url)) {
           log.info("request by openapi white-list: {} ", url);
         } else {
           throw new ApiAlertException("current api unsupported: " + url);
+        }
+      } else {
+        Object[] objects = joinPoint.getArgs();
+        for (OpenAPI.Param param : openAPI.param()) {
+          String bingFor = param.bindFor();
+          if (StringUtils.isNotBlank(bingFor)) {
+            String name = param.name();
+            for (Object args : objects) {
+              Field bindForField = ReflectUtils.getField(args.getClass(), bingFor);
+              if (bindForField != null) {
+                Object value = request.getParameter(name);
+                bindForField.setAccessible(true);
+                if (value != null) {
+                  if (param.type().equals(String.class)) {
+                    bindForField.set(args, value.toString());
+                  } else if (param.type().equals(Boolean.class)
+                      || param.type().equals(boolean.class)) {
+                    bindForField.set(args, Boolean.parseBoolean(value.toString()));
+                  } else if (param.type().equals(Integer.class) || param.type().equals(int.class)) {
+                    bindForField.set(args, Integer.parseInt(value.toString()));
+                  } else if (param.type().equals(Long.class) || param.type().equals(long.class)) {
+                    bindForField.set(args, Long.parseLong(value.toString()));
+                  } else if (param.type().equals(Date.class)) {
+                    bindForField.set(
+                        args,
+                        DateUtils.parse(
+                            value.toString(), DateUtils.fullFormat(), TimeZone.getDefault()));
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

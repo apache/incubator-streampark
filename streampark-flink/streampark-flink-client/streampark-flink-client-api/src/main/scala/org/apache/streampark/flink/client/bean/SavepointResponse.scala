@@ -18,4 +18,4 @@
 package org.apache.streampark.flink.client.bean
 
 /** Result class of trigger savepoint presents savepoint path. */
-case class SavepointResponse(savePointDir: String)
+case class SavepointResponse(savepointDir: String)

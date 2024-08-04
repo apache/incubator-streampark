@@ -20,24 +20,24 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.annotation.Nullable;
 
-public interface SavePointService extends IService<SavePoint> {
+public interface SavepointService extends IService<Savepoint> {
 
   void expire(Long appId);
 
-  SavePoint getLatest(Long id);
+  Savepoint getLatest(Long id);
 
   void trigger(Long appId, @Nullable String savepointPath);
 
   Boolean delete(Long id, Application application) throws InternalException;
 
-  IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
+  IPage<Savepoint> page(Savepoint savepoint, RestRequest request);
 
   void removeApp(Application application);
 

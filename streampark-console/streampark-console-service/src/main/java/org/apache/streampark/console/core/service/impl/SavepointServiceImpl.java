@@ -32,17 +32,17 @@ import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 import org.apache.streampark.console.core.enums.CheckPointType;
 import org.apache.streampark.console.core.enums.Operation;
 import org.apache.streampark.console.core.enums.OptionState;
-import org.apache.streampark.console.core.mapper.SavePointMapper;
+import org.apache.streampark.console.core.mapper.SavepointMapper;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
@@ -80,8 +80,8 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
-    implements SavePointService {
+public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint>
+    implements SavepointService {
 
   @Autowired private FlinkEnvService flinkEnvService;
 
@@ -108,21 +108,21 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
   @Override
   public void expire(Long appId) {
-    SavePoint savePoint = new SavePoint();
-    savePoint.setLatest(false);
-    LambdaQueryWrapper<SavePoint> queryWrapper =
-        new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, appId);
-    this.update(savePoint, queryWrapper);
+    Savepoint savepoint = new Savepoint();
+    savepoint.setLatest(false);
+    LambdaQueryWrapper<Savepoint> queryWrapper =
+        new LambdaQueryWrapper<Savepoint>().eq(Savepoint::getAppId, appId);
+    this.update(savepoint, queryWrapper);
   }
 
   @Override
-  public boolean save(SavePoint entity) {
+  public boolean save(Savepoint entity) {
     this.expire(entity);
     this.expire(entity.getAppId());
     return super.save(entity);
   }
 
-  private void expire(SavePoint entity) {
+  private void expire(Savepoint entity) {
     FlinkEnv flinkEnv = flinkEnvService.getByAppId(entity.getAppId());
     Application application = applicationService.getById(entity.getAppId());
     Utils.notNull(flinkEnv);
@@ -186,40 +186,40 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     if (cpThreshold == 0) {
-      LambdaQueryWrapper<SavePoint> queryWrapper =
-          new LambdaQueryWrapper<SavePoint>()
-              .eq(SavePoint::getAppId, entity.getAppId())
-              .eq(SavePoint::getType, 1);
+      LambdaQueryWrapper<Savepoint> queryWrapper =
+          new LambdaQueryWrapper<Savepoint>()
+              .eq(Savepoint::getAppId, entity.getAppId())
+              .eq(Savepoint::getType, 1);
       this.remove(queryWrapper);
     } else {
-      LambdaQueryWrapper<SavePoint> queryWrapper =
-          new LambdaQueryWrapper<SavePoint>()
-              .select(SavePoint::getTriggerTime)
-              .eq(SavePoint::getAppId, entity.getAppId())
-              .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-              .orderByDesc(SavePoint::getTriggerTime);
+      LambdaQueryWrapper<Savepoint> queryWrapper =
+          new LambdaQueryWrapper<Savepoint>()
+              .select(Savepoint::getTriggerTime)
+              .eq(Savepoint::getAppId, entity.getAppId())
+              .eq(Savepoint::getType, CheckPointType.CHECKPOINT.get())
+              .orderByDesc(Savepoint::getTriggerTime);
 
-      Page<SavePoint> savePointPage =
+      Page<Savepoint> savepointPage =
           this.baseMapper.selectPage(new Page<>(1, cpThreshold + 1), queryWrapper);
-      if (!savePointPage.getRecords().isEmpty()
-          && savePointPage.getRecords().size() > cpThreshold) {
-        SavePoint savePoint = savePointPage.getRecords().get(cpThreshold - 1);
-        LambdaQueryWrapper<SavePoint> lambdaQueryWrapper =
-            new LambdaQueryWrapper<SavePoint>()
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .eq(SavePoint::getType, 1)
-                .lt(SavePoint::getTriggerTime, savePoint.getTriggerTime());
+      if (!savepointPage.getRecords().isEmpty()
+          && savepointPage.getRecords().size() > cpThreshold) {
+        Savepoint savepoint = savepointPage.getRecords().get(cpThreshold - 1);
+        LambdaQueryWrapper<Savepoint> lambdaQueryWrapper =
+            new LambdaQueryWrapper<Savepoint>()
+                .eq(Savepoint::getAppId, entity.getAppId())
+                .eq(Savepoint::getType, 1)
+                .lt(Savepoint::getTriggerTime, savepoint.getTriggerTime());
         this.remove(lambdaQueryWrapper);
       }
     }
   }
 
   @Override
-  public SavePoint getLatest(Long id) {
-    LambdaQueryWrapper<SavePoint> queryWrapper =
-        new LambdaQueryWrapper<SavePoint>()
-            .eq(SavePoint::getAppId, id)
-            .eq(SavePoint::getLatest, true);
+  public Savepoint getLatest(Long id) {
+    LambdaQueryWrapper<Savepoint> queryWrapper =
+        new LambdaQueryWrapper<Savepoint>()
+            .eq(Savepoint::getAppId, id)
+            .eq(Savepoint::getLatest, true);
     return this.getOne(queryWrapper);
   }
 
@@ -336,10 +336,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             10L,
             TimeUnit.MINUTES,
             savepointResponse -> {
-              if (savepointResponse != null && savepointResponse.savePointDir() != null) {
+              if (savepointResponse != null && savepointResponse.savepointDir() != null) {
                 applicationLog.setSuccess(true);
-                String savePointDir = savepointResponse.savePointDir();
-                log.info("Request savepoint successful, savepointDir: {}", savePointDir);
+                String savepointDir = savepointResponse.savepointDir();
+                log.info("Request savepoint successful, savepointDir: {}", savepointDir);
               }
             },
             e -> {
@@ -422,10 +422,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   @Override
   @Transactional(rollbackFor = Exception.class)
   public Boolean delete(Long id, Application application) throws InternalException {
-    SavePoint savePoint = getById(id);
+    Savepoint savepoint = getById(id);
     try {
-      if (CommonUtils.notEmpty(savePoint.getPath())) {
-        application.getFsOperator().delete(savePoint.getPath());
+      if (CommonUtils.notEmpty(savepoint.getPath())) {
+        application.getFsOperator().delete(savepoint.getPath());
       }
       removeById(id);
       return true;
@@ -436,11 +436,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   }
 
   @Override
-  public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
+  public IPage<Savepoint> page(Savepoint savepoint, RestRequest request) {
     request.setSortField("trigger_time");
-    Page<SavePoint> page = MybatisPager.getPage(request);
-    LambdaQueryWrapper<SavePoint> queryWrapper =
-        new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, savePoint.getAppId());
+    Page<Savepoint> page = MybatisPager.getPage(request);
+    LambdaQueryWrapper<Savepoint> queryWrapper =
+        new LambdaQueryWrapper<Savepoint>().eq(Savepoint::getAppId, savepoint.getAppId());
     return this.page(page, queryWrapper);
   }
 
@@ -448,8 +448,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
   public void removeApp(Application application) {
     Long appId = application.getId();
 
-    LambdaQueryWrapper<SavePoint> queryWrapper =
-        new LambdaQueryWrapper<SavePoint>().eq(SavePoint::getAppId, appId);
+    LambdaQueryWrapper<Savepoint> queryWrapper =
+        new LambdaQueryWrapper<Savepoint>().eq(Savepoint::getAppId, appId);
     this.remove(queryWrapper);
 
     try {

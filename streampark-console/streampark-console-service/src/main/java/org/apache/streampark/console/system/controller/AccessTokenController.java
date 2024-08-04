@@ -17,10 +17,8 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionScope;
 import org.apache.streampark.console.core.enums.AccessTokenState;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -94,44 +92,5 @@ public class AccessTokenController {
   public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
     boolean res = accessTokenService.delete(tokenId);
     return RestResponse.success(res);
-  }
-
-  /**
-   * copy cURL, hardcode now, there is no need for configuration here, because there are several
-   * fixed interfaces
-   */
-  @PermissionScope(app = "#appId", team = "#teamId")
-  @PostMapping(value = "curl")
-  public RestResponse copyRestApiCurl(
-      @NotBlank(message = "{required}") String appId,
-      @NotBlank(message = "{required}") String teamId,
-      @NotBlank(message = "{required}") String baseUrl,
-      @NotBlank(message = "{required}") String path) {
-    String resultCURL = null;
-    CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
-
-    curlBuilder
-        .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-        .addHeader(
-            "Authorization", accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
-
-    if ("/flink/app/start".equalsIgnoreCase(path)) {
-      resultCURL =
-          curlBuilder
-              .addFormData("id", appId)
-              .addFormData("teamId", teamId)
-              .addFormData("allowNonRestored", "false")
-              .addFormData("savePointed", "false")
-              .build();
-    } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
-      resultCURL =
-          curlBuilder
-              .addFormData("id", appId)
-              .addFormData("teamId", teamId)
-              .addFormData("savePointed", "false")
-              .addFormData("drain", "false")
-              .build();
-    }
-    return RestResponse.success(resultCURL);
   }
 }

@@ -67,13 +67,20 @@ public class OpenAPIController {
             required = true,
             type = Long.class),
         @OpenAPI.Param(
-            name = "savePointed",
-            description = "restored app from the savepoint or latest checkpoint",
+            name = "argument",
+            description = "flink program run argument",
             required = false,
             type = String.class,
-            defaultValue = "false"),
+            bindFor = "args"),
         @OpenAPI.Param(
-            name = "savePoint",
+            name = "restoreFromSavepoint",
+            description = "restored app from the savepoint or checkpoint",
+            required = false,
+            type = Boolean.class,
+            defaultValue = "false",
+            bindFor = "restoreOrTriggerSavepoint"),
+        @OpenAPI.Param(
+            name = "savepointPath",
             description = "savepoint or checkpoint path",
             required = false,
             type = String.class),
@@ -81,15 +88,15 @@ public class OpenAPIController {
             name = "allowNonRestored",
             description = "ignore savepoint if cannot be restored",
             required = false,
-            type = boolean.class,
-            defaultValue = "false")
+            type = Boolean.class,
+            defaultValue = "false"),
       })
   @PermissionScope(app = "#app.appId", team = "#app.teamId")
   @PostMapping("app/start")
   @RequiresPermissions("app:start")
   public RestResponse flinkStart(Application app) throws Exception {
     applicationService.start(app, false);
-    return RestResponse.success();
+    return RestResponse.success(true);
   }
 
   @OpenAPI(
@@ -114,13 +121,14 @@ public class OpenAPIController {
             required = true,
             type = Long.class),
         @OpenAPI.Param(
-            name = "savePointed",
+            name = "triggerSavepoint",
             description = "trigger savepoint before taking stopping",
             required = false,
-            type = boolean.class,
-            defaultValue = "false"),
+            type = Boolean.class,
+            defaultValue = "false",
+            bindFor = "restoreOrTriggerSavepoint"),
         @OpenAPI.Param(
-            name = "savePoint",
+            name = "savepointPath",
             description = "savepoint path",
             required = false,
             type = String.class),
@@ -128,7 +136,7 @@ public class OpenAPIController {
             name = "drain",
             description = "send max watermark before canceling",
             required = false,
-            type = boolean.class,
+            type = Boolean.class,
             defaultValue = "false"),
       })
   @PermissionScope(app = "#app.appId", team = "#app.teamId")
@@ -141,11 +149,8 @@ public class OpenAPIController {
 
   @PostMapping("curl")
   public RestResponse copyOpenApiCurl(
-      String baseUrl,
-      Long appId,
-      @NotNull(message = "{required}") Long teamId,
-      @NotBlank(message = "{required}") String name) {
-    String url = openAPIComponent.getOpenApiCUrl(baseUrl, appId, teamId, name);
+      @NotBlank String name, String baseUrl, @NotNull Long appId, @NotNull Long teamId) {
+    String url = openAPIComponent.getOpenApiCUrl(name, baseUrl, appId, teamId);
     return RestResponse.success(url);
   }
 
