@@ -38,14 +38,12 @@ public class AuthenticatorImpl implements Authenticator {
   @Autowired private LdapService ldapService;
 
   @Override
-  public User authenticate(String username, String password, String loginType) throws Exception {
-    LoginType loginTypeEnum = LoginType.of(loginType);
-    if (loginTypeEnum == null) {
-      throw new ApiAlertException(
-          String.format("the login type [%s] is not supported.", loginType));
+  public User authenticate(String username, String password, LoginType loginType) throws Exception {
+    if (loginType == null) {
+      throw new ApiAlertException(String.format("the login type is null."));
     }
 
-    if (loginTypeEnum.equals(LoginType.PASSWORD)) {
+    if (loginType.equals(LoginType.PASSWORD)) {
       return passwordAuthenticate(username, password);
     } else {
       return ldapAuthenticate(username, password);

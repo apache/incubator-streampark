@@ -36,8 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -51,17 +49,15 @@ public class PassportController {
   @Autowired private Authenticator authenticator;
 
   @PostMapping("signin")
-  public RestResponse signin(
-      @NotBlank(message = "{required}") String username,
-      @NotBlank(message = "{required}") String password,
-      @NotBlank(message = "{required}") String loginType)
-      throws Exception {
+  public RestResponse signin(User loginUser) throws Exception {
 
-    if (StringUtils.isEmpty(username)) {
+    if (StringUtils.isEmpty(loginUser.getUsername())) {
       return RestResponse.success().put("code", 0);
     }
 
-    User user = authenticator.authenticate(username, password, loginType);
+    User user =
+        authenticator.authenticate(
+            loginUser.getUsername(), loginUser.getPassword(), loginUser.getLoginType());
 
     if (user == null) {
       return RestResponse.success().put("code", 0);
@@ -71,7 +67,7 @@ public class PassportController {
       return RestResponse.success().put("code", 1);
     }
 
-    this.userService.updateLoginTime(username);
+    this.userService.updateLoginTime(user.getUsername());
     String token = JWTUtil.sign(user, AuthenticationType.SIGN);
 
     LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
