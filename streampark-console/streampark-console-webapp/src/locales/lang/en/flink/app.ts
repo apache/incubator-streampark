@@ -84,6 +84,7 @@ export default {
     created: 'CREATED',
     starting: 'STARTING',
     restarting: 'RESTARTING',
+    savepoint: 'SAVEPOINTING',
     running: 'RUNNING',
     failing: 'FAILING',
     failed: 'FAILED',

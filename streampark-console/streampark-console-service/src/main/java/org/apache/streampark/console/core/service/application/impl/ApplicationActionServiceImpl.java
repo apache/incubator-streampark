@@ -251,7 +251,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         applicationLog.setYarnAppId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
-        if (appParam.getSavePointed()) {
+        if (appParam.getRestoreOrTriggerSavepoint()) {
             FlinkAppHttpWatcher.addSavepoint(application.getId());
             application.setOptionState(OptionStateEnum.SAVEPOINTING.getValue());
         } else {
@@ -270,8 +270,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
         // infer savepoint
         String customSavepoint = null;
-        if (appParam.getSavePointed()) {
-            customSavepoint = appParam.getSavePoint();
+        if (appParam.getRestoreOrTriggerSavepoint()) {
+            customSavepoint = appParam.getSavepointPath();
             if (StringUtils.isBlank(customSavepoint)) {
                 customSavepoint = savePointService.getSavePointPath(appParam);
             }
@@ -303,7 +303,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             properties,
             clusterId,
             application.getJobId(),
-            appParam.getSavePointed(),
+            appParam.getRestoreOrTriggerSavepoint(),
             appParam.getDrain(),
             customSavepoint,
             appParam.getNativeFormat(),
@@ -333,7 +333,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                         application.setState(FlinkAppStateEnum.FAILED.getValue());
                         updateById(application);
 
-                        if (appParam.getSavePointed()) {
+                        if (appParam.getRestoreOrTriggerSavepoint()) {
                             savePointService.expire(application.getId());
                         }
                         // re-tracking flink job on kubernetes and logging exception
@@ -403,7 +403,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             if (!application.isNeedRestartOnFailed()) {
                 return;
             }
-            appParam.setSavePointed(true);
+            appParam.setRestoreOrTriggerSavepoint(true);
             application.setRestartCount(application.getRestartCount() + 1);
         }
         // 2) update app state to starting...
@@ -431,17 +431,22 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         }
 
         // Get the args after placeholder replacement
-        String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getArgs());
+        String args = StringUtils.isBlank(appParam.getArgs()) ? application.getArgs() : appParam.getArgs();
+        String applicationArgs = variableService.replaceVariable(application.getTeamId(), args);
 
         Tuple3<String, String, FlinkK8sRestExposedType> clusterIdNamespace = getNamespaceClusterId(application);
         String k8sNamespace = clusterIdNamespace.t1;
         String k8sClusterId = clusterIdNamespace.t2;
         FlinkK8sRestExposedType exposedType = clusterIdNamespace.t3;
 
+        String dynamicProperties =
+            StringUtils.isBlank(appParam.getDynamicProperties()) ? application.getDynamicProperties()
+                : appParam.getDynamicProperties();
+
         SubmitRequest submitRequest = new SubmitRequest(
             flinkEnv.getFlinkVersion(),
             FlinkExecutionMode.of(application.getExecutionMode()),
-            getProperties(application),
+            getProperties(application, dynamicProperties),
             flinkEnv.getFlinkConf(),
             FlinkDevelopmentMode.of(application.getJobType()),
             application.getId(),
@@ -449,7 +454,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             application.getJobName(),
             appConf,
             application.getApplicationType(),
-            getSavePointed(appParam),
+            getSavepointPath(appParam),
             FlinkRestoreMode.of(appParam.getRestoreMode()),
             applicationArgs,
             k8sClusterId,
@@ -713,7 +718,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         return Tuple2.of(flinkUserJar, appConf);
     }
 
-    private Map<String, Object> getProperties(Application application) {
+    private Map<String, Object> getProperties(Application application, String runtimeProperties) {
         Map<String, Object> properties = new HashMap<>(application.getOptionMap());
         if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
             FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -756,8 +761,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
         }
 
-        Map<String, String> dynamicProperties = PropertiesUtils
-            .extractDynamicPropertiesAsJava(application.getDynamicProperties());
+        Map<String, String> dynamicProperties = PropertiesUtils.extractDynamicPropertiesAsJava(runtimeProperties);
         properties.putAll(dynamicProperties);
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
         if (resolveOrder != null) {
@@ -797,15 +801,15 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         }
     }
 
-    private String getSavePointed(Application appParam) {
-        if (appParam.getSavePointed()) {
-            if (StringUtils.isBlank(appParam.getSavePoint())) {
+    private String getSavepointPath(Application appParam) {
+        if (appParam.getRestoreOrTriggerSavepoint()) {
+            if (StringUtils.isBlank(appParam.getSavepointPath())) {
                 SavePoint savePoint = savePointService.getLatest(appParam.getId());
                 if (savePoint != null) {
                     return savePoint.getPath();
                 }
             } else {
-                return appParam.getSavePoint();
+                return appParam.getSavepointPath();
             }
         }
         return null;

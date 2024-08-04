@@ -205,7 +205,7 @@ export function fetchK8sStartLog(data): Promise<AxiosResponse<any>> {
  */
 export function fetchCheckSavepointPath(data: {
   id?: string;
-  savePoint?: string;
+  savepointPath?: string;
 }): Promise<AxiosResponse<Result>> {
   return defHttp.post(
     { url: APP_API.CHECK_SAVEPOINT_PATH, data },

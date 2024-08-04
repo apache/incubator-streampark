@@ -67,7 +67,7 @@ public class OpenAPIComponent {
         return schemas.get(name);
     }
 
-    public String getOpenApiCUrl(String baseUrl, Long appId, Long teamId, String name) {
+    public String getOpenApiCUrl(String name, String baseUrl, Long appId, Long teamId) {
         OpenAPISchema schema = this.getOpenAPISchema(name);
         if (schema == null) {
             throw new UnsupportedOperationException("Unsupported OpenAPI: " + name);
@@ -86,10 +86,15 @@ public class OpenAPIComponent {
 
         schema.getSchema().forEach(c -> {
             if (c.isRequired()) {
-                if ("appId".equals(c.getBindFor())) {
-                    curlBuilder.addFormData(c.getName(), appId);
-                } else if ("teamId".equals(c.getBindFor())) {
-                    curlBuilder.addFormData(c.getName(), teamId);
+                switch (c.getBindFor()) {
+                    case "appId":
+                        curlBuilder.addFormData(c.getName(), appId);
+                        break;
+                    case "teamId":
+                        curlBuilder.addFormData(c.getName(), teamId);
+                        break;
+                    default:
+                        break;
                 }
             } else {
                 curlBuilder.addFormData(c.getName(), c.getDefaultValue());

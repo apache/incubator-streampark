@@ -19,20 +19,17 @@ package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
-import org.apache.streampark.console.system.entity.AccessToken;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -47,15 +44,11 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Component
 @Aspect
-public class StreamParkAspect {
+public class PermissionAspect {
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
@@ -65,30 +58,6 @@ public class StreamParkAspect {
 
     @Autowired
     private ApplicationManageService applicationManageService;
-
-    @Pointcut("execution(public"
-        + " org.apache.streampark.console.base.domain.RestResponse"
-        + " org.apache.streampark.console.core.controller.*.*(..))")
-    public void openAPI() {
-    }
-
-    @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-    @Around(value = "openAPI()")
-    public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.debug("restResponse aspect, method:{}", methodSignature.getName());
-        Boolean isApi = (Boolean) SecurityUtils.getSubject().getSession().getAttribute(AccessToken.IS_API_TOKEN);
-        if (isApi != null && isApi) {
-            OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
-            if (openAPI == null) {
-                HttpServletRequest request =
-                    ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-                String url = request.getRequestURI();
-                throw new ApiAlertException("openapi unsupported: " + url);
-            }
-        }
-        return (RestResponse) joinPoint.proceed();
-    }
 
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
     public void appUpdated() {
