@@ -40,7 +40,7 @@ class JWTTest extends SpringTestBase {
     User user = new User();
     user.setUserId(10000L);
     user.setUsername(userName);
-    user.setSalt("streampark");
+    user.setPassword("streampark");
     String token =
         JWTUtil.sign(
             user,
