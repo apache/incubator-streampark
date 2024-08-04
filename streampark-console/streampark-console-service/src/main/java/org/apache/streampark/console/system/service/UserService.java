@@ -138,11 +138,10 @@ public interface UserService extends IService<User> {
      * Generate user information for the front end
      *
      * @param user User
-     * @param teamId team id
      * @param token JWTToken
      * @return
      */
-    Map<String, Object> generateFrontendUserInfo(User user, Long teamId, JWTToken token);
+    Map<String, Object> generateFrontendUserInfo(User user, JWTToken token);
 
     /**
      * transfer user resources to specified users
@@ -158,7 +157,7 @@ public interface UserService extends IService<User> {
      * @param user User
      * @return RestResponse
      */
-    RestResponse getLoginUserInfo(User user);
+    RestResponse getLoginUserInfo(User user) throws Exception;
 
     void deleteUser(Long userId);
 }

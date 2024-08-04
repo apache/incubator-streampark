@@ -82,6 +82,7 @@ export default {
     created: '创建中',
     starting: '启动中',
     restarting: '重启中',
+    savepoint: '快照中',
     running: '运行中',
     failing: '失败中',
     failed: '作业失败',

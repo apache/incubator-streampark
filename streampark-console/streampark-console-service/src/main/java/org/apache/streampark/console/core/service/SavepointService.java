@@ -20,14 +20,14 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.annotation.Nullable;
 
-public interface SavePointService extends IService<SavePoint> {
+public interface SavepointService extends IService<Savepoint> {
 
     /**
      * Expires all savepoints for the specified application.
@@ -42,7 +42,7 @@ public interface SavePointService extends IService<SavePoint> {
      * @param id the unique identifier of the SavePoint
      * @return the latest SavePoint object, or null if not found
      */
-    SavePoint getLatest(Long id);
+    Savepoint getLatest(Long id);
 
     /**
      * Triggers a savepoint for the specified application.
@@ -67,11 +67,11 @@ public interface SavePointService extends IService<SavePoint> {
     /**
      * Retrieves a page of savepoint objects based on the specified parameters.
      *
-     * @param savePoint The SavePoint object to be used for filtering the page results.
+     * @param savepoint The SavePoint object to be used for filtering the page results.
      * @param request The RestRequest object containing additional request parameters.
      * @return An instance of IPage<SavePoint> representing the page of SavePoint objects.
      */
-    IPage<SavePoint> getPage(SavePoint savePoint, RestRequest request);
+    IPage<Savepoint> getPage(Savepoint savepoint, RestRequest request);
 
     /**
      * Removes all savepoints for the specified application.
