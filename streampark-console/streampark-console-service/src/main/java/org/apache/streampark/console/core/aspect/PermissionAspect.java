@@ -24,7 +24,6 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
-import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
@@ -51,32 +50,16 @@ import org.springframework.stereotype.Component;
 public class PermissionAspect {
 
     @Autowired
-    private FlinkAppHttpWatcher flinkAppHttpWatcher;
-
-    @Autowired
     private MemberService memberService;
 
     @Autowired
     private ApplicationManageService applicationManageService;
 
-    @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppUpdated)")
-    public void appUpdated() {
-    }
-
-    @Around("appUpdated()")
-    public Object appUpdated(ProceedingJoinPoint joinPoint) throws Throwable {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.debug("appUpdated aspect, method:{}", methodSignature.getName());
-        Object target = joinPoint.proceed();
-        flinkAppHttpWatcher.init();
-        return target;
-    }
-
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
-    public void permissionAction() {
+    public void permissionPointcut() {
     }
 
-    @Around("permissionAction()")
+    @Around("permissionPointcut()")
     public RestResponse permissionAction(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);

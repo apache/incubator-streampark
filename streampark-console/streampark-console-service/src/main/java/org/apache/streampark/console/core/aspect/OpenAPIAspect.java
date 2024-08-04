@@ -51,11 +51,11 @@ public class OpenAPIAspect {
     @Pointcut("execution(public"
         + " org.apache.streampark.console.base.domain.RestResponse"
         + " org.apache.streampark.console.core.controller.*.*(..))")
-    public void openAPI() {
+    public void openAPIPointcut() {
     }
 
     @SuppressWarnings("checkstyle:SimplifyBooleanExpression")
-    @Around(value = "openAPI()")
+    @Around(value = "openAPIPointcut()")
     public RestResponse openAPI(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("restResponse aspect, method:{}", methodSignature.getName());

@@ -53,7 +53,6 @@ public class OpenAPIController {
             @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
             @OpenAPI.Param(name = "argument", description = "flink program run arguments", required = false, type = String.class, bindFor = "args"),
-            @OpenAPI.Param(name = "properties", description = "flink app dynamic properties", required = false, type = String.class, bindFor = "dynamicProperties"),
             @OpenAPI.Param(name = "restoreFromSavepoint", description = "restored app from the savepoint or checkpoint", required = false, type = Boolean.class, defaultValue = "false", bindFor = "restoreOrTriggerSavepoint"),
             @OpenAPI.Param(name = "savepointPath", description = "savepoint or checkpoint path", required = false, type = String.class),
             @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = Boolean.class, defaultValue = "false"),
