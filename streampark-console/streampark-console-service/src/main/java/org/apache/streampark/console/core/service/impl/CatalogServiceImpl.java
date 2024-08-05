@@ -115,7 +115,7 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
 
     /** validate catalog name */
     private boolean validateCatalogName(String catalogName) {
-        String regex = "^[a-z0-9]+([\\-\\.][a-z0-9]+)*$";
+        String regex = "^(?:[a-z0-9]+[-\\.]?)*(?:[a-z0-9]+)$";
         return catalogName.matches(regex);
     }
 }
