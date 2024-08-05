@@ -43,9 +43,9 @@
 
         <docker.client.version>3.2.13</docker.client.version>
 
-        <commons-compress.version>1.21</commons-compress.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
         <javax-mail.version>1.4.7</javax-mail.version>
-        <jsch.version>0.2.11</jsch.version>
+        <jsch.version>0.2.18</jsch.version>
         <shiro.version>1.10.0</shiro.version>
         <p6spy.version>3.9.1</p6spy.version>
         <freemarker.version>2.3.32</freemarker.version>
@@ -181,11 +181,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
         <dependency>

@@ -26,7 +26,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface MessageService extends IService<Message> {
 
-  void push(Message message);
-
   IPage<Message> getUnRead(NoticeType noticeType, RestRequest request);
 }

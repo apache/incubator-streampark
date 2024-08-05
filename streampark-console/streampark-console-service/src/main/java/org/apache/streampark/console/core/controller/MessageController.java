@@ -46,8 +46,8 @@ public class MessageController {
     return RestResponse.success(pages);
   }
 
-  @PostMapping("delnotice")
-  public RestResponse delNotice(Long id) {
+  @PostMapping("clear")
+  public RestResponse clear(Long id) {
     return RestResponse.success(messageService.removeById(id));
   }
 }

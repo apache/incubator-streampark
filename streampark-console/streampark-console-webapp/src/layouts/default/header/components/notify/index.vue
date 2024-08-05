@@ -93,7 +93,7 @@
         try {
           notifyLoading.value = true;
           await fetchNotifyDelete(id);
-          getNotifyList(unref(notifyType));
+          await getNotifyList(unref(notifyType));
         } catch (error) {
           console.error(error);
         } finally {
@@ -135,6 +135,7 @@
           },
         },
       });
+
       watch([data, currentPage], ([newData]: [NotifyItem], [newPage]) => {
         if (newData && isObject(newData)) {
           /* The abnormal alarm */
