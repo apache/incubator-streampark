@@ -71,6 +71,15 @@ export const useUserStore = defineStore({
     getExpire(): string {
       return this.expire || getAuthCache<string>(EXPIRE_KEY);
     },
+    getAuthExpire(): number | undefined {
+      let alive: number | undefined;
+      if (this.getExpire) {
+        alive =
+          Math.floor((new Date(this.getExpire).getTime() - new Date().getTime()) / 1000) * 1000;
+        if (alive < 0) alive = 0;
+      }
+      return alive;
+    },
     getRoleList(): RoleEnum[] {
       return this.roleList?.length > 0 ? this.roleList : getAuthCache<RoleEnum[]>(ROLES_KEY);
     },
@@ -95,20 +104,20 @@ export const useUserStore = defineStore({
   actions: {
     setToken(info: string | undefined) {
       this.token = info ? info : ''; // for null or undefined value
-      setAuthCache(TOKEN_KEY, info);
+      setAuthCache(TOKEN_KEY, info, this.getAuthExpire);
     },
     setExpire(info: string | undefined) {
       this.expire = info || '';
-      setAuthCache(EXPIRE_KEY, info);
+      setAuthCache(EXPIRE_KEY, info, this.getAuthExpire);
     },
     setRoleList(roleList: RoleEnum[]) {
       this.roleList = roleList || [];
-      setAuthCache(ROLES_KEY, roleList);
+      setAuthCache(ROLES_KEY, roleList, this.getAuthExpire);
     },
     setUserInfo(info: UserInfo | null) {
       this.userInfo = info;
       this.lastUpdateTime = new Date().getTime();
-      setAuthCache(USER_INFO_KEY, info);
+      setAuthCache(USER_INFO_KEY, info, this.getAuthExpire);
     },
     setSessionTimeout(flag: boolean) {
       this.sessionTimeout = flag;
@@ -125,9 +134,8 @@ export const useUserStore = defineStore({
     },
     setData(data: Recordable) {
       const { token, expire, user, permissions, roles = [] } = data;
-
-      this.setToken(token);
       this.setExpire(expire);
+      this.setToken(token);
       this.setUserInfo(user);
       this.setRoleList(roles);
       this.setPermissions(permissions);

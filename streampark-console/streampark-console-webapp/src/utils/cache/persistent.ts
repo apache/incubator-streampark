@@ -57,9 +57,14 @@ export class Persistent {
     return localMemory.get(key)?.value as Nullable<T>;
   }
 
-  static setLocal(key: LocalKeys, value: LocalStore[LocalKeys], immediate = false): void {
-    localMemory.set(key, toRaw(value));
-    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache);
+  static setLocal(
+    key: LocalKeys,
+    value: LocalStore[LocalKeys],
+    immediate = false,
+    expires?: number,
+  ): void {
+    localMemory.set(key, toRaw(value), expires);
+    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache, expires);
   }
 
   static removeLocal(key: LocalKeys, immediate = false): void {
@@ -76,9 +81,14 @@ export class Persistent {
     return sessionMemory.get(key)?.value as Nullable<T>;
   }
 
-  static setSession(key: SessionKeys, value: SessionStore[SessionKeys], immediate = false): void {
-    sessionMemory.set(key, toRaw(value));
-    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache);
+  static setSession(
+    key: SessionKeys,
+    value: SessionStore[SessionKeys],
+    immediate = false,
+    expires?: number,
+  ): void {
+    sessionMemory.set(key, toRaw(value), expires);
+    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache, expires);
   }
 
   static removeSession(key: SessionKeys, immediate = false): void {

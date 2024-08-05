@@ -24,12 +24,12 @@ export function getAuthCache<T>(key: BasicKeys) {
   }
 }
 
-export function setAuthCache(key: BasicKeys, value) {
+export function setAuthCache(key: BasicKeys, value: any, expire?: number) {
   if (isLocal) {
-    return Persistent.setLocal(key, value, true);
+    return Persistent.setLocal(key, value, true, expire);
   } else {
-    Persistent.setLocal(key, value, true);
-    return Persistent.setSession(key, value, true);
+    Persistent.setLocal(key, value, true, expire);
+    return Persistent.setSession(key, value, true, expire);
   }
 }
 
