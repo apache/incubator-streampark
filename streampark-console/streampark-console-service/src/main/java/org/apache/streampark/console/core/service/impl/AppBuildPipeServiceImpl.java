@@ -256,6 +256,7 @@ public class AppBuildPipeServiceImpl
                       app.getJobName().concat(" release failed"),
                       Utils.stringifyException(snapshot.error().exception()),
                       NoticeType.EXCEPTION);
+              messageService.save(message);
               app.setRelease(ReleaseState.FAILED.get());
               app.setOptionState(OptionState.NONE.getValue());
               app.setBuild(true);

@@ -33,20 +33,17 @@
   </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, ref, unref, watch, h } from 'vue';
-
+  import { computed, defineComponent, ref, unref, h } from 'vue';
   import { Popover, Tabs, Badge, Spin } from 'ant-design-vue';
   import { BellOutlined } from '@ant-design/icons-vue';
   import NoticeList from './NoticeList.vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { fetchNotify, fetchNotifyDelete } from '/@/api/system/notify';
   import { NotifyItem } from '/@/api/system/model/notifyModel';
-  import { useWebSocket } from '@vueuse/core';
-  import { useUserStoreWithOut } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { isObject } from '/@/utils/is';
   import { useI18n } from '/@/hooks/web/useI18n';
   const { t } = useI18n();
+
   export interface TabItem {
     key: number;
     name: string;
@@ -58,8 +55,7 @@
     components: { Popover, BellOutlined, Tabs, TabPane: Tabs.TabPane, Badge, NoticeList, Spin },
     setup() {
       const { prefixCls } = useDesign('header-notify');
-      const userStore = useUserStoreWithOut();
-      const { createMessage, createConfirm } = useMessage();
+      const { createConfirm } = useMessage();
       const notifyType = ref(1);
       const currentPage = ref(1);
       const notifyVisible = ref(false);
@@ -75,6 +71,7 @@
         }
         return count;
       });
+
       /* View notification messages */
       async function handleNotifyInfo(record: NotifyItem) {
         notifyVisible.value = false;
@@ -112,6 +109,7 @@
           notifyLoading.value = false;
         }
       }
+
       /* Process notification message data */
       function handleNotifyMessage(type: number, data: NotifyItem[]) {
         /* The abnormal alarm */
@@ -122,36 +120,8 @@
         }
       }
 
-      const wbSocketUrl = `${window.location.origin}${
-        import.meta.env.VITE_GLOB_API_URL + (import.meta.env.VITE_GLOB_API_URL_PREFIX || '')
-      }/websocket/${userStore.getUserInfo.userId}`;
+      setInterval(() => getNotifyList(1), 5000);
 
-      const { data } = useWebSocket(wbSocketUrl.replace(/http/, 'ws'), {
-        autoReconnect: {
-          retries: 3,
-          delay: 1000,
-          onFailed() {
-            createMessage.warning('Message server connection failed!');
-          },
-        },
-      });
-
-      watch([data, currentPage], ([newData]: [NotifyItem], [newPage]) => {
-        if (newData && isObject(newData)) {
-          /* The abnormal alarm */
-          if (unref(notifyType) === 1) {
-            listData.value[0].list.push(newData);
-          } else {
-            listData.value[1].list.push(newData);
-          }
-          handleNotifyInfo(newData);
-        }
-        if (newPage) {
-          getNotifyList(unref(notifyType));
-        }
-      });
-      getNotifyList(1);
-      getNotifyList(2);
       return {
         prefixCls,
         listData,
