@@ -17,117 +17,131 @@
 
 package org.apache.streampark.console.core.bean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.streampark.common.enums.CatalogType;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCatalog;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.NotBlank;
+
 import java.io.Serializable;
 
 @Data
 @Slf4j
 public class FlinkCatalogParams implements Serializable {
-  private Long id;
 
-  private Long teamId;
+    private Long id;
 
-  private String catalogName;
+    private Long teamId;
 
-  private CatalogType catalogType;
+    private String catalogName;
 
-  /** creator */
-  private Long userId;
+    private CatalogType catalogType;
 
-  private FlinkJDBCCatalog flinkJDBCCatalog;
+    /** creator */
+    private Long userId;
 
-  private FlinkHiveCatalog flinkHiveCatalog;
+    private FlinkJDBCCatalog flinkJDBCCatalog;
 
-  private FlinkPaimonCatalog flinkPaimonCatalog;
+    private FlinkHiveCatalog flinkHiveCatalog;
 
-  private String customCatalogConfig;
+    private FlinkPaimonCatalog flinkPaimonCatalog;
 
-  public static FlinkCatalogParams of(FlinkCatalog flinkCatalog) {
-    if (flinkCatalog == null) {
-      return null;
+    private String customCatalogConfig;
+
+    public static FlinkCatalogParams of(FlinkCatalog flinkCatalog) {
+        if (flinkCatalog == null) {
+            return null;
+        }
+        FlinkCatalogParams flinkCatalogParams = new FlinkCatalogParams();
+        BeanUtils.copyProperties(flinkCatalog, flinkCatalogParams, "configuration");
+        try {
+            switch (flinkCatalog.getCatalogType()) {
+                case JDBC:
+                    flinkCatalogParams.setFlinkJDBCCatalog(
+                        JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkJDBCCatalog.class));
+                    break;
+                case HIVE:
+                    flinkCatalogParams.setFlinkHiveCatalog(
+                        JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkHiveCatalog.class));
+                    break;
+                case PAIMON:
+                    flinkCatalogParams.setFlinkPaimonCatalog(
+                        JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkPaimonCatalog.class));
+                    break;
+                case CUSTOM:
+                    flinkCatalogParams.setCustomCatalogConfig(flinkCatalog.getConfiguration());
+                    break;
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Flink catalog params json read failed", e);
+            throw new RuntimeException(e);
+        }
+
+        return flinkCatalogParams;
     }
-    FlinkCatalogParams flinkCatalogParams = new FlinkCatalogParams();
-    BeanUtils.copyProperties(flinkCatalog, flinkCatalogParams, "configuration");
-    try {
-      switch (flinkCatalog.getCatalogType()) {
-        case JDBC:
-          flinkCatalogParams.setFlinkJDBCCatalog(
-              JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkJDBCCatalog.class));
-          break;
-        case HIVE:
-          flinkCatalogParams.setFlinkHiveCatalog(
-              JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkHiveCatalog.class));
-          break;
-        case PAIMON:
-          flinkCatalogParams.setFlinkPaimonCatalog(
-              JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkPaimonCatalog.class));
-          break;
-        case CUSTOM:
-          flinkCatalogParams.setCustomCatalogConfig(flinkCatalog.getConfiguration());
-          break;
-      }
-    } catch (JsonProcessingException e) {
-      log.error("Flink catalog params json read failed", e);
-      throw new RuntimeException(e);
+
+    @Data
+    public static class FlinkJDBCCatalog implements Serializable {
+
+        @NotBlank
+        private String type;
+
+        @NotBlank
+        @JsonProperty("default-database")
+        private String defaultDatabase;
+
+        @NotBlank
+        private String username;
+        @NotBlank
+        private String password;
+
+        @NotBlank
+        @JsonProperty("base-url")
+        private String baseUrl;
     }
 
-    return flinkCatalogParams;
-  }
+    @Data
+    public static class FlinkHiveCatalog implements Serializable {
 
-  @Data
-  public static class FlinkJDBCCatalog {
-    @NotBlank private String type;
+        @NotBlank
+        private String type;
+        @NotBlank
+        private String name;
 
-    @NotBlank
-    @JsonProperty("default-database")
-    private String defaultDatabase;
+        @JsonProperty("hive-conf-dir")
+        private String hiveConfDir;
 
-    @NotBlank private String username;
-    @NotBlank private String password;
+        @JsonProperty("default-database")
+        private String defaultDatabase;
 
-    @NotBlank
-    @JsonProperty("base-url")
-    private String baseUrl;
-  }
+        @JsonProperty("hive-version")
+        private String hiveVersion;
 
-  @Data
-  public static class FlinkHiveCatalog {
-    @NotBlank private String type;
-    @NotBlank private String name;
+        @JsonProperty("hadoop-conf-dir")
+        private String hadoopConfDir;
+    }
 
-    @JsonProperty("hive-conf-dir")
-    private String hiveConfDir;
+    @Data
+    public static class FlinkPaimonCatalog implements Serializable {
 
-    @JsonProperty("default-database")
-    private String defaultDatabase;
+        @NotBlank
+        private String type;
+        @NotBlank
+        private String warehouse;
+        @NotBlank
+        private String metastore; // hive filesystem
+        private String uri;
 
-    @JsonProperty("hive-version")
-    private String hiveVersion;
+        @JsonProperty("hive-conf-dir")
+        private String hiveConfDir;
 
-    @JsonProperty("hadoop-conf-dir")
-    private String hadoopConfDir;
-  }
-
-  @Data
-  public static class FlinkPaimonCatalog {
-    @NotBlank private String type;
-    @NotBlank private String warehouse;
-    @NotBlank private String metastore; // hive filesystem
-    private String uri;
-
-    @JsonProperty("hive-conf-dir")
-    private String hiveConfDir;
-
-    @JsonProperty("hadoop-conf-dir")
-    private String hadoopConfDir;
-  }
+        @JsonProperty("hadoop-conf-dir")
+        private String hadoopConfDir;
+    }
 }

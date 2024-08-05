@@ -17,41 +17,42 @@
 
 package org.apache.streampark.console.core.service;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.bean.FlinkCatalogParams;
 import org.apache.streampark.console.core.entity.FlinkCatalog;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+
 /** This interface is use to managed catalog */
 public interface CatalogService extends IService<FlinkCatalog> {
 
-  /**
-   * Create Catalog
-   *
-   * @param catalog The {@link FlinkCatalogParams} object containing the search criteria.
-   */
-  boolean create(FlinkCatalogParams catalog, Long userId);
+    /**
+     * Create Catalog
+     *
+     * @param catalog The {@link FlinkCatalogParams} object containing the search criteria.
+     */
+    boolean create(FlinkCatalogParams catalog, Long userId);
 
-  /**
-   * Remove Catalog
-   *
-   * @param id The {@link FlinkCatalogParams} object containing the search criteria.
-   */
-  boolean remove(Long id);
+    /**
+     * Remove Catalog
+     *
+     * @param id The {@link FlinkCatalogParams} object containing the search criteria.
+     */
+    boolean remove(Long id);
 
-  /**
-   * Retrieves a page of applications based on the provided parameters. Params: catalog – The
-   * Catalog object to be used for filtering the results. request – The REST request object
-   * containing additional parameters or headers. Returns: A page of Catalog objects based on the
-   * provided parameters.
-   */
-  IPage<FlinkCatalogParams> page(FlinkCatalogParams catalog, RestRequest request);
+    /**
+     * Retrieves a page of applications based on the provided parameters. Params: catalog – The
+     * Catalog object to be used for filtering the results. request – The REST request object
+     * containing additional parameters or headers. Returns: A page of Catalog objects based on the
+     * provided parameters.
+     */
+    IPage<FlinkCatalogParams> page(FlinkCatalogParams catalog, RestRequest request);
 
-  /**
-   * update Catalog
-   *
-   * @param catalog The {@link FlinkCatalogParams} object containing the search criteria.
-   */
-  boolean update(FlinkCatalogParams catalog, long userId);
+    /**
+     * update Catalog
+     *
+     * @param catalog The {@link FlinkCatalogParams} object containing the search criteria.
+     */
+    boolean update(FlinkCatalogParams catalog, long userId);
 }

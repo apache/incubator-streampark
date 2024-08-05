@@ -19,8 +19,8 @@ package org.apache.streampark.common.enums;
 
 /** catalog type */
 public enum CatalogType {
-  JDBC,
-  HIVE,
-  PAIMON,
-  CUSTOM
+    JDBC,
+    HIVE,
+    PAIMON,
+    CUSTOM
 }

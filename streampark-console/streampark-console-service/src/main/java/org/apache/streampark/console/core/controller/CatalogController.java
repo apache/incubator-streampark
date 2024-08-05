@@ -17,15 +17,17 @@
 
 package org.apache.streampark.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.FlinkCatalogParams;
 import org.apache.streampark.console.core.service.CatalogService;
 import org.apache.streampark.console.core.util.ServiceHelper;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,39 +42,40 @@ import java.io.IOException;
 @RequestMapping("flink/catalog")
 public class CatalogController {
 
-  @Autowired CatalogService catalogService;
+    @Autowired
+    CatalogService catalogService;
 
-  @Permission(team = "#catalog.teamId")
-  @PostMapping("create")
-  @RequiresPermissions("catalog:create")
-  public RestResponse create(FlinkCatalogParams catalog) throws IOException {
-    Long userId = ServiceHelper.getUserId();
-    boolean saved = catalogService.create(catalog, userId);
-    return RestResponse.success(saved);
-  }
+    @Permission(team = "#catalog.teamId")
+    @PostMapping("create")
+    @RequiresPermissions("catalog:create")
+    public RestResponse create(FlinkCatalogParams catalog) throws IOException {
+        Long userId = ServiceHelper.getUserId();
+        boolean saved = catalogService.create(catalog, userId);
+        return RestResponse.success(saved);
+    }
 
-  @PostMapping("list")
-  @Permission(team = "#app.teamId")
-  @RequiresPermissions("catalog:view")
-  public RestResponse list(FlinkCatalogParams catalog, RestRequest request) {
-    IPage<FlinkCatalogParams> catalogList = catalogService.page(catalog, request);
-    return RestResponse.success(catalogList);
-  }
+    @PostMapping("list")
+    @Permission(team = "#app.teamId")
+    @RequiresPermissions("catalog:view")
+    public RestResponse list(FlinkCatalogParams catalog, RestRequest request) {
+        IPage<FlinkCatalogParams> catalogList = catalogService.page(catalog, request);
+        return RestResponse.success(catalogList);
+    }
 
-  @PostMapping("delete")
-  @Permission(team = "#app.teamId")
-  @RequiresPermissions("catalog:delete")
-  public RestResponse remove(FlinkCatalogParams catalog, RestRequest request) {
-    boolean deleted = catalogService.remove(catalog.getId());
-    return RestResponse.success(deleted);
-  }
+    @PostMapping("delete")
+    @Permission(team = "#app.teamId")
+    @RequiresPermissions("catalog:delete")
+    public RestResponse remove(FlinkCatalogParams catalog, RestRequest request) {
+        boolean deleted = catalogService.remove(catalog.getId());
+        return RestResponse.success(deleted);
+    }
 
-  @PostMapping("update")
-  @Permission(team = "#app.teamId")
-  @RequiresPermissions("catalog:update")
-  public RestResponse remove(FlinkCatalogParams catalog) {
-    Long userId = ServiceHelper.getUserId();
-    boolean updated = catalogService.update(catalog, userId);
-    return RestResponse.success(updated);
-  }
+    @PostMapping("update")
+    @Permission(team = "#app.teamId")
+    @RequiresPermissions("catalog:update")
+    public RestResponse remove(FlinkCatalogParams catalog) {
+        Long userId = ServiceHelper.getUserId();
+        boolean updated = catalogService.update(catalog, userId);
+        return RestResponse.success(updated);
+    }
 }
