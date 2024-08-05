@@ -120,7 +120,7 @@
         }
       }
 
-      setInterval(() => getNotifyList(1), 5000);
+      setInterval(() => getNotifyList(1), 1000 * 30);
 
       return {
         prefixCls,
