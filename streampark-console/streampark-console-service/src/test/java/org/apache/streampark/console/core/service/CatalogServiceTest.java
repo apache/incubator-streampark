@@ -17,69 +17,99 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.Catalog;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.apache.streampark.common.enums.CatalogType;
+import org.apache.streampark.console.SpringUnitTestBase;
+import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.core.bean.FlinkCatalogParams;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** CatalogService Tests */
 public class CatalogServiceTest extends SpringUnitTestBase {
 
-    @Autowired
-    private CatalogService catalogService;
+  @Autowired private CatalogService catalogService;
 
-    @AfterEach
-    void cleanTestRecordsInDatabase() {
-        catalogService.remove(new QueryWrapper<>());
-    }
+  @AfterEach
+  void cleanTestRecordsInDatabase() {
+    catalogService.remove(new QueryWrapper<>());
+  }
 
-    @Test
-    public void create() {
-        Catalog catalog = new Catalog();
-        catalog.setTeamId(1L);
-        catalog.setCatalogName("catalog-name");
-        catalog.setConfiguration("{\"test\": \" test\"}");
-        boolean create = catalogService.create(catalog, 1L);
-        assertThat(create).isTrue();
-    }
+  @Test
+  @Order(1)
+  public void create() {
+    FlinkCatalogParams catalog = new FlinkCatalogParams();
+    catalog.setTeamId(1L);
+    catalog.setCatalogType(CatalogType.JDBC);
+    catalog.setCatalogName("catalog-name");
+    FlinkCatalogParams.FlinkJDBCCatalog flinkJDBCCatalog =
+        new FlinkCatalogParams.FlinkJDBCCatalog();
+    flinkJDBCCatalog.setType("jdbc");
+    flinkJDBCCatalog.setDefaultDatabase("aa");
+    flinkJDBCCatalog.setPassword("11");
+    flinkJDBCCatalog.setUsername("user");
+    flinkJDBCCatalog.setBaseUrl("url");
+    catalog.setFlinkJDBCCatalog(flinkJDBCCatalog);
 
-    @Test
-    public void remove() {
-        Catalog catalog = new Catalog();
-        // catalog.setId(2L);
-        catalog.setTeamId(1L);
-        catalog.setCatalogName("catalog-name");
-        catalog.setConfiguration("{\"test\": \" test\"}");
-        catalogService.create(catalog, 1L);
-        RestRequest request = new RestRequest();
-        IPage<Catalog> catalogIPage = catalogService.page(catalog, request);
-        boolean deleted = catalogService.remove(catalog.getId());
-        assertThat(deleted).isTrue();
-    }
+    boolean create = catalogService.create(catalog, 1L);
+    assertThat(create).isTrue();
+  }
 
-    @Test
-    public void update() {
-        Catalog catalog = new Catalog();
-        // catalog.setId(2L);
-        catalog.setTeamId(1L);
-        catalog.setCatalogName("catalog-name");
-        catalog.setConfiguration("{\"test\": \" test\"}");
-        catalogService.create(catalog, 1L);
+  @Test
+  @Order(2)
+  public void update() {
+    FlinkCatalogParams catalog = new FlinkCatalogParams();
+    catalog.setTeamId(1L);
+    catalog.setCatalogType(CatalogType.JDBC);
+    catalog.setCatalogName("catalog-name");
+    FlinkCatalogParams.FlinkJDBCCatalog flinkJDBCCatalog =
+        new FlinkCatalogParams.FlinkJDBCCatalog();
+    flinkJDBCCatalog.setType("jdbc");
+    flinkJDBCCatalog.setDefaultDatabase("aa");
+    flinkJDBCCatalog.setPassword("11");
+    flinkJDBCCatalog.setUsername("user");
+    flinkJDBCCatalog.setBaseUrl("url1");
+    catalog.setFlinkJDBCCatalog(flinkJDBCCatalog);
+    RestRequest request = new RestRequest();
+    catalogService.create(catalog, 1L);
 
-        catalog.setConfiguration("{\"test1\": \" test1\"}");
-        RestRequest request = new RestRequest();
-        IPage<Catalog> catalogIPage = catalogService.page(catalog, request);
-        List<Catalog> catalogs = catalogIPage.getRecords();
+    IPage<FlinkCatalogParams> catalogIPage = catalogService.page(catalog, request);
+    FlinkCatalogParams catalogs = catalogIPage.getRecords().get(0);
+    catalogs.getFlinkJDBCCatalog().setBaseUrl("url2");
+    catalogService.update(catalogs, 2L);
 
-        assertThat(catalogs.get(0).getConfiguration().contains("test1")).isTrue();
-    }
+    IPage<FlinkCatalogParams> catalogResult = catalogService.page(catalog, request);
+
+    assertThat(
+            catalogResult.getRecords().get(0).getFlinkJDBCCatalog().getBaseUrl().contains("url2"))
+        .isTrue();
+    assertThat(catalogResult.getRecords().get(0).getUserId().equals(2L)).isTrue();
+  }
+
+  @Test
+  @Order(3)
+  public void remove() {
+    FlinkCatalogParams catalog = new FlinkCatalogParams();
+    catalog.setTeamId(1L);
+    catalog.setCatalogType(CatalogType.JDBC);
+    catalog.setCatalogName("catalog-name");
+    FlinkCatalogParams.FlinkJDBCCatalog flinkJDBCCatalog =
+        new FlinkCatalogParams.FlinkJDBCCatalog();
+    flinkJDBCCatalog.setType("jdbc");
+    flinkJDBCCatalog.setDefaultDatabase("aa");
+    flinkJDBCCatalog.setPassword("11");
+    flinkJDBCCatalog.setUsername("user");
+    flinkJDBCCatalog.setBaseUrl("url");
+    catalog.setFlinkJDBCCatalog(flinkJDBCCatalog);
+    catalogService.create(catalog, 1L);
+    RestRequest request = new RestRequest();
+    IPage<FlinkCatalogParams> catalogIPage = catalogService.page(catalog, request);
+    boolean deleted = catalogService.remove(catalogIPage.getRecords().get(0).getId());
+    assertThat(deleted).isTrue();
+  }
 }

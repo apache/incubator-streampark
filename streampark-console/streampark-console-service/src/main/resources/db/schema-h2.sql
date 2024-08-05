@@ -583,6 +583,7 @@ create table if not exists `t_spark_app` (
        `id` BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
        `team_id` bigint not null,
        `user_id` bigint default null,
+       `catalog_type` varchar(255) not NULL,
        `catalog_name` VARCHAR(255) NOT NULL,
        `configuration` text,
        `create_time` TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
