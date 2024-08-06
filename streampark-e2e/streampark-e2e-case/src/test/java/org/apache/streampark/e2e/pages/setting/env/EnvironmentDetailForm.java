@@ -48,7 +48,7 @@ public class EnvironmentDetailForm {
                 return (T) new IngressSettingForm(this);
             default:
                 throw new UnsupportedOperationException(
-                    String.format("Unsupported Evn setting type %s", envSettingTypeEnum.desc()));
+                    String.format("Unsupported Environment setting type %s", envSettingTypeEnum.desc()));
         }
     }
 
