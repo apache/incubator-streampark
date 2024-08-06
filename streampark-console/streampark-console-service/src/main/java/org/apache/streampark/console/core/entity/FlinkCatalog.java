@@ -92,7 +92,7 @@ public class FlinkCatalog implements Serializable {
             }
         } catch (JsonProcessingException e) {
             log.error("Flink catalog json read failed", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Flink catalog json read failed");
         }
         return flinkCatalog;
     }

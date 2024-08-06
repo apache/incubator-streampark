@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /** catalog manage */
 @Service
@@ -46,6 +47,8 @@ import java.util.List;
 public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
     implements
         CatalogService {
+
+    private static final String CATALOG_REGEX = "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$";
 
     @Override
     public boolean create(FlinkCatalogParams catalog, Long userId) {
@@ -115,7 +118,6 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
 
     /** validate catalog name */
     private boolean validateCatalogName(String catalogName) {
-        String regex = "^(?:[a-z0-9]+[-\\.]?)*(?:[a-z0-9]+)$";
-        return catalogName.matches(regex);
+        return Pattern.compile(CATALOG_REGEX).matcher(catalogName).matches();
     }
 }

@@ -80,7 +80,7 @@ public class FlinkCatalogParams implements Serializable {
             }
         } catch (JsonProcessingException e) {
             log.error("Flink catalog params json read failed", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Flink catalog params json read failed");
         }
 
         return flinkCatalogParams;
