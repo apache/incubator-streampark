@@ -27,7 +27,7 @@ interface NotifyParam {
 }
 enum NOTIFY_API {
   NOTICE = '/message/notice',
-  DEL = '/message/delnotice',
+  CLEAR = '/message/clear',
 }
 /**
  * Get notification list
@@ -45,7 +45,7 @@ export function fetchNotify(data: NotifyParam): Promise<NotifyList> {
  */
 export function fetchNotifyDelete(id: string): Promise<NotifyList> {
   return defHttp.post({
-    url: NOTIFY_API.DEL,
+    url: NOTIFY_API.CLEAR,
     data: { id },
   });
 }

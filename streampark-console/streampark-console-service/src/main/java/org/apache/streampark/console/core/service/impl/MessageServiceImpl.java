@@ -23,7 +23,6 @@ import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.enums.NoticeType;
 import org.apache.streampark.console.core.mapper.MessageMapper;
 import org.apache.streampark.console.core.service.MessageService;
-import org.apache.streampark.console.core.websocket.WebSocketEndpoint;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -39,12 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     implements MessageService {
-
-  @Override
-  public void push(Message message) {
-    save(message);
-    WebSocketEndpoint.pushNotice(message);
-  }
 
   @Override
   public IPage<Message> getUnRead(NoticeType noticeType, RestRequest request) {
