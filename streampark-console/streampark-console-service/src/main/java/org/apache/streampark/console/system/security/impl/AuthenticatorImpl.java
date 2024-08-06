@@ -39,13 +39,11 @@ public class AuthenticatorImpl implements Authenticator {
     private LdapService ldapService;
 
     @Override
-    public User authenticate(String username, String password, String loginType) throws Exception {
-        LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
-
+    public User authenticate(String username, String password, LoginTypeEnum loginType) throws Exception {
         ApiAlertException.throwIfNull(
-            loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
+            loginType, "the login type is null");
 
-        switch (loginTypeEnum) {
+        switch (loginType) {
             case PASSWORD:
                 return passwordAuthenticate(username, password);
             case LDAP:

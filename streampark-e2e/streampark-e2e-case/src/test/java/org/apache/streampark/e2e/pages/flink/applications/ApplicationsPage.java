@@ -180,7 +180,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(xpath = "//button[@id='startApplicationModal_startSavePointed']//span[contains(text(), 'ON')]")
+        @FindBy(xpath = "//button[@id='startApplicationModal_restoreSavepoint']//span[contains(text(), 'ON')]")
         private WebElement radioFromSavepoint;
 
         @FindBy(xpath = "//div[contains(.,'Start Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")

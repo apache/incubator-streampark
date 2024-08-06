@@ -44,8 +44,7 @@ class CURLBuilder(val url: String) {
     headers.keySet.foreach(h => cURL.append(String.format("-H \'%s: %s\' \\\n", h, headers.get(h))))
     formData.foreach(k =>
       cURL.append(String.format("--data-urlencode \'%s=%s\' \\\n", k._1, k._2)))
-    cURL.append("-i")
-    cURL.toString
+    cURL.toString.trim.dropRight(1)
   }
 
 }
