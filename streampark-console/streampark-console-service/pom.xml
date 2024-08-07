@@ -448,6 +448,7 @@
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>
