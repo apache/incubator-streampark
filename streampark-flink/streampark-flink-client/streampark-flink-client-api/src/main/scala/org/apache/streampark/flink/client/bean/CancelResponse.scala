@@ -17,4 +17,4 @@
 
 package org.apache.streampark.flink.client.bean
 
-case class CancelResponse(savePointDir: String)
+case class CancelResponse(savepointDir: String)

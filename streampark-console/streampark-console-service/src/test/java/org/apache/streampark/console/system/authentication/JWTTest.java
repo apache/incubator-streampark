@@ -19,8 +19,9 @@ package org.apache.streampark.console.system.authentication;
 
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
-import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.User;
 
 import com.auth0.jwt.JWT;
 import org.junit.jupiter.api.Assertions;
@@ -32,19 +33,23 @@ import java.util.TimeZone;
 class JWTTest extends SpringUnitTestBase {
 
     @Test
-    void testExpireTime() {
+    void testExpireTime() throws Exception {
         String userName = "black";
-        String expireTime = AccessToken.DEFAULT_EXPIRE_TIME;
-        String token = JWTUtil.sign(
-            10000L,
-            userName,
-            "streampark",
-            AuthenticationType.SIGN,
-            DateUtils.getTime(expireTime, DateUtils.fullFormat(), TimeZone.getDefault()));
+        String ttl = "2022-09-01 00:00:00";
 
+        User user = new User();
+        user.setUserId(10000L);
+        user.setUsername(userName);
+        user.setPassword("streampark");
+        String token =
+            JWTUtil.sign(
+                user,
+                AuthenticationType.SIGN,
+                DateUtils.getTime(ttl, DateUtils.fullFormat(), TimeZone.getDefault()));
         assert token != null;
-        Date expiresAt = JWT.decode(token).getExpiresAt();
-        String decodeExpireTime = DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
-        Assertions.assertEquals(expireTime, decodeExpireTime);
+        Date expiresAt = JWT.decode(EncryptUtils.decrypt(token)).getExpiresAt();
+        String decodeExpireTime =
+            DateUtils.format(expiresAt, DateUtils.fullFormat(), TimeZone.getDefault());
+        Assertions.assertEquals(ttl, decodeExpireTime);
     }
 }

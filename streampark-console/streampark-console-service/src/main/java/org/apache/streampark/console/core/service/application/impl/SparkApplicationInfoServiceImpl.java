@@ -305,9 +305,9 @@ public class SparkApplicationInfoServiceImpl
 
     @Override
     public String checkSavepointPath(SparkApplication appParam) throws Exception {
-        String savepointPath = appParam.getSavePoint();
+        String savepointPath = appParam.getSavepointPath();
         if (StringUtils.isBlank(savepointPath)) {
-            // savepointPath = savePointService.getSavePointPath(appParam);
+            // savepointPath = savepointService.getSavePointPath(appParam);
         }
 
         if (StringUtils.isNotBlank(savepointPath)) {

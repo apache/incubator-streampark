@@ -46,7 +46,7 @@
     labelWidth: 120,
     schemas: [
       {
-        field: 'stopSavePointed',
+        field: 'triggerSavepoint',
         label: t('flink.app.operation.triggerSavePoint'),
         component: 'Switch',
         componentProps: {
@@ -65,7 +65,7 @@
           placeholder: t('flink.app.operation.customSavepoint'),
           allowClear: true,
         },
-        ifShow: ({ values }) => !!values.stopSavePointed,
+        ifShow: ({ values }) => !!values.triggerSavepoint,
       },
       {
         field: 'drain',
@@ -76,7 +76,7 @@
           unCheckedChildren: 'OFF',
         },
         defaultValue: false,
-        ifShow: ({ values }) => !!values.stopSavePointed,
+        ifShow: ({ values }) => !!values.triggerSavepoint,
         afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.operation.enableDrain')),
       },
     ],
@@ -90,18 +90,18 @@
   /* submit */
   async function handleSubmit() {
     try {
-      const { stopSavePointed, customSavepoint, drain } = (await validate()) as Recordable;
+      const { triggerSavepoint, customSavepoint, drain } = (await validate()) as Recordable;
       const stopReq = {
         id: app.id,
-        savePointed: stopSavePointed,
-        savePoint: customSavepoint,
+        restoreOrTriggerSavepoint: triggerSavepoint,
+        savepointPath: customSavepoint,
         drain: drain,
       };
 
-      if (stopSavePointed) {
+      if (triggerSavepoint) {
         if (customSavepoint) {
           const { data } = await fetchCheckSavepointPath({
-            savePoint: customSavepoint,
+            savepointPath: customSavepoint,
           });
           if (data.data === false) {
             await createErrorSwal(t('flink.app.operation.invalidSavePoint') + data.message);

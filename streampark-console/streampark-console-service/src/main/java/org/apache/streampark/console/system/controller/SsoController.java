@@ -92,7 +92,7 @@ public class SsoController {
         ApiAlertException.throwIfNull(
             principal.getName(), SSO_CONFIG_PRINCIPAL_NAME_ERROR);
 
-        User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO.toString());
+        User user = authenticator.authenticate(principal.getName(), null, LoginTypeEnum.SSO);
 
         return userService.getLoginUserInfo(user);
     }

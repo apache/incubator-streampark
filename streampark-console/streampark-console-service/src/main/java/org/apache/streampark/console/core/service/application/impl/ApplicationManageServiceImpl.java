@@ -49,7 +49,7 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
@@ -122,7 +122,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private SavePointService savePointService;
+    private SavepointService savepointService;
 
     @Autowired
     private EffectiveService effectiveService;
@@ -213,7 +213,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         backUpService.remove(application);
 
         // 6) remove savepoint
-        savePointService.remove(application);
+        savepointService.remove(application);
 
         // 7) remove BuildPipeline
         appBuildPipeService.removeByAppId(application.getId());

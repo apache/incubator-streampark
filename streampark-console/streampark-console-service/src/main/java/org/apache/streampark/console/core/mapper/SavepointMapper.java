@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.core.entity.SavePoint;
+import org.apache.streampark.console.core.entity.Savepoint;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SavePointMapper extends BaseMapper<SavePoint> {
+public interface SavepointMapper extends BaseMapper<Savepoint> {
 }

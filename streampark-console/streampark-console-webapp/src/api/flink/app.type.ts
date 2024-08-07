@@ -116,8 +116,8 @@ export interface AppListRecord {
   flinkVersion: string;
   confPath?: any;
   format?: any;
-  savePoint?: any;
-  savePointed: boolean;
+  savepointPath?: any;
+  restoreOrTriggerSavepoint: boolean;
   drain: boolean;
   nativeFormat: boolean;
   allowNonRestored: boolean;
@@ -149,10 +149,10 @@ interface AppControl {
 /* cancel params */
 export interface CancelParam {
   id: string;
-  savePointed: boolean;
+  restoreOrTriggerSavepoint: boolean;
   drain: boolean;
   nativeFormat: boolean;
-  savePoint: string;
+  savepointPath: string;
 }
 // create Params
 export interface CreateParams {
