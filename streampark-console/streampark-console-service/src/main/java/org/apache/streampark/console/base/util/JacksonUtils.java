@@ -22,10 +22,12 @@ import org.apache.streampark.common.util.DateUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 /** Serialization utils */
@@ -55,5 +57,14 @@ public final class JacksonUtils {
 
     public static String write(Object object) throws JsonProcessingException {
         return MAPPER.writeValueAsString(object);
+    }
+
+    public static boolean isValidJson(String jsonStr) {
+        try {
+            JsonNode jsonNode = MAPPER.readTree(jsonStr);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
