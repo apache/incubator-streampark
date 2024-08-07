@@ -108,11 +108,11 @@ public class SparkApplicationBackUpServiceImpl
             configService.setLatestOrEffective(true, bakParam.getId(), bakParam.getAppId());
         } else {
             effectiveService.saveOrUpdate(
-                bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
-            // if flink sql task, will be rollback sql and dependencies
+                bakParam.getAppId(), EffectiveTypeEnum.SPARKCONFIG, bakParam.getId());
+            // if spark sql task, will be rollback sql and dependencies
             if (application.isSparkSqlJob()) {
                 effectiveService.saveOrUpdate(
-                    bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
+                    bakParam.getAppId(), EffectiveTypeEnum.SPARKSQL, bakParam.getSqlId());
             }
         }
 
@@ -174,7 +174,7 @@ public class SparkApplicationBackUpServiceImpl
             .eq(SparkApplicationBackUp::getSqlId, sparkSqlParam.getId());
         SparkApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
-            backUp, "Application backup can't be null. Rollback flink sql failed.");
+            backUp, "Application backup can't be null. Rollback spark sql failed.");
         // rollback config and sql
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.SPARKCONFIG, backUp.getId());
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.SPARKSQL, backUp.getSqlId());
@@ -206,7 +206,7 @@ public class SparkApplicationBackUpServiceImpl
             if (config != null) {
                 appParam.setConfigId(config.getId());
             }
-            // flink sql tasks need to back up sql and dependencies
+            // spark sql tasks need to back up sql and dependencies
             int version = 1;
             if (sparkSqlParam != null) {
                 appParam.setSqlId(sparkSqlParam.getId());

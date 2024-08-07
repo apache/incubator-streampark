@@ -38,13 +38,13 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
+import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
@@ -95,13 +95,13 @@ public class SparkApplicationManageServiceImpl
     private ProjectService projectService;
 
     @Autowired
-    private ApplicationBackUpService backUpService;
+    private SparkApplicationBackUpService backUpService;
 
     @Autowired
     private SparkApplicationConfigService configService;
 
     @Autowired
-    private ApplicationLogService applicationLogService;
+    private SparkApplicationLogService applicationLogService;
 
     @Autowired
     private SparkSqlService sparkSqlService;
@@ -289,7 +289,7 @@ public class SparkApplicationManageServiceImpl
                 sparkSqlService.create(sparkSql);
             }
             if (appParam.getConfig() != null) {
-                // configService.create(appParam, true);
+                configService.create(appParam, true);
             }
             return true;
         } else {

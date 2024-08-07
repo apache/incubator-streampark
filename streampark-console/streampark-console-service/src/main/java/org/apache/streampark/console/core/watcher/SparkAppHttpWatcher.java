@@ -261,7 +261,7 @@ public class SparkAppHttpWatcher {
 
     /** set current option state */
     public static void setOptionState(Long appId, SparkOptionStateEnum state) {
-        log.info("[StreamPark][SparkAppHttpWatcher]  setOptioning");
+        log.info("[StreamPark][SparkAppHttpWatcher] setOptioning");
         OPTIONING.put(appId, state);
         if (SparkOptionStateEnum.STOPPING == state) {
             STOP_FROM_MAP.put(appId, StopFromEnum.STREAMPARK);

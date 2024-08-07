@@ -27,8 +27,8 @@ import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationConfigMapper;
-import org.apache.streampark.console.core.service.EffectiveService;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
+import org.apache.streampark.console.core.service.SparkEffectiveService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -64,7 +64,7 @@ public class SparkApplicationConfigServiceImpl
     private ResourceLoader resourceLoader;
 
     @Autowired
-    private EffectiveService effectiveService;
+    private SparkEffectiveService effectiveService;
 
     @Override
     public synchronized void create(SparkApplication appParam, Boolean latest) {
@@ -152,7 +152,7 @@ public class SparkApplicationConfigServiceImpl
         SparkApplicationConfig effectiveConfig = getEffective(appParam.getId());
         if (Utils.isEmpty(appParam.getConfig())) {
             if (effectiveConfig != null) {
-                effectiveService.remove(appParam.getId(), EffectiveTypeEnum.CONFIG);
+                effectiveService.remove(appParam.getId(), EffectiveTypeEnum.SPARKCONFIG);
             }
         } else {
             // there was no configuration before, is a new configuration
@@ -190,7 +190,7 @@ public class SparkApplicationConfigServiceImpl
         LambdaUpdateWrapper<SparkApplicationConfig> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.eq(SparkApplicationConfig::getAppId, appId).set(SparkApplicationConfig::getLatest, false);
         this.update(updateWrapper);
-        effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.CONFIG, configId);
+        effectiveService.saveOrUpdate(appId, EffectiveTypeEnum.SPARKCONFIG, configId);
     }
 
     @Override
@@ -248,7 +248,7 @@ public class SparkApplicationConfigServiceImpl
                 String template = stringBuffer.toString();
                 this.sparkConfTemplate = Base64.getEncoder().encodeToString(template.getBytes());
             } catch (Exception e) {
-                log.error("Read conf/flink-application.conf failed, please check your deployment");
+                log.error("Read conf/spark-application.conf failed, please check your deployment");
                 log.error(e.getMessage(), e);
             }
         }

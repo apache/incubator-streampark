@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.cli
 
-import org.apache.streampark.common.conf.ConfigKeys.KEY_FLINK_SQL
+import org.apache.streampark.common.conf.ConfigKeys.KEY_SPARK_SQL
 import org.apache.streampark.common.util.DeflaterUtils
 import org.apache.streampark.spark.core.{SparkBatch, SparkStreaming}
 import org.apache.streampark.spark.core.util.{ParameterTool, SqlCommand, SqlCommandParser}
@@ -35,7 +35,7 @@ object SqlClient extends App {
   private[this] val parameterTool = ParameterTool.fromArgs(args)
 
   private[this] val sparkSql = {
-    val sql = parameterTool.get(KEY_FLINK_SQL())
+    val sql = parameterTool.get(KEY_SPARK_SQL())
     require(StringUtils.isNotBlank(sql), "Usage: spark sql cannot be null")
     Try(DeflaterUtils.unzipString(sql)) match {
       case Success(value) => value

@@ -115,7 +115,6 @@ case class SubmitRequest(
       map
         .filter(_._1.startsWith(prefix))
         .filter(_._2.nonEmpty)
-        .map(x => x._1.drop(prefix.length) -> x._2)
     }
   }
 

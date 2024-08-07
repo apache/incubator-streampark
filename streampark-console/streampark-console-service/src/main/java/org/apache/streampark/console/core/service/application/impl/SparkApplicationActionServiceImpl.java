@@ -292,16 +292,16 @@ public class SparkApplicationActionServiceImpl
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), sparkSql.getSql());
             sparkSql.setSql(DeflaterUtils.zipString(realSql));
-            extraParameter.put(ConfigKeys.KEY_FLINK_SQL(null), sparkSql.getSql());
+            extraParameter.put(ConfigKeys.KEY_SPARK_SQL(null), sparkSql.getSql());
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(sparkEnv, application);
-        String flinkUserJar = userJarAndAppConf.f0;
+        String sparkUserJar = userJarAndAppConf.f0;
         String appConf = userJarAndAppConf.f1;
 
         BuildResult buildResult = buildPipeline.getBuildResult();
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
-            buildResult = new ShadedBuildResponse(null, flinkUserJar, true);
+            buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
                 extraParameter.put("yarnQueueName", application.getYarnQueueName());
             }
@@ -415,7 +415,7 @@ public class SparkApplicationActionServiceImpl
         ApiAlertException.throwIfNull(
             executionModeEnum, "ExecutionMode can't be null, start application failed.");
 
-        String flinkUserJar = null;
+        String sparkUserJar = null;
         String appConf = null;
 
         switch (application.getDevelopmentMode()) {
@@ -431,7 +431,7 @@ public class SparkApplicationActionServiceImpl
                 // 3) client
                 if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
                     String clientPath = Workspace.remote().APP_CLIENT();
-                    flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
+                    sparkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 break;
 
@@ -451,7 +451,7 @@ public class SparkApplicationActionServiceImpl
                     resource.getFilePath().endsWith(Constant.PYTHON_SUFFIX),
                     "pyflink format error, must be a \".py\" suffix, start application failed.");
 
-                flinkUserJar = resource.getFilePath();
+                sparkUserJar = resource.getFilePath();
                 break;
 
             case CUSTOM_CODE:
@@ -478,25 +478,25 @@ public class SparkApplicationActionServiceImpl
                             break;
                         default:
                             throw new IllegalArgumentException(
-                                "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
+                                "[StreamPark] ApplicationType must be (StreamPark spark | Apache spark)... ");
                     }
                 }
 
                 if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
-                            flinkUserJar = String.format(
+                            sparkUserJar = String.format(
                                 "%s/%s",
                                 application.getAppLib(),
                                 application.getModule().concat(Constant.JAR_SUFFIX));
                             break;
                         case APACHE_SPARK:
-                            flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
-                            if (!FsOperator.hdfs().exists(flinkUserJar)) {
+                            sparkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
+                            if (!FsOperator.hdfs().exists(sparkUserJar)) {
                                 resource = resourceService.findByResourceName(
                                     application.getTeamId(), application.getJar());
                                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                                    flinkUserJar = String.format(
+                                    sparkUserJar = String.format(
                                         "%s/%s",
                                         application.getAppHome(),
                                         new File(resource.getFilePath()).getName());
@@ -505,12 +505,12 @@ public class SparkApplicationActionServiceImpl
                             break;
                         default:
                             throw new IllegalArgumentException(
-                                "[StreamPark] ApplicationType must be (StreamPark flink | Apache flink)... ");
+                                "[StreamPark] ApplicationType must be (StreamPark spark | Apache spark)... ");
                     }
                 }
                 break;
         }
-        return Tuple2.of(flinkUserJar, appConf);
+        return Tuple2.of(sparkUserJar, appConf);
     }
 
     private void doStopped(Long id) {

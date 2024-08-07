@@ -126,7 +126,12 @@ object YarnClient extends SparkClientTrait {
 
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {
     logger.info("[StreamPark][Spark][YarnClient] set spark configuration.")
-    // 1) set spark conf
+    // 1) put yarn queue
+    if (SparkExecutionMode.isYarnMode(submitRequest.executionMode)) {
+      setYarnQueue(submitRequest)
+    }
+
+    // 2) set spark conf
     submitRequest.appProperties.foreach(prop => {
       val k = prop._1
       val v = prop._2
@@ -134,10 +139,20 @@ object YarnClient extends SparkClientTrait {
       sparkLauncher.setConf(k, v)
     })
 
-    // 2) set spark args
+    // 3) set spark args
     submitRequest.appArgs.foreach(sparkLauncher.addAppArgs(_))
     if (submitRequest.hasExtra("sql")) {
       sparkLauncher.addAppArgs("--sql", submitRequest.getExtra("sql").toString)
+    }
+  }
+
+  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
+    if (submitRequest.hasExtra("yarnQueueName")) {
+      submitRequest.appProperties.put("spark.yarn.queue", submitRequest.getExtra("yarnQueueName").asInstanceOf[String])
+    }
+    if (submitRequest.hasExtra("yarnQueueLabel")) {
+      submitRequest.appProperties.put("spark.yarn.am.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+      submitRequest.appProperties.put("spark.yarn.executor.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
     }
   }
 }

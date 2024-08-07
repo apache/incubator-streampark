@@ -65,6 +65,9 @@ object ConfigKeys {
 
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
+  def KEY_SPARK_SQL(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}sql"
+
   /** about config flink */
   def KEY_APP_CONF(prefix: String = null): String =
     s"${Option(prefix).getOrElse("")}conf"

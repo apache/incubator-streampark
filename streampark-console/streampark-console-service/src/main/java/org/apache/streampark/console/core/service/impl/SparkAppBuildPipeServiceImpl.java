@@ -31,29 +31,27 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.entity.ApplicationConfig;
-import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
+import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
-import org.apache.streampark.console.core.service.ApplicationConfigService;
-import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.ServiceHelper;
-import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
+import org.apache.streampark.console.core.service.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
+import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
@@ -108,16 +106,10 @@ public class SparkAppBuildPipeServiceImpl
     private SparkEnvService sparkEnvService;
 
     @Autowired
-    private FlinkSqlService flinkSqlService;
-
-    @Autowired
-    private ApplicationBackUpService backUpService;
+    private SparkSqlService sparkSqlService;
 
     @Autowired
     private ServiceHelper serviceHelper;
-
-    @Autowired
-    private SettingService settingService;
 
     @Autowired
     private MessageService messageService;
@@ -135,7 +127,7 @@ public class SparkAppBuildPipeServiceImpl
     private SparkAppHttpWatcher sparkAppHttpWatcher;
 
     @Autowired
-    private ApplicationConfigService applicationConfigService;
+    private SparkApplicationConfigService applicationConfigService;
 
     @Autowired
     private ResourceService resourceService;
@@ -174,13 +166,13 @@ public class SparkAppBuildPipeServiceImpl
         }
 
         // 1) spark sql setDependency
-        FlinkSql newFlinkSql = flinkSqlService.getCandidate(app.getId(), CandidateTypeEnum.NEW);
-        FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(app.getId(), false);
+        SparkSql newSparkSql = sparkSqlService.getCandidate(app.getId(), CandidateTypeEnum.NEW);
+        SparkSql effectiveSparkSql = sparkSqlService.getEffective(app.getId(), false);
         if (app.isSparkSqlJob()) {
-            FlinkSql flinkSql = newFlinkSql == null ? effectiveFlinkSql : newFlinkSql;
-            AssertUtils.notNull(flinkSql);
-            app.setDependency(flinkSql.getDependency());
-            app.setTeamResource(flinkSql.getTeamResource());
+            SparkSql sparkSql = newSparkSql == null ? effectiveSparkSql : newSparkSql;
+            AssertUtils.notNull(sparkSql);
+            app.setDependency(sparkSql.getDependency());
+            app.setTeamResource(sparkSql.getTeamResource());
         }
 
         // create pipeline instance
@@ -297,11 +289,11 @@ public class SparkAppBuildPipeServiceImpl
                             // If the current task is not running, or the task has just been added, directly
                             // set
                             // the candidate version to the official version
-                            if (app.isSparkSqlJob()) {
+                            if (app.isCustomCodeOrPySparkJob()) {
                                 applicationManageService.toEffective(app);
                             } else {
                                 if (app.isStreamParkJob()) {
-                                    ApplicationConfig config =
+                                    SparkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
                                         config.setToApplication(app);
@@ -357,12 +349,12 @@ public class SparkAppBuildPipeServiceImpl
         SparkEnv env = sparkEnvService.getById(app.getVersionId());
         boolean checkVersion = env.getSparkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
-            checkVersion, "Unsupported flink version:" + env.getSparkVersion().version());
+            checkVersion, "Unsupported spark version:" + env.getSparkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
         ApiAlertException.throwIfFalse(
-            envOk, "Check spark env failed, please check the flink version of this job");
+            envOk, "Check spark env failed, please check the spark version of this job");
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(

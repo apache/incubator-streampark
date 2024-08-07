@@ -31,7 +31,6 @@ import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
-import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.runner.EnvInitializer;
@@ -51,6 +50,8 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Nonnull;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,8 +96,64 @@ public class SparkApplicationInfoServiceImpl
 
         // result json
         Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
-        // TODO: Tasks running metrics for presentation
-        // dashboardDataMap.put("metrics key", "metrics value");
+        Long totalNumTasks = 0L;
+        Long totalNumCompletedTasks = 0L;
+        Long totalNumStages = 0L;
+        Long totalNumCompletedStages = 0L;
+        Long totalUsedMemory = 0L;
+        Long totalUsedVCores = 0L;
+        Integer runningApplication = 0;
+
+        for (SparkApplication app : SparkAppHttpWatcher.getWatchingApps()) {
+            if (!teamId.equals(app.getTeamId())) {
+                continue;
+            }
+            if (app.getState() == SparkAppStateEnum.RUNNING.getValue()) {
+                runningApplication++;
+            }
+            if (app.getNumTasks() != null) {
+                totalNumTasks += app.getNumTasks();
+            }
+            if (app.getNumCompletedTasks() != null) {
+                totalNumCompletedTasks += app.getNumCompletedTasks();
+            }
+            if (app.getNumStages() != null) {
+                totalNumStages += app.getNumStages();
+            }
+            if (app.getNumCompletedStages() != null) {
+                totalNumCompletedStages += app.getNumCompletedStages();
+            }
+            if (app.getUsedMemory() != null) {
+                totalUsedMemory += app.getUsedMemory();
+            }
+            if (app.getUsedVCores() != null) {
+                totalUsedVCores += app.getUsedVCores();
+            }
+        }
+
+        // result json
+        return constructDashboardMap(
+            runningApplication, totalNumTasks, totalNumCompletedTasks, totalNumStages, totalNumCompletedStages,
+            totalUsedMemory, totalUsedVCores);
+    }
+
+    @Nonnull
+    private Map<String, Serializable> constructDashboardMap(
+                                                            Integer runningApplication,
+                                                            Long totalNumTasks,
+                                                            Long totalNumCompletedTasks,
+                                                            Long totalNumStages,
+                                                            Long totalNumCompletedStages,
+                                                            Long totalUsedMemory,
+                                                            Long totalUsedVCores) {
+        Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
+        dashboardDataMap.put("runningApplication", runningApplication);
+        dashboardDataMap.put("numTasks", totalNumTasks);
+        dashboardDataMap.put("numCompletedTasks", totalNumCompletedTasks);
+        dashboardDataMap.put("numStages", totalNumStages);
+        dashboardDataMap.put("numCompletedStages", totalNumCompletedStages);
+        dashboardDataMap.put("usedMemory", totalUsedMemory);
+        dashboardDataMap.put("usedVCores", totalUsedVCores);
 
         return dashboardDataMap;
     }
@@ -260,7 +317,7 @@ public class SparkApplicationInfoServiceImpl
             }
 
             // has stopped status
-            if (FlinkAppStateEnum.isEndState(app.getState())) {
+            if (SparkAppStateEnum.isEndState(app.getState())) {
                 // check whether jobName exists on yarn
                 if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
                     && YarnUtils.isContains(appParam.getAppName())) {

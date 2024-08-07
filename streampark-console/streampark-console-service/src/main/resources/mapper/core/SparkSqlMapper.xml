@@ -32,7 +32,7 @@
         from t_spark_sql s
         inner join t_spark_effective e
         on s.id = e.target_id
-        where e.target_type = 2
+        where e.target_type = 4
         and e.app_id = #{appId}
     </select>
 
