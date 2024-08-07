@@ -26,6 +26,7 @@ public enum UserMessageStatus implements Status {
 
     SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS(10000, "user {0} can only sign in with [{1}]", "用户{0}只能使用 [{1}] 登录"),
     SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT(10010, "The login type [{0}] is not supported", "不支持登录类型[{0}]"),
+    SYSTEM_USER_LOGIN_TYPE_NULL(10010, "The login type is null", "登录类型为空"),
     SYSTEM_USER_ALLOW_LOGIN_TYPE(10020, "user {0} can not login with {1}", "用户{0}无法使用{1}登录"),
     SYSTEM_USER_NOT_LOGIN(10030, "Permission denied, please login first.", "权限被拒绝，请先登录"),
     SYSTEM_USER_NOT_BELONG_TEAM_LOGIN(10040,

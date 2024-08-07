@@ -34,6 +34,7 @@ import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_PASSWORD_INCORRECT;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_NULL;
 import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_NOT_EXIST;
 
 @Component
@@ -47,8 +48,7 @@ public class AuthenticatorImpl implements Authenticator {
     @Override
     public User authenticate(String username, String password, LoginTypeEnum loginType) throws Exception {
         ApiAlertException.throwIfNull(
-            loginType, "the login type is null");
-            loginTypeEnum, SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT, loginType);
+            loginType, SYSTEM_USER_LOGIN_TYPE_NULL);
 
         switch (loginType) {
             case PASSWORD:
