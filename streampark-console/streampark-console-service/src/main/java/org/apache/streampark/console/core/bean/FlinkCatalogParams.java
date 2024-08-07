@@ -30,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @Slf4j
@@ -45,6 +46,10 @@ public class FlinkCatalogParams implements Serializable {
 
     /** creator */
     private Long userId;
+
+    private Date createTime;
+
+    private Date updateTime;
 
     private FlinkJDBCCatalog flinkJDBCCatalog;
 

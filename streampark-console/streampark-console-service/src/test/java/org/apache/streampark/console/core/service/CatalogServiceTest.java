@@ -91,6 +91,8 @@ public class CatalogServiceTest extends SpringUnitTestBase {
             catalogResult.getRecords().get(0).getFlinkJDBCCatalog().getBaseUrl().contains("url2"))
                 .isTrue();
         assertThat(catalogResult.getRecords().get(0).getUserId().equals(2L)).isTrue();
+        assertThat(catalogResult.getRecords().get(0).getCatalogType().equals(CatalogType.JDBC))
+            .isTrue();
     }
 
     @Test
