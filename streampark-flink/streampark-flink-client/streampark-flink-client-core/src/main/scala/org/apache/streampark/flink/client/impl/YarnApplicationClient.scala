@@ -24,11 +24,11 @@ import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
@@ -46,19 +46,19 @@ object YarnApplicationClient extends YarnClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     super.setConfig(submitRequest, flinkConfig)
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-      submitRequest.flinkVersion.flinkHome)
-    val currentUser = UserGroupInformation.getCurrentUser
-    logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      logDebug(s"kerberos Security is Enabled...")
-      val useTicketCache =
-        flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(
-          s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-      }
-    }
+    // val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
+    //   submitRequest.flinkVersion.flinkHome)
+    // val currentUser = UserGroupInformation.getCurrentUser
+    // logDebug(s"UserGroupInformation currentUser: $currentUser")
+    // if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+    //   logDebug(s"kerberos Security is Enabled...")
+    //   val useTicketCache =
+    //     flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
+    //   if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
+    //     throw new RuntimeException(
+    //       s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
+    //   }
+    // }
     val providedLibs = {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
@@ -98,11 +98,8 @@ object YarnApplicationClient extends YarnClientTrait {
     SecurityUtils.install(new SecurityConfiguration(flinkConfig))
     SecurityUtils.getInstalledContext.runSecured(new Callable[SubmitResponse] {
       override def call(): SubmitResponse = {
-        val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-        val clientFactory =
-          clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-
-        val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+        val (clusterSpecification, clusterDescriptor: YarnClusterDescriptor) =
+          getYarnClusterDeployDescriptor(flinkConfig)
         logInfo(s"""
                    |------------------------<<specification>>-------------------------
                    |$clusterSpecification
@@ -110,7 +107,6 @@ object YarnApplicationClient extends YarnClientTrait {
                    |""".stripMargin)
 
         val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
-        val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
         val clusterClient = clusterDescriptor
           .deployApplicationCluster(clusterSpecification, applicationConfiguration)
           .getClusterClient

@@ -22,7 +22,7 @@ import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
+import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.util.HadoopUtils
@@ -62,19 +62,19 @@ object YarnSessionClient extends YarnClientTrait {
       deployRequest: DeployRequest,
       flinkConfig: Configuration): Unit = {
 
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-      deployRequest.flinkVersion.flinkHome)
-    val currentUser = UserGroupInformation.getCurrentUser
-    logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      logDebug(s"kerberos Security is Enabled...")
-      val useTicketCache =
-        flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-        throw new RuntimeException(
-          s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-      }
-    }
+    // val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
+    //   deployRequest.flinkVersion.flinkHome)
+    // val currentUser = UserGroupInformation.getCurrentUser
+    // logDebug(s"UserGroupInformation currentUser: $currentUser")
+    // if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+    //   logDebug(s"kerberos Security is Enabled...")
+    //   val useTicketCache =
+    //     flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
+    //   if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
+    //     throw new RuntimeException(
+    //       s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
+    //   }
+    // }
 
     val shipFiles = new util.ArrayList[String]()
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
@@ -105,9 +105,8 @@ object YarnSessionClient extends YarnClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
-    val clusterDescriptor = yarnClusterDescriptor._2
-    val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
+    val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
+      getYarnClusterDescriptor(flinkConfig)
     val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
     val jobGraph = programJobGraph._2
@@ -160,7 +159,8 @@ object YarnSessionClient extends YarnClientTrait {
 
       deployClusterConfig(deployRequest, flinkConfig)
 
-      val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDeployDescriptor(flinkConfig)
+      val clusterSpecification: ClusterSpecification = yarnClusterDescriptor._1
       clusterDescriptor = yarnClusterDescriptor._2
       if (StringUtils.isNotBlank(deployRequest.clusterId)) {
         try {
@@ -181,7 +181,7 @@ object YarnSessionClient extends YarnClientTrait {
           case e: Exception => return DeployResponse(error = e)
         }
       }
-      val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
+      val clientProvider = clusterDescriptor.deploySessionCluster(clusterSpecification)
       client = clientProvider.getClusterClient
       if (client.getWebInterfaceURL != null) {
         DeployResponse(
@@ -210,7 +210,8 @@ object YarnSessionClient extends YarnClientTrait {
           })
       flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId)
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-      val yarnClusterDescriptor = getSessionClusterDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDescriptor(flinkConfig)
+      val applicationId: ApplicationId = yarnClusterDescriptor._1
       clusterDescriptor = yarnClusterDescriptor._2
       if (
         FinalApplicationStatus.UNDEFINED.equals(
@@ -218,7 +219,7 @@ object YarnSessionClient extends YarnClientTrait {
             .getApplicationReport(ApplicationId.fromString(shutDownRequest.clusterId))
             .getFinalApplicationStatus)
       ) {
-        val clientProvider = clusterDescriptor.retrieve(yarnClusterDescriptor._1)
+        val clientProvider = clusterDescriptor.retrieve(applicationId)
         client = clientProvider.getClusterClient
         client.shutDownCluster()
       }
@@ -231,17 +232,6 @@ object YarnSessionClient extends YarnClientTrait {
     } finally {
       Utils.close(client, clusterDescriptor)
     }
-  }
-
-  private[this] def getYarnSessionClusterDescriptor(
-      flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
-    require(yarnClusterId != null)
-    val clusterDescriptor =
-      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-    (yarnClusterId, clusterDescriptor)
   }
 
 }
