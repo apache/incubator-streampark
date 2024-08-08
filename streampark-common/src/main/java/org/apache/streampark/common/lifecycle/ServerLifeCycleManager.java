@@ -17,20 +17,18 @@
 
 package org.apache.streampark.common.lifecycle;
 
+import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @UtilityClass
+@Getter
 public class ServerLifeCycleManager {
 
     private static volatile ServerStatus serverStatus = ServerStatus.RUNNING;
 
     private static long serverStartupTime = System.currentTimeMillis();
-
-    public static long getServerStartupTime() {
-        return serverStartupTime;
-    }
 
     public static boolean isRunning() {
         return serverStatus == ServerStatus.RUNNING;
@@ -38,10 +36,6 @@ public class ServerLifeCycleManager {
 
     public static boolean isStopped() {
         return serverStatus == ServerStatus.STOPPED;
-    }
-
-    public static ServerStatus getServerStatus() {
-        return serverStatus;
     }
 
     /**
