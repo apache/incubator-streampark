@@ -98,13 +98,17 @@ public class SparkApplication extends BaseEntity {
 
     /**
      * Arbitrary Spark configuration property in key=value format
-     * e.g. "spark.driver.cores=1"
+     * e.g. spark.driver.cores=1
      */
     private String appProperties;
 
     /** Arguments passed to the main method of your main class */
     private String appArgs;
 
+    /**
+     * yarn application id for spark on Yarn. e.g. application_1722935916851_0014
+     * driver pod name for spark on K8s.(will be supported in the future)
+     */
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String appId;
 
@@ -112,6 +116,10 @@ public class SparkApplication extends BaseEntity {
 
     private transient String yarnQueueName;
 
+    /**
+     * spark on yarn can launch am and executors on particular nodes by configuring:
+     * "spark.yarn.am.nodeLabelExpression" and "spark.yarn.executor.nodeLabelExpression"
+     */
     private transient String yarnQueueLabel;
 
     /** The api server url of k8s. */
@@ -178,14 +186,14 @@ public class SparkApplication extends BaseEntity {
 
     private String tags;
 
-    /** resource */
+    /** scheduling */
     private Long driverCores;
     private Long driverMemory;
     private Long executorCores;
     private Long executorMemory;
     private Long executorMaxNums;
 
-    /** running job */
+    /** metrics of running job */
     private Long numTasks;
     private Long numCompletedTasks;
     private Long numStages;
@@ -197,8 +205,6 @@ public class SparkApplication extends BaseEntity {
     private transient String dependency;
     private transient Long sqlId;
     private transient String sparkSql;
-    private transient Integer[] stateArray;
-    private transient Integer[] jobTypeArray;
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
     private transient String config;
@@ -206,12 +212,6 @@ public class SparkApplication extends BaseEntity {
     private transient String sparkVersion;
     private transient String confPath;
     private transient Integer format;
-    private transient Boolean drain = false;
-    private transient Boolean nativeFormat = false;
-    private transient Boolean allowNonRestored = false;
-    private transient Integer restoreMode;
-    private transient String socketId;
-    private transient String projectName;
     private transient String backUpDescription;
 
     /** spark Web UI Url */

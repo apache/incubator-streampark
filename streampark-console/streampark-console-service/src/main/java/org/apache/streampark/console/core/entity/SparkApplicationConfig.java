@@ -17,12 +17,10 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 
-import org.apache.commons.collections.MapUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -37,8 +35,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 @Data
 @TableName("t_spark_config")
 @Slf4j
@@ -77,47 +73,8 @@ public class SparkApplicationConfig {
         application.setFormat(this.format);
     }
 
-    public Map<String, String> readConfig() {
-        Map<String, String> configs = renderConfigs();
-
-        if (MapUtils.isNotEmpty(configs)) {
-            return configs.entrySet().stream()
-                .collect(
-                    Collectors.toMap(
-                        entry -> {
-                            String key = entry.getKey();
-                            if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_OPTION_PREFIX())) {
-                                key = key.substring(
-                                    ConfigKeys.KEY_FLINK_OPTION_PREFIX()
-                                        .length());
-                            } else if (key.startsWith(ConfigKeys
-                                .KEY_FLINK_PROPERTY_PREFIX())) {
-                                key = key.substring(ConfigKeys
-                                    .KEY_FLINK_PROPERTY_PREFIX()
-                                    .length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_FLINK_TABLE_PREFIX())) {
-                                key = key.substring(ConfigKeys
-                                    .KEY_FLINK_TABLE_PREFIX().length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_APP_PREFIX())) {
-                                key = key.substring(ConfigKeys.KEY_APP_PREFIX()
-                                    .length());
-                            } else if (key.startsWith(
-                                ConfigKeys.KEY_SQL_PREFIX())) {
-                                key = key.substring(ConfigKeys.KEY_SQL_PREFIX()
-                                    .length());
-                            }
-                            return key;
-                        },
-                        Map.Entry::getValue));
-        }
-        return new HashMap<>();
-    }
-
     @Nullable
-    private Map<String, String> renderConfigs() {
+    private Map<String, String> readConfig() {
         ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(this.format);
         if (fileType == null) {
             return null;

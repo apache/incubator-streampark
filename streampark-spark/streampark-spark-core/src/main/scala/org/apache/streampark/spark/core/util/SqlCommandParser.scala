@@ -149,21 +149,20 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   val values: immutable.IndexedSeq[SqlCommand] = findValues
 
-  // ---- DDL Statements--------------------------------------------------------------------------------------------------------------------------------
   // ---- ALTER Statements--------------------------------------------------------------------------------------------------------------------------------
   /**
-   * <pre>ALTER { DATABASE | SCHEMA | NAMESPACE } database_name SET { DBPROPERTIES | PROPERTIES } ( property_name = property_value [ , ... ] )</pre>
-   * <pre>ALTER { DATABASE | SCHEMA | NAMESPACE } database_name SET LOCATION 'new_location'</pre>
+   * <pre> ALTER { DATABASE | SCHEMA | NAMESPACE } database_name SET { DBPROPERTIES | PROPERTIES } ( property_name = property_value [ , ... ] )
+   * ALTER { DATABASE | SCHEMA | NAMESPACE } database_name SET LOCATION 'new_location'</pre>
    */
   case object ALTER_DATABASE extends SqlCommand("alter database", "(ALTER\\s+(DATABASE\\s+|SCHEMA\\s+|NAMESPACE\\s+)\\s+.+)")
 
   /**
-   * <pre>ALTER TABLE table_identifier ....</pre>
+   * <pre> ALTER TABLE table_identifier ....</pre>
    */
   case object ALTER_TABLE extends SqlCommand("alter table", "(ALTER\\s+TABLE\\s+.+)")
 
   /**
-   * <pre>ALTER VIEW view_identifier ....</pre>
+   * <pre> ALTER VIEW view_identifier ....</pre>
    */
   case object ALTER_VIEW extends SqlCommand("alter view", "(ALTER\\s+VIEW\\s+.+)")
 
@@ -200,8 +199,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     extends SqlCommand("create table", "(CREATE\\s+(EXTERNAL\\s+|)TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+|).+)")
 
   /**
-   * <pre> CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name [( columnName
-   * [, columnName ]* )] [COMMENT view_comment] AS query_expression< </pre
+   * <pre> CREATE [TEMPORARY] VIEW [IF NOT EXISTS] [catalog_name.][db_name.]view_name
+   * [( columnName[, columnName ]* )] [COMMENT view_comment] AS query_expression </pre>
    */
   case object CREATE_VIEW
     extends SqlCommand(
@@ -210,47 +209,51 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   // ----DROP Statements--------------------------------------------------------------------------------------------------------------------------------
 
-  /** <strong>DROP { DATABASE | SCHEMA } [ IF EXISTS ] dbname [ RESTRICT | CASCADE ]</strong> */
+  /** <pre> DROP { DATABASE | SCHEMA } [ IF EXISTS ] dbname [ RESTRICT | CASCADE ]</pre> */
   case object DROP_DATABASE extends SqlCommand("drop database", "(DROP\\s+(DATABASE\\s+|SCHEMA\\s+)(IF\\s+EXISTS\\s+|).+)")
 
-  /** <strong>DROP [ TEMPORARY ] FUNCTION [ IF EXISTS ] function_name</strong> */
+  /** <pre> DROP [ TEMPORARY ] FUNCTION [ IF EXISTS ] function_name</pre> */
   case object DROP_FUNCTION
     extends SqlCommand(
       "drop function",
       "(DROP\\s+(TEMPORARY\\s+|)FUNCTION\\s+(IF\\s+EXISTS\\s+|).+)")
 
-  /** <strong>DROP TABLE [ IF EXISTS ] table_identifier [ PURGE ]</strong> */
+  /** <pre> DROP TABLE [ IF EXISTS ] table_identifier [ PURGE ]</pre> */
   case object DROP_TABLE extends SqlCommand("drop table", "(DROP\\s+TABLE\\s+(IF\\s+EXISTS\\s+|).+)")
 
-  /** <strong>DROP VIEW [ IF EXISTS ] view_identifier</strong> */
+  /** <pre> DROP VIEW [ IF EXISTS ] view_identifier</pre> */
   case object DROP_VIEW extends SqlCommand("drop view", "(DROP\\s+VIEW\\s+(IF\\s+EXISTS\\s+|).+)")
 
-  /** <strong>[MSCK] REPAIR TABLE table_identifier [{ADD|DROP|SYNC} PARTITIONS]</strong> */
+  // ---- REPAIR Statements--------------------------------------------------------------------------------------------------------------------------------
+
+  /** <pre> [MSCK] REPAIR TABLE table_identifier [{ADD|DROP|SYNC} PARTITIONS]</pre> */
   case object REPAIR_TABLE extends SqlCommand("repair table", "((MSCK\\s+|)DROP\\s+TABLE\\s+.+)")
 
-  /** <strong>TRUNCATE TABLE table_identifier [ partition_spec ]</strong> */
+  // ---- TRUNCATE Statements-----------------------------------------------------------------------------------------------------------------------------
+
+  /** <pre> TRUNCATE TABLE table_identifier [ partition_spec ]</pre> */
   case object TRUNCATE_TABLE extends SqlCommand("truncate table", "(TRUNCATE\\s+TABLE\\s+.+)")
 
-  /** <strong>USE database_name</strong> */
-  case object USE_DATABASE extends SqlCommand("use database", "(USE\\s+.+)")
+  // ---- TRUNCATE Statements-----------------------------------------------------------------------------------------------------------------------------
 
-  // ---- DML Statements--------------------------------------------------------------------------------------------------------------------------------
+  /** <pre> USE database_name</pre> */
+  case object USE_DATABASE extends SqlCommand("use database", "(USE\\s+.+)")
 
   // ---- INSERT Statement--------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * <pre>INSERT [ INTO | OVERWRITE ] [ TABLE ] table_identifier [ partition_spec ] [ ( column_list ) ]
-   * { VALUES ( { value | NULL } [ , ... ] ) [ , ( ... ) ] | query }<pre>
+   * <pre> INSERT [ INTO | OVERWRITE ] [ TABLE ] table_identifier [ partition_spec ] [ ( column_list ) ]
+   * { VALUES ( { value | NULL } [ , ... ] ) [ , ( ... ) ] | query }</pre>
    */
   case object INSERT extends SqlCommand("insert", "(INSERT\\s+(INTO|OVERWRITE)\\s+.+)")
 
   /**
-   * <pre>INSERT INTO [ TABLE ] table_identifier REPLACE WHERE boolean_expression query
+   * <pre> INSERT INTO [ TABLE ] table_identifier REPLACE WHERE boolean_expression query
    */
   case object INSERT_REPLACE extends SqlCommand("insert replace", "(INSERT\\s+INTO\\s+(TABLE|)\\s+(\\S+)\\s+REPLACE\\s+WHERE\\s+.+)")
 
   /**
-   * <pre>INSERT OVERWRITE [ LOCAL ] DIRECTORY [ directory_path ]
+   * <pre> INSERT OVERWRITE [ LOCAL ] DIRECTORY [ directory_path ]
    * { spark_format | hive_format }
    * { VALUES ( { value | NULL } [ , ... ] ) [ , ( ... ) ] | query }<pre>
    */
@@ -258,7 +261,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   // ----LOAD Statements--------------------------------------------------------------------------------------------------------------------------------
   /**
-   * <pre>LOAD DATA [ LOCAL ] INPATH path [ OVERWRITE ] INTO TABLE table_identifier [ partition_spec ]<pre>
+   * <pre> LOAD DATA [ LOCAL ] INPATH path [ OVERWRITE ] INTO TABLE table_identifier [ partition_spec ]</pre>
    */
   case object LOAD_DATE extends SqlCommand("load data", "(LOAD\\s+DATA\\s+(LOCAL|)\\s+INPATH\\s+.+)")
 
@@ -269,34 +272,38 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   // ---- EXPLAIN Statement--------------------------------------------------------------------------------------------------------------------------------
 
-  /** EXPLAIN [ EXTENDED | CODEGEN | COST | FORMATTED ] statement */
+  /** <pre>EXPLAIN [ EXTENDED | CODEGEN | COST | FORMATTED ] statement<pre> */
   case object EXPLAIN extends SqlCommand("explain", "(EXPLAIN\\s+(EXTENDED|CODEGEN|COST|FORMATTED)\\s.+)")
 
   // ---- ADD Statement--------------------------------------------------------------------------------------------------------------------------------
-  /** ADD { FILE | FILES } resource_name [ ... ] */
+  /** <pre> ADD { FILE | FILES } resource_name [ ... ]</pre> */
   case object ADD_FILE extends SqlCommand("add file", "(ADD\\s+(FILE|FILES)\\s+.+)")
 
-  /** ADD { JAR | JARS } file_name [ ... ] */
+  /** <pre> ADD { JAR | JARS } file_name [ ... ]</pre> */
   case object ADD_JAR extends SqlCommand("add jar", "(ADD\\s+(JAR|JARS)\\s+.+)")
 
+  // ---- ANALYZE Statement--------------------------------------------------------------------------------------------------------------------------------
+
   /**
-   * ANALYZE TABLE table_identifier [ partition_spec ]
+   * <pre> ANALYZE TABLE table_identifier [ partition_spec ]
    * COMPUTE STATISTICS [ NOSCAN | FOR COLUMNS col [ , ... ] | FOR ALL COLUMNS ]
    *
-   * ANALYZE TABLES [ { FROM | IN } database_name ] COMPUTE STATISTICS [ NOSCAN ]
+   * ANALYZE TABLES [ { FROM | IN } database_name ] COMPUTE STATISTICS [ NOSCAN ]</pre>
    */
   case object ANALYZE_TABLE extends SqlCommand("analyze table", "(ANALYZE\\s+(TABLES|TABLE)\\s+.+)")
 
+  // ---- CACHE Statement--------------------------------------------------------------------------------------------------------------------------------
+
   /**
-   * CACHE [ LAZY ] TABLE table_identifier
-   * [ OPTIONS ( 'storageLevel' [ = ] value ) ] [ [ AS ] query ]
+   * <pre> CACHE [ LAZY ] TABLE table_identifier
+   * [ OPTIONS ( 'storageLevel' [ = ] value ) ] [ [ AS ] query ]</pre>
    */
   case object CACHE_TABLE extends SqlCommand("cache table", "(CACHE\\s+(LAZY\\s+|)TABLE\\s+.+)")
 
-  /** UNCACHE TABLE [ IF EXISTS ] table_identifier */
+  /** <pre>UNCACHE TABLE [ IF EXISTS ] table_identifier</pre> */
   case object UNCACHE_TABLE extends SqlCommand("uncache table", "(UNCACHE\\s+TABLE\\s+.+)")
 
-  /** CLEAR CACHE */
+  /** <pre>CLEAR CACHE</pre> */
   case object CLEAR_CACHE extends SqlCommand("clear cache", "(CLEAR\\s+CACHE\\s*)")
 
   // ---- DESCRIBE Statement--------------------------------------------------------------------------------------------------------------------------------
@@ -304,10 +311,11 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object DESCRIBE extends SqlCommand("describe", "((DESCRIBE|DESC)\\s+.+)")
 
   // ---- LIST Statement--------------------------------------------------------------------------------------------------------------------------------
-  /** LIST { FILE | FILES } file_name [ ... ] */
+
+  /** <pre>LIST { FILE | FILES } file_name [ ... ]</pre> */
   case object LIST_FILE extends SqlCommand("list file", "(LIST\\s+(FILE|FILES)\\s+.+)")
 
-  /** LIST { JAR | JARS } file_name [ ... ] */
+  /** <pre>LIST { JAR | JARS } file_name [ ... ]</pre> */
   case object LIST_JAR extends SqlCommand("list jar", "(LIST\\s+(JAR|JARS)\\s+.+)")
 
   // ---- REFRESH Statement--------------------------------------------------------------------------------------------------------------------------------
@@ -315,52 +323,49 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   // ----SET Statements--------------------------------------------------------------------------------------------------------------------------------
 
-  /** SET ('key' = 'value') */
+  /**
+   * <pre> SET
+   * SET [ -v ]
+   * SET property_key[ = property_value ]</pre>
+   */
   case object SET
-    extends SqlCommand(
-      "set",
-      "SET(\\s+(\\S+)\\s*=(.*))?",
-      {
-        case a if a.length < 3 => None
-        case a if a.head == null => Some(Array[String](cleanUp(a.head)))
-        case a => Some(Array[String](cleanUp(a(1)), cleanUp(a(2))))
-      })
+    extends SqlCommand("set", "(SET(|\\s+.+))")
 
   // ----RESET Statements--------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * RESET;
-   *
-   * RESET configuration_key;
+   * <pre> RESET;
+   * RESET configuration_key;</pre>
    */
   case object RESET extends SqlCommand("reset", "RESET\\s*(.*)?")
+
   // ----SHOW Statements--------------------------------------------------------------------------------------------------------------------------------
 
-  /** SHOW COLUMNS table_identifier [ database ] */
+  /** <pre>SHOW COLUMNS table_identifier [ database ]</pre> */
   case object SHOW_COLUMNS extends SqlCommand("show columns", "(SHOW\\s+COLUMNS\\s+.+)")
 
-  /** SHOW CREATE TABLE table_identifier [ AS SERDE ] */
+  /** <pre>SHOW CREATE TABLE table_identifier [ AS SERDE ]</pre> */
   case object SHOW_CREATE_TABLE extends SqlCommand("show create table", "(SHOW\\s+CREATE\\s+TABLE\\s+.+)")
 
-  /** SHOW { DATABASES | SCHEMAS } [ LIKE regex_pattern ] */
+  /** <pre>SHOW { DATABASES | SCHEMAS } [ LIKE regex_pattern ]</pre> */
   case object SHOW_DATABASES extends SqlCommand("show databases", "(SHOW\\s+(DATABASES|SCHEMAS)\\s+.+)")
 
-  /** SHOW [ function_kind ] FUNCTIONS [ { FROM | IN } database_name ] [ LIKE regex_pattern ] */
+  /** <pre>SHOW [ function_kind ] FUNCTIONS [ { FROM | IN } database_name ] [ LIKE regex_pattern ]</pre> */
   case object SHOW_FUNCTIONS extends SqlCommand("show functions", "(SHOW\\s+(USER|SYSTEM|ALL|)\\s+FUNCTIONS\\s+.+)")
 
-  /** SHOW PARTITIONS table_identifier [ partition_spec ] */
+  /** <pre>SHOW PARTITIONS table_identifier [ partition_spec ]</pre> */
   case object SHOW_PARTITIONS extends SqlCommand("show partitions", "(SHOW\\s+PARTITIONS\\s+.+)")
 
-  /** SHOW TABLE EXTENDED [ { IN | FROM } database_name ] LIKE regex_pattern [ partition_spec ] */
+  /** <pre>SHOW TABLE EXTENDED [ { IN | FROM } database_name ] LIKE regex_pattern [ partition_spec ]</pre> */
   case object SHOW_TABLE_EXTENDED extends SqlCommand("show table extended", "(SHOW\\s+TABLE\\s+EXTENDED\\s+.+)")
 
-  /** SHOW TABLES [ { FROM | IN } database_name ] [ LIKE regex_pattern ] */
+  /** <pre>SHOW TABLES [ { FROM | IN } database_name ] [ LIKE regex_pattern ]</pre> */
   case object SHOW_TABLES extends SqlCommand("show tables", "(SHOW\\s+TABLES\\s+.+)")
 
-  /** SHOW TBLPROPERTIES table_identifier [ ( unquoted_property_key | property_key_as_string_literal ) ] */
+  /** <pre>SHOW TBLPROPERTIES table_identifier [ ( unquoted_property_key | property_key_as_string_literal ) ]</pre> */
   case object SHOW_TBLPROPERTIES extends SqlCommand("show tblproperties", "(SHOW\\s+TBLPROPERTIES\\s+.+)")
 
-  /** SHOW VIEWS [ { FROM | IN } database_name ] [ LIKE regex_pattern ] */
+  /** <pre>SHOW VIEWS [ { FROM | IN } database_name ] [ LIKE regex_pattern ]</pre> */
   case object SHOW_VIEWS extends SqlCommand("show views", "(SHOW\\s+VIEWS\\s+.+)")
 
   private[this] def cleanUp(sql: String): String =
