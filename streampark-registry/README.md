@@ -34,4 +34,4 @@ Event content can be viewed in event.java
 
 ### streampark-registry-plugins
 
-This module contains all registry implementations in DS
+This module contains all registry implementations in SP
