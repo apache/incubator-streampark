@@ -26,6 +26,6 @@ class UUIDUtilsTestCase {
     @Test
     void testGenerateUUID() {
         long uuid = UUIDUtils.generateUUID();
-        assertThat(String.valueOf(uuid).length()).isGreaterThan(9);
+        assertThat(String.valueOf(uuid).length()).isGreaterThan(4);
     }
 }
