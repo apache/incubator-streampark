@@ -64,6 +64,6 @@ class YarnQueueLabelExpressionTest {
         assertThat(YarnQueueLabelExpression.of("a").getQueue()).isEqualTo("a");
         assertThatThrownBy(() -> YarnQueueLabelExpression.of("a@"))
             .isInstanceOf(ApiAlertException.class)
-            .hasMessageContaining(YARN_QUEUE_LABEL_FORMAT.getMessage().replaceAll("'", ""));
+            .hasMessageContaining(YARN_QUEUE_LABEL_FORMAT.getMessage());
     }
 }

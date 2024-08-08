@@ -79,6 +79,14 @@ public enum ApplicationMessageStatus implements Status {
     EXTERNAL_LINK_PARAM_EXISTING_ERROR(101060, "{0}:{1} is already existing.", "{0}:{1}已经能存在"),
 
     API_NOT_SUPPORT(101150, "current api unsupported: {0}", "当前API不受支持: {0}"),
+
+    CATALOG_NOT_EXISTS_ERROR(101160, "Catalog not exist, please check.", "Catalog不存在, 请检查"),
+    CATALOG_NAME_EXISTS_ERROR(101161, "Catalog already exist, please check.", "Catalog存在, 请检查"),
+    CATALOG_NAME_MODIFY_ERROR(101162, "The catalog name cannot be modified.", "目录名称无法修改"),
+    CATALOG_NAME_VALID_MSG(101163,
+        "Catalog Name only lowercase letters, numbers, and -,.. Symbol composition, cannot end with a symbol.",
+        "目录名称 仅限小写字母、数字和-,..符号组成，不能以符号结尾。"),
+
     ;
     private final int code;
     private final String enMsg;

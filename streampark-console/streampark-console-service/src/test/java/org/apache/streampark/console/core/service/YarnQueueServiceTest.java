@@ -177,7 +177,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         yarnQueue.setQueueLabel("q1@");
         assertThatThrownBy(() -> yarnQueueService.updateYarnQueue(yarnQueue))
             .isInstanceOf(ApiAlertException.class)
-            .hasMessage(YARN_QUEUE_LABEL_FORMAT.getMessage().replaceAll("'", ""));
+            .hasMessage(YARN_QUEUE_LABEL_FORMAT.getMessage());
 
         // Test for formal cases.
         yarnQueue.setQueueLabel(newQueue);
