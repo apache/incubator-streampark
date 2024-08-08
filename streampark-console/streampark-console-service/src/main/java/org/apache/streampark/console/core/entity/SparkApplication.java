@@ -187,11 +187,11 @@ public class SparkApplication extends BaseEntity {
     private String tags;
 
     /** scheduling */
-    private Long driverCores;
-    private Long driverMemory;
-    private Long executorCores;
-    private Long executorMemory;
-    private Long executorMaxNums;
+    private String driverCores;
+    private String driverMemory;
+    private String executorCores;
+    private String executorMemory;
+    private String executorMaxNums;
 
     /** metrics of running job */
     private Long numTasks;
@@ -242,6 +242,31 @@ public class SparkApplication extends BaseEntity {
         Map<String, String> queueLabelMap = YarnQueueLabelExpression.getQueueLabelMap(this.yarnQueue);
         this.setYarnQueueName(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_QUEUE(), "default"));
         this.setYarnQueueLabel(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), null));
+    }
+
+    /**
+     * Resolve the scheduling configuration of the Spark application.
+     * About executorMaxNums:
+     * 1) if dynamic allocation is disabled, it depends on "spark.executor.instances".
+     * 2) if dynamic allocation is enabled and "spark.dynamicAllocation.maxExecutors" is set, it depends on it.
+     * 3) if dynamic allocation is enabled and "spark.dynamicAllocation.maxExecutors" is not set,
+     *    the number of executors can up to infinity.
+     *
+     * @param map The configuration map integrated with default configurations,
+     *            configuration template and custom configurations.
+     */
+    public void resolveScheduleConf(Map<String, String> map) {
+        this.setDriverCores(map.get(ConfigKeys.KEY_SPARK_DRIVER_CORES()));
+        this.setDriverMemory(map.get(ConfigKeys.KEY_SPARK_DRIVER_MEMORY()));
+        this.setExecutorCores(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_CORES()));
+        this.setExecutorMemory(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_MEMORY()));
+        boolean isDynamicAllocationEnabled =
+            Boolean.parseBoolean(map.get(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED()));
+        if (isDynamicAllocationEnabled) {
+            this.setExecutorMaxNums(map.getOrDefault(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS(), "inf"));
+        } else {
+            this.setExecutorMaxNums(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_INSTANCES()));
+        }
     }
 
     /**

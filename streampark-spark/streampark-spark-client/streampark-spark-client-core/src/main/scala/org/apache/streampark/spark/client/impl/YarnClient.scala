@@ -77,7 +77,7 @@ object YarnClient extends SparkClientTrait {
           s"appid: ${handle.getAppId}, " +
           s"state: ${handle.getState}")
         sparkHandles += handle.getAppId -> handle
-        SubmitResponse(handle.getAppId)
+        SubmitResponse(handle.getAppId, submitRequest.appProperties)
       case Failure(e) => throw e
     }
   }

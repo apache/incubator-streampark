@@ -65,6 +65,20 @@ object ConfigKeys {
 
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
+  val KEY_SPARK_DRIVER_CORES = "spark.driver.cores"
+
+  val KEY_SPARK_DRIVER_MEMORY = "spark.driver.memory"
+
+  val KEY_SPARK_EXECUTOR_INSTANCES = "spark.executor.instances"
+
+  val KEY_SPARK_EXECUTOR_CORES = "spark.executor.cores"
+
+  val KEY_SPARK_EXECUTOR_MEMORY = "spark.executor.memory"
+
+  val KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED = "spark.dynamicAllocation.enabled"
+
+  val KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS = "spark.dynamicAllocation.maxExecutors"
+
   def KEY_SPARK_SQL(prefix: String = null): String =
     s"${Option(prefix).getOrElse("")}sql"
 

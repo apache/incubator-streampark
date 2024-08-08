@@ -59,11 +59,11 @@
         <result column="end_time" jdbcType="DATE" property="endTime"/>
         <result column="duration" jdbcType="BIGINT" property="duration"/>
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
-        <result column="driver_cores" jdbcType="BIGINT" property="driverCores"/>
-        <result column="driver_memory" jdbcType="BIGINT" property="driverMemory"/>
-        <result column="executor_cores" jdbcType="BIGINT" property="executorCores"/>
-        <result column="executor_memory" jdbcType="BIGINT" property="executorMemory"/>
-        <result column="executor_max_nums" jdbcType="BIGINT" property="executorMaxNums"/>
+        <result column="driver_cores" jdbcType="VARCHAR" property="driverCores"/>
+        <result column="driver_memory" jdbcType="VARCHAR" property="driverMemory"/>
+        <result column="executor_cores" jdbcType="VARCHAR" property="executorCores"/>
+        <result column="executor_memory" jdbcType="VARCHAR" property="executorMemory"/>
+        <result column="executor_max_nums" jdbcType="VARCHAR" property="executorMaxNums"/>
         <result column="num_tasks" jdbcType="BIGINT" property="numTasks"/>
         <result column="num_completed_tasks" jdbcType="BIGINT" property="numCompletedTasks"/>
         <result column="num_stages" jdbcType="BIGINT" property="numStages"/>

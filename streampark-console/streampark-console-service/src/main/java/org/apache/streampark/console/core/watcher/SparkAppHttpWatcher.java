@@ -216,9 +216,10 @@ public class SparkAppHttpWatcher {
                         summary.setUsedMemory(Long.parseLong(yarnAppInfo.getApp().getAllocatedMB()));
                         summary.setUsedVCores(Long.parseLong(yarnAppInfo.getApp().getAllocatedVCores()));
                         application.fillRunningMetrics(summary);
-                    } catch (IOException e){
+                    } catch (IOException e) {
                         // This may happen when the job is finished right after the job status is abtained from yarn.
-                        log.warn("[StreamPark][SparkAppHttpWatcher] getStateFromYarn, fetch spark job status failed. The job may have already been finished.");
+                        log.warn(
+                            "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, fetch spark job status failed. The job may have already been finished.");
                     }
                 }
                 application.setState(sparkAppStateEnum.getValue());

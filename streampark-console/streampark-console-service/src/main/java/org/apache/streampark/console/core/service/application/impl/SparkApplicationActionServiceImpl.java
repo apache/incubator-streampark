@@ -355,6 +355,7 @@ public class SparkApplicationActionServiceImpl
 
                 // 3) success
                 applicationLog.setSuccess(true);
+                application.resolveScheduleConf(response.sparkProperties());
                 if (StringUtils.isNoneEmpty(response.sparkAppId())) {
                     application.setAppId(response.sparkAppId());
                 }
