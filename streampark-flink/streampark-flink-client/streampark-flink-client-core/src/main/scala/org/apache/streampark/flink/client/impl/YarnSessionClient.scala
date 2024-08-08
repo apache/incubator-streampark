@@ -61,21 +61,6 @@ object YarnSessionClient extends YarnClientTrait {
   private def deployClusterConfig(
       deployRequest: DeployRequest,
       flinkConfig: Configuration): Unit = {
-
-    // val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-    //   deployRequest.flinkVersion.flinkHome)
-    // val currentUser = UserGroupInformation.getCurrentUser
-    // logDebug(s"UserGroupInformation currentUser: $currentUser")
-    // if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-    //   logDebug(s"kerberos Security is Enabled...")
-    //   val useTicketCache =
-    //     flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-    //   if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-    //     throw new RuntimeException(
-    //       s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-    //   }
-    // }
-
     val shipFiles = new util.ArrayList[String]()
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/plugins")

@@ -46,19 +46,6 @@ object YarnApplicationClient extends YarnClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     super.setConfig(submitRequest, flinkConfig)
-    // val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-    //   submitRequest.flinkVersion.flinkHome)
-    // val currentUser = UserGroupInformation.getCurrentUser
-    // logDebug(s"UserGroupInformation currentUser: $currentUser")
-    // if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-    //   logDebug(s"kerberos Security is Enabled...")
-    //   val useTicketCache =
-    //     flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-    //   if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
-    //     throw new RuntimeException(
-    //       s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-    //   }
-    // }
     val providedLibs = {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
