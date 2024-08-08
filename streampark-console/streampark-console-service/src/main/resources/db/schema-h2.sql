@@ -492,6 +492,21 @@ create table if not exists `t_yarn_queue` (
 );
 
 -- ----------------------------
+-- Table structure for t_flink_catalog
+-- ----------------------------
+create table if not exists t_flink_catalog (
+   `id` BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+   `team_id` bigint not null,
+   `user_id` bigint default null,
+   `catalog_type` varchar(255) not NULL,
+   `catalog_name` VARCHAR(255) NOT NULL,
+   `configuration` text,
+   `create_time` TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
+   `update_time` TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
+   CONSTRAINT uniq_catalog_name UNIQUE (`catalog_name`)
+);
+
+-- ----------------------------
 -- Table structure for t_spark_env
 -- ----------------------------
 create table if not exists `t_spark_env` (
