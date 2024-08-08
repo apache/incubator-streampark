@@ -50,7 +50,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   lazy val providedLibs: DependencyInfo = {
     val providedLibs =
-      ArrayBuffer(localWorkspace.APP_JARS, localWorkspace.APP_PLUGINS, customFlinkUserJar)
+      ArrayBuffer(localWorkspace.APP_JARS, customFlinkUserJar)
     if (developmentMode == FlinkDevelopmentMode.FLINK_SQL) {
       providedLibs += s"${localWorkspace.APP_SHIMS}/flink-${flinkVersion.majorVersion}"
     }

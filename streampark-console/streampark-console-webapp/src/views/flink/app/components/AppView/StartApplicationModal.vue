@@ -50,7 +50,7 @@
       Object.assign(receiveData, data);
       resetFields();
       setFieldsValue({
-        startSavePoint: receiveData.selected?.path,
+        savepointPath: receiveData.selected?.path,
       });
     }
   });
@@ -67,7 +67,7 @@
     labelWidth: 120,
     schemas: [
       {
-        field: 'startSavePointed',
+        field: 'restoreSavepoint',
         label: t('flink.app.view.fromSavepoint'),
         component: 'Switch',
         componentProps: {
@@ -78,7 +78,7 @@
         afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointTip')),
       },
       {
-        field: 'startSavePoint',
+        field: 'savepointPath',
         label: 'Savepoint',
         component:
           receiveData.historySavePoint && receiveData.historySavePoint.length > 0
@@ -87,7 +87,7 @@
         afterItem: () =>
           h('span', { class: 'conf-switch' }, handleSavePointTip(receiveData.historySavePoint)),
         slot: 'savepoint',
-        ifShow: ({ values }) => values.startSavePointed,
+        ifShow: ({ values }) => values.restoreSavepoint,
         required: true,
       },
       {
@@ -100,7 +100,7 @@
         },
         afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.ignoreRestoredTip')),
         defaultValue: false,
-        ifShow: ({ values }) => values.startSavePointed,
+        ifShow: ({ values }) => values.restoreSavepoint,
       },
     ],
     colon: true,
@@ -132,13 +132,13 @@
   async function handleDoSubmit() {
     try {
       const formValue = (await validate()) as Recordable;
-      const savePointed = formValue.startSavePointed;
-      const savePointPath = savePointed ? formValue['startSavePoint'] : null;
+      const restoreOrTriggerSavepoint = formValue.restoreSavepoint;
+      const savepointPath = restoreOrTriggerSavepoint ? formValue['savepointPath'] : null;
       handleReset();
       const { data } = await fetchStart({
         id: receiveData.application.id,
-        savePointed,
-        savePoint: savePointPath,
+        restoreOrTriggerSavepoint,
+        savepointPath: savepointPath,
         allowNonRestored: formValue.allowNonRestoredState || false,
       });
       if (data.data) {

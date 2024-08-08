@@ -18,9 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
-import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -40,10 +38,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -82,18 +76,14 @@ public class PassportController {
     }
 
     @PostMapping("signin")
-    public RestResponse signin(
-                               HttpServletRequest request,
-                               HttpServletResponse response,
-                               @NotBlank(message = "{required}") String username,
-                               @NotBlank(message = "{required}") String password,
-                               @NotBlank(message = "{required}") String loginType) throws Exception {
+    public RestResponse signin(User loginUser) throws Exception {
 
-        if (StringUtils.isEmpty(username)) {
+        if (StringUtils.isEmpty(loginUser.getUsername())) {
             return RestResponse.success().put("code", 0);
         }
 
-        User user = authenticator.authenticate(username, password, loginType);
+        User user =
+            authenticator.authenticate(loginUser.getUsername(), loginUser.getPassword(), loginUser.getLoginType());
 
         if (user == null) {
             return RestResponse.success().put("code", 0);
@@ -103,30 +93,17 @@ public class PassportController {
             return RestResponse.success().put("code", 1);
         }
 
-        // set team
-        userService.fillInTeam(user);
-
-        // no team.
-        if (user.getLastTeamId() == null) {
-            return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
-        }
-
-        this.userService.updateLoginTime(username);
-        String sign = JWTUtil.sign(user.getUserId(), username, user.getSalt(), AuthenticationType.SIGN);
+        this.userService.updateLoginTime(loginUser.getUsername());
+        String token = JWTUtil.sign(user, AuthenticationType.SIGN);
 
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(JWTUtil.getTTLOfSecond());
         String ttl = DateUtils.formatFullTime(expireTime);
 
-        // shiro login
-        JWTToken loginToken = new JWTToken(sign, ttl);
-        SecurityUtils.getSubject().login(loginToken);
-
         // generate UserInfo
-        String token = WebUtils.encryptToken(sign);
-        JWTToken jwtToken = new JWTToken(token, ttl);
         String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
-        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, user.getLastTeamId(), jwtToken);
+        JWTToken jwtToken = new JWTToken(token, ttl);
+        Map<String, Object> userInfo = userService.generateFrontendUserInfo(user, jwtToken);
 
         return new RestResponse().data(userInfo);
     }

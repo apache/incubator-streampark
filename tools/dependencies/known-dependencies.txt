@@ -36,7 +36,6 @@ caffeine-2.8.6.jar
 checker-qual-3.5.0.jar
 chill-java-0.9.5.jar
 chill_2.12-0.9.5.jar
-classgraph-4.8.147.jar
 commons-beanutils-1.9.3.jar
 commons-cli-1.5.0.jar
 commons-codec-1.15.jar
@@ -127,7 +126,6 @@ jackson-core-2.13.5.jar
 jackson-core-asl-1.9.13.jar
 jackson-databind-2.13.5.jar
 jackson-databind-nullable-0.2.4.jar
-jackson-dataformat-yaml-2.13.5.jar
 jackson-datatype-jdk8-2.13.5.jar
 jackson-datatype-jsr310-2.13.5.jar
 jackson-jaxrs-base-2.13.5.jar
@@ -193,9 +191,6 @@ kerby-config-1.0.1.jar
 kerby-pkix-1.0.1.jar
 kerby-util-1.0.1.jar
 kerby-xdr-1.0.1.jar
-knife4j-core-4.0.0.jar
-knife4j-openapi3-spring-boot-starter-4.0.0.jar
-knife4j-openapi3-ui-4.0.0.jar
 kotlin-stdlib-1.6.21.jar
 kotlin-stdlib-common-1.6.21.jar
 kotlin-stdlib-jdk7-1.6.21.jar
@@ -379,18 +374,11 @@ spring-tx-5.3.27.jar
 spring-web-5.3.27.jar
 spring-webmvc-5.3.27.jar
 spring-websocket-5.3.27.jar
-springdoc-openapi-common-1.6.9.jar
-springdoc-openapi-ui-1.6.9.jar
-springdoc-openapi-webmvc-core-1.6.9.jar
 stax2-api-3.1.4.jar
 stream-2.9.6.jar
 streampark-shaded-jackson-1.0.0.jar
 streampark-shaded-slf4j-1.0.0.jar
 swagger-annotations-1.6.5.jar
-swagger-annotations-2.2.2.jar
-swagger-core-2.2.0.jar
-swagger-models-2.2.2.jar
-swagger-ui-4.11.1.jar
 threeten-extra-1.5.0.jar
 tika-core-1.20.jar
 token-provider-1.0.1.jar
@@ -400,7 +388,6 @@ undertow-servlet-2.2.24.Final.jar
 undertow-websockets-jsr-2.2.24.Final.jar
 univocity-parsers-2.9.1.jar
 unused-1.0.0.jar
-webjars-locator-core-0.50.jar
 wildfly-client-config-1.0.1.Final.jar
 wildfly-common-1.5.4.Final.jar
 woodstox-core-5.0.3.jar

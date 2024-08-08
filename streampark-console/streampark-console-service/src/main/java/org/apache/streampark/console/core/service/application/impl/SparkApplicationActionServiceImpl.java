@@ -46,7 +46,6 @@ import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
@@ -54,6 +53,7 @@ import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
@@ -119,9 +119,6 @@ public class SparkApplicationActionServiceImpl
 
     @Autowired
     private SparkSqlService sparkSqlService;
-
-    @Autowired
-    private ServiceHelper serviceHelper;
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
@@ -195,11 +192,11 @@ public class SparkApplicationActionServiceImpl
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
         applicationLog.setSparkAppId(application.getAppId());
-        applicationLog.setUserId(serviceHelper.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
         application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
 
-        Long userId = serviceHelper.getUserId();
+        Long userId = ServiceHelper.getUserId();
         if (!application.getUserId().equals(userId)) {
             SparkAppHttpWatcher.addCanceledApp(application.getId(), userId);
         }
@@ -281,7 +278,7 @@ public class SparkApplicationActionServiceImpl
         applicationLog.setOptionName(SparkOperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setUserId(serviceHelper.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
 
         // set the latest to Effective, (it will only become the current effective at this time)
         // applicationManageService.toEffective(application);
@@ -423,7 +420,7 @@ public class SparkApplicationActionServiceImpl
                 SparkSql sparkSql = sparkSqlService.getEffective(application.getId(), false);
                 AssertUtils.notNull(sparkSql);
                 // 1) dist_userJar
-                String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
+                String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
                 // 2) appConfig
                 appConf = applicationConfig == null
                     ? null

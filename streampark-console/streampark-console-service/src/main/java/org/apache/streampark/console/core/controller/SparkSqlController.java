@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.service.SparkSqlService;
@@ -87,7 +87,7 @@ public class SparkSqlController {
     }
 
     @PostMapping("list")
-    @PermissionScope(app = "#flinkSql.appId", team = "#flinkSql.teamId")
+    @Permission(app = "#sparkSql.appId", team = "#sparkSql.teamId")
     public RestResponse list(SparkSql sparkSql, RestRequest request) {
         IPage<SparkSql> page = sparkSqlService.getPage(sparkSql.getAppId(), request);
         return RestResponse.success(page);
@@ -95,14 +95,14 @@ public class SparkSqlController {
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
-    @PermissionScope(app = "#flinkSql.appId", team = "#flinkSql.teamId")
+    @Permission(app = "#sparkSql.appId", team = "#sparkSql.teamId")
     public RestResponse delete(SparkSql sparkSql) {
         Boolean deleted = sparkSqlService.removeById(sparkSql.getSql());
         return RestResponse.success(deleted);
     }
 
     @PostMapping("get")
-    @PermissionScope(app = "#appId", team = "#teamId")
+    @Permission(app = "#appId", team = "#teamId")
     public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
             appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
@@ -118,7 +118,7 @@ public class SparkSqlController {
     }
 
     @PostMapping("history")
-    @PermissionScope(app = "#app.id", team = "#app.teamId")
+    @Permission(app = "#app.id", team = "#app.teamId")
     public RestResponse history(Application app) {
         List<SparkSql> sqlList = sparkSqlService.listSparkSqlHistory(app.getId());
         return RestResponse.success(sqlList);

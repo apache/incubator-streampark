@@ -21,12 +21,11 @@ import { ContentTypeEnum } from '/@/enums/httpEnum';
 import { defHttp } from '/@/utils/http/axios';
 
 enum APP_API {
-  READ_CONF = '/flink/app/readConf',
+  READ_CONF = '/flink/app/read_conf',
   UPDATE = '/flink/app/update',
   COPY = '/flink/app/copy',
   UPLOAD = '/flink/app/upload',
-  K8S_START_LOG = '/flink/app/k8sStartLog',
-  DEPLOY = '/flink/app/deploy',
+  K8S_LOG = '/flink/app/k8s_log',
   MAPPING = '/flink/app/mapping',
   YARN = '/flink/app/yarn',
   LIST = '/flink/app/list',
@@ -34,23 +33,20 @@ enum APP_API {
   DASHBOARD = '/flink/app/dashboard',
   MAIN = '/flink/app/main',
   NAME = '/flink/app/name',
-  CHECK_NAME = '/flink/app/checkName',
+  CHECK_NAME = '/flink/app/check/name',
   CANCEL = '/flink/app/cancel',
   ABORT = '/flink/app/abort',
   DELETE = '/flink/app/delete',
-  DELETE_BAK = '/flink/app/deletebak',
+  DELETE_BAK = '/flink/app/delete/backup',
   CREATE = '/flink/app/create',
-  CHECK_START = '/flink/app/check_start',
+  CHECK_START = '/flink/app/check/start',
   START = '/flink/app/start',
-  CLEAN = '/flink/app/clean',
   BACKUPS = '/flink/app/backups',
   ROLLBACK = '/flink/app/rollback',
   REVOKE = '/flink/app/revoke',
-  OPTION_LOG = '/flink/app/optionlog',
-  DELETE_OPERATION_LOG = '/flink/app/deleteOperationLog',
-  CHECK_JAR = '/flink/app/checkjar',
-  VERIFY_SCHEMA = '/flink/app/verifySchema',
-  CHECK_SAVEPOINT_PATH = '/flink/app/checkSavepointPath',
+  OPTION_LOG = '/flink/app/opt_log',
+  DELETE_LOG = '/flink/app/delete/opt_log',
+  CHECK_SAVEPOINT_PATH = '/flink/app/check/savepoint_path',
 }
 
 /**
@@ -163,7 +159,7 @@ export function fetchOptionLog(data) {
 }
 
 export function fetchDeleteOperationLog(id: string) {
-  return defHttp.post({ url: APP_API.DELETE_OPERATION_LOG, data: { id } });
+  return defHttp.post({ url: APP_API.DELETE_LOG, data: { id } });
 }
 
 /**
@@ -200,7 +196,7 @@ export function fetchMapping(data): Promise<boolean> {
  * @returns {Promise<AxiosResponse<any>>}
  */
 export function fetchK8sStartLog(data): Promise<AxiosResponse<any>> {
-  return defHttp.post({ url: APP_API.K8S_START_LOG, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: APP_API.K8S_LOG, data }, { isReturnNativeResponse: true });
 }
 /**
  * SavepointPath
@@ -209,7 +205,7 @@ export function fetchK8sStartLog(data): Promise<AxiosResponse<any>> {
  */
 export function fetchCheckSavepointPath(data: {
   id?: string;
-  savePoint?: string;
+  savepointPath?: string;
 }): Promise<AxiosResponse<Result>> {
   return defHttp.post(
     { url: APP_API.CHECK_SAVEPOINT_PATH, data },

@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.AccessToken;
@@ -44,22 +44,21 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
     @Test
     void testCrudToken() throws Exception {
         Long mockUserId = 100000L;
-        String expireTime = "9999-01-01 00:00:00";
         RestResponse restResponse = accessTokenService.create(mockUserId, "");
         Assertions.assertNotNull(restResponse);
-        Assertions.assertInstanceOf(AccessToken.class, restResponse.get(RestResponse.DATA_KEY));
+        Assertions.assertInstanceOf(AccessToken.class, restResponse.get("data"));
 
         // verify
-        AccessToken accessToken = (AccessToken) restResponse.get(RestResponse.DATA_KEY);
+        AccessToken accessToken = (AccessToken) restResponse.get("data");
         LOG.info(accessToken.getToken());
-        JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(accessToken.getToken()));
+        JWTToken jwtToken = new JWTToken(EncryptUtils.decrypt(accessToken.getToken()));
         LOG.info(jwtToken.getToken());
         String username = JWTUtil.getUserName(jwtToken.getToken());
         Assertions.assertNotNull(username);
         Assertions.assertEquals("admin", username);
         User user = userService.getByUsername(username);
         Assertions.assertNotNull(user);
-        Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getSalt()));
+        Assertions.assertTrue(JWTUtil.verify(jwtToken.getToken(), username, user.getPassword()));
 
         // list
         AccessToken mockToken1 = new AccessToken();
@@ -73,9 +72,9 @@ public class AccessTokenServiceTest extends SpringUnitTestBase {
 
         // toggle
         Long tokenId = accessToken.getId();
-        RestResponse toggleTokenResp = accessTokenService.toggleToken(tokenId);
+        RestResponse toggleTokenResp = accessTokenService.toggle(tokenId);
         Assertions.assertNotNull(toggleTokenResp);
-        Assertions.assertTrue((Boolean) toggleTokenResp.get(RestResponse.DATA_KEY));
+        Assertions.assertTrue((Boolean) toggleTokenResp.get("data"));
 
         // get
         AccessToken afterToggle = accessTokenService.getByUserId(mockUserId);

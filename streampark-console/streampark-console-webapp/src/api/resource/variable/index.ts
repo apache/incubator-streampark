@@ -26,14 +26,14 @@ import {
 
 enum VARIABLE_API {
   PAGE = '/variable/page',
-  DEPEND = '/variable/dependApps',
+  DEPEND = '/variable/depend_apps',
   UPDATE = '/variable/update',
   POST = '/variable/post',
   DELETE = '/variable/delete',
   SELECT = '/variable/select',
   CHECK_CODE = '/variable/check/code',
   LIST = '/variable/list',
-  SHOWORIGIN = '/variable/showOriginal',
+  SHOWORIGIN = '/variable/show_original',
 }
 /**
  * get variable list

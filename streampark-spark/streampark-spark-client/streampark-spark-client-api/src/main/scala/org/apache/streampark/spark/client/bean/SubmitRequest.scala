@@ -144,8 +144,7 @@ case class SubmitRequest(
       sparkHome,
       sparkLib = s"$sparkHdfsHome/jars",
       sparkPlugins = s"$sparkHdfsHome/plugins",
-      appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS)
+      appJars = workspace.APP_JARS)
   }
 
   @throws[Exception]
@@ -170,5 +169,4 @@ case class HdfsWorkspace(
     sparkHome: String,
     sparkLib: String,
     sparkPlugins: String,
-    appJars: String,
-    appPlugins: String)
+    appJars: String)

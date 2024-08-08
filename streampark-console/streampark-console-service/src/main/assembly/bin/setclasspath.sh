@@ -32,8 +32,8 @@ case "$(uname)" in
   Darwin*) darwin=true
     # Use /usr/libexec/java_home if available, otherwise fall back to /Library/Java/Home
     # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
-    if [ -z "$JAVA_HOME" ]; then
-      if [ -x "/usr/libexec/java_home" ]; then
+    if [[ -z "$JAVA_HOME" ]]; then
+      if [[ -x "/usr/libexec/java_home" ]]; then
         JAVA_HOME="$(/usr/libexec/java_home)"; export JAVA_HOME
       else
         JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
@@ -42,8 +42,8 @@ case "$(uname)" in
     ;;
 esac
 
-if [ -z "$JAVA_HOME" ] ; then
-  if [ -r /etc/gentoo-release ] ; then
+if [[ -z "$JAVA_HOME" ]]; then
+  if [[ -r /etc/gentoo-release ]]; then
     JAVA_HOME=$(java-config --jre-home)
   fi
 fi
@@ -62,12 +62,12 @@ if $mingw ; then
     JAVA_HOME="$(cd "$JAVA_HOME" || (echo "cannot cd into $JAVA_HOME."; exit 1); pwd)"
 fi
 
-if [ -z "$JAVA_HOME" ]; then
+if [[ -z "$JAVA_HOME" ]]; then
   javaExecutable="$(which javac)"
-  if [ -n "$javaExecutable" ] && ! [ "$(expr "\"$javaExecutable\"" : '\([^ ]*\)')" = "no" ]; then
+  if [[ -n "$javaExecutable" ]] && ! [[ "$(expr "\"$javaExecutable\"" : '\([^ ]*\)')" = "no" ]]; then
     # readlink(1) is not available as standard on Solaris 10.
     readLink=$(which readlink)
-    if [ ! "$(expr "$readLink" : '\([^ ]*\)')" = "no" ]; then
+    if [[ ! "$(expr "$readLink" : '\([^ ]*\)')" = "no" ]]; then
       if $darwin ; then
         javaHome="$(dirname "\"$javaExecutable\"")"
         javaExecutable="$(cd "\"$javaHome\"" && pwd -P)/javac"
@@ -82,9 +82,9 @@ if [ -z "$JAVA_HOME" ]; then
   fi
 fi
 
-if [ -z "$JAVACMD" ] ; then
-  if [ -n "$JAVA_HOME"  ] ; then
-    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+if [[ -z "$JAVACMD" ]]; then
+  if [[ -n "$JAVA_HOME"  ]]; then
+    if [[ -x "$JAVA_HOME/jre/sh/java" ]]; then
       # IBM's JDK on AIX uses strange locations for the executables
       JAVACMD="$JAVA_HOME/jre/sh/java"
     else
@@ -95,12 +95,12 @@ if [ -z "$JAVACMD" ] ; then
   fi
 fi
 
-if [ ! -x "$JAVACMD" ] ; then
+if [[ ! -x "$JAVACMD" ]]; then
   echo "Error: JAVA_HOME is not defined correctly." >&2
   echo "  We cannot execute $JAVACMD" >&2
   exit 1
 fi
 
-if [ -z "$JAVA_HOME" ] ; then
+if [[ -z "$JAVA_HOME" ]]; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi

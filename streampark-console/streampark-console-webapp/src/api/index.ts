@@ -14,12 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as process from 'node:process';
+
 export function baseUrl() {
-  if (import.meta.env.VITE_APP_ENV) {
+  if (process.env.NODE_ENV === 'production') {
     return `${location.protocol}//${location.host}`;
   }
-
-  const baseApi = import.meta.env.VITE_GLOB_API_URL;
-
-  return baseApi ? baseApi : '';
+  return '';
 }

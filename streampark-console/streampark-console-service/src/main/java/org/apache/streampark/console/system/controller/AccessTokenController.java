@@ -17,13 +17,12 @@
 
 package org.apache.streampark.console.system.controller;
 
-import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.enums.AccessTokenStateEnum;
-import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.AccessToken;
+import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.AccessTokenService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -46,32 +44,25 @@ public class AccessTokenController {
     @Autowired
     private AccessTokenService accessTokenService;
 
-    @Autowired
-    private ServiceHelper serviceHelper;
-
     @PostMapping(value = "create")
     @RequiresPermissions("token:add")
     public RestResponse createToken(
-                                    @NotBlank(message = "{required}") Long userId,
-                                    @RequestParam(required = false) String description) throws InternalException {
+                                    @NotNull(message = "{required}") Long userId,
+                                    @RequestParam(required = false) String description) throws Exception {
         return accessTokenService.create(userId, description);
     }
 
     @PostMapping(value = "check")
     public RestResponse verifyToken() {
-        Long userId = serviceHelper.getUserId();
+        Long userId = ServiceHelper.getUserId();
         RestResponse restResponse = RestResponse.success();
-        if (userId != null) {
-            AccessToken accessToken = accessTokenService.getByUserId(userId);
-            if (accessToken == null) {
-                restResponse.data(AccessTokenStateEnum.NULL.get());
-            } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getFinalStatus())) {
-                restResponse.data(AccessTokenStateEnum.INVALID.get());
-            } else {
-                restResponse.data(AccessTokenStateEnum.OK.get());
-            }
-        } else {
-            restResponse.data(AccessTokenStateEnum.INVALID.get());
+        AccessToken accessToken = accessTokenService.getByUserId(userId);
+        if (accessToken == null) {
+            restResponse.data(AccessTokenStateEnum.NULL.get());
+        } else if (AccessToken.STATUS_DISABLE.equals(accessToken.getStatus())) {
+            restResponse.data(AccessTokenStateEnum.INVALID_TOKEN.get());
+        } else if (User.STATUS_LOCK.equals(accessToken.getUserStatus())) {
+            restResponse.data(AccessTokenStateEnum.LOCKED_USER.get());
         }
         return restResponse;
     }
@@ -86,50 +77,13 @@ public class AccessTokenController {
     @PostMapping("toggle")
     @RequiresPermissions("token:add")
     public RestResponse toggleToken(@NotNull(message = "{required}") Long tokenId) {
-        return accessTokenService.toggleToken(tokenId);
+        return accessTokenService.toggle(tokenId);
     }
 
     @DeleteMapping(value = "delete")
     @RequiresPermissions("token:delete")
-    public RestResponse deleteToken(@NotBlank(message = "{required}") Long tokenId) {
+    public RestResponse deleteToken(@NotNull(message = "{required}") Long tokenId) {
         boolean res = accessTokenService.removeById(tokenId);
         return RestResponse.success(res);
-    }
-
-    /**
-     * copy cURL, hardcode now, there is no need for configuration here, because there are several
-     * fixed interfaces
-     */
-    @PostMapping(value = "curl")
-    public RestResponse copyRestApiCurl(
-                                        @NotBlank(message = "{required}") String appId,
-                                        @NotBlank(message = "{required}") String baseUrl,
-                                        @NotBlank(message = "{required}") String path) {
-        String resultCURL = null;
-        CURLBuilder curlBuilder = new CURLBuilder(baseUrl + path);
-
-        curlBuilder
-            .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-            .addHeader(
-                "Authorization",
-                accessTokenService.getByUserId(serviceHelper.getUserId()).getToken());
-
-        if ("/flink/app/start".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("allowNonRestored", "false")
-                .addFormData("savePoint", "")
-                .addFormData("savePointed", "false")
-                .addFormData("id", appId)
-                .build();
-        } else if ("/flink/app/cancel".equalsIgnoreCase(path)) {
-            resultCURL = curlBuilder
-                .addFormData("id", appId)
-                .addFormData("savePointed", "false")
-                .addFormData("drain", "false")
-                .addFormData("nativeFormat", "false")
-                .addFormData("savePoint", "")
-                .build();
-        }
-        return RestResponse.success(resultCURL);
     }
 }

@@ -18,19 +18,16 @@
 package org.apache.streampark.console.core.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 
-@Schema(name = "AlertWeCom")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertWeComParams implements Serializable {
 
-    @Schema(name = "token", description = "we-com token")
     @NotBlank(message = "The access token of WeCom must be not empty")
     private String token;
 }

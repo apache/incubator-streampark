@@ -40,7 +40,6 @@ import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
@@ -49,6 +48,7 @@ import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
 import org.apache.commons.lang3.StringUtils;
@@ -111,9 +111,6 @@ public class SparkApplicationManageServiceImpl
 
     @Autowired
     private SettingService settingService;
-
-    @Autowired
-    private ServiceHelper serviceHelper;
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
@@ -180,7 +177,7 @@ public class SparkApplicationManageServiceImpl
         // backUpService.remove(application);
 
         // 6) remove savepoint
-        // savePointService.remove(application);
+        // savepointService.remove(application);
 
         // 7) remove BuildPipeline
         appBuildPipeService.removeByAppId(application.getId());
@@ -258,7 +255,8 @@ public class SparkApplicationManageServiceImpl
     public boolean create(SparkApplication appParam) {
         ApiAlertException.throwIfNull(
             appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-        appParam.setUserId(serviceHelper.getUserId());
+
+        appParam.setUserId(ServiceHelper.getUserId());
         appParam.setState(SparkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -327,7 +325,6 @@ public class SparkApplicationManageServiceImpl
         newApp.setJar(oldApp.getJar());
         newApp.setJarCheckSum(oldApp.getJarCheckSum());
         newApp.setAppProperties(oldApp.getAppProperties());
-        // TODO：这里需要判断吗
         newApp.setAppArgs(appParam.getAppArgs() != null ? appParam.getAppArgs() : oldApp.getAppArgs());
         newApp.setYarnQueue(oldApp.getYarnQueue());
         newApp.resolveYarnQueue();
@@ -342,7 +339,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setState(SparkAppStateEnum.ADDED.getValue());
         newApp.setOptions(oldApp.getOptions());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());
-        newApp.setUserId(serviceHelper.getUserId());
+        newApp.setUserId(ServiceHelper.getUserId());
         newApp.setDescription(oldApp.getDescription());
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setAlertId(oldApp.getAlertId());

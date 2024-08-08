@@ -39,7 +39,6 @@ if [[ ${have_tty} -eq 1 ]]; then
   GREEN=$(printf '\033[32m')
   YELLOW=$(printf '\033[33m')
   BLUE=$(printf '\033[34m')
-  BOLD=$(printf '\033[1m')
   RESET=$(printf '\033[0m')
 else
   PRIMARY=""
@@ -47,7 +46,6 @@ else
   GREEN=""
   YELLOW=""
   BLUE=""
-  BOLD=""
   RESET=""
 fi
 
@@ -82,8 +80,8 @@ case "$(uname)" in
   Darwin*) darwin=true
     # Use /usr/libexec/java_home if available, otherwise fall back to /Library/Java/Home
     # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
-    if [ -z "$JAVA_HOME" ]; then
-      if [ -x "/usr/libexec/java_home" ]; then
+    if [[ -z "$JAVA_HOME" ]]; then
+      if [[ -x "/usr/libexec/java_home" ]]; then
         JAVA_HOME="$(/usr/libexec/java_home)"; export JAVA_HOME
       else
         JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
@@ -92,32 +90,32 @@ case "$(uname)" in
     ;;
 esac
 
-if [ -z "$JAVA_HOME" ] ; then
-  if [ -r /etc/gentoo-release ] ; then
+if [[ -z "$JAVA_HOME" ]]; then
+  if [[ -r /etc/gentoo-release ]]; then
     JAVA_HOME=$(java-config --jre-home)
   fi
 fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
-  [ -n "$JAVA_HOME" ] &&
+  [[ -n "$JAVA_HOME" ]] &&
     JAVA_HOME=$(cygpath --unix "$JAVA_HOME")
-  [ -n "$CLASSPATH" ] &&
+  [[ -n "$CLASSPATH" ]] &&
     CLASSPATH=$(cygpath --path --unix "$CLASSPATH")
 fi
 
 # For Mingw, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
-  [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] &&
+  [[ -n "$JAVA_HOME" ]] && [[ -d "$JAVA_HOME" ]] &&
     JAVA_HOME="$(cd "$JAVA_HOME" || (echo "cannot cd into $JAVA_HOME."; exit 1); pwd)"
 fi
 
-if [ -z "$JAVA_HOME" ]; then
+if [[ -z "$JAVA_HOME" ]]; then
   javaExecutable="$(which javac)"
-  if [ -n "$javaExecutable" ] && ! [ "$(expr "\"$javaExecutable\"" : '\([^ ]*\)')" = "no" ]; then
+  if [[ -n "$javaExecutable" ]] && ! [[ "$(expr "\"$javaExecutable\"" : '\([^ ]*\)')" = "no" ]]; then
     # readlink(1) is not available as standard on Solaris 10.
     readLink=$(which readlink)
-    if [ ! "$(expr "$readLink" : '\([^ ]*\)')" = "no" ]; then
+    if [[ ! "$(expr "$readLink" : '\([^ ]*\)')" = "no" ]]; then
       if $darwin ; then
         javaHome="$(dirname "\"$javaExecutable\"")"
         javaExecutable="$(cd "\"$javaHome\"" && pwd -P)/javac"
@@ -132,7 +130,7 @@ if [ -z "$JAVA_HOME" ]; then
   fi
 fi
 
-if [ -z "$JAVA_HOME" ] ; then
+if [[ -z "$JAVA_HOME" ]]; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi
 
@@ -172,10 +170,10 @@ print_logo() {
 }
 
 build() {
-  if [ -x "$PRG_DIR/mvnw" ]; then
+  if [[ -x "$PRG_DIR/mvnw" ]]; then
     echo_g "Apache StreamPark, building..."
     "$PRG_DIR/mvnw" -Pshaded,webapp,dist -DskipTests clean install
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
       printf '\n'
       echo_g """StreamPark project build successful!
       dist: $(cd "$PRG_DIR" &>/dev/null && pwd)/dist\n"""

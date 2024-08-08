@@ -46,7 +46,6 @@ import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
@@ -54,6 +53,7 @@ import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
@@ -109,9 +109,6 @@ public class SparkAppBuildPipeServiceImpl
     private SparkSqlService sparkSqlService;
 
     @Autowired
-    private ServiceHelper serviceHelper;
-
-    @Autowired
     private MessageService messageService;
 
     @Autowired
@@ -153,7 +150,7 @@ public class SparkAppBuildPipeServiceImpl
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setUserId(serviceHelper.getUserId());
+        applicationLog.setUserId(ServiceHelper.getUserId());
 
         // check if you need to go through the build process (if the jar and pom have changed,
         // you need to go through the build process, if other common parameters are modified,
@@ -308,7 +305,7 @@ public class SparkAppBuildPipeServiceImpl
 
                     } else {
                         Message message = new Message(
-                            serviceHelper.getUserId(),
+                            ServiceHelper.getUserId(),
                             app.getId(),
                             app.getAppName().concat(" release failed"),
                             ExceptionUtils.stringifyException(snapshot.error().exception()),
@@ -417,8 +414,10 @@ public class SparkAppBuildPipeServiceImpl
                 }
             case PYSPARK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
+
             case SPARK_SQL:
-                String sqlDistJar = serviceHelper.getSparkSqlClientJar(sparkEnv);
+                String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
+
                 if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
