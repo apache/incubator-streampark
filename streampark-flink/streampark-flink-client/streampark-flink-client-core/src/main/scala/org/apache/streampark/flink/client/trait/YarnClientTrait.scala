@@ -125,8 +125,10 @@ trait YarnClientTrait extends FlinkClientTrait {
   /**
    * Retrieves the YarnClusterDescriptor and the application ID.
    *
-   * @param flinkConfig the Flink configuration
-   * @return a tuple containing the application ID and the YarnClusterDescriptor
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the application ID and the YarnClusterDescriptor
    */
   private[client] def getYarnClusterDescriptor(
       flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
@@ -159,8 +161,10 @@ trait YarnClientTrait extends FlinkClientTrait {
   /**
    * Retrieves the ClusterSpecification and the YarnClusterDescriptor for deployment.
    *
-   * @param flinkConfig the Flink configuration
-   * @return a tuple containing the ClusterSpecification and the YarnClusterDescriptor
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the ClusterSpecification and the YarnClusterDescriptor
    */
   private[client] def getYarnClusterDeployDescriptor(
       flinkConfig: Configuration): (ClusterSpecification, YarnClusterDescriptor) = {
