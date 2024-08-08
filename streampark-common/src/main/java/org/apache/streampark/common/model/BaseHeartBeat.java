@@ -33,11 +33,6 @@ public class BaseHeartBeat implements HeartBeat {
     protected int processId;
     protected long startupTime;
     protected long reportTime;
-    // protected double jvmCpuUsage;
-    // protected double cpuUsage;
-    // protected double jvmMemoryUsage;
-    // protected double memoryUsage;
-    // protected double diskUsage;
     protected ServerStatus serverStatus;
 
     protected String host;
