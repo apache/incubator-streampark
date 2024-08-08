@@ -40,7 +40,9 @@ import java.util.stream.Collectors;
 import static org.apache.streampark.console.base.enums.CommonStatus.APPLICATION;
 import static org.apache.streampark.console.base.enums.CommonStatus.FLINK_CLUSTERS;
 import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_ID_NULL;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_EXIST;
 import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_FORMAT;
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_NULL;
 import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NOT_EXIST;
 import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_NULL;
 import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_USED_FORMAT;
@@ -120,11 +122,13 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         YarnQueue yarnQueue = mockYarnQueue(1L, "queue@");
         ResponseResult<String> result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(2);
+        assertThat(result.getMsg()).isEqualTo(YARN_QUEUE_LABEL_FORMAT.getMessage());
 
         // Test for error format with empty.
         yarnQueue.setQueueLabel("");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(3);
+        assertThat(result.getMsg()).isEqualTo(YARN_QUEUE_LABEL_NULL.getMessage());
 
         // Test for existed
         yarnQueue.setQueueLabel("queue1@label1");
@@ -145,6 +149,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         yarnQueue.setQueueLabel("queue1@label1");
         result = yarnQueueService.checkYarnQueue(yarnQueue);
         assertThat(result.getStatus()).isEqualTo(1);
+        assertThat(result.getMsg()).isEqualTo(YARN_QUEUE_LABEL_EXIST.getMessage());
 
         // Test for normal cases.
         yarnQueue.setQueueLabel("q1");
