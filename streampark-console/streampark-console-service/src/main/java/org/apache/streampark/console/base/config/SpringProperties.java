@@ -89,7 +89,6 @@ public class SpringProperties {
                 String userName = userConfig.getProperty("datasource.username", "admin");
                 String password = userConfig.getProperty("datasource.password", "streampark");
 
-                // springConfig.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
                 springConfig.put("spring.datasource.driver-class-name", "org.h2.Driver");
                 springConfig.put("spring.datasource.username", userName);
                 springConfig.put("spring.datasource.password", password);
