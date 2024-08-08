@@ -1,7 +1,7 @@
 # Introduction
 
 This module is the jdbc registry plugin module, this plugin will use jdbc as the registry center. Will use the database
-configuration same as streampark in api'yaml default.
+configuration same as streampark in config.yaml default.
 
 # How to use
 
@@ -25,9 +25,6 @@ store server metadata.
 
 NOTE: You need to add `mysql-connector-java.jar` into DS classpath if you use mysql database, since this plugin will not
 bundle this driver in distribution.
-You can get the detail
-about <a href="https://streampark.apache.org/en-us/docs/3.1.2/guide/installation/pseudo-cluster">Initialize the
-Database</a>.
 
 ## Optional configuration
 
@@ -50,9 +47,9 @@ registry:
 
 ## Use different database configuration for jdbc registry center
 
-You need to set the registry properties in master/worker/api's application.yml
+You need to set the registry properties in console config.yaml
 
-### Use Mysql as registry center
+### Use MySql as registry center
 
 ```yaml
 registry:
@@ -68,7 +65,7 @@ registry:
     idle-timeout: 600000
 ```
 
-### Use Postgresql as registry center
+### Use PostgreSQL as registry center
 
 ```yaml
 registry:

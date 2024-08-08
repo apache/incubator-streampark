@@ -11,7 +11,7 @@ delete the server's metadata when server down.
 
 ## How to use
 
-At present, we have implements three registry: Zookeeper(Default),Etcd,Mysql. If you
+At present, we have implements three registry: JDBC(Default, Support MySql and PostgreSQL),Zookeeper. If you
 want to use them, you should config it at resource/application.yaml. The configuration details
 can be viewed in the README of plugin under Module streampark-registry-plugins
 
