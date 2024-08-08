@@ -88,7 +88,7 @@ public class ExternalLinkTest {
                     .as("Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
-                        String.format("The name: %s is already existing.", newName))));
+                        String.format("badge name:%s is already existing.", newName))));
 
         externalLinkPage.errorMessageConfirmButton().click();
         externalLinkPage.createExternalLinkForm().buttonCancel().click();
