@@ -17,12 +17,24 @@
 
 package org.apache.streampark.console;
 
+import org.apache.streampark.common.CommonConfiguration;
+import org.apache.streampark.common.IStoppable;
+import org.apache.streampark.common.constants.Constants;
+import org.apache.streampark.common.lifecycle.ServerLifeCycleManager;
+import org.apache.streampark.common.thread.ThreadUtils;
 import org.apache.streampark.console.base.config.SpringProperties;
+import org.apache.streampark.console.base.util.SpringContextUtils;
+import org.apache.streampark.console.core.registry.ConsoleRegistryClient;
+import org.apache.streampark.registry.api.RegistryConfiguration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -46,12 +58,66 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
-public class StreamParkConsoleBootstrap {
+@Import({CommonConfiguration.class,
+        RegistryConfiguration.class})
+public class StreamParkConsoleBootstrap implements IStoppable {
+
+    @Autowired
+    private ConsoleRegistryClient consoleRegistryClient;
+
+    @Autowired
+    private SpringContextUtils springContextUtils;
 
     public static void main(String[] args) throws Exception {
         new SpringApplicationBuilder()
             .properties(SpringProperties.get())
             .sources(StreamParkConsoleBootstrap.class)
             .run(args);
+    }
+
+    @PostConstruct
+    public void run() {
+        consoleRegistryClient.start();
+        consoleRegistryClient.setRegistryStoppable(this);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!ServerLifeCycleManager.isStopped()) {
+                close("ConsoleServer shutdownHook");
+            }
+        }));
+    }
+
+    /**
+     * gracefully close console server
+     *
+     * @param cause close cause
+     */
+    public void close(String cause) {
+        // set stop signal is true
+        // execute only once
+        if (!ServerLifeCycleManager.toStopped()) {
+            log.warn("MasterServer is already stopped, current cause: {}", cause);
+            return;
+        }
+        // thread sleep 3 seconds for thread quietly stop
+        ThreadUtils.sleep(Constants.SERVER_CLOSE_WAIT_TIME.toMillis());
+        try (ConsoleRegistryClient closedMasterRegistryClient = consoleRegistryClient) {
+            // todo: close other resources
+            springContextUtils.close();
+            log.info("Master server is stopping, current cause : {}", cause);
+        } catch (Exception e) {
+            log.error("MasterServer stop failed, current cause: {}", cause, e);
+            return;
+        }
+        log.info("MasterServer stopped, current cause: {}", cause);
+    }
+
+    @Override
+    public void stop(String cause) {
+        close(cause);
+
+        // make sure exit after server closed, don't call System.exit in close logic, will cause deadlock if close
+        // multiple times at the same time
+        System.exit(1);
     }
 }

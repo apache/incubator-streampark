@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
@@ -372,7 +372,7 @@ public class SparkAppBuildPipeServiceImpl
         }
 
         SparkExecutionMode executionModeEnum = app.getSparkExecutionMode();
-        String mainClass = Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS;
+        String mainClass = Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS;
         switch (executionModeEnum) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
@@ -404,7 +404,7 @@ public class SparkAppBuildPipeServiceImpl
                 switch (app.getApplicationType()) {
                     case STREAMPARK_SPARK:
                         return String.format(
-                            "%s/%s", app.getAppLib(), app.getModule().concat(Constant.JAR_SUFFIX));
+                            "%s/%s", app.getAppLib(), app.getModule().concat(Constants.JAR_SUFFIX));
                     case APACHE_SPARK:
                         return String.format("%s/%s", app.getAppHome(), app.getJar());
                     default:

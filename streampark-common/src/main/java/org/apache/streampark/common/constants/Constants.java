@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common;
+package org.apache.streampark.common.constants;
+
+import java.time.Duration;
 
 /** A constant class to hold the constants variables. */
-public final class Constant {
+public final class Constants {
 
-    private Constant() {
+    private Constants() {
     }
 
     public static final String DEFAULT = "default";
@@ -50,4 +52,15 @@ public final class Constant {
     public static final String STREAMPARK_SPARKSQL_CLIENT_CLASS = "org.apache.streampark.spark.cli.SqlClient";
 
     public static final String PYTHON_EXECUTABLE = "venv.zip/venv/bin/python3";
+
+    public static final String SINGLE_SLASH = "/";
+
+    public static final String LOCAL_HOST = "localhost";
+
+    /**
+     * sleep 1000ms
+     */
+    public static final long SLEEP_TIME_MILLIS = 1_000L;
+
+    public static final Duration SERVER_CLOSE_WAIT_TIME = Duration.ofSeconds(3);
 }

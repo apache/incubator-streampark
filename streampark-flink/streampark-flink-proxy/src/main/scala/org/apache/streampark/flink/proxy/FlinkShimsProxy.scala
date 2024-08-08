@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.proxy
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{ConfigKeys, FlinkVersion}
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.util.{ChildFirstClassLoader, ClassLoaderObjectInputStream, ClassLoaderUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
 
@@ -138,7 +138,7 @@ object FlinkShimsProxy extends Logger {
       .listFiles()
       .foreach((jar: File) => {
         val jarName = jar.getName
-        if (jarName.endsWith(Constant.JAR_SUFFIX)) {
+        if (jarName.endsWith(Constants.JAR_SUFFIX)) {
           if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
             val prefixVer =
               s"$FLINK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"

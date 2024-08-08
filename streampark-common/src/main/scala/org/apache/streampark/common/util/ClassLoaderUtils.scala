@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.Constant
+import org.apache.streampark.common.constants.Constants
 
 import java.io.{File, IOException}
 import java.net.{URL, URLClassLoader}
@@ -112,7 +112,7 @@ object ClassLoaderUtils extends Logger {
 
   private[this] def loadPath(
       filepath: String,
-      ext: List[String] = List(Constant.JAR_SUFFIX, Constant.ZIP_SUFFIX)): Unit = {
+      ext: List[String] = List(Constants.JAR_SUFFIX, Constants.ZIP_SUFFIX)): Unit = {
     val file = new File(filepath)
     loopFiles(file, ext)
   }
