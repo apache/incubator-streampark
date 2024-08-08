@@ -286,7 +286,7 @@ public class SparkAppBuildPipeServiceImpl
                             // If the current task is not running, or the task has just been added, directly
                             // set
                             // the candidate version to the official version
-                            if (app.isCustomCodeOrPySparkJob()) {
+                            if (app.isCustomCodeOrSparkSqlJob()) {
                                 applicationManageService.toEffective(app);
                             } else {
                                 if (app.isStreamParkJob()) {

@@ -210,14 +210,16 @@ public class SparkAppHttpWatcher {
                     application.setEndTime(new Date());
                 }
                 if (SparkAppStateEnum.RUNNING == sparkAppStateEnum) {
-                    SparkApplicationSummary summary = httpStageAndTaskStatus(application);
-                    summary.setUsedMemory(Long.parseLong(yarnAppInfo.getApp().getAllocatedMB()));
-                    summary.setUsedVCores(Long.parseLong(yarnAppInfo.getApp().getAllocatedVCores()));
-                    log.info(
-                        "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, app {} was running, appId is {}, metric: {}",
-                        application.getId(),
-                        application.getAppId(),
-                        summary);
+                    SparkApplicationSummary summary;
+                    try {
+                        summary = httpStageAndTaskStatus(application);
+                        summary.setUsedMemory(Long.parseLong(yarnAppInfo.getApp().getAllocatedMB()));
+                        summary.setUsedVCores(Long.parseLong(yarnAppInfo.getApp().getAllocatedVCores()));
+                        application.fillRunningMetrics(summary);
+                    } catch (IOException e){
+                        // This may happen when the job is finished right after the job status is abtained from yarn.
+                        log.warn("[StreamPark][SparkAppHttpWatcher] getStateFromYarn, fetch spark job status failed. The job may have already been finished.");
+                    }
                 }
                 application.setState(sparkAppStateEnum.getValue());
                 cleanOptioning(optionStateEnum, application.getId());
@@ -300,7 +302,7 @@ public class SparkAppHttpWatcher {
         return yarnRestRequest(reqURL, YarnAppInfo.class);
     }
 
-    private Job[] httpJobsStatus(SparkApplication application) throws Exception {
+    private Job[] httpJobsStatus(SparkApplication application) throws IOException {
         String format = "proxy/%s/api/v1/applications/%s/jobs";
         String reqURL = String.format(format, application.getAppId(), application.getAppId());
         return yarnRestRequest(reqURL, Job[].class);
@@ -314,7 +316,7 @@ public class SparkAppHttpWatcher {
      * @return task progress
      * @throws Exception
      */
-    private SparkApplicationSummary httpStageAndTaskStatus(SparkApplication application) throws Exception {
+    private SparkApplicationSummary httpStageAndTaskStatus(SparkApplication application) throws IOException {
         Job[] jobs = httpJobsStatus(application);
         SparkApplicationSummary summary = new SparkApplicationSummary(0L, 0L, 0L, 0L, null, null);
         if (jobs == null) {

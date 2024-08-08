@@ -371,6 +371,11 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
+    public boolean isCustomCodeOrSparkSqlJob() {
+        return isSparkSqlJob() || isCustomCodeJob();
+    }
+
+    @JsonIgnore
     public boolean isCustomCodeOrPySparkJob() {
         return SparkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
             || SparkDevelopmentMode.PYSPARK.getMode().equals(this.getJobType());
@@ -449,10 +454,7 @@ public class SparkApplication extends BaseEntity {
         return Workspace.of(getStorageType());
     }
 
-    private boolean needFillYarnQueueLabel(SparkExecutionMode mode) {
-        return SparkExecutionMode.YARN_CLUSTER == mode || SparkExecutionMode.YARN_CLIENT == mode;
-    }
-    private void fillRunningMetrics(SparkApplicationSummary summary) {
+    public void fillRunningMetrics(SparkApplicationSummary summary) {
         this.setNumTasks(summary.getNumTasks());
         this.setNumCompletedTasks(summary.getNumCompletedTasks());
         this.setNumStages(summary.getNumStages());

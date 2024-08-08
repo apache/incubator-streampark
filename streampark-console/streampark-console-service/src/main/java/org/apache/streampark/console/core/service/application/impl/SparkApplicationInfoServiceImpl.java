@@ -79,7 +79,7 @@ public class SparkApplicationInfoServiceImpl
 
     private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
-    private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
+    private static final int DEFAULT_HISTORY_CONTAINER_IMAGE_RECORD_LIMIT = 5;
 
     private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
@@ -95,7 +95,6 @@ public class SparkApplicationInfoServiceImpl
     public Map<String, Serializable> getDashboardDataMap(Long teamId) {
 
         // result json
-        Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
         Long totalNumTasks = 0L;
         Long totalNumCompletedTasks = 0L;
         Long totalNumStages = 0L;
@@ -215,23 +214,8 @@ public class SparkApplicationInfoServiceImpl
     }
 
     @Override
-    public List<String> listRecentK8sClusterId(Integer executionMode) {
-        return baseMapper.selectRecentK8sClusterIds(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sPodTemplate() {
-        return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sJmPodTemplate() {
-        return baseMapper.selectRecentK8sJmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sTmPodTemplate() {
-        return baseMapper.selectRecentK8sTmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    public List<String> listRecentK8sContainerImage() {
+        return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_CONTAINER_IMAGE_RECORD_LIMIT);
     }
 
     @Override

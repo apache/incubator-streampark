@@ -127,34 +127,11 @@ public interface SparkApplicationInfoService extends IService<SparkApplication> 
     List<String> listRecentK8sNamespace();
 
     /**
-     * Retrieves the list of recent K8s cluster IDs based on the specified execution mode.
+     * Retrieves the recent K8s container images
      *
-     * @param executionMode The execution mode to filter the recent K8s cluster IDs. 1: Production
-     *     mode 2: Test mode 3: Development mode -1: All modes
-     * @return The list of recent K8s cluster IDs based on the specified execution mode.
+     * @return a List of Strings representing the recent K8s container images.
      */
-    List<String> listRecentK8sClusterId(Integer executionMode);
-
-    /**
-     * Retrieves the recent K8s pod templates.
-     *
-     * @return a List of Strings representing the recent K8s pod templates.
-     */
-    List<String> listRecentK8sPodTemplate();
-
-    /**
-     * Retrieves the list of recent Kubernetes Job Manager Pod templates.
-     *
-     * @return A List of string values representing the recent Kubernetes Job Manager Pod templates.
-     */
-    List<String> listRecentK8sJmPodTemplate();
-
-    /**
-     * Retrieves the list of recent K8s TM pod templates.
-     *
-     * @return The list of recent K8s TM pod templates as a List of String objects.
-     */
-    List<String> listRecentK8sTmPodTemplate();
+    List<String> listRecentK8sContainerImage();
 
     /**
      * Uploads a list of jars to the server for historical reference.

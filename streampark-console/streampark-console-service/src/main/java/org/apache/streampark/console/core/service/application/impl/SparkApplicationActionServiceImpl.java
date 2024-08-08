@@ -44,8 +44,8 @@ import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkOperationEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEnvService;
@@ -121,7 +121,7 @@ public class SparkApplicationActionServiceImpl
     private SparkSqlService sparkSqlService;
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private SparkAppBuildPipeService appBuildPipeService;
 
     @Autowired
     private VariableService variableService;
