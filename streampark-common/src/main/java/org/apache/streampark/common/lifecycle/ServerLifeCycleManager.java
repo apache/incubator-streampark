@@ -23,11 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @UtilityClass
-@Getter
 public class ServerLifeCycleManager {
 
+    @Getter
     private static volatile ServerStatus serverStatus = ServerStatus.RUNNING;
 
+    @Getter
     private static long serverStartupTime = System.currentTimeMillis();
 
     public static boolean isRunning() {
