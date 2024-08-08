@@ -53,7 +53,7 @@ trait YarnClientTrait extends FlinkClientTrait {
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
     val jobID = getJobID(request.jobId)
     flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
-    // 使用 getYarnClusterDescriptor 来获取 ClusterClient
+    // Get the ClusterClient from the YarnClusterDescriptor
     val (applicationId, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDescriptor(
       flinkConf)
     val clusterClient = clusterDescriptor.retrieve(applicationId).getClusterClient
@@ -122,20 +122,26 @@ trait YarnClientTrait extends FlinkClientTrait {
       .asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
+  /**
+   * Retrieves the YarnClusterDescriptor and the application ID.
+   *
+   * @param flinkConfig the Flink configuration
+   * @return a tuple containing the application ID and the YarnClusterDescriptor
+   */
   private[client] def getYarnClusterDescriptor(
       flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
-    // 设置 Kerberos 认证
+    // Set up Kerberos authentication
     val ugi = HadoopUtils.getUgi()
 
-    // 使用 ugi.doAs() 包装整个操作
+    // Wrap the operation in ugi.doAs()
     val result = Try {
       ugi.doAs(new PrivilegedAction[(ApplicationId, YarnClusterDescriptor)] {
         override def run(): (ApplicationId, YarnClusterDescriptor) = {
           val clientFactory = new YarnClusterClientFactory
-          // 获取集群 ID
+          // Get the cluster ID
           val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
           require(yarnClusterId != null)
-          // 创建 ClusterDescriptor
+          // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
 
           (yarnClusterId, clusterDescriptor)
@@ -150,19 +156,25 @@ trait YarnClientTrait extends FlinkClientTrait {
     result
   }
 
+  /**
+   * Retrieves the ClusterSpecification and the YarnClusterDescriptor for deployment.
+   *
+   * @param flinkConfig the Flink configuration
+   * @return a tuple containing the ClusterSpecification and the YarnClusterDescriptor
+   */
   private[client] def getYarnClusterDeployDescriptor(
       flinkConfig: Configuration): (ClusterSpecification, YarnClusterDescriptor) = {
-    // 设置 Kerberos 认证
+    // Set up Kerberos authentication
     val ugi = HadoopUtils.getUgi()
 
-    // 使用 ugi.doAs() 包装整个操作
+    // Wrap the operation in ugi.doAs()
     val result = Try {
       ugi.doAs(new PrivilegedAction[(ClusterSpecification, YarnClusterDescriptor)] {
         override def run(): (ClusterSpecification, YarnClusterDescriptor) = {
           val clientFactory = new YarnClusterClientFactory
-          // 获取 ClusterSpecification
+          // Get the ClusterSpecification
           val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-          // 创建 ClusterDescriptor
+          // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
 
           (clusterSpecification, clusterDescriptor)
