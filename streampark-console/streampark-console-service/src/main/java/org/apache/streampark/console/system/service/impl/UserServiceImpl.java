@@ -130,7 +130,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // set team member
         Member member = new Member();
         member.setUserName(user.getUsername());
-        member.setTeamId(user.getLastTeamId());
+        member.setTeamId(teamService.getSysDefaultTeam().getId());
         Role role = roleService.getSysDefaultRole();
         member.setRoleId(role.getRoleId());
         member.setRoleName(role.getRoleName());
