@@ -94,7 +94,7 @@ trait SparkClientTrait extends Logger {
     submitRequest.appProperties.clear()
     // 2) put default configuration
     submitRequest.appProperties.putAll(defaultConfig)
-    // 3) put configuration from .yaml
+    // 3) put configuration from template (spark-application.conf)
     submitRequest.appProperties.putAll(submitRequest.sparkParameterMap)
     // 4) put configuration from appProperties
     submitRequest.appProperties.putAll(userConfig)

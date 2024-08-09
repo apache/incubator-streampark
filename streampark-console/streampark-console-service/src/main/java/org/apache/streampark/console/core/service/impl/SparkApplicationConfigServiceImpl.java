@@ -71,24 +71,24 @@ public class SparkApplicationConfigServiceImpl
         String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
         String config = DeflaterUtils.zipString(decode.trim());
 
-        SparkApplicationConfig applicationConfig = new SparkApplicationConfig();
-        applicationConfig.setAppId(appParam.getId());
+        SparkApplicationConfig sparkApplicationConfig = new SparkApplicationConfig();
+        sparkApplicationConfig.setAppId(appParam.getId());
 
         if (appParam.getFormat() != null) {
             ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(appParam.getFormat());
             ApiAlertException.throwIfTrue(
                 fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
-                "application' config error. must be (.properties|.yaml|.yml |.conf)");
+                "spark application config error. must be (.properties|.yaml|.yml|.conf)");
 
-            applicationConfig.setFormat(fileType.getValue());
+            sparkApplicationConfig.setFormat(fileType.getValue());
         }
 
-        applicationConfig.setContent(config);
-        applicationConfig.setCreateTime(new Date());
+        sparkApplicationConfig.setContent(config);
+        sparkApplicationConfig.setCreateTime(new Date());
         Integer version = this.baseMapper.selectLastVersion(appParam.getId());
-        applicationConfig.setVersion(version == null ? 1 : version + 1);
-        save(applicationConfig);
-        this.setLatestOrEffective(latest, applicationConfig.getId(), appParam.getId());
+        sparkApplicationConfig.setVersion(version == null ? 1 : version + 1);
+        save(sparkApplicationConfig);
+        this.setLatestOrEffective(latest, sparkApplicationConfig.getId(), appParam.getId());
     }
 
     public void setLatest(Long appId, Long configId) {
@@ -148,14 +148,14 @@ public class SparkApplicationConfigServiceImpl
 
     private void updateForSparkSqlJob(
                                       SparkApplication appParam, Boolean latest, SparkApplicationConfig latestConfig) {
-        // get effect config
+        // get effective config
         SparkApplicationConfig effectiveConfig = getEffective(appParam.getId());
         if (Utils.isEmpty(appParam.getConfig())) {
             if (effectiveConfig != null) {
                 effectiveService.remove(appParam.getId(), EffectiveTypeEnum.SPARKCONFIG);
             }
         } else {
-            // there was no configuration before, is a new configuration
+            // there was no configuration before, create a new configuration
             if (effectiveConfig == null) {
                 if (latestConfig != null) {
                     removeById(latestConfig.getId());
@@ -175,7 +175,7 @@ public class SparkApplicationConfigServiceImpl
         }
     }
 
-    /** Not running tasks are set to Effective, running tasks are set to Latest */
+    /** Set not running tasks to effective and running tasks to Latest */
     @Override
     public void setLatestOrEffective(Boolean latest, Long configId, Long appId) {
         if (latest) {

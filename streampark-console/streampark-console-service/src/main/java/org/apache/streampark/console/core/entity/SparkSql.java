@@ -64,14 +64,6 @@ public class SparkSql {
     public SparkSql() {
     }
 
-    public SparkSql(Application application) {
-        this.appId = application.getId();
-        this.sql = application.getFlinkSql();
-        this.teamResource = application.getTeamResource();
-        this.dependency = application.getDependency();
-        this.createTime = new Date();
-    }
-
     public SparkSql(SparkApplication application) {
         this.appId = application.getId();
         this.sql = application.getSparkSql();
@@ -82,14 +74,6 @@ public class SparkSql {
 
     public void decode() {
         this.setSql(DeflaterUtils.unzipString(this.sql));
-    }
-
-    public void setToApplication(Application application) {
-        String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
-        application.setFlinkSql(encode);
-        application.setDependency(this.dependency);
-        application.setTeamResource(this.teamResource);
-        application.setSqlId(this.id);
     }
 
     public void setToApplication(SparkApplication application) {
