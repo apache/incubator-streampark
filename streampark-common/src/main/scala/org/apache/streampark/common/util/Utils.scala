@@ -125,7 +125,12 @@ object Utils extends Logger {
     try {
       func(handle)
     } catch {
-      case e: Throwable if excFunc != null => excFunc(e)
+      case e: Throwable =>
+        if (excFunc != null) {
+          excFunc(e)
+        } else {
+          throw e
+        }
     } finally {
       if (handle != null) {
         handle.close()
