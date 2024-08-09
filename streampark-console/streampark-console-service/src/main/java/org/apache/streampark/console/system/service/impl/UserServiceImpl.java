@@ -23,10 +23,13 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ShaHashUtils;
 import org.apache.streampark.console.system.authentication.JWTToken;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -62,6 +65,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   @Autowired private MenuService menuService;
 
   @Autowired private TeamService teamService;
+
+  @Autowired private RoleService roleService;
 
   @Override
   public User findByName(String username) {
@@ -104,6 +109,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     user.setLastTeamId(teamService.getSysDefaultTeam().getId());
     user.setPassword(password);
     save(user);
+    // set team member
+    Member member = new Member();
+    member.setUserName(user.getUsername());
+    member.setTeamId(user.getLastTeamId());
+    Role role = roleService.getSysDefaultRole();
+    member.setRoleId(role.getRoleId());
+    member.setRoleName(role.getRoleName());
+    memberService.createMember(member);
   }
 
   @Override
