@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
+import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
@@ -32,8 +33,9 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.lang.{Boolean => JavaBool}
 import java.lang.reflect.Method
+import java.security.PrivilegedAction
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
@@ -50,17 +52,12 @@ trait YarnClientTrait extends FlinkClientTrait {
       flinkConf: Configuration,
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
     val jobID = getJobID(request.jobId)
-    val clusterClient = {
-      flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
-      val clusterClientFactory = new YarnClusterClientFactory
-      val applicationId = clusterClientFactory.getClusterId(flinkConf)
-      if (applicationId == null) {
-        throw new FlinkException(
-          "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-      }
-      val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConf)
-      clusterDescriptor.retrieve(applicationId).getClusterClient
-    }
+    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
+    // Get the ClusterClient from the YarnClusterDescriptor
+    val (applicationId, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDescriptor(
+      flinkConf)
+    val clusterClient = clusterDescriptor.retrieve(applicationId).getClusterClient
+
     Try {
       actionFunc(jobID, clusterClient)
     }.recover {
@@ -125,22 +122,74 @@ trait YarnClientTrait extends FlinkClientTrait {
       .asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
-  private[client] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](
-      flinkConfig: Configuration): (ApplicationId, T) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
-    require(yarnClusterId != null)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
-    (yarnClusterId, clusterDescriptor)
+  /**
+   * Retrieves the YarnClusterDescriptor and the application ID.
+   *
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the application ID and the YarnClusterDescriptor
+   */
+  private[client] def getYarnClusterDescriptor(
+      flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
+    // Set up Kerberos authentication
+    val ugi = HadoopUtils.getUgi()
+
+    // Wrap the operation in ugi.doAs()
+    val result = Try {
+      ugi.doAs(new PrivilegedAction[(ApplicationId, YarnClusterDescriptor)] {
+        override def run(): (ApplicationId, YarnClusterDescriptor) = {
+          val clientFactory = new YarnClusterClientFactory
+          // Get the cluster ID
+          val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
+          require(yarnClusterId != null)
+          // Create the ClusterDescriptor
+          val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
+
+          (yarnClusterId, clusterDescriptor)
+        }
+      })
+    } match {
+      case Success(result) => result
+      case Failure(e) =>
+        throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
+    }
+
+    result
   }
 
-  private[client] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](
-      flinkConfig: Configuration): (ClusterSpecification, T) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
-    (clusterSpecification, clusterDescriptor)
+  /**
+   * Retrieves the ClusterSpecification and the YarnClusterDescriptor for deployment.
+   *
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the ClusterSpecification and the YarnClusterDescriptor
+   */
+  private[client] def getYarnClusterDeployDescriptor(
+      flinkConfig: Configuration): (ClusterSpecification, YarnClusterDescriptor) = {
+    // Set up Kerberos authentication
+    val ugi = HadoopUtils.getUgi()
+
+    // Wrap the operation in ugi.doAs()
+    val result = Try {
+      ugi.doAs(new PrivilegedAction[(ClusterSpecification, YarnClusterDescriptor)] {
+        override def run(): (ClusterSpecification, YarnClusterDescriptor) = {
+          val clientFactory = new YarnClusterClientFactory
+          // Get the ClusterSpecification
+          val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+          // Create the ClusterDescriptor
+          val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
+
+          (clusterSpecification, clusterDescriptor)
+        }
+      })
+    } match {
+      case Success(result) => result
+      case Failure(e) =>
+        throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
+    }
+
+    result
   }
 }
