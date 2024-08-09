@@ -120,8 +120,8 @@ public class ConsoleRegistryClient implements AutoCloseable {
         ConsoleHeartBeat heartBeat = consoleHeartBeatTask.getHeartBeat();
         while (ServerStatus.BUSY.equals(heartBeat.getServerStatus())) {
             log.warn("Console node is BUSY: {}", heartBeat);
-            heartBeat = consoleHeartBeatTask.getHeartBeat();
             ThreadUtils.sleep(SLEEP_TIME_MILLIS);
+            heartBeat = consoleHeartBeatTask.getHeartBeat();
         }
 
         // remove before persist

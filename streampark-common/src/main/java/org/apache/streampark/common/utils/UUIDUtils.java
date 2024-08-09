@@ -19,14 +19,16 @@ package org.apache.streampark.common.utils;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 @UtilityClass
 public class UUIDUtils {
 
     public static long generateUUID() {
-        String uuidString = UUID.randomUUID().toString().replaceAll("[^0-9]]", "");
-        return Arrays.hashCode(uuidString.getBytes());
+        String uuidOrigin = Long.toString(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        if (uuidOrigin.length() > 14) {
+            return Long.parseLong(uuidOrigin.substring(0, 14));
+        }
+        return Long.parseLong(uuidOrigin);
     }
 }

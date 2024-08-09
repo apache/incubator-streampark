@@ -17,15 +17,54 @@
 
 package org.apache.streampark.common.utils;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Slf4j
 class UUIDUtilsTestCase {
 
     @Test
     void testGenerateUUID() {
         long uuid = UUIDUtils.generateUUID();
-        assertThat(String.valueOf(uuid).length()).isGreaterThan(4);
+        assertThat(String.valueOf(uuid).length()).isEqualTo(14);
+    }
+
+    @Test
+    @SneakyThrows
+    void testNoDuplicateGenerateUUID() {
+        int threadNum = 10;
+        int uuidNum = 1000000;
+
+        CountDownLatch countDownLatch = new CountDownLatch(threadNum);
+        Map<String, List<Long>> nodeUUIDs = new ConcurrentHashMap<>();
+
+        for (int i = 0; i < threadNum; i++) {
+            new Thread(() -> {
+                List<Long> uuids = new ArrayList<>(uuidNum);
+                for (int j = 0; j < uuidNum; j++) {
+                    uuids.add(UUIDUtils.generateUUID());
+                }
+                nodeUUIDs.put(Thread.currentThread().getName(), uuids);
+                countDownLatch.countDown();
+            }).start();
+        }
+
+        countDownLatch.await();
+        Set<Long> totalUUIDs = new HashSet<>();
+        nodeUUIDs.values().forEach(totalUUIDs::addAll);
+
+        assertEquals(uuidNum * threadNum, totalUUIDs.size());
     }
 }
