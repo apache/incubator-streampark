@@ -52,6 +52,8 @@ public class User extends BaseEntity {
 
     public static final Integer DEFAULT_PASSWORD_LENGTH = 8;
 
+    public static final String DEFAULT_SECRET = "streampark";
+
     @TableId(type = IdType.AUTO)
     private Long userId;
 

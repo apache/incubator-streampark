@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.domain;
+package org.apache.streampark.e2e.pages.setting.env;
 
-/** System constants */
-public class Constant {
+import lombok.Getter;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.PageFactory;
 
-    // order rules: descend
-    public static final String ORDER_DESC = "desc";
-    // order rules: ascend
-    public static final String ORDER_ASC = "asc";
+@Getter
+public abstract class CommonForm {
 
-    public static final String DEFAULT_SORT_FIELD = "create_time";
+    private WebDriver driver;
 
-    public static final String APP_MENU_ID = "100015";
+    private final EnvironmentDetailForm parent;
 
-    public static final String APP_DETAIL_MENU_ID = "100018";
-
-    public static final Long DEFAULT_TEAM_ID = 100000L;
-
-    public static final Long DEFAULT_ROLE_ID = 100001L;
+    public CommonForm(EnvironmentDetailForm environmentDetailForm) {
+        final WebDriver driver = environmentDetailForm.driver();
+        PageFactory.initElements(driver, this);
+        this.parent = environmentDetailForm;
+    }
 }
