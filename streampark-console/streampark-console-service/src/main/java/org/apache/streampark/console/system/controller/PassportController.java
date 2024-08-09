@@ -18,6 +18,7 @@
 package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.common.util.DateUtils;
+import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.enums.AuthenticationType;
 import org.apache.streampark.console.system.authentication.JWTToken;
@@ -65,6 +66,11 @@ public class PassportController {
 
     if (User.STATUS_LOCK.equals(user.getStatus())) {
       return RestResponse.success().put("code", 1);
+    }
+
+    // no team.
+    if (user.getLastTeamId() == null) {
+      return RestResponse.success().data(user.getUserId()).put("code", ResponseCode.CODE_FORBIDDEN);
     }
 
     this.userService.updateLoginTime(user.getUsername());
