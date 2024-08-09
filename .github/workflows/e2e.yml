@@ -110,6 +110,8 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: EnvironmentTest
+            class: org.apache.streampark.e2e.cases.EnvironmentTest
           - name: AlarmTest
             class: org.apache.streampark.e2e.cases.AlarmTest
           - name: ExternalLinkTest
