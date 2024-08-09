@@ -37,9 +37,9 @@ public class SparkApplicationBackUp {
 
     private Long appId;
 
-    private Long sqlId;
-
     private Long configId;
+
+    private Long sqlId;
 
     private String path;
 

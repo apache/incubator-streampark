@@ -51,16 +51,16 @@ public class SparkApplicationConfig {
      */
     private Integer format;
 
-    /** default version: 1 */
-    private Integer version = 1;
-
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String content;
 
-    private Date createTime;
+    /** default version: 1 */
+    private Integer version = 1;
 
     /** record the configuration to take effect for the target */
     private Boolean latest;
+
+    private Date createTime;
 
     private transient boolean effective = false;
 
