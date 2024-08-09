@@ -31,10 +31,13 @@ import org.apache.streampark.console.core.service.application.ApplicationInfoSer
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
 import org.apache.streampark.console.system.authentication.JWTToken;
 import org.apache.streampark.console.system.authentication.JWTUtil;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.Role;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.mapper.UserMapper;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.MenuService;
+import org.apache.streampark.console.system.service.RoleService;
 import org.apache.streampark.console.system.service.TeamService;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -85,6 +88,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private RoleService roleService;
+
     @Override
     public User getByUsername(String username) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
@@ -121,6 +127,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setPassword(password);
         }
         save(user);
+        // set team member
+        Member member = new Member();
+        member.setUserName(user.getUsername());
+        member.setTeamId(user.getLastTeamId());
+        Role role = roleService.getSysDefaultRole();
+        member.setRoleId(role.getRoleId());
+        member.setRoleName(role.getRoleName());
+        memberService.createMember(member);
     }
 
     @Override

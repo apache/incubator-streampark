@@ -123,4 +123,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         }
         roleMenuService.saveBatch(roleMenus);
     }
+
+    @Override
+    public Role getSysDefaultRole() {
+        return baseMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleId, Constant.DEFAULT_ROLE_ID));
+    }
 }
