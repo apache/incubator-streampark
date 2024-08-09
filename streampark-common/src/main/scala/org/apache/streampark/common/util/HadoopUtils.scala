@@ -232,7 +232,6 @@ object HadoopUtils extends Logger {
 
   def yarnClient: YarnClient = {
     if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
-      // 使用doAs方法确保以下操作以ugi的身份执行
       reusableYarnClient = Try {
         getUgi().doAs(new PrivilegedAction[YarnClient]() {
           override def run(): YarnClient = {

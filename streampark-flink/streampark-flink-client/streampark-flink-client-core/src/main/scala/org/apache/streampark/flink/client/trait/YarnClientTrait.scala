@@ -22,7 +22,7 @@ import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.api.common.JobID
-import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
@@ -132,30 +132,22 @@ trait YarnClientTrait extends FlinkClientTrait {
    */
   private[client] def getYarnClusterDescriptor(
       flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
-    // Set up Kerberos authentication
-    val ugi = HadoopUtils.getUgi()
-
-    // Wrap the operation in ugi.doAs()
-    val result = Try {
-      ugi.doAs(new PrivilegedAction[(ApplicationId, YarnClusterDescriptor)] {
-        override def run(): (ApplicationId, YarnClusterDescriptor) = {
+    Try {
+      doAsYarnClusterDescriptor[ApplicationId](
+        () => {
           val clientFactory = new YarnClusterClientFactory
           // Get the cluster ID
           val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
           require(yarnClusterId != null)
           // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-
           (yarnClusterId, clusterDescriptor)
-        }
-      })
+        })
     } match {
       case Success(result) => result
       case Failure(e) =>
         throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
     }
-
-    result
   }
 
   /**
@@ -168,28 +160,31 @@ trait YarnClientTrait extends FlinkClientTrait {
    */
   private[client] def getYarnClusterDeployDescriptor(
       flinkConfig: Configuration): (ClusterSpecification, YarnClusterDescriptor) = {
-    // Set up Kerberos authentication
-    val ugi = HadoopUtils.getUgi()
-
-    // Wrap the operation in ugi.doAs()
-    val result = Try {
-      ugi.doAs(new PrivilegedAction[(ClusterSpecification, YarnClusterDescriptor)] {
-        override def run(): (ClusterSpecification, YarnClusterDescriptor) = {
+    Try {
+      doAsYarnClusterDescriptor[ClusterSpecification](
+        () => {
           val clientFactory = new YarnClusterClientFactory
           // Get the ClusterSpecification
           val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
           // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
-
-          (clusterSpecification, clusterDescriptor)
-        }
-      })
+          clusterSpecification -> clusterDescriptor
+        })
     } match {
       case Success(result) => result
       case Failure(e) =>
         throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
     }
-
-    result
   }
+
+  private[this] def doAsYarnClusterDescriptor[T](
+      func: () => (T, YarnClusterDescriptor)): (T, YarnClusterDescriptor) = {
+    // Wrap the operation in ugi.doAs()
+    HadoopUtils
+      .getUgi()
+      .doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
+        override def run(): (T, YarnClusterDescriptor) = func()
+      })
+  }
+
 }
