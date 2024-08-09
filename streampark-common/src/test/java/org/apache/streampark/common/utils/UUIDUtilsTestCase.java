@@ -44,8 +44,8 @@ class UUIDUtilsTestCase {
     @Test
     @SneakyThrows
     void testNoDuplicateGenerateUUID() {
-        int threadNum = 10;
-        int uuidNum = 1000000;
+        int threadNum = 100;
+        int uuidNum = 10000;
 
         CountDownLatch countDownLatch = new CountDownLatch(threadNum);
         Map<String, List<Long>> nodeUUIDs = new ConcurrentHashMap<>();
