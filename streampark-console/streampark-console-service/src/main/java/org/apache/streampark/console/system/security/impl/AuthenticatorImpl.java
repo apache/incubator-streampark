@@ -119,6 +119,7 @@ public class AuthenticatorImpl implements Authenticator {
         newUser.setUserType(UserTypeEnum.USER);
         newUser.setStatus(User.STATUS_VALID);
         newUser.setSex(User.SEX_UNKNOWN);
+        newUser.setPassword(User.DEFAULT_SECRET);
         usersService.createUser(newUser);
         return newUser;
     }
