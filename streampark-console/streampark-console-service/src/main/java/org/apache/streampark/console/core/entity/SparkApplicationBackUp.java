@@ -36,9 +36,13 @@ public class SparkApplicationBackUp {
     private Long id;
 
     private Long appId;
+
     private Long sqlId;
+
     private Long configId;
+
     private String path;
+
     private String description;
     /** version number at the backup */
     private Integer version;

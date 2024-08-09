@@ -44,7 +44,9 @@ public class SparkSql {
     private String sql;
 
     private String teamResource;
+
     private String dependency;
+
     private Integer version = 1;
 
     /**
@@ -55,6 +57,7 @@ public class SparkSql {
     private Integer candidate;
 
     private Date createTime;
+
     private transient boolean effective = false;
     /** sql diff */
     private transient boolean sqlDifference = false;
@@ -86,7 +89,7 @@ public class SparkSql {
 
     public ChangeTypeEnum checkChange(SparkSql target) {
         // 1) determine if sql statement has changed
-        boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
+        boolean isSqlChanged = !this.getSql().trim().equals(target.getSql().trim());
         // 2) determine if dependency has changed
         Dependency thisDependency = Dependency.toDependency(this.getDependency());
         Dependency targetDependency = Dependency.toDependency(target.getDependency());
@@ -94,10 +97,10 @@ public class SparkSql {
         // 3) determine if team resource has changed
         boolean teamResDifference = !Objects.equals(this.teamResource, target.getTeamResource());
 
-        if (sqlDifference && depDifference && teamResDifference) {
+        if (isSqlChanged && depDifference && teamResDifference) {
             return ChangeTypeEnum.ALL;
         }
-        if (sqlDifference) {
+        if (isSqlChanged) {
             return ChangeTypeEnum.SQL;
         }
         if (depDifference) {
