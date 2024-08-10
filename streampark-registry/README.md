@@ -1,12 +1,12 @@
 ## Function
 
-DS use registry to do the below three things:
+SP use registry to do the below three things:
 
 1. Store the metadata of master/worker so that it can get notify when nodes up and down.
 2. Store the metadata of worker to do load balance.
 3. Acquire a global lock when do failover.
 
-So for DS, the registry need to notify the server when the server subscribe data have added/deleted/updated, support a way to create/release a global lock,
+So for SP, the registry need to notify the server when the server subscribe data have added/deleted/updated, support a way to create/release a global lock,
 delete the server's metadata when server down.
 
 ## How to use

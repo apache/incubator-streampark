@@ -23,7 +23,7 @@ registry:
 After do this two steps, you can start your streampark cluster, your cluster will use mysql as registry center to
 store server metadata.
 
-NOTE: You need to add `mysql-connector-java.jar` into DS classpath if you use mysql database, since this plugin will not
+NOTE: You need to add `mysql-connector-java.jar` into SP classpath if you use mysql database, since this plugin will not
 bundle this driver in distribution.
 
 ## Optional configuration
