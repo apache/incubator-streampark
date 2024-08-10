@@ -81,6 +81,7 @@ import java.util.concurrent.TimeoutException;
 import static org.apache.flink.configuration.CheckpointingOptions.MAX_RETAINED_CHECKPOINTS;
 import static org.apache.flink.configuration.CheckpointingOptions.SAVEPOINT_DIRECTORY;
 import static org.apache.streampark.common.util.PropertiesUtils.extractDynamicPropertiesAsJava;
+import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
 import static org.apache.streampark.console.core.enums.CheckPointTypeEnum.CHECKPOINT;
 
 @Slf4j
@@ -276,7 +277,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
             try {
                 result = this.getSavePointPath(application);
             } catch (Exception e) {
-                throw new ApiAlertException(
+                ApiAlertException.throwException(UNKNOWN_ERROR,
                     "Error in getting savepoint path for triggering savepoint for app "
                         + application.getId(),
                     e);
@@ -387,7 +388,9 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         return config.isEmpty() ? null : config.get(SAVEPOINT_DIRECTORY.key());
     }
 
-    /** Try get the 'state.checkpoints.num-retained' from the dynamic properties. */
+    /**
+     * Try get the 'state.checkpoints.num-retained' from the dynamic properties.
+     */
     private Optional<Integer> tryGetChkNumRetainedFromDynamicProps(String dynamicProps) {
         String rawCfgValue = extractDynamicPropertiesAsJava(dynamicProps).get(MAX_RETAINED_CHECKPOINTS.key());
         if (StringUtils.isBlank(rawCfgValue)) {
@@ -407,7 +410,9 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         return Optional.empty();
     }
 
-    /** Try get the 'state.checkpoints.num-retained' from the flink env. */
+    /**
+     * Try get the 'state.checkpoints.num-retained' from the flink env.
+     */
     private int getChkNumRetainedFromFlinkEnv(
                                               @Nonnull FlinkEnv flinkEnv, @Nonnull Application application) {
         String flinkConfNumRetained = flinkEnv.convertFlinkYamlAsMap().get(MAX_RETAINED_CHECKPOINTS.key());

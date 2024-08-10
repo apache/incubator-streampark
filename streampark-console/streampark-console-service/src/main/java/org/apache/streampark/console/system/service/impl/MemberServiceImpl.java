@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.system.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
+import org.apache.streampark.console.base.enums.UserMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.system.entity.Member;
@@ -42,6 +42,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_TEAM_ID_CHANGE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.MEMBER_USER_ID_CHANGE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_CANNOT_NULL;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_NOT_EXIST;
 
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -76,7 +84,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public IPage<Member> getPage(Member member, RestRequest request) {
-        ApiAlertException.throwIfNull(member.getTeamId(), "The team id is required.");
+        ApiAlertException.throwIfNull(member.getTeamId(), SYSTEM_TEAM_ID_CANNOT_NULL);
         Page<Member> page = MybatisPager.getPage(request);
         return baseMapper.selectPage(page, member);
     }
@@ -101,7 +109,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     private Member findByUserId(Long teamId, Long userId) {
-        ApiAlertException.throwIfNull(teamId, "The team id is required.");
+        ApiAlertException.throwIfNull(teamId, SYSTEM_TEAM_ID_CANNOT_NULL);
         LambdaQueryWrapper<Member> queryWrapper = new LambdaQueryWrapper<Member>()
             .eq(Member::getTeamId, teamId)
             .eq(Member::getUserId, userId);
@@ -118,15 +126,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public void createMember(Member member) {
         User user = userService.getByUsername(member.getUserName());
-        ApiAlertException.throwIfNull(user, "The username [%s] not found", member.getUserName());
+        ApiAlertException.throwIfNull(user, SYSTEM_USER_NOT_EXIST, member.getUserName());
 
         ApiAlertException.throwIfNull(
-            roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+            roleService.getById(member.getRoleId()), SYSTEM_ROLE_ID_NOT_EXIST, member.getRoleId());
         Team team = teamService.getById(member.getTeamId());
-        ApiAlertException.throwIfNull(team, "The teamId [%s] not found", member.getTeamId());
+        ApiAlertException.throwIfNull(team, SYSTEM_TEAM_ID_NOT_EXIST, member.getTeamId());
         ApiAlertException.throwIfNotNull(
             findByUserId(member.getTeamId(), user.getUserId()),
-            "The user [%s] has been added the team [%s], please don't add it again.",
+            UserMessageStatus.MEMBER_USER_TEAM_ALREADY_ERROR,
             member.getUserName(),
             team.getTeamName());
 
@@ -139,7 +147,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public void remove(Long id) {
         Member member = this.getById(id);
-        ApiAlertException.throwIfNull(member, "The member [id=%s] not found", id);
+        ApiAlertException.throwIfNull(member, MEMBER_ID_NOT_EXIST, id);
         this.removeById(member);
         userService.clearLastTeam(member.getUserId(), member.getTeamId());
     }
@@ -147,13 +155,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public void updateMember(Member member) {
         Member oldMember = this.getById(member.getId());
-        ApiAlertException.throwIfNull(oldMember, "The member [id=%s] not found", member.getId());
-        AssertUtils.state(
-            oldMember.getTeamId().equals(member.getTeamId()), "Team id cannot be changed.");
-        AssertUtils.state(
-            oldMember.getUserId().equals(member.getUserId()), "User id cannot be changed.");
+        ApiAlertException.throwIfNull(oldMember, MEMBER_ID_NOT_EXIST, member.getId());
+        ApiAlertException.throwIfFalse(oldMember.getTeamId().equals(member.getTeamId()), MEMBER_TEAM_ID_CHANGE_ERROR);
+        ApiAlertException.throwIfFalse(oldMember.getUserId().equals(member.getUserId()), MEMBER_USER_ID_CHANGE_ERROR);
         ApiAlertException.throwIfNull(
-            roleService.getById(member.getRoleId()), "The roleId [%s] not found", member.getRoleId());
+            roleService.getById(member.getRoleId()), SYSTEM_ROLE_ID_NOT_EXIST, member.getRoleId());
         oldMember.setRoleId(member.getRoleId());
         updateById(oldMember);
     }

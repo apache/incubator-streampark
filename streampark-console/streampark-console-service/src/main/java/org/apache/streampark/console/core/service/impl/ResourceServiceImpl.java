@@ -24,6 +24,7 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.enums.ResourceMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -85,6 +86,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_CONNECTOR_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_FLINK_APP_JAR_EMPTY_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_FLINK_JAR_NULL;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_MULTI_FILE_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NAME_MODIFY_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NAME_NULL_FAILED;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_NOT_EXIST_ERROR;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_POM_JAR_EMPTY;
+import static org.apache.streampark.console.base.enums.ResourceMessageStatus.RESOURCE_STILL_USE_DELETE_ERROR;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -124,7 +135,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     @Override
     public void addResource(Resource resource) throws Exception {
         String resourceStr = resource.getResource();
-        ApiAlertException.throwIfNull(resourceStr, "Please add pom or jar resource.");
+        ApiAlertException.throwIfNull(resourceStr, RESOURCE_POM_JAR_EMPTY);
 
         // check
         Dependency dependency = Dependency.toDependency(resourceStr);
@@ -135,12 +146,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resource.getResourceType() == ResourceTypeEnum.CONNECTOR) {
             processConnectorResource(resource);
         } else {
-            ApiAlertException.throwIfNull(resource.getResourceName(), "The resourceName is required.");
+            ApiAlertException.throwIfNull(resource.getResourceName(), RESOURCE_NAME_NULL_FAILED);
         }
 
         ApiAlertException.throwIfNotNull(
             this.findByResourceName(resource.getTeamId(), resource.getResourceName()),
-            "the resource %s already exists, please check.",
+            ResourceMessageStatus.RESOURCE_ALREADY_ERROR,
             resource.getResourceName());
 
         if (!jars.isEmpty()) {
@@ -157,7 +168,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private static void processConnectorResource(Resource resource) throws JsonProcessingException {
         String connector = resource.getConnector();
-        ApiAlertException.throwIfNull(connector, "the flink connector is null.");
+        ApiAlertException.throwIfNull(connector, FLINK_ENV_CONNECTOR_NULL_ERROR);
         FlinkConnector connectorResource = JacksonUtils.read(connector, FlinkConnector.class);
         resource.setResourceName(connectorResource.getFactoryIdentifier());
         Optional.ofNullable(connectorResource.getRequiredOptions())
@@ -172,12 +183,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     private void check(Resource resource, List<String> jars, List<MavenPom> poms) {
         ApiAlertException.throwIfTrue(
-            jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
+            jars.isEmpty() && poms.isEmpty(), RESOURCE_POM_JAR_EMPTY);
         ApiAlertException.throwIfTrue(
             resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
-            "Please upload jar for Flink_App resource");
+            RESOURCE_FLINK_APP_JAR_EMPTY_ERROR);
         ApiAlertException.throwIfTrue(
-            jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
+            jars.size() + poms.size() > 1, RESOURCE_MULTI_FILE_ERROR);
     }
 
     @Override
@@ -197,7 +208,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         if (resourceName != null) {
             ApiAlertException.throwIfFalse(
                 resourceName.equals(findResource.getResourceName()),
-                "Please make sure the resource name is not changed.");
+                RESOURCE_NAME_MODIFY_ERROR);
 
             Dependency dependency = Dependency.toDependency(resource.getResource());
             if (!dependency.getJar().isEmpty()) {
@@ -241,7 +252,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     /**
      * change resource owner
      *
-     * @param userId original user id
+     * @param userId       original user id
      * @param targetUserId target user id
      */
     @Override
@@ -346,7 +357,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             return buildExceptResponse(e, 1);
         }
         ApiAlertException.throwIfTrue(
-            jarFile == null || !jarFile.exists(), "flink app jar must exist.");
+            jarFile == null || !jarFile.exists(), RESOURCE_FLINK_JAR_NULL);
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
         if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
@@ -453,16 +464,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         File localJar = new File(resourcePath);
         File teamUploadJar = new File(teamUploads, localJar.getName());
         ApiAlertException.throwIfFalse(
-            localJar.exists(), "Missing file: " + resourcePath + ", please upload again");
+            localJar.exists(), RESOURCE_NOT_EXIST_ERROR);
         FsOperator.lfs()
             .upload(localJar.getAbsolutePath(), teamUploadJar.getAbsolutePath(), false, true);
     }
 
     private void checkOrElseAlert(Resource resource) {
-        ApiAlertException.throwIfNull(resource, "The resource does not exist.");
+        ApiAlertException.throwIfNull(resource, RESOURCE_NOT_EXIST_ERROR);
 
         ApiAlertException.throwIfTrue(
-            isDependByApplications(resource), "The resource is still in use, cannot be removed.");
+            isDependByApplications(resource), RESOURCE_STILL_USE_DELETE_ERROR);
     }
 
     private boolean isDependByApplications(Resource resource) {

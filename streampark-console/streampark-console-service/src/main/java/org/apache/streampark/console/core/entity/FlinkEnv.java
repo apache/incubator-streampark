@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE;
+
 @Data
 @TableName("t_flink_env")
 public class FlinkEnv implements Serializable {
@@ -79,22 +81,17 @@ public class FlinkEnv implements Serializable {
         float ver = Float.parseFloat(getVersionOfFirst().concat(".").concat(getVersionOfMiddle()));
         if (ver < 1.19f) {
             yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
-            if (!yaml.exists()) {
-                throw new ApiAlertException("cannot find flink-conf.yaml in flink/conf ");
-            }
+            ApiAlertException.throwIfFalse(yaml.exists(), FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE, "flink-conf.yaml");
         } else if (ver == 1.19f) {
             yaml = new File(this.flinkHome.concat("/conf/flink-conf.yaml"));
             if (!yaml.exists()) {
                 yaml = new File(this.flinkHome.concat("/conf/config.yaml"));
             }
-            if (!yaml.exists()) {
-                throw new ApiAlertException("cannot find config.yaml|flink-conf.yaml in flink/conf ");
-            }
+            ApiAlertException.throwIfFalse(yaml.exists(), FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE,
+                "config.yaml|flink-conf.yaml");
         } else {
             yaml = new File(this.flinkHome.concat("/conf/config.yaml"));
-            if (!yaml.exists()) {
-                throw new ApiAlertException("cannot find config.yaml in flink/conf ");
-            }
+            ApiAlertException.throwIfFalse(yaml.exists(), FLINK_ENV_DIRECTORY_NOT_CONFIG_FILE, "config.yaml");
         }
         try {
             String flinkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);

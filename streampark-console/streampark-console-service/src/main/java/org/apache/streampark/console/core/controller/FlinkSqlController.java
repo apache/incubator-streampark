@@ -43,6 +43,8 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINk_SQL_APPID_OR_TEAM_ID_IS_NULL;
+
 @Slf4j
 @Validated
 @RestController
@@ -105,7 +107,7 @@ public class FlinkSqlController {
     @Permission(app = "#appId", team = "#teamId")
     public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
-            appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
+            appId == null || teamId == null, FLINk_SQL_APPID_OR_TEAM_ID_IS_NULL);
         String[] array = id.split(",");
         FlinkSql flinkSql1 = flinkSqlService.getById(array[0]);
         flinkSql1.base64Encode();

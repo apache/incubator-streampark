@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+
 @Slf4j
 @Validated
 @RestController
@@ -55,7 +57,7 @@ public class ProjectController {
     @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
         ApiAlertException.throwIfNull(
-            project.getTeamId(), "The teamId can't be null. Create team failed.");
+            project.getTeamId(), SYSTEM_TEAM_ID_NULL_ERROR);
         return projectService.create(project);
     }
 

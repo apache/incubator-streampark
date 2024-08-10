@@ -83,10 +83,8 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
                     defaultApi
                         .openSession(
                             new OpenSessionRequestBody()
-                                .sessionName(environment
-                                    .getSessionName())
-                                .properties(environment
-                                    .getSessionConfig()))
+                                .sessionName(environment.getSessionName())
+                                .properties(environment.getSessionConfig()))
                         .getSessionHandle()));
         } catch (ApiException e) {
             throw new SqlGatewayException("Flink native SqlGateWay openSession failed!", e);
@@ -173,13 +171,10 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
                 Objects.requireNonNull(
                     defaultApi
                         .executeStatement(
-                            UUID.fromString(sessionHandle
-                                .getIdentifier()),
+                            UUID.fromString(sessionHandle.getIdentifier()),
                             new ExecuteStatementRequestBody()
                                 .statement(statement)
-                                // currently, sql gateway
-                                // don't support execution
-                                // timeout
+                                // currently, sql gateway don't support execution timeout
                                 // .executionTimeout(executionTimeoutMs)
                                 .executionConfig(null))
                         .getOperationHandle()));
@@ -216,8 +211,7 @@ public class FlinkSqlGatewayImpl implements SqlGatewayService {
             resultsColumns.forEach(
                 column -> columns.add(
                     new Column(
-                        column.getName(), column.getLogicalType().toJson(),
-                        column.getComment())));
+                        column.getName(), column.getLogicalType().toJson(), column.getComment())));
 
             resultsData.forEach(row -> data.add(new RowData(row.getKind().getValue(), row.getFields())));
 

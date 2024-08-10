@@ -111,6 +111,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_BUILD_RESOURCE_GROUP_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_JOB_IS_INVALID;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
@@ -171,7 +176,7 @@ public class AppBuildPipeServiceImpl
     /**
      * Build application. This is an async call method.
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
@@ -284,10 +289,8 @@ public class AppBuildPipeServiceImpl
                             for (String jar : app.getDependencyObject().getJar()) {
                                 File localJar = new File(WebUtils.getAppTempDir(), jar);
                                 File uploadJar = new File(localUploads, jar);
-                                if (!localJar.exists() && !uploadJar.exists()) {
-                                    throw new ApiAlertException(
-                                        "Missing file: " + jar + ", please upload again");
-                                }
+                                ApiAlertException.throwIfTrue(!localJar.exists() && !uploadJar.exists(),
+                                    FLINK_ENV_FILE_OR_DIR_NOT_EXIST);
                                 if (localJar.exists()) {
                                     checkOrElseUploadJar(
                                         FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(),
@@ -419,31 +422,31 @@ public class AppBuildPipeServiceImpl
     /**
      * check the build environment
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      */
     private void checkBuildEnv(Long appId, boolean forceBuild) {
         Application app = applicationManageService.getById(appId);
 
         // 1) check flink version
-        String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";
         FlinkEnv env = flinkEnvService.getByIdOrDefault(app.getVersionId());
-        ApiAlertException.throwIfNull(env, checkEnvErrorMessage);
+        ApiAlertException.throwIfNull(env, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
         boolean checkVersion = env.getFlinkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
-            checkVersion, "Unsupported flink version:" + env.getFlinkVersion().version());
+            checkVersion, FLINK_ENV_FLINK_VERSION_UNSUPPORT, env.getFlinkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
-        ApiAlertException.throwIfFalse(envOk, checkEnvErrorMessage);
+        ApiAlertException.throwIfFalse(envOk, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
-            !forceBuild && !allowToBuildNow(appId),
-            "The job is invalid, or the job cannot be built while it is running");
+            !forceBuild && !allowToBuildNow(appId), APP_JOB_IS_INVALID);
     }
 
-    /** create building pipeline instance */
+    /**
+     * create building pipeline instance
+     */
     private BuildPipeline createPipelineInstance(@Nonnull Application app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
         String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
@@ -573,7 +576,9 @@ public class AppBuildPipeServiceImpl
             getMergedDependencyInfo(app));
     }
 
-    /** copy from {@link ApplicationActionService#start(Application, boolean)} */
+    /**
+     * copy from {@link ApplicationActionService#start(Application, boolean)}
+     */
     private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
         switch (app.getDevelopmentMode()) {
             case CUSTOM_CODE:
@@ -718,7 +723,7 @@ public class AppBuildPipeServiceImpl
                                             resourceService.getById(
                                                 resourceIdInGroup)));
                             } catch (JsonProcessingException e) {
-                                throw new ApiAlertException("Parse resource group failed.", e);
+                                ApiAlertException.throwException(APP_BUILD_RESOURCE_GROUP_FAILED, e);
                             }
                         }
                     });

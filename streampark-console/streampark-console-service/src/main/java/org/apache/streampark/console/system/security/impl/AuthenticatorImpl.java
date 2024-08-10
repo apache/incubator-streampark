@@ -30,6 +30,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_ALLOW_LOGIN_TYPE;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_PASSWORD_INCORRECT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_LOGIN_TYPE_NULL;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_USER_NOT_EXIST;
+
 @Component
 public class AuthenticatorImpl implements Authenticator {
 
@@ -41,7 +48,7 @@ public class AuthenticatorImpl implements Authenticator {
     @Override
     public User authenticate(String username, String password, LoginTypeEnum loginType) throws Exception {
         ApiAlertException.throwIfNull(
-            loginType, "the login type is null");
+            loginType, SYSTEM_USER_LOGIN_TYPE_NULL);
 
         switch (loginType) {
             case PASSWORD:
@@ -51,26 +58,26 @@ public class AuthenticatorImpl implements Authenticator {
             case SSO:
                 return ssoAuthenticate(username);
             default:
-                throw new ApiAlertException(
-                    String.format("the login type [%s] is not supported.", loginType));
+                return ApiAlertException.throwException(SYSTEM_USER_LOGIN_TYPE_NOT_SUPPORT, loginType);
         }
     }
 
     private User passwordAuthenticate(String username, String password) {
         User user = usersService.getByUsername(username);
 
-        ApiAlertException.throwIfNull(user, String.format("User [%s] does not exist", username));
+        ApiAlertException.throwIfNull(user, SYSTEM_USER_NOT_EXIST, username);
 
         ApiAlertException.throwIfTrue(
             user.getLoginType() != LoginTypeEnum.PASSWORD,
-            "user [%s] can not login with PASSWORD",
-            username);
+            SYSTEM_USER_ALLOW_LOGIN_TYPE,
+            username,
+            LoginTypeEnum.PASSWORD);
 
         String salt = user.getSalt();
         password = ShaHashUtils.encrypt(salt, password);
 
         ApiAlertException.throwIfFalse(
-            StringUtils.equals(user.getPassword(), password), "Incorrect password");
+            StringUtils.equals(user.getPassword(), password), SYSTEM_USER_LOGIN_PASSWORD_INCORRECT);
 
         return user;
     }
@@ -86,7 +93,7 @@ public class AuthenticatorImpl implements Authenticator {
         if (user != null) {
             ApiAlertException.throwIfTrue(
                 user.getLoginType() != LoginTypeEnum.LDAP,
-                "user [%s] can only sign in with %s",
+                SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS,
                 username,
                 user.getLoginType());
 
@@ -102,7 +109,7 @@ public class AuthenticatorImpl implements Authenticator {
         if (user != null) {
             ApiAlertException.throwIfTrue(
                 user.getLoginType() != LoginTypeEnum.SSO,
-                "user [%s] can only sign in with %s",
+                SYSTEM_USER_LOGIN_TYPE_CONSTRAINTS,
                 username,
                 user.getLoginType());
             return user;

@@ -46,6 +46,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_SQL_BACKUP_IS_NULL_ROLLBACK_FAILED;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -174,7 +176,7 @@ public class ApplicationBackUpServiceImpl
             .eq(ApplicationBackUp::getSqlId, flinkSqlParam.getId());
         ApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
-            backUp, "Application backup can't be null. Rollback flink sql failed.");
+            backUp, FLINK_SQL_BACKUP_IS_NULL_ROLLBACK_FAILED);
         // rollback config and sql
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.CONFIG, backUp.getId());
         effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.FLINKSQL, backUp.getSqlId());

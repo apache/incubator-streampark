@@ -15,14 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.console.base.enums;
 
-/**
- * Applies to all application exceptions
- */
-public class ApplicationException extends ApiAlertException {
+import org.springframework.context.i18n.LocaleContextHolder;
 
-    public ApplicationException(String message, Throwable cause) {
-        super(message, cause);
+import java.util.Locale;
+
+public interface Status {
+
+    /** get status code */
+    int getCode();
+
+    /** get english message */
+    String getEnMsg();
+
+    /** get chinese message */
+    String getZhMsg();
+
+    /** get internationalization message */
+    default String getMessage() {
+        if (Locale.SIMPLIFIED_CHINESE.getLanguage().equals(LocaleContextHolder.getLocale().getLanguage())) {
+            return getZhMsg();
+        } else {
+            return getEnMsg();
+        }
     }
 }

@@ -45,7 +45,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_EXIST_USED_DELETE_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_ROLE_NOT_EXIST;
 
 @Slf4j
 @Service
@@ -82,17 +84,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void removeById(Long roleId) {
-        Role role = Optional.ofNullable(this.getById(roleId))
-            .orElseThrow(
-                () -> new ApiAlertException(
-                    String.format("Role id [%s] not found. Delete role failed.",
-                        roleId)));
+        Role role = this.getById(roleId);
+        ApiAlertException.throwIfNull(role, SYSTEM_ROLE_NOT_EXIST);
         List<Long> userIdsByRoleId = memberService.listUserIdsByRoleId(roleId);
         ApiAlertException.throwIfFalse(
             CollectionUtils.isEmpty(userIdsByRoleId),
-            String.format(
-                "There are some users of role %s, delete role failed, please unbind it first.",
-                role.getRoleName()));
+            SYSTEM_ROLE_EXIST_USED_DELETE_ERROR,
+            role.getRoleName());
         super.removeById(roleId);
         this.roleMenuService.removeByRoleId(roleId);
     }

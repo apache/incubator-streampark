@@ -49,6 +49,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_CONFIG_FILE_TYPE_ILLEGALLY;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -77,8 +79,7 @@ public class ApplicationConfigServiceImpl
         if (appParam.getFormat() != null) {
             ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(appParam.getFormat());
             ApiAlertException.throwIfTrue(
-                fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType,
-                "application' config error. must be (.properties|.yaml|.yml |.conf)");
+                fileType == null || ConfigFileTypeEnum.UNKNOWN == fileType, APP_CONFIG_FILE_TYPE_ILLEGALLY);
 
             applicationConfig.setFormat(fileType.getValue());
         }
@@ -174,7 +175,9 @@ public class ApplicationConfigServiceImpl
         }
     }
 
-    /** Not running tasks are set to Effective, running tasks are set to Latest */
+    /**
+     * Not running tasks are set to Effective, running tasks are set to Latest
+     */
     @Override
     public void setLatestOrEffective(Boolean latest, Long configId, Long appId) {
         if (latest) {

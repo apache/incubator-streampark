@@ -91,6 +91,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_BUILD_RESOURCE_GROUP_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_JOB_IS_INVALID;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FILE_OR_DIR_NOT_EXIST;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_NOT_FOUND;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_FLINK_VERSION_UNSUPPORT;
 import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 
 @Service
@@ -136,7 +141,7 @@ public class SparkAppBuildPipeServiceImpl
     /**
      * Build application. This is an async call method.
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      * @return Whether the pipeline was successfully started
      */
@@ -249,10 +254,8 @@ public class SparkAppBuildPipeServiceImpl
                             for (String jar : app.getDependencyObject().getJar()) {
                                 File localJar = new File(WebUtils.getAppTempDir(), jar);
                                 File uploadJar = new File(localUploads, jar);
-                                if (!localJar.exists() && !uploadJar.exists()) {
-                                    throw new ApiAlertException(
-                                        "Missing file: " + jar + ", please upload again");
-                                }
+                                ApiAlertException.throwIfTrue(!localJar.exists() && !uploadJar.exists(),
+                                    FLINK_ENV_FILE_OR_DIR_NOT_EXIST, jar);
                                 if (localJar.exists()) {
                                     checkOrElseUploadJar(
                                         FsOperator.lfs(), localJar, uploadJar.getAbsolutePath(),
@@ -336,7 +339,7 @@ public class SparkAppBuildPipeServiceImpl
     /**
      * check the build environment
      *
-     * @param appId application id
+     * @param appId      application id
      * @param forceBuild forced start pipeline or not
      */
     private void checkBuildEnv(Long appId, boolean forceBuild) {
@@ -346,20 +349,22 @@ public class SparkAppBuildPipeServiceImpl
         SparkEnv env = sparkEnvService.getById(app.getVersionId());
         boolean checkVersion = env.getSparkVersion().checkVersion(false);
         ApiAlertException.throwIfFalse(
-            checkVersion, "Unsupported flink version:" + env.getSparkVersion().version());
+            checkVersion, FLINK_ENV_FLINK_VERSION_UNSUPPORT, env.getSparkVersion().version());
 
         // 2) check env
         boolean envOk = applicationInfoService.checkEnv(app);
         ApiAlertException.throwIfFalse(
-            envOk, "Check flink env failed, please check the flink version of this job");
+            envOk, FLINK_ENV_FLINK_VERSION_NOT_FOUND);
 
         // 3) Whether the application can currently start a new building progress
         ApiAlertException.throwIfTrue(
             !forceBuild && !allowToBuildNow(appId),
-            "The job is invalid, or the job cannot be built while it is running");
+            APP_JOB_IS_INVALID);
     }
 
-    /** create building pipeline instance */
+    /**
+     * create building pipeline instance
+     */
     private BuildPipeline createPipelineInstance(@Nonnull SparkApplication app) {
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(app.getVersionId());
         String sparkUserJar = retrieveSparkUserJar(sparkEnv, app);
@@ -534,7 +539,7 @@ public class SparkAppBuildPipeServiceImpl
                                             resourceService.getById(
                                                 resourceIdInGroup)));
                             } catch (JsonProcessingException e) {
-                                throw new ApiAlertException("Parse resource group failed.", e);
+                                ApiAlertException.throwException(APP_BUILD_RESOURCE_GROUP_FAILED, e);
                             }
                         }
                     });

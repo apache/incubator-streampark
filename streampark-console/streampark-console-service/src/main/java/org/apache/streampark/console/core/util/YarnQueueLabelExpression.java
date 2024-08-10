@@ -22,8 +22,6 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -32,16 +30,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static org.apache.streampark.console.base.enums.YarnMessageStatus.YARN_QUEUE_LABEL_FORMAT;
+
 /** Util class for parsing and checking Yarn queue & Label */
 public class YarnQueueLabelExpression {
 
     private static final String AT = "@";
 
     private static final String REGEX = "[a-zA-Z0-9_\\-]+";
-
-    @VisibleForTesting
-    public static final String ERR_FORMAT_HINTS =
-        "Yarn queue label format should be in format {queue} or {queue}@{label1,label2}";
 
     private static final Pattern QUEUE_LABEL_PATTERN = Pattern
         .compile(String.format("^(%s)(.%s)*(%s(%s)(,%s)*)?$", REGEX, REGEX, AT, REGEX, REGEX));
@@ -85,7 +81,7 @@ public class YarnQueueLabelExpression {
 
     // Visible for test.
     public static YarnQueueLabelExpression of(@Nonnull String queueLabelExpr) {
-        ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), ERR_FORMAT_HINTS);
+        ApiAlertException.throwIfFalse(isValid(queueLabelExpr, false), YARN_QUEUE_LABEL_FORMAT);
         String[] strs = queueLabelExpr.split(AT);
         if (strs.length == 2) {
             return new YarnQueueLabelExpression(strs[0], strs[1]);
@@ -97,7 +93,7 @@ public class YarnQueueLabelExpression {
                                               @Nonnull String queue, @Nullable String labelExpression) {
         YarnQueueLabelExpression queueLabelExpression = new YarnQueueLabelExpression(queue, labelExpression);
         ApiAlertException.throwIfFalse(
-            isValid(queueLabelExpression.toString(), false), ERR_FORMAT_HINTS);
+            isValid(queueLabelExpression.toString(), false), YARN_QUEUE_LABEL_FORMAT);
         return queueLabelExpression;
     }
 

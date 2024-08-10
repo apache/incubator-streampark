@@ -18,12 +18,16 @@
 package org.apache.streampark.console.base.exception;
 
 import org.apache.streampark.console.base.domain.ResponseCode;
+import org.apache.streampark.console.base.enums.Status;
 
+import org.bouncycastle.util.Arrays;
+
+import java.text.MessageFormat;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- *
- *
  * <pre>
  * To notify the frontend of an exception message,
  * it is usually a <strong> clear </strong> and <strong> concise </strong> message, e.g:
@@ -34,48 +38,77 @@ import java.util.Objects;
  */
 public class ApiAlertException extends AbstractApiException {
 
-    public ApiAlertException(String message) {
+    protected ApiAlertException(String message) {
         super(message, ResponseCode.CODE_FAIL_ALERT);
     }
 
-    public ApiAlertException(Throwable cause) {
+    protected ApiAlertException(Throwable cause) {
         super(cause, ResponseCode.CODE_FAIL_ALERT);
     }
 
-    public ApiAlertException(String message, Throwable cause) {
+    protected ApiAlertException(String message, Throwable cause) {
         super(message, cause, ResponseCode.CODE_FAIL_ALERT);
     }
 
-    public static void throwIfNull(Object object, String errorMsgFmt, Object... args) {
+    public static void throwIfNull(Object object, Status status, Object... args) {
         if (Objects.isNull(object)) {
-            if (args == null || args.length < 1) {
-                throw new ApiAlertException(errorMsgFmt);
-            }
-            throw new ApiAlertException(String.format(errorMsgFmt, args));
+            throwException(status, args);
         }
     }
 
-    public static void throwIfNotNull(Object object, String errorMsgFmt, Object... args) {
-        if (!Objects.isNull(object)) {
-            if (args == null || args.length < 1) {
-                throw new ApiAlertException(errorMsgFmt);
-            }
-            throw new ApiAlertException(String.format(errorMsgFmt, args));
+    public static void throwIfNotNull(Object object, Status status, Object... args) {
+        if (Objects.nonNull(object)) {
+            throwException(status, args);
         }
     }
 
-    public static void throwIfFalse(boolean expression, String errorMessage) {
-        if (!expression) {
-            throw new ApiAlertException(errorMessage);
-        }
+    public static void throwIfFalse(boolean expression, Status status, Object... args) {
+        throwIfTrue(!expression, status, args);
     }
 
-    public static void throwIfTrue(boolean expression, String errorMsgFmt, Object... args) {
+    public static void throwIfTrue(boolean expression, Status status, Object... args) {
         if (expression) {
-            if (args == null || args.length < 1) {
-                throw new ApiAlertException(errorMsgFmt);
-            }
-            throw new ApiAlertException(String.format(errorMsgFmt, args));
+            throwException(status, args);
         }
+    }
+
+    private static Object[] processArgs(Object[] args) {
+        if (!Arrays.isNullOrEmpty(args)) {
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
+                if (arg instanceof Status) {
+                    args[i] = ((Status) arg).getMessage();
+                }
+            }
+        }
+        return args;
+    }
+
+    private static final Pattern MESSAGE_BRACES_PATTERN = Pattern.compile("\\{([^{}]+)}");
+
+    private static String formatMessage(Status status, Object... args) {
+        // Use regular expressions to find all the contents in the curly braces and that they are not pure numbers
+        Matcher matcher = MESSAGE_BRACES_PATTERN.matcher(status.getMessage().replaceAll("'", "''"));
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            String content = matcher.group(1);
+            // if the content is not a pure number replace it
+            if (!content.matches("\\d+")) {
+                String replacement = "'{" + content + "}'";
+                matcher.appendReplacement(result, replacement);
+            } else {
+                matcher.appendReplacement(result, "{" + content + "}");
+            }
+        }
+        matcher.appendTail(result);
+        return MessageFormat.format(result.toString(), processArgs(args));
+    }
+
+    public static <T> T throwException(Status status, Throwable cause, Object... args) {
+        throw new ApiAlertException(formatMessage(status, args), cause);
+    }
+
+    public static <T> T throwException(Status status, Object... args) {
+        throw new ApiAlertException(formatMessage(status, args));
     }
 }

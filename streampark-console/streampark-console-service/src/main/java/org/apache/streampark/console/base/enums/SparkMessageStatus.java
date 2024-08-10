@@ -15,14 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.base.exception;
+package org.apache.streampark.console.base.enums;
 
-/**
- * Applies to all application exceptions
- */
-public class ApplicationException extends ApiAlertException {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public ApplicationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@AllArgsConstructor
+@Getter
+public enum SparkMessageStatus implements Status {
+
+    SPARK_ENV_HOME_NULL_ERROR(10710, "The spark home does not exist, please check.",
+        "Spark Home不存在，请查验。"),
+    SPARK_ENV_HOME_IS_DEFAULT_SET(10720, "The spark home is set as default, please change it first.",
+        "Spark Home 设置为默认设置，请先更改"),
+    SPARK_ENV_VERSION_NOT_FOUND(10730, "[StreamPark] can no found spark {0} version",
+        "[StreamPark] 无法找到Spark {0} 版本"),
+
+    ;
+    private final int code;
+    private final String enMsg;
+    private final String zhMsg;
+
 }

@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
@@ -38,6 +37,9 @@ import org.springframework.util.PropertyPlaceholderHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.EXTERNAL_LINK_PARAM_EXISTING_ERROR;
 
 @Slf4j
 @Service
@@ -74,7 +76,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     @Override
     public List<ExternalLink> render(Long appId) {
         Application app = applicationManageService.getById(appId);
-        AssertUtils.notNull(app, "Application doesn't exist");
+        ApiAlertException.throwIfNull(app, APP_NOT_EXISTS_ERROR);
         List<ExternalLink> externalLink = this.list();
         if (externalLink != null && externalLink.size() > 0) {
             // Render the placeholder
@@ -109,9 +111,9 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
             return true;
         }
         ApiAlertException.throwIfTrue(result.getBadgeName().equals(params.getBadgeName()),
-            String.format("The name: %s is already existing.", result.getBadgeName()));
+            EXTERNAL_LINK_PARAM_EXISTING_ERROR, "badge name", result.getBadgeName());
         ApiAlertException.throwIfTrue(result.getLinkUrl().equals(params.getLinkUrl()),
-            String.format("The linkUrl: %s is already existing.", result.getLinkUrl()));
+            EXTERNAL_LINK_PARAM_EXISTING_ERROR, "link url", result.getLinkUrl());
 
         return false;
     }

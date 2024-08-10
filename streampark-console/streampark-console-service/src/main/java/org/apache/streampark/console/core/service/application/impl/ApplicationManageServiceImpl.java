@@ -91,15 +91,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_CREATE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_FLINK_CLUSTER_NOT_RUNNING_UPDATE_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_NAME_REPEAT_COPY_FAILED;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY;
+import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_SQL_IS_NULL_UPDATE_FAILED;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_NULL_ERROR;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper, Application>
     implements
         ApplicationManageService {
-
-    private static final String ERROR_APP_QUEUE_HINT =
-        "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
     @Autowired
     private ProjectService projectService;
@@ -320,7 +325,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public boolean create(Application appParam) {
         ApiAlertException.throwIfNull(
-            appParam.getTeamId(), "The teamId can't be null. Create application failed.");
+            appParam.getTeamId(), SYSTEM_TEAM_ID_NULL_ERROR);
         appParam.setUserId(ServiceHelper.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
@@ -333,7 +338,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
             success,
-            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY, appParam.getYarnQueue(), appParam.getTeamId());
 
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
@@ -358,7 +363,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             }
             return true;
         } else {
-            throw new ApiAlertException("create application failed");
+            return ApiAlertException.throwException(APP_CREATE_FAILED);
         }
     }
 
@@ -374,7 +379,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         boolean existsByJobName = this.existsByJobName(appParam.getJobName());
         ApiAlertException.throwIfFalse(
             !existsByJobName,
-            "[StreamPark] Application names can't be repeated, copy application failed.");
+            APP_NAME_REPEAT_COPY_FAILED);
 
         Application persist = getById(appParam.getId());
         Application newApp = new Application();
@@ -451,7 +456,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             }
             return newApp.getId();
         } else {
-            throw new ApiAlertException(
+            return ApiAlertException.throwException(UNKNOWN_ERROR,
                 "create application from copy failed, copy source app: " + persist.getJobName());
         }
     }
@@ -469,7 +474,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 ApiAlertException.throwIfFalse(
                     flinkClusterWatcher.getClusterState(flinkCluster) == ClusterState.RUNNING,
-                    "[StreamPark] update failed, because bind flink cluster not running");
+                    APP_FLINK_CLUSTER_NOT_RUNNING_UPDATE_FAILED);
                 break;
             default:
         }
@@ -477,7 +482,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         boolean success = validateQueueIfNeeded(application, appParam);
         ApiAlertException.throwIfFalse(
             success,
-            String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
+            APP_QUEUE_LABEL_IN_TEAM_ILLEGALLY, appParam.getYarnQueue(), appParam.getTeamId());
 
         application.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
 
@@ -602,7 +607,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             // get previous flink sql and decode
             FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
             ApiAlertException.throwIfNull(
-                copySourceFlinkSql, "Flink sql is null, update flink sql job failed.");
+                copySourceFlinkSql, FLINK_SQL_IS_NULL_UPDATE_FAILED);
             copySourceFlinkSql.decode();
 
             // get submit flink sql
@@ -807,7 +812,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
      *
      * @param application application entity.
      * @return If the executionMode is (Yarn PerJob or application mode) and the queue label is not
-     *     (empty or default), return true, false else.
+     * (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(Application application) {
         return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())

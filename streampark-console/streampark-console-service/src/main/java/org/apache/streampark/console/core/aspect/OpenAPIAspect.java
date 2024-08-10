@@ -43,6 +43,8 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
+
 @Slf4j
 @Component
 @Aspect
@@ -66,7 +68,7 @@ public class OpenAPIAspect {
             OpenAPI openAPI = methodSignature.getMethod().getAnnotation(OpenAPI.class);
             if (openAPI == null) {
                 String url = request.getRequestURI();
-                throw new ApiAlertException("openapi unsupported: " + url);
+                ApiAlertException.throwException(UNKNOWN_ERROR, "openapi unsupported: " + url);
             } else {
                 Object[] objects = joinPoint.getArgs();
                 for (OpenAPI.Param param : openAPI.param()) {

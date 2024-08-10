@@ -37,6 +37,8 @@ import javax.naming.ldap.LdapContext;
 
 import java.util.Properties;
 
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_LDAP_NOT_ENABLE;
+
 @Component
 @Configuration
 @Slf4j
@@ -74,7 +76,7 @@ public class LdapService {
      */
     public boolean ldapLogin(String userId, String userPwd) {
         ApiAlertException.throwIfFalse(
-            enable, "ldap is not enabled, Please check the configuration: ldap.enable");
+            enable, SYSTEM_LDAP_NOT_ENABLE);
         renderLdapEnv();
         try {
             NamingEnumeration<SearchResult> results = getSearchResults(userId);

@@ -78,6 +78,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_BUILDING_STATE;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_GIT_PASSWORD_DECRYPT_FAILED;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_MODULE_NULL_ERROR;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_NAME_EXIST;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_RUNNING_BUILDING_EXCEED_LIMIT;
+import static org.apache.streampark.console.base.enums.ProjectMessageStatus.PROJECT_TEAM_ID_MODIFY_ERROR;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -105,7 +112,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
 
-        ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
+        ApiAlertException.throwIfTrue(count > 0, PROJECT_NAME_EXIST);
         if (StringUtils.isNotBlank(project.getPassword())) {
             String salt = ShaHashUtils.getRandomSalt();
             try {
@@ -113,16 +120,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 project.setSalt(salt);
                 project.setPassword(encrypt);
             } catch (Exception e) {
-                log.error("Project password decrypt failed", e);
-                throw new ApiAlertException("Project github/gitlab password decrypt failed");
+                ApiAlertException.throwException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
             }
         }
         boolean status = save(project);
-
-        if (status) {
-            return response.message("Add project successfully").data(true);
-        }
-        return response.message("Add project failed").data(false);
+        return response.message("Add project " + (status ? "successfully" : "failed")).data(true);
     }
 
     @Override
@@ -131,10 +133,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         AssertUtils.notNull(project);
         ApiAlertException.throwIfFalse(
             project.getTeamId().equals(projectParam.getTeamId()),
-            "TeamId can't be changed, update project failed.");
-        ApiAlertException.throwIfFalse(
-            !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
-            "The project is being built, update project failed.");
+            PROJECT_TEAM_ID_MODIFY_ERROR);
+        ApiAlertException.throwIfTrue(
+            BuildStateEnum.BUILDING.get() == project.getBuildState(),
+            PROJECT_BUILDING_STATE);
         updateInternal(projectParam, project);
         if (project.isHttpRepositoryUrl()) {
             if (StringUtils.isBlank(projectParam.getUserName())) {
@@ -150,8 +152,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         project.setPassword(encrypt);
                         project.setSalt(salt);
                     } catch (Exception e) {
-                        log.error("The project github/gitlab password encrypt failed");
-                        throw new ApiAlertException(e);
+                        ApiAlertException.throwException(PROJECT_GIT_PASSWORD_DECRYPT_FAILED, e);
                     }
                 }
             }
@@ -232,9 +233,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Long currentBuildCount = this.baseMapper.getBuildingCount();
         ApiAlertException.throwIfTrue(
             maxProjectBuildNum > -1 && currentBuildCount > maxProjectBuildNum,
-            String.format(
-                "The number of running Build projects exceeds the maximum number: %d of max-build-num",
-                maxProjectBuildNum));
+            PROJECT_RUNNING_BUILDING_EXCEED_LIMIT,
+            maxProjectBuildNum);
         Project project = getById(id);
         this.baseMapper.updateBuildState(project.getId(), BuildStateEnum.BUILDING.get());
         String logPath = getBuildLogPath(id);
@@ -287,7 +287,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> listJars(Project project) {
         ApiAlertException.throwIfNull(
-            project.getModule(), "Project module can't be null, please check.");
+            project.getModule(), PROJECT_MODULE_NULL_ERROR);
         File projectModuleDir = new File(project.getDistHome(), project.getModule());
         return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
             .map(File::getName)

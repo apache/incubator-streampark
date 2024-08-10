@@ -40,7 +40,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** catalog manage */
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.CATALOG_NAME_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.CATALOG_NAME_MODIFY_ERROR;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.CATALOG_NAME_VALID_MSG;
+import static org.apache.streampark.console.base.enums.ApplicationMessageStatus.CATALOG_NOT_EXISTS_ERROR;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_TEAM_ID_CANNOT_NULL;
+
+/**
+ * catalog manage
+ */
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
@@ -53,12 +61,12 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
     @Override
     public boolean create(FlinkCatalogParams catalog, Long userId) {
         AlertException.throwIfNull(
-            catalog.getTeamId(), "The teamId can't be null. Create catalog failed.");
+            catalog.getTeamId(), SYSTEM_TEAM_ID_CANNOT_NULL);
         AlertException.throwIfFalse(
             validateCatalogName(catalog.getCatalogName()),
-            "Catalog Name only lowercase letters, numbers, and -,.. Symbol composition, cannot end with a symbol.");
+            CATALOG_NAME_VALID_MSG);
         AlertException.throwIfTrue(
-            existsByCatalogName(catalog.getCatalogName()), "Catalog name  already exists.");
+            existsByCatalogName(catalog.getCatalogName()), CATALOG_NAME_EXISTS_ERROR);
         FlinkCatalog flinkCatalog = FlinkCatalog.of(catalog);
         Date date = new Date();
         flinkCatalog.setCreateTime(date);
@@ -69,14 +77,14 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
     @Override
     public boolean remove(Long id) {
         FlinkCatalog catalog = getById(id);
-        ApiAlertException.throwIfNull(catalog, "Catalog not exist, please check.");
+        ApiAlertException.throwIfNull(catalog, CATALOG_NOT_EXISTS_ERROR);
         return this.removeById(id);
     }
 
     @Override
     public IPage<FlinkCatalogParams> page(FlinkCatalogParams catalog, RestRequest request) {
         AlertException.throwIfNull(
-            catalog.getTeamId(), "The teamId can't be null. List catalog failed.");
+            catalog.getTeamId(), SYSTEM_TEAM_ID_CANNOT_NULL);
 
         Page<FlinkCatalog> page = MybatisPager.getPage(request);
         this.baseMapper.selectPage(page, FlinkCatalog.of(catalog));
@@ -95,12 +103,12 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
     @Override
     public boolean update(FlinkCatalogParams catalogParam, long userId) {
         AlertException.throwIfNull(
-            catalogParam.getTeamId(), "The teamId can't be null. List catalog failed.");
+            catalogParam.getTeamId(), SYSTEM_TEAM_ID_CANNOT_NULL);
         FlinkCatalog catalog = getById(catalogParam.getId());
         FlinkCatalog flinkCatalog = FlinkCatalog.of(catalogParam);
         AlertException.throwIfFalse(
             catalogParam.getCatalogName().equalsIgnoreCase(catalog.getCatalogName()),
-            "The catalog name cannot be modified.");
+            CATALOG_NAME_MODIFY_ERROR);
         log.debug(
             "Catalog {} has modify from {} to {}",
             catalog.getCatalogName(),
@@ -116,7 +124,9 @@ public class CatalogServiceImpl extends ServiceImpl<CatalogMapper, FlinkCatalog>
         return this.baseMapper.existsByCatalogName(catalogName);
     }
 
-    /** validate catalog name */
+    /**
+     * validate catalog name
+     */
     private boolean validateCatalogName(String catalogName) {
         return Pattern.compile(CATALOG_REGEX).matcher(catalogName).matches();
     }

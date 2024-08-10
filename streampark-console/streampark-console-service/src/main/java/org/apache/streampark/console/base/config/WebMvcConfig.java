@@ -31,11 +31,14 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import java.util.List;
+import java.util.Locale;
 
 /** Customize the SpringMVC configuration */
 @Configuration
@@ -51,6 +54,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
             HttpMethod.OPTIONS.name(),
             HttpMethod.DELETE.name()
     };
+
+    public static final String LOCALE_LANGUAGE_COOKIE = "language";
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -95,4 +100,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
             .addInterceptor(uploadFileTypeInterceptor)
             .addPathPatterns("/flink/app/upload", "/resource/upload");
     }
+
+    @Bean(name = "localeResolver")
+    public LocaleResolver localeResolver() {
+        CookieLocaleResolver localeResolver = new CookieLocaleResolver();
+        localeResolver.setCookieName(LOCALE_LANGUAGE_COOKIE);
+        // set default locale
+        localeResolver.setDefaultLocale(Locale.US);
+        // set language tag compliant
+        localeResolver.setLanguageTagCompliant(false);
+        return localeResolver;
+    }
+
 }

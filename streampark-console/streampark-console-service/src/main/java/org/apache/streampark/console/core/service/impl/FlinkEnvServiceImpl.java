@@ -36,6 +36,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.util.Date;
 
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_HOME_EXIST_APP_USE;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_HOME_EXIST_CLUSTER_USE;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_HOME_IS_DEFAULT_SET;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINK_ENV_HOME_NOT_EXIST;
+
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -102,7 +107,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
         Long count = this.baseMapper.selectCount(null);
         ApiAlertException.throwIfFalse(
             !(count > 1 && flinkEnv.getIsDefault()),
-            "The flink home is set as default, please change it first.");
+            FLINK_ENV_HOME_IS_DEFAULT_SET);
 
         this.baseMapper.deleteById(id);
     }
@@ -162,16 +167,16 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     private void checkOrElseAlert(FlinkEnv flinkEnv) {
 
         // 1.check exists
-        ApiAlertException.throwIfNull(flinkEnv, "The flink home does not exist, please check.");
+        ApiAlertException.throwIfNull(flinkEnv, FLINK_ENV_HOME_NOT_EXIST);
 
         // 2.check if it is being used by any flink cluster
         ApiAlertException.throwIfTrue(
             flinkClusterService.existsByFlinkEnvId(flinkEnv.getId()),
-            "The flink home is still in use by some flink cluster, please check.");
+            FLINK_ENV_HOME_EXIST_CLUSTER_USE);
 
         // 3.check if it is being used by any application
         ApiAlertException.throwIfTrue(
             applicationInfoService.existsByFlinkEnvId(flinkEnv.getId()),
-            "The flink home is still in use by some application, please check.");
+            FLINK_ENV_HOME_EXIST_APP_USE);
     }
 }

@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.aspect;
 
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.base.enums.UserMessageStatus;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
@@ -44,6 +45,12 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
+import static org.apache.streampark.console.base.enums.CommonStatus.UNKNOWN_ERROR;
+import static org.apache.streampark.console.base.enums.FlinkMessageStatus.FLINk_APP_IS_NULL;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_JOB_OWNER_MISMATCH;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH;
+import static org.apache.streampark.console.base.enums.UserMessageStatus.SYSTEM_PERMISSION_TEAM_NO_PERMISSION;
+
 @Slf4j
 @Component
 @Aspect
@@ -65,7 +72,7 @@ public class PermissionAspect {
         Permission permission = methodSignature.getMethod().getAnnotation(Permission.class);
 
         User currentUser = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
+        ApiAlertException.throwIfNull(currentUser, UserMessageStatus.SYSTEM_USER_NOT_LOGIN);
 
         boolean isAdmin = currentUser.getUserType() == UserTypeEnum.ADMIN;
 
@@ -74,27 +81,23 @@ public class PermissionAspect {
             Long userId = getId(joinPoint, methodSignature, permission.user());
             ApiAlertException.throwIfTrue(
                 userId != null && !currentUser.getUserId().equals(userId),
-                "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
+                SYSTEM_PERMISSION_LOGIN_USER_PERMISSION_MISMATCH);
 
             // 2) check team
             Long teamId = getId(joinPoint, methodSignature, permission.team());
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
-                ApiAlertException.throwIfTrue(
-                    member == null,
-                    "Permission denied, only members of this team can access this permission");
+                ApiAlertException.throwIfTrue(member == null, SYSTEM_PERMISSION_TEAM_NO_PERMISSION);
             }
 
             // 3) check app
             Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
                 Application app = applicationManageService.getById(appId);
-                ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
+                ApiAlertException.throwIfTrue(app == null, FLINk_APP_IS_NULL);
                 if (!currentUser.getUserId().equals(app.getUserId())) {
                     Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());
-                    ApiAlertException.throwIfTrue(
-                        member == null,
-                        "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+                    ApiAlertException.throwIfTrue(member == null, SYSTEM_PERMISSION_JOB_OWNER_MISMATCH);
                 }
             }
         }
@@ -123,7 +126,7 @@ public class PermissionAspect {
         try {
             return Long.parseLong(value.toString());
         } catch (NumberFormatException e) {
-            throw new ApiAlertException(
+            return ApiAlertException.throwException(UNKNOWN_ERROR,
                 "Wrong use of annotation on method " + methodSignature.getName(), e);
         }
     }
