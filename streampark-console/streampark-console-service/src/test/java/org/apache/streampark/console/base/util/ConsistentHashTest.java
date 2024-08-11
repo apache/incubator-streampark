@@ -17,10 +17,9 @@
 
 package org.apache.streampark.console.base.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,9 +34,9 @@ public class ConsistentHashTest {
     Long startTime;
 
     List<String> servers;
-    
+
     ConsistentHash<String> hash;
-    
+
     Integer jobNum = 300000;
 
     List<Integer> jobIds = new ArrayList<>();
@@ -47,7 +46,7 @@ public class ConsistentHashTest {
         startTime = System.currentTimeMillis();
         servers = new ArrayList<>(Arrays.asList("Server-A", "Server-B", "Server-C"));
         hash = new ConsistentHash<>(servers);
-        for (int i = 0; i < jobNum; i ++) {
+        for (int i = 0; i < jobNum; i++) {
             jobIds.add(i);
         }
     }
@@ -55,8 +54,8 @@ public class ConsistentHashTest {
     @Test
     public void initWatch() {
         Map<String, Long> counts = jobIds.stream()
-        .map(hash::get)
-        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            .map(hash::get)
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         counts.forEach((k, v) -> {
             log.info("node:{}, initWatch count:{}", k, v);
         });
@@ -68,8 +67,8 @@ public class ConsistentHashTest {
         servers.add("Server-D");
         hash.add("Server-D");
         Map<String, Long> counts = jobIds.stream()
-        .map(hash::get)
-        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            .map(hash::get)
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         counts.forEach((k, v) -> {
             log.info("node:{}, addServer count:{}", k, v);
         });
@@ -81,8 +80,8 @@ public class ConsistentHashTest {
         servers.remove("Server-C");
         hash.remove("Server-C");
         Map<String, Long> counts = jobIds.stream()
-        .map(hash::get)
-        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            .map(hash::get)
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         counts.forEach((k, v) -> {
             log.info("node:{}, removeServer count:{}", k, v);
         });
