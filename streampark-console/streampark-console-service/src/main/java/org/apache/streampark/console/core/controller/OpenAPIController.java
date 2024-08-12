@@ -62,11 +62,6 @@ public class OpenAPIController {
             type = Long.class,
             bindFor = "appId"),
         @OpenAPI.Param(
-            name = "teamId",
-            description = "current user teamId",
-            required = true,
-            type = Long.class),
-        @OpenAPI.Param(
             name = "argument",
             description = "flink program run argument",
             required = false,
@@ -91,7 +86,7 @@ public class OpenAPIController {
             type = Boolean.class,
             defaultValue = "false"),
       })
-  @PermissionScope(app = "#app.appId", team = "#app.teamId")
+  @PermissionScope(app = "#app.appId")
   @PostMapping("app/start")
   @RequiresPermissions("app:start")
   public RestResponse flinkStart(Application app) throws Exception {
@@ -116,11 +111,6 @@ public class OpenAPIController {
             type = Long.class,
             bindFor = "appId"),
         @OpenAPI.Param(
-            name = "teamId",
-            description = "current user teamId",
-            required = true,
-            type = Long.class),
-        @OpenAPI.Param(
             name = "triggerSavepoint",
             description = "trigger savepoint before taking stopping",
             required = false,
@@ -139,7 +129,7 @@ public class OpenAPIController {
             type = Boolean.class,
             defaultValue = "false"),
       })
-  @PermissionScope(app = "#app.appId", team = "#app.teamId")
+  @PermissionScope(app = "#app.appId")
   @PostMapping("app/cancel")
   @RequiresPermissions("app:cancel")
   public RestResponse flinkCancel(Application app) throws Exception {

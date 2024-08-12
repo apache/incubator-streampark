@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -57,12 +56,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
   @Autowired private TeamService teamService;
   @Autowired private ServiceHelper serviceHelper;
-
-  @Override
-  @Transactional
-  public void deleteByRoleIds(String[] roleIds) {
-    Arrays.stream(roleIds).forEach(id -> baseMapper.deleteByRoleId(Long.valueOf(id)));
-  }
 
   @Override
   @Transactional
@@ -95,15 +88,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
   }
 
   @Override
-  public Member findByUserName(Long teamId, String userName) {
-    User user = userService.findByName(userName);
-    if (user == null) {
-      return null;
-    }
-    return findByUserId(teamId, user.getUserId());
-  }
-
-  private Member findByUserId(Long teamId, Long userId) {
+  public Member findByUserId(Long teamId, Long userId) {
     ApiAlertException.throwIfNull(teamId, "The team id is required.");
     LambdaQueryWrapper<Member> queryWrapper =
         new LambdaQueryWrapper<Member>()

@@ -29,8 +29,6 @@ import java.util.List;
 
 public interface MemberService extends IService<Member> {
 
-  void deleteByRoleIds(String[] roleIds);
-
   void deleteByUserId(Long userId);
 
   void deleteByTeamId(Long teamId);
@@ -41,7 +39,7 @@ public interface MemberService extends IService<Member> {
 
   List<Team> findUserTeams(Long userId);
 
-  Member findByUserName(Long teamId, String userName);
+  Member findByUserId(Long teamId, Long userId);
 
   List<Long> findUserIdsByRoleId(Long roleId);
 

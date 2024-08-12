@@ -26,9 +26,8 @@ enum MEMBER_API {
   UPDATE = '/member/update',
   LIST = '/member/list',
   TEAMS = '/member/teams',
-  CHECK_NAME = '/user/check/name',
   DELETE = '/member/delete',
-  CANDIDATE_USERS = '/member/candidateUsers',
+  CANDIDATE_USERS = '/member/candidate_users',
 }
 
 /**
@@ -77,14 +76,6 @@ export function fetchUserTeam(data: {
   userId: number | string;
 }): Promise<Array<{ id: string; teamName: string }>> {
   return defHttp.post({ url: MEMBER_API.TEAMS, data });
-}
-/**
- * name check
- * @param {Object} data username
- * @returns {Promise<boolean>}
- */
-export function fetchCheckUserName(data: { username: string }): Promise<boolean> {
-  return defHttp.post({ url: MEMBER_API.CHECK_NAME, data });
 }
 
 /**

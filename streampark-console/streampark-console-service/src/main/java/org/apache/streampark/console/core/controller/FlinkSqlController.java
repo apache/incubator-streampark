@@ -97,7 +97,7 @@ public class FlinkSqlController {
   }
 
   @PostMapping("get")
-  @PermissionScope(app = "#appId", team = "#teamId")
+  @PermissionScope(app = "#appId")
   public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
     ApiAlertException.throwIfTrue(
         appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");

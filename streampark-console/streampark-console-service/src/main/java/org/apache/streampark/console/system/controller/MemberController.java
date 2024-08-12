@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class MemberController {
     return RestResponse.success(userList);
   }
 
-  @PostMapping("candidateUsers")
+  @PostMapping("candidate_users")
   @RequiresPermissions("member:add")
   public RestResponse candidateUsers(Long teamId) {
     List<User> userList = memberService.findCandidateUsers(teamId);
@@ -68,12 +67,6 @@ public class MemberController {
   public RestResponse listTeams(Long userId) {
     List<Team> teamList = memberService.findUserTeams(userId);
     return RestResponse.success(teamList);
-  }
-
-  @PostMapping("check/user")
-  public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
-    Member result = this.memberService.findByUserName(teamId, userName);
-    return RestResponse.success(result == null);
   }
 
   @PermissionScope(team = "#member.teamId")

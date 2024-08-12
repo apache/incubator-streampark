@@ -99,7 +99,7 @@ public class ProxyServiceImpl implements ProxyService {
       return builder.body("Invalid operation, appId is invalid.");
     }
     if (!currentUser.getUserId().equals(app.getUserId())) {
-      Member member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+      Member member = memberService.findByUserId(app.getTeamId(), currentUser.getUserId());
       if (member == null) {
         return builder.body(
             "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");

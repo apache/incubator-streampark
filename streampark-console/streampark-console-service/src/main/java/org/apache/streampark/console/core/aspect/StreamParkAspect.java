@@ -187,7 +187,7 @@ public class StreamParkAspect {
       // 2) check team
       Long teamId = getId(joinPoint, methodSignature, permissionScope.team());
       if (teamId != null) {
-        Member member = memberService.findByUserName(teamId, currentUser.getUsername());
+        Member member = memberService.findByUserId(teamId, currentUser.getUserId());
         ApiAlertException.throwIfTrue(
             member == null,
             "Permission denied, only members of this team can access this permission");
@@ -199,7 +199,7 @@ public class StreamParkAspect {
         Application app = applicationService.getById(appId);
         ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
         if (!currentUser.getUserId().equals(app.getUserId())) {
-          Member member = memberService.findByUserName(app.getTeamId(), currentUser.getUsername());
+          Member member = memberService.findByUserId(app.getTeamId(), currentUser.getUserId());
           ApiAlertException.throwIfTrue(
               member == null,
               "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
