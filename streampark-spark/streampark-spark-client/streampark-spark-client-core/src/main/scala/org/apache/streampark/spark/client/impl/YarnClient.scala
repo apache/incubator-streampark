@@ -22,12 +22,11 @@ import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
-
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
 
 import java.util.concurrent.{ConcurrentHashMap, CountDownLatch}
-
 import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
@@ -147,12 +146,12 @@ object YarnClient extends SparkClientTrait {
   }
 
   protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
-    if (submitRequest.hasExtra("yarnQueueName")) {
-      submitRequest.appProperties.put("spark.yarn.queue", submitRequest.getExtra("yarnQueueName").asInstanceOf[String])
+    if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_NAME)) {
+      submitRequest.appProperties.put(KEY_SPARK_YARN_QUEUE, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_NAME).asInstanceOf[String])
     }
-    if (submitRequest.hasExtra("yarnQueueLabel")) {
-      submitRequest.appProperties.put("spark.yarn.am.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
-      submitRequest.appProperties.put("spark.yarn.executor.nodeLabelExpression", submitRequest.getExtra("yarnQueueLabel").asInstanceOf[String])
+    if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_LABEL)) {
+      submitRequest.appProperties.put(KEY_SPARK_YARN_AM_NODE_LABEL, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_LABEL).asInstanceOf[String])
+      submitRequest.appProperties.put(KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_LABEL).asInstanceOf[String])
     }
   }
 }

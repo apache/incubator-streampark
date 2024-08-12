@@ -261,7 +261,7 @@ public class SparkApplicationManageServiceImpl
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
         appParam.setCreateTime(new Date());
-        appParam.setModifyTime(new Date());
+        appParam.setModifyTime(appParam.getCreateTime());
 
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
@@ -344,7 +344,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setAlertId(oldApp.getAlertId());
         newApp.setCreateTime(new Date());
-        newApp.setModifyTime(new Date());
+        newApp.setModifyTime(newApp.getCreateTime());
         newApp.setTags(oldApp.getTags());
 
         boolean saved = save(newApp);

@@ -300,10 +300,10 @@ public class SparkApplicationActionServiceImpl
         if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
-                extraParameter.put("yarnQueueName", application.getYarnQueueName());
+                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
             }
             if (StringUtils.isNotBlank(application.getYarnQueueLabel())) {
-                extraParameter.put("yarnQueueLabel", application.getYarnQueueLabel());
+                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL(), application.getYarnQueueLabel());
             }
         }
 
