@@ -141,11 +141,7 @@ public enum FlinkAppState implements Serializable {
   public static class Bridge {
     /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
     public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-      if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
-        return INITIALIZING;
-      } else {
-        return of(flinkJobState.toString());
-      }
+      return of(flinkJobState.toString());
     }
 
     /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */

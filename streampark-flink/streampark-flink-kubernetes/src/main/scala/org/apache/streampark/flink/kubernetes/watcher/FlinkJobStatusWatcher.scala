@@ -323,20 +323,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
         val isConnection = KubernetesDeploymentHelper.checkConnection()
 
         if (deployExists) {
-          val deployError = KubernetesDeploymentHelper.isDeploymentError(
-            trackId.namespace,
-            trackId.clusterId
-          )
-          if (!deployError) {
-            logger.info("Task Enter the initialization process.")
-            FlinkJobState.K8S_INITIALIZING
-          } else if (isConnection) {
-            logger.info("Enter the task failure deletion process.")
-            KubernetesDeploymentHelper.watchPodTerminatedLog(
+          if (isConnection) {
+            logger.info("Enter the task starting process.")
+            KubernetesDeploymentHelper.watchDeploymentLog(
               trackId.namespace,
               trackId.clusterId,
               trackId.jobId)
-            FlinkJobState.FAILED
+            FlinkJobState.STARTING
           } else {
             inferFromPreCache(latest)
           }
