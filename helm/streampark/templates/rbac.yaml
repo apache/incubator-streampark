@@ -21,7 +21,7 @@ RBAC rules used to create the operator (cluster)role based on the scope
 {{- define "streampark.rbacRules" }}
 rules:
   - apiGroups:
-      - ""
+      - "*"
     resources:
       - pods
       - services
@@ -31,6 +31,10 @@ rules:
       - configmaps
       - secrets
       - nodes
+      - deployments
+      - ingresses
+      - replicasets
+      - pods/log
     verbs:
       - "*"
 {{- end }}
