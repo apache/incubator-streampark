@@ -23,26 +23,45 @@ import java.util.TreeMap;
 
 public class ConsistentHash<T> {
 
+    // the number of virtual nodes for each server
     private final int numberOfReplicas = 2 << 16;
 
+    // the hash ring of servers
     private final SortedMap<Long, T> circle = new TreeMap<>();
 
-    public ConsistentHash(Collection<T> nodes) {
-        nodes.forEach(this::add);
+    /**
+     * Initialize the ConsistentHash with a collection of servers.
+     * @param servers the collection of servers
+     */
+    public ConsistentHash(Collection<T> servers) {
+        servers.forEach(this::add);
     }
 
-    public void add(T node) {
+    /**
+     * Add the virtual nodes of the server to the hash ring.
+     * @param server the server to be added
+     */
+    public void add(T server) {
         for (int i = 0; i < numberOfReplicas; i++) {
-            circle.put(Murmur3Hash.hash64(node.toString() + i), node);
+            circle.put(Murmur3Hash.hash64(server.toString() + i), server);
         }
     }
 
-    public void remove(T node) {
+    /**
+     * Remove the virtual nodes of the server from the hash ring.
+     * @param server the server to be removed
+     */
+    public void remove(T server) {
         for (int i = 0; i < numberOfReplicas; i++) {
-            circle.remove(Murmur3Hash.hash64(node.toString() + i));
+            circle.remove(Murmur3Hash.hash64(server.toString() + i));
         }
     }
 
+    /**
+     * Get the server that the key belongs to from the hash ring.
+     * @param key the key
+     * @return the specified server
+     */
     public T get(Object key) {
         if (circle.isEmpty()) {
             return null;
@@ -55,6 +74,10 @@ public class ConsistentHash<T> {
         return circle.get(hash);
     }
 
+    /**
+     * Get the size of the hash ring.
+     * @return the size of the hash ring
+     */
     public long getSize() {
         return circle.size();
     }
