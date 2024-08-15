@@ -85,6 +85,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
 
     private void renderLinkUrl(ExternalLink link, Application app) {
         Map<String, String> placeholderValueMap = new HashMap<>();
+        placeholderValueMap.put(PlaceholderTypeEnum.ID.get(), String.valueOf(app.getId()));
         placeholderValueMap.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());
         placeholderValueMap.put(PlaceholderTypeEnum.JOB_NAME.get(), app.getJobName());
         placeholderValueMap.put(PlaceholderTypeEnum.YARN_ID.get(), app.getClusterId());
