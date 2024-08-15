@@ -15,10 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.common.util.Implicits.JavaMap
+import org.apache.streampark.console.core.entity.SparkSql;
 
-case class SubmitResponse(
-    var sparkAppId: String,
-    sparkProperties: JavaMap[String, String])
+import org.apache.ibatis.annotations.Param;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
+
+public interface SparkSqlMapper extends BaseMapper<SparkSql> {
+
+    SparkSql getEffective(@Param("appId") Long appId);
+
+    Integer getLatestVersion(@Param("appId") Long appId);
+
+    List<SparkSql> selectSqlsByTeamId(@Param("teamId") Long teamId);
+}

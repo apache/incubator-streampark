@@ -19,15 +19,13 @@ package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
-import org.apache.streampark.console.base.util.Tuple2;
-import org.apache.streampark.console.base.util.Tuple3;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
-import org.apache.streampark.console.core.metrics.spark.SparkExecutor;
+import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
@@ -59,7 +57,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -206,25 +203,24 @@ public class SparkAppHttpWatcher {
                 }
                 if (SparkAppStateEnum.isEndState(sparkAppStateEnum.getValue())) {
                     log.info(
-                        "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, app {} was ended, jobId is {}, state is {}",
+                        "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, app {} was ended, appId is {}, state is {}",
                         application.getId(),
-                        application.getJobId(),
+                        application.getAppId(),
                         sparkAppStateEnum);
                     application.setEndTime(new Date());
                 }
                 if (SparkAppStateEnum.RUNNING == sparkAppStateEnum) {
-                    Tuple3<Double, Double, Long> resourceStatus = getResourceStatus(application);
-                    double memoryUsed = resourceStatus.t1;
-                    double maxMemory = resourceStatus.t2;
-                    double totalCores = resourceStatus.t3;
-                    log.info(
-                        "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, app {} was running, jobId is {}, memoryUsed: {}MB, maxMemory: {}MB, totalCores: {}",
-                        application.getId(),
-                        application.getJobId(),
-                        String.format("%.2f", memoryUsed),
-                        String.format("%.2f", maxMemory),
-                        totalCores);
-                    // TODO: Modify the table structure to persist the results
+                    SparkApplicationSummary summary;
+                    try {
+                        summary = httpStageAndTaskStatus(application);
+                        summary.setUsedMemory(Long.parseLong(yarnAppInfo.getApp().getAllocatedMB()));
+                        summary.setUsedVCores(Long.parseLong(yarnAppInfo.getApp().getAllocatedVCores()));
+                        application.fillRunningMetrics(summary);
+                    } catch (IOException e) {
+                        // This may happen when the job is finished right after the job status is abtained from yarn.
+                        log.warn(
+                            "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, fetch spark job status failed. The job may have already been finished.");
+                    }
                 }
                 application.setState(sparkAppStateEnum.getValue());
                 cleanOptioning(optionStateEnum, application.getId());
@@ -238,63 +234,19 @@ public class SparkAppHttpWatcher {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException("[StreamPark][SparkAppHttpWatcher] getStateFromYarn failed!");
+                throw new RuntimeException("[StreamPark][SparkAppHttpWatcher] getStateFromYarn failed!", e);
             }
         }
     }
 
-    /**
-     * Calculate spark task progress from Spark rest api. (proxyed by yarn) Only available when yarn
-     * application status is RUNNING.
-     *
-     * @param application
-     * @return task progress
-     * @throws Exception
-     */
-    private double getTasksProgress(SparkApplication application) throws Exception {
-        Job[] jobs = httpJobsStatus(application);
-        if (jobs.length == 0) {
-            return 0.0;
-        }
-        Optional<Tuple2<Integer, Integer>> jobsSumOption =
-            Arrays.stream(jobs)
-                .map(job -> new Tuple2<>(job.getNumCompletedTasks(), job.getNumTasks()))
-                .reduce((val1, val2) -> new Tuple2<>(val1.t1 + val2.t1, val1.t2 + val2.t2));
-        Tuple2<Integer, Integer> jobsSum = jobsSumOption.get();
-        return jobsSum.t1 * 1.0 / jobsSum.t2;
-    }
-
-    private Tuple3<Double, Double, Long> getResourceStatus(SparkApplication application) throws Exception {
-        SparkExecutor[] executors = httpExecutorsStatus(application);
-        if (executors.length == 0) {
-            return new Tuple3<>(0.0, 0.0, 0L);
-        }
-        SparkExecutor totalExecutor =
-            Arrays.stream(executors)
-                .reduce(
-                    (e1, e2) -> {
-                        SparkExecutor temp = new SparkExecutor();
-                        temp.setMemoryUsed(e1.getMemoryUsed() + e2.getMemoryUsed());
-                        temp.setMaxMemory(e1.getMaxMemory() + e2.getMaxMemory());
-                        temp.setTotalCores(e1.getTotalCores() + e2.getTotalCores());
-                        return temp;
-                    })
-                .get();
-        return new Tuple3<>(
-            totalExecutor.getMemoryUsed() * 1.0 / 1024 / 1024,
-            totalExecutor.getMaxMemory() * 1.0 / 1024 / 1024,
-            totalExecutor.getTotalCores());
-    }
-
     private void doPersistMetrics(SparkApplication application, boolean stopWatch) {
         if (SparkAppStateEnum.isEndState(application.getState())) {
-            application.setOverview(null);
-            application.setTotalTM(null);
-            application.setTotalSlot(null);
-            application.setTotalTask(null);
-            application.setAvailableSlot(null);
-            application.setJmMemory(null);
-            application.setTmMemory(null);
+            application.setUsedMemory(null);
+            application.setUsedVCores(null);
+            application.setNumTasks(null);
+            application.setNumCompletedTasks(null);
+            application.setNumStages(null);
+            application.setNumCompletedStages(null);
             unWatching(application.getId());
         } else if (stopWatch) {
             unWatching(application.getId());
@@ -313,7 +265,7 @@ public class SparkAppHttpWatcher {
 
     /** set current option state */
     public static void setOptionState(Long appId, SparkOptionStateEnum state) {
-        log.info("[StreamPark][SparkAppHttpWatcher]  setOptioning");
+        log.info("[StreamPark][SparkAppHttpWatcher] setOptioning");
         OPTIONING.put(appId, state);
         if (SparkOptionStateEnum.STOPPING == state) {
             STOP_FROM_MAP.put(appId, StopFromEnum.STREAMPARK);
@@ -347,22 +299,37 @@ public class SparkAppHttpWatcher {
     }
 
     private YarnAppInfo httpYarnAppInfo(SparkApplication application) throws Exception {
-        String reqURL = "ws/v1/cluster/apps/".concat(application.getJobId());
+        String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
         return yarnRestRequest(reqURL, YarnAppInfo.class);
     }
 
-    private Job[] httpJobsStatus(SparkApplication application) throws Exception {
+    private Job[] httpJobsStatus(SparkApplication application) throws IOException {
         String format = "proxy/%s/api/v1/applications/%s/jobs";
-        String reqURL = String.format(format, application.getJobId(), application.getJobId());
+        String reqURL = String.format(format, application.getAppId(), application.getAppId());
         return yarnRestRequest(reqURL, Job[].class);
     }
 
-    private SparkExecutor[] httpExecutorsStatus(SparkApplication application) throws Exception {
-        // "executor" is used for active executors only.
-        // "allexecutor" is used for all executors including the dead.
-        String format = "proxy/%s/api/v1/applications/%s/executors";
-        String reqURL = String.format(format, application.getJobId(), application.getJobId());
-        return yarnRestRequest(reqURL, SparkExecutor[].class);
+    /**
+     * Calculate spark stage and task metric from yarn rest api.
+     * Only available when yarn application status is RUNNING.
+     *
+     * @param application
+     * @return task progress
+     * @throws Exception
+     */
+    private SparkApplicationSummary httpStageAndTaskStatus(SparkApplication application) throws IOException {
+        Job[] jobs = httpJobsStatus(application);
+        SparkApplicationSummary summary = new SparkApplicationSummary(0L, 0L, 0L, 0L, null, null);
+        if (jobs == null) {
+            return summary;
+        }
+        Arrays.stream(jobs).forEach(job -> {
+            summary.setNumTasks(job.getNumTasks() + summary.getNumTasks());
+            summary.setNumCompletedTasks(job.getNumCompletedTasks() + summary.getNumCompletedTasks());
+            summary.setNumStages(job.getStageIds().size() + summary.getNumStages());
+            summary.setNumStages(job.getNumCompletedStages() + summary.getNumCompletedStages());
+        });
+        return summary;
     }
 
     private <T> T yarnRestRequest(String url, Class<T> clazz) throws IOException {

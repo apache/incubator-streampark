@@ -55,9 +55,4 @@ public interface SparkApplicationMapper extends BaseMapper<SparkApplication> {
     void resetOptionState();
 
     List<SparkApplication> selectAppsByProjectId(@Param("projectId") Long id);
-
-    boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
-
-    Integer countAffectedByClusterId(
-                                     @Param("clusterId") Long clusterId, @Param("dbType") String dbType);
 }

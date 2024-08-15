@@ -15,10 +15,20 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.util.Implicits.JavaMap
+import org.apache.streampark.console.core.entity.SparkEffective;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
-case class SubmitResponse(
-    var sparkAppId: String,
-    sparkProperties: JavaMap[String, String])
+import com.baomidou.mybatisplus.extension.service.IService;
+
+public interface SparkEffectiveService extends IService<SparkEffective> {
+
+    void remove(Long appId, EffectiveTypeEnum config);
+
+    SparkEffective get(Long appId, EffectiveTypeEnum config);
+
+    void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id);
+
+    void removeByAppId(Long appId);
+}

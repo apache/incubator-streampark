@@ -15,10 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.metrics.spark;
 
-import org.apache.streampark.common.util.Implicits.JavaMap
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-case class SubmitResponse(
-    var sparkAppId: String,
-    sparkProperties: JavaMap[String, String])
+import java.io.Serializable;
+
+@Data
+@AllArgsConstructor
+public class SparkApplicationSummary implements Serializable {
+
+    private Long numTasks;
+    private Long numCompletedTasks;
+    private Long numStages;
+    private Long numCompletedStages;
+    private Long usedMemory;
+    private Long usedVCores;
+}

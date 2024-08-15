@@ -28,4 +28,4 @@ case class StopRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
     @Nullable properties: JavaMap[String, String],
-    jobId: String)
+    appId: String)

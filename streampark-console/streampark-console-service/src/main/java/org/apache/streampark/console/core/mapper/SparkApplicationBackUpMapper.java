@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.common.util.Implicits.JavaMap
+import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
 
-case class SubmitResponse(
-    var sparkAppId: String,
-    sparkProperties: JavaMap[String, String])
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+public interface SparkApplicationBackUpMapper extends BaseMapper<SparkApplicationBackUp> {
+}

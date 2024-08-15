@@ -15,10 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.spark.client.bean
+package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.util.Implicits.JavaMap
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
-case class SubmitResponse(
-    var sparkAppId: String,
-    sparkProperties: JavaMap[String, String])
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Date;
+
+@Data
+@TableName("t_spark_effective")
+@Slf4j
+public class SparkEffective {
+
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    private Long appId;
+    /**
+     * 1) config <br>
+     * 2) spark Sql<br>
+     */
+    private Integer targetType;
+
+    private Long targetId;
+    private Date createTime;
+
+    private transient EffectiveTypeEnum effectiveType;
+}
