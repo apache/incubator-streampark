@@ -22,8 +22,6 @@ object FlinkJobState extends Enumeration {
 
   // flink job has been submit by the streampark.
   val STARTING,
-  // flink k8s resources are being initialized.
-  K8S_INITIALIZING,
   // lost track of flink job temporarily.
   SILENT,
   // flink job has terminated positively (maybe FINISHED or CANCELED)

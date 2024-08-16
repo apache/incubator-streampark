@@ -1844,12 +1844,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setOptionTime(new Date());
     updateById(application);
     savepointService.expire(application.getId());
-    // re-tracking flink job on kubernetes and logging exception
+    // delete deployment
     if (application.isKubernetesModeJob()) {
-      TrackId id = k8sWatcherWrapper.toTrackId(application);
-      flinkK8sWatcher.doWatching(id);
-    } else {
-      FlinkAppHttpWatcher.unWatching(application.getId());
+      try {
+        KubernetesDeploymentHelper.delete(application.getK8sNamespace(), application.getJobName());
+      } catch (Exception e) {
+        log.error("job abort failed!", e);
+      }
     }
     // kill application
     if (ExecutionMode.isYarnMode(application.getExecutionModeEnum())) {
