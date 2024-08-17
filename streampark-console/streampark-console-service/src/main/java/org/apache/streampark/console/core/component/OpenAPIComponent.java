@@ -89,15 +89,8 @@ public class OpenAPIComponent {
         .forEach(
             c -> {
               if (c.isRequired()) {
-                switch (c.getBindFor()) {
-                  case "appId":
-                    curlBuilder.addFormData(c.getName(), appId);
-                    break;
-                  case "teamId":
-                    curlBuilder.addFormData(c.getName(), teamId);
-                    break;
-                  default:
-                    break;
+                if (c.getBindFor().equals("appId")) {
+                  curlBuilder.addFormData(c.getName(), appId);
                 }
               } else {
                 curlBuilder.addFormData(c.getName(), c.getDefaultValue());
