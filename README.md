@@ -58,10 +58,14 @@
 
 ## 🚀 QuickStart
 
-- [Start with Docker](docker/README.md)
-- [Start with Kubernetes](helm/README.md)
+```shell
+curl -L https://github.com/apache/incubator-streampark/raw/dev/quickstart.sh | sh
+```
 
-Click [Official Documentation](https://streampark.apache.org/docs/framework/quick-start) for more information
+more:
+ - [Start with Docker](docker/README.md)
+ - [Start with Kubernetes](helm/README.md)
+ - [Official Documentation](https://streampark.apache.org/docs/framework/quick-start)
 
 ## 🔨 How to Build
 

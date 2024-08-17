@@ -81,7 +81,7 @@ export default defineComponent({
         <BasicModal
           width={800}
           onRegister={registerModal}
-          minHeight={520}
+          minHeight={500}
           showCancelBtn={false}
           okText={t('flink.app.detail.copyCurl')}
           onOk={handleCopyCurl}

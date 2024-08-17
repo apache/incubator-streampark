@@ -249,7 +249,8 @@ $_RUNJAVA -cp "${SP_HOME}/lib/*" $BASH_UTIL --replace "$SP_CONFIG" "port: 10000|
 FLINK_PROCESS="$(ps -ef | grep "flink-dist-" | grep 'org.apache.flink.runtime.entrypoint.StandaloneSessionClusterEntrypoint')"
 if [[ -n "${FLINK_PROCESS}" ]]; then
   FLINK_PARAM=$($_RUNJAVA -cp "${SP_HOME}/lib/*" $BASH_UTIL --read_flink "$FLINK_PROCESS")
-  IFS=',' read -r -a ARRAY <<< "$FLINK_PARAM"
+  # shellcheck disable=SC2206
+  ARRAY=(${FLINK_PARAM//,/ })
   FLINK_HOME=${ARRAY[0]}
   FLINK_NAME=${ARRAY[1]}
   FLINK_PORT=${ARRAY[2]}
@@ -259,7 +260,6 @@ else
   FLINK_TAR="${FLINK_NAME}-bin-scala_2.12.tgz"
   FLINK_HOME="${WORK_DIR}"/${SP_NAME}/flink/${FLINK_NAME}
   FLINK_PATH="${WORK_DIR}"/"${FLINK_TAR}"
-  FLINK_CONF="${FLINK_HOME}/conf/config.yaml"
 
   # 1) download flink
   echo_g "download flink..."
