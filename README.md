@@ -59,7 +59,7 @@
 ## 🚀 QuickStart
 
 ```shell
-curl -L https://github.com/apache/incubator-streampark/raw/dev/quickstart.sh | sh
+curl -L https://streampark.apache.org/quickstart.sh | sh
 ```
 
 more:
