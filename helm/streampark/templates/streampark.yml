@@ -60,7 +60,6 @@ spec:
             {{- toYaml .Values.spec.container.env | nindent 12 }}
           securityContext:
             privileged: false
-          command: ["bash","-c","bash ./bin/streampark.sh start_docker"]
           {{- if .Values.spec.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
@@ -94,6 +93,9 @@ spec:
           volumeMounts:
             - name: streampark-default-config-volume
               mountPath: /streampark/conf
+            {{- if .Values.spec.volumeMounts }}
+            {{ toYaml .Values.spec.volumeMounts | trim | nindent 12 }}
+            {{- end }}
           resources:
           {{- toYaml .Values.spec.resources | nindent 12 }}
       volumes:
@@ -105,3 +107,6 @@ spec:
                 path: config.yaml
               - key: logback-spring.xml
                 path: logback-spring.xml
+        {{- if .Values.spec.volumes }}
+        {{ toYaml .Values.spec.volumes | trim | nindent 8 }}
+        {{- end }}

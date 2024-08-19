@@ -38,4 +38,10 @@ spec:
                   name: {{ .Values.spec.name }}
             path: {{ .Values.ingress.path }}
             pathType: {{ .Values.ingress.pathType }}
+{{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.tlsSecretName }}
+{{- end }}
 {{- end }}

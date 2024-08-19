@@ -44,8 +44,8 @@ rules:
 {{/*
 Namespaced scoped RBAC.
 */}}
-{{- if .Values.watchNamespaces }}
-{{- range .Values.watchNamespaces }}
+{{- if .Values.rbac.watchNamespaces }}
+{{- range .Values.rbac.watchNamespaces }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -70,6 +70,22 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "streampark.serviceAccountName" $ }}
     namespace: {{ $.Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: streampark-flink-role-binding-default
+  namespace: {{ . }}
+  labels:
+    {{- include "streampark.labels" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: {{ . }}
 ---
 {{- end }}
 {{ else }}
@@ -100,6 +116,19 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "streampark.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: streampark-flink-role-binding-default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+  - kind: ServiceAccount
+    name: default
     namespace: {{ .Release.Namespace }}
 {{- end }}
 {{- end }}

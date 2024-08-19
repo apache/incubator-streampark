@@ -15,9 +15,6 @@
 # limitations under the License.
 #
 
-# When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
-# watchNamespaces: ["streampark"]
-
 image:
   repository: "apache/streampark"
   pullPolicy: "IfNotPresent"
@@ -26,6 +23,8 @@ image:
 
 rbac:
   create: true
+  ## When enabled RBAC is only created for said namespaces, otherwise it is done for the cluster scope.
+#  watchNamespaces: ["streampark"]
 
 spec:
   container:
@@ -107,6 +106,9 @@ spec:
     failureThreshold: "3"
     successThreshold: "1"
 
+  volumeMounts: []
+  volumes: []
+
 ingress:
   enabled: true
   host: "streampark.apache.org"
@@ -120,6 +122,10 @@ ingress:
     nginx.ingress.kubernetes.io/configuration-snippet: 'rewrite ^(/streampark)$ $1/ permanent;',
     kubernetes.io/ingress.class: "nginx"
   }
+  tls:
+    enabled: false
+    ## Secret that contains the TLS certificate
+    tlsSecretName: streampark-tls-secret
 
 service:
   ## type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer
