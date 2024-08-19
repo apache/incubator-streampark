@@ -34,6 +34,10 @@ export default {
     flinkHome: 'Flink Home',
     flinkCluster: 'Clusters',
   },
+  spark: {
+    application: 'Applications',
+    sparkHome: 'Spark Home'
+  },
   setting: {
     menu: 'Settings',
     system: 'Environments',
