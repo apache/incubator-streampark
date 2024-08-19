@@ -28,7 +28,7 @@ import org.apache.hadoop.yarn.util.{ConverterUtils, RMHAUtils}
 import org.apache.http.client.config.RequestConfig
 
 import java.io.IOException
-import java.net.InetAddress
+import java.net.{ConnectException, InetAddress}
 import java.security.PrivilegedExceptionAction
 import java.util
 import java.util.{List => JavaList}
@@ -231,9 +231,9 @@ object YarnUtils extends Logger {
           case Success(v) => v
           case Failure(e) =>
             if (hasYarnHttpKerberosAuth) {
-              throw new IOException(s"yarnUtils authRestRequest error, url: $u, detail: $e")
+              throw new ConnectException(s"yarnUtils authRestRequest error, url: $u, detail: $e")
             } else {
-              throw new IOException(s"yarnUtils restRequest error, url: $u, detail: $e")
+              throw new ConnectException(s"yarnUtils restRequest error, url: $u, detail: $e")
             }
         }
       case _ =>
@@ -243,7 +243,8 @@ object YarnUtils extends Logger {
             Utils.retry[String](5)(request(s"${getRMWebAppURL(true)}/$url", timeout)) match {
               case Success(v) => v
               case Failure(e) =>
-                throw new IOException(s"yarnUtils restRequest retry 5 times all failed. detail: $e")
+                throw new ConnectException(
+                  s"yarnUtils restRequest retry 5 times all failed. detail: $e")
             }
         }
     }

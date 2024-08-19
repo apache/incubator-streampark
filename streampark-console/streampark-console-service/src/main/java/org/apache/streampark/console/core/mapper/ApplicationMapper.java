@@ -62,4 +62,6 @@ public interface ApplicationMapper extends BaseMapper<Application> {
   boolean existsRunningJobByClusterId(@Param("clusterId") Long clusterId);
 
   boolean existsJobByClusterId(@Param("clusterId") Long clusterId);
+
+  void updateJobManagerUrl(@Param("id") Long id, @Param("url") String url);
 }
