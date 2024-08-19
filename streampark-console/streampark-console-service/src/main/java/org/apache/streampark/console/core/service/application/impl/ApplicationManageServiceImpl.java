@@ -231,7 +231,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                 .getFsOperator()
                 .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path =
+                Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -250,10 +251,11 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         if (ArrayUtils.isNotEmpty(appParam.getStateArray())
             && Arrays.stream(appParam.getStateArray())
                 .anyMatch(x -> x == FlinkAppStateEnum.FINISHED.getValue())) {
-            Integer[] newArray = ArrayUtils.insert(
-                appParam.getStateArray().length,
-                appParam.getStateArray(),
-                FlinkAppStateEnum.POS_TERMINATED.getValue());
+            Integer[] newArray =
+                ArrayUtils.insert(
+                    appParam.getStateArray().length,
+                    appParam.getStateArray(),
+                    FlinkAppStateEnum.POS_TERMINATED.getValue());
             appParam.setStateArray(newArray);
         }
         this.baseMapper.selectPage(page, appParam);
@@ -261,28 +263,30 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         long now = System.currentTimeMillis();
 
         List<Long> appIds = records.stream().map(Application::getId).collect(Collectors.toList());
-        Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
+        Map<Long, PipelineStatusEnum> pipeStates =
+            appBuildPipeService.listAppIdPipelineStatusMap(appIds);
 
-        List<Application> newRecords = records.stream()
-            .peek(
-                record -> {
-                    // status of flink job on kubernetes mode had been automatically persisted
-                    // to db
-                    // in time.
-                    if (record.isKubernetesModeJob()) {
-                        // set duration
-                        String restUrl = k8SFlinkTrackMonitor
-                            .getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
-                        record.setFlinkRestUrl(restUrl);
-                        setAppDurationIfNeeded(record, now);
-                    }
-                    if (pipeStates.containsKey(record.getId())) {
-                        record.setBuildStatus(pipeStates.get(record.getId()).getCode());
-                    }
-                    AppControl appControl = getAppControl(record);
-                    record.setAppControl(appControl);
-                })
-            .collect(Collectors.toList());
+        List<Application> newRecords =
+            records.stream()
+                .peek(
+                    record -> {
+                        // status of flink job on kubernetes mode had been automatically persisted
+                        // to db
+                        // in time.
+                        if (record.isKubernetesModeJob()) {
+                            // set duration
+                            String restUrl =
+                                k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(record));
+                            record.setFlinkRestUrl(restUrl);
+                            setAppDurationIfNeeded(record, now);
+                        }
+                        if (pipeStates.containsKey(record.getId())) {
+                            record.setBuildStatus(pipeStates.get(record.getId()).getCode());
+                        }
+                        AppControl appControl = getAppControl(record);
+                        record.setAppControl(appControl);
+                    })
+                .collect(Collectors.toList());
         page.setRecords(newRecords);
         return page;
     }
@@ -299,20 +303,19 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         return new AppControl()
             .setAllowBuild(
                 record.getBuildStatus() == null
-                    || !PipelineStatusEnum.running.getCode()
-                        .equals(record.getBuildStatus()))
+                    || !PipelineStatusEnum.running.getCode().equals(record.getBuildStatus()))
             .setAllowStart(
                 !record.shouldTracking()
-                    && PipelineStatusEnum.success.getCode()
-                        .equals(record.getBuildStatus()))
+                    && PipelineStatusEnum.success.getCode().equals(record.getBuildStatus()))
             .setAllowStop(record.isRunning());
     }
 
     @Override
     public void changeOwnership(Long userId, Long targetUserId) {
-        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<Application>()
-            .eq(Application::getUserId, userId)
-            .set(Application::getUserId, targetUserId);
+        LambdaUpdateWrapper<Application> updateWrapper =
+            new LambdaUpdateWrapper<Application>()
+                .eq(Application::getUserId, userId)
+                .set(Application::getUserId, targetUserId);
         this.baseMapper.update(null, updateWrapper);
     }
 
@@ -337,10 +340,12 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
         appParam.doSetHotParams();
         if (appParam.isUploadJob()) {
-            String jarPath = String.format(
-                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
+            String jarPath =
+                String.format(
+                    "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
             if (!new File(jarPath).exists()) {
-                Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
+                Resource resource =
+                    resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                     jarPath = resource.getFilePath();
                 }
@@ -545,6 +550,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         application.setCpFailureRateInterval(appParam.getCpFailureRateInterval());
         application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
         application.setTags(appParam.getTags());
+        if (appParam.getJobManagerUrl() != null
+            && !appParam.getJobManagerUrl().equalsIgnoreCase(application.getJobManagerUrl())) {
+            application.setJobManagerUrl(appParam.getJobManagerUrl());
+        }
 
         switch (appParam.getFlinkExecutionMode()) {
             case YARN_APPLICATION:
@@ -616,7 +625,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             // if has been changed
             if (changeTypeEnum.hasChanged()) {
                 // check if there is a candidate version for the newly added record
-                FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
+                FlinkSql newFlinkSql =
+                    flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.NEW);
                 // If the candidate version of the new record exists, it will be deleted directly,
                 // and only one candidate version will be retained. If the new candidate version is not
                 // effective,
@@ -626,7 +636,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                     // delete all records about candidates
                     flinkSqlService.removeById(newFlinkSql.getId());
                 }
-                FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
+                FlinkSql historyFlinkSql =
+                    flinkSqlService.getCandidate(application.getId(), CandidateTypeEnum.HISTORY);
                 // remove candidate flags that already exist but are set as candidates
                 if (historyFlinkSql != null) {
                     flinkSqlService.cleanCandidate(historyFlinkSql.getId());
@@ -681,8 +692,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         return getBaseMapper()
             .selectList(
                 new LambdaQueryWrapper<Application>()
-                    .eq((SFunction<Application, Long>) Application::getTeamId,
-                        teamId)
+                    .eq((SFunction<Application, Long>) Application::getTeamId, teamId)
                     .in(
                         Application::getExecutionMode,
                         executionModeEnums.stream()
@@ -706,7 +716,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
 
             // backup
             if (appParam.isFlinkSqlJob()) {
-                FlinkSql newFlinkSql = flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
+                FlinkSql newFlinkSql =
+                    flinkSqlService.getCandidate(appParam.getId(), CandidateTypeEnum.NEW);
                 if (!appParam.isNeedRollback() && newFlinkSql != null) {
                     backUpService.backup(appParam, newFlinkSql);
                 }
@@ -745,13 +756,15 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             flinkSql.setToApplication(application);
         } else {
             if (application.isCICDJob()) {
-                String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+                String path =
+                    this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
                 application.setConfPath(path);
             }
         }
         // add flink web url info for k8s-mode
         if (application.isKubernetesModeJob()) {
-            String restUrl = k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
+            String restUrl =
+                k8SFlinkTrackMonitor.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(application));
             application.setFlinkRestUrl(restUrl);
 
             // set duration
@@ -819,18 +832,14 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
             && (ObjectUtils.trimNoEquals(
                 application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
                 || ObjectUtils.trimNoEquals(
-                    application.getK8sJmPodTemplate(),
-                    appParam.getK8sJmPodTemplate())
+                    application.getK8sJmPodTemplate(), appParam.getK8sJmPodTemplate())
                 || ObjectUtils.trimNoEquals(
-                    application.getK8sTmPodTemplate(),
-                    appParam.getK8sTmPodTemplate())
+                    application.getK8sTmPodTemplate(), appParam.getK8sTmPodTemplate())
                 || ObjectUtils.trimNoEquals(
                     application.getK8sPodTemplates(), appParam.getK8sPodTemplates())
                 || ObjectUtils.trimNoEquals(
-                    application.getK8sHadoopIntegration(),
-                    appParam.getK8sHadoopIntegration())
-                || ObjectUtils.trimNoEquals(application.getFlinkImage(),
-                    appParam.getFlinkImage()));
+                    application.getK8sHadoopIntegration(), appParam.getK8sHadoopIntegration())
+                || ObjectUtils.trimNoEquals(application.getFlinkImage(), appParam.getFlinkImage()));
     }
 
     private boolean isYarnApplicationModeChange(Application application, Application appParam) {
