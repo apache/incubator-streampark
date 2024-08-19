@@ -131,4 +131,6 @@ public interface ApplicationService extends IService<Application> {
   List<ApplicationReport> getYARNApplication(String appName);
 
   RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception;
+
+  void updateJobManagerUrl(Long id, String url);
 }

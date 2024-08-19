@@ -18,66 +18,6 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.ApplicationMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Application">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
-        <result column="project_id" jdbcType="BIGINT" property="projectId"/>
-        <result column="module" jdbcType="VARCHAR" property="module"/>
-        <result column="args" jdbcType="LONGVARCHAR" property="args"/>
-        <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
-        <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
-        <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
-        <result column="version_id" jdbcType="BIGINT" property="versionId"/>
-        <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
-        <result column="flink_cluster_id" jdbcType="BIGINT" property="flinkClusterId"/>
-        <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
-        <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
-        <result column="app_type" jdbcType="INTEGER" property="appType"/>
-        <result column="job_type" jdbcType="INTEGER" property="jobType"/>
-        <result column="resource_from" jdbcType="INTEGER" property="resourceFrom"/>
-        <result column="execution_mode" jdbcType="INTEGER" property="executionMode"/>
-        <result column="tracking" jdbcType="INTEGER" property="tracking"/>
-        <result column="jar" jdbcType="VARCHAR" property="jar"/>
-        <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
-        <result column="dependency" jdbcType="LONGVARCHAR" property="dependency"/>
-        <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
-        <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
-        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
-        <result column="user_id" jdbcType="BIGINT" property="userId"/>
-        <result column="start_time" jdbcType="DATE" property="startTime"/>
-        <result column="end_time" jdbcType="DATE" property="endTime"/>
-        <result column="duration" jdbcType="BIGINT" property="duration"/>
-        <result column="state" jdbcType="INTEGER" property="state"/>
-        <result column="cp_max_failure_interval" jdbcType="INTEGER" property="cpMaxFailureInterval"/>
-        <result column="cp_failure_rate_interval" jdbcType="INTEGER" property="cpFailureRateInterval"/>
-        <result column="cp_failure_action" jdbcType="INTEGER" property="cpFailureAction"/>
-        <result column="restart_size" jdbcType="INTEGER" property="restartSize"/>
-        <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
-        <result column="release" jdbcType="INTEGER" property="release"/>
-        <result column="build" jdbcType="BOOLEAN" property="build"/>
-        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
-        <result column="total_tm" jdbcType="INTEGER" property="totalTM"/>
-        <result column="total_slot" jdbcType="INTEGER" property="totalSlot"/>
-        <result column="available_slot" jdbcType="INTEGER" property="availableSlot"/>
-        <result column="total_task" jdbcType="INTEGER" property="totalTask"/>
-        <result column="jm_memory" jdbcType="INTEGER" property="jmMemory"/>
-        <result column="tm_memory" jdbcType="INTEGER" property="tmMemory"/>
-        <result column="option_state" jdbcType="INTEGER" property="optionState"/>
-        <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-        <result column="option_time" jdbcType="DATE" property="optionTime"/>
-        <result column="k8s_rest_exposed_type" jdbcType="INTEGER" property="k8sRestExposedType"/>
-        <result column="k8s_pod_template" jdbcType="LONGVARCHAR" property="k8sPodTemplate"/>
-        <result column="k8s_jm_pod_template" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
-        <result column="k8s_tm_pod_template" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
-        <result column="ingress_template" jdbcType="LONGVARCHAR" property="ingressTemplate"/>
-        <result column="k8s_hadoop_integration" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
-        <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
-        <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
-        <result column="tags" jdbcType="VARCHAR" property="tags"/>
-    </resultMap>
 
     <update id="resetOptionState">
         update t_flink_app
@@ -292,6 +232,12 @@
             tracking=1
         </set>
         where id=#{application.id}
+    </update>
+
+    <update id="updateJobManagerUrl" >
+        update t_flink_app
+        set job_manager_url = #{url}
+        where id = #{id}
     </update>
 
     <select id="getRecentK8sNamespace" resultType="java.lang.String" parameterType="java.lang.Integer">

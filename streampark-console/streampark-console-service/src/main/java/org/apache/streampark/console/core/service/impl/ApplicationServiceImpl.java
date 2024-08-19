@@ -2013,6 +2013,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return RestResponse.success(actionResult);
   }
 
+  @Override
+  public void updateJobManagerUrl(Long id, String url) {
+    baseMapper.updateJobManagerUrl(id, url);
+  }
+
   private Tuple2<String, String> getNamespaceClusterId(Application application) {
     String clusterId = null;
     String k8sNamespace = null;
