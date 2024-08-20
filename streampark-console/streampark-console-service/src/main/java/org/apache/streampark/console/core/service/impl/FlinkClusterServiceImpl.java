@@ -185,7 +185,7 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
         // 2) setAddress
         if (ExecutionMode.YARN_SESSION.equals(executionModeEnum)) {
           String address =
-              YarnUtils.getRMWebAppURL(true) + "/proxy/" + deployResponse.clusterId() + "/";
+              YarnUtils.getRMWebAppProxyURL() + "/proxy/" + deployResponse.clusterId() + "/";
           flinkCluster.setAddress(address);
         } else {
           flinkCluster.setAddress(deployResponse.address());
