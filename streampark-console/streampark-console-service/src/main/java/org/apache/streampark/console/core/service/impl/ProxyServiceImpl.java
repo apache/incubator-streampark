@@ -18,9 +18,7 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.HadoopUtils;
-import org.apache.streampark.common.util.SystemPropertyUtils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -84,9 +82,7 @@ public class ProxyServiceImpl implements ProxyService {
 
   private final RestTemplate proxyRestTemplate;
 
-  private final boolean hasYarnHttpKerberosAuth;
-
-  private String lastUsername = "";
+  private String httpAuthUsername = "";
 
   public ProxyServiceImpl(RestTemplateBuilder restTemplateBuilder) {
     this.proxyRestTemplate =
@@ -99,9 +95,6 @@ public class ProxyServiceImpl implements ProxyService {
                   }
                 })
             .build();
-
-    String yarnHttpAuth = SystemPropertyUtils.get("streampark.yarn.http-auth");
-    this.hasYarnHttpKerberosAuth = "kerberos".equalsIgnoreCase(yarnHttpAuth);
   }
 
   @Override
@@ -174,8 +167,7 @@ public class ProxyServiceImpl implements ProxyService {
     return proxyRequest(request, url);
   }
 
-  private HttpEntity<?> getRequestEntity(HttpServletRequest request, String url, boolean setAuth)
-      throws Exception {
+  private HttpEntity<?> getRequestEntity(HttpServletRequest request, String url) throws Exception {
     HttpHeaders headers = new HttpHeaders();
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -187,13 +179,6 @@ public class ProxyServiceImpl implements ProxyService {
     URI uri = new URI(url);
     headers.set("Host", uri.getHost());
 
-    if (setAuth) {
-      String token = serviceHelper.getAuthorization();
-      if (token != null) {
-        headers.set("Authorization", EncryptUtils.encrypt(token));
-      }
-    }
-
     byte[] body = null;
     if (request.getInputStream().available() > 0) {
       InputStream inputStream = request.getInputStream();
@@ -201,33 +186,26 @@ public class ProxyServiceImpl implements ProxyService {
       IOUtils.copy(inputStream, byteArrayOutputStream);
       body = byteArrayOutputStream.toByteArray();
     }
-
-    HttpEntity<?> requestEntity = new HttpEntity<>(body, headers);
-    return requestEntity;
+    return new HttpEntity<>(body, headers);
   }
 
   private ResponseEntity<?> proxyRequest(HttpServletRequest request, String url) throws Exception {
-    HttpEntity<?> requestEntity = getRequestEntity(request, url, true);
+    HttpEntity<?> requestEntity = getRequestEntity(request, url);
     return proxyRestTemplate.exchange(
         url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
   }
 
   private ResponseEntity<?> proxyYarnRequest(HttpServletRequest request, String url)
       throws Exception {
-    if (hasYarnHttpKerberosAuth) {
+    if (YarnUtils.hasYarnHttpKerberosAuth()) {
       UserGroupInformation ugi = HadoopUtils.getUgi();
-
-      HttpEntity<?> requestEntity = getRequestEntity(request, url, false);
+      HttpEntity<?> requestEntity = getRequestEntity(request, url);
       setRestTemplateCredentials(ugi.getShortUserName());
-
       return ugi.doAs(
-          new PrivilegedExceptionAction<ResponseEntity<?>>() {
-            @Override
-            public ResponseEntity<?> run() throws Exception {
-              return proxyRestTemplate.exchange(
-                  url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
-            }
-          });
+          (PrivilegedExceptionAction<ResponseEntity<?>>)
+              () ->
+                  proxyRestTemplate.exchange(
+                      url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class));
     } else {
       return proxyRequest(request, url);
     }
@@ -238,26 +216,20 @@ public class ProxyServiceImpl implements ProxyService {
         + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
   }
 
-  private void setRestTemplateCredentials(String username) {
-    setRestTemplateCredentials(username, null);
-  }
-
   /**
    * Configures the RestTemplate's HttpClient connector. This method is primarily used to configure
    * the HttpClient authentication information and SSL certificate validation policies.
    *
    * @param username The username for HTTP basic authentication.
-   * @param password The password for HTTP basic authentication.
    */
-  private void setRestTemplateCredentials(String username, String password) {
+  private void setRestTemplateCredentials(String username) {
     // Check if the username is not null and has changed since the last configuration
-    if (username != null && !this.lastUsername.equals(username)) {
+    if (username != null && !this.httpAuthUsername.equals(username)) {
       // Create a new credentials provider
       BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
       // Add the username and password for HTTP basic authentication
       credentialsProvider.setCredentials(
-          AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-
+          AuthScope.ANY, new UsernamePasswordCredentials(username, null));
       // Customize the HttpClient with the credentials provider
       CloseableHttpClient httpClient =
           HttpClients.custom().setDefaultCredentialsProvider(credentialsProvider).build();
@@ -265,7 +237,7 @@ public class ProxyServiceImpl implements ProxyService {
       this.proxyRestTemplate.setRequestFactory(
           new HttpComponentsClientHttpRequestFactory(httpClient));
       // Update the last known username
-      this.lastUsername = username;
+      this.httpAuthUsername = username;
     }
   }
 }
