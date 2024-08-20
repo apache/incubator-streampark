@@ -49,7 +49,7 @@ object YarnUtils extends Logger {
    *
    * @return
    */
-  private lazy val hasYarnHttpKerberosAuth: Boolean = {
+  lazy val hasYarnHttpKerberosAuth: Boolean = {
     val yarnHttpAuth: String = InternalConfigHolder.get[String](CommonConfig.STREAMPARK_YARN_AUTH)
     "kerberos".equalsIgnoreCase(yarnHttpAuth)
   }
