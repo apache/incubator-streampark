@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
+import org.apache.streampark.console.base.exception.PermissionDeniedException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -34,6 +35,7 @@ import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -98,29 +100,11 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   @Override
-  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long appId) throws Exception {
-    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
-    if (appId == null) {
-      return builder.body("Invalid operation, appId is null");
-    }
+  public ResponseEntity<?> proxyFlink(HttpServletRequest request, Long appId) throws Exception {
+    ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
     Application app = applicationService.getById(appId);
-    if (app == null) {
-      return builder.body("Invalid operation, appId is invalid.");
-    }
-
-    String token = serviceHelper.getAuthorization();
-    if (token != null) {
-      Long userId = JWTUtil.getUserId(token);
-      if (userId != null && !userId.equals(app.getUserId())) {
-        Member member = memberService.findByUserId(app.getTeamId(), userId);
-        if (member == null) {
-          return builder.body(
-              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
-        }
-      }
-    }
-
+    checkProxyApp(app);
     String url = null;
     switch (app.getExecutionModeEnum()) {
       case YARN_PER_JOB:
@@ -128,7 +112,7 @@ public class ProxyServiceImpl implements ProxyService {
       case YARN_SESSION:
         String yarnURL = YarnUtils.getRMWebAppProxyURL();
         url = yarnURL + "/proxy/" + app.getClusterId();
-        url += getRequestURL(request).replace("/proxy/flink-ui/" + appId, "");
+        url += getRequestURL(request).replace("/proxy/flink/" + appId, "");
         return proxyYarnRequest(request, url);
       case REMOTE:
         FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
@@ -141,30 +125,70 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     if (url == null) {
-      builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+      ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
       builder.body("The flink job manager url is not ready");
       return builder.build();
     }
 
-    url += getRequestURL(request).replace("/proxy/flink-ui/" + appId, "");
+    url += getRequestURL(request).replace("/proxy/flink/" + appId, "");
     return proxyRequest(request, url);
   }
 
   @Override
-  public ResponseEntity<?> proxyYarn(HttpServletRequest request, String appId) throws Exception {
+  public ResponseEntity<?> proxyYarn(HttpServletRequest request, Long logId) throws Exception {
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+    ApplicationLog log = logService.getById(logId);
+    if (log == null) {
+      return builder.body("The application log not found.");
+    }
+    checkProxyAppLog(log);
+    String yarnId = log.getYarnAppId();
     String yarnURL = YarnUtils.getRMWebAppProxyURL();
-    String url = yarnURL + "/proxy/" + appId + "/";
-    url += getRequestURL(request).replace("/proxy/yarn/" + appId, "");
+    String url = yarnURL + "/proxy/" + yarnId + "/";
+    url += getRequestURL(request).replace("/proxy/yarn/" + yarnId, "");
     return proxyYarnRequest(request, url);
   }
 
   @Override
-  public ResponseEntity<?> proxyJobManager(HttpServletRequest request, Long logId)
-      throws Exception {
+  public ResponseEntity<?> proxyHistory(HttpServletRequest request, Long logId) throws Exception {
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+
     ApplicationLog log = logService.getById(logId);
+    if (log == null) {
+      return builder.body("The application log not found.");
+    }
+    checkProxyAppLog(log);
     String url = log.getJobManagerUrl();
-    url += getRequestURL(request).replace("/proxy/job_manager/" + logId, "");
+    if (StringUtils.isBlank(url)) {
+      return builder.body("The jobManager url is null.");
+    }
+    url += getRequestURL(request).replace("/proxy/history/" + logId, "");
     return proxyRequest(request, url);
+  }
+
+  public void checkProxyApp(Application app) {
+    if (app == null) {
+      throw new PermissionDeniedException("Invalid operation, application is invalid.");
+    }
+    String token = serviceHelper.getAuthorization();
+    if (token != null) {
+      Long userId = JWTUtil.getUserId(token);
+      if (userId != null && !userId.equals(app.getUserId())) {
+        Member member = memberService.findByUserId(app.getTeamId(), userId);
+        if (member == null) {
+          throw new PermissionDeniedException(
+              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+        }
+      }
+    }
+  }
+
+  public void checkProxyAppLog(ApplicationLog log) {
+    if (log == null) {
+      throw new PermissionDeniedException("Invalid operation, The application log not found.");
+    }
+    Application app = applicationService.getById(log.getAppId());
+    checkProxyApp(app);
   }
 
   private HttpEntity<?> getRequestEntity(HttpServletRequest request, String url) throws Exception {

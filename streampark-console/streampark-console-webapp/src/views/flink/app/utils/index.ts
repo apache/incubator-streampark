@@ -103,7 +103,7 @@ export function descriptionFilter(option) {
 }
 
 export async function handleView(app: AppListRecord) {
-  window.open(baseUrl() + '/proxy/flink-ui/' + app.id + '/');
+  window.open(baseUrl() + '/proxy/flink/' + app.id + '/');
 }
 
 export function handleIsStart(app: Recordable, optionApps: Recordable) {
