@@ -1,0 +1,45 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.streampark.e2e.pages.flink.clusters;
+
+import org.apache.streampark.e2e.pages.common.CommonFactory;
+
+import lombok.Getter;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+@Getter
+public class RemoteForm extends CommonForm {
+
+    private WebDriver driver;
+
+    @FindBy(id = "form_item_address")
+    private WebElement inputJobManagerURL;
+
+    public RemoteForm(ClusterDetailForm clusterDetailForm) {
+        super(clusterDetailForm);
+
+        this.driver = clusterDetailForm.driver();
+    }
+
+    public RemoteForm jobManagerURL(String address) {
+        CommonFactory.WebElementDeleteAndInput(this.inputJobManagerURL, address);
+        return this;
+    }
+}
