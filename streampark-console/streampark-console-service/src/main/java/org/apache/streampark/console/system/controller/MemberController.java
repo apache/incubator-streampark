@@ -19,7 +19,7 @@ package org.apache.streampark.console.system.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -70,13 +70,13 @@ public class MemberController {
     }
 
     @PostMapping("check/user")
-    public RestResponse check(@NotBlank(message = "{required}") Long teamId, String userName) {
+    public RestResponse check(@NotNull(message = "{required}") Long teamId, String userName) {
         Member result = this.memberService.getByTeamIdUserName(teamId, userName);
         return RestResponse.success(result == null);
     }
 
     @PostMapping("post")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:add")
     public RestResponse create(@Valid Member member) {
         this.memberService.createMember(member);
@@ -84,7 +84,7 @@ public class MemberController {
     }
 
     @DeleteMapping("delete")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:delete")
     public RestResponse delete(Member member) {
         this.memberService.remove(member.getId());
@@ -92,7 +92,7 @@ public class MemberController {
     }
 
     @PutMapping("update")
-    @PermissionScope(team = "#member.teamId")
+    @Permission(team = "#member.teamId")
     @RequiresPermissions("member:update")
     public RestResponse update(Member member) {
         this.memberService.updateMember(member);

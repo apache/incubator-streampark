@@ -35,7 +35,7 @@ import java.util.Properties
 import java.util.regex.Pattern
 
 import scala.annotation.meta.param
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.util.{Failure, Success, Try}
 
 object KafkaSource {

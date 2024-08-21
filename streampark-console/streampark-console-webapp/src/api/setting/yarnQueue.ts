@@ -21,12 +21,12 @@ import { AxiosResponse } from 'axios';
 import { BasicTableParams } from '/@/api/model/baseModel';
 
 enum YARN_QUEUE_API {
-  CREATE = '/flink/yarnQueue/create',
-  UPDATE = '/flink/yarnQueue/update',
-  LIST = '/flink/yarnQueue/list',
-  DELETE = '/flink/yarnQueue/delete',
-  GET = '/flink/yarnQueue/get',
-  CHECK_YARN_QUEUE = '/flink/yarnQueue/check',
+  CREATE = '/yarn/queue/create',
+  UPDATE = '/yarn/queue/update',
+  LIST = '/yarn/queue/list',
+  DELETE = '/yarn/queue/delete',
+  GET = '/yarn/queue/get',
+  CHECK_YARN_QUEUE = '/yarn/queue/check',
 }
 
 /**

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.system.security;
 
+import org.apache.streampark.console.core.enums.LoginTypeEnum;
 import org.apache.streampark.console.system.entity.User;
 
 public interface Authenticator {
@@ -28,5 +29,5 @@ public interface Authenticator {
      * @param password user password
      * @return result object
      */
-    User authenticate(String username, String password, String loginType) throws Exception;
+    User authenticate(String username, String password, LoginTypeEnum loginType) throws Exception;
 }

@@ -17,8 +17,7 @@
 
 package org.apache.streampark.console.system.authentication;
 
-import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.enums.AuthenticationType;
+import org.apache.streampark.console.base.util.EncryptUtils;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
@@ -58,20 +57,14 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader(TOKEN);
-        AuthenticationType type = JWTUtil.getAuthType(WebUtils.decryptToken(token));
-        if (type == null) {
+        try {
+            token = EncryptUtils.decrypt(token);
+            JWTToken jwtToken = new JWTToken(token);
+            getSubject(request, response).login(jwtToken);
+            return true;
+        } catch (Exception e) {
             return false;
         }
-        if (type == AuthenticationType.OPENAPI) {
-            JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
-            try {
-                getSubject(request, response).login(jwtToken);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /** cross-domain support */

@@ -18,11 +18,11 @@
 package org.apache.streampark.flink.packer.pipeline
 
 import org.apache.streampark.common.util.{Logger, ThreadUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.BuildPipeline.executor
 
 import java.util.concurrent.{Callable, LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 import scala.util.{Failure, Success, Try}

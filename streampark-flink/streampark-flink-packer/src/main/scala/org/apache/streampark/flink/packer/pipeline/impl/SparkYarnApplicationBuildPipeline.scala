@@ -18,17 +18,15 @@
 package org.apache.streampark.flink.packer.pipeline.impl
 
 import org.apache.streampark.common.conf.Workspace
-import org.apache.streampark.common.enums.FlinkDevelopmentMode
+import org.apache.streampark.common.enums.SparkDevelopmentMode
 import org.apache.streampark.common.fs.{FsOperator, HdfsOperator, LfsOperator}
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.maven.MavenTool
 import org.apache.streampark.flink.packer.pipeline._
 
 import org.apache.commons.codec.digest.DigestUtils
 
 import java.io.{File, FileInputStream, IOException}
-
-import scala.collection.convert.ImplicitConversions._
 
 /** Building pipeline for spark yarn application mode */
 class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildRequest)
@@ -48,7 +46,7 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
   override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
       request.developmentMode match {
-        case FlinkDevelopmentMode.FLINK_SQL =>
+        case SparkDevelopmentMode.SPARK_SQL =>
           LfsOperator.mkCleanDirs(request.localWorkspace)
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
         case _ =>
@@ -59,7 +57,7 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
     val mavenJars =
       execStep(2) {
         request.developmentMode match {
-          case FlinkDevelopmentMode.FLINK_SQL =>
+          case SparkDevelopmentMode.SPARK_SQL =>
             val mavenArts =
               MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
             mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs

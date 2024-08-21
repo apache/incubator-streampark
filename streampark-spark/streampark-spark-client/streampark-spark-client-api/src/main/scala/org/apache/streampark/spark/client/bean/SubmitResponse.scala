@@ -17,12 +17,8 @@
 
 package org.apache.streampark.spark.client.bean
 
-import javax.annotation.Nullable
-
-import java.util.{Map => JavaMap}
+import org.apache.streampark.common.util.Implicits.JavaMap
 
 case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String],
-    @Nullable jobId: String = "",
-    @Nullable jobManagerUrl: String = "")
+    var sparkAppId: String,
+    sparkProperties: JavaMap[String, String])

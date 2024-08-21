@@ -26,27 +26,18 @@ import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.exception.ApplicationException;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
-import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
-import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.runner.EnvInitializer;
-import org.apache.streampark.console.core.service.FlinkClusterService;
-import org.apache.streampark.console.core.service.SavePointService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
-import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.core.conf.ParameterCli;
-import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
-import org.apache.streampark.flink.kubernetes.model.FlinkMetricCV;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -60,10 +51,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
@@ -87,7 +79,7 @@ public class SparkApplicationInfoServiceImpl
 
     private static final int DEFAULT_HISTORY_RECORD_LIMIT = 25;
 
-    private static final int DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT = 5;
+    private static final int DEFAULT_HISTORY_CONTAINER_IMAGE_RECORD_LIMIT = 5;
 
     private static final Pattern JOB_NAME_PATTERN = Pattern.compile("^[.\\x{4e00}-\\x{9fa5}A-Za-z\\d_\\-\\s]+$");
 
@@ -97,93 +89,70 @@ public class SparkApplicationInfoServiceImpl
     private SparkEnvService sparkEnvService;
 
     @Autowired
-    private SavePointService savePointService;
-
-    @Autowired
     private EnvInitializer envInitializer;
-
-    @Autowired
-    private FlinkK8sWatcher k8SFlinkTrackMonitor;
-
-    @Autowired
-    private FlinkClusterService flinkClusterService;
-
-    @Autowired
-    private FlinkClusterWatcher flinkClusterWatcher;
 
     @Override
     public Map<String, Serializable> getDashboardDataMap(Long teamId) {
-        JobsOverview.Task overview = new JobsOverview.Task();
-        Integer totalJmMemory = 0;
-        Integer totalTmMemory = 0;
-        Integer totalTm = 0;
-        Integer totalSlot = 0;
-        Integer availableSlot = 0;
-        Integer runningJob = 0;
 
-        // stat metrics from other than kubernetes mode
-        for (Application app : FlinkAppHttpWatcher.getWatchingApps()) {
+        // result json
+        Long totalNumTasks = 0L;
+        Long totalNumCompletedTasks = 0L;
+        Long totalNumStages = 0L;
+        Long totalNumCompletedStages = 0L;
+        Long totalUsedMemory = 0L;
+        Long totalUsedVCores = 0L;
+        Integer runningApplication = 0;
+
+        for (SparkApplication app : SparkAppHttpWatcher.getWatchingApps()) {
             if (!teamId.equals(app.getTeamId())) {
                 continue;
             }
-            if (app.getJmMemory() != null) {
-                totalJmMemory += app.getJmMemory();
+            if (app.getState() == SparkAppStateEnum.RUNNING.getValue()) {
+                runningApplication++;
             }
-            if (app.getTmMemory() != null) {
-                totalTmMemory += app.getTmMemory() * (app.getTotalTM() == null ? 1 : app.getTotalTM());
+            if (app.getNumTasks() != null) {
+                totalNumTasks += app.getNumTasks();
             }
-            if (app.getTotalTM() != null) {
-                totalTm += app.getTotalTM();
+            if (app.getNumCompletedTasks() != null) {
+                totalNumCompletedTasks += app.getNumCompletedTasks();
             }
-            if (app.getTotalSlot() != null) {
-                totalSlot += app.getTotalSlot();
+            if (app.getNumStages() != null) {
+                totalNumStages += app.getNumStages();
             }
-            if (app.getAvailableSlot() != null) {
-                availableSlot += app.getAvailableSlot();
+            if (app.getNumCompletedStages() != null) {
+                totalNumCompletedStages += app.getNumCompletedStages();
             }
-            if (app.getState() == FlinkAppStateEnum.RUNNING.getValue()) {
-                runningJob++;
+            if (app.getUsedMemory() != null) {
+                totalUsedMemory += app.getUsedMemory();
             }
-            JobsOverview.Task task = app.getOverview();
-            if (task != null) {
-                overview.setTotal(overview.getTotal() + task.getTotal());
-                overview.setCreated(overview.getCreated() + task.getCreated());
-                overview.setScheduled(overview.getScheduled() + task.getScheduled());
-                overview.setDeploying(overview.getDeploying() + task.getDeploying());
-                overview.setRunning(overview.getRunning() + task.getRunning());
-                overview.setFinished(overview.getFinished() + task.getFinished());
-                overview.setCanceling(overview.getCanceling() + task.getCanceling());
-                overview.setCanceled(overview.getCanceled() + task.getCanceled());
-                overview.setFailed(overview.getFailed() + task.getFailed());
-                overview.setReconciling(overview.getReconciling() + task.getReconciling());
+            if (app.getUsedVCores() != null) {
+                totalUsedVCores += app.getUsedVCores();
             }
-        }
-
-        // merge metrics from flink kubernetes cluster
-        FlinkMetricCV k8sMetric = k8SFlinkTrackMonitor.getAccGroupMetrics(teamId.toString());
-        if (k8sMetric != null) {
-            totalJmMemory += k8sMetric.totalJmMemory();
-            totalTmMemory += k8sMetric.totalTmMemory();
-            totalTm += k8sMetric.totalTm();
-            totalSlot += k8sMetric.totalSlot();
-            availableSlot += k8sMetric.availableSlot();
-            runningJob += k8sMetric.runningJob();
-            overview.setTotal(overview.getTotal() + k8sMetric.totalJob());
-            overview.setRunning(overview.getRunning() + k8sMetric.runningJob());
-            overview.setFinished(overview.getFinished() + k8sMetric.finishedJob());
-            overview.setCanceled(overview.getCanceled() + k8sMetric.cancelledJob());
-            overview.setFailed(overview.getFailed() + k8sMetric.failedJob());
         }
 
         // result json
+        return constructDashboardMap(
+            runningApplication, totalNumTasks, totalNumCompletedTasks, totalNumStages, totalNumCompletedStages,
+            totalUsedMemory, totalUsedVCores);
+    }
+
+    @Nonnull
+    private Map<String, Serializable> constructDashboardMap(
+                                                            Integer runningApplication,
+                                                            Long totalNumTasks,
+                                                            Long totalNumCompletedTasks,
+                                                            Long totalNumStages,
+                                                            Long totalNumCompletedStages,
+                                                            Long totalUsedMemory,
+                                                            Long totalUsedVCores) {
         Map<String, Serializable> dashboardDataMap = new HashMap<>(8);
-        dashboardDataMap.put("task", overview);
-        dashboardDataMap.put("jmMemory", totalJmMemory);
-        dashboardDataMap.put("tmMemory", totalTmMemory);
-        dashboardDataMap.put("totalTM", totalTm);
-        dashboardDataMap.put("availableSlot", availableSlot);
-        dashboardDataMap.put("totalSlot", totalSlot);
-        dashboardDataMap.put("runningJob", runningJob);
+        dashboardDataMap.put("runningApplication", runningApplication);
+        dashboardDataMap.put("numTasks", totalNumTasks);
+        dashboardDataMap.put("numCompletedTasks", totalNumCompletedTasks);
+        dashboardDataMap.put("numStages", totalNumStages);
+        dashboardDataMap.put("numCompletedStages", totalNumCompletedStages);
+        dashboardDataMap.put("usedMemory", totalUsedMemory);
+        dashboardDataMap.put("usedVCores", totalUsedVCores);
 
         return dashboardDataMap;
     }
@@ -203,14 +172,6 @@ public class SparkApplicationInfoServiceImpl
             }
             envInitializer.checkSparkEnv(application.getStorageType(), sparkEnv);
             envInitializer.storageInitialize(application.getStorageType());
-
-            if (SparkExecutionMode.REMOTE == application.getSparkExecutionMode()) {
-                FlinkCluster flinkCluster = flinkClusterService.getById(application.getSparkClusterId());
-                boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
-                if (!conned) {
-                    throw new ApiAlertException("the target cluster is unavailable, please check!");
-                }
-            }
             return true;
         } catch (Exception e) {
             log.error(ExceptionUtils.stringifyException(e));
@@ -221,10 +182,10 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public boolean checkAlter(SparkApplication appParam) {
         Long appId = appParam.getId();
-        if (FlinkAppStateEnum.CANCELED != appParam.getStateEnum()) {
+        if (SparkAppStateEnum.KILLED != appParam.getStateEnum()) {
             return false;
         }
-        long cancelUserId = FlinkAppHttpWatcher.getCanceledJobUserId(appId);
+        long cancelUserId = SparkAppHttpWatcher.getCanceledJobUserId(appId);
         long appUserId = appParam.getUserId();
         return cancelUserId != -1 && cancelUserId != appUserId;
     }
@@ -242,37 +203,6 @@ public class SparkApplicationInfoServiceImpl
     }
 
     @Override
-    public boolean existsRunningByClusterId(Long clusterId) {
-        return baseMapper.existsRunningJobByClusterId(clusterId)
-            || FlinkAppHttpWatcher.getWatchingApps().stream()
-                .anyMatch(
-                    application -> clusterId.equals(application.getFlinkClusterId())
-                        && FlinkAppStateEnum.RUNNING == application
-                            .getStateEnum());
-    }
-
-    @Override
-    public boolean existsByClusterId(Long clusterId) {
-        return baseMapper.exists(
-            new LambdaQueryWrapper<SparkApplication>()
-                .eq(SparkApplication::getSparkClusterId, clusterId));
-    }
-
-    @Override
-    public Integer countByClusterId(Long clusterId) {
-        return baseMapper
-            .selectCount(
-                new LambdaQueryWrapper<SparkApplication>()
-                    .eq(SparkApplication::getSparkClusterId, clusterId))
-            .intValue();
-    }
-
-    @Override
-    public Integer countAffectedByClusterId(Long clusterId, String dbType) {
-        return baseMapper.countAffectedByClusterId(clusterId, dbType);
-    }
-
-    @Override
     public boolean existsBySparkEnvId(Long sparkEnvId) {
         return baseMapper.exists(
             new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getVersionId, sparkEnvId));
@@ -284,23 +214,8 @@ public class SparkApplicationInfoServiceImpl
     }
 
     @Override
-    public List<String> listRecentK8sClusterId(Integer executionMode) {
-        return baseMapper.selectRecentK8sClusterIds(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sPodTemplate() {
-        return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sJmPodTemplate() {
-        return baseMapper.selectRecentK8sJmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listRecentK8sTmPodTemplate() {
-        return baseMapper.selectRecentK8sTmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
+    public List<String> listRecentK8sContainerImage() {
+        return baseMapper.selectRecentK8sPodTemplates(DEFAULT_HISTORY_CONTAINER_IMAGE_RECORD_LIMIT);
     }
 
     @Override
@@ -321,7 +236,7 @@ public class SparkApplicationInfoServiceImpl
             return AppExistsStateEnum.INVALID;
         }
         if (SparkExecutionMode.isYarnMode(application.getExecutionMode())) {
-            boolean exists = !getYarnAppReport(application.getJobName()).isEmpty();
+            boolean exists = !getYarnAppReport(application.getAppName()).isEmpty();
             return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
         }
         // todo on k8s check...
@@ -369,15 +284,15 @@ public class SparkApplicationInfoServiceImpl
     @Override
     public AppExistsStateEnum checkExists(SparkApplication appParam) {
 
-        if (!checkJobName(appParam.getJobName())) {
+        if (!checkJobName(appParam.getAppName())) {
             return AppExistsStateEnum.INVALID;
         }
 
-        boolean existsByJobName = this.existsByJobName(appParam.getJobName());
+        boolean existsByJobName = this.existsByAppName(appParam.getAppName());
 
         if (appParam.getId() != null) {
             SparkApplication app = getById(appParam.getId());
-            if (app.getJobName().equals(appParam.getJobName())) {
+            if (app.getAppName().equals(appParam.getAppName())) {
                 return AppExistsStateEnum.NO;
             }
 
@@ -386,10 +301,10 @@ public class SparkApplicationInfoServiceImpl
             }
 
             // has stopped status
-            if (FlinkAppStateEnum.isEndState(app.getState())) {
+            if (SparkAppStateEnum.isEndState(app.getState())) {
                 // check whether jobName exists on yarn
                 if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                    && YarnUtils.isContains(appParam.getJobName())) {
+                    && YarnUtils.isContains(appParam.getAppName())) {
                     return AppExistsStateEnum.IN_YARN;
                 }
             }
@@ -400,16 +315,16 @@ public class SparkApplicationInfoServiceImpl
 
             // check whether jobName exists on yarn
             if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
-                && YarnUtils.isContains(appParam.getJobName())) {
+                && YarnUtils.isContains(appParam.getAppName())) {
                 return AppExistsStateEnum.IN_YARN;
             }
         }
         return AppExistsStateEnum.NO;
     }
 
-    private boolean existsByJobName(String jobName) {
+    private boolean existsByAppName(String jobName) {
         return baseMapper.exists(
-            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getJobName, jobName));
+            new LambdaQueryWrapper<SparkApplication>().eq(SparkApplication::getAppName, jobName));
     }
 
     @Override
@@ -426,37 +341,6 @@ public class SparkApplicationInfoServiceImpl
             jarFile = new File(appParam.getJar());
         }
         return Utils.getJarManClass(jarFile);
-    }
-
-    @Override
-    public String checkSavepointPath(SparkApplication appParam) throws Exception {
-        String savepointPath = appParam.getSavePoint();
-        if (StringUtils.isBlank(savepointPath)) {
-            // savepointPath = savePointService.getSavePointPath(appParam);
-        }
-
-        if (StringUtils.isNotBlank(savepointPath)) {
-            final URI uri = URI.create(savepointPath);
-            final String scheme = uri.getScheme();
-            final String pathPart = uri.getPath();
-            String error = null;
-            if (scheme == null) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
-            } else if (pathPart == null) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
-            } else if (pathPart.isEmpty() || "/".equals(pathPart)) {
-                error = "This state.savepoints.dir value "
-                    + savepointPath
-                    + " Cannot use the root directory for checkpoints.";
-            }
-            return error;
-        } else {
-            return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
-        }
     }
 
     private Boolean checkJobName(String jobName) {

@@ -117,7 +117,7 @@ insert into "public"."t_menu" values (120218, 120200, 'sql delete', null, null, 
 insert into "public"."t_menu" values (120301, 120300, 'add', NULL, NULL, 'variable:add', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120302, 120300, 'update', NULL, NULL, 'variable:update', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120303, 120300, 'delete', NULL, NULL, 'variable:delete', NULL, '1', '1', NULL, now(), now());
-insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/flink/variable/depend_apps', 'flink/variable/DependApps', 'variable:depend_apps', '', '0', '0', NULL, now(), now());
+insert into "public"."t_menu" values (120304, 120300, 'depend apps', '/resource/variable/depend_apps', 'resource/variable/DependApps', 'variable:depend_apps', '', '0', '0', NULL, now(), now());
 insert into "public"."t_menu" values (120305, 120300, 'show original', NULL, NULL, 'variable:show_original', NULL, '1', '1', NULL, now(), now());
 insert into "public"."t_menu" values (120306, 120300, 'view', NULL, NULL, 'variable:view', NULL, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (120307, 120300, 'depend view', null, null, 'variable:depend_apps', null, '1', '1', NULL, now(), now());
@@ -263,7 +263,7 @@ insert into "public"."t_setting" values (15, 'ingress.mode.default', null, 'Ingr
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, null, '1', now(), now(), null, 0, null, null);
+insert into "public"."t_user" values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(), null, 0, null, null);
 
 -- ----------------------------
 -- Records of t_member

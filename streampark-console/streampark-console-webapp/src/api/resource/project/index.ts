@@ -21,19 +21,16 @@ import { AxiosResponse } from 'axios';
 
 enum Api {
   BRANCHES = '/project/branches',
-  GIT_CHECK = '/project/gitcheck',
+  GIT_CHECK = '/project/git_check',
   EXISTS = '/project/exists',
   CREATE = '/project/create',
   GET = '/project/get',
   UPDATE = '/project/update',
-  COPY = '/project/copy',
   BUILD = '/project/build',
-  BUILD_LOG = '/project/buildlog',
-  CLOSE_BUILD = '/project/closebuild',
+  BUILD_LOG = '/project/build_log',
   LIST = '/project/list',
-  FILE_LIST = '/project/filelist',
   MODULES = '/project/modules',
-  LIST_CONF = '/project/listconf',
+  LIST_CONF = '/project/list_conf',
   JARS = '/project/jars',
   DELETE = '/project/delete',
   SELECT = '/project/select',
@@ -95,13 +92,6 @@ export function buildProject(data: Recordable): Promise<boolean> {
 
 export function buildLog(data: Recordable): Promise<AxiosResponse<any>> {
   return defHttp.post({ url: Api.BUILD_LOG, data }, { isReturnNativeResponse: true });
-}
-
-export function closeBuild(data: Recordable) {
-  return defHttp.post({
-    url: Api.CLOSE_BUILD,
-    data,
-  });
 }
 
 export function deleteProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {

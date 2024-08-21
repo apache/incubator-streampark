@@ -67,6 +67,22 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     }
 
     /**
+     * Create a ThreadPoolTaskExecutor for SparkAppHttpWatcher.
+     *
+     * @return Executor
+     */
+    @Bean("sparkRestAPIWatchingExecutor")
+    public Executor sparkRestAPIWatchingExecutor() {
+        return new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("spark-cluster-watching-executor-"));
+    }
+
+    /**
      * Create a ThreadPoolTaskExecutor for FlinkClusterWatcher.
      *
      * @return Executor

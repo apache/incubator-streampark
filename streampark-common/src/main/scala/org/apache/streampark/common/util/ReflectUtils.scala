@@ -17,9 +17,12 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import org.apache.commons.lang3.StringUtils
 
-import java.lang.reflect.{Field, Modifier}
+import java.lang.annotation.Annotation
+import java.lang.reflect.{Field, Method, Modifier}
 import java.util.Objects
 
 import scala.util.{Failure, Success, Try}
@@ -53,8 +56,9 @@ object ReflectUtils extends Logger {
   }
 
   def getFieldValue(obj: Any, field: Field): Any = {
-    if (Objects.isNull(obj) || Objects.isNull(field)) null
-    else {
+    if (obj == null || field == null) {
+      null
+    } else {
       field.setAccessible(true)
       field.get(obj) match {
         case Success(v) => v
@@ -69,8 +73,7 @@ object ReflectUtils extends Logger {
       throw new IllegalArgumentException(
         "Could not find field [" + fieldName + "] on target [" + obj + "]")
     }
-    try
-      field.set(obj, value)
+    try field.set(obj, value)
     catch {
       case e: IllegalAccessException =>
         logError("Failed to assign to the element.", e)
@@ -88,7 +91,7 @@ object ReflectUtils extends Logger {
         makeAccessible(field)
         return field
       } catch {
-        case e: NoSuchFieldException =>
+        case _: NoSuchFieldException =>
       }
       superClass = superClass.getSuperclass
     }
@@ -101,6 +104,10 @@ object ReflectUtils extends Logger {
         || Modifier.isFinal(field.getModifiers)) && !field.isAccessible) {
       field.setAccessible(true)
     }
+  }
+
+  def getMethodsByAnnotation(beanClass: Class[_], annotClazz: Class[_ <: Annotation]): JavaList[Method] = {
+    beanClass.getDeclaredMethods.filter(_.getDeclaredAnnotation(annotClazz) != null).toList
   }
 
 }

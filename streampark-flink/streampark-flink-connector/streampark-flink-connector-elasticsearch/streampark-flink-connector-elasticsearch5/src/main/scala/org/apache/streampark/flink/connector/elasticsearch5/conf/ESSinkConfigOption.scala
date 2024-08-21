@@ -19,11 +19,10 @@ package org.apache.streampark.flink.connector.elasticsearch5.conf
 
 import org.apache.streampark.common.conf.ConfigOption
 import org.apache.streampark.common.util.ConfigUtils
+import org.apache.streampark.common.util.Implicits._
 
 import java.net.InetSocketAddress
-import java.util.{Map => JavaMap, Properties}
-
-import scala.collection.convert.ImplicitConversions._
+import java.util.Properties
 
 object ESSinkConfigOption {
   val ES_SINK_PREFIX = "es.sink"

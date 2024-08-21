@@ -110,6 +110,14 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: EnvironmentTest
+            class: org.apache.streampark.e2e.cases.EnvironmentTest
+          - name: AlarmTest
+            class: org.apache.streampark.e2e.cases.AlarmTest
+          - name: ExternalLinkTest
+            class: org.apache.streampark.e2e.cases.ExternalLinkTest
+          - name: YarnQueueTest
+            class: org.apache.streampark.e2e.cases.YarnQueueTest
           - name: TokenManagementTest
             class: org.apache.streampark.e2e.cases.TokenManagementTest
           - name: UploadManagementTest

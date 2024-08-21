@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.lang3.StringUtils
 import org.yaml.snakeyaml.Yaml
@@ -24,17 +26,22 @@ import org.yaml.snakeyaml.Yaml
 import javax.annotation.Nonnull
 
 import java.io._
-import java.util.{HashMap => JavaMap, LinkedHashMap => LinkedMap, Properties, Scanner}
+import java.util.{Properties, Scanner}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, Map => MutableMap}
 
 object PropertiesUtils extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
+
+  private[this] lazy val SPARK_PROPERTY_COMPLEX_PATTERN = Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$")
+
+  // scalastyle:off
+  private[this] lazy val SPARK_ARGUMENT_REGEXP = "\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?"
+  // scalastyle:on
 
   private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
@@ -59,7 +66,7 @@ object PropertiesUtils extends Logger {
       prefix: String = "",
       proper: MutableMap[String, String] = MutableMap[String, String]()): Map[String, String] = {
     v match {
-      case map: LinkedMap[_, _] =>
+      case map: JavaLinkedMap[_, _] =>
         map
           .flatMap(x => {
             prefix match {
@@ -203,31 +210,31 @@ object PropertiesUtils extends Logger {
   }
 
   def fromYamlTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlText(text))
+    new JavaHashMap[String, String](fromYamlText(text))
 
   def fromHoconTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconText(text))
+    new JavaHashMap[String, String](fromHoconText(text))
 
   def fromPropertiesTextAsJava(text: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesText(text))
+    new JavaHashMap[String, String](fromPropertiesText(text))
 
   def fromYamlFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(filename))
+    new JavaHashMap[String, String](fromYamlFile(filename))
 
   def fromHoconFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(filename))
+    new JavaHashMap[String, String](fromHoconFile(filename))
 
   def fromPropertiesFileAsJava(filename: String): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(filename))
+    new JavaHashMap[String, String](fromPropertiesFile(filename))
 
   def fromYamlFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromYamlFile(inputStream))
+    new JavaHashMap[String, String](fromYamlFile(inputStream))
 
   def fromHoconFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromHoconFile(inputStream))
+    new JavaHashMap[String, String](fromHoconFile(inputStream))
 
   def fromPropertiesFileAsJava(inputStream: InputStream): JavaMap[String, String] =
-    new JavaMap[String, String](fromPropertiesFile(inputStream))
+    new JavaHashMap[String, String](fromPropertiesFile(inputStream))
 
   /**
    * @param file
@@ -242,7 +249,7 @@ object PropertiesUtils extends Logger {
 
   def loadFlinkConfYaml(yaml: String): JavaMap[String, String] = {
     require(yaml != null && yaml.nonEmpty, "[StreamPark] loadFlinkConfYaml: yaml must not be null")
-    val flinkConf = new JavaMap[String, String]()
+    val flinkConf = new JavaHashMap[String, String]()
     val scanner: Scanner = new Scanner(yaml)
     val lineNo: AtomicInteger = new AtomicInteger(0)
     while (scanner.hasNextLine) {
@@ -370,13 +377,57 @@ object PropertiesUtils extends Logger {
   }
 
   @Nonnull def extractDynamicPropertiesAsJava(properties: String): JavaMap[String, String] =
-    new JavaMap[String, String](extractDynamicProperties(properties))
+    new JavaHashMap[String, String](extractDynamicProperties(properties))
 
   @Nonnull def extractMultipleArgumentsAsJava(
       args: Array[String]): JavaMap[String, JavaMap[String, String]] = {
     val map =
-      extractMultipleArguments(args).map(c => c._1 -> new JavaMap[String, String](c._2))
-    new JavaMap[String, JavaMap[String, String]](map)
+      extractMultipleArguments(args).map(c => c._1 -> new JavaHashMap[String, String](c._2))
+    new JavaHashMap[String, JavaMap[String, String]](map)
   }
 
+  /** extract spark configuration from sparkApplication.appProperties */
+  @Nonnull def extractSparkPropertiesAsJava(properties: String): JavaMap[String, String] =
+    new JavaHashMap[String, String](extractSparkProperties(properties))
+
+  @Nonnull def extractSparkProperties(properties: String): Map[String, String] = {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    else {
+      val map = mutable.Map[String, String]()
+      properties.split("(\\s)*(--conf|-c)(\\s)+") match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(x)
+              if (p.matches) {
+                map += p.group(1).trim -> p.group(2).trim
+              }
+            }
+          })
+        case _ =>
+      }
+      map.toMap
+    }
+  }
+
+  /** extract spark configuration from sparkApplication.appArgs */
+  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] =
+    new JavaArrayList[String](extractSparkArguments(arguments))
+
+  @Nonnull def extractSparkArguments(arguments: String): List[String] = {
+    if (StringUtils.isEmpty(arguments)) List.empty[String]
+    else {
+      val list = List[String]()
+      arguments.split(SPARK_ARGUMENT_REGEXP) match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              list :+ x
+            }
+          })
+        case _ =>
+      }
+      list
+    }
+  }
 }

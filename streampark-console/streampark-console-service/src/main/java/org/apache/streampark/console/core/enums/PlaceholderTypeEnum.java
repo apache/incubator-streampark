@@ -20,6 +20,8 @@ package org.apache.streampark.console.core.enums;
 /** configFile Type enum */
 public enum PlaceholderTypeEnum {
 
+    ID("id"),
+
     JOB_ID("job_id"),
 
     JOB_NAME("job_name"),

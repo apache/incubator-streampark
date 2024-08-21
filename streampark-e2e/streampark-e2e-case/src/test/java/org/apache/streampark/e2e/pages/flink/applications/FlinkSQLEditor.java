@@ -20,6 +20,10 @@ package org.apache.streampark.e2e.pages.flink.applications;
 import org.apache.streampark.e2e.pages.common.Constants;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.platform.commons.util.StringUtils;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -28,11 +32,14 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.List;
+
 @Getter
+@Slf4j
 public final class FlinkSQLEditor {
 
-    @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line')]")
-    private WebElement flinkSqlEditor;
+    @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line') and not(contains(@class, 'view-lines'))]")
+    private List<WebElement> flinkSqlEditor;
 
     private WebDriver driver;
 
@@ -41,15 +48,69 @@ public final class FlinkSQLEditor {
         this.driver = driver;
     }
 
+    @SneakyThrows
     public FlinkSQLEditor content(String content) {
-        new WebDriverWait(this.driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor));
-
-        flinkSqlEditor.click();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(flinkSqlEditor.get(0)));
 
         Actions actions = new Actions(this.driver);
-        actions.moveToElement(flinkSqlEditor).sendKeys(content).perform();
+
+        List<String> contentList = List.of(content.split(Constants.LINE_SEPARATOR));
+
+        for (int i = 0; i < contentList.size(); i++) {
+            String editorLineText;
+            String inputContent = contentList.get(i);
+            int flinkSqlEditorIndex = Math.min(i, 21);
+
+            if (i == 0) {
+                actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                    .click()
+                    .sendKeys(inputContent)
+                    .sendKeys(Constants.LINE_SEPARATOR)
+                    .perform();
+                continue;
+            } else {
+                editorLineText = flinkSqlEditor.get(flinkSqlEditorIndex).getText();
+            }
+
+            if (StringUtils.isNotBlank(inputContent)) {
+                if (editorLineText.isEmpty()) {
+                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                        .click()
+                        .sendKeys(inputContent)
+                        .sendKeys(Constants.LINE_SEPARATOR)
+                        .perform();
+                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
+                } else {
+                    for (int p = 0; p < editorLineText.strip().length(); p++) {
+                        clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
+                    }
+                    if (!editorLineText.isEmpty()) {
+                        clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
+                    }
+                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                        .click()
+                        .sendKeys(inputContent)
+                        .sendKeys(Constants.LINE_SEPARATOR)
+                        .perform();
+                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
+                }
+            } else {
+                actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                    .click()
+                    .sendKeys(Constants.LINE_SEPARATOR)
+                    .perform();
+                Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
+            }
+        }
 
         return this;
+    }
+
+    private void clearLine(Actions actions, WebElement element) {
+        actions.moveToElement(element)
+            .click()
+            .sendKeys(Keys.BACK_SPACE)
+            .perform();
     }
 }

@@ -17,6 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 
@@ -25,16 +26,15 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
-import java.io.Serializable;
-import java.util.Date;
-
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_alert_config")
 @Slf4j
-public class AlertConfig implements Serializable {
+public class AlertConfig extends BaseEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -61,12 +61,6 @@ public class AlertConfig implements Serializable {
 
     /** lark alert parameters */
     private String larkParams;
-
-    /** create time */
-    private Date createTime;
-
-    /** modify time */
-    private Date modifyTime;
 
     public static AlertConfig of(AlertConfigParams params) {
         if (params == null) {

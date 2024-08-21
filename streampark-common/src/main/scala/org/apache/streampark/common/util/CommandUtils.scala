@@ -17,12 +17,13 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
+
 import java.io._
 import java.lang.{Iterable => JavaIterable}
 import java.util.Scanner
 import java.util.function.Consumer
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {

@@ -49,11 +49,11 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.SavePointService;
-import org.apache.streampark.console.core.service.ServiceHelper;
+import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
@@ -117,16 +117,13 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private SavePointService savePointService;
+    private SavepointService savepointService;
 
     @Autowired
     private EffectiveService effectiveService;
 
     @Autowired
     private SettingService settingService;
-
-    @Autowired
-    private ServiceHelper serviceHelper;
 
     @Autowired
     private FlinkK8sWatcher k8SFlinkTrackMonitor;
@@ -211,7 +208,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         backUpService.remove(application);
 
         // 6) remove savepoint
-        savePointService.remove(application);
+        savepointService.remove(application);
 
         // 7) remove BuildPipeline
         appBuildPipeService.removeByAppId(application.getId());
@@ -324,7 +321,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     public boolean create(Application appParam) {
         ApiAlertException.throwIfNull(
             appParam.getTeamId(), "The teamId can't be null. Create application failed.");
-        appParam.setUserId(serviceHelper.getUserId());
+        appParam.setUserId(ServiceHelper.getUserId());
         appParam.setState(FlinkAppStateEnum.ADDED.getValue());
         appParam.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         appParam.setOptionState(OptionStateEnum.NONE.getValue());
@@ -415,7 +412,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         newApp.setResourceFrom(persist.getResourceFrom());
         newApp.setProjectId(persist.getProjectId());
         newApp.setModule(persist.getModule());
-        newApp.setUserId(serviceHelper.getUserId());
+        newApp.setUserId(ServiceHelper.getUserId());
         newApp.setState(FlinkAppStateEnum.ADDED.getValue());
         newApp.setRelease(ReleaseStateEnum.NEED_RELEASE.get());
         newApp.setOptionState(OptionStateEnum.NONE.getValue());

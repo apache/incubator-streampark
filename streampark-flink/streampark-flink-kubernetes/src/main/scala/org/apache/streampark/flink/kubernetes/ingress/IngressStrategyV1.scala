@@ -17,13 +17,12 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 class IngressStrategyV1 extends IngressStrategy {

@@ -22,6 +22,7 @@ import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
@@ -40,7 +41,6 @@ import java.security.PrivilegedAction
 import java.util
 import java.util.Collections
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 /** yarn application mode submit */
@@ -66,8 +66,7 @@ object YarnApplicationClient extends YarnClientTrait {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
         submitRequest.hdfsWorkspace.flinkPlugins,
-        submitRequest.hdfsWorkspace.appJars,
-        submitRequest.hdfsWorkspace.appPlugins)
+        submitRequest.hdfsWorkspace.appJars)
       submitRequest.developmentMode match {
         case FlinkDevelopmentMode.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"

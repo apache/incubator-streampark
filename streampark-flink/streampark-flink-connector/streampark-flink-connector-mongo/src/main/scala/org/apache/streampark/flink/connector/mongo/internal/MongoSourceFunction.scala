@@ -38,7 +38,7 @@ import org.bson.Document
 import java.lang
 import java.util.Properties
 
-import scala.collection.convert.ImplicitConversions._
+import org.apache.streampark.common.util.Implicits._
 import scala.util.{Success, Try}
 
 class MongoSourceFunction[R: TypeInformation](

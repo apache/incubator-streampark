@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,9 +74,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void createRole(Role role) {
-        Date date = new Date();
-        role.setCreateTime(date);
-        role.setModifyTime(date);
         this.save(role);
 
         String[] menuIds = role.getMenuId().split(StringPool.COMMA);
@@ -103,7 +99,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void updateRole(Role role) {
-        role.setModifyTime(new Date());
         baseMapper.updateById(role);
         LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId,
             role.getRoleId());
@@ -127,5 +122,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             roleMenus.add(rm);
         }
         roleMenuService.saveBatch(roleMenus);
+    }
+
+    @Override
+    public Role getSysDefaultRole() {
+        return baseMapper.selectOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleId, Constant.DEFAULT_ROLE_ID));
     }
 }

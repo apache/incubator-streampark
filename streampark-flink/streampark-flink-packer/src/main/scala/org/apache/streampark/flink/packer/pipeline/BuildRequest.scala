@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
-import org.apache.streampark.common.enums.{FlinkDevelopmentMode, FlinkExecutionMode}
+import org.apache.streampark.common.enums.{FlinkDevelopmentMode, FlinkExecutionMode, SparkDevelopmentMode}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
 import org.apache.streampark.flink.packer.maven.DependencyInfo
@@ -50,7 +50,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   lazy val providedLibs: DependencyInfo = {
     val providedLibs =
-      ArrayBuffer(localWorkspace.APP_JARS, localWorkspace.APP_PLUGINS, customFlinkUserJar)
+      ArrayBuffer(localWorkspace.APP_JARS, customFlinkUserJar)
     if (developmentMode == FlinkDevelopmentMode.FLINK_SQL) {
       providedLibs += s"${localWorkspace.APP_SHIMS}/flink-${flinkVersion.majorVersion}"
     }
@@ -128,6 +128,6 @@ case class SparkYarnApplicationBuildRequest(
     mainClass: String,
     localWorkspace: String,
     yarnProvidedPath: String,
-    developmentMode: FlinkDevelopmentMode,
+    developmentMode: SparkDevelopmentMode,
     dependencyInfo: DependencyInfo)
   extends BuildParam

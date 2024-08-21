@@ -24,6 +24,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 @Component
 public class SpringContextUtils implements ApplicationContextAware {
 
@@ -56,5 +59,9 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     public static Class<?> getType(String name) {
         return applicationContext.getType(name);
+    }
+
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+        return applicationContext.getBeansWithAnnotation(annotationType);
     }
 }

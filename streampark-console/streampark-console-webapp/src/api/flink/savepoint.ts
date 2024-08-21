@@ -26,7 +26,7 @@ enum SAVE_POINT_API {
 export function fetchLatest(data: Recordable) {
   return defHttp.post({ url: SAVE_POINT_API.LATEST, data });
 }
-export function fetchSavePonitHistory(data: Recordable) {
+export function fetchSavePointHistory(data: Recordable) {
   return defHttp.post({ url: SAVE_POINT_API.HISTORY, data });
 }
 /**

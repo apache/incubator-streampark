@@ -26,7 +26,39 @@ public class Constants {
 
     public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
 
+    public static final Integer DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS = 1000;
+
     public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
 
     public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
+
+    public static final String LINE_SEPARATOR = "\n";
+
+    /** datagen flink sql for test */
+    public static final String TEST_FLINK_SQL = "CREATE TABLE datagen (\n"
+        + "f_sequence INT,\n"
+        + "f_random INT,\n"
+        + "f_random_str STRING,\n"
+        + "ts AS localtimestamp,\n"
+        + "WATERMARK FOR ts AS ts\n"
+        + ") WITH (\n"
+        + "'connector' = 'datagen',\n"
+        + "'rows-per-second'='5',\n"
+        + "'fields.f_sequence.kind'='sequence',\n"
+        + "'fields.f_sequence.start'='1',\n"
+        + "'fields.f_sequence.end'='100',\n"
+        + "'fields.f_random.min'='1',\n"
+        + "'fields.f_random.max'='100',\n"
+        + "'fields.f_random_str.length'='10'\n"
+        + ");\n"
+        + "\n"
+        + "CREATE TABLE print_table (\n"
+        + "f_sequence INT,\n"
+        + "f_random INT,\n"
+        + "f_random_str STRING\n"
+        + ") WITH (\n"
+        + "'connector' = 'print'\n"
+        + ");\n"
+        + "\n"
+        + "INSERT INTO print_table select f_sequence,f_random,f_random_str from datagen;";
 }

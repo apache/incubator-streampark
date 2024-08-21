@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.kubernetes
 
-import org.apache.streampark.common.util.ImplicitsUtils._
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
@@ -34,7 +34,6 @@ import org.apache.hc.core5.util.Timeout
 
 import javax.annotation.Nullable
 
-import scala.collection.convert.ImplicitConversions._
 import scala.util.{Failure, Success, Try}
 
 object KubernetesRetriever extends Logger {

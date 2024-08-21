@@ -22,73 +22,60 @@ import org.apache.streampark.common.conf.{SparkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.pipeline.{BuildResult, ShadedBuildResponse}
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.commons.collections.MapUtils
 
 import javax.annotation.Nullable
 
 import java.io.{File, IOException}
-import java.net.URL
 import java.nio.file.Files
-import java.util.{Map => JavaMap}
-
-import scala.collection.convert.ImplicitConversions._
-import scala.util.Try
 
 case class SubmitRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    properties: JavaMap[String, Any],
     sparkYaml: String,
-    developmentMode: FlinkDevelopmentMode,
+    developmentMode: SparkDevelopmentMode,
     id: Long,
-    jobId: String,
     appName: String,
+    mainClass: String,
     appConf: String,
+    appProperties: JavaMap[String, String],
+    appArgs: JavaList[String],
     applicationType: ApplicationType,
-    args: String,
     @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
 
-  private[this] lazy val appProperties: Map[String, String] = getParameterMap(
+  val DEFAULT_SUBMIT_PARAM = Map[String, String](
+    "spark.driver.cores" -> "1",
+    "spark.driver.memory" -> "1g",
+    "spark.executor.cores" -> "1",
+    "spark.executor.memory" -> "1g",
+    "spark.executor.instances" -> "2")
+
+  lazy val sparkParameterMap: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL =>
-      Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.SPARK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => mainClass
+    case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }
 
-  lazy val effectiveAppName: String =
-    if (this.appName == null) appProperties(KEY_FLINK_APP_NAME)
-    else this.appName
-
-  lazy val libs: List[URL] = {
-    val path = s"${Workspace.local.APP_WORKSPACE}/$id/lib"
-    Try(new File(path).listFiles().map(_.toURI.toURL).toList)
-      .getOrElse(List.empty[URL])
-  }
-
-  lazy val classPaths: List[URL] = sparkVersion.sparkLibs ++ libs
-
-  lazy val flinkSQL: String = extraParameter.get(KEY_FLINK_SQL()).toString
-
-  lazy val userJarFile: File = {
+  lazy val userJarPath: String = {
     executionMode match {
       case _ =>
         checkBuildResult()
-        new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
+        buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
     }
   }
 
-  lazy val safePackageProgram: Boolean = {
-    sparkVersion.version.split("\\.").map(_.trim.toInt) match {
-      case Array(a, b, c) if a >= 3 => b > 1
-      case _ => false
-    }
-  }
+  def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
+
+  def getExtra(key: String): Any = extraParameter.get(key)
 
   private[this] def getParameterMap(prefix: String = ""): Map[String, String] = {
     if (this.appConf == null) {
@@ -128,12 +115,11 @@ case class SubmitRequest(
       map
         .filter(_._1.startsWith(prefix))
         .filter(_._2.nonEmpty)
-        .map(x => x._1.drop(prefix.length) -> x._2)
     }
   }
 
   @throws[IOException]
-  def isSymlink(file: File): Boolean = {
+  private def isSymlink(file: File): Boolean = {
     if (file == null) throw new NullPointerException("File must not be null")
     Files.isSymbolicLink(file.toPath)
   }
@@ -158,21 +144,20 @@ case class SubmitRequest(
       sparkHome,
       sparkLib = s"$sparkHdfsHome/jars",
       sparkPlugins = s"$sparkHdfsHome/plugins",
-      appJars = workspace.APP_JARS,
-      appPlugins = workspace.APP_PLUGINS)
+      appJars = workspace.APP_JARS)
   }
 
   @throws[Exception]
-  def checkBuildResult(): Unit = {
+  private def checkBuildResult(): Unit = {
     executionMode match {
       case _ =>
         if (this.buildResult == null) {
           throw new Exception(
-            s"[spark-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
+            s"[spark-submit] current job: $appName was not yet built, buildResult is empty")
         }
         if (!this.buildResult.pass) {
           throw new Exception(
-            s"[spark-submit] current job ${this.effectiveAppName} build failed, please check")
+            s"[spark-submit] current job $appName build failed, please check")
         }
     }
   }
@@ -184,5 +169,4 @@ case class HdfsWorkspace(
     sparkHome: String,
     sparkLib: String,
     sparkPlugins: String,
-    appJars: String,
-    appPlugins: String)
+    appJars: String)

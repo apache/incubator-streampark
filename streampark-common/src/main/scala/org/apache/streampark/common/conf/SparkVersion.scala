@@ -18,46 +18,62 @@
 package org.apache.streampark.common.conf
 
 import org.apache.streampark.common.util.{CommandUtils, Logger}
-
-import org.apache.commons.lang3.StringUtils
+import org.apache.streampark.common.util.Implicits._
 
 import java.io.File
-import java.net.{URL => NetURL}
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
-import scala.collection.convert.ImplicitConversions._
 import scala.collection.mutable
 
 /** @param sparkHome actual spark home that must be a readable local path */
-class SparkVersion(val sparkHome: String) extends java.io.Serializable with Logger {
+class SparkVersion(val sparkHome: String) extends Serializable with Logger {
 
   private[this] lazy val SPARK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$")
 
-  private[this] lazy val SPARK_VERSION_PATTERN = Pattern.compile("(version) (\\d+\\.\\d+\\.\\d+)")
+  private[this] lazy val SPARK_VERSION_PATTERN = Pattern.compile("\\s{2}version\\s(\\d+\\.\\d+\\.\\d+)")
 
-  private[this] lazy val SPARK_SCALA_VERSION_PATTERN =
-    Pattern.compile("^spark-core_(.*)-[0-9].*.jar$")
+  private[this] lazy val SPARK_SCALA_VERSION_PATTERN = Pattern.compile("Using\\sScala\\sversion\\s(\\d+\\.\\d+)")
 
-  lazy val scalaVersion: String = {
-    val matcher = SPARK_SCALA_VERSION_PATTERN.matcher(sparkCoreJar.getName)
-    if (matcher.matches()) {
-      matcher.group(1);
-    } else {
-      "2.12"
+  val (version, scalaVersion) = {
+    var sparkVersion: String = null
+    var scalaVersion: String = null
+    val cmd = List(s"$sparkHome/bin/spark-submit --version")
+    val buffer = new mutable.StringBuilder
+
+    CommandUtils.execute(
+      sparkHome,
+      cmd,
+      new Consumer[String]() {
+        override def accept(out: String): Unit = {
+          buffer.append(out).append("\n")
+          val matcher = SPARK_VERSION_PATTERN.matcher(out)
+          if (matcher.find) {
+            sparkVersion = matcher.group(1)
+          } else {
+            val matcher1 = SPARK_SCALA_VERSION_PATTERN.matcher(out)
+            if (matcher1.find) {
+              scalaVersion = matcher1.group(1)
+            }
+          }
+        }
+      })
+
+    logInfo(buffer.toString())
+    if (sparkVersion == null || scalaVersion == null) {
+      throw new IllegalStateException(s"[StreamPark] parse spark version failed. $buffer")
     }
+    buffer.clear()
+    (sparkVersion, scalaVersion)
   }
 
-  def checkVersion(throwException: Boolean = true): Boolean = {
-    version.split("\\.").map(_.trim.toInt) match {
-      case Array(3, v, _) if v >= 1 && v <= 3 => true
-      case _ =>
-        if (throwException) {
-          throw new UnsupportedOperationException(s"Unsupported flink version: $version")
-        } else {
-          false
-        }
+  lazy val majorVersion: String = {
+    if (version == null) {
+      null
+    } else {
+      val matcher = SPARK_VER_PATTERN.matcher(version)
+      matcher.matches()
+      matcher.group(1)
     }
   }
 
@@ -73,55 +89,16 @@ class SparkVersion(val sparkHome: String) extends java.io.Serializable with Logg
     lib
   }
 
-  lazy val sparkLibs: List[NetURL] = sparkLib.listFiles().map(_.toURI.toURL).toList
-
-  lazy val majorVersion: String = {
-    if (version == null) {
-      null
-    } else {
-      val matcher = SPARK_VER_PATTERN.matcher(version)
-      matcher.matches()
-      matcher.group(1)
-    }
-  }
-
-  lazy val version: String = {
-    val sparkVersion = new AtomicReference[String]
-    val cmd = List(s"$sparkHome/bin/spark-submit --version")
-    val success = new AtomicBoolean(false)
-    val buffer = new mutable.StringBuilder
-    CommandUtils.execute(
-      sparkHome,
-      cmd,
-      new Consumer[String]() {
-        override def accept(out: String): Unit = {
-          buffer.append(out).append("\n")
-          val matcher = SPARK_VERSION_PATTERN.matcher(out)
-          if (matcher.find && StringUtils.isBlank(sparkVersion.get())) {
-            success.set(true)
-            sparkVersion.set(matcher.group(2))
-          }
-        }
-      })
-    logInfo(buffer.toString())
-    if (!success.get()) {
-      throw new IllegalStateException(s"[StreamPark] parse spark version failed. $buffer")
-    }
-    buffer.clear()
-    sparkVersion.get
-  }
-
-  lazy val sparkCoreJar: File = {
-    val distJar = sparkLib.listFiles().filter(_.getName.matches("spark-core.*\\.jar"))
-    distJar match {
-      case x if x.isEmpty =>
-        throw new IllegalArgumentException(s"[StreamPark] can no found spark-core jar in $sparkLib")
-      case x if x.length > 1 =>
-        throw new IllegalArgumentException(
-          s"[StreamPark] found multiple spark-core jar in $sparkLib")
+  def checkVersion(throwException: Boolean = true): Boolean = {
+    version.split("\\.").map(_.trim.toInt) match {
+      case Array(3, v, _) if v >= 1 && v <= 3 => true
       case _ =>
+        if (throwException) {
+          throw new UnsupportedOperationException(s"Unsupported spark version: $version")
+        } else {
+          false
+        }
     }
-    distJar.head
   }
 
   override def toString: String =

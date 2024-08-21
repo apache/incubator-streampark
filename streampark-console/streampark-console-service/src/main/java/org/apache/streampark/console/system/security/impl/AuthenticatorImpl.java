@@ -30,8 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
 public class AuthenticatorImpl implements Authenticator {
 
@@ -41,13 +39,11 @@ public class AuthenticatorImpl implements Authenticator {
     private LdapService ldapService;
 
     @Override
-    public User authenticate(String username, String password, String loginType) throws Exception {
-        LoginTypeEnum loginTypeEnum = LoginTypeEnum.of(loginType);
-
+    public User authenticate(String username, String password, LoginTypeEnum loginType) throws Exception {
         ApiAlertException.throwIfNull(
-            loginTypeEnum, String.format("the login type [%s] is not supported.", loginType));
+            loginType, "the login type is null");
 
-        switch (loginTypeEnum) {
+        switch (loginType) {
             case PASSWORD:
                 return passwordAuthenticate(username, password);
             case LDAP:
@@ -117,15 +113,13 @@ public class AuthenticatorImpl implements Authenticator {
 
     private User newUserCreate(LoginTypeEnum loginTypeEnum, String username) throws Exception {
         User newUser = new User();
-        Date date = new Date();
-        newUser.setCreateTime(date);
-        newUser.setModifyTime(date);
         newUser.setUsername(username);
         newUser.setNickName(username);
         newUser.setLoginType(loginTypeEnum);
         newUser.setUserType(UserTypeEnum.USER);
         newUser.setStatus(User.STATUS_VALID);
         newUser.setSex(User.SEX_UNKNOWN);
+        newUser.setPassword(User.DEFAULT_SECRET);
         usersService.createUser(newUser);
         return newUser;
     }

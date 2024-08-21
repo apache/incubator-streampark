@@ -17,13 +17,12 @@
 
 package org.apache.streampark.common.util
 
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Utils.isEmpty
 
 import javax.annotation.Nullable
 
 import java.util
-
-import scala.collection.convert.ImplicitConversions._
 
 /** @since 2.2.0 */
 object AssertUtils {

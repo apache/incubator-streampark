@@ -17,23 +17,24 @@
 
 package org.apache.streampark.console.system.entity;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("t_access_token")
-public class AccessToken implements Serializable {
+public class AccessToken extends BaseEntity {
 
-    private static final long serialVersionUID = 1L;
-    public static final String DEFAULT_EXPIRE_TIME = "9999-01-01 00:00:00";
     public static final String IS_API_TOKEN = "is_api_token";
 
     public static final Integer STATUS_ENABLE = 1;
@@ -55,10 +56,6 @@ public class AccessToken implements Serializable {
     private Date expireTime;
 
     private String description;
-
-    private Date createTime;
-
-    private Date modifyTime;
 
     private transient String username;
 

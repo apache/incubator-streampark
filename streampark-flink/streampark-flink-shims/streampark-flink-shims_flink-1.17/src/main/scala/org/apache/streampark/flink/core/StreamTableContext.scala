@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.common.util.Implicits.JavaList
+
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.table.api._
@@ -26,8 +28,6 @@ import org.apache.flink.table.module.ModuleEntry
 import org.apache.flink.table.resource.ResourceUri
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.types.Row
-
-import java.util.{List => JavaList}
 
 class StreamTableContext(
     override val parameter: ParameterTool,

@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.annotation.PermissionScope;
+import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -87,7 +87,7 @@ public class FlinkSqlController {
     }
 
     @PostMapping("list")
-    @PermissionScope(app = "#flinkSql.appId", team = "#flinkSql.teamId")
+    @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
     public RestResponse list(FlinkSql flinkSql, RestRequest request) {
         IPage<FlinkSql> page = flinkSqlService.getPage(flinkSql.getAppId(), request);
         return RestResponse.success(page);
@@ -95,14 +95,14 @@ public class FlinkSqlController {
 
     @PostMapping("delete")
     @RequiresPermissions("sql:delete")
-    @PermissionScope(app = "#flinkSql.appId", team = "#flinkSql.teamId")
+    @Permission(app = "#flinkSql.appId", team = "#flinkSql.teamId")
     public RestResponse delete(FlinkSql flinkSql) {
         Boolean deleted = flinkSqlService.removeById(flinkSql.getSql());
         return RestResponse.success(deleted);
     }
 
     @PostMapping("get")
-    @PermissionScope(app = "#appId", team = "#teamId")
+    @Permission(app = "#appId", team = "#teamId")
     public RestResponse get(Long appId, Long teamId, String id) throws InternalException {
         ApiAlertException.throwIfTrue(
             appId == null || teamId == null, "Permission denied, appId and teamId cannot be null");
@@ -118,13 +118,13 @@ public class FlinkSqlController {
     }
 
     @PostMapping("history")
-    @PermissionScope(app = "#app.id", team = "#app.teamId")
+    @Permission(app = "#app.id", team = "#app.teamId")
     public RestResponse history(Application app) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(app.getId());
         return RestResponse.success(sqlList);
     }
 
-    @PostMapping("sqlComplete")
+    @PostMapping("sql_complete")
     public RestResponse getSqlComplete(@NotNull(message = "{required}") String sql) {
         return RestResponse.success().put("word", sqlComplete.getComplete(sql));
     }

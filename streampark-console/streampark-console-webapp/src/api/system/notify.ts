@@ -27,7 +27,7 @@ interface NotifyParam {
 }
 enum NOTIFY_API {
   NOTICE = '/message/notice',
-  DEL = '/message/delnotice',
+  DEL = '/message/delete',
 }
 /**
  * Get notification list

@@ -46,7 +46,7 @@ if $os400; then
   # this will not work if the user belongs in secondary groups
   eval
 else
-  if [ ! -x "$PRG_DIR"/"$EXECUTABLE" ]; then
+  if [[ ! -x "$PRG_DIR"/"$EXECUTABLE" ]]; then
     echo "Cannot find $PRG_DIR/$EXECUTABLE"
     echo "The file is absent or does not have execute permission"
     echo "This file is needed to run this program"

@@ -21,7 +21,7 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum FLINK_API {
   LIST = '/flink/cluster/list',
-  REMOTE_URL = '/flink/cluster/remoteUrl',
+  REMOTE_URL = '/flink/cluster/remote_url',
   CREATE = '/flink/cluster/create',
   CHECK = '/flink/cluster/check',
   GET = '/flink/cluster/get',
