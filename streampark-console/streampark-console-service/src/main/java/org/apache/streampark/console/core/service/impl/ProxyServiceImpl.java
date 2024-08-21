@@ -28,8 +28,8 @@ import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.ProxyService;
 import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
+import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
-import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
@@ -104,25 +104,25 @@ public class ProxyServiceImpl implements ProxyService {
       return builder.body("Invalid operation, appId is null");
     }
 
-    User currentUser = serviceHelper.getLoginUser();
     Application app = applicationService.getById(appId);
     if (app == null) {
       return builder.body("Invalid operation, appId is invalid.");
     }
-    if (!currentUser.getUserId().equals(app.getUserId())) {
-      Member member = memberService.findByUserId(app.getTeamId(), currentUser.getUserId());
-      if (member == null) {
-        return builder.body(
-            "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+
+    String token = serviceHelper.getAuthorization();
+    if (token != null) {
+      Long userId = JWTUtil.getUserId(token);
+      if (userId != null && !userId.equals(app.getUserId())) {
+        Member member = memberService.findByUserId(app.getTeamId(), userId);
+        if (member == null) {
+          return builder.body(
+              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+        }
       }
     }
 
     String url = null;
     switch (app.getExecutionModeEnum()) {
-      case REMOTE:
-        FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
-        url = cluster.getAddress();
-        break;
       case YARN_PER_JOB:
       case YARN_APPLICATION:
       case YARN_SESSION:
@@ -130,20 +130,20 @@ public class ProxyServiceImpl implements ProxyService {
         url = yarnURL + "/proxy/" + app.getClusterId();
         url += getRequestURL(request).replace("/proxy/flink-ui/" + appId, "");
         return proxyYarnRequest(request, url);
+      case REMOTE:
+        FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
+        url = cluster.getAddress();
+        break;
       case KUBERNETES_NATIVE_APPLICATION:
       case KUBERNETES_NATIVE_SESSION:
-        String jobManagerUrl = app.getJobManagerUrl();
-        if (jobManagerUrl == null) {
-          builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
-          builder.body("The flink job manager url is not ready");
-          return builder.build();
-        }
         url = flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(app));
         break;
     }
 
     if (url == null) {
-      return builder.body("The flink job manager url is not ready");
+      builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+      builder.body("The flink job manager url is not ready");
+      return builder.build();
     }
 
     url += getRequestURL(request).replace("/proxy/flink-ui/" + appId, "");
@@ -178,7 +178,6 @@ public class ProxyServiceImpl implements ProxyService {
     // Ensure the Host header is set correctly.
     URI uri = new URI(url);
     headers.set("Host", uri.getHost());
-
     byte[] body = null;
     if (request.getInputStream().available() > 0) {
       InputStream inputStream = request.getInputStream();
