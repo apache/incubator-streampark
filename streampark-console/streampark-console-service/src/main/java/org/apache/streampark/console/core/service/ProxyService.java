@@ -22,9 +22,9 @@ import org.springframework.http.ResponseEntity;
 import javax.servlet.http.HttpServletRequest;
 
 public interface ProxyService {
-  ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, Long id) throws Exception;
+  ResponseEntity<?> proxyFlink(HttpServletRequest request, Long id) throws Exception;
 
-  ResponseEntity<?> proxyYarn(HttpServletRequest request, String url) throws Exception;
+  ResponseEntity<?> proxyYarn(HttpServletRequest request, Long logId) throws Exception;
 
-  ResponseEntity<?> proxyJobManager(HttpServletRequest request, Long logId) throws Exception;
+  ResponseEntity<?> proxyHistory(HttpServletRequest request, Long logId) throws Exception;
 }

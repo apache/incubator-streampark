@@ -38,21 +38,21 @@ public class ProxyController {
 
   @Autowired private ProxyService proxyService;
 
-  @GetMapping("flink-ui/{id}/**")
-  public ResponseEntity<?> proxyFlinkUI(HttpServletRequest request, @PathVariable("id") Long id)
+  @GetMapping("flink/{id}/**")
+  public ResponseEntity<?> proxyFlink(HttpServletRequest request, @PathVariable("id") Long id)
       throws Exception {
-    return proxyService.proxyFlinkUI(request, id);
+    return proxyService.proxyFlink(request, id);
   }
 
-  @GetMapping("job_manager/{id}/**")
-  public ResponseEntity<?> proxyJobManager(
-      HttpServletRequest request, @PathVariable("id") Long logId) throws Exception {
-    return proxyService.proxyJobManager(request, logId);
+  @GetMapping("history/{id}/**")
+  public ResponseEntity<?> proxyHistory(HttpServletRequest request, @PathVariable("id") Long logId)
+      throws Exception {
+    return proxyService.proxyHistory(request, logId);
   }
 
   @GetMapping("yarn/{appId}/**")
-  public ResponseEntity<?> proxyURL(HttpServletRequest request, @PathVariable("appId") String appId)
+  public ResponseEntity<?> proxyYarn(HttpServletRequest request, @PathVariable("appId") Long logId)
       throws Exception {
-    return proxyService.proxyYarn(request, appId);
+    return proxyService.proxyYarn(request, logId);
   }
 }

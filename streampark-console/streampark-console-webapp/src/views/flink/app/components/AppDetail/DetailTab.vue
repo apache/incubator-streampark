@@ -272,12 +272,12 @@
     });
   }
 
-  async function handleYarnUrl(yarnAppId: string) {
-    window.open(baseUrl() + '/proxy/yarn/' + yarnAppId + '/');
+  async function handleYarnUrl(id: string) {
+    window.open(baseUrl() + '/proxy/yarn/' + id + '/');
   }
 
-  async function handleViewJobManager(record: Recordable) {
-    window.open(baseUrl() + '/proxy/job_manager/' + record.id + '/');
+  async function handleViewHistory(record: Recordable) {
+    window.open(baseUrl() + '/proxy/history/' + record.id + '/');
   }
 
   function getSavePointAction(record: Recordable): ActionItem[] {
@@ -394,12 +394,12 @@
               <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
             <template v-if="column.dataIndex === 'yarnAppId'">
-              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
+              <a type="link" @click="handleYarnUrl(record.id)" target="_blank">
                 {{ record.yarnAppId }}
               </a>
             </template>
             <template v-if="column.dataIndex === 'jobManagerUrl'">
-              <a type="link" target="_blank" @click="handleViewJobManager(record)">
+              <a type="link" target="_blank" @click="handleViewHistory(record)">
                 {{ record.jobManagerUrl }}
               </a>
             </template>
