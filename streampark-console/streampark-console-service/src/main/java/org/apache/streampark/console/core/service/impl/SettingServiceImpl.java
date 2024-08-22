@@ -49,6 +49,7 @@ import javax.mail.Transport;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -60,6 +61,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         SettingService {
 
     private final Setting emptySetting = new Setting();
+
+    private static final int DEFAULT_STREAMPARK_UPLOADS_RECORD_LIMIT = 25;
 
     @PostConstruct
     public void loadSettings() {
@@ -253,5 +256,12 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             }
         }
         return true;
+    }
+
+    @Override
+    public Integer getStreamparkUploadsRecordLimit() {
+        Setting setting = get(SettingService.KEY_STREAMPARK_UPLOADS_RECORD_LIMIT);
+        return Objects.isNull(setting) ? DEFAULT_STREAMPARK_UPLOADS_RECORD_LIMIT
+            : Integer.parseInt(setting.getSettingValue());
     }
 }

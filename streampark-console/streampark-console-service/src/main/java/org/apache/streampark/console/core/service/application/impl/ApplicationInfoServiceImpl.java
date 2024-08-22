@@ -42,6 +42,7 @@ import org.apache.streampark.console.core.runner.EnvInitializer;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.SavePointService;
+import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.watcher.FlinkClusterWatcher;
@@ -64,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,6 +120,9 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
     @Autowired
     private FlinkK8sWatcherWrapper flinkK8sWatcherWrapper;
+
+    @Resource
+    private SettingService settingService;
 
     @Override
     public Map<String, Serializable> getDashboardDataMap(Long teamId) {
@@ -341,7 +346,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
             .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
-            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
+            .limit(settingService.getStreamparkUploadsRecordLimit())
             .collect(Collectors.toList());
     }
 

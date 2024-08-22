@@ -51,6 +51,8 @@ public interface SettingService extends IService<Setting> {
 
     String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
+    String KEY_STREAMPARK_UPLOADS_RECORD_LIMIT = "streampark.uploads.record.limit";
+
     /**
      * Retrieves the value of the setting associated with the specified key.
      *
@@ -135,4 +137,11 @@ public interface SettingService extends IService<Setting> {
      * @return Whether the update operation was successful
      */
     boolean updateEmail(SenderEmail senderEmail);
+
+    /**
+     * Retrieves the StreamPark uploads record limit.
+     *
+     * @return A number representing the StreamPark upload dependency history
+     */
+    Integer getStreamparkUploadsRecordLimit();
 }
