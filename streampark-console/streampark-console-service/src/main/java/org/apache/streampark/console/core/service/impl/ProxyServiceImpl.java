@@ -145,7 +145,7 @@ public class ProxyServiceImpl implements ProxyService {
     String yarnId = log.getYarnAppId();
     String yarnURL = YarnUtils.getRMWebAppProxyURL();
     String url = yarnURL + "/proxy/" + yarnId + "/";
-    url += getRequestURL(request).replace("/proxy/yarn/" + yarnId, "");
+    url += getRequestURL(request).replace("/proxy/yarn/" + logId, "");
     return proxyYarnRequest(request, url);
   }
 

@@ -19,6 +19,8 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.core.service.ProxyService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,19 +41,22 @@ public class ProxyController {
   @Autowired private ProxyService proxyService;
 
   @GetMapping("flink/{id}/**")
+  @RequiresPermissions("app:view")
   public ResponseEntity<?> proxyFlink(HttpServletRequest request, @PathVariable("id") Long id)
       throws Exception {
     return proxyService.proxyFlink(request, id);
   }
 
   @GetMapping("history/{id}/**")
+  @RequiresPermissions("app:view")
   public ResponseEntity<?> proxyHistory(HttpServletRequest request, @PathVariable("id") Long logId)
       throws Exception {
     return proxyService.proxyHistory(request, logId);
   }
 
-  @GetMapping("yarn/{appId}/**")
-  public ResponseEntity<?> proxyYarn(HttpServletRequest request, @PathVariable("appId") Long logId)
+  @GetMapping("yarn/{id}/**")
+  @RequiresPermissions("app:view")
+  public ResponseEntity<?> proxyYarn(HttpServletRequest request, @PathVariable("id") Long logId)
       throws Exception {
     return proxyService.proxyYarn(request, logId);
   }
