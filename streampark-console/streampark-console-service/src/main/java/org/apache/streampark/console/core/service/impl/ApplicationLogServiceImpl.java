@@ -59,4 +59,9 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
   public Boolean delete(ApplicationLog applicationLog) {
     return removeById(applicationLog.getId());
   }
+
+  @Override
+  public void updateJobManagerUrl(Long appId, String jobManagerUrl) {
+    baseMapper.updateJobManagerUrl(appId, jobManagerUrl);
+  }
 }

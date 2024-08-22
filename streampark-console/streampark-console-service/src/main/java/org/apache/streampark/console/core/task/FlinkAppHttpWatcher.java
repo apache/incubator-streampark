@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
+import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.SavepointService;
@@ -75,6 +76,8 @@ import java.util.stream.Collectors;
 public class FlinkAppHttpWatcher {
 
   @Autowired private ApplicationService applicationService;
+
+  @Autowired private ApplicationLogService applicationLogService;
 
   @Autowired private AlertService alertService;
 
@@ -575,6 +578,7 @@ public class FlinkAppHttpWatcher {
           if (trackingUrl != null && !trackingUrl.equals(application.getJobManagerUrl())) {
             application.setJobManagerUrl(trackingUrl);
             applicationService.updateJobManagerUrl(application.getId(), trackingUrl);
+            applicationLogService.updateJobManagerUrl(application.getId(), trackingUrl);
           }
 
           String state = yarnAppInfo.getApp().getFinalStatus();
