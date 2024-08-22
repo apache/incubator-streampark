@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -74,8 +75,10 @@ public class SparkEnv implements Serializable {
     public void doSetSparkConf() throws ApiDetailException {
         try {
             File yaml = new File(this.sparkHome.concat("/conf/spark-defaults.conf"));
-            String sparkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);
-            this.sparkConf = DeflaterUtils.zipString(sparkConf);
+            if (yaml.exists()) {
+                String sparkConf = FileUtils.readFileToString(yaml, StandardCharsets.UTF_8);
+                this.sparkConf = DeflaterUtils.zipString(sparkConf);
+            }
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
@@ -84,15 +87,12 @@ public class SparkEnv implements Serializable {
     public void doSetVersion() {
         this.setVersion(this.getSparkVersion().version());
         this.setScalaVersion(this.getSparkVersion().scalaVersion());
-        if (!streamParkScalaVersion.startsWith(this.getSparkVersion().scalaVersion())) {
-            throw new UnsupportedOperationException(
-                String.format(
-                    "The current Scala version of StreamPark is %s, but the scala version of Spark to be added is %s, which does not match, Please check",
-                    streamParkScalaVersion, this.getSparkVersion().scalaVersion()));
-        }
     }
 
     public Map<String, String> convertSparkYamlAsMap() {
+        if (sparkConf == null) {
+            return new HashMap<>();
+        }
         String sparkYamlString = DeflaterUtils.unzipString(sparkConf);
         return PropertiesUtils.loadFlinkConfYaml(sparkYamlString);
     }
@@ -106,7 +106,9 @@ public class SparkEnv implements Serializable {
     }
 
     public void unzipSparkConf() {
-        this.sparkConf = DeflaterUtils.unzipString(this.sparkConf);
+        if (sparkConf != null) {
+            this.sparkConf = DeflaterUtils.unzipString(this.sparkConf);
+        }
     }
 
     public String getLargeVersion() {

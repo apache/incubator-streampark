@@ -26,7 +26,7 @@
   import { fetchSparkEnvCreate } from '/@/api/spark/home';
 
   defineOptions({
-    name: 'FlinkModal',
+    name: 'SparkModal',
   });
   const emit = defineEmits(['reload', 'register']);
   const versionId = ref<string | null>(null);
@@ -74,10 +74,10 @@
     ],
   });
   const [registerModalInner, { changeOkLoading, closeModal }] = useModalInner(async (data) => {
-    resetFields();
+    await resetFields();
     if (data) {
       versionId.value = data.versionId;
-      setFieldsValue(data);
+      await setFieldsValue(data);
     }
   });
 
@@ -94,12 +94,12 @@
       changeOkLoading(false);
     }
     // Detection environment
-    const { data: resp } = await fetchSparkEnvCheck({
+    const resp = await fetchSparkEnvCheck({
       id: versionId.value,
       sparkName: formValue.sparkName,
       sparkHome: formValue.sparkHome,
     });
-    const checkResp = parseInt(resp.data);
+    const checkResp = parseInt(resp);
     if (checkResp !== SparkEnvCheckEnum.OK) {
       switch (checkResp) {
         case SparkEnvCheckEnum.INVALID_PATH:
@@ -127,7 +127,7 @@
         const res = await fetchSparkEnvCreate(formValue);
         if (res.data) {
           success = true;
-          message = formValue.flinkName.concat(t('spark.home.tips.createSparkHomeSuccessful'));
+          message = formValue.sparkName.concat(t('spark.home.tips.createSparkHomeSuccessful'));
         } else {
           message = res.message;
         }
@@ -138,7 +138,7 @@
           ...formValue,
         });
         if (res.data) {
-          message = formValue.flinkName.concat(t('spark.home.tips.updateSparkHomeSuccessful'));
+          message = formValue.sparkName.concat(t('spark.home.tips.updateSparkHomeSuccessful'));
           success = true;
         } else {
           message = res.message;
