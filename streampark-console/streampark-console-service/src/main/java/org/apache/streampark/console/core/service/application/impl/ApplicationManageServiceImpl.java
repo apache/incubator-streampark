@@ -101,6 +101,8 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
     private static final String ERROR_APP_QUEUE_HINT =
         "Queue label '%s' isn't available for teamId '%d', please add it into the team first.";
 
+    private static final String DEFAULT_APP_OPTIONS = "{}";
+
     @Autowired
     private ProjectService projectService;
 
@@ -329,6 +331,10 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         appParam.setCreateTime(date);
         appParam.setModifyTime(date);
         appParam.setDefaultModeIngress(settingService.getIngressModeDefault());
+
+        if (StringUtils.isEmpty(appParam.getOptions())) {
+            appParam.setOptions(DEFAULT_APP_OPTIONS);
+        }
 
         boolean success = validateQueueIfNeeded(appParam);
         ApiAlertException.throwIfFalse(
