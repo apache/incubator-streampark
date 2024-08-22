@@ -294,6 +294,7 @@ insert into `t_setting` values (12, 'docker.register.user', null, 'Docker Regist
 insert into `t_setting` values (13, 'docker.register.password', null, 'Docker Register Password', 'Docker container service authentication password', 1);
 insert into `t_setting` values (14, 'docker.register.namespace', null, 'Docker namespace', 'Namespace for docker image used in docker building env and target image register', 1);
 insert into `t_setting` values (15, 'ingress.mode.default', null, 'Ingress domain address', 'Automatically generate an nginx-based ingress by passing in a domain name', 1);
+insert into `t_setting` values (16, 'streampark.uploads.record.limit', 25, 'Uploads file record limit', 'Job dependent query limit on the number of uploaded files', 1);
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
