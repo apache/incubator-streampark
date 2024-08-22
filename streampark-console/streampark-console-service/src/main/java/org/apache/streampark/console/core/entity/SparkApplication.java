@@ -21,7 +21,7 @@ import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
+import org.apache.streampark.common.enums.SparkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
@@ -29,16 +29,13 @@ import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.bean.Dependency;
-import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceFromEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
-import org.apache.streampark.console.core.metrics.flink.JobsOverview;
+import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.util.YarnQueueLabelExpression;
-import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates;
 import org.apache.streampark.flink.packer.maven.DependencyInfo;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
@@ -49,16 +46,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @Data
 @TableName("t_spark_app")
@@ -73,90 +67,26 @@ public class SparkApplication extends BaseEntity {
     /** 1) custom code 2) spark SQL */
     private Integer jobType;
 
-    private Long projectId;
-    /** creator */
-    private Long userId;
-
-    /** The name of the frontend and program displayed in yarn */
-    private String jobName;
-
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String appId;
-
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String jobId;
-
-    /** The address of the jobmanager, that is, the direct access address of the Flink web UI */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String jobManagerUrl;
+    /** 1) Apache Spark 2) StreamPark Spark */
+    private Integer appType;
 
     /** spark version */
     private Long versionId;
 
-    /** k8s cluster id */
-    private String clusterId;
+    /** spark.app.name */
+    private String appName;
 
-    /** spark docker base image */
-    private String sparkImage;
+    private Integer executionMode;
 
-    /** The resource name of the spark job on k8s, equivalent to clusterId in application mode. */
-    private String k8sName;
+    /** 1: cicd (build from csv) 2: upload (upload local jar job) */
+    private Integer resourceFrom;
 
-    /** k8s namespace */
-    private String k8sNamespace = Constant.DEFAULT;
+    private Long projectId;
 
-    /** The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type) */
-    private Integer k8sRestExposedType;
-    /** spark kubernetes pod template */
-    private String k8sPodTemplate;
-
-    private String k8sJmPodTemplate;
-    private String k8sTmPodTemplate;
-
-    @Getter
-    private String ingressTemplate;
-    private String defaultModeIngress;
-
-    /** spark-hadoop integration on spark-k8s mode */
-    private Boolean k8sHadoopIntegration;
-
-    private Integer state;
-    /** task release status */
-    @TableField("`release`")
-    private Integer release;
-
-    /** determine if a task needs to be built */
-    private Boolean build;
-
-    /** max restart retries after job failed */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private Integer restartSize;
-
-    /** has restart count */
-    private Integer restartCount;
-
-    private Integer optionState;
-
-    /** alert id */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private Long alertId;
-
-    private String args;
     /** application module */
     private String module;
 
-    private String options;
-
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String hotParams;
-
-    private Integer resolveOrder;
-    private Integer executionMode;
-    private String dynamicProperties;
-    private Integer appType;
-
-    /** determine if tracking status */
-    private Integer tracking;
+    private String mainClass;
 
     private String jar;
 
@@ -166,7 +96,86 @@ public class SparkApplication extends BaseEntity {
      */
     private Long jarCheckSum;
 
-    private String mainClass;
+    /**
+     * Arbitrary Spark configuration property in key=value format
+     * e.g. spark.driver.cores=1
+     */
+    private String appProperties;
+
+    /** Arguments passed to the main method of your main class */
+    private String appArgs;
+
+    /**
+     * yarn application id for spark on Yarn. e.g. application_1722935916851_0014
+     * driver pod name for spark on K8s.(will be supported in the future)
+     */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String appId;
+
+    private String yarnQueue;
+
+    private transient String yarnQueueName;
+
+    /**
+     * spark on yarn can launch am and executors on particular nodes by configuring:
+     * "spark.yarn.am.nodeLabelExpression" and "spark.yarn.executor.nodeLabelExpression"
+     */
+    private transient String yarnQueueLabel;
+
+    /** The api server url of k8s. */
+    private String k8sMasterUrl;
+
+    /** spark docker base image */
+    private String k8sContainerImage;
+
+    /** k8s image pull policy */
+    private int k8sImagePullPolicy;
+
+    /** k8s spark service account */
+    private String k8sServiceAccount;
+
+    /** k8s namespace */
+    private String k8sNamespace = Constant.DEFAULT;
+
+    @TableField("HADOOP_USER")
+    private String hadoopUser;
+
+    /** max restart retries after job failed */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Integer restartSize;
+
+    /** has restart count */
+    private Integer restartCount;
+
+    private Integer state;
+
+    private String options;
+
+    private Integer optionState;
+
+    private Date optionTime;
+
+    private Long userId;
+
+    private String description;
+
+    /** determine if tracking status */
+    private Integer tracking;
+
+    /** task release status */
+    @TableField("`release`")
+    private Integer release;
+
+    /** determine if a task needs to be built */
+    private Boolean build;
+
+    /** alert id */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private Long alertId;
+
+    private Date createTime;
+
+    private Date modifyTime;
 
     private Date startTime;
 
@@ -175,73 +184,35 @@ public class SparkApplication extends BaseEntity {
 
     private Long duration;
 
-    /** checkpoint max failure interval */
-    private Integer cpMaxFailureInterval;
-
-    /** checkpoint failure rate interval */
-    private Integer cpFailureRateInterval;
-
-    /** Actions triggered after X minutes failed Y times: 1: send alert 2: restart */
-    private Integer cpFailureAction;
-
-    /** overview */
-    @TableField("TOTAL_TM")
-    private Integer totalTM;
-
-    @TableField("HADOOP_USER")
-    private String hadoopUser;
-
-    private Integer totalSlot;
-    private Integer availableSlot;
-    private Integer jmMemory;
-    private Integer tmMemory;
-    private Integer totalTask;
-
-    /** the cluster id bound to the task in remote mode */
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private Long sparkClusterId;
-
-    private String description;
-
-    private Date optionTime;
-
-    /** 1: cicd (build from csv) 2: upload (upload local jar job) */
-    private Integer resourceFrom;
-
     private String tags;
 
-    /** running job */
-    private transient JobsOverview.Task overview;
+    /** scheduling */
+    private String driverCores;
+    private String driverMemory;
+    private String executorCores;
+    private String executorMemory;
+    private String executorMaxNums;
+
+    /** metrics of running job */
+    private Long numTasks;
+    private Long numCompletedTasks;
+    private Long numStages;
+    private Long numCompletedStages;
+    private Long usedMemory;
+    private Long usedVCores;
 
     private transient String teamResource;
     private transient String dependency;
     private transient Long sqlId;
     private transient String sparkSql;
-
-    private transient Integer[] stateArray;
-    private transient Integer[] jobTypeArray;
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
-    private transient String userName;
-    private transient String nickName;
     private transient String config;
     private transient Long configId;
     private transient String sparkVersion;
     private transient String confPath;
     private transient Integer format;
-    private transient String savePoint;
-    private transient Boolean savePointed = false;
-    private transient Boolean drain = false;
-    private transient Boolean nativeFormat = false;
-    private transient Long savePointTimeout = 60L;
-    private transient Boolean allowNonRestored = false;
-    private transient Integer restoreMode;
-    private transient String socketId;
-    private transient String projectName;
-    private transient String createTimeFrom;
-    private transient String createTimeTo;
     private transient String backUpDescription;
-    private transient String yarnQueue;
 
     /** spark Web UI Url */
     private transient String sparkRestUrl;
@@ -251,16 +222,8 @@ public class SparkApplication extends BaseEntity {
 
     private transient AppControl appControl;
 
-    public void setDefaultModeIngress(String defaultModeIngress) {
-        this.defaultModeIngress = defaultModeIngress;
-    }
-
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constant.DEFAULT : k8sNamespace;
-    }
-
-    public K8sPodTemplates getK8sPodTemplates() {
-        return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
     }
 
     public void setState(Integer state) {
@@ -268,20 +231,41 @@ public class SparkApplication extends BaseEntity {
         this.tracking = shouldTracking() ? 1 : 0;
     }
 
-    public void setYarnQueueByHotParams() {
+    public void resolveYarnQueue() {
         if (!(SparkExecutionMode.YARN_CLIENT == this.getSparkExecutionMode()
             || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
             return;
         }
+        if (StringUtils.isBlank(this.yarnQueue)) {
+            this.yarnQueue = "default";
+        }
+        Map<String, String> queueLabelMap = YarnQueueLabelExpression.getQueueLabelMap(this.yarnQueue);
+        this.setYarnQueueName(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_QUEUE(), "default"));
+        this.setYarnQueueLabel(queueLabelMap.getOrDefault(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), null));
+    }
 
-        Map<String, Object> hotParamsMap = this.getHotParamsMap();
-        if (MapUtils.isNotEmpty(hotParamsMap)
-            && hotParamsMap.containsKey(ConfigKeys.KEY_YARN_APP_QUEUE())) {
-            String yarnQueue = hotParamsMap.get(ConfigKeys.KEY_YARN_APP_QUEUE()).toString();
-            String labelExpr = Optional.ofNullable(hotParamsMap.get(ConfigKeys.KEY_YARN_APP_NODE_LABEL()))
-                .map(Object::toString)
-                .orElse(null);
-            this.setYarnQueue(YarnQueueLabelExpression.of(yarnQueue, labelExpr).toString());
+    /**
+     * Resolve the scheduling configuration of the Spark application.
+     * About executorMaxNums:
+     * 1) if dynamic allocation is disabled, it depends on "spark.executor.instances".
+     * 2) if dynamic allocation is enabled and "spark.dynamicAllocation.maxExecutors" is set, it depends on it.
+     * 3) if dynamic allocation is enabled and "spark.dynamicAllocation.maxExecutors" is not set,
+     *    the number of executors can up to infinity.
+     *
+     * @param map The configuration map integrated with default configurations,
+     *            configuration template and custom configurations.
+     */
+    public void resolveScheduleConf(Map<String, String> map) {
+        this.setDriverCores(map.get(ConfigKeys.KEY_SPARK_DRIVER_CORES()));
+        this.setDriverMemory(map.get(ConfigKeys.KEY_SPARK_DRIVER_MEMORY()));
+        this.setExecutorCores(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_CORES()));
+        this.setExecutorMemory(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_MEMORY()));
+        boolean isDynamicAllocationEnabled =
+            Boolean.parseBoolean(map.get(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED()));
+        if (isDynamicAllocationEnabled) {
+            this.setExecutorMaxNums(map.getOrDefault(ConfigKeys.KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS(), "inf"));
+        } else {
+            this.setExecutorMaxNums(map.get(ConfigKeys.KEY_SPARK_EXECUTOR_INSTANCES()));
         }
     }
 
@@ -327,8 +311,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public FlinkDevelopmentMode getDevelopmentMode() {
-        return FlinkDevelopmentMode.of(jobType);
+    public SparkDevelopmentMode getDevelopmentMode() {
+        return SparkDevelopmentMode.valueOf(jobType);
     }
 
     @JsonIgnore
@@ -339,21 +323,6 @@ public class SparkApplication extends BaseEntity {
     @JsonIgnore
     public SparkExecutionMode getSparkExecutionMode() {
         return SparkExecutionMode.of(executionMode);
-    }
-
-    public boolean cpFailedTrigger() {
-        return this.cpMaxFailureInterval != null
-            && this.cpFailureRateInterval != null
-            && this.cpFailureAction != null;
-    }
-
-    public boolean eqFlinkJob(SparkApplication other) {
-        if (this.isSparkSqlJob()
-            && other.isSparkSqlJob()
-            && this.getSparkSql().trim().equals(other.getSparkSql().trim())) {
-            return this.getDependencyObject().equals(other.getDependencyObject());
-        }
-        return false;
     }
 
     /** Local compilation and packaging working directory */
@@ -418,18 +387,23 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public boolean isSparkSqlJob() {
-        return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType());
+        return SparkDevelopmentMode.SPARK_SQL.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isCustomCodeJob() {
-        return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
+        return SparkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
+    }
+
+    @JsonIgnore
+    public boolean isCustomCodeOrSparkSqlJob() {
+        return isSparkSqlJob() || isCustomCodeJob();
     }
 
     @JsonIgnore
     public boolean isCustomCodeOrPySparkJob() {
-        return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
-            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+        return SparkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
+            || SparkDevelopmentMode.PYSPARK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
@@ -461,7 +435,7 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public boolean isRunning() {
-        return FlinkAppStateEnum.RUNNING.getValue() == this.getState();
+        return SparkAppStateEnum.RUNNING.getValue() == this.getState();
     }
 
     @JsonIgnore
@@ -505,40 +479,13 @@ public class SparkApplication extends BaseEntity {
         return Workspace.of(getStorageType());
     }
 
-    @JsonIgnore
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getHotParamsMap() {
-        if (StringUtils.isNotBlank(this.hotParams)) {
-            Map<String, Object> hotParamsMap = JacksonUtils.read(this.hotParams, Map.class);
-            hotParamsMap.entrySet().removeIf(entry -> entry.getValue() == null);
-            return hotParamsMap;
-        }
-        return Collections.EMPTY_MAP;
-    }
-
-    @SneakyThrows
-    public void doSetHotParams() {
-        updateHotParams(this);
-    }
-
-    @SneakyThrows
-    public void updateHotParams(SparkApplication appParam) {
-        if (appParam != this) {
-            this.hotParams = null;
-        }
-        SparkExecutionMode executionModeEnum = appParam.getSparkExecutionMode();
-        Map<String, String> hotParams = new HashMap<>(0);
-        if (needFillYarnQueueLabel(executionModeEnum)) {
-            hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
-        }
-        if (MapUtils.isNotEmpty(hotParams)) {
-            this.setHotParams(JacksonUtils.write(hotParams));
-        }
-    }
-
-    private boolean needFillYarnQueueLabel(SparkExecutionMode mode) {
-        return SparkExecutionMode.YARN_CLUSTER == mode || SparkExecutionMode.YARN_CLIENT == mode;
+    public void fillRunningMetrics(SparkApplicationSummary summary) {
+        this.setNumTasks(summary.getNumTasks());
+        this.setNumCompletedTasks(summary.getNumCompletedTasks());
+        this.setNumStages(summary.getNumStages());
+        this.setNumCompletedStages(summary.getNumCompletedStages());
+        this.setUsedMemory(summary.getUsedMemory());
+        this.setUsedVCores(summary.getUsedVCores());
     }
 
     @Override
@@ -560,19 +507,12 @@ public class SparkApplication extends BaseEntity {
     public static class SFunc {
 
         public static final SFunction<SparkApplication, Long> ID = SparkApplication::getId;
-        public static final SFunction<SparkApplication, String> JOB_ID = SparkApplication::getJobId;
+        public static final SFunction<SparkApplication, String> APP_ID = SparkApplication::getAppId;
         public static final SFunction<SparkApplication, Date> START_TIME = SparkApplication::getStartTime;
         public static final SFunction<SparkApplication, Date> END_TIME = SparkApplication::getEndTime;
         public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;
-        public static final SFunction<SparkApplication, Integer> TOTAL_TASK = SparkApplication::getTotalTask;
-        public static final SFunction<SparkApplication, Integer> TOTAL_TM = SparkApplication::getTotalTM;
-        public static final SFunction<SparkApplication, Integer> TOTAL_SLOT = SparkApplication::getTotalSlot;
-        public static final SFunction<SparkApplication, Integer> JM_MEMORY = SparkApplication::getJmMemory;
-        public static final SFunction<SparkApplication, Integer> TM_MEMORY = SparkApplication::getTmMemory;
         public static final SFunction<SparkApplication, Integer> STATE = SparkApplication::getState;
         public static final SFunction<SparkApplication, String> OPTIONS = SparkApplication::getOptions;
-        public static final SFunction<SparkApplication, Integer> AVAILABLE_SLOT = SparkApplication::getAvailableSlot;
         public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getExecutionMode;
-        public static final SFunction<SparkApplication, String> JOB_MANAGER_URL = SparkApplication::getJobManagerUrl;
     }
 }

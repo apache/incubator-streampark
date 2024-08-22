@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Validated
 @RestController
@@ -51,9 +52,10 @@ public class OpenAPIController {
     }, param = {
             @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "restored app from the savepoint or latest checkpoint", required = false, type = String.class, defaultValue = "false"),
-            @OpenAPI.Param(name = "savePoint", description = "savepoint or checkpoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = boolean.class, defaultValue = "false")
+            @OpenAPI.Param(name = "argument", description = "flink program run arguments", required = false, type = String.class, bindFor = "args"),
+            @OpenAPI.Param(name = "restoreFromSavepoint", description = "restored app from the savepoint or checkpoint", required = false, type = Boolean.class, defaultValue = "false", bindFor = "restoreOrTriggerSavepoint"),
+            @OpenAPI.Param(name = "savepointPath", description = "savepoint or checkpoint path", required = false, type = String.class),
+            @OpenAPI.Param(name = "allowNonRestored", description = "ignore savepoint if cannot be restored", required = false, type = Boolean.class, defaultValue = "false"),
     })
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/start")
@@ -68,9 +70,9 @@ public class OpenAPIController {
     }, param = {
             @OpenAPI.Param(name = "id", description = "current flink application id", required = true, type = Long.class, bindFor = "appId"),
             @OpenAPI.Param(name = "teamId", description = "current user teamId", required = true, type = Long.class),
-            @OpenAPI.Param(name = "savePointed", description = "trigger savepoint before taking stopping", required = false, type = boolean.class, defaultValue = "false"),
-            @OpenAPI.Param(name = "savePoint", description = "savepoint path", required = false, type = String.class),
-            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = boolean.class, defaultValue = "false"),
+            @OpenAPI.Param(name = "triggerSavepoint", description = "trigger savepoint before taking stopping", required = false, type = Boolean.class, defaultValue = "false", bindFor = "restoreOrTriggerSavepoint"),
+            @OpenAPI.Param(name = "savepointPath", description = "savepoint path", required = false, type = String.class),
+            @OpenAPI.Param(name = "drain", description = "send max watermark before canceling", required = false, type = Boolean.class, defaultValue = "false"),
     })
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/cancel")
@@ -81,11 +83,11 @@ public class OpenAPIController {
     }
 
     @PostMapping("curl")
-    public RestResponse copyOpenApiCurl(String baseUrl,
-                                        Long appId,
-                                        @NotBlank(message = "{required}") Long teamId,
-                                        @NotBlank(message = "{required}") String name) {
-        String url = openAPIComponent.getOpenApiCUrl(baseUrl, appId, teamId, name);
+    public RestResponse copyOpenApiCurl(String name,
+                                        String baseUrl,
+                                        @NotNull Long appId,
+                                        @NotNull Long teamId) {
+        String url = openAPIComponent.getOpenApiCUrl(name, baseUrl, appId, teamId);
         return RestResponse.success(url);
     }
 

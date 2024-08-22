@@ -65,6 +65,33 @@ object ConfigKeys {
 
   val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
+  val KEY_SPARK_DRIVER_CORES = "spark.driver.cores"
+
+  val KEY_SPARK_DRIVER_MEMORY = "spark.driver.memory"
+
+  val KEY_SPARK_EXECUTOR_INSTANCES = "spark.executor.instances"
+
+  val KEY_SPARK_EXECUTOR_CORES = "spark.executor.cores"
+
+  val KEY_SPARK_EXECUTOR_MEMORY = "spark.executor.memory"
+
+  val KEY_SPARK_DYNAMIC_ALLOCATION_ENABLED = "spark.dynamicAllocation.enabled"
+
+  val KEY_SPARK_DYNAMIC_ALLOCATION_MAX_EXECUTORS = "spark.dynamicAllocation.maxExecutors"
+
+  val KEY_SPARK_YARN_QUEUE = "spark.yarn.queue"
+
+  val KEY_SPARK_YARN_QUEUE_NAME = "yarnQueueName"
+
+  val KEY_SPARK_YARN_QUEUE_LABEL = "yarnQueueLabel"
+
+  val KEY_SPARK_YARN_AM_NODE_LABEL = "spark.yarn.am.nodeLabelExpression"
+
+  val KEY_SPARK_YARN_EXECUTOR_NODE_LABEL = "spark.yarn.executor.nodeLabelExpression"
+
+  def KEY_SPARK_SQL(prefix: String = null): String =
+    s"${Option(prefix).getOrElse("")}sql"
+
   /** about config flink */
   def KEY_APP_CONF(prefix: String = null): String =
     s"${Option(prefix).getOrElse("")}conf"
@@ -87,7 +114,7 @@ object ConfigKeys {
 
   val KEY_FLINK_TABLE_PREFIX = "flink.table."
 
-  val KEY_SPARK_PROPERTY_PREFIX = "spark.property."
+  val KEY_SPARK_PROPERTY_PREFIX = "spark."
 
   val KEY_APP_PREFIX = "app."
 

@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.component;
 
 import org.apache.streampark.common.util.CURLBuilder;
 import org.apache.streampark.common.util.ReflectUtils;
+import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.controller.OpenAPIController;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +52,8 @@ public class OpenAPIComponent {
     @Autowired
     private AccessTokenService accessTokenService;
 
+    private final Map<String, String> types = new HashMap<>();
+
     private final Map<String, OpenAPISchema> schemas = new HashMap<>();
 
     public synchronized OpenAPISchema getOpenAPISchema(String name) {
@@ -63,87 +67,7 @@ public class OpenAPIComponent {
         return schemas.get(name);
     }
 
-    private void initOpenAPISchema() {
-        Class<?> clazz = OpenAPIController.class;
-        RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
-        String basePath = requestMapping.value()[0];
-        List<Method> methodList = ReflectUtils.getMethodsByAnnotation(clazz, OpenAPI.class);
-
-        for (Method method : methodList) {
-            String[] subUriPath = getMethodUriPath(method);
-            String subPath = (subUriPath != null && subUriPath.length > 0) ? subUriPath[0] : "";
-            String restUrl = "/" + basePath;
-            if (subPath != null) {
-                restUrl += "/" + subPath;
-            }
-            restUrl = restUrl.replaceAll("/+", "/").replaceAll("/$", "");
-
-            List<OpenAPISchema.Schema> headerList = new ArrayList<>();
-            OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
-            for (OpenAPI.Param header : openAPI.header()) {
-                headerList.add(paramToSchema(header));
-            }
-
-            List<OpenAPISchema.Schema> paramList = new ArrayList<>();
-            for (OpenAPI.Param param : openAPI.param()) {
-                paramList.add(paramToSchema(param));
-            }
-
-            OpenAPISchema detail = new OpenAPISchema();
-            detail.setUrl(restUrl);
-            detail.setSchema(paramList);
-            detail.setHeader(headerList);
-
-            schemas.put(openAPI.name(), detail);
-        }
-    }
-
-    private OpenAPISchema.Schema paramToSchema(OpenAPI.Param param) {
-        OpenAPISchema.Schema schema = new OpenAPISchema.Schema();
-        schema.setName(param.name());
-        if (StringUtils.isBlank(param.bindFor())) {
-            schema.setBindFor(param.name());
-        } else {
-            schema.setBindFor(param.bindFor());
-        }
-        schema.setType(param.type().getName());
-        schema.setRequired(param.required());
-        schema.setDescription(param.description());
-        schema.setDefaultValue(param.defaultValue());
-        return schema;
-    }
-
-    private String[] getMethodUriPath(Method method) {
-        method.setAccessible(true);
-
-        GetMapping getMapping = method.getDeclaredAnnotation(GetMapping.class);
-        if (getMapping != null) {
-            return getMapping.value();
-        }
-
-        PostMapping postMapping = method.getDeclaredAnnotation(PostMapping.class);
-        if (postMapping != null) {
-            return postMapping.value();
-        }
-
-        DeleteMapping deleteMapping = method.getDeclaredAnnotation(DeleteMapping.class);
-        if (deleteMapping != null) {
-            return deleteMapping.value();
-        }
-
-        PatchMapping patchMapping = method.getDeclaredAnnotation(PatchMapping.class);
-        if (patchMapping != null) {
-            return patchMapping.value();
-        }
-
-        PutMapping putMapping = method.getDeclaredAnnotation(PutMapping.class);
-        if (putMapping != null) {
-            return putMapping.value();
-        }
-        return null;
-    }
-
-    public String getOpenApiCUrl(String baseUrl, Long appId, Long teamId, String name) {
+    public String getOpenApiCUrl(String name, String baseUrl, Long appId, Long teamId) {
         OpenAPISchema schema = this.getOpenAPISchema(name);
         if (schema == null) {
             throw new UnsupportedOperationException("Unsupported OpenAPI: " + name);
@@ -162,15 +86,134 @@ public class OpenAPIComponent {
 
         schema.getSchema().forEach(c -> {
             if (c.isRequired()) {
-                if ("appId".equals(c.getBindFor())) {
-                    curlBuilder.addFormData(c.getName(), appId);
-                } else if ("teamId".equals(c.getBindFor())) {
-                    curlBuilder.addFormData(c.getName(), teamId);
+                switch (c.getBindFor()) {
+                    case "appId":
+                        curlBuilder.addFormData(c.getName(), appId);
+                        break;
+                    case "teamId":
+                        curlBuilder.addFormData(c.getName(), teamId);
+                        break;
+                    default:
+                        break;
                 }
             } else {
                 curlBuilder.addFormData(c.getName(), c.getDefaultValue());
             }
         });
         return curlBuilder.build();
+    }
+
+    private void initOpenAPISchema() {
+        initTypes();
+        Class<?> clazz = OpenAPIController.class;
+        RequestMapping requestMapping = clazz.getDeclaredAnnotation(RequestMapping.class);
+        String basePath = requestMapping.value()[0];
+        List<Method> methodList = ReflectUtils.getMethodsByAnnotation(clazz, OpenAPI.class);
+
+        for (Method method : methodList) {
+            OpenAPISchema detail = new OpenAPISchema();
+
+            List<OpenAPISchema.Schema> headerList = new ArrayList<>();
+            OpenAPI openAPI = method.getDeclaredAnnotation(OpenAPI.class);
+            for (OpenAPI.Param header : openAPI.header()) {
+                headerList.add(paramToSchema(header));
+            }
+
+            List<OpenAPISchema.Schema> paramList = new ArrayList<>();
+            for (OpenAPI.Param param : openAPI.param()) {
+                paramList.add(paramToSchema(param));
+            }
+
+            detail.setSchema(paramList);
+            detail.setHeader(headerList);
+
+            Tuple2<String, String[]> methodURI = getMethodAndRequestURI(method);
+            String[] requestURI = methodURI.t2;
+            String uri = (requestURI != null && requestURI.length > 0) ? requestURI[0] : "";
+            String restURI = "/" + basePath;
+            if (uri != null) {
+                restURI += "/" + uri;
+            }
+            restURI = restURI.replaceAll("/+", "/").replaceAll("/$", "");
+            detail.setUrl(restURI);
+            detail.setMethod(methodURI.t1);
+            schemas.put(openAPI.name(), detail);
+        }
+    }
+
+    private OpenAPISchema.Schema paramToSchema(OpenAPI.Param param) {
+        OpenAPISchema.Schema schema = new OpenAPISchema.Schema();
+        schema.setName(param.name());
+        if (StringUtils.isBlank(param.bindFor())) {
+            schema.setBindFor(param.name());
+        } else {
+            schema.setBindFor(param.bindFor());
+        }
+        schema.setRequired(param.required());
+        schema.setDescription(param.description());
+        schema.setDefaultValue(param.defaultValue());
+        String type = types.get(param.type().getSimpleName());
+        if (type != null) {
+            schema.setType(type);
+        } else {
+            schema.setType("string(" + param.type().getSimpleName() + ")");
+        }
+        return schema;
+    }
+
+    private Tuple2<String, String[]> getMethodAndRequestURI(Method method) {
+        method.setAccessible(true);
+
+        GetMapping getMapping = method.getDeclaredAnnotation(GetMapping.class);
+        if (getMapping != null) {
+            return Tuple2.of(HttpMethod.GET.name(), getMapping.value());
+        }
+
+        PostMapping postMapping = method.getDeclaredAnnotation(PostMapping.class);
+        if (postMapping != null) {
+            return Tuple2.of(HttpMethod.POST.name(), postMapping.value());
+        }
+
+        DeleteMapping deleteMapping = method.getDeclaredAnnotation(DeleteMapping.class);
+        if (deleteMapping != null) {
+            return Tuple2.of(HttpMethod.DELETE.name(), deleteMapping.value());
+        }
+
+        PatchMapping patchMapping = method.getDeclaredAnnotation(PatchMapping.class);
+        if (patchMapping != null) {
+            return Tuple2.of(HttpMethod.PATCH.name(), patchMapping.value());
+        }
+
+        PutMapping putMapping = method.getDeclaredAnnotation(PutMapping.class);
+        if (putMapping != null) {
+            return Tuple2.of(HttpMethod.PUT.name(), putMapping.value());
+        }
+
+        throw new IllegalArgumentException("get http method and requestURI failed: " + method.getName());
+    }
+
+    private void initTypes() {
+        types.put("String", "string");
+
+        types.put("int", "integer(int32)");
+        types.put("Integer", "integer(int32)");
+        types.put("Short", "integer(int32)");
+
+        types.put("long", "integer(int64)");
+        types.put("Long", "integer(int64)");
+
+        types.put("double", "number(double)");
+        types.put("Double", "number(double)");
+
+        types.put("float", "number(float)");
+        types.put("Float", "number(float)");
+        types.put("boolean", "boolean");
+        types.put("Boolean", "boolean");
+
+        types.put("byte", "string(byte)");
+        types.put("Byte", "string(byte)");
+
+        types.put("Date", "string(date)");
+        types.put("DateTime", "string(datetime)");
     }
 }

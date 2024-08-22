@@ -14,48 +14,39 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
+<script setup lang="ts" name="ApplicationDetail">
   import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
-  export default defineComponent({
-    name: 'ApplicationDetail',
-  });
-</script>
-<script setup lang="ts" name="ApplicationDetail">
+  import { useModal } from '/@/components/Modal';
   import { PageWrapper } from '/@/components/Page';
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
   import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
-  import { useIntervalFn, useClipboard } from '@vueuse/core';
+  import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
   import { handleView } from './utils';
   import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
-  import { fetchCheckToken } from '/@/api/system/token';
-  import { fetchCopyCurl } from '/@/api/system/openapi';
-  import { useMessage } from '/@/hooks/web/useMessage';
-  import { baseUrl } from '/@/api';
   import { fetchListVer } from '/@/api/flink/config';
-  import { fetchSavePonitHistory } from '/@/api/flink/savepoint';
+  import { fetchSavePointHistory } from '/@/api/flink/savepoint';
   import Mergely from './components/Mergely.vue';
   import DetailTab from './components/AppDetail/DetailTab.vue';
+  import RequestModal from './components/RequestModal';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
 
+  defineOptions({
+    name: 'ApplicationDetail',
+  });
   const route = useRoute();
   const router = useRouter();
 
-  const { Swal, createMessage } = useMessage();
-  const { copy } = useClipboard({
-    legacy: true,
-  });
   const { t } = useI18n();
 
   const yarn = ref('');
@@ -89,7 +80,11 @@
               type: 'primary',
               size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('flinkStart'),
+              onClick: () =>
+                openApiModal(true, {
+                  name: 'flinkStart',
+                  app,
+                }),
             },
             () => [t('flink.app.detail.copyStartcURL')],
           ),
@@ -99,7 +94,12 @@
               type: 'primary',
               size: 'small',
               class: 'mx-3px px-5px',
-              onClick: () => handleCopyCurl('flinkCancel'),
+              onClick: () => {
+                openApiModal(true, {
+                  name: 'flinkCancel',
+                  app,
+                });
+              },
             },
             () => [t('flink.app.detail.copyCancelcURL')],
           ),
@@ -112,6 +112,7 @@
   });
 
   const [registerConfDrawer] = useDrawer();
+  const [registerOpenApi, { openModal: openApiModal }] = useModal();
 
   /* Flink Web UI */
   function handleFlinkView() {
@@ -155,7 +156,7 @@
     };
 
     const confList = await fetchListVer(commonParams);
-    const pointHistory = await fetchSavePonitHistory(commonParams);
+    const pointHistory = await fetchSavePointHistory(commonParams);
     const backupList = await fetchBackUps(commonParams);
     const optionList = await fetchOptionLog(commonParams);
 
@@ -168,35 +169,6 @@
   /* Get yarn data */
   async function handleYarn() {
     yarn.value = await fetchYarn();
-  }
-
-  /* copyCurl */
-  async function handleCopyCurl(name) {
-    const resp = await fetchCheckToken({});
-    const result = parseInt(resp);
-    if (result === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: t('flink.app.detail.nullAccessToken'),
-        showConfirmButton: true,
-        timer: 3500,
-      });
-    } else if (result === 1) {
-      Swal.fire({
-        icon: 'error',
-        title: t('flink.app.detail.invalidAccessToken'),
-        showConfirmButton: true,
-        timer: 3500,
-      });
-    } else {
-      const res = await fetchCopyCurl({
-        baseUrl: baseUrl(),
-        appId: app.id,
-        name: name,
-      });
-      copy(res);
-      createMessage.success(t('flink.app.detail.detailTab.copySuccess'));
-    }
   }
 
   async function getExternalLinks() {
@@ -248,6 +220,7 @@
     <Divider class="mt-20px -mb-17px" />
     <DetailTab :app="app" :tabConf="detailTabs" />
     <Mergely @register="registerConfDrawer" :readOnly="true" />
+    <RequestModal @register="registerOpenApi" />
   </PageWrapper>
 </template>
 <style lang="less">

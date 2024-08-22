@@ -98,7 +98,7 @@
           h(
             'span',
             { class: 'tip-info' },
-            'Supported variables: {job_id}, {yarn_id}, {job_name},Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
+            'Supported variables: {id}, {job_id}, {yarn_id}, {job_name},Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
           ),
         rules: [
           {

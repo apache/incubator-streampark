@@ -120,4 +120,12 @@ export default {
     dragText: 'Hold down the slider and drag',
     successText: 'Verified',
   },
+  openApi: {
+    param: 'Parameter Name',
+    defaultValue: 'Default Value',
+    type: 'Type',
+    required: 'Required',
+    description: 'Description',
+    empty: 'This request has no data of this type',
+  },
 };

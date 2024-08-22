@@ -80,6 +80,9 @@ insert into `t_menu` values (110118, 110100, 'app sql delete', null, null, 'sql:
 insert into `t_menu` values (110301, 110300, 'cluster add', '/flink/add_cluster', 'flink/cluster/Add', 'cluster:create', '', '0', 0, null, now(), now());
 insert into `t_menu` values (110302, 110300, 'cluster edit', '/flink/edit_cluster', 'flink/cluster/Edit', 'cluster:update', '', '0', 0, null, now(), now());
 
+insert into `t_menu` values (120100, 120000, 'spark.application', '/spark/app', 'spark/app/index', null, null, '0', 1, 2, now(), now());
+insert into `t_menu` values (120200, 120000, 'spark.sparkHome', '/spark/home', 'spark/home/index', null, null, '0', 1, 3, now(), now());
+
 insert into `t_menu` values (130100, 130000, 'resource.project', '/resource/project', 'resource/project/View', null, 'github', '0', 1, 2, now(), now());
 insert into `t_menu` values (130200, 130000, 'resource.variable', '/resource/variable', 'resource/variable/View', null, null, '0', 1, 3, now(), now());
 insert into `t_menu` values (130300, 130000, 'resource.upload', '/resource/upload', 'resource/upload/View', null, null, '0', 1, 1, now(), now());
@@ -292,10 +295,10 @@ insert into `t_setting` values (15, 'ingress.mode.default', null, 'Ingress domai
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100001, 'test1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100002, 'test2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
-insert into `t_user` values (100003, 'test3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, null, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100000, 'admin', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 1, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100001, 'test1', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100002, 'test2', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100000, '1', now(), now(),null,'0',null,null);
+insert into `t_user` values (100003, 'test3', '', 'rh8b1ojwog777yrg0daesf04gk', '2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f', null, 2, 0, 100001, '1', now(), now(),null,'0',null,null);
 
 -- ----------------------------
 -- Records of t_member

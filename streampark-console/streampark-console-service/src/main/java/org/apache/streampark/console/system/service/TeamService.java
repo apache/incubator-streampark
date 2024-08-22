@@ -72,4 +72,11 @@ public interface TeamService extends IService<Team> {
      * @return List of Team
      */
     List<Team> listByUserId(Long userId);
+
+    /**
+     * get system default team
+     * @return
+     */
+
+    Team getSysDefaultTeam();
 }

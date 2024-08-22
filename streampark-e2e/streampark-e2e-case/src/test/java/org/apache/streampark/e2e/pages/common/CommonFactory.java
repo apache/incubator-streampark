@@ -29,9 +29,19 @@ import java.time.Duration;
 public class CommonFactory {
 
     public static void WebElementDeleteAndInput(WebElement element, String value) {
+        WebElementDelete(element);
+        element.sendKeys(value);
+    }
+
+    public static void WebElementDelete(WebElement element) {
         element.sendKeys(Keys.CONTROL + "a");
         element.sendKeys(Keys.BACK_SPACE);
-        element.sendKeys(value);
+    }
+
+    public static void WebElementClick(WebDriver driver, WebElement clickableElement) {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(clickableElement));
+        clickableElement.click();
     }
 
     public static void WebDriverWaitForElementVisibilityAndInvisibility(WebDriver driver, String msg) {

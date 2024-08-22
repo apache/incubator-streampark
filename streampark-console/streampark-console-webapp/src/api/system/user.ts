@@ -32,8 +32,7 @@ enum Api {
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
   CheckName = '/user/check/name',
-  SET_TEAM = '/user/setTeam',
-  INIT_TEAM = '/user/initTeam',
+  SET_TEAM = '/user/set_team',
   APP_OWNERS = '/user/appOwners',
   TransferUserResource = '/user/transferResource',
 }
@@ -96,13 +95,6 @@ export function fetchUserPasswordUpdate(data: {
 export function fetchAppOwners(data: Recordable): Promise<Array<UserInfo>> {
   return defHttp.post({
     url: Api.APP_OWNERS,
-    data,
-  });
-}
-
-export function fetchInitUserTeam(data: { userId: string; teamId: string }) {
-  return defHttp.post({
-    url: Api.INIT_TEAM,
     data,
   });
 }

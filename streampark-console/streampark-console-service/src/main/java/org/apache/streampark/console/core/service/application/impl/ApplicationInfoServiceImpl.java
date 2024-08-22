@@ -104,7 +104,7 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     private FlinkEnvService flinkEnvService;
 
     @Autowired
-    private SavePointService savePointService;
+    private SavepointService savepointService;
 
     @Autowired
     private EnvInitializer envInitializer;
@@ -500,9 +500,9 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
 
     @Override
     public String checkSavepointPath(Application appParam) throws Exception {
-        String savepointPath = appParam.getSavePoint();
+        String savepointPath = appParam.getSavepointPath();
         if (StringUtils.isBlank(savepointPath)) {
-            savepointPath = savePointService.getSavePointPath(appParam);
+            savepointPath = savepointService.getSavePointPath(appParam);
         }
 
         if (StringUtils.isNotBlank(savepointPath)) {

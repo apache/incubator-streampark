@@ -62,4 +62,10 @@ public interface RoleService extends IService<Role> {
      * @param role Role
      */
     void updateRole(Role role);
+
+    /**
+     * Get the Default Role
+     *
+     */
+    Role getSysDefaultRole();
 }

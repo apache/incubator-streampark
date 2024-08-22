@@ -20,7 +20,7 @@ package org.apache.streampark.common.enums;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/** The flink deployment mode enum. */
+/** The spark deployment mode enum. */
 public enum SparkDevelopmentMode {
 
     /** Unknown type replace null */
@@ -29,8 +29,11 @@ public enum SparkDevelopmentMode {
     /** custom code */
     CUSTOM_CODE("Custom Code", 1),
 
-    /** spark SQL */
-    SPARK_SQL("Spark SQL", 2);
+    /** Spark SQL */
+    SPARK_SQL("Spark SQL", 2),
+
+    /** Py spark Mode */
+    PYSPARK("Python Spark", 3);
 
     private final String name;
 
@@ -44,17 +47,22 @@ public enum SparkDevelopmentMode {
     /**
      * Try to resolve the mode value into {@link SparkDevelopmentMode}.
      *
-     * @param value The mode value of potential flink deployment mode.
-     * @return The parsed flink deployment mode.
+     * @param value The mode value of potential spark deployment mode.
+     * @return The parsed spark deployment mode.
      */
     @Nonnull
     public static SparkDevelopmentMode valueOf(@Nullable Integer value) {
-        for (SparkDevelopmentMode flinkDevelopmentMode : values()) {
-            if (flinkDevelopmentMode.mode.equals(value)) {
-                return flinkDevelopmentMode;
+        for (SparkDevelopmentMode sparkDevelopmentMode : values()) {
+            if (sparkDevelopmentMode.mode.equals(value)) {
+                return sparkDevelopmentMode;
             }
         }
         return SparkDevelopmentMode.UNKNOWN;
     }
 
+    /** Get the mode value of the current {@link SparkDevelopmentMode} enum. */
+    @Nonnull
+    public Integer getMode() {
+        return mode;
+    }
 }

@@ -119,8 +119,8 @@ public class AlertTemplateUtils {
     public static AlertTemplate createAlertTemplate(SparkApplication application, SparkAppStateEnum appState) {
         return AlertTemplate.builder()
             .duration(application.getStartTime(), application.getEndTime())
-            .jobName(application.getJobName())
-            .link(application.getSparkExecutionMode(), application.getJobId())
+            .jobName(application.getAppName())
+            .link(application.getSparkExecutionMode(), application.getAppId())
             .startTime(application.getStartTime())
             .endTime(application.getEndTime())
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -129,9 +129,9 @@ public class AlertTemplateUtils {
             .type(AlertTypeEnum.EMAIL.getCode())
             .title(
                 String.format(
-                    "%s %s %s", ALERT_TITLE_PREFIX, application.getJobName(), appState.name()))
+                    "%s %s %s", ALERT_TITLE_PREFIX, application.getAppName(), appState.name()))
             .subject(
-                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getJobName(), appState))
+                String.format("%s %s %s", ALERT_SUBJECT_PREFIX, application.getAppName(), appState))
             .status(appState.name())
             .build();
     }

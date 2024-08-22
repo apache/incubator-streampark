@@ -123,17 +123,7 @@ public class UserController {
         return RestResponse.success(newPass);
     }
 
-    @PostMapping("initTeam")
-    public RestResponse initTeam(Long teamId, Long userId) {
-        Team team = teamService.getById(teamId);
-        if (team == null) {
-            return RestResponse.fail(ResponseCode.CODE_FAIL_ALERT, "teamId is invalid");
-        }
-        userService.setLastTeam(teamId, userId);
-        return RestResponse.success();
-    }
-
-    @PostMapping("setTeam")
+    @PostMapping("set_team")
     public RestResponse setTeam(Long teamId) {
         Team team = teamService.getById(teamId);
         if (team == null) {
@@ -146,8 +136,9 @@ public class UserController {
 
         // 2) get latest userInfo
         user.dataMasking();
+        user.setLastTeamId(teamId);
 
-        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, teamId, null);
+        Map<String, Object> infoMap = userService.generateFrontendUserInfo(user, null);
         return new RestResponse().data(infoMap);
     }
 

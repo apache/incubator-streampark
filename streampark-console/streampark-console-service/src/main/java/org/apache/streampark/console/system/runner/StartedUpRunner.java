@@ -54,6 +54,7 @@ public class StartedUpRunner implements ApplicationRunner {
             System.out.println("    Info   :  streampark-console start successful                     ");
             System.out.println("    Local  :  http://localhost:" + port);
             System.out.println("    Time   :  " + LocalDateTime.now() + "\n\n");
+            System.setProperty("streampark.start.timestamp", System.currentTimeMillis() + "");
         }
     }
 }

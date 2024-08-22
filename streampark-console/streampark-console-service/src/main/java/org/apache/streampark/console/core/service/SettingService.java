@@ -22,6 +22,7 @@ import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -52,6 +53,9 @@ public interface SettingService extends IService<Setting> {
     String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
 
     String KEY_STREAMPARK_UPLOADS_RECORD_LIMIT = "streampark.uploads.record.limit";
+
+    String KEY_DEFAULT_ENGINE = "engine.default";
+
 
     /**
      * Retrieves the value of the setting associated with the specified key.
@@ -138,10 +142,14 @@ public interface SettingService extends IService<Setting> {
      */
     boolean updateEmail(SenderEmail senderEmail);
 
+
     /**
      * Retrieves the StreamPark uploads record limit.
      *
      * @return A number representing the StreamPark upload dependency history
      */
     Integer getStreamparkUploadsRecordLimit();
+
+    EngineTypeEnum getEngine();
+
 }

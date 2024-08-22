@@ -37,6 +37,12 @@ object PropertiesUtils extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
+  private[this] lazy val SPARK_PROPERTY_COMPLEX_PATTERN = Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$")
+
+  // scalastyle:off
+  private[this] lazy val SPARK_ARGUMENT_REGEXP = "\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?"
+  // scalastyle:on
+
   private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
@@ -380,4 +386,48 @@ object PropertiesUtils extends Logger {
     new JavaHashMap[String, JavaMap[String, String]](map)
   }
 
+  /** extract spark configuration from sparkApplication.appProperties */
+  @Nonnull def extractSparkPropertiesAsJava(properties: String): JavaMap[String, String] =
+    new JavaHashMap[String, String](extractSparkProperties(properties))
+
+  @Nonnull def extractSparkProperties(properties: String): Map[String, String] = {
+    if (StringUtils.isEmpty(properties)) Map.empty[String, String]
+    else {
+      val map = mutable.Map[String, String]()
+      properties.split("(\\s)*(--conf|-c)(\\s)+") match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              val p = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(x)
+              if (p.matches) {
+                map += p.group(1).trim -> p.group(2).trim
+              }
+            }
+          })
+        case _ =>
+      }
+      map.toMap
+    }
+  }
+
+  /** extract spark configuration from sparkApplication.appArgs */
+  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] =
+    new JavaArrayList[String](extractSparkArguments(arguments))
+
+  @Nonnull def extractSparkArguments(arguments: String): List[String] = {
+    if (StringUtils.isEmpty(arguments)) List.empty[String]
+    else {
+      val list = List[String]()
+      arguments.split(SPARK_ARGUMENT_REGEXP) match {
+        case d if Utils.isNotEmpty(d) =>
+          d.foreach(x => {
+            if (x.nonEmpty) {
+              list :+ x
+            }
+          })
+        case _ =>
+      }
+      list
+    }
+  }
 }

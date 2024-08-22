@@ -20,5 +20,5 @@ package org.apache.streampark.spark.client.bean
 import org.apache.streampark.common.util.Implicits.JavaMap
 
 case class SubmitResponse(
-    clusterId: String,
-    sparkConfig: JavaMap[String, String])
+    var sparkAppId: String,
+    sparkProperties: JavaMap[String, String])

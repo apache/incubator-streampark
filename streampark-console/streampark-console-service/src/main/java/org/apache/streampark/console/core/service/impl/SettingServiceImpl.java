@@ -22,6 +22,7 @@ import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.mapper.SettingMapper;
 import org.apache.streampark.console.core.service.SettingService;
 
@@ -143,6 +144,13 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return SETTINGS
             .getOrDefault(SettingService.KEY_INGRESS_MODE_DEFAULT, emptySetting)
             .getSettingValue();
+    }
+
+    @Override
+    public EngineTypeEnum getEngine() {
+        return EngineTypeEnum.valueOf(SETTINGS
+            .getOrDefault(SettingService.KEY_DEFAULT_ENGINE, emptySetting)
+            .getSettingValue().toUpperCase());
     }
 
     @Override
