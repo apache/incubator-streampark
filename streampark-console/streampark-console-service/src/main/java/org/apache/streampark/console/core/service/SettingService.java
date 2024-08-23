@@ -22,6 +22,7 @@ import org.apache.streampark.console.core.bean.MavenConfig;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.bean.SenderEmail;
 import org.apache.streampark.console.core.entity.Setting;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -50,6 +51,8 @@ public interface SettingService extends IService<Setting> {
     String KEY_STREAMPARK_ADDRESS = "streampark.console.webapp.address";
 
     String KEY_INGRESS_MODE_DEFAULT = "ingress.mode.default";
+
+    String KEY_DEFAULT_ENGINE = "engine.default";
 
     /**
      * Retrieves the value of the setting associated with the specified key.
@@ -135,4 +138,6 @@ public interface SettingService extends IService<Setting> {
      * @return Whether the update operation was successful
      */
     boolean updateEmail(SenderEmail senderEmail);
+
+    EngineTypeEnum getEngine();
 }

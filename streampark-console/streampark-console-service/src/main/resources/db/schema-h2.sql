@@ -515,7 +515,7 @@ create table if not exists `t_spark_env` (
   `spark_home` varchar(255)  not null comment 'spark home path',
   `version` varchar(64)  not null comment 'spark version',
   `scala_version` varchar(64)  not null comment 'scala version of spark',
-  `spark_conf` text  not null comment 'spark-conf',
+  `spark_conf` text default null comment 'spark-conf',
   `is_default` tinyint not null default 0 comment 'whether default version or not',
   `description` varchar(255)  default null comment 'description',
   `create_time` datetime not null default current_timestamp comment 'create time',

@@ -14,36 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default {
-  system: {
-    menu: 'System',
-    user: 'User Management',
-    role: 'Role Management',
-    token: 'Token Management',
-    team: 'Team Management',
-    member: 'Member Management',
-  },
-  resource: {
-    menu: 'Resources',
-    project: 'Projects',
-    upload: 'Uploads',
-    variable: 'Variables',
-  },
-  flink: {
-    application: 'Applications',
-    flinkHome: 'Flink Home',
-    flinkCluster: 'Clusters',
-  },
-  spark: {
-    application: 'Applications',
-    sparkHome: 'Spark Home'
-  },
-  setting: {
-    menu: 'Settings',
-    system: 'Environments',
-    alarm: 'Alarms',
-    externalLink: 'External Link',
-    yarnQueue: 'Yarn Queue',
-    flinkGateway: 'FLink Gateway',
-  },
-};
+// flink home data
+export interface SparkEnv {
+  id: string;
+  sparkName: string;
+  sparkHome: string;
+  sparkConf: string;
+  description: string;
+  scalaVersion: string;
+  version: string;
+  isDefault: boolean;
+  createTime: string;
+  streamParkScalaVersion: string;
+  versionOfMiddle?: any;
+}
+
+export interface SparkCreate {
+  id?: string | null;
+  flinkName: string;
+  flinkHome: string;
+  description: string;
+}
