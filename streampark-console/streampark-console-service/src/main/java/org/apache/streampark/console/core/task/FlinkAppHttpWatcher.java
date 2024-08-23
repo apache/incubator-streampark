@@ -574,16 +574,15 @@ public class FlinkAppHttpWatcher {
         }
       } else {
         try {
-          String trackingUrl = yarnAppInfo.getApp().getTrackingUrl();
-          if (trackingUrl != null && !trackingUrl.equals(application.getJobManagerUrl())) {
-            application.setJobManagerUrl(trackingUrl);
-            applicationService.updateJobManagerUrl(application.getId(), trackingUrl);
-            applicationLogService.updateJobManagerUrl(application.getId(), trackingUrl);
-          }
-
           String state = yarnAppInfo.getApp().getFinalStatus();
           FlinkAppState flinkAppState = FlinkAppState.of(state);
           if (FlinkAppState.OTHER.equals(flinkAppState)) {
+            String trackingUrl = yarnAppInfo.getApp().getTrackingUrl();
+            if (trackingUrl != null && !trackingUrl.equals(application.getJobManagerUrl())) {
+              application.setJobManagerUrl(trackingUrl);
+              applicationService.updateJobManagerUrl(application.getId(), trackingUrl);
+              applicationLogService.updateJobManagerUrl(application.getClusterId(), trackingUrl);
+            }
             return;
           }
           if (FlinkAppState.KILLED.equals(flinkAppState)) {

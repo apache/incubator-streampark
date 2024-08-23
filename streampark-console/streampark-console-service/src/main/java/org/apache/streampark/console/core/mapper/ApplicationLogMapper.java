@@ -25,5 +25,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
   void updateJobManagerUrl(
-      @Param("appId") Long yarnAppId, @Param("jobManagerUrl") String jobManagerUrl);
+      @Param("yarnAppId") String yarnAppId, @Param("jobManagerUrl") String jobManagerUrl);
 }

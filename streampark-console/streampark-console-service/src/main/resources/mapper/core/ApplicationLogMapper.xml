@@ -32,6 +32,6 @@
     <update id="updateJobManagerUrl" >
         update t_flink_log
         set job_manager_url = #{jobManagerUrl}
-        where app_id = #{appId}
+        where yarn_app_id = #{yarnAppId}
     </update>
 </mapper>

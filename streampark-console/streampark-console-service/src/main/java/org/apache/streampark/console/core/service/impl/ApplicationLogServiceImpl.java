@@ -61,7 +61,7 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
   }
 
   @Override
-  public void updateJobManagerUrl(Long appId, String jobManagerUrl) {
-    baseMapper.updateJobManagerUrl(appId, jobManagerUrl);
+  public void updateJobManagerUrl(String yarnAppId, String jobManagerUrl) {
+    baseMapper.updateJobManagerUrl(yarnAppId, jobManagerUrl);
   }
 }
