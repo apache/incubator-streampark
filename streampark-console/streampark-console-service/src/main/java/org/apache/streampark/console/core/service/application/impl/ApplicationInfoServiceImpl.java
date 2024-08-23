@@ -341,7 +341,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
             .filter(fn -> fn.endsWith(Constant.JAR_SUFFIX))
-            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
             .collect(Collectors.toList());
     }
 
