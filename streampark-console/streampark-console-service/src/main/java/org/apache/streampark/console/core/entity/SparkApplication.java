@@ -64,7 +64,7 @@ public class SparkApplication extends BaseEntity {
 
     private Long teamId;
 
-    /** 1) custom code 2) spark SQL */
+    /** 1) spark jar 2) spark SQL 3) pyspark*/
     private Integer jobType;
 
     /** 1) Apache Spark 2) StreamPark Spark */

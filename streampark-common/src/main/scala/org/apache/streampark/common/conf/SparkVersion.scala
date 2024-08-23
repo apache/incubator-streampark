@@ -38,7 +38,7 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
   val (version, scalaVersion) = {
     var sparkVersion: String = null
     var scalaVersion: String = null
-    val cmd = List(s"$sparkHome/bin/spark-submit --version")
+    val cmd = List(s"export SPARK_HOME=$sparkHome&&$sparkHome/bin/spark-submit --version")
     val buffer = new mutable.StringBuilder
 
     CommandUtils.execute(
@@ -91,7 +91,7 @@ class SparkVersion(val sparkHome: String) extends Serializable with Logger {
 
   def checkVersion(throwException: Boolean = true): Boolean = {
     version.split("\\.").map(_.trim.toInt) match {
-      case Array(3, v, _) if v >= 1 && v <= 3 => true
+      case Array(v, _, _) if v == 2 || v == 3 => true
       case _ =>
         if (throwException) {
           throw new UnsupportedOperationException(s"Unsupported spark version: $version")
