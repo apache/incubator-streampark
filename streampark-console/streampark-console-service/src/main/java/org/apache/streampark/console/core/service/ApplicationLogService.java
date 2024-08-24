@@ -31,5 +31,5 @@ public interface ApplicationLogService extends IService<ApplicationLog> {
 
   Boolean delete(ApplicationLog applicationLog);
 
-  void updateJobManagerUrl(String yarnAppId, String JobManagerUrl);
+  void updateJobManagerUrl(String yarnAppId, String jobManagerUrl);
 }
