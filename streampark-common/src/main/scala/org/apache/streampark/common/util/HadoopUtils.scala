@@ -50,8 +50,6 @@ object HadoopUtils extends Logger {
 
   private[this] var reusableYarnClient: YarnClient = _
 
-  private[this] var ugi: UserGroupInformation = _
-
   private[this] var reusableConf: Configuration = _
 
   private[this] var reusableHdfs: FileSystem = _
@@ -61,15 +59,12 @@ object HadoopUtils extends Logger {
   private[this] lazy val configurationCache: util.Map[String, Configuration] =
     new ConcurrentHashMap[String, Configuration]()
 
-  def getUgi(): UserGroupInformation = {
-    if (ugi == null) {
-      ugi = if (HadoopConfigUtils.kerberosEnable) {
-        getKerberosUGI()
-      } else {
-        UserGroupInformation.createRemoteUser(HadoopConfigUtils.hadoopUserName)
-      }
+  lazy val ugi: UserGroupInformation = {
+    if (HadoopConfigUtils.kerberosEnable) {
+      getKerberosUGI()
+    } else {
+      UserGroupInformation.createRemoteUser(HadoopConfigUtils.hadoopUserName)
     }
-    ugi
   }
 
   private[this] lazy val hadoopConfDir: String = Try(
@@ -160,7 +155,6 @@ object HadoopUtils extends Logger {
       tgt = null
     }
     reusableConf = null
-    ugi = null
   }
 
   private[this] def getKerberosUGI(): UserGroupInformation = {
@@ -200,7 +194,7 @@ object HadoopUtils extends Logger {
   def hdfs: FileSystem = {
     Option(reusableHdfs).getOrElse {
       reusableHdfs = Try {
-        getUgi().doAs[FileSystem](new PrivilegedAction[FileSystem]() {
+        ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
           // scalastyle:off FileSystemGet
           override def run(): FileSystem = FileSystem.get(hadoopConf)
           // scalastyle:on FileSystemGet
@@ -233,7 +227,7 @@ object HadoopUtils extends Logger {
   def yarnClient: YarnClient = {
     if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
       reusableYarnClient = Try {
-        getUgi().doAs(new PrivilegedAction[YarnClient]() {
+        ugi.doAs(new PrivilegedAction[YarnClient]() {
           override def run(): YarnClient = {
             val yarnConf = new YarnConfiguration(hadoopConf);
             val client = YarnClient.createYarnClient;

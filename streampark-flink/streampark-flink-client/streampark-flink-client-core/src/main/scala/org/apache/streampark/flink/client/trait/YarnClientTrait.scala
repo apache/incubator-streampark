@@ -180,11 +180,9 @@ trait YarnClientTrait extends FlinkClientTrait {
   private[this] def doAsYarnClusterDescriptor[T](
       func: () => (T, YarnClusterDescriptor)): (T, YarnClusterDescriptor) = {
     // Wrap the operation in ugi.doAs()
-    HadoopUtils
-      .getUgi()
-      .doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
-        override def run(): (T, YarnClusterDescriptor) = func()
-      })
+    HadoopUtils.ugi.doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
+      override def run(): (T, YarnClusterDescriptor) = func()
+    })
   }
 
 }

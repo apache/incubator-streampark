@@ -253,13 +253,11 @@ object YarnUtils extends Logger {
   private[this] def request(reqUrl: String, timeout: Int): String = {
     val config = RequestConfig.custom.setConnectTimeout(timeout).build
     if (hasYarnHttpKerberosAuth) {
-      HadoopUtils
-        .getUgi()
-        .doAs(new PrivilegedExceptionAction[String] {
-          override def run(): String = {
-            HttpClientUtils.httpAuthGetRequest(reqUrl, config)
-          }
-        })
+      HadoopUtils.ugi.doAs(new PrivilegedExceptionAction[String] {
+        override def run(): String = {
+          HttpClientUtils.httpAuthGetRequest(reqUrl, config)
+        }
+      })
     } else {
       val url =
         if (!hasYarnHttpSimpleAuth) reqUrl

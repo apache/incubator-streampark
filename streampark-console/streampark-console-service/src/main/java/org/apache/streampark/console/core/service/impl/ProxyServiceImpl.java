@@ -36,7 +36,6 @@ import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -221,14 +220,17 @@ public class ProxyServiceImpl implements ProxyService {
   private ResponseEntity<?> proxyYarnRequest(HttpServletRequest request, String url)
       throws Exception {
     if (YarnUtils.hasYarnHttpKerberosAuth()) {
-      UserGroupInformation ugi = HadoopUtils.getUgi();
       HttpEntity<?> requestEntity = getRequestEntity(request, url);
-      setRestTemplateCredentials(ugi.getShortUserName());
-      return ugi.doAs(
-          (PrivilegedExceptionAction<ResponseEntity<?>>)
-              () ->
-                  proxyRestTemplate.exchange(
-                      url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class));
+      setRestTemplateCredentials(HadoopUtils.ugi().getShortUserName());
+      return HadoopUtils.ugi()
+          .doAs(
+              (PrivilegedExceptionAction<ResponseEntity<?>>)
+                  () ->
+                      proxyRestTemplate.exchange(
+                          url,
+                          HttpMethod.valueOf(request.getMethod()),
+                          requestEntity,
+                          byte[].class));
     } else {
       return proxyRequest(request, url);
     }
