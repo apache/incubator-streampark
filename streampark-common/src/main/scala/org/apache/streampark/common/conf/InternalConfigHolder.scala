@@ -43,7 +43,7 @@ object InternalConfigHolder extends Logger {
   private val confOptions = new ConcurrentHashMap[String, InternalOption](initialCapacity)
 
   /** Initialize the ConfigHub. */
-  {
+  def initConfigHub(): Unit = {
     Seq(CommonConfig, K8sFlinkConfig)
   }
 
@@ -68,13 +68,19 @@ object InternalConfigHolder extends Logger {
    */
   @Nonnull
   def get[T](@Nonnull conf: InternalOption): T = {
-    confData.get(conf.key) match {
-      case null =>
-        SystemPropertyUtils.get(conf.key) match {
-          case v if v != null => v.cast[T](conf.classType)
-          case _ => conf.defaultValue.asInstanceOf[T]
+    val value = confData.get(conf.key)
+    if (value == null || value == conf.defaultValue) {
+      val v = SystemPropertyUtils.get(conf.key)
+      if (v != null) {
+        if (v != value) {
+          set(conf, v)
         }
-      case v: T => v
+        v.cast[T](conf.classType)
+      } else {
+        conf.defaultValue.asInstanceOf[T]
+      }
+    } else {
+      value.toString.cast[T](conf.classType)
     }
   }
 

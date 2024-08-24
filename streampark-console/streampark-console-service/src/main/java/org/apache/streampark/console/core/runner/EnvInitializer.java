@@ -97,6 +97,7 @@ public class EnvInitializer implements ApplicationRunner {
   }
 
   private void initInternalConfig(Environment springEnv) {
+    InternalConfigHolder.initConfigHub();
     // override config from spring application.yaml
     InternalConfigHolder.keys().stream()
         .filter(springEnv::containsProperty)
