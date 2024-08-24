@@ -29,4 +29,9 @@
         <result column="option_name" jdbcType="INTEGER" property="optionName"/>
     </resultMap>
 
+    <update id="updateJobManagerUrl" >
+        update t_flink_log
+        set job_manager_url = #{jobManagerUrl}
+        where yarn_app_id = #{yarnAppId}
+    </update>
 </mapper>

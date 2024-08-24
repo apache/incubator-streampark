@@ -19,6 +19,11 @@ package org.apache.streampark.console.core.mapper;
 
 import org.apache.streampark.console.core.entity.ApplicationLog;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {}
+public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
+  void updateJobManagerUrl(
+      @Param("yarnAppId") String yarnAppId, @Param("jobManagerUrl") String jobManagerUrl);
+}
