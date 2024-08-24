@@ -38,7 +38,7 @@ trait SavepointRequestTrait {
 
   val withSavepoint: Boolean = true
 
-  val ugi: UserGroupInformation
+  val ugi: UserGroupInformation = null
 
   val savepointPath: String
 
