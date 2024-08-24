@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.ExecutionMode;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -224,7 +225,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
             executionModeEnum,
             flinkCluster.getProperties(),
             flinkCluster.getClusterId(),
-            flinkCluster.getClusterName());
+            flinkCluster.getClusterName(),
+            HadoopUtils.ugi());
       case KUBERNETES_NATIVE_SESSION:
         return KubernetesDeployRequest.apply(
             flinkEnv.getFlinkVersion(),

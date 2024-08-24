@@ -23,6 +23,7 @@ import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.commons.io.FileUtils
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.hadoop.security.UserGroupInformation
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -32,7 +33,8 @@ case class DeployRequest(
     executionMode: ExecutionMode,
     properties: JavaMap[String, Any],
     clusterId: String,
-    clusterName: String) {
+    clusterName: String,
+    ugi: UserGroupInformation = null) {
 
   private[client] lazy val hdfsWorkspace = {
 

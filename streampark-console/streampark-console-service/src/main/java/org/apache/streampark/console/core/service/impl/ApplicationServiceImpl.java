@@ -83,7 +83,6 @@ import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.task.CheckpointProcessor;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
-import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
@@ -107,6 +106,7 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -218,8 +218,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
   @Autowired private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
   @Autowired private CheckpointProcessor checkpointProcessor;
-
-  @Autowired private MemberService memberService;
 
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors() * 4);
 
@@ -1367,6 +1365,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.getRestoreOrTriggerSavepoint(),
             appParam.getDrain() != null && appParam.getDrain(),
             customSavepoint,
+            getUgi(application.getExecutionModeEnum()),
             namespace);
 
     final Date triggerTime = new Date();
@@ -1659,6 +1658,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getApplicationType(),
             getSavepointPath(appParam),
             applicationArgs,
+            getUgi(application.getExecutionModeEnum()),
             buildResult,
             extraParameter,
             k8sClusterId,
@@ -2052,5 +2052,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         break;
     }
     return Tuple2.apply(k8sNamespace, clusterId);
+  }
+
+  private UserGroupInformation getUgi(ExecutionMode executionMode) {
+    if (ExecutionMode.isYarnMode(executionMode)) {
+      return HadoopUtils.ugi();
+    }
+    return null;
   }
 }

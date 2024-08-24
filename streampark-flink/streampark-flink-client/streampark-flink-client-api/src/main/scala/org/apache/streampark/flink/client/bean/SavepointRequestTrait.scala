@@ -20,6 +20,8 @@ package org.apache.streampark.flink.client.bean
 import org.apache.streampark.common.conf.{FlinkVersion, K8sFlinkConfig}
 import org.apache.streampark.common.enums.ExecutionMode
 
+import org.apache.hadoop.security.UserGroupInformation
+
 import javax.annotation.Nullable
 
 import java.util.{Map => JavaMap}
@@ -35,6 +37,8 @@ trait SavepointRequestTrait {
   val jobId: String
 
   val withSavepoint: Boolean = true
+
+  val ugi: UserGroupInformation
 
   val savepointPath: String
 

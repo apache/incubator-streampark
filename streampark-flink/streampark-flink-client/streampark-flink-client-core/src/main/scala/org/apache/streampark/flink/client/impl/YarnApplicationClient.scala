@@ -27,11 +27,8 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
-import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.hadoop.security.UserGroupInformation
-import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.Collections
 import java.util.concurrent.Callable
@@ -86,7 +83,7 @@ object YarnApplicationClient extends YarnClientTrait {
     SecurityUtils.getInstalledContext.runSecured(new Callable[SubmitResponse] {
       override def call(): SubmitResponse = {
         val (clusterSpecification, clusterDescriptor: YarnClusterDescriptor) =
-          getYarnClusterDeployDescriptor(flinkConfig)
+          getYarnClusterDeployDescriptor(submitRequest.ugi, flinkConfig)
         logInfo(s"""
                    |------------------------<<specification>>-------------------------
                    |$clusterSpecification

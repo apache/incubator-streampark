@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.bean._
 
@@ -29,6 +28,7 @@ import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.lang.{Boolean => JavaBool}
@@ -54,8 +54,8 @@ trait YarnClientTrait extends FlinkClientTrait {
     val jobID = getJobID(request.jobId)
     flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
     // Get the ClusterClient from the YarnClusterDescriptor
-    val (applicationId, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDescriptor(
-      flinkConf)
+    val (applicationId, clusterDescriptor: YarnClusterDescriptor) =
+      getYarnClusterDescriptor(request.ugi, flinkConf)
     val clusterClient = clusterDescriptor.retrieve(applicationId).getClusterClient
 
     Try {
@@ -131,9 +131,11 @@ trait YarnClientTrait extends FlinkClientTrait {
    *   a tuple containing the application ID and the YarnClusterDescriptor
    */
   private[client] def getYarnClusterDescriptor(
+      ugi: UserGroupInformation,
       flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
     Try {
       doAsYarnClusterDescriptor[ApplicationId](
+        ugi,
         () => {
           val clientFactory = new YarnClusterClientFactory
           // Get the cluster ID
@@ -142,7 +144,8 @@ trait YarnClientTrait extends FlinkClientTrait {
           // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
           (yarnClusterId, clusterDescriptor)
-        })
+        }
+      )
     } match {
       case Success(result) => result
       case Failure(e) =>
@@ -159,9 +162,11 @@ trait YarnClientTrait extends FlinkClientTrait {
    *   a tuple containing the ClusterSpecification and the YarnClusterDescriptor
    */
   private[client] def getYarnClusterDeployDescriptor(
+      ugi: UserGroupInformation,
       flinkConfig: Configuration): (ClusterSpecification, YarnClusterDescriptor) = {
     Try {
       doAsYarnClusterDescriptor[ClusterSpecification](
+        ugi,
         () => {
           val clientFactory = new YarnClusterClientFactory
           // Get the ClusterSpecification
@@ -169,7 +174,8 @@ trait YarnClientTrait extends FlinkClientTrait {
           // Create the ClusterDescriptor
           val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
           clusterSpecification -> clusterDescriptor
-        })
+        }
+      )
     } match {
       case Success(result) => result
       case Failure(e) =>
@@ -178,9 +184,10 @@ trait YarnClientTrait extends FlinkClientTrait {
   }
 
   private[this] def doAsYarnClusterDescriptor[T](
+      ugi: UserGroupInformation,
       func: () => (T, YarnClusterDescriptor)): (T, YarnClusterDescriptor) = {
     // Wrap the operation in ugi.doAs()
-    HadoopUtils.ugi.doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
+    ugi.doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
       override def run(): (T, YarnClusterDescriptor) = func()
     })
   }

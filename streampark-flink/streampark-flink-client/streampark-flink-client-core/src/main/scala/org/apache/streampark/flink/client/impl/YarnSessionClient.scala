@@ -91,7 +91,7 @@ object YarnSessionClient extends YarnClientTrait {
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
     val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
-      getYarnClusterDescriptor(flinkConfig)
+      getYarnClusterDescriptor(submitRequest.ugi, flinkConfig)
     val programJobGraph = super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
     val jobGraph = programJobGraph._2
@@ -144,7 +144,7 @@ object YarnSessionClient extends YarnClientTrait {
 
       deployClusterConfig(deployRequest, flinkConfig)
 
-      val yarnClusterDescriptor = getYarnClusterDeployDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDeployDescriptor(deployRequest.ugi, flinkConfig)
       val clusterSpecification: ClusterSpecification = yarnClusterDescriptor._1
       clusterDescriptor = yarnClusterDescriptor._2
       if (StringUtils.isNotBlank(deployRequest.clusterId)) {
@@ -195,7 +195,7 @@ object YarnSessionClient extends YarnClientTrait {
           })
       flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId)
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-      val yarnClusterDescriptor = getYarnClusterDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDescriptor(shutDownRequest.ugi, flinkConfig)
       val applicationId: ApplicationId = yarnClusterDescriptor._1
       clusterDescriptor = yarnClusterDescriptor._2
       if (

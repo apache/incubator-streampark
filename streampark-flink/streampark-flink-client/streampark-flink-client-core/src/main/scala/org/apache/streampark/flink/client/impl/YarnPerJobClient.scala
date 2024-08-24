@@ -23,7 +23,7 @@ import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.client.program.PackagedProgram
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
@@ -59,7 +59,7 @@ object YarnPerJobClient extends YarnClientTrait {
     val flinkHome = submitRequest.flinkVersion.flinkHome
 
     val (clusterSpecification, clusterDescriptor: YarnClusterDescriptor) =
-      getYarnClusterDeployDescriptor(flinkConfig)
+      getYarnClusterDeployDescriptor(submitRequest.ugi, flinkConfig)
     val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
     clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
     clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
@@ -107,8 +107,8 @@ object YarnPerJobClient extends YarnClientTrait {
     flinkConf
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     val response = super.doCancel(cancelRequest, flinkConf)
-    val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
-      getYarnClusterDescriptor(flinkConf)
+    val (_: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
+      getYarnClusterDescriptor(cancelRequest.ugi, flinkConf)
     clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response
   }

@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
@@ -52,6 +53,7 @@ import org.apache.streampark.flink.util.FlinkUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.hadoop.security.UserGroupInformation;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -310,6 +312,11 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     Map<String, Object> properties = this.tryGetRestProps(application, cluster);
 
+    UserGroupInformation ugi = null;
+    if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+      ugi = HadoopUtils.ugi();
+    }
+
     TriggerSavepointRequest request =
         new TriggerSavepointRequest(
             flinkEnv.getFlinkVersion(),
@@ -318,6 +325,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
             clusterId,
             application.getJobId(),
             customSavepoint,
+            ugi,
             application.getK8sNamespace());
 
     CompletableFuture<SavepointResponse> savepointFuture =

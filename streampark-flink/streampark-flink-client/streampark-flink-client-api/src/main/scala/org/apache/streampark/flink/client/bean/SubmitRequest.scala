@@ -27,6 +27,7 @@ import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
 import org.apache.commons.io.FileUtils
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
+import org.apache.hadoop.security.UserGroupInformation
 
 import javax.annotation.Nullable
 
@@ -49,6 +50,7 @@ case class SubmitRequest(
     applicationType: ApplicationType,
     savePoint: String,
     args: String,
+    @Nullable ugi: UserGroupInformation,
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any],
     @Nullable clusterId: String,
