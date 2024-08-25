@@ -112,7 +112,7 @@ public class ProxyServiceImpl implements ProxyService {
       case YARN_SESSION:
         String yarnURL = YarnUtils.getRMWebAppProxyURL();
         url = yarnURL + "/proxy/" + app.getClusterId();
-        url += getRequestURL(request).replace("/proxy/flink/" + appId, "");
+        url += getRequestURL(request, "/proxy/flink/" + appId);
         return proxyYarnRequest(request, url);
       case REMOTE:
         FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
@@ -130,7 +130,7 @@ public class ProxyServiceImpl implements ProxyService {
       return builder.build();
     }
 
-    url += getRequestURL(request).replace("/proxy/flink/" + appId, "");
+    url += getRequestURL(request, "/proxy/flink/" + appId);
     return proxyRequest(request, url);
   }
 
@@ -145,7 +145,7 @@ public class ProxyServiceImpl implements ProxyService {
     String yarnId = log.getYarnAppId();
     String yarnURL = YarnUtils.getRMWebAppProxyURL();
     String url = yarnURL + "/proxy/" + yarnId + "/";
-    url += getRequestURL(request).replace("/proxy/yarn/" + logId, "");
+    url += getRequestURL(request, "/proxy/yarn/" + logId);
     return proxyYarnRequest(request, url);
   }
 
@@ -162,7 +162,23 @@ public class ProxyServiceImpl implements ProxyService {
     if (StringUtils.isBlank(url)) {
       return builder.body("The jobManager url is null.");
     }
-    url += getRequestURL(request).replace("/proxy/history/" + logId, "");
+    url += getRequestURL(request, "/proxy/history/" + logId);
+    return proxyRequest(request, url);
+  }
+
+  @Override
+  public ResponseEntity<?> proxyCluster(HttpServletRequest request, Long clusterId)
+      throws Exception {
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+    FlinkCluster cluster = flinkClusterService.getById(clusterId);
+    if (cluster == null) {
+      return builder.body("The cluster not found.");
+    }
+    String url = cluster.getAddress();
+    if (StringUtils.isBlank(url)) {
+      return builder.body("The cluster address is invalid.");
+    }
+    url += getRequestURL(request, "/proxy/cluster/" + clusterId);
     return proxyRequest(request, url);
   }
 
@@ -234,9 +250,11 @@ public class ProxyServiceImpl implements ProxyService {
     }
   }
 
-  private String getRequestURL(HttpServletRequest request) {
-    return request.getRequestURI()
-        + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+  private String getRequestURL(HttpServletRequest request, String replaceString) {
+    String url =
+        request.getRequestURI()
+            + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+    return url.replace(replaceString, "");
   }
 
   /**

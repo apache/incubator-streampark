@@ -124,9 +124,9 @@ export default {
     copyStartcURL: 'App Start',
     copyCancelcURL: 'App Cancel',
     apiDocCenter: 'Api Doc Center',
-    nullAccessToken: "The current user's token not exist, please contact the administrator to add",
-    invalidAccessToken: 'access token is invalid, please contact the administrator',
-    invalidTokenUser: 'the user is locked, please contact the administrator',
+    nullAccessToken: "The current user have no token, please contact the admin to add",
+    invalidAccessToken: 'access token is invalid, please contact the admin',
+    invalidTokenUser: 'the user is locked, please contact the admin',
     detailTab: {
       detailTabName: {
         option: 'Option',
