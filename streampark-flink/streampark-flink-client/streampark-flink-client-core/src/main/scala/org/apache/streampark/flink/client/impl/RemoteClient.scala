@@ -85,8 +85,12 @@ object RemoteClient extends FlinkClientTrait {
         e.printStackTrace()
         throw e
     } finally {
-      if (client != null) client.close()
-      if (standAloneDescriptor != null) standAloneDescriptor._2.close()
+      if (client != null) {
+        client.close()
+      }
+      if (standAloneDescriptor != null) {
+        standAloneDescriptor._2.close()
+      }
     }
   }
 
