@@ -206,6 +206,7 @@ public class Application implements Serializable {
   private String k8sPodTemplate;
 
   private String k8sJmPodTemplate;
+
   private String k8sTmPodTemplate;
 
   private String ingressTemplate;

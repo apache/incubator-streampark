@@ -47,8 +47,6 @@ enum APP_API {
   REVOKE = '/flink/app/revoke',
   OPTION_LOG = '/flink/app/optionlog',
   DELETE_OPERATION_LOG = '/flink/app/deleteOperationLog',
-  CHECK_JAR = '/flink/app/checkjar',
-  VERIFY_SCHEMA = '/flink/app/verifySchema',
   CHECK_SAVEPOINT_PATH = '/flink/app/checkSavepointPath',
 }
 
