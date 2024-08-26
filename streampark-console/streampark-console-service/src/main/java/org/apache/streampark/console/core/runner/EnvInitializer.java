@@ -65,7 +65,7 @@ public class EnvInitializer implements ApplicationRunner {
 
   private static final Pattern PATTERN_FLINK_SHIMS_JAR =
       Pattern.compile(
-          "^streampark-flink-shims_flink-(1.1[2-9])_(2.11|2.12)-(.*).jar$",
+          "^streampark-flink-shims_flink-(1.1[2-9]|1.20)_(2.11|2.12)-(.*).jar$",
           Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
   @Override
