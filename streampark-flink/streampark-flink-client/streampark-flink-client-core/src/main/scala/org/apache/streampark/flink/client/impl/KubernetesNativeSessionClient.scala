@@ -212,7 +212,10 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   }
 
   private[this] def getFlinkK8sConfig(deployRequest: KubernetesDeployRequest): Configuration = {
-    extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
+    extractConfiguration(
+      deployRequest.flinkVersion.flinkHome,
+      deployRequest.properties,
+      deployRequest.clusterName)
       .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
       .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.kubernetesNamespace)
       .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, deployRequest.serviceAccount)

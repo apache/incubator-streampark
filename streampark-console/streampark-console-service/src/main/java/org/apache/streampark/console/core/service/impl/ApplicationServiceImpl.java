@@ -1820,7 +1820,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     if (ExecutionMode.isKubernetesApplicationMode(application.getExecutionMode())) {
       String archiveDir =
-          flinkEnv.getFlinkConfig().getProperty(JobManagerOptions.ARCHIVE_DIR.key());
+          flinkEnv.getFlinkConfig(application).getProperty(JobManagerOptions.ARCHIVE_DIR.key());
       if (archiveDir != null) {
         properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
       }

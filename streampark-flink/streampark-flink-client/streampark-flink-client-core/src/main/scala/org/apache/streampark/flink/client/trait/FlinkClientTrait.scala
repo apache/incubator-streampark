@@ -18,8 +18,9 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode}
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
+import org.apache.streampark.common.utils.CommonUtils
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.conf.FlinkRunOption
 import org.apache.streampark.flink.deployment.FlinkClusterClient
@@ -376,7 +377,11 @@ trait FlinkClientTrait extends Logger {
       commandLine)
 
     val configuration =
-      applyConfiguration(submitRequest.flinkVersion.flinkHome, activeCommandLine, commandLine)
+      applyConfiguration(
+        submitRequest.flinkVersion.flinkHome,
+        activeCommandLine,
+        commandLine,
+        submitRequest.appName)
 
     commandLine -> configuration
 
@@ -394,7 +399,8 @@ trait FlinkClientTrait extends Logger {
 
   private[client] def extractConfiguration(
       flinkHome: String,
-      properties: JavaMap[String, Any]): Configuration = {
+      properties: JavaMap[String, Any],
+      jobName: String): Configuration = {
     val commandLine = {
       val commandLineOptions = getCommandLineOptions(flinkHome)
       // read and verify user config...
@@ -414,7 +420,7 @@ trait FlinkClientTrait extends Logger {
     }
     val activeCommandLine =
       validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
-    val flinkConfig = applyConfiguration(flinkHome, activeCommandLine, commandLine)
+    val flinkConfig = applyConfiguration(flinkHome, activeCommandLine, commandLine, jobName)
     flinkConfig
   }
 
@@ -443,7 +449,8 @@ trait FlinkClientTrait extends Logger {
   private[this] def applyConfiguration(
       flinkHome: String,
       activeCustomCommandLine: CustomCommandLine,
-      commandLine: CommandLine): Configuration = {
+      commandLine: CommandLine,
+      jobName: String): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
     val configuration = new Configuration()
@@ -452,7 +459,7 @@ trait FlinkClientTrait extends Logger {
       key => {
         val value = flinkDefaultConfiguration.getString(key, null)
         if (value != null) {
-          configuration.setString(key, value)
+          configuration.setString(key, CommonUtils.fixedValueBaseVar(value, jobName))
         }
       })
     configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
