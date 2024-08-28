@@ -1702,12 +1702,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           // 3) success
           applicationLog.setSuccess(true);
 
-          // issue: https://github.com/apache/incubator-streampark/issues/3749
-          if (appParam.getRestoreOrTriggerSavepoint() == null
-              || !appParam.getRestoreOrTriggerSavepoint()) {
-            checkpointProcessor.resetCheckpointNum(appParam.getId());
-          }
-
           if (response.flinkConfig() != null) {
             String jmMemory = response.flinkConfig().get(ConfigConst.KEY_FLINK_JM_PROCESS_MEMORY());
             if (jmMemory != null) {
