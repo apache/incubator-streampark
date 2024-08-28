@@ -486,7 +486,7 @@ CREATE TABLE `t_external_link` (
   `badge_label` varchar(64) collate utf8mb4_general_ci default null,
   `badge_name` varchar(64) collate utf8mb4_general_ci default null,
   `badge_color` varchar(64) collate utf8mb4_general_ci default null,
-  `link_url` varchar(255) collate utf8mb4_general_ci default null,
+  `link_url` text collate utf8mb4_general_ci default null,
   `create_time` datetime default null COMMENT 'create time',
   `modify_time` datetime default null COMMENT 'modify time'
 ) engine = innodb default charset=utf8mb4 collate=utf8mb4_general_ci;
