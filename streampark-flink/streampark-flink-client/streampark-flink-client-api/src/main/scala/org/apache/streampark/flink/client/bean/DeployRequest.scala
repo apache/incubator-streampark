@@ -67,7 +67,7 @@ class KubernetesDeployRequest(
     override val clusterId: String,
     override val clusterName: String,
     val kubernetesNamespace: String = KubernetesConfigOptions.NAMESPACE.defaultValue(),
-    val kubeConf: String = "~/.kube/config",
+    val kubeConf: String,
     val serviceAccount: String = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue(),
     val flinkImage: String = KubernetesConfigOptions.CONTAINER_IMAGE.defaultValue(),
     val flinkRestExposedType: FlinkK8sRestExposedType = FlinkK8sRestExposedType.CLUSTER_IP)
