@@ -36,15 +36,15 @@ import java.nio.file.Files
 case class SubmitRequest(
     sparkVersion: SparkVersion,
     executionMode: SparkExecutionMode,
-    properties: JavaMap[String, String],
     sparkYaml: String,
     developmentMode: SparkDevelopmentMode,
     id: Long,
-    jobId: String,
     appName: String,
+    mainClass: String,
     appConf: String,
+    appProperties: JavaMap[String, String],
+    appArgs: JavaList[String],
     applicationType: ApplicationType,
-    args: String,
     @Nullable hadoopUser: String,
     @Nullable buildResult: BuildResult,
     @Nullable extraParameter: JavaMap[String, Any]) {
@@ -53,21 +53,16 @@ case class SubmitRequest(
     "spark.driver.cores" -> "1",
     "spark.driver.memory" -> "1g",
     "spark.executor.cores" -> "1",
-    "spark.executor.memory" -> "1g")
+    "spark.executor.memory" -> "1g",
+    "spark.executor.instances" -> "2")
 
-  private[this] lazy val appProperties: Map[String, String] = getParameterMap(
+  lazy val sparkParameterMap: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
     case SparkDevelopmentMode.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case SparkDevelopmentMode.CUSTOM_CODE => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
+    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => mainClass
     case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
-  }
-
-  lazy val effectiveAppName: String = if (this.appName == null) {
-    appProperties(KEY_FLINK_APP_NAME)
-  } else {
-    this.appName
   }
 
   lazy val userJarPath: String = {
@@ -77,10 +72,6 @@ case class SubmitRequest(
         buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
     }
   }
-
-  def hasProp(key: String): Boolean = MapUtils.isNotEmpty(properties) && properties.containsKey(key)
-
-  def getProp(key: String): Any = properties.get(key)
 
   def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
 
@@ -124,7 +115,6 @@ case class SubmitRequest(
       map
         .filter(_._1.startsWith(prefix))
         .filter(_._2.nonEmpty)
-        .map(x => x._1.drop(prefix.length) -> x._2)
     }
   }
 
@@ -163,11 +153,11 @@ case class SubmitRequest(
       case _ =>
         if (this.buildResult == null) {
           throw new Exception(
-            s"[spark-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty")
+            s"[spark-submit] current job: $appName was not yet built, buildResult is empty")
         }
         if (!this.buildResult.pass) {
           throw new Exception(
-            s"[spark-submit] current job ${this.effectiveAppName} build failed, please check")
+            s"[spark-submit] current job $appName build failed, please check")
         }
     }
   }

@@ -534,6 +534,7 @@ export const useCreateAndEditSchema = (
           } else if (model.appType == AppTypeEnum.STREAMPARK_SPARK) {
             return getAlertSvgIcon('spark', 'StreamPark Spark');
           }
+          return '';
         },
       },
     ];

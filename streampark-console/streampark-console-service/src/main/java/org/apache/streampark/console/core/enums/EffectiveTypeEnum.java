@@ -25,7 +25,11 @@ public enum EffectiveTypeEnum {
     /** config */
     CONFIG(1),
     /** FLINKSQL */
-    FLINKSQL(2);
+    FLINKSQL(2),
+    /** spark config */
+    SPARKCONFIG(3),
+    /** SPARKSQL */
+    SPARKSQL(4);
 
     private final int type;
 

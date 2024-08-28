@@ -567,65 +567,56 @@ drop table if exists `t_spark_app`;
 create table `t_spark_app` (
   `id` bigint not null auto_increment,
   `team_id` bigint not null,
-  `job_type` tinyint default null,
-  `execution_mode` tinyint default null,
+  `job_type` tinyint default null comment '(1)custom code(2)spark SQL',
+  `app_type` tinyint default null comment '(1)Apache Spark(2)StreamPark Spark',
+  `version_id` bigint default null comment 'spark version',
+  `app_name` varchar(255) collate utf8mb4_general_ci default null comment 'spark.app.name',
+  `execution_mode` tinyint default null comment 'spark.submit.deployMode(1)cluster(2)client',
   `resource_from` tinyint default null,
   `project_id` bigint default null,
-  `job_name` varchar(255) collate utf8mb4_general_ci default null,
   `module` varchar(255) collate utf8mb4_general_ci default null,
+  `main_class` varchar(255) collate utf8mb4_general_ci default null comment 'The entry point for your application (e.g. org.apache.spark.examples.SparkPi)',
   `jar` varchar(255) collate utf8mb4_general_ci default null,
   `jar_check_sum` bigint default null,
-  `main_class` varchar(255) collate utf8mb4_general_ci default null,
-  `args` text collate utf8mb4_general_ci,
-  `options` text collate utf8mb4_general_ci,
-  `hot_params` text collate utf8mb4_general_ci,
-  `user_id` bigint default null,
-  `app_id` varchar(64) collate utf8mb4_general_ci default null,
-  `app_type` tinyint default null,
-  `duration` bigint default null,
-  `job_id` varchar(64) collate utf8mb4_general_ci default null,
-  `job_manager_url` varchar(255) collate utf8mb4_general_ci default null,
-  `version_id` bigint default null,
-  `cluster_id` varchar(45) collate utf8mb4_general_ci default null,
-  `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
-  `k8s_namespace` varchar(63) collate utf8mb4_general_ci default null,
-  `spark_image` varchar(128) collate utf8mb4_general_ci default null,
-  `state` int default null,
+  `app_properties` text collate utf8mb4_general_ci comment 'Arbitrary Spark configuration property in key=value format (e.g. spark.driver.cores=1)',
+  `app_args` text collate utf8mb4_general_ci comment 'Arguments passed to the main method of your main class',
+  `app_id` varchar(64) collate utf8mb4_general_ci default null comment '(1)application_id on yarn(2)driver_pod_name on k8s',
+  `yarn_queue` varchar(128) collate utf8mb4_general_ci default null,
+  `k8s_master_url` varchar(128) collate utf8mb4_general_ci default null,
+  `k8s_container_image` varchar(128) collate utf8mb4_general_ci default null,
+  `k8s_image_pull_policy` tinyint default 1,
+  `k8s_service_account` varchar(64) collate utf8mb4_general_ci default null,
+  `k8s_namespace` varchar(64) collate utf8mb4_general_ci default null,
+  `hadoop_user` varchar(64) collate utf8mb4_general_ci default null,
   `restart_size` int default null,
   `restart_count` int default null,
-  `cp_threshold` int default null,
-  `cp_max_failure_interval` int default null,
-  `cp_failure_rate_interval` int default null,
-  `cp_failure_action` tinyint default null,
-  `dynamic_properties` text collate utf8mb4_general_ci,
-  `description` varchar(255) collate utf8mb4_general_ci default null,
-  `resolve_order` tinyint default null,
-  `k8s_rest_exposed_type` tinyint default null,
-  `jm_memory` int default null,
-  `tm_memory` int default null,
-  `total_task` int default null,
-  `total_tm` int default null,
-  `total_slot` int default null,
-  `available_slot` int default null,
+  `state` int default null,
+  `options` text collate utf8mb4_general_ci,
   `option_state` tinyint default null,
-  `tracking` tinyint default null,
-  `create_time` datetime default null comment 'create time',
-  `modify_time` datetime default null comment 'modify time',
   `option_time` datetime default null,
+  `user_id` bigint default null,
+  `description` varchar(255) collate utf8mb4_general_ci default null,
+  `tracking` tinyint default null,
   `release` tinyint default 1,
   `build` tinyint default 1,
+  `alert_id` bigint default null,
+  `create_time` datetime default null,
+  `modify_time` datetime default null,
   `start_time` datetime default null,
   `end_time` datetime default null,
-  `alert_id` bigint default null,
-  `k8s_pod_template` text collate utf8mb4_general_ci,
-  `k8s_jm_pod_template` text collate utf8mb4_general_ci,
-  `k8s_tm_pod_template` text collate utf8mb4_general_ci,
-  `k8s_hadoop_integration` tinyint default 0,
-  `spark_cluster_id` bigint default null,
-  `ingress_template` text collate utf8mb4_general_ci,
-  `default_mode_ingress` text collate utf8mb4_general_ci,
-  `tags` varchar(500) default null,
-  `hadoop_user` varchar(64) collate utf8mb4_general_ci default null,
+  `duration` bigint default null,
+  `tags` varchar(500) collate utf8mb4_general_ci default null,
+  `driver_cores` varchar(64) collate utf8mb4_general_ci default null,
+  `driver_memory` varchar(64) collate utf8mb4_general_ci default null,
+  `executor_cores` varchar(64) collate utf8mb4_general_ci default null,
+  `executor_memory` varchar(64) collate utf8mb4_general_ci default null,
+  `executor_max_nums` varchar(64) collate utf8mb4_general_ci default null,
+  `num_tasks` bigint default null,
+  `num_completed_tasks` bigint default null,
+  `num_stages` bigint default null,
+  `num_completed_stages` bigint default null,
+  `used_memory` bigint default null,
+  `used_v_cores` bigint default null,
   primary key (`id`) using btree,
   key `inx_job_type` (`job_type`) using btree,
   key `inx_track` (`tracking`) using btree,
@@ -704,5 +695,70 @@ CREATE TABLE `t_jdbc_registry_data_change_event`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+-- ----------------------------
+-- table structure for t_spark_effective
+-- ----------------------------
+drop table if exists `t_spark_effective`;
+create table `t_spark_effective` (
+  `id` bigint not null auto_increment,
+  `app_id` bigint not null,
+  `target_type` tinyint not null comment '1) config 2) spark sql',
+  `target_id` bigint not null comment 'configid or sqlid',
+  `create_time` datetime default null comment 'create time',
+  primary key (`id`) using btree,
+  unique key `un_effective_inx` (`app_id`,`target_type`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- table structure for t_spark_config
+-- ----------------------------
+drop table if exists `t_spark_config`;
+create table `t_spark_config` (
+  `id` bigint not null auto_increment,
+  `app_id` bigint not null,
+  `format` tinyint not null default 0,
+  `version` int not null,
+  `latest` tinyint not null default 0,
+  `content` text collate utf8mb4_general_ci not null,
+  `create_time` datetime default null comment 'create time',
+  primary key (`id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- Table structure for t_spark_sql
+-- ----------------------------
+drop table if exists `t_spark_sql`;
+create table `t_spark_sql` (
+  `id` bigint not null auto_increment,
+  `app_id` bigint default null,
+  `sql` text collate utf8mb4_general_ci,
+  `team_resource` varchar(64) collate utf8mb4_general_ci,
+  `dependency` text collate utf8mb4_general_ci,
+  `version` int default null,
+  `candidate` tinyint not null default 1,
+  `create_time` datetime default null comment 'create time',
+  primary key (`id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- table structure for t_spark_app_backup
+-- ----------------------------
+drop table if exists `t_spark_app_backup`;
+create table `t_spark_app_backup` (
+  `id` bigint not null auto_increment,
+  `app_id` bigint default null,
+  `sql_id` bigint default null,
+  `config_id` bigint default null,
+  `version` int default null,
+  `path` varchar(128) collate utf8mb4_general_ci default null,
+  `description` varchar(255) collate utf8mb4_general_ci default null,
+  `create_time` datetime default null comment 'create time',
+  primary key (`id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
 
 set foreign_key_checks = 1;

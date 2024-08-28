@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
+import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.fs.LfsOperator;
@@ -341,7 +341,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
             .filter(fn -> fn.endsWith(Constants.JAR_SUFFIX))
-            .limit(DEFAULT_HISTORY_RECORD_LIMIT)
             .collect(Collectors.toList());
     }
 
