@@ -34,10 +34,6 @@ spec:
         value: "Asia/Shanghai"
       },
       {
-        name: DOCKER_HOST,
-        value: "tcp://localhost:2375"
-      },
-      {
         name: LANG,
         value: en_US.UTF-8
       },
@@ -65,7 +61,7 @@ spec:
   ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
   resources: {
     limits: {
-      memory: "1Gi",
+      memory: "2Gi",
       cpu: "1"
     },
     requests: {
@@ -106,8 +102,40 @@ spec:
     failureThreshold: "3"
     successThreshold: "1"
 
-  volumeMounts: []
-  volumes: []
+  volumeMounts:
+    - name: flink-default-config-volume
+      # config your flink conf path
+      mountPath: /opt/flink-1.19.1/conf/
+    - name: flink-old-config-volume
+      mountPath: /opt/flink-1.17.2/conf/
+    - name: kube-config-volume
+      mountPath: /root/.kube
+    - name: streampark-volume
+      mountPath: /tmp/workspace
+  volumes:
+    - name: flink-default-config-volume
+      configMap:
+        name: flink-console-config
+        items:
+          # the flink default conf file has changed name since flink 1.19
+          - key: config.yaml
+            path: config.yaml
+    - name: flink-old-config-volume
+      configMap:
+        name: flink-console-config
+        items:
+          # flink 1.18 and before
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+    - name: kube-config-volume
+      secret:
+        secretName: kube-config
+        items:
+          - key: config
+            path: config
+    - name: streampark-volume
+      persistentVolumeClaim:
+        claimName: streampark-pvc
 
 ingress:
   enabled: true
@@ -141,7 +169,20 @@ streamParkDefaultConfiguration:
   # logback-spring.xml: |+
   #   ...
 
+flinkDefaultConfiguration:
+  create: true
+  append: true
+
+flinkOldConfiguration:
+  create: true
+  append: true
+
 streamParkServiceAccount:
   create: true
   annotations: {}
   name: "streampark"
+
+workSpace:
+  # the workspace path configured in your streampark configuration file
+  path: /tmp/workspace
+  storageSize: 10Gi

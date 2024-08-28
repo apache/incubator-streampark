@@ -25,16 +25,41 @@ metadata:
 data:
   config.yaml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/config.yaml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/streampark/config.yaml" | nindent 4 -}}
 {{- end }}
 {{- if index (.Values.streamParkDefaultConfiguration) "config.yaml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "config.yaml" | nindent 4 -}}
 {{- end }}
   logback-spring.xml: |+
 {{- if .Values.streamParkDefaultConfiguration.append }}
-    {{- $.Files.Get "conf/logback-spring.xml"  | nindent 4 -}}
+    {{- $.Files.Get "conf/streampark/logback-spring.xml" | nindent 4 -}}
 {{- end }}
 {{- if index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" }}
     {{- index (.Values.streamParkDefaultConfiguration) "logback-spring.xml" | nindent 4 -}}
+{{- end }}
+{{- end }}
+---
+{{- if .Values.flinkDefaultConfiguration.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-console-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "streampark.labels" . | nindent 4 }}
+data:
+  config.yaml: |+
+{{- if .Values.flinkDefaultConfiguration.append }}
+    {{- $.Files.Get "conf/flink/config.yaml" | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.flinkDefaultConfiguration) "config.yaml" }}
+    {{- index (.Values.flinkDefaultConfiguration) "config.yaml" | nindent 4 -}}
+{{- end }}
+  flink-conf.yaml: |+
+{{- if .Values.flinkOldConfiguration.append }}
+    {{- $.Files.Get "conf/flink/flink-conf.yaml" | nindent 4 -}}
+{{- end }}
+{{- if index (.Values.flinkOldConfiguration) "flink-conf.yaml" }}
+    {{- index (.Values.flinkOldConfiguration) "flink-conf.yaml" | nindent 4 -}}
 {{- end }}
 {{- end }}
