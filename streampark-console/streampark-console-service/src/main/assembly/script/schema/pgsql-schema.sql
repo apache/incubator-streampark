@@ -738,7 +738,7 @@ create table "public"."t_external_link" (
   "badge_label" varchar(64) collate "pg_catalog"."default",
   "badge_name" varchar(64) collate "pg_catalog"."default",
   "badge_color" varchar(64) collate "pg_catalog"."default",
-  "link_url" varchar(255) collate "pg_catalog"."default",
+  "link_url" text collate "pg_catalog"."default",
   "create_time" timestamp(6),
   "modify_time" timestamp(6))
 ;
