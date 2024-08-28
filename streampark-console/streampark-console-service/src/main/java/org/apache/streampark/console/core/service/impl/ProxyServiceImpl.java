@@ -23,6 +23,7 @@ import org.apache.streampark.console.base.exception.PermissionDeniedException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -31,7 +32,9 @@ import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
+import org.apache.streampark.console.system.service.UserService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
 import org.apache.commons.io.IOUtils;
@@ -77,6 +80,8 @@ public class ProxyServiceImpl implements ProxyService {
   @Autowired private MemberService memberService;
 
   @Autowired private ApplicationLogService logService;
+
+  @Autowired private UserService userService;
 
   @Autowired private FlinkK8sWatcher flinkK8sWatcher;
 
@@ -190,10 +195,13 @@ public class ProxyServiceImpl implements ProxyService {
     if (token != null) {
       Long userId = JWTUtil.getUserId(token);
       if (userId != null && !userId.equals(app.getUserId())) {
-        Member member = memberService.findByUserId(app.getTeamId(), userId);
-        if (member == null) {
-          throw new PermissionDeniedException(
-              "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+        User user = userService.getById(userId);
+        if (user != null && user.getUserType() != UserType.ADMIN) {
+          Member member = memberService.findByUserId(app.getTeamId(), userId);
+          if (member == null) {
+            throw new PermissionDeniedException(
+                "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
+          }
         }
       }
     }
