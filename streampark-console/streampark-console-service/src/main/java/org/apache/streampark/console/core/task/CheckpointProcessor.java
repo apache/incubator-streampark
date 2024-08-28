@@ -83,19 +83,29 @@ public class CheckpointProcessor {
     CheckPointKey checkPointKey = new CheckPointKey(appId, jobID, checkPoint.getId());
 
     if (CheckPointStatus.COMPLETED.equals(status)) {
-      if (checkSaveAsSavepoint(checkPointKey, checkPoint)) {
-        savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
-        saveSavepoint(checkPoint, application.getId());
-        flinkAppHttpWatcher.cleanSavepoint(application);
-        return;
+      switch (checkPoint.getCheckPointType()) {
+        case SAVEPOINT:
+          if (checkSaveForSavepoint(checkPointKey, checkPoint)) {
+            savepointedCache.put(checkPointKey.getSavePointId(), DEFAULT_FLAG_BYTE);
+            saveSavepoint(checkPoint, application.getId());
+            flinkAppHttpWatcher.cleanSavepoint(application);
+            return;
+          }
+          break;
+        case CHECKPOINT:
+          Long latestChkId = getLatestCheckpointId(appId, checkPointKey.getCheckPointId());
+          if (checkSaveForCheckpoint(checkPoint, latestChkId)) {
+            checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
+            saveSavepoint(checkPoint, application.getId());
+          }
+          break;
+        default:
+          break;
       }
+      return;
+    }
 
-      Long latestChkId = getLatestCheckpointId(appId, checkPointKey.getCheckPointId());
-      if (checkSaveAsCheckpoint(checkPoint, latestChkId)) {
-        checkPointCache.put(checkPointKey.getCheckPointId(), checkPoint.getId());
-        saveSavepoint(checkPoint, application.getId());
-      }
-    } else if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
+    if (shouldProcessFailedTrigger(checkPoint, application.cpFailedTrigger(), status)) {
       Counter counter = checkPointFailedCache.get(appId);
       if (counter == null) {
         checkPointFailedCache.put(appId, new Counter(checkPoint.getTriggerTimestamp()));
@@ -131,27 +141,13 @@ public class CheckpointProcessor {
     }
   }
 
-  // issue: https://github.com/apache/incubator-streampark/issues/3749
-  public void resetCheckpointNum(Long appId) {
-    checkPointCache
-        .asMap()
-        .forEach(
-            (k, v) -> {
-              if (k.startsWith(appId.toString())) {
-                checkPointCache.invalidate(k);
-              }
-            });
+  private boolean checkSaveForCheckpoint(
+      @Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
+    return latestId == null || !latestId.equals(checkPoint.getId());
   }
 
-  private boolean checkSaveAsCheckpoint(@Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
-    return !checkPoint.getIsSavepoint() && (latestId == null || latestId < checkPoint.getId());
-  }
-
-  private boolean checkSaveAsSavepoint(
+  private boolean checkSaveForSavepoint(
       CheckPointKey checkPointKey, @Nonnull CheckPoints.CheckPoint checkPoint) {
-    if (!checkPoint.getIsSavepoint()) {
-      return false;
-    }
     return savepointedCache.getIfPresent(checkPointKey.getSavePointId()) == null
         // If the savepoint triggered before SAVEPOINT_CACHE_HOUR span, we'll see it as out-of-time
         // savepoint and ignore it.
@@ -160,9 +156,9 @@ public class CheckpointProcessor {
   }
 
   @Nullable
-  private Long getLatestCheckpointId(Long appId, String cacheId) {
+  private Long getLatestCheckpointId(Long appId, String checkpointId) {
     return checkPointCache.get(
-        cacheId,
+        checkpointId,
         key -> {
           Savepoint savepoint = savepointService.getLatest(appId);
           return Optional.ofNullable(savepoint).map(Savepoint::getChkId).orElse(null);
