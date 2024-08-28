@@ -143,7 +143,9 @@ public class CheckpointProcessor {
 
   private boolean checkSaveForCheckpoint(
       @Nonnull CheckPoints.CheckPoint checkPoint, Long latestId) {
-    return latestId == null || !latestId.equals(checkPoint.getId());
+    return checkPoint.getId().equals(1L)
+        || latestId == null
+        || !latestId.equals(checkPoint.getId());
   }
 
   private boolean checkSaveForSavepoint(
