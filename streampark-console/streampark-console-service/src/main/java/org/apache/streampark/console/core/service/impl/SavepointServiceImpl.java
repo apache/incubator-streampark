@@ -95,9 +95,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
+  private static final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
 
-  private final String MAX_RETAINED_CHECKPOINTS_NEW_KEY = "execution.checkpointing.num-retained";
+  private static final String MAX_RETAINED_CHECKPOINTS_NEW_KEY =
+      "execution.checkpointing.num-retained";
 
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors());
 
