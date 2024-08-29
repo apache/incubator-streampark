@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.core
 
-import collection.JavaConverters._
-import collection.mutable._
+import collection.JavaConversions._
+import com.google.common.collect.Lists
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.hadoop.fs.Path
 
@@ -29,7 +29,7 @@ class YarnClusterDescriptorWrapper(yarnClusterDescriptor: YarnClusterDescriptor)
   extends YarnClusterDescriptorTrait(yarnClusterDescriptor) {
 
   override def addShipFiles(input: util.List[File]) = {
-    val f = input.map(c => new Path(c.toURI)).asJava
-    yarnClusterDescriptor.addShipFiles(f)
+    val f = input.map(c => new Path(c.toURI))
+    yarnClusterDescriptor.addShipFiles(Lists.newArrayList(f: _*))
   }
 }
