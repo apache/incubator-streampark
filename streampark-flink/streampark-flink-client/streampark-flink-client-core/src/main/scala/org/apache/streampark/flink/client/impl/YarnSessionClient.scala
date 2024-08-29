@@ -17,20 +17,16 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.util.{AssertUtils, Utils}
 import org.apache.streampark.common.util.Implicits._
+import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.api.common.JobID
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
-import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.{ApplicationId, FinalApplicationStatus}
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException
 import org.apache.hadoop.yarn.util.ConverterUtils
@@ -60,19 +56,6 @@ object YarnSessionClient extends YarnClientTrait {
    * @param flinkConfig
    */
   def deployClusterConfig(deployRequest: DeployRequest, flinkConfig: Configuration): Unit = {
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-      deployRequest.flinkVersion.flinkHome)
-    val currentUser = UserGroupInformation.getCurrentUser
-    logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      logDebug(s"kerberos Security is Enabled...")
-      val useTicketCache =
-        flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      AssertUtils.required(
-        HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
-        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-    }
-
     val shipFiles = new util.ArrayList[String]()
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/lib")
     shipFiles.add(s"${deployRequest.flinkVersion.flinkHome}/plugins")
@@ -98,9 +81,7 @@ object YarnSessionClient extends YarnClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
-    val clusterDescriptor = yarnClusterDescriptor._2
-    val yarnClusterId: ApplicationId = yarnClusterDescriptor._1
+    val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDescriptor(flinkConfig)
     val programJobGraph =
       super.getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile)
     val packageProgram = programJobGraph._1
@@ -119,59 +100,20 @@ object YarnSessionClient extends YarnClientTrait {
     resp
   }
 
-  private[this] def executeClientAction[O, R <: SavepointRequestTrait](
-      savepointRequestTrait: R,
-      flinkConfig: Configuration,
-      actFunc: (JobID, ClusterClient[_]) => O): O = {
-    flinkConfig
-      .safeSet(YarnConfigOptions.APPLICATION_ID, savepointRequestTrait.clusterId)
-      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-    logInfo(s"""
-               |------------------------------------------------------------------
-               |Effective submit configuration: $flinkConfig
-               |------------------------------------------------------------------
-               |""".stripMargin)
-
-    var clusterDescriptor: YarnClusterDescriptor = null
-    var client: ClusterClient[ApplicationId] = null
-    try {
-      val yarnClusterDescriptor = getYarnSessionClusterDescriptor(flinkConfig)
-      clusterDescriptor = yarnClusterDescriptor._2
-      client = clusterDescriptor.retrieve(yarnClusterDescriptor._1).getClusterClient
-      actFunc(JobID.fromHexString(savepointRequestTrait.jobId), client)
-    } catch {
-      case e: Exception =>
-        logError(s"${savepointRequestTrait.getClass.getSimpleName} for flink yarn session job fail")
-        e.printStackTrace()
-        throw e
-    } finally {
-      Utils.close(client, clusterDescriptor)
-    }
-  }
-
   override def doCancel(
       cancelRequest: CancelRequest,
       flinkConfig: Configuration): CancelResponse = {
-    executeClientAction(
-      cancelRequest,
-      flinkConfig,
-      (jobID, clusterClient) => {
-        val actionResult = super.cancelJob(cancelRequest, jobID, clusterClient)
-        CancelResponse(actionResult)
-      })
+    flinkConfig
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    super.doCancel(cancelRequest, flinkConfig)
   }
 
   override def doTriggerSavepoint(
-      savepointRequest: TriggerSavepointRequest,
+      request: TriggerSavepointRequest,
       flinkConfig: Configuration): SavepointResponse = {
-    executeClientAction(
-      savepointRequest,
-      flinkConfig,
-      (jobID, clusterClient) => {
-        val actionResult =
-          super.triggerSavepoint(savepointRequest, jobID, clusterClient)
-        SavepointResponse(actionResult)
-      })
+    flinkConfig
+      .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    super.doTriggerSavepoint(request, flinkConfig)
   }
 
   def deploy(deployRequest: DeployRequest): DeployResponse = {
@@ -191,7 +133,7 @@ object YarnSessionClient extends YarnClientTrait {
       val flinkConfig =
         extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
       deployClusterConfig(deployRequest, flinkConfig)
-      val yarnClusterDescriptor = getSessionClusterDeployDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDeployDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       if (StringUtils.isNotBlank(deployRequest.clusterId)) {
         try {
@@ -213,13 +155,12 @@ object YarnSessionClient extends YarnClientTrait {
             logInfo("this applicationId have not managed by yarn ,need deploy ...")
         }
       }
-      val clientProvider =
-        clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
+      val clientProvider = clusterDescriptor.deploySessionCluster(yarnClusterDescriptor._1)
       client = clientProvider.getClusterClient
       if (client.getWebInterfaceURL != null) {
         DeployResponse(client.getWebInterfaceURL, client.getClusterId.toString)
       } else {
-        null
+        DeployResponse(error = new RuntimeException("get the cluster getWebInterfaceURL failed."))
       }
     } catch {
       case e: Exception =>
@@ -243,7 +184,7 @@ object YarnSessionClient extends YarnClientTrait {
         })
       flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId)
       flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
-      val yarnClusterDescriptor = getSessionClusterDescriptor(flinkConfig)
+      val yarnClusterDescriptor = getYarnClusterDescriptor(flinkConfig)
       clusterDescriptor = yarnClusterDescriptor._2
       val shutDownState = FinalApplicationStatus.UNDEFINED.equals(
         clusterDescriptor.getYarnClient
@@ -267,20 +208,6 @@ object YarnSessionClient extends YarnClientTrait {
     } finally {
       Utils.close(client, clusterDescriptor)
     }
-  }
-
-  private[this] def getYarnSessionClusterDescriptor(
-      flinkConfig: Configuration): (ApplicationId, YarnClusterDescriptor) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory =
-      serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
-    require(yarnClusterId != null)
-    val clusterDescriptor =
-      clientFactory
-        .createClusterDescriptor(flinkConfig)
-        .asInstanceOf[YarnClusterDescriptor]
-    (yarnClusterId, clusterDescriptor)
   }
 
 }
