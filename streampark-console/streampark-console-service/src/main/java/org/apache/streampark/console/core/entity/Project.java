@@ -21,11 +21,8 @@ import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.util.CommonUtils;
-import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.enums.GitAuthorizedError;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +44,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -154,30 +150,6 @@ public class Project implements Serializable {
   public void delete() throws IOException {
     FileUtils.deleteDirectory(getAppSource());
     FileUtils.deleteDirectory(getDistHome());
-  }
-
-  @JsonIgnore
-  public List<String> getAllBranches() {
-    try {
-      return GitUtils.getBranchList(this);
-    } catch (Exception e) {
-      throw new ApiDetailException(e);
-    }
-  }
-
-  public GitAuthorizedError gitCheck() {
-    try {
-      GitUtils.getBranchList(this);
-      return GitAuthorizedError.SUCCESS;
-    } catch (Exception e) {
-      String err = e.getMessage();
-      if (err.contains("not authorized")) {
-        return GitAuthorizedError.ERROR;
-      } else if (err.contains("Authentication is required")) {
-        return GitAuthorizedError.REQUIRED;
-      }
-      return GitAuthorizedError.UNKNOW;
-    }
   }
 
   @JsonIgnore
@@ -311,13 +283,5 @@ public class Project implements Serializable {
   @JsonIgnore
   private String getLogHeader(String header) {
     return "---------------------------------[ " + header + " ]---------------------------------\n";
-  }
-
-  public boolean isHttpRepositoryUrl() {
-    return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
-  }
-
-  public boolean isSshRepositoryUrl() {
-    return url != null && url.trim().startsWith("git@");
   }
 }

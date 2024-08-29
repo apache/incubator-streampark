@@ -105,7 +105,7 @@ public class ProjectController {
   @PostMapping("branches")
   @PermissionScope(team = "#project.teamId")
   public RestResponse branches(Project project) {
-    List<String> branches = project.getAllBranches();
+    List<String> branches = projectService.getAllBranches(project);
     return RestResponse.success().data(branches);
   }
 
@@ -120,7 +120,7 @@ public class ProjectController {
   @PostMapping("gitcheck")
   @PermissionScope(team = "#project.teamId")
   public RestResponse gitCheck(Project project) {
-    GitAuthorizedError error = project.gitCheck();
+    GitAuthorizedError error = projectService.gitCheck(project);
     return RestResponse.success().data(error.getType());
   }
 
