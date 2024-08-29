@@ -95,6 +95,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
+  private final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
+
+  private final String MAX_RETAINED_CHECKPOINTS_NEW_KEY = "execution.checkpointing.num-retained";
+
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors());
 
   private final ExecutorService flinkTriggerExecutor =
@@ -135,7 +139,6 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     if (StringUtils.isBlank(numRetainedFromDynamicProp)) {
       // for flink 1.20
-      String MAX_RETAINED_CHECKPOINTS_NEW_KEY = "execution.checkpointing.num-retained";
       numRetainedFromDynamicProp =
           PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
               .get(MAX_RETAINED_CHECKPOINTS_NEW_KEY);
@@ -240,7 +243,6 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
-    String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
     if (StringUtils.isBlank(savepointPath)) {
       // for flink 1.20
       savepointPath =
