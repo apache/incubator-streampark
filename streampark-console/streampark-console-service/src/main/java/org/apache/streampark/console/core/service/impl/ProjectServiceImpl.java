@@ -27,14 +27,17 @@ import org.apache.streampark.console.base.domain.ResponseCode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
+import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
+import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.enums.ReleaseState;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
@@ -136,7 +139,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setDescription(projectParam.getDescription());
     project.setBuildArgs(projectParam.getBuildArgs());
     project.setModifyTime(new Date());
-    if (project.isSshRepositoryUrl()) {
+    if (GitUtils.isSshRepositoryUrl(project.getUrl())) {
       project.setUserName(null);
     } else {
       project.setPrvkeyPath(null);
@@ -309,6 +312,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             .eq(Project::getName, project.getName())
             .eq(Project::getTeamId, project.getTeamId());
     return this.baseMapper.selectCount(queryWrapper) > 0;
+  }
+
+  @Override
+  public List<String> getAllBranches(Project project) {
+    try {
+      GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+      request.setUrl(project.getUrl());
+      request.setUsername(project.getUserName());
+      request.setPassword(project.getPassword());
+      request.setPrivateKey(project.getPrvkeyPath());
+      return GitUtils.getBranchList(request);
+    } catch (Exception e) {
+      throw new ApiDetailException(e);
+    }
+  }
+
+  @Override
+  public GitAuthorizedError gitCheck(Project project) {
+    try {
+      GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+      request.setUrl(project.getUrl());
+      request.setUsername(project.getUserName());
+      request.setPassword(project.getPassword());
+      request.setPrivateKey(project.getPrvkeyPath());
+      GitUtils.getBranchList(request);
+      return GitAuthorizedError.SUCCESS;
+    } catch (Exception e) {
+      String err = e.getMessage();
+      if (err.contains("not authorized")) {
+        return GitAuthorizedError.ERROR;
+      } else if (err.contains("Authentication is required")) {
+        return GitAuthorizedError.REQUIRED;
+      }
+      return GitAuthorizedError.UNKNOW;
+    }
   }
 
   @Override

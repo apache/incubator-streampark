@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
+import org.apache.streampark.console.core.enums.GitAuthorizedError;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -57,4 +58,8 @@ public interface ProjectService extends IService<Project> {
   List<Application> getApplications(Project project);
 
   boolean checkExists(Project project);
+
+  List<String> getAllBranches(Project project);
+
+  GitAuthorizedError gitCheck(Project project);
 }

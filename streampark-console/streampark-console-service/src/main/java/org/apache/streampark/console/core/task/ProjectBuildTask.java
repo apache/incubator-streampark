@@ -26,7 +26,6 @@ import org.apache.streampark.console.core.enums.BuildState;
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.lib.StoredConfig;
 
 import java.io.File;
@@ -91,7 +90,16 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       project.cleanCloned();
       fileLogger.info("clone {}, {} starting...", project.getName(), project.getUrl());
       fileLogger.info(project.getLog4CloneStart());
-      Git git = GitUtils.clone(project);
+
+      GitUtils.GitCloudRequest request = new GitUtils.GitCloudRequest();
+      request.setUrl(project.getUrl());
+      request.setBranches(project.getBranches());
+      request.setStoreDir(project.getAppSource());
+      request.setUsername(project.getUserName());
+      request.setPassword(project.getPassword());
+      request.setPrivateKey(project.getPrvkeyPath());
+
+      Git git = GitUtils.clone(request);
       StoredConfig config = git.getRepository().getConfig();
       config.setBoolean("http", project.getUrl(), "sslVerify", false);
       config.setBoolean("https", project.getUrl(), "sslVerify", false);
@@ -104,19 +112,6 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       git.close();
       return true;
     } catch (Exception e) {
-      if (e instanceof InvalidRemoteException) {
-        if (project.isHttpRepositoryUrl()) {
-          String url =
-              project
-                  .getUrl()
-                  .replaceAll(
-                      "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
-          project.setUrl(url);
-          fileLogger.info(
-              "clone project by https(http) failed, Now try to clone project by ssh...");
-          return cloneSourceCode(project);
-        }
-      }
       fileLogger.error(
           String.format(
               "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
