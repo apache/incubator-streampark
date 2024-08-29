@@ -91,7 +91,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
       fileLogger.info("clone {}, {} starting...", project.getName(), project.getUrl());
       fileLogger.info(project.getLog4CloneStart());
 
-      GitUtils.GitCloudRequest request = new GitUtils.GitCloudRequest();
+      GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
       request.setUrl(project.getUrl());
       request.setBranches(project.getBranches());
       request.setStoreDir(project.getAppSource());

@@ -49,7 +49,7 @@ public class GitUtils {
 
   private GitUtils() {}
 
-  public static Git clone(GitCloudRequest request) throws GitAPIException {
+  public static Git clone(GitCloneRequest request) throws GitAPIException {
     try {
       CloneCommand cloneCommand =
           Git.cloneRepository().setURI(request.getUrl()).setDirectory(request.getStoreDir());
@@ -195,7 +195,7 @@ public class GitUtils {
 
   @Getter
   @Setter
-  public static class GitCloudRequest extends GitGetRequest {
+  public static class GitCloneRequest extends GitGetRequest {
     private File storeDir;
     private String branches;
   }
