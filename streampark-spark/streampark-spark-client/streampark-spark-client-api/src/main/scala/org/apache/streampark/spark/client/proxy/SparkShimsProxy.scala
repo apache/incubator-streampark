@@ -135,7 +135,7 @@ object SparkShimsProxy extends Logger {
             if (INCLUDE_PATTERN.matcher(jarName).matches()) {
               addShimUrl(jar)
               logInfo(s"Include jar lib: $jarName")
-            } else if (jarName.matches(s"^streampark-.*_$scalaVersion.*$$")) {
+            } else if (jarName.matches(s"^streampark-(?!flink).*_$scalaVersion.*$$")) {
               addShimUrl(jar)
               logInfo(s"Include streampark lib: $jarName")
             }

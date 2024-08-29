@@ -452,7 +452,7 @@ public class SparkApplicationActionServiceImpl
                 sparkUserJar = resource.getFilePath();
                 break;
 
-            case CUSTOM_CODE:
+            case SPARK_JAR:
                 if (application.isUploadJob()) {
                     appConf = applicationConfig == null
                         ? null

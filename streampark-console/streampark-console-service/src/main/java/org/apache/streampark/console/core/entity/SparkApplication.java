@@ -386,35 +386,36 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
+    public boolean isSparkOnYarnJob() {
+        return SparkExecutionMode.YARN_CLUSTER.getMode() == (this.getExecutionMode())
+            || SparkExecutionMode.YARN_CLIENT.getMode() == (this.getExecutionMode());
+    }
+
+    @JsonIgnore
     public boolean isSparkSqlJob() {
         return SparkDevelopmentMode.SPARK_SQL.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
-    public boolean isCustomCodeJob() {
-        return SparkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
+    public boolean isSparkJarJob() {
+        return SparkDevelopmentMode.SPARK_JAR.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
-    public boolean isCustomCodeOrSparkSqlJob() {
-        return isSparkSqlJob() || isCustomCodeJob();
-    }
-
-    @JsonIgnore
-    public boolean isCustomCodeOrPySparkJob() {
-        return SparkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
+    public boolean isSparkJarOrPySparkJob() {
+        return SparkDevelopmentMode.SPARK_JAR.getMode().equals(this.getJobType())
             || SparkDevelopmentMode.PYSPARK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isUploadJob() {
-        return isCustomCodeOrPySparkJob()
+        return isSparkJarOrPySparkJob()
             && ResourceFromEnum.UPLOAD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore
     public boolean isCICDJob() {
-        return isCustomCodeOrPySparkJob()
+        return isSparkJarOrPySparkJob()
             && ResourceFromEnum.CICD.getValue().equals(this.getResourceFrom());
     }
 
