@@ -25,10 +25,8 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
-import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.{ApplicationId, FinalApplicationStatus}
 import org.apache.hadoop.yarn.util.ConverterUtils
 

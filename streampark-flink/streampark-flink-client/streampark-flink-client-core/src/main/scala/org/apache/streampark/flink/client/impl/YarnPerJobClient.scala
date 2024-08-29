@@ -24,7 +24,7 @@ import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.client.program.PackagedProgram
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}

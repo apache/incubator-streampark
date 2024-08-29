@@ -19,4 +19,4 @@ package org.apache.streampark.flink.core
 import org.apache.flink.yarn.YarnClusterDescriptor
 
 class YarnClusterDescriptorWrapper(yarnClusterDescriptor: YarnClusterDescriptor)
-  extends YarnClusterDescriptorTrait(yarnClusterDescriptor) {}
+  extends YarnClusterDescriptorTrait(yarnClusterDescriptor)
