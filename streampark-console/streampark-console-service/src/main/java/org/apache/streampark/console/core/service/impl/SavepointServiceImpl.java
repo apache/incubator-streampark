@@ -159,7 +159,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     if (cpThreshold == 0) {
       String flinkConfNumRetained = flinkEnv.getFlinkConfig().getProperty(numRetainedKey);
-      int numRetainedDefaultValue = 3;
+      int numRetainedDefaultValue = 1;
       if (flinkConfNumRetained != null) {
         try {
           int value = Integer.parseInt(flinkConfNumRetained.trim());
