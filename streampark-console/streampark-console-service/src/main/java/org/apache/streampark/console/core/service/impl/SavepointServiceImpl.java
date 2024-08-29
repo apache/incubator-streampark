@@ -95,6 +95,11 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
+  private static final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
+
+  private static final String MAX_RETAINED_CHECKPOINTS_NEW_KEY =
+      "execution.checkpointing.num-retained";
+
   private static final int CPU_NUM = Math.max(2, Runtime.getRuntime().availableProcessors());
 
   private final ExecutorService flinkTriggerExecutor =
@@ -133,6 +138,13 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(numRetainedKey);
 
+    if (StringUtils.isBlank(numRetainedFromDynamicProp)) {
+      // for flink 1.20
+      numRetainedFromDynamicProp =
+          PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+              .get(MAX_RETAINED_CHECKPOINTS_NEW_KEY);
+    }
+
     int cpThreshold = 0;
     if (numRetainedFromDynamicProp != null) {
       try {
@@ -141,17 +153,17 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
           cpThreshold = value;
         } else {
           log.warn(
-              "this value of dynamicProperties key: state.checkpoints.num-retained is invalid, must be gt 0");
+              "this value of dynamicProperties key: state.checkpoints.num-retained or execution.checkpointing.num-retained is invalid, must be gt 0");
         }
       } catch (NumberFormatException e) {
         log.warn(
-            "this value of dynamicProperties key: state.checkpoints.num-retained invalid, must be number");
+            "this value of dynamicProperties key: state.checkpoints.num-retained or execution.checkpointing.num-retained invalid, must be number");
       }
     }
 
     if (cpThreshold == 0) {
       String flinkConfNumRetained = flinkEnv.getFlinkConfig().getProperty(numRetainedKey);
-      int numRetainedDefaultValue = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.defaultValue();
+      int numRetainedDefaultValue = 1;
       if (flinkConfNumRetained != null) {
         try {
           int value = Integer.parseInt(flinkConfNumRetained.trim());
@@ -160,13 +172,13 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
           } else {
             cpThreshold = numRetainedDefaultValue;
             log.warn(
-                "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be gt 0, default value: {} will be use",
+                "the value of key: state.checkpoints.num-retained or execution.checkpointing.num-retained in flink-conf.yaml is invalid, must be gt 0, default value: {} will be use",
                 numRetainedDefaultValue);
           }
         } catch (NumberFormatException e) {
           cpThreshold = numRetainedDefaultValue;
           log.warn(
-              "the value of key: state.checkpoints.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be use",
+              "the value of key: state.checkpoints.num-retained or execution.checkpointing.num-retained in flink-conf.yaml is invalid, must be number, flink env: {}, default value: {} will be use",
               flinkEnv.getFlinkHome(),
               flinkConfNumRetained);
         }
@@ -232,6 +244,13 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
             .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
 
+    if (StringUtils.isBlank(savepointPath)) {
+      // for flink 1.20
+      savepointPath =
+          PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
+              .get(SAVEPOINT_DIRECTORY_NEW_KEY);
+    }
+
     // Application conf configuration has the second priority. If it is a streampark|flinksql type
     // task,
     // see if Application conf is configured when the task is defined, if checkpoints are configured
@@ -244,6 +263,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
           Map<String, String> map = applicationConfig.readConfig();
           if (FlinkUtils.isCheckpointEnabled(map)) {
             savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+            if (StringUtils.isBlank(savepointPath)) {
+              // for flink 1.20
+              savepointPath = map.get(SAVEPOINT_DIRECTORY_NEW_KEY);
+            }
           }
         }
       }
@@ -264,6 +287,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         Map<String, String> config = cluster.getFlinkConfig();
         if (!config.isEmpty()) {
           savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+          if (StringUtils.isBlank(savepointPath)) {
+            // for flink 1.20
+            savepointPath = config.get(SAVEPOINT_DIRECTORY_NEW_KEY);
+          }
         }
       }
     }
@@ -274,6 +301,11 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
       FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
       savepointPath =
           flinkEnv.getFlinkConfig().getProperty(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+
+      if (StringUtils.isBlank(savepointPath)) {
+        // for flink 1.20
+        savepointPath = flinkEnv.getFlinkConfig().getProperty(SAVEPOINT_DIRECTORY_NEW_KEY);
+      }
     }
 
     return savepointPath;
