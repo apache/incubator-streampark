@@ -19,6 +19,10 @@ package org.apache.streampark.console.core.mapper;
 
 import org.apache.streampark.console.core.entity.Savepoint;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SavepointMapper extends BaseMapper<Savepoint> {}
+public interface SavepointMapper extends BaseMapper<Savepoint> {
+  Savepoint findLatestByTime(@Param("appId") Long appId);
+}
