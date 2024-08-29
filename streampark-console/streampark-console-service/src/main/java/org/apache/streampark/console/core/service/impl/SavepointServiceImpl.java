@@ -232,7 +232,11 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         new LambdaQueryWrapper<Savepoint>()
             .eq(Savepoint::getAppId, id)
             .eq(Savepoint::getLatest, true);
-    return this.getOne(queryWrapper);
+    Savepoint savepoint = this.baseMapper.selectOne(queryWrapper);
+    if (savepoint == null) {
+      savepoint = this.baseMapper.findLatestByTime(id);
+    }
+    return savepoint;
   }
 
   @Override

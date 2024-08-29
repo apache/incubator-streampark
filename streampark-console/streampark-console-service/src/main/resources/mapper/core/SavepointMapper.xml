@@ -26,4 +26,12 @@
         <result column="trigger_time" jdbcType="DATE" property="triggerTime"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
+
+    <select id="findLatestByTime" resultType="org.apache.streampark.console.core.entity.Savepoint">
+        select * from t_flink_savepoint
+        where app_id = #{appId}
+        order by trigger_time desc
+        limit 1;
+    </select>
+
 </mapper>
