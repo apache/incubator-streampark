@@ -29,7 +29,7 @@ class YarnClusterDescriptorWrapper(yarnClusterDescriptor: YarnClusterDescriptor)
   extends YarnClusterDescriptorTrait(yarnClusterDescriptor) {
 
   override def addShipFiles(input: util.List[File]) = {
-    val f = input.map(c => new Path(c.toURI)).asJava
+    val f = input.map(c => new Path(c.toURI))
     yarnClusterDescriptor.addShipFiles(f)
   }
 }
