@@ -33,7 +33,3 @@
 -XX:+UseGCLogFileRotation
 -XX:GCLogFileSize=50M
 -XX:NumberOfGCLogFiles=10
-
-# solved jdk1.8+ dynamic loading of resources to the classpath issue, if jdk > 1.8, you can enable this parameter
-#--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED
-
