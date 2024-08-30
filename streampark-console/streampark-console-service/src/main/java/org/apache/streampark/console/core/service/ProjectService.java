@@ -62,4 +62,6 @@ public interface ProjectService extends IService<Project> {
   List<String> getAllBranches(Project project);
 
   GitAuthorizedError gitCheck(Project project);
+
+  List<String> getAllTags(Project project);
 }

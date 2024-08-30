@@ -322,7 +322,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       request.setUsername(project.getUserName());
       request.setPassword(project.getPassword());
       request.setPrivateKey(project.getPrvkeyPath());
-      return GitUtils.getBranchList(request);
+      return GitUtils.getBranches(request);
     } catch (Exception e) {
       throw new ApiDetailException(e);
     }
@@ -336,7 +336,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       request.setUsername(project.getUserName());
       request.setPassword(project.getPassword());
       request.setPrivateKey(project.getPrvkeyPath());
-      GitUtils.getBranchList(request);
+      GitUtils.getBranches(request);
       return GitAuthorizedError.SUCCESS;
     } catch (Exception e) {
       String err = e.getMessage();
@@ -346,6 +346,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return GitAuthorizedError.REQUIRED;
       }
       return GitAuthorizedError.UNKNOW;
+    }
+  }
+
+  @Override
+  public List<String> getAllTags(Project project) {
+    try {
+      GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+      request.setUrl(project.getUrl());
+      request.setUsername(project.getUserName());
+      request.setPassword(project.getPassword());
+      request.setPrivateKey(project.getPrvkeyPath());
+      return GitUtils.getTags(request);
+    } catch (Exception e) {
+      throw new ApiDetailException(e);
     }
   }
 

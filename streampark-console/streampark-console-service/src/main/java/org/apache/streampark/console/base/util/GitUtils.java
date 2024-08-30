@@ -53,13 +53,22 @@ public class GitUtils {
     try {
       CloneCommand cloneCommand =
           Git.cloneRepository().setURI(request.getUrl()).setDirectory(request.getStoreDir());
-      if (request.getBranches() != null) {
-        cloneCommand.setBranch(Constants.R_HEADS + request.getBranches());
-        cloneCommand.setBranchesToClone(
-            Collections.singletonList(Constants.R_HEADS + request.getBranches()));
-      }
       setCredentials(cloneCommand, request);
-      return cloneCommand.call();
+      if (StringUtils.isNotBlank(request.getBranch())) {
+        cloneCommand.setBranch(Constants.R_HEADS + request.getBranch());
+        cloneCommand.setBranchesToClone(
+            Collections.singletonList(Constants.R_HEADS + request.getBranch()));
+      }
+
+      Git git = cloneCommand.call();
+      if (StringUtils.isNotBlank(request.getBranch())) {
+        git.checkout().setName(request.getBranch()).call();
+      } else if (StringUtils.isNotBlank(request.getTag())) {
+        git.checkout().setName(request.getTag()).call();
+      } else {
+        throw new IllegalArgumentException("git clone failed, No tag or branch specified");
+      }
+      return git;
     } catch (Exception e) {
       if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
         String url = httpUrlToSSH(request.getUrl());
@@ -70,7 +79,7 @@ public class GitUtils {
     }
   }
 
-  public static List<String> getBranchList(GitGetRequest request) throws GitAPIException {
+  public static List<String> getBranches(GitGetRequest request) throws GitAPIException {
     try {
       LsRemoteCommand command = Git.lsRemoteRepository().setRemote(request.getUrl()).setHeads(true);
       setCredentials(command, request);
@@ -88,7 +97,31 @@ public class GitUtils {
       if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
         String url = httpUrlToSSH(request.getUrl());
         request.setUrl(url);
-        return getBranchList(request);
+        return getBranches(request);
+      }
+      throw e;
+    }
+  }
+
+  public static List<String> getTags(GitGetRequest request) throws GitAPIException {
+    try {
+      LsRemoteCommand command = Git.lsRemoteRepository().setRemote(request.getUrl()).setTags(true);
+      setCredentials(command, request);
+      Collection<Ref> refList = command.call();
+      List<String> branchList = new ArrayList<>(4);
+      for (Ref ref : refList) {
+        String refName = ref.getName();
+        if (refName.startsWith(Constants.R_TAGS)) {
+          String branchName = refName.replace(Constants.R_TAGS, "");
+          branchList.add(branchName);
+        }
+      }
+      return branchList;
+    } catch (Exception e) {
+      if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
+        String url = httpUrlToSSH(request.getUrl());
+        request.setUrl(url);
+        return getTags(request);
       }
       throw e;
     }
@@ -197,6 +230,7 @@ public class GitUtils {
   @Setter
   public static class GitCloneRequest extends GitGetRequest {
     private File storeDir;
-    private String branches;
+    private String branch;
+    private String tag;
   }
 }
