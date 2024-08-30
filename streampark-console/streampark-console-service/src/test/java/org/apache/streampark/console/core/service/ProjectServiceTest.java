@@ -48,6 +48,13 @@ public class ProjectServiceTest extends SpringTestBase {
 
   @Disabled("This test case can't be runnable due to external service is not available.")
   @Test
+  void testGitTags() {
+    List<String> branches = projectService.getAllTags(project);
+    branches.forEach(System.out::println);
+  }
+
+  @Disabled("This test case can't be runnable due to external service is not available.")
+  @Test
   void testGitCheckAuth() {
     GitAuthorizedError error = projectService.gitCheck(project);
     System.out.println(error);

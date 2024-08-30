@@ -93,7 +93,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
       GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
       request.setUrl(project.getUrl());
-      request.setBranches(project.getBranches());
+      request.setBranch(project.getBranches());
       request.setStoreDir(project.getAppSource());
       request.setUsername(project.getUserName());
       request.setPassword(project.getPassword());
