@@ -131,7 +131,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         "The project is being built, update project failed.");
     project.setName(projectParam.getName());
     project.setUrl(projectParam.getUrl());
-    project.setBranches(projectParam.getBranches());
+    project.setRefs(projectParam.getRefs());
     project.setPrvkeyPath(projectParam.getPrvkeyPath());
     project.setUserName(projectParam.getUserName());
     project.setPassword(projectParam.getPassword());

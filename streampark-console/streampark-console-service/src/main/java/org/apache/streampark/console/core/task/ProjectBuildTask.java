@@ -93,7 +93,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
 
       GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
       request.setUrl(project.getUrl());
-      request.setBranch(project.getBranches());
+      request.setRefs(project.getRefs());
       request.setStoreDir(project.getAppSource());
       request.setUsername(project.getUserName());
       request.setPassword(project.getPassword());
@@ -114,8 +114,8 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     } catch (Exception e) {
       fileLogger.error(
           String.format(
-              "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
-              project.getName(), project.getBranches(), e));
+              "[StreamPark] project [%s] refs [%s] git clone failed, err: %s",
+              project.getName(), project.getRefs(), e));
       fileLogger.error(String.format("project %s clone error ", project.getName()), e);
       return false;
     }

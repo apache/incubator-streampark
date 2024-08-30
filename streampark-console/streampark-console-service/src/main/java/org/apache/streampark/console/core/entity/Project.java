@@ -61,8 +61,8 @@ public class Project implements Serializable {
 
   private String url;
 
-  /** git branch */
-  private String branches;
+  /** git branch or tag */
+  private String refs;
 
   private Date lastBuild;
 
@@ -131,7 +131,16 @@ public class Project implements Serializable {
   }
 
   private String getSourceDirName() {
-    String branches = this.getBranches() == null ? "main" : this.getBranches();
+    String branches = "main";
+    if (StringUtils.isNotBlank(this.refs)) {
+      if (this.refs.startsWith(Constants.R_HEADS)) {
+        branches = this.refs.replace(Constants.R_HEADS, "");
+      } else if (this.refs.startsWith(Constants.R_TAGS)) {
+        branches = this.refs.replace(Constants.R_TAGS, "");
+      } else {
+        branches = this.refs;
+      }
+    }
     String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
     return rootName.concat("-").concat(branches);
   }
@@ -269,15 +278,15 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getLog4BuildStart() {
     return String.format(
-        "%sproject : %s\nbranches: %s\ncommand : %s\n\n",
-        getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
+        "%sproject : %s\nrefs: %s\ncommand : %s\n\n",
+        getLogHeader("maven install"), getName(), getRefs(), getMavenArgs());
   }
 
   @JsonIgnore
   public String getLog4CloneStart() {
     return String.format(
-        "%sproject  : %s\nbranches : %s\nworkspace: %s\n\n",
-        getLogHeader("git clone"), getName(), getBranches(), getAppSource());
+        "%sproject  : %s\nrefs : %s\nworkspace: %s\n\n",
+        getLogHeader("git clone"), getName(), getRefs(), getAppSource());
   }
 
   @JsonIgnore

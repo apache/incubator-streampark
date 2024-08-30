@@ -19,3 +19,6 @@ use streampark;
 
 ALTER TABLE `t_external_link`
     MODIFY `link_url` text collate utf8mb4_general_ci default null;
+
+ALTER TABLE `t_flink_project`
+    change column `branches` `refs` varchar(255) collate utf8mb4_general_ci default null;

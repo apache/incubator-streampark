@@ -165,7 +165,7 @@ create table if not exists `t_flink_project` (
   `team_id` bigint not null,
   `name` varchar(255) default null,
   `url` varchar(255) default null,
-  `branches` varchar(64) default null,
+  `refs` varchar(255) default null,
   `user_name` varchar(64) default null,
   `password` varchar(64) default null,
   `prvkey_path` varchar(128) default null,

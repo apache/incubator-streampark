@@ -43,8 +43,8 @@ export default {
     userNamePlaceholder: 'UserName for this project',
     password: 'Password',
     passwordPlaceholder: 'Password for this project',
-    branches: 'Branches',
-    branchesPlaceholder: 'Select a branch',
+    branches: 'Branch/Tag',
+    branchesPlaceholder: 'Select by branch or tag',
     pom: 'POM',
     pomPlaceholder:
       'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml',

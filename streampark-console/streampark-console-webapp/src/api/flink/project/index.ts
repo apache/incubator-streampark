@@ -64,7 +64,7 @@ export function gitCheck(data: Recordable) {
  * @param data
  * @returns
  */
-export function fetchBranches(data: Recordable): Promise<string[]> {
+export function fetchBranches(data: Recordable): Promise<AxiosResponse<any>> {
   return defHttp.post({
     url: Api.BRANCHES,
     data,

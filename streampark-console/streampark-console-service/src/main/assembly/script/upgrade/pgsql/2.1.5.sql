@@ -17,3 +17,10 @@
 
 ALTER TABLE "public"."t_external_link"
     ALTER COLUMN "link_url" TYPE text collate "pg_catalog"."default";
+
+ALTER TABLE "public"."t_flink_project"
+    ALTER COLUMN "branches" TYPE varchar(255) collate "pg_catalog"."default";
+
+ALTER TABLE "public"."t_flink_project"
+    rename column "branches" to "refs";
+

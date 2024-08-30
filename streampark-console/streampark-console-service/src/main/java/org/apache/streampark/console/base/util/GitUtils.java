@@ -59,7 +59,6 @@ public class GitUtils {
         cloneCommand.setBranchesToClone(
             Collections.singletonList(Constants.R_HEADS + request.getBranch()));
       }
-
       Git git = cloneCommand.call();
       if (StringUtils.isNotBlank(request.getBranch())) {
         git.checkout().setName(request.getBranch()).call();
@@ -70,7 +69,7 @@ public class GitUtils {
       }
       return git;
     } catch (Exception e) {
-      if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
+      if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
         String url = httpUrlToSSH(request.getUrl());
         request.setUrl(url);
         return clone(request);
@@ -94,7 +93,7 @@ public class GitUtils {
       }
       return branchList;
     } catch (Exception e) {
-      if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
+      if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
         String url = httpUrlToSSH(request.getUrl());
         request.setUrl(url);
         return getBranches(request);
@@ -108,17 +107,17 @@ public class GitUtils {
       LsRemoteCommand command = Git.lsRemoteRepository().setRemote(request.getUrl()).setTags(true);
       setCredentials(command, request);
       Collection<Ref> refList = command.call();
-      List<String> branchList = new ArrayList<>(4);
+      List<String> tagList = new ArrayList<>(4);
       for (Ref ref : refList) {
         String refName = ref.getName();
         if (refName.startsWith(Constants.R_TAGS)) {
           String branchName = refName.replace(Constants.R_TAGS, "");
-          branchList.add(branchName);
+          tagList.add(branchName);
         }
       }
-      return branchList;
+      return tagList;
     } catch (Exception e) {
-      if (e instanceof InvalidRemoteException && request.getAuthType() == GitAuthType.HTTP) {
+      if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
         String url = httpUrlToSSH(request.getUrl());
         request.setUrl(url);
         return getTags(request);
@@ -141,7 +140,7 @@ public class GitUtils {
 
   private static void setCredentials(
       TransportCommand<?, ?> transportCommand, GitAuthRequest request) {
-    switch (request.authType) {
+    switch (request.connType) {
       case HTTP:
         if (!StringUtils.isAllEmpty(request.getUsername(), request.getPassword())) {
           UsernamePasswordCredentialsProvider credentialsProvider =
@@ -194,7 +193,7 @@ public class GitUtils {
   }
 
   @Getter
-  public enum GitAuthType {
+  public enum GitConnType {
     HTTP,
     SSH
   }
@@ -202,7 +201,7 @@ public class GitUtils {
   @Getter
   @Setter
   public static class GitAuthRequest {
-    private GitAuthType authType;
+    private GitConnType connType;
     private String username;
     private String password;
     private String privateKey;
@@ -219,9 +218,9 @@ public class GitUtils {
       }
       this.url = url;
       if (GitUtils.isSshRepositoryUrl(url)) {
-        setAuthType(GitAuthType.SSH);
+        setConnType(GitConnType.SSH);
       } else {
-        setAuthType(GitAuthType.HTTP);
+        setConnType(GitConnType.HTTP);
       }
     }
   }
@@ -232,5 +231,21 @@ public class GitUtils {
     private File storeDir;
     private String branch;
     private String tag;
+
+    public void setRefs(String refs) {
+      if (StringUtils.isNotBlank(refs)) {
+        if (!refs.startsWith(Constants.R_REFS)) {
+          this.branch = refs;
+          return;
+        }
+        if (refs.startsWith(Constants.R_HEADS)) {
+          this.branch = refs.replace(Constants.R_HEADS, "");
+          return;
+        }
+        if (refs.startsWith(Constants.R_TAGS)) {
+          this.tag = refs.replace(Constants.R_TAGS, "");
+        }
+      }
+    }
   }
 }
