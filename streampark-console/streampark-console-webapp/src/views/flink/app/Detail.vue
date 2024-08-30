@@ -25,7 +25,7 @@
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
-  import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
+  import { onUnmounted, reactive, h, ref, onMounted, computed } from 'vue';
   import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';

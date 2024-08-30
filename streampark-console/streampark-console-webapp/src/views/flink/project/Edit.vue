@@ -63,7 +63,7 @@
         url: values.url,
         repository: values.repository,
         type: values.type,
-        branches: values.branches,
+        refs: values.refs,
         userName: values.userName,
         password: values.password,
         prvkeyPath: values.prvkeyPath,

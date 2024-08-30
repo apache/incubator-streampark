@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +107,11 @@ public class ProjectController {
   @PermissionScope(team = "#project.teamId")
   public RestResponse branches(Project project) {
     List<String> branches = projectService.getAllBranches(project);
-    return RestResponse.success().data(branches);
+    List<String> tags = projectService.getAllTags(project);
+    Map<String, List<String>> refs = new HashMap<>();
+    refs.put("tags", tags);
+    refs.put("branches", branches);
+    return RestResponse.success().data(refs);
   }
 
   @PostMapping("delete")

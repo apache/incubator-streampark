@@ -20,7 +20,7 @@
   });
 </script>
 <script lang="ts" setup name="AppView">
-  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
+  import { defineComponent, nextTick, ref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
