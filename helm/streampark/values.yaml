@@ -44,6 +44,10 @@ spec:
       {
         name: LC_ALL,
         value: en_US.UTF-8
+      },
+      {
+        name: HADOOP_HOME,
+        value: /opt/hadoop
       }
     ]
 
