@@ -124,7 +124,7 @@ export default {
     copyStartcURL: 'App Start',
     copyCancelcURL: 'App Cancel',
     apiDocCenter: 'Api Doc Center',
-    nullAccessToken: "The current user have no token, please contact the admin to add",
+    nullAccessToken: 'The current user have no token, please contact the admin to add',
     invalidAccessToken: 'access token is invalid, please contact the admin',
     invalidTokenUser: 'the user is locked, please contact the admin',
     detailTab: {

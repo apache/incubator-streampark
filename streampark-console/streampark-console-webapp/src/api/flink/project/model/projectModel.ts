@@ -22,7 +22,7 @@ export interface ProjectRecord {
   id: string;
   name: string;
   url: string;
-  branches: string;
+  refs: string;
   lastBuild?: any;
   userName?: any;
   password?: any;

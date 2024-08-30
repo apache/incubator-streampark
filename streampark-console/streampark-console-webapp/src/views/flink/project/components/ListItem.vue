@@ -49,8 +49,17 @@
       </li>
       <li class="list-content_item">
         <span>{{ t('flink.project.form.branches') }}</span>
-        <p>
-          <Tag color="blue" style="border-radius: 4px">{{ item.branches }}</Tag>
+        <p v-if="item.refs != null">
+          <a-tag
+            v-if="item.refs.startsWith('refs/tags/') > 0"
+            color="#108ee9"
+            style="border-radius: 4px"
+          >
+            {{ item.refs.replace('refs/tags/', '') }}
+          </a-tag>
+          <a-tag v-else color="#2db7f5" style="border-radius: 4px">
+            {{ item.refs.replace('refs/heads/', '') }}
+          </a-tag>
         </p>
       </li>
       <li class="list-content_item build_time">

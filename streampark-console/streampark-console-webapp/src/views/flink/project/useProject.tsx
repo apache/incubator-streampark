@@ -276,21 +276,24 @@ export const useProject = () => {
               return {
                 label: c,
                 value: 'refs/heads/' + c,
-              }
-            })
+              };
+            });
             const tags = (resp['tags'] || []).map((c: string) => {
               return {
                 label: c,
                 value: 'refs/tags/' + c,
-              }
-            })
-            branchList.value = [{
-              'label': 'Branches',
-              options: branches
-            },{
-              'label': 'Tags',
-              options: tags
-            }]
+              };
+            });
+            branchList.value = [
+              {
+                label: 'Branches',
+                options: branches,
+              },
+              {
+                label: 'Tags',
+                options: tags,
+              },
+            ];
           }
         }
       }
