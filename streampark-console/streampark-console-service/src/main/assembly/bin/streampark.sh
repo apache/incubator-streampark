@@ -284,6 +284,7 @@ JAVA_OPTS=${JAVA_OPTS:-"${JVM_ARGS}"}
 JAVA_OPTS="$JAVA_OPTS -XX:HeapDumpPath=${APP_HOME}/logs/dump.hprof"
 JAVA_OPTS="$JAVA_OPTS -Xloggc:${APP_HOME}/logs/gc.log"
 [[ $MAJOR_VER -gt $MIN_VERSION ]] && JAVA_OPTS="$JAVA_OPTS --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED"
+[[ $MAJOR_VER -ge 17 ]] && JAVA_OPTS="$JAVA_OPTS -Djava.security.manager=allow"
 
 SERVER_PORT=$($_RUNJAVA -cp "$APP_LIB/*" $BASH_UTIL --get_yaml "server.port" "$CONFIG")
 # ----- Execute The Requested Command -----------------------------------------
@@ -415,8 +416,8 @@ start() {
   eval $NOHUP $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
-    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     $APP_MAIN "$@" >> "$APP_OUT" 2>&1 "&"
 
     local PID=$!
@@ -481,8 +482,8 @@ start_docker() {
   $_RUNJAVA $JAVA_OPTS \
     -classpath "$APP_CLASSPATH" \
     -Dapp.home="${APP_HOME}" \
-    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     -Djava.io.tmpdir="$APP_TMPDIR" \
+    -Dlogging.config="${APP_CONF}/logback-spring.xml" \
     $APP_MAIN
 
 }

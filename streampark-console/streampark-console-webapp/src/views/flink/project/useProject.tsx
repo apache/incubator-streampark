@@ -124,6 +124,26 @@ export const useProject = () => {
         },
       },
       {
+        field: 'refs',
+        label: t('flink.project.form.branches'),
+        component: 'Select',
+        required: true,
+        componentProps: ({ formModel }) => {
+          return {
+            showSearch: true,
+            filterOption,
+            placeholder: t('flink.project.form.branchesPlaceholder'),
+            options: unref(branchList),
+            onDropdownVisibleChange: (open: boolean) => {
+              console.log('open', open);
+              if (open) {
+                handleBranches(formModel);
+              }
+            },
+          };
+        },
+      },
+      {
         field: 'prvkeyPath',
         label: t('flink.project.form.prvkeyPath'),
         component: 'Input',
@@ -149,26 +169,6 @@ export const useProject = () => {
         componentProps: {
           placeholder: t('flink.project.form.passwordPlaceholder'),
           autocomplete: 'new-password',
-        },
-      },
-      {
-        field: 'refs',
-        label: t('flink.project.form.branches'),
-        component: 'Select',
-        required: true,
-        componentProps: ({ formModel }) => {
-          return {
-            showSearch: true,
-            filterOption,
-            placeholder: t('flink.project.form.branchesPlaceholder'),
-            options: unref(branchList),
-            onDropdownVisibleChange: (open: boolean) => {
-              console.log('open', open);
-              if (open) {
-                handleBranches(formModel);
-              }
-            },
-          };
         },
       },
       {
