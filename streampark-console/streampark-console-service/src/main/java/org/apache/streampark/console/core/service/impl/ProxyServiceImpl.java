@@ -57,6 +57,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Nonnull;
@@ -237,9 +238,7 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   private ResponseEntity<?> proxyRequest(HttpServletRequest request, String url) throws Exception {
-    HttpEntity<?> requestEntity = getRequestEntity(request, url);
-    return proxyRestTemplate.exchange(
-        url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
+    return proxy(request, url, getRequestEntity(request, url));
   }
 
   private ResponseEntity<?> proxyYarnRequest(HttpServletRequest request, String url)
@@ -249,12 +248,19 @@ public class ProxyServiceImpl implements ProxyService {
       HttpEntity<?> requestEntity = getRequestEntity(request, url);
       setRestTemplateCredentials(ugi.getShortUserName());
       return ugi.doAs(
-          (PrivilegedExceptionAction<ResponseEntity<?>>)
-              () ->
-                  proxyRestTemplate.exchange(
-                      url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class));
+          (PrivilegedExceptionAction<ResponseEntity<?>>) () -> proxy(request, url, requestEntity));
     } else {
       return proxyRequest(request, url);
+    }
+  }
+
+  private ResponseEntity<?> proxy(
+      HttpServletRequest request, String url, HttpEntity<?> requestEntity) {
+    try {
+      return proxyRestTemplate.exchange(
+          url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
+    } catch (RestClientException e) {
+      return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
     }
   }
 

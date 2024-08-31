@@ -40,31 +40,34 @@ public class ProxyController {
 
   @Autowired private ProxyService proxyService;
 
-  @GetMapping("flink/{id}/**")
-  @RequiresPermissions("app:view")
-  public ResponseEntity<?> proxyFlink(HttpServletRequest request, @PathVariable("id") Long id)
+  @GetMapping("{type}/{id}/assets/**")
+  public ResponseEntity<?> proxyFlinkAssets(
+      HttpServletRequest request, @PathVariable("type") String type, @PathVariable("id") Long id)
       throws Exception {
-    return proxyService.proxyFlink(request, id);
+    return proxy(type, request, id);
   }
 
-  @GetMapping("cluster/{id}/**")
+  @GetMapping("{type}/{id}/**")
   @RequiresPermissions("app:view")
-  public ResponseEntity<?> proxyCluster(HttpServletRequest request, @PathVariable("id") Long id)
+  public ResponseEntity<?> proxyFlink(
+      HttpServletRequest request, @PathVariable("type") String type, @PathVariable("id") Long id)
       throws Exception {
-    return proxyService.proxyCluster(request, id);
+    return proxy(type, request, id);
   }
 
-  @GetMapping("history/{id}/**")
-  @RequiresPermissions("app:view")
-  public ResponseEntity<?> proxyHistory(HttpServletRequest request, @PathVariable("id") Long id)
+  private ResponseEntity<?> proxy(String type, HttpServletRequest request, Long id)
       throws Exception {
-    return proxyService.proxyHistory(request, id);
-  }
-
-  @GetMapping("yarn/{id}/**")
-  @RequiresPermissions("app:view")
-  public ResponseEntity<?> proxyYarn(HttpServletRequest request, @PathVariable("id") Long logId)
-      throws Exception {
-    return proxyService.proxyYarn(request, logId);
+    switch (type) {
+      case "flink":
+        return proxyService.proxyFlink(request, id);
+      case "cluster":
+        return proxyService.proxyCluster(request, id);
+      case "history":
+        return proxyService.proxyHistory(request, id);
+      case "yarn":
+        return proxyService.proxyYarn(request, id);
+      default:
+        return ResponseEntity.notFound().build();
+    }
   }
 }

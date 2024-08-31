@@ -195,11 +195,7 @@
 
   /* view */
   async function handleJobView(app: AppListRecord) {
-    // Task is running, restarting, in savePoint
-    if (
-      [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(app.state) ||
-      app['optionState'] === OptionStateEnum.SAVEPOINTING
-    ) {
+    if (app['appControl']['allowView'] === true) {
       await handleView(app);
     }
   }
@@ -258,9 +254,7 @@
           <span
             class="link"
             :class="{
-              'cursor-pointer':
-                [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(record.state) ||
-                record['optionState'] === OptionStateEnum.SAVEPOINTING,
+              'cursor-pointer': record['appControl']['allowView'] === true,
             }"
             @click="handleJobView(record)"
           >
