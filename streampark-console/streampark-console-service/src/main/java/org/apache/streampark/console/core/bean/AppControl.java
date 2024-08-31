@@ -34,4 +34,7 @@ public class AppControl {
 
   /** allow to build the application */
   private boolean allowBuild;
+
+  /** allow to view application web ui */
+  private boolean allowView;
 }

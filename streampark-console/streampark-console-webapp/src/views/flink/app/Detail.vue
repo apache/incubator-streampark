@@ -182,7 +182,7 @@
   });
 
   const appNotRunning = computed(
-    () => app.state !== AppStateEnum.RUNNING || (yarn.value === null && app.flinkRestUrl === null),
+    () => app['appControl']['allowView'] === false || (yarn.value === null && app.flinkRestUrl === null),
   );
 </script>
 <template>

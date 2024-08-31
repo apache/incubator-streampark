@@ -558,16 +558,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
           }
 
           // 4) appControl
-          AppControl appControl =
-              new AppControl()
-                  .setAllowBuild(
-                      record.getBuildStatus() == null
-                          || !PipelineStatus.running.getCode().equals(record.getBuildStatus()))
-                  .setAllowStart(
-                      !record.shouldBeTrack()
-                          && PipelineStatus.success.getCode().equals(record.getBuildStatus()))
-                  .setAllowStop(record.isRunning());
-          record.setAppControl(appControl);
+          record.setAppControl(buildAppControl(record));
         });
 
     return page;
@@ -1264,7 +1255,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       }
     }
     application.setByHotParams();
+    application.setAppControl(buildAppControl(application));
     return application;
+  }
+
+  private AppControl buildAppControl(Application app) {
+    return new AppControl()
+        .setAllowBuild(
+            app.getBuildStatus() == null
+                || !PipelineStatus.running.getCode().equals(app.getBuildStatus()))
+        .setAllowStart(
+            !app.shouldBeTrack() && PipelineStatus.success.getCode().equals(app.getBuildStatus()))
+        .setAllowStop(app.isRunning())
+        .setAllowView(
+            (!FlinkAppState.isEndState(app.getState()))
+                || OptionState.SAVEPOINTING.getValue() == app.getOptionState());
   }
 
   @Override
