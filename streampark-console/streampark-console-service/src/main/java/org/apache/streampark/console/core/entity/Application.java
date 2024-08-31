@@ -323,6 +323,7 @@ public class Application implements Serializable {
       case FINISHED:
       case FAILED:
       case CANCELED:
+      case KILLED:
       case TERMINATED:
       case POS_TERMINATED:
       case LOST:

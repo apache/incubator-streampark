@@ -54,6 +54,7 @@ export const stateMap = {
   [AppStateEnum.FAILED]: { color: '#f5222d', title: t('flink.app.runState.failed') },
   [AppStateEnum.CANCELLING]: { color: '#faad14', title: t('flink.app.runState.cancelling') },
   [AppStateEnum.CANCELED]: { color: '#fa8c16', title: t('flink.app.runState.canceled') },
+  [AppStateEnum.KILLED]: { color: '#fa8c16', title: t('flink.app.runState.canceled') },
   [AppStateEnum.FINISHED]: { color: '#1890ff', title: t('flink.app.runState.finished') },
   [AppStateEnum.SUSPENDED]: { color: '#722ed1', title: t('flink.app.runState.suspended') },
   [AppStateEnum.RECONCILING]: {
