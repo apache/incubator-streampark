@@ -52,6 +52,7 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.enums.TaskActionEnum;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -63,6 +64,7 @@ import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
+import org.apache.streampark.console.core.service.TaskActionService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -176,6 +178,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     private ResourceService resourceService;
 
     @Autowired
+    private TaskActionService taskActionService;
+
+    @Autowired
     private FlinkClusterWatcher flinkClusterWatcher;
 
     @Autowired
@@ -190,6 +195,12 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         Application application = getById(appId);
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s not found, revoke failed.", appId));
+
+        // For HA purposes, if the task is not processed locally, save the task action and return
+        if (!taskActionService.isLocalProcessing(appId)) {
+            taskActionService.saveTaskAction(application, false, TaskActionEnum.REVOKE);
+            return;
+        }
 
         // 1) delete files that have been published to workspace
         application.getFsOperator().delete(application.getAppHome());
@@ -213,15 +224,25 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void restart(Application appParam) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the task action and return
+        if (!taskActionService.isLocalProcessing(appParam.getId())) {
+            taskActionService.saveTaskAction(appParam, false, TaskActionEnum.RESTART);
+            return;
+        }
         this.cancel(appParam);
         this.start(appParam, false);
     }
 
     @Override
     public void abort(Long id) {
+        Application application = this.baseMapper.selectApp(id);
+        // For HA purposes, if the task is not processed locally, save the task action and return
+        if (!taskActionService.isLocalProcessing(id)) {
+            taskActionService.saveTaskAction(application, false, TaskActionEnum.ABORT);
+            return;
+        }
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
         CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(id);
-        Application application = this.baseMapper.selectApp(id);
         if (application.isKubernetesModeJob()) {
             KubernetesDeploymentHelper.watchPodTerminatedLog(
                 application.getK8sNamespace(), application.getJobName(), application.getJobId());
@@ -239,6 +260,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void cancel(Application appParam) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the task action and return
+        if (!taskActionService.isLocalProcessing(appParam.getId())) {
+            taskActionService.saveTaskAction(appParam, false, TaskActionEnum.CANCEL);
+            return;
+        }
         FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
         Application application = getById(appParam.getId());
         application.setState(FlinkAppStateEnum.CANCELLING.getValue());
@@ -373,6 +399,11 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void start(Application appParam, boolean auto) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the task action and return
+        if (!taskActionService.isLocalProcessing(appParam.getId())) {
+            taskActionService.saveTaskAction(appParam, auto, TaskActionEnum.START);
+            return;
+        }
         // 1) check application
         final Application application = getById(appParam.getId());
         AssertUtils.notNull(application);

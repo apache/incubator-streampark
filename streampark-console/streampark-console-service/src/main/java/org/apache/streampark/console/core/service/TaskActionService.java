@@ -15,31 +15,31 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.task;
+package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.TaskAction;
 import org.apache.streampark.console.core.enums.TaskActionEnum;
 
 import java.util.List;
 
 /**
- * TaskManager is the interface for managing tasks.
+ * TaskActionService is the interface for managing tasks.
  */
-public interface TaskManager {
+public interface TaskActionService {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param appParam Application
-     * @param taskAction It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
+     * @param taskAction TaskAction
      */
-    void executeTaskAction(Application appParam, TaskActionEnum taskAction);
+    void executeTaskAction(TaskAction taskAction) throws Exception;
 
     /**
      * Through this interface, the watcher obtains the list of tasks that need to be monitored.
-     * @param server String
-     * @return List<Application>
+     * @param applications List<Application>
+     * @return List<Application> List of tasks that need to be monitored
      */
-    List<Application> getMonitoredTaskList(String server);
+    List<Application> getMonitoredTaskList(List<Application> applications);
 
     /**
      * This interface handles task redistribution when server nodes are added.
@@ -52,4 +52,21 @@ public interface TaskManager {
      * @param server String
      */
     void removeServerRedistribute(String server);
+
+    /**
+     * Determine whether the task is processed locally
+     *
+     * @param appId Long
+     * @return boolean
+     */
+    public boolean isLocalProcessing(Long appId);
+
+    /**
+     * Save task action
+     *
+     * @param appParam  Application
+     * @param autoStart boolean
+     * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
+     */
+    public void saveTaskAction(Application appParam, boolean autoStart, TaskActionEnum action);
 }
