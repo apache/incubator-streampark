@@ -45,13 +45,6 @@ public class ShiroConfig {
     filterChainDefinitionMap.put("/actuator/**", "anon");
     filterChainDefinitionMap.put("/h2-console/**", "anon");
 
-    filterChainDefinitionMap.put("/doc.html", "anon");
-    filterChainDefinitionMap.put("/swagger-ui.html", "anon");
-    filterChainDefinitionMap.put("/swagger-ui/**", "anon");
-    filterChainDefinitionMap.put("/swagger-resources/**", "anon");
-    filterChainDefinitionMap.put("/v3/api-docs/**", "anon");
-    filterChainDefinitionMap.put("/webjars/**", "anon");
-
     filterChainDefinitionMap.put("/passport/**", "anon");
     filterChainDefinitionMap.put("/systemName", "anon");
     filterChainDefinitionMap.put("/member/teams", "anon");
