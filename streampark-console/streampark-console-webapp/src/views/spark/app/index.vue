@@ -211,13 +211,13 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight fixed-height>
     <AppDashboard ref="appDashboardRef" />
     <BasicTable
       @register="registerTable"
       :columns="getAppColumns"
       @resize-column="onTableColumnResize"
-      class="app_list !px-0 pt-20px"
+      class="app_list !px-0 pt-20px flex flex-col"
       :formConfig="formConfig"
     >
       <template #bodyCell="{ column, record }">

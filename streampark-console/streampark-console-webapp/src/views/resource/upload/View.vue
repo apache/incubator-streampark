@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'resource:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -98,18 +98,14 @@
       @register="registerDrawer"
       @success="handleSuccess"
     />
-  </div>
+  </PageWrapper>
 </template>
-<script lang="ts">
-  export default defineComponent({
-    name: 'Resource',
-  });
-</script>
 
 <script lang="ts" setup>
-  import { defineComponent, onMounted, ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
   import UploadDrawer from './components/UploadDrawer.vue';
+  import { PageWrapper } from '/@/components/Page';
   import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema, EngineTypeEnum, ResourceTypeEnum } from './upload.data';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -128,7 +124,9 @@
   import udxfSvg from '/@/assets/icons/fx.svg';
   import jarSvg from '/@/assets/icons/jar.svg';
   import groupSvg from '/@/assets/icons/group.svg';
-
+  defineOptions({
+    name: 'Resource',
+  });
   const teamResource = ref<Array<any>>([]);
   const [registerDrawer, { openDrawer }] = useDrawer();
   const { createMessage } = useMessage();

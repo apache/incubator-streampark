@@ -15,19 +15,11 @@
   limitations under the License.
 -->
 
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
+<script lang="ts" setup name="ExternalLinkSetting">
+  import { onMounted, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
   import { useMessage } from '/@/hooks/web/useMessage';
-
-  export default defineComponent({
-    name: 'ExternalLinkSetting',
-  });
-</script>
-<script lang="ts" setup name="ExternalLinkSetting">
-  import { onMounted, ref } from 'vue';
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { ColumnsType } from 'ant-design-vue/lib/table';
   import { useModal } from '/@/components/Modal';
@@ -38,6 +30,9 @@
   import { Table, Popconfirm, Card } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/setting/externalLink';
   import { BasicTitle } from '/@/components/Basic';
+  defineOptions({
+    name: 'ExternalLinkSetting',
+  });
   const [registerLinkModal, { openModal: openLinkModal }] = useModal();
   const { Swal } = useMessage();
   const { t } = useI18n();
@@ -89,7 +84,7 @@
   const APopconfirm = Popconfirm;
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight content-background>
     <Card :bordered="false">
       <BasicTitle>{{ t('setting.externalLink.externalLinkSetting') }}</BasicTitle>
       <div v-auth="'externalLink:create'" style="margin-bottom: 20px">

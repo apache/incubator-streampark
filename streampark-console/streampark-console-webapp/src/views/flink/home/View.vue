@@ -14,14 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-  export default defineComponent({
-    name: 'FlinkEnvSetting',
-  });
-</script>
 <script lang="ts" setup name="FlinkEnvSetting">
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { onMounted, ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { SvgIcon } from '/@/components/Icon';
@@ -47,7 +41,9 @@
   import { useDrawer } from '/@/components/Drawer';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
-
+  defineOptions({
+    name: 'FlinkEnvSetting',
+  });
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
 
@@ -110,7 +106,7 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight content-background>
     <Card :bordered="false">
       <BasicTitle>{{ t('setting.flinkHome.title') }}</BasicTitle>
       <div v-auth="'project:create'">

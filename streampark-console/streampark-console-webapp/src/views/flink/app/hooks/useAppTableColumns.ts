@@ -53,8 +53,17 @@ export const useAppTableColumns = () => {
       resizable: true,
       width: unref(tableColumnWidth).jobName,
     },
-    { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion' },
-    { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
+    {
+      title: t('flink.app.flinkVersion'),
+      dataIndex: 'flinkVersion',
+      width: unref(tableColumnWidth).flinkVersion,
+    },
+    {
+      title: t('flink.app.tags'),
+      ellipsis: true,
+      dataIndex: 'tags',
+      width: unref(tableColumnWidth).tags,
+    },
     {
       title: t('flink.app.runStatus'),
       dataIndex: 'state',

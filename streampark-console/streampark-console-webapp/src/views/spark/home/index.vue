@@ -85,7 +85,7 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight content-background>
     <Card :bordered="false">
       <BasicTitle>{{ t('spark.home.title') }}</BasicTitle>
       <div>

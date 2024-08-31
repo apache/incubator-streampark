@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper contentFullHeight fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -43,7 +43,8 @@
                 icon: 'icon-park-outline:mind-mapping',
                 tooltip: t('flink.variable.table.depend'),
                 auth: 'variable:depend_apps',
-                onClick: () => router.push('/resource/variable/depend_apps?id=' + record.variableCode),
+                onClick: () =>
+                  router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
                 icon: 'ant-design:delete-outlined',
@@ -62,7 +63,7 @@
     </BasicTable>
     <VariableDrawer @register="registerDrawer" @success="handleSuccess" />
     <VariableInfo @register="registerInfo" />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   export default defineComponent({
@@ -82,6 +83,7 @@
   import { fetchVariableDelete, fetchVariableList } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
+  import { PageWrapper } from '/@/components/Page';
 
   const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();

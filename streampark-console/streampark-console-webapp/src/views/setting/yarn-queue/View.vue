@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
           <Icon icon="ant-design:plus-outlined" />
@@ -53,7 +53,7 @@
       @register="registerDrawer"
       @success="handleSuccess"
     />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
@@ -66,10 +66,10 @@
   import { fetchYarnQueueList, fetchYarnQueueDelete } from '/@/api/setting/yarnQueue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-
+  import { PageWrapper } from '/@/components/Page';
   export default defineComponent({
     name: 'YarnQueue',
-    components: { BasicTable, YarnQueueDrawer, TableAction, Icon },
+    components: { BasicTable, YarnQueueDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();

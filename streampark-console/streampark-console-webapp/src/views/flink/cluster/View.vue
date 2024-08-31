@@ -14,17 +14,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useTimeoutFn } from '@vueuse/core';
-  import { onUnmounted } from 'vue';
-
-  export default defineComponent({
-    name: 'FlinkClusterSetting',
-  });
-</script>
 <script lang="ts" setup name="FlinkClusterSetting">
   import { onMounted, ref } from 'vue';
+  import { useTimeoutFn } from '@vueuse/core';
+  import { onUnmounted } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
   import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
@@ -49,6 +42,10 @@
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
   import State from './State';
+
+  defineOptions({
+    name: 'FlinkClusterSetting',
+  });
 
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
@@ -132,7 +129,7 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight content-background>
     <Card :bordered="false">
       <BasicTitle>{{ t('setting.flinkCluster.title') }}</BasicTitle>
       <div v-auth="'project:create'">
