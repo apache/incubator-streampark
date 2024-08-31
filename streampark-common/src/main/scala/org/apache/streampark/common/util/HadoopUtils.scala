@@ -128,7 +128,10 @@ object HadoopUtils extends Logger {
   def hadoopConf: Configuration = Option(reusableConf).getOrElse {
     reusableConf = getConfigurationFromHadoopConfDir(hadoopConfDir)
     // add hadoopConfDir to classpath...you know why???
-    ClassLoaderUtils.loadResource(hadoopConfDir)
+    Try(ClassLoaderUtils.loadResource(hadoopConfDir)) match {
+      case Failure(e) => logWarn(s"Load hadoop resource to classpath failed. $e")
+      case _ =>
+    }
 
     if (StringUtils.isBlank(reusableConf.get("hadoop.tmp.dir"))) {
       reusableConf.set("hadoop.tmp.dir", "/tmp")

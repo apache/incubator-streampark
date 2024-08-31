@@ -139,7 +139,7 @@ object ClassLoaderUtils extends Logger {
         } catch {
           case _: NoSuchFieldException =>
             throw new UnsupportedOperationException(
-              s"Add resource to classpath unsupported jdk version: ${System.getProperty("java.version")}")
+              s"Add resource to classpath unsupported, jdk version: ${System.getProperty("java.version")}")
         }
     }
   }
