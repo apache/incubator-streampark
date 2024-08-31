@@ -46,6 +46,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -69,6 +70,7 @@ import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 
+@Slf4j
 @Service
 public class ProxyServiceImpl implements ProxyService {
 
@@ -260,6 +262,7 @@ public class ProxyServiceImpl implements ProxyService {
       return proxyRestTemplate.exchange(
           url, HttpMethod.valueOf(request.getMethod()), requestEntity, byte[].class);
     } catch (RestClientException e) {
+      log.error("Proxy url: {} failed. ", url, e);
       return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
     }
   }
