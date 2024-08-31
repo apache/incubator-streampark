@@ -22,7 +22,7 @@ export default {
   selectUserAlertMessage: 'Please select a user',
   table: {
     title: 'Token List',
-    userName: 'User Name',
+    userName: 'Username',
     token: 'Token',
     status: 'Status',
   },
