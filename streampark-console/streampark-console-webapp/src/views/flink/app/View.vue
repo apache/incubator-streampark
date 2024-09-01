@@ -271,7 +271,7 @@
       @register="registerTable"
       :columns="getAppColumns"
       @resize-column="onTableColumnResize"
-      class="app_list !px-0 table-searchbar flex-1 pt-20px !px-0 flex flex-col"
+      class="app_list !px-0 table-searchbar flex-1 pt-15px !px-0 flex flex-col"
     >
       <template #tableTitle>
         <div class="flex justify-between" style="width: 100%">
