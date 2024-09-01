@@ -24,6 +24,7 @@ export default {
   flinkNamePlaceholder: '请输入Flink别名',
   flinkHome: '安装路径',
   flinkHomePlaceholder: '请输入Flink安装路径',
+  flinkVersion: 'Flink 版本',
   description: '描述',
   descriptionPlaceholder: 'Flink描述',
   operateMessage: {

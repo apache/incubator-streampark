@@ -49,6 +49,7 @@
     columns: [
       { dataIndex: 'flinkName', title: t('setting.flinkHome.flinkName') },
       { dataIndex: 'flinkHome', title: t('setting.flinkHome.flinkHome') },
+      { dataIndex: 'version', title: t('setting.flinkHome.flinkVersion') },
       { dataIndex: 'default', title: 'Default' },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],

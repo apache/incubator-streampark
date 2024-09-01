@@ -29,8 +29,9 @@
                 >{{ item.label }}</a-radio-button
               >
             </a-radio-group>
-            <a-input-search
+            <a-input
               v-model:value="queryParams.name"
+              allow-clear
               @search="() => reload()"
               :placeholder="t('flink.project.searchPlaceholder')"
               class="search-input"

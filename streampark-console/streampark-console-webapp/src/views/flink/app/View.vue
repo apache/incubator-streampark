@@ -282,6 +282,7 @@
                   <Select
                     :placeholder="t('flink.app.tags')"
                     show-search
+                    allow-clear
                     v-model:value="searchRef.tags"
                     @change="() => handleResetReload()"
                     :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
@@ -293,6 +294,7 @@
                   <Select
                     :placeholder="t('flink.app.owner')"
                     show-search
+                    allow-clear
                     v-model:value="searchRef.userId"
                     @change="() => handleResetReload()"
                     :options="
@@ -309,6 +311,7 @@
                   <Select
                     :placeholder="t('flink.app.jobType')"
                     show-search
+                    allow-clear
                     v-model:value="searchRef.jobType"
                     @change="() => handleResetReload()"
                     :options="[
@@ -322,6 +325,7 @@
                 <Form.Item>
                   <Input
                     :placeholder="t('flink.app.searchName')"
+                    allow-clear
                     v-model:value="searchRef.jobName"
                     @change="() => handleResetReload()"
                     @search="() => handleResetReload()"

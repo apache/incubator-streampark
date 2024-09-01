@@ -24,6 +24,7 @@ export default {
   flinkNamePlaceholder: 'Please enter flink name',
   flinkHome: 'Flink Home',
   flinkHomePlaceholder: 'Please enter flink home',
+  flinkVersion: 'Flink Version',
   description: 'description',
   descriptionPlaceholder: 'Please enter description',
   operateMessage: {
