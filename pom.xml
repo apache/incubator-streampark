@@ -67,7 +67,6 @@
         <module>streampark-flink</module>
         <module>streampark-spark</module>
         <module>streampark-console</module>
-        <module>streampark-registry</module>
     </modules>
 
     <scm>
@@ -148,7 +147,6 @@
         <mockito-scala.version>1.17.14</mockito-scala.version>
         <assertj.version>3.23.1</assertj.version>
         <testcontainer.version>1.19.3</testcontainer.version>
-        <zookeeper.version>3.8.0</zookeeper.version>
         <curator.version>5.3.0</curator.version>
         <snappy.version>1.1.10.1</snappy.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
@@ -410,27 +408,6 @@
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
                 <version>${curator.version}</version>
-            </dependency>
-
-            <!-- Zookeeper -->
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>${zookeeper.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.netty</groupId>
-                        <artifactId>netty</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.github.spotbugs</groupId>
-                        <artifactId>spotbugs-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>

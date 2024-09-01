@@ -29,11 +29,6 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-registry-zookeeper</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-registry-jdbc</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -29,7 +29,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>streampark-registry-zookeeper</module>
         <module>streampark-registry-jdbc</module>
         <module>streampark-registry-it</module>
     </modules>

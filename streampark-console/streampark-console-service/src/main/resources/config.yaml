@@ -105,21 +105,6 @@ registry:
   heartbeat-refresh-interval: 1s
   session-timeout: 3s
 
-# zookeeper registry example
-#registry:
-#  type: zookeeper
-#  zookeeper:
-#    namespace: streampark
-#    connect-string: localhost:2181
-#    retry-policy:
-#      base-sleep-time: 1s
-#      max-sleep: 3s
-#      max-retries: 5
-#    session-timeout: 60s
-#    connection-timeout: 15s
-#    block-until-connected: 15s
-#    digest: ~
-
 network:
   # network interface preferred like eth0, default: empty
   preferred-interface: ""
