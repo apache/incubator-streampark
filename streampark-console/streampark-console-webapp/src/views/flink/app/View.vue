@@ -72,7 +72,7 @@
     maxBuild: '',
   });
 
-  const [registerTable, { reload, getLoading, setPagination }] = useTable({
+  const [registerTable, { reload, getLoading, setPagination, getDataSource }] = useTable({
     rowKey: 'id',
     api: fetchAppRecord,
     beforeFetch: (params) => {
@@ -338,6 +338,7 @@
         <AppTableResize
           :table-container="tableContainer"
           :resize-min="100"
+          v-if="getDataSource()?.length > 0"
           v-model:left="tableColumnWidth.jobName"
         />
       </template>
