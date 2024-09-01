@@ -201,6 +201,7 @@
         useSearchForm: false,
         striped: false,
         bordered: false,
+        canResize: false,
         showIndexColumn: false,
         actionColumn: {
           width: 200,

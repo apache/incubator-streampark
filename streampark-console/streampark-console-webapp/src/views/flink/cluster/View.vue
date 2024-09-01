@@ -19,7 +19,7 @@
   import { useTimeoutFn } from '@vueuse/core';
   import { onUnmounted } from 'vue';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Popconfirm, Tooltip, Card, Tag } from 'ant-design-vue';
+  import { List, Popconfirm, Tooltip, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import {
     PauseCircleOutlined,
@@ -129,20 +129,20 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight content-background>
-    <Card :bordered="false">
-      <BasicTitle>{{ t('setting.flinkCluster.title') }}</BasicTitle>
+  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+    <div class="bg-white py-16px px-24px">
+      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
+        {{ t('setting.flinkCluster.title') }}
+      </BasicTitle>
       <div v-auth="'project:create'">
-        <a-button
-          type="dashed"
-          style="width: 100%; margin-top: 20px"
-          @click="go('/flink/add_cluster')"
-        >
+        <a-button type="dashed" class="w-full mt-10px" @click="go('/flink/add_cluster')">
           <PlusOutlined />
           {{ t('common.add') }}
         </a-button>
       </div>
-      <List>
+    </div>
+    <div class="flex-1">
+      <List class="cluster-card-list !mt-10px">
         <ListItem v-for="(item, index) in clusters" :key="'cluster'.concat(String(index))">
           <ListItemMeta
             :title="item.clusterName"
@@ -268,6 +268,12 @@
           </template>
         </ListItem>
       </List>
-    </Card>
+    </div>
   </PageWrapper>
 </template>
+<style lang="less" scoped>
+  .cluster-card-list {
+    background-color: @component-background;
+    height: 100%;
+  }
+</style>

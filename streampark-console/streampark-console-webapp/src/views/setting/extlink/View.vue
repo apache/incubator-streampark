@@ -27,7 +27,7 @@
   import { ExternalLinkModal } from './components';
 
   import { PageWrapper } from '/@/components/Page';
-  import { Table, Popconfirm, Card } from 'ant-design-vue';
+  import { Table, Popconfirm } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/setting/externalLink';
   import { BasicTitle } from '/@/components/Basic';
   defineOptions({
@@ -84,19 +84,19 @@
   const APopconfirm = Popconfirm;
 </script>
 <template>
-  <PageWrapper contentFullHeight content-background>
-    <Card :bordered="false">
-      <BasicTitle>{{ t('setting.externalLink.externalLinkSetting') }}</BasicTitle>
-      <div v-auth="'externalLink:create'" style="margin-bottom: 20px">
-        <a-button
-          type="dashed"
-          style="width: 100%; margin-top: 20px"
-          @click="openLinkModal(true, {})"
-        >
-          <plus-outlined />
+  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+    <div class="bg-white py-16px px-24px">
+      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
+        {{ t('setting.externalLink.externalLinkSetting') }}
+      </BasicTitle>
+      <div v-auth="'externalLink:create'">
+        <a-button type="dashed" class="w-full mt-10px" @click="openLinkModal(true, {})">
+          <PlusOutlined />
           {{ t('common.add') }}
         </a-button>
       </div>
+    </div>
+    <div class="flex-1 mt-10px bg-white">
       <a-table
         :showHeader="false"
         :data-source="externalLinks"
@@ -132,7 +132,7 @@
           </template>
         </template>
       </a-table>
-    </Card>
+    </div>
     <ExternalLinkModal @register="registerLinkModal" width="850px" @reload="getExternalLink" />
   </PageWrapper>
 </template>

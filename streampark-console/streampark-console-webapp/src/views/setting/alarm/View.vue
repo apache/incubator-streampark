@@ -167,16 +167,18 @@
 
 <template>
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
-    <div v-auth="'project:create'" class="bg-white py-10px px-24px">
+    <div class="bg-white py-10px px-24px">
       <span class="alarm-title">{{ t('setting.alarm.alertSetting') }}</span>
-      <a-button
-        type="dashed"
-        style="width: 100%; margin-top: 10px"
-        @click="openAlertModal(true, {})"
-      >
-        <PlusOutlined />
-        {{ t('common.add') }}
-      </a-button>
+      <div v-auth="'project:create'">
+        <a-button
+          type="dashed"
+          style="width: 100%; margin-top: 10px"
+          @click="openAlertModal(true, {})"
+        >
+          <PlusOutlined />
+          {{ t('common.add') }}
+        </a-button>
+      </div>
     </div>
 
     <div class="flex-1">
