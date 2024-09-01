@@ -22,18 +22,20 @@
     :collapsedShowTitle="collapsedShowTitle"
   >
     <template #title>
-      <span class="menu-down-svg">
-        <SvgIcon v-if="item.path === '/system'" name="management" size="25" />
-        <SvgIcon v-if="item.path === '/flink'" name="flink3" size="25" />
-        <SvgIcon v-if="item.path === '/setting'" name="settings" size="25" />
-      </span>
-      <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
-        {{ getI18nName }}
+      <div class="flex items-center">
+        <span class="menu-down-svg flex items-center">
+          <SvgIcon v-if="item.path === '/system'" name="management" :size="20" />
+          <SvgIcon v-if="item.path === '/flink'" name="flink3" :size="20" />
+          <SvgIcon v-if="item.path === '/setting'" name="settings" :size="20" />
+        </span>
+        <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
+          {{ getI18nName }}
+        </div>
+        <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`]">
+          {{ getI18nName }}
+        </span>
+        <SimpleMenuTag :item="item" :collapseParent="!!collapse && !!parent" />
       </div>
-      <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`]">
-        {{ getI18nName }}
-      </span>
-      <SimpleMenuTag :item="item" :collapseParent="!!collapse && !!parent" />
     </template>
     <template v-for="childrenItem in item.children || []" :key="childrenItem.path">
       <SimpleSubMenu v-bind="$props" :item="childrenItem" :parent="false" />

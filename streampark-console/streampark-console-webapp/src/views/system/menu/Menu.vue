@@ -15,14 +15,14 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess" />
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" @fetch-success="onFetchSuccess" class="flex flex-col" />
     <MenuDrawer
       :okText="t('common.submitText')"
       @register="registerDrawer"
       @success="handleSuccess"
     />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent, nextTick } from 'vue';
@@ -37,10 +37,11 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { isArray } from '/@/utils/is';
+  import { PageWrapper } from '/@/components/Page';
 
   export default defineComponent({
     name: 'MenuManagement',
-    components: { BasicTable, MenuDrawer },
+    components: { BasicTable, MenuDrawer, PageWrapper },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();

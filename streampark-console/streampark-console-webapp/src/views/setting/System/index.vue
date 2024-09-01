@@ -14,12 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  export default defineComponent({
-    name: 'SystemSetting',
-  });
-</script>
 <script setup lang="ts" name="SystemSetting">
   import { Collapse, Card } from 'ant-design-vue';
   import { ref, onMounted, computed } from 'vue';
@@ -30,7 +24,9 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import SettingList from './SettingList.vue';
   import { PageWrapper } from '/@/components/Page';
-
+  defineOptions({
+    name: 'SystemSetting',
+  });
   const { t } = useI18n();
   const CollapsePane = Collapse.Panel;
   const { createMessage } = useMessage();
@@ -111,7 +107,7 @@
 <style lang="less">
   .system-setting {
     .ant-card-body {
-      padding: 0 24px;
+      padding: 16px 24px;
     }
 
     .streampark-basic-title {

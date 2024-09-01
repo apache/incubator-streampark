@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -31,7 +31,7 @@
     </BasicTable>
     <UserDrawer @register="registerDrawer" @success="handleSuccess" />
     <UserModal @register="registerModal" />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { computed, defineComponent } from 'vue';
@@ -50,10 +50,11 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { LoginTypeEnum } from '/@/views/base/login/useLogin';
+  import { PageWrapper } from '/@/components/Page';
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon },
+    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const { t } = useI18n();
       const userStore = useUserStoreWithOut();

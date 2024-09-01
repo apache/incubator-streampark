@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -49,7 +49,7 @@
       </template>
     </BasicTable>
     <TeamDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
@@ -62,9 +62,10 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { PageWrapper } from '/@/components/Page';
   export default defineComponent({
     name: 'Team',
-    components: { BasicTable, TeamDrawer, TableAction, Icon },
+    components: { BasicTable, TeamDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { createMessage } = useMessage();

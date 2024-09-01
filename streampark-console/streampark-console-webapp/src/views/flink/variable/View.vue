@@ -15,15 +15,14 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper contentFullHeight fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
       </template>
-      <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -62,16 +61,10 @@
     </BasicTable>
     <VariableDrawer @register="registerDrawer" @success="handleSuccess" />
     <VariableInfo @register="registerInfo" />
-  </div>
+  </PageWrapper>
 </template>
-<script lang="ts">
-  export default defineComponent({
-    name: 'Variable',
-  });
-</script>
 
 <script lang="ts" setup>
-  import { defineComponent } from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
   import VariableDrawer from './components/VariableDrawer.vue';
   import VariableInfo from './components/VariableInfo.vue';
@@ -82,7 +75,11 @@
   import { fetchVariableDelete, fetchVariableList } from '/@/api/flink/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
+  import { PageWrapper } from '/@/components/Page';
 
+  defineOptions({
+    name: 'Variable',
+  });
   const router = useRouter();
   const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();

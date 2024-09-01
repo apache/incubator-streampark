@@ -167,9 +167,10 @@
 
   .@{prefix-cls} {
     position: relative;
-
+    padding: 16px;
+    padding-bottom: 0;
     .@{prefix-cls}-content {
-      margin: 16px;
+      // margin: 16px;
       border-radius: @border-radius-base;
     }
 

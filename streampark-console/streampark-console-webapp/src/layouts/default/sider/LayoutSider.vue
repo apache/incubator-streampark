@@ -23,6 +23,23 @@
     </template>
     <LayoutMenu :theme="getMenuTheme" :menuMode="getMode" :splitType="getSplitType" />
     <DragBar ref="dragBarRef" />
+    <div
+      class="flex justify-between items-center border-t-1 border-[#c0c0c01a] h-50px px-4"
+      v-if="!getCollapsed"
+    >
+      <a @click="openWindow(SITE_URL)" class="text-gray-400 hover:text-white">{{
+        t('layout.footer.website')
+      }}</a>
+
+      <GithubFilled
+        class="text-14px !text-gray-400 !hover:text-white cursor-pointer"
+        @click="openWindow(GITHUB_URL)"
+      />
+
+      <a @click="openWindow(DOC_URL)" class="text-gray-400 hover:text-white">{{
+        t('layout.footer.onlineDocument')
+      }}</a>
+    </div>
   </Sider>
 </template>
 <script lang="ts">
@@ -31,6 +48,7 @@
   import { Layout } from 'ant-design-vue';
   import LayoutMenu from '../menu/index.vue';
   import LayoutTrigger from '/@/layouts/default/trigger/index.vue';
+  import { version } from '../../../../package.json';
 
   import { MenuModeEnum, MenuSplitTyeEnum } from '/@/enums/menuEnum';
 
@@ -38,14 +56,19 @@
   import { useTrigger, useDragLine, useSiderEvent } from './useLayoutSider';
   import { useAppInject } from '/@/hooks/web/useAppInject';
   import { useDesign } from '/@/hooks/web/useDesign';
+  import { openWindow } from '/@/utils';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { DOC_URL, GITHUB_URL, SITE_URL } from '/@/settings/siteSetting';
+  import { GithubFilled } from '@ant-design/icons-vue';
 
   import DragBar from './DragBar.vue';
   export default defineComponent({
     name: 'LayoutSideBar',
-    components: { Sider: Layout.Sider, LayoutMenu, DragBar, LayoutTrigger },
+    components: { Sider: Layout.Sider, LayoutMenu, DragBar, LayoutTrigger, GithubFilled },
     setup() {
       const dragBarRef = ref<ElRef>(null);
       const sideRef = ref<ElRef>(null);
+      const { t } = useI18n();
 
       const {
         getCollapsed,
@@ -108,6 +131,8 @@
       const getTrigger = h(LayoutTrigger);
 
       return {
+        t,
+        version,
         prefixCls,
         sideRef,
         dragBarRef,
@@ -127,6 +152,10 @@
         getSplitType,
         getShowTrigger,
         toggleCollapsed,
+        openWindow,
+        DOC_URL,
+        GITHUB_URL,
+        SITE_URL,
       };
     },
   });

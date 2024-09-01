@@ -16,8 +16,8 @@
 -->
 
 <template>
-  <div>
-    <BasicTable @register="registerTable" :formConfig="formConfig">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" :formConfig="formConfig" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -55,15 +55,8 @@
       :roleOptions="roleListOptions"
       okText="Submit"
     />
-  </div>
+  </PageWrapper>
 </template>
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'Member',
-  });
-</script>
 
 <script setup lang="ts" name="member">
   import { computed, onMounted, ref, unref } from 'vue';
@@ -78,7 +71,10 @@
   import { getRoleListByPage } from '/@/api/base/system';
   import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
   import Icon from '/@/components/Icon';
-
+  import { PageWrapper } from '/@/components/Page';
+  defineOptions({
+    name: 'Member',
+  });
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
   const [registerDrawer, { openDrawer }] = useDrawer();
