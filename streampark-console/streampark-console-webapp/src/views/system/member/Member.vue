@@ -124,7 +124,7 @@
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: true,
+    showTableSetting: false,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {

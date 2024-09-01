@@ -103,7 +103,7 @@
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
         },
-        showTableSetting: true,
+        showTableSetting: false,
         useSearchForm: true,
         showIndexColumn: false,
         canResize: false,

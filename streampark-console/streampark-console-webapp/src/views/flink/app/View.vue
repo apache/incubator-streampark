@@ -104,7 +104,8 @@
         delete params.state;
       }
       currentTablePage.value = params.pageNum;
-      // sessionStorage.setItem('appPageNo', params.pageNum);
+      Object.assign(params, searchRef.value);
+      sessionStorage.setItem('appPageNo', params.pageNum);
       return params;
     },
     afterFetch: (dataSource) => {
@@ -191,7 +192,7 @@
     immediate: true,
     canResize: false,
     showIndexColumn: false,
-    showTableSetting: true,
+    showTableSetting: false,
     useSearchForm: false,
     tableSetting: { fullScreen: true, redo: false },
     actionColumn: {
@@ -272,12 +273,12 @@
       @resize-column="onTableColumnResize"
       class="app_list !px-0 table-searchbar flex-1 pt-20px !px-0 flex flex-col"
     >
-    <template #tableTitle>
-        <div class="flex justify-between" style="width: calc(100% - 130px)">
+      <template #tableTitle>
+        <div class="flex justify-between" style="width: 100%">
           <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1">
-            <Row :gutter="10" class="w-full">
-              <Col :span="5">
-                <Form.Item :label="t('flink.app.tags')">
+            <Row :gutter="5" class="w-full">
+              <Col :span="4">
+                <Form.Item>
                   <Select
                     :placeholder="t('flink.app.tags')"
                     show-search
@@ -287,8 +288,8 @@
                   />
                 </Form.Item>
               </Col>
-              <Col :span="5">
-                <Form.Item :label="t('flink.app.owner')">
+              <Col :span="4">
+                <Form.Item>
                   <Select
                     :placeholder="t('flink.app.owner')"
                     show-search
@@ -303,8 +304,8 @@
                   />
                 </Form.Item>
               </Col>
-              <Col :span="5">
-                <Form.Item :label="t('flink.app.jobType')">
+              <Col :span="4">
+                <Form.Item>
                   <Select
                     :placeholder="t('flink.app.jobType')"
                     show-search
@@ -317,8 +318,8 @@
                   />
                 </Form.Item>
               </Col>
-              <Col :span="7">
-                <Form.Item :label="t('flink.app.searchName')">
+              <Col :span="6">
+                <Form.Item>
                   <Input
                     :placeholder="t('flink.app.searchName')"
                     v-model:value="searchRef.jobName"

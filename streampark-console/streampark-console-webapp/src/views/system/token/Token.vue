@@ -88,7 +88,7 @@
           schemas: searchFormSchema,
         },
         useSearchForm: false,
-        showTableSetting: true,
+        showTableSetting: false,
         rowKey: 'tokenId',
         showIndexColumn: false,
         canResize: false,

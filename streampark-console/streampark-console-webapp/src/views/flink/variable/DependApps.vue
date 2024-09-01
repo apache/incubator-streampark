@@ -34,7 +34,7 @@
     api: fetchDependApps,
     canResize: false,
     showIndexColumn: false,
-    showTableSetting: true,
+    showTableSetting: false,
     tableSetting: { setting: true },
     beforeFetch(params: Recordable) {
       Object.assign(params, {
