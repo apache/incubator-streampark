@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
           <Icon icon="ant-design:plus-outlined" />

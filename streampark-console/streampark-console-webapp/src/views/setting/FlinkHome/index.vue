@@ -14,18 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-  export default defineComponent({
-    name: 'FlinkEnvSetting',
-  });
-</script>
 <script lang="ts" setup name="FlinkEnvSetting">
   import { onMounted, ref } from 'vue';
   import { useModal } from '/@/components/Modal';
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Switch, Card, Popconfirm, Tooltip } from 'ant-design-vue';
+  import { List, Switch, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
     CheckOutlined,
     CloseOutlined,
@@ -47,7 +41,9 @@
   import { useDrawer } from '/@/components/Drawer';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTitle } from '/@/components/Basic';
-
+  defineOptions({
+    name: 'FlinkEnvSetting',
+  });
   const ListItem = List.Item;
   const ListItemMeta = ListItem.Meta;
 
@@ -110,20 +106,20 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
-    <Card :bordered="false">
-      <BasicTitle>{{ t('setting.flinkHome.title') }}</BasicTitle>
+  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+    <div class="bg-white py-16px px-24px">
+      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
+        {{ t('setting.flinkHome.title') }}
+      </BasicTitle>
       <div v-auth="'project:create'">
-        <a-button
-          type="dashed"
-          style="width: 100%; margin-top: 20px"
-          @click="openFlinkModal(true, {})"
-        >
+        <a-button type="dashed" class="w-full mt-10px" @click="openFlinkModal(true, {})">
           <PlusOutlined />
           {{ t('common.add') }}
         </a-button>
       </div>
-      <List>
+    </div>
+    <div class="flex-1">
+      <List class="home-card-list !mt-10px">
         <ListItem v-for="(item, index) in flinks" :key="index">
           <ListItemMeta style="width: 60%" :title="item.flinkName" :description="item.description">
             <template #avatar>
@@ -198,10 +194,15 @@
           </template>
         </ListItem>
       </List>
-    </Card>
+    </div>
 
     <FlinkEnvModal @register="registerModal" @reload="getFlinkSetting" />
     <FlinkEnvDrawer @register="registerFlinkDraw" width="60%" />
   </PageWrapper>
 </template>
-<style lang="less"></style>
+<style lang="less" scoped>
+  .home-card-list {
+    background-color: @component-background;
+    height: 100%;
+  }
+</style>

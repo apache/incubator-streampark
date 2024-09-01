@@ -14,28 +14,22 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
+<script lang="ts" setup name="ExternalLinkSetting">
   import { useI18n } from '/@/hooks/web/useI18n';
   import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
   import { useMessage } from '/@/hooks/web/useMessage';
-
-  export default defineComponent({
-    name: 'ExternalLinkSetting',
-  });
-</script>
-<script lang="ts" setup name="ExternalLinkSetting">
   import { onMounted, ref } from 'vue';
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { ColumnsType } from 'ant-design-vue/lib/table';
   import { useModal } from '/@/components/Modal';
   import { ExternalLinkModal, ExternalLinkBadge } from './components';
   import { PageWrapper } from '/@/components/Page';
-  import { Table, Popconfirm, Card } from 'ant-design-vue';
+  import { Table, Popconfirm } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/flink/setting/externalLink';
   import { BasicTitle } from '/@/components/Basic';
+  defineOptions({
+    name: 'ExternalLinkSetting',
+  });
   const [registerLinkModal, { openModal: openLinkModal }] = useModal();
   const { Swal } = useMessage();
   const { t } = useI18n();
@@ -87,19 +81,19 @@
   const APopconfirm = Popconfirm;
 </script>
 <template>
-  <PageWrapper contentFullHeight>
-    <Card :bordered="false">
-      <BasicTitle>{{ t('setting.externalLink.externalLinkSetting') }}</BasicTitle>
-      <div v-auth="'externalLink:create'" style="margin-bottom: 20px">
-        <a-button
-          type="dashed"
-          style="width: 100%; margin-top: 20px"
-          @click="openLinkModal(true, {})"
-        >
-          <plus-outlined />
+  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+    <div class="bg-white py-16px px-24px">
+      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
+        {{ t('setting.externalLink.externalLinkSetting') }}
+      </BasicTitle>
+      <div v-auth="'externalLink:create'">
+        <a-button type="dashed" class="w-full mt-10px" @click="openLinkModal(true, {})">
+          <PlusOutlined />
           {{ t('common.add') }}
         </a-button>
       </div>
+    </div>
+    <div class="flex-1 mt-10px bg-white">
       <a-table
         :showHeader="false"
         :data-source="externalLinks"
@@ -135,7 +129,7 @@
           </template>
         </template>
       </a-table>
-    </Card>
+    </div>
     <ExternalLinkModal @register="registerLinkModal" width="850px" @reload="getExternalLink" />
   </PageWrapper>
 </template>

@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate" v-auth="'role:add'">
           <Icon icon="ant-design:plus-outlined" />
@@ -62,7 +62,7 @@
       @success="handleSuccess"
     />
     <RoleInfo @register="registerInfo" />
-  </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
@@ -83,10 +83,11 @@
   import { RoleListRecord } from '/@/api/system/model/roleModel';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { PageWrapper } from '/@/components/Page';
 
   export default defineComponent({
     name: 'RoleManagement',
-    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon },
+    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const { t } = useI18n();
       const [registerDrawer, { openDrawer }] = useDrawer();

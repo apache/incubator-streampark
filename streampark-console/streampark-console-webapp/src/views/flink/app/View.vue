@@ -14,16 +14,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default defineComponent({
-    name: 'AppView',
-  });
-</script>
 <script lang="ts" setup name="AppView">
-  import { defineComponent, nextTick, ref, onUnmounted, onMounted } from 'vue';
+  import { nextTick, ref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
+  import { JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useTimeoutFn } from '@vueuse/core';
   import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app/app';
@@ -50,6 +45,9 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+  defineOptions({
+    name: 'AppView',
+  });
   const { t } = useI18n();
   const optionApps = {
     starting: new Map(),
@@ -238,13 +236,13 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper contentFullHeight content-class="flex flex-col">
     <AppDashboard ref="appDashboardRef" />
     <BasicTable
       @register="registerTable"
       :columns="getAppColumns"
       @resize-column="onTableColumnResize"
-      class="app_list !px-0 pt-20px"
+      class="app_list !px-0 table-searchbar flex-1 pt-20px !px-0 flex flex-col"
       :formConfig="formConfig"
     >
       <template #bodyCell="{ column, record }">
