@@ -34,7 +34,7 @@
   const getStyle = computed(() => {
     return {
       left: `${props.left + 10}px`,
-      top: '50px',
+      top: '20px',
     };
   });
   const isMove = ref(false);
@@ -118,8 +118,7 @@
 
     &.app-vertical {
       width: 7px;
-      height: calc(100% - 95px);
-      border-left: 1px solid var(--resize-border-color);
+      height: 100px;
       cursor: col-resize;
     }
   }
