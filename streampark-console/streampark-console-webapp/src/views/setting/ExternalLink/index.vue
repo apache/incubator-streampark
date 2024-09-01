@@ -19,7 +19,7 @@
   import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { onMounted, ref } from 'vue';
-  import { PlusOutlined } from '@ant-design/icons-vue';
+  import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
   import { ColumnsType } from 'ant-design-vue/lib/table';
   import { useModal } from '/@/components/Modal';
   import { ExternalLinkModal, ExternalLinkBadge } from './components';
@@ -27,6 +27,7 @@
   import { Table, Popconfirm } from 'ant-design-vue';
   import { fetchExternalLink, fetchExternalLinkDelete } from '/@/api/flink/setting/externalLink';
   import { BasicTitle } from '/@/components/Basic';
+  import { Icon } from '/@/components/Icon';
   defineOptions({
     name: 'ExternalLinkSetting',
   });
@@ -114,16 +115,17 @@
                 v-auth="'externalLink:update'"
                 type="link"
                 @click="handleEditExternalLink(record)"
-                >{{ t('common.edit') }}</a-button
               >
+                <Icon icon="clarity:note-edit-line" />
+              </a-button>
               <a-popconfirm
                 :title="t('setting.externalLink.confDeleteTitle')"
                 @confirm="handleDeleteExternalLink(record.id)"
                 placement="topRight"
               >
-                <a-button v-auth="'externalLink:delete'" danger type="text">{{
-                  t('common.delText')
-                }}</a-button>
+                <a-button v-auth="'externalLink:delete'" danger type="text">
+                  <DeleteOutlined />
+                </a-button>
               </a-popconfirm>
             </span>
           </template>

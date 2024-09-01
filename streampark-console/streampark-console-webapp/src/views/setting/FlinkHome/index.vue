@@ -18,14 +18,13 @@
   import { onMounted, ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { SvgIcon } from '/@/components/Icon';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { List, Switch, Popconfirm, Tooltip } from 'ant-design-vue';
   import {
     CheckOutlined,
     CloseOutlined,
     DeleteOutlined,
     EyeOutlined,
-    EditOutlined,
     PlusOutlined,
   } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
@@ -161,7 +160,7 @@
                 size="large"
                 class="control-button"
               >
-                <EditOutlined />
+                <Icon icon="clarity:note-edit-line" />
               </a-button>
             </Tooltip>
             <Tooltip :title="t('setting.flinkHome.conf')">

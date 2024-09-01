@@ -102,7 +102,7 @@
                 onClick: handleBuild.bind(null, record),
               },
               {
-                icon: 'ant-design:edit-outlined',
+                icon: 'clarity:note-edit-line',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:update',
                 tooltip: t('common.edit'),
@@ -247,7 +247,7 @@
         }
       }
       const handleEdit = function (record: ProjectRecord) {
-        router.push({ path: '/project/edit', query: { id: record.id } });
+        router.push({ path: '/flink/project/edit', query: { id: record.id } });
       };
       async function handleDelete(record: ProjectRecord) {
         try {
