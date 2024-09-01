@@ -18,7 +18,7 @@
   import { onUnmounted } from 'vue';
   import { useTimeoutFn } from '@vueuse/core';
   import { onMounted, ref } from 'vue';
-  import { SvgIcon } from '/@/components/Icon';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { List, Popconfirm, Tooltip, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import {
@@ -26,7 +26,6 @@
     EyeOutlined,
     PlusOutlined,
     PlayCircleOutlined,
-    EditOutlined,
     DeleteOutlined,
   } from '@ant-design/icons-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -196,7 +195,7 @@
                 size="large"
                 class="control-button"
               >
-                <EditOutlined />
+                <Icon icon="clarity:note-edit-line" />
               </a-button>
             </Tooltip>
             <template v-if="handleIsStart(item)">

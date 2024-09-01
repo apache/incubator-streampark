@@ -131,6 +131,7 @@ public enum FlinkAppState implements Serializable {
     return FlinkAppState.CANCELED == flinkAppState
         || FlinkAppState.FAILED == flinkAppState
         || FlinkAppState.KILLED == flinkAppState
+        || FlinkAppState.ADDED == flinkAppState
         || FlinkAppState.FINISHED == flinkAppState
         || FlinkAppState.SUCCEEDED == flinkAppState
         || FlinkAppState.LOST == flinkAppState

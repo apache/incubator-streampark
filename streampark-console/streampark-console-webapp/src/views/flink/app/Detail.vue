@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script setup lang="ts" name="ApplicationDetail">
-  import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
+  import { ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/flink/setting/externalLink';
   import { ExternalLink } from '/@/api/flink/setting/types/externalLink.type';
@@ -25,7 +25,7 @@
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
-  import { onUnmounted, reactive, h, ref, onMounted, computed } from 'vue';
+  import { onUnmounted, reactive, h, ref, onMounted } from 'vue';
   import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
@@ -48,6 +48,8 @@
   const router = useRouter();
 
   const { t } = useI18n();
+
+  const appNotRunning = ref(false);
 
   const yarn = ref('');
   const externalLinks = ref<ExternalLink[]>([]);
@@ -106,8 +108,9 @@
       },
     ],
     data: app,
-    layout: 'vertical',
-    column: 3,
+    layout: 'horizontal',
+    column: 2,
+    size: 'small',
   });
 
   const [registerConfDrawer] = useDrawer();
@@ -145,6 +148,7 @@
       await handleDetailTabs();
     }
     Object.assign(app, res);
+    appNotRunning.value = !app.appControl.allowView;
   }
 
   async function handleDetailTabs() {
@@ -180,10 +184,6 @@
   onUnmounted(() => {
     pause();
   });
-
-  const appNotRunning = computed(
-    () => app['appControl']['allowView'] === false || (yarn.value === null && app.flinkRestUrl === null),
-  );
 </script>
 <template>
   <PageWrapper content-full-height content-background contentClass="p-24px">

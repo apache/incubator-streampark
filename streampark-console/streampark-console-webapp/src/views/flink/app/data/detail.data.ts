@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { BasicColumn } from '/@/components/Table/src/types/table';
-import { Tag, TypographyParagraph } from 'ant-design-vue';
+import { Tag } from 'ant-design-vue';
 import { DescItem } from '/@/components/Description';
 import { h } from 'vue';
 import State from '../components/State';
@@ -30,45 +30,13 @@ export const getDescSchema = (): DescItem[] => {
     {
       field: 'id',
       label: t('flink.app.id'),
-      render: (curVal) =>
-        h(TypographyParagraph, { copyable: true, style: { color: '#477de9' } }, () => curVal),
-    },
-    { field: 'jobName', label: t('flink.app.appName') },
-    {
-      field: 'jobType',
-      label: t('flink.app.developmentMode'),
-      render: (curVal) =>
-        h(
-          'div',
-          { class: 'bold-tag' },
-          h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2', class: 'mr-8px' }, () =>
-            curVal === 1 ? 'Custom Code' : 'Flink SQL',
-          ),
-        ),
-    },
-    {
-      field: 'module',
-      label: t('flink.app.module'),
-      show: (data) => data.jobType != JobTypeEnum.SQL,
-    },
-    {
-      field: 'projectName',
-      label: t('flink.app.project'),
-      show: (data) => data.jobType != JobTypeEnum.SQL,
-    },
-    {
-      field: 'appType',
-      label: t('flink.app.appType'),
-      render: (curVal) =>
-        h(Tag, { color: curVal == AppTypeEnum.STREAMPARK_FLINK ? 'cyan' : 'blue' }, () =>
-          curVal == AppTypeEnum.STREAMPARK_FLINK ? 'StreamPark Flink' : 'Apache Flink',
-        ),
     },
     {
       field: 'state',
       label: t('flink.app.status'),
       render: (_curVal, data) => h(State, { option: 'state', data }),
     },
+    { field: 'jobName', label: t('flink.app.appName') },
     {
       field: 'startTime',
       label: t('flink.app.startTime'),
@@ -82,6 +50,18 @@ export const getDescSchema = (): DescItem[] => {
         ),
     },
     {
+      field: 'jobType',
+      label: t('flink.app.developmentMode'),
+      render: (curVal) =>
+        h(
+          'div',
+          { class: 'bold-tag' },
+          h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2' }, () =>
+            curVal === 1 ? 'Custom Code' : 'Flink SQL',
+          ),
+        ),
+    },
+    {
       field: 'endTime',
       label: t('flink.app.endTime'),
       render: (curVal) =>
@@ -92,6 +72,28 @@ export const getDescSchema = (): DescItem[] => {
             ? [h(Icon, { icon: 'ant-design:clock-circle-outlined' }), h('span', null, curVal)]
             : '-',
         ),
+    },
+    {
+      field: 'module',
+      label: t('flink.app.module'),
+      show: (data) => data.jobType != JobTypeEnum.SQL,
+    },
+    {
+      field: 'appType',
+      label: t('flink.app.appType'),
+      render: (curVal) =>
+        h(
+          'div',
+          { class: 'bold-tag' },
+          h(Tag, { color: '#108ee9' }, () =>
+            curVal == AppTypeEnum.STREAMPARK_FLINK ? 'StreamPark Flink' : 'Apache Flink',
+          ),
+        ),
+    },
+    {
+      field: 'projectName',
+      label: t('flink.app.project'),
+      show: (data) => data.jobType != JobTypeEnum.SQL,
     },
     {
       field: 'duration',

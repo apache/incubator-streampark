@@ -1267,9 +1267,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         .setAllowStart(
             !app.shouldBeTrack() && PipelineStatus.success.getCode().equals(app.getBuildStatus()))
         .setAllowStop(app.isRunning())
-        .setAllowView(
-            (!FlinkAppState.isEndState(app.getState()))
-                || OptionState.SAVEPOINTING.getValue() == app.getOptionState());
+        .setAllowView(app.shouldBeTrack());
   }
 
   @Override

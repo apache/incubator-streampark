@@ -52,7 +52,7 @@ export default {
     buildArgsPlaceholder: '构建参数, 比如: -Pprod',
     description: '描述',
     descriptionPlaceholder: '请输入对该项目的描述信息',
-    lastBuild: '最近一次构建',
+    lastBuild: '最后构建',
     buildState: '构建状态',
   },
   operationTips: {
