@@ -182,20 +182,4 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
             ThreadUtils.threadFactory("streampark-build-executor-"),
             new ThreadPoolExecutor.AbortPolicy());
     }
-
-    /**
-     * Create a ThreadPoolTaskExecutor for TaskAction.
-     *
-     * @return Executor
-     */
-    @Bean("streamparkTaskActionExecutor")
-    public Executor taskActionExecutor() {
-        return new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 5,
-            Runtime.getRuntime().availableProcessors() * 10,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streampark-task-action-"));
-    }
 }
