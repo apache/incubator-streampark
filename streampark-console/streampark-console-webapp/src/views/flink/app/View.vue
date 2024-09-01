@@ -170,7 +170,7 @@
     },
     fetchSetting: { listField: 'records' },
     immediate: true,
-    canResize: false,
+    isCanResizeParent: true,
     showIndexColumn: false,
     showTableSetting: true,
     useSearchForm: true,
