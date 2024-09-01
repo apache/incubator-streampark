@@ -264,6 +264,7 @@ export const useAppTableAction = (
 
   const formConfig = computed((): Partial<FormProps> => {
     const tableFormConfig: FormProps = {
+      name: 'appTableForm',
       baseColProps: { span: 5, style: { paddingRight: '20px' } },
       actionColOptions: { span: 4 },
       showSubmitButton: false,
@@ -356,5 +357,5 @@ export const useAppTableAction = (
   onMounted(() => {
     handleInitTagsOptions();
   });
-  return { getTableActions, formConfig };
+  return { getTableActions, formConfig, tagsOptions, users };
 };

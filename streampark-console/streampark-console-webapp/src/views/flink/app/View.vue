@@ -15,12 +15,24 @@
   limitations under the License.
 -->
 <script lang="ts" setup name="AppView">
+  import { PlusOutlined } from '@ant-design/icons-vue';
   import { nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
-  import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
+  import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
+  import {
+    Form,
+    Button,
+    Select,
+    Input,
+    Tooltip,
+    Badge,
+    Tag,
+    Popover,
+    Row,
+    Col,
+  } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
@@ -45,10 +57,12 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+  import { useRouter } from 'vue-router';
   defineOptions({
     name: 'AppView',
   });
   const { t } = useI18n();
+  const router = useRouter();
   const optionApps = {
     starting: new Map(),
     stopping: new Map(),
@@ -66,6 +80,11 @@
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+  const searchRef = ref<Recordable>({
+    tags: undefined,
+    owner: undefined,
+    jobType: undefined,
+  });
   const titleLenRef = ref({
     maxState: '',
     maxRelease: '',
@@ -170,10 +189,10 @@
     },
     fetchSetting: { listField: 'records' },
     immediate: true,
-    isCanResizeParent: true,
+    canResize: false,
     showIndexColumn: false,
     showTableSetting: true,
-    useSearchForm: true,
+    useSearchForm: false,
     tableSetting: { fullScreen: true, redo: false },
     actionColumn: {
       dataIndex: 'operation',
@@ -182,7 +201,7 @@
     },
   });
 
-  const { getTableActions, formConfig } = useAppTableAction(
+  const { getTableActions, tagsOptions, users } = useAppTableAction(
     openStartModal,
     openStopModal,
     openSavepoint,
@@ -191,7 +210,6 @@
     handlePageDataReload,
     optionApps,
   );
-
   /* view */
   async function handleJobView(app: AppListRecord) {
     // Task is running, restarting, in savePoint
@@ -219,6 +237,14 @@
       reload({ polling });
     });
   }
+
+  const handleResetReload = useDebounceFn(() => {
+    setPagination({
+      current: 1,
+    });
+    reload();
+  }, 500);
+
   const { start, stop } = useTimeoutFn(() => {
     if (!getLoading()) {
       handlePageDataReload(true);
@@ -249,8 +275,73 @@
       :columns="getAppColumns"
       @resize-column="onTableColumnResize"
       class="app_list table-searchbar flex-1 pt-20px !px-0 flex flex-col"
-      :formConfig="formConfig"
     >
+      <template #tableTitle>
+        <div class="flex justify-between" style="width: calc(100% - 130px)">
+          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1">
+            <Row :gutter="10" class="w-full">
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.tags')">
+                  <Select
+                    :placeholder="t('flink.app.tags')"
+                    show-search
+                    v-model:value="searchRef.tags"
+                    @change="() => handleResetReload()"
+                    :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.owner')">
+                  <Select
+                    :placeholder="t('flink.app.owner')"
+                    show-search
+                    v-model:value="searchRef.userId"
+                    @change="() => handleResetReload()"
+                    :options="
+                      (users || []).map((u: Recordable) => ({
+                        label: u.nickName || u.username,
+                        value: u.userId,
+                      }))
+                    "
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.jobType')">
+                  <Select
+                    :placeholder="t('flink.app.jobType')"
+                    show-search
+                    v-model:value="searchRef.jobType"
+                    @change="() => handleResetReload()"
+                    :options="[
+                      { label: 'JAR', value: JobTypeEnum.JAR },
+                      { label: 'SQL', value: JobTypeEnum.SQL },
+                      { label: 'PYFLINK', value: JobTypeEnum.PYFLINK },
+                    ]"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.searchName')">
+                  <Input
+                    :placeholder="t('flink.app.searchName')"
+                    v-model:value="searchRef.jobName"
+                    @change="() => handleResetReload()"
+                    @search="() => handleResetReload()"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+          <div v-auth="'app:create'">
+            <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
+              <PlusOutlined />
+              {{ t('common.add') }}
+            </Button>
+          </div>
+        </div>
+      </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
