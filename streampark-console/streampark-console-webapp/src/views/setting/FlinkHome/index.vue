@@ -15,18 +15,12 @@
   limitations under the License.
 -->
 <script lang="ts" setup name="FlinkEnvSetting">
-  import { onMounted, ref } from 'vue';
+  import { ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { Icon, SvgIcon } from '/@/components/Icon';
-  import { List, Switch, Popconfirm, Tooltip } from 'ant-design-vue';
-  import {
-    CheckOutlined,
-    CloseOutlined,
-    DeleteOutlined,
-    EyeOutlined,
-    PlusOutlined,
-  } from '@ant-design/icons-vue';
+  import { SvgIcon } from '/@/components/Icon';
+  import { Switch } from 'ant-design-vue';
+  import { CheckOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
   import {
     fetchValidity,
@@ -39,19 +33,38 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useDrawer } from '/@/components/Drawer';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTitle } from '/@/components/Basic';
+  import { BasicTable, TableAction, useTable } from '/@/components/Table';
   defineOptions({
     name: 'FlinkEnvSetting',
   });
-  const ListItem = List.Item;
-  const ListItemMeta = ListItem.Meta;
 
   const { t } = useI18n();
   const versionId = ref<string | null>(null);
   const { Swal, createMessage } = useMessage();
-  const flinks = ref<FlinkEnv[]>([]);
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
+  const [registerTable, { reload, getDataSource }] = useTable({
+    title: t('setting.flinkHome.title'),
+    api: fetchFlinkEnv,
+    columns: [
+      { dataIndex: 'flinkName', title: t('setting.flinkHome.flinkName') },
+      { dataIndex: 'flinkHome', title: t('setting.flinkHome.flinkHome') },
+      { dataIndex: 'default', title: 'Default' },
+      { dataIndex: 'description', title: t('setting.flinkHome.description') },
+    ],
+    useSearchForm: false,
+    striped: false,
+    canResize: false,
+    bordered: false,
+    showIndexColumn: false,
+    pagination: false,
+    actionColumn: {
+      width: 200,
+      title: t('component.table.operation'),
+      dataIndex: 'action',
+    },
+  });
+
   /* Edit button */
   async function handleEditFlink(item: FlinkEnv) {
     const resp = await fetchValidity(item.id);
@@ -76,7 +89,7 @@
   async function handleDelete(item: FlinkEnv) {
     const resp = await fetchFlinkEnvRemove(item.id);
     if (resp.data.code == 200) {
-      await getFlinkSetting();
+      reload();
       createMessage.success('The current flink home is removed.');
     }
   }
@@ -91,111 +104,73 @@
         showConfirmButton: false,
         timer: 2000,
       });
-      getFlinkSetting();
+      reload();
     }
   }
-
-  /* Get flink environment data */
-  async function getFlinkSetting() {
-    flinks.value = await fetchFlinkEnv();
-  }
-
-  onMounted(() => {
-    getFlinkSetting();
-  });
 </script>
 <template>
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
-    <div class="bg-white py-16px px-24px">
-      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
-        {{ t('setting.flinkHome.title') }}
-      </BasicTitle>
-      <div v-auth="'project:create'">
-        <a-button type="dashed" class="w-full mt-10px" @click="openFlinkModal(true, {})">
-          <PlusOutlined />
-          {{ t('common.add') }}
-        </a-button>
-      </div>
-    </div>
-    <div class="flex-1">
-      <List class="home-card-list !mt-10px">
-        <ListItem v-for="(item, index) in flinks" :key="index">
-          <ListItemMeta style="width: 60%" :title="item.flinkName" :description="item.description">
-            <template #avatar>
-              <SvgIcon class="avatar p-15px" name="flink" size="60" />
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #toolbar>
+        <div v-auth="'project:create'">
+          <a-button type="primary" class="w-full mt-10px" @click="openFlinkModal(true, {})">
+            <PlusOutlined />
+            {{ t('common.add') }}
+          </a-button>
+        </div>
+      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'flinkName'">
+          <svg-icon class="avatar" name="flink" :size="20" />
+          {{ record.flinkName }}
+        </template>
+        <template v-if="column.dataIndex === 'default'">
+          <Switch
+            :disabled="record.isDefault"
+            @click="handleSetDefault(record)"
+            v-model:checked="record.isDefault"
+          >
+            <template #checkedChildren>
+              <CheckOutlined />
             </template>
-          </ListItemMeta>
+            <template #unCheckedChildren>
+              <CloseOutlined />
+            </template>
+          </Switch>
+        </template>
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                auth: 'project:build',
+                tooltip: t('setting.flinkHome.edit'),
+                onClick: handleEditFlink.bind(null, record),
+              },
+              {
+                icon: 'ant-design:eye-outlined',
+                auth: 'project:build',
+                tooltip: t('setting.flinkHome.conf'),
+                onClick: handleFlinkConf.bind(null, record),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('common.delText'),
+                disabled: record.isDefault && getDataSource()?.length > 1,
+                popConfirm: {
+                  title: t('setting.flinkHome.delete'),
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
+      </template>
+    </BasicTable>
 
-          <div class="list-content flex" style="width: 40%">
-            <div class="list-content-item" style="width: 60%">
-              <span>Flink Home</span>
-              <p style="margin-top: 10px">
-                {{ item.flinkHome }}
-              </p>
-            </div>
-            <div class="list-content-item">
-              <span>Default</span>
-              <p style="margin-top: 10px">
-                <Switch
-                  :disabled="item.isDefault"
-                  @click="handleSetDefault(item)"
-                  v-model:checked="item.isDefault"
-                >
-                  <template #checkedChildren>
-                    <CheckOutlined />
-                  </template>
-                  <template #unCheckedChildren>
-                    <CloseOutlined />
-                  </template>
-                </Switch>
-              </p>
-            </div>
-          </div>
-
-          <template #actions>
-            <Tooltip :title="t('setting.flinkHome.edit')">
-              <a-button
-                @click="handleEditFlink(item)"
-                shape="circle"
-                size="large"
-                class="control-button"
-              >
-                <Icon icon="clarity:note-edit-line" />
-              </a-button>
-            </Tooltip>
-            <Tooltip :title="t('setting.flinkHome.conf')">
-              <a-button
-                shape="circle"
-                @click="handleFlinkConf(item)"
-                target="_blank"
-                size="large"
-                class="control-button"
-              >
-                <EyeOutlined />
-              </a-button>
-            </Tooltip>
-            <Popconfirm
-              :title="t('setting.flinkHome.delete')"
-              :cancel-text="t('common.no')"
-              :ok-text="t('common.yes')"
-              @confirm="handleDelete(item)"
-            >
-              <a-button
-                :disabled="item.isDefault && flinks.length > 1"
-                type="danger"
-                shape="circle"
-                size="large"
-                class="control-button"
-              >
-                <DeleteOutlined />
-              </a-button>
-            </Popconfirm>
-          </template>
-        </ListItem>
-      </List>
-    </div>
-
-    <FlinkEnvModal @register="registerModal" @reload="getFlinkSetting" />
+    <FlinkEnvModal @register="registerModal" @reload="reload" />
     <FlinkEnvDrawer @register="registerFlinkDraw" width="60%" />
   </PageWrapper>
 </template>
