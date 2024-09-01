@@ -276,7 +276,18 @@
       <template #tableTitle>
         <div class="flex justify-between" style="width: 100%">
           <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1">
-            <Row :gutter="5" class="w-full">
+            <Row :gutter="4" class="w-full">
+              <Col :span="5">
+                <Form.Item>
+                  <Input
+                    :placeholder="t('flink.app.searchName')"
+                    allow-clear
+                    v-model:value="searchRef.jobName"
+                    @change="() => handleResetReload()"
+                    @search="() => handleResetReload()"
+                  />
+                </Form.Item>
+              </Col>
               <Col :span="4">
                 <Form.Item>
                   <Select
@@ -286,23 +297,6 @@
                     v-model:value="searchRef.tags"
                     @change="() => handleResetReload()"
                     :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
-                  />
-                </Form.Item>
-              </Col>
-              <Col :span="4">
-                <Form.Item>
-                  <Select
-                    :placeholder="t('flink.app.owner')"
-                    show-search
-                    allow-clear
-                    v-model:value="searchRef.userId"
-                    @change="() => handleResetReload()"
-                    :options="
-                      (users || []).map((u: Recordable) => ({
-                        label: u.nickName || u.username,
-                        value: u.userId,
-                      }))
-                    "
                   />
                 </Form.Item>
               </Col>
@@ -321,14 +315,20 @@
                   />
                 </Form.Item>
               </Col>
-              <Col :span="6">
+              <Col :span="4">
                 <Form.Item>
-                  <Input
-                    :placeholder="t('flink.app.searchName')"
+                  <Select
+                    :placeholder="t('flink.app.owner')"
+                    show-search
                     allow-clear
-                    v-model:value="searchRef.jobName"
+                    v-model:value="searchRef.userId"
                     @change="() => handleResetReload()"
-                    @search="() => handleResetReload()"
+                    :options="
+                      (users || []).map((u: Recordable) => ({
+                        label: u.nickName || u.username,
+                        value: u.userId,
+                      }))
+                    "
                   />
                 </Form.Item>
               </Col>

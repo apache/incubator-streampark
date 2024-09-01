@@ -133,7 +133,7 @@
 
   import { PageWrapper } from '/@/components/Page';
   import { statusList } from './project.data';
-  import { RadioGroup, Radio, Input, Card, Tag, Badge } from 'ant-design-vue';
+  import { RadioGroup, Radio, Card, Tag, Badge } from 'ant-design-vue';
   import { buildStateMap } from './project.data';
   import { buildProject, deleteProject, getList } from '/@/api/flink/project';
   import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
@@ -157,7 +157,6 @@
       PageWrapper,
       ARadioGroup: RadioGroup,
       ARadioButton: Radio.Button,
-      AInputSearch: Input.Search,
       ACard: Card,
       ATag: Tag,
       ABadge: Badge,
