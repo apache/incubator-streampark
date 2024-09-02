@@ -70,15 +70,22 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'username',
-    label: t('system.user.form.userName'),
+    label: '',
     component: 'Input',
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('system.user.form.userName'),
+      allowClear: true,
+    },
+    colProps: { span: 4 },
   },
   {
     field: 'createTime',
-    label: t('common.createTime'),
+    label: '',
     component: 'RangePicker',
-    colProps: { span: 8 },
+    componentProps: {
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];
 

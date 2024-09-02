@@ -15,19 +15,12 @@
   limitations under the License.
 -->
 <script lang="ts" setup name="FlinkClusterSetting">
-  import { onUnmounted } from 'vue';
+  import { nextTick, onUnmounted } from 'vue';
   import { useTimeoutFn } from '@vueuse/core';
-  import { onMounted, ref } from 'vue';
-  import { Icon, SvgIcon } from '/@/components/Icon';
-  import { List, Popconfirm, Tooltip, Tag } from 'ant-design-vue';
+  import { SvgIcon } from '/@/components/Icon';
+  import { Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
-  import {
-    PauseCircleOutlined,
-    EyeOutlined,
-    PlusOutlined,
-    PlayCircleOutlined,
-    DeleteOutlined,
-  } from '@ant-design/icons-vue';
+  import { PlusOutlined } from '@ant-design/icons-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import {
     fetchClusterRemove,
@@ -39,18 +32,49 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTitle } from '/@/components/Basic';
+  import { BasicTable, TableAction, useTable } from '/@/components/Table';
   defineOptions({
     name: 'FlinkClusterSetting',
   });
-  const ListItem = List.Item;
-  const ListItemMeta = ListItem.Meta;
+  const executionModeMap = {
+    [ExecModeEnum.STANDALONE]: {
+      color: '#2db7f5',
+      text: 'standalone',
+    },
+    [ExecModeEnum.YARN_SESSION]: {
+      color: '#87d068',
+      text: 'yarn session',
+    },
+    [ExecModeEnum.KUBERNETES_SESSION]: {
+      color: '#108ee9',
+      text: 'k8s session',
+    },
+  };
 
   const go = useGo();
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
-  const clusters = ref<FlinkCluster[]>([]);
-  const loading = ref(false);
+  const [registerTable, { reload, getLoading }] = useTable({
+    // title: t('setting.flinkCluster.title'),
+    api: fetchFlinkCluster,
+    columns: [
+      { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
+      { dataIndex: 'executionMode', title: t('setting.flinkCluster.form.executionMode') },
+      { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
+      { dataIndex: 'description', title: t('setting.flinkHome.description') },
+    ],
+    useSearchForm: false,
+    striped: false,
+    bordered: false,
+    canResize: false,
+    showIndexColumn: false,
+    pagination: false,
+    actionColumn: {
+      width: 200,
+      title: t('component.table.operation'),
+      dataIndex: 'action',
+    },
+  });
   function handleIsStart(item) {
     return item.clusterState === ClusterStateEnum.STARTED;
   }
@@ -82,7 +106,7 @@
   /* delete */
   async function handleDelete(item: FlinkCluster) {
     await fetchClusterRemove(item.id);
-    await getFlinkCluster();
+    reload();
     createMessage.success('The current cluster is remove');
   }
   /* shutdown */
@@ -98,163 +122,109 @@
     }
   }
 
-  async function getFlinkCluster() {
-    try {
-      loading.value = true;
-      clusters.value = await fetchFlinkCluster();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      loading.value = false;
-    }
+  function handlePageDataReload(polling = false) {
+    nextTick(() => {
+      reload({ polling });
+    });
   }
   const { start, stop } = useTimeoutFn(() => {
     // Prevent another request from being initiated while the previous request is pending
-    if (!loading.value) {
-      getFlinkCluster();
+    if (!getLoading()) {
+      handlePageDataReload(true);
     }
     start();
   }, 1000 * 3);
 
-  onMounted(() => {
-    getFlinkCluster();
-  });
   onUnmounted(() => {
     stop();
   });
 </script>
 <template>
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
-    <div class="bg-white py-16px px-24px">
-      <BasicTitle class="!inline-block" style="margin: 0 !important; height: initial">
-        {{ t('setting.flinkCluster.title') }}
-      </BasicTitle>
-      <div v-auth="'project:create'">
-        <a-button type="dashed" class="w-full mt-10px" @click="go('/setting/add_cluster')">
-          <PlusOutlined />
-          {{ t('common.add') }}
-        </a-button>
-      </div>
-    </div>
-    <div class="flex-1">
-      <List class="cluster-card-list !mt-10px">
-        <ListItem v-for="(item, index) in clusters" :key="index">
-          <ListItemMeta
-            :title="item.clusterName"
-            style="width: 20%"
-            :description="item.description"
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #toolbar>
+        <div v-auth="'project:create'">
+          <a-button type="primary" class="w-full mt-10px" @click="() => go('/setting/add_cluster')">
+            <PlusOutlined />
+            {{ t('common.add') }}
+          </a-button>
+        </div>
+      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'clusterName'">
+          <svg-icon class="avatar" name="flink" :size="20" />
+          {{ record.clusterName }}
+        </template>
+        <template v-if="column.dataIndex === 'executionMode'">
+          <Tag
+            v-if="executionModeMap[record.executionMode]"
+            :color="executionModeMap[record.executionMode]?.color"
           >
-            <template #avatar>
-              <SvgIcon class="avatar p-15px" name="flink" size="60" />
-            </template>
-          </ListItemMeta>
-          <div class="list-content" style="width: 20%">
-            <div class="list-content-item">
-              <span>{{ t('setting.flinkCluster.form.executionMode') }}</span>
-              <p style="margin-top: 10px" v-if="item.executionMode === ExecModeEnum.STANDALONE">
-                <Tag color="#2db7f5">standalone</Tag>
-              </p>
-              <p
-                style="margin-top: 10px"
-                v-else-if="item.executionMode === ExecModeEnum.YARN_SESSION"
-              >
-                <Tag color="#87d068">yarn session</Tag>
-              </p>
-              <p
-                style="margin-top: 10px"
-                v-else-if="item.executionMode === ExecModeEnum.KUBERNETES_SESSION"
-              >
-                <Tag color="#108ee9">k8s session</Tag>
-              </p>
-            </div>
-          </div>
-          <div
-            class="list-content"
-            style="width: 35%"
+            {{ executionModeMap[record.executionMode]?.text }}
+          </Tag>
+        </template>
+        <template v-if="column.dataIndex === 'address'">
+          <a
+            :href="`/proxy/cluster/${record.id}/`"
+            target="_blank"
             v-if="
-              item.executionMode === ExecModeEnum.STANDALONE ||
-              item.executionMode === ExecModeEnum.YARN_SESSION
+              record.executionMode === ExecModeEnum.STANDALONE ||
+              record.executionMode === ExecModeEnum.YARN_SESSION
             "
           >
-            <div class="list-content-item">
-              <span>{{ t('setting.flinkCluster.form.address') }}</span>
-              <p style="margin-top: 10px">
-                <a :href="`/proxy/cluster/${item.id}/`" target="_blank">
-                  {{ item.address }}
-                </a>
-              </p>
-            </div>
-          </div>
-          <template #actions>
-            <Tooltip :title="t('setting.flinkCluster.edit')">
-              <a-button
-                v-auth="'cluster:update'"
-                :disabled="handleIsStart(item)"
-                @click="handleEditCluster(item)"
-                shape="circle"
-                size="large"
-                class="control-button"
-              >
-                <Icon icon="clarity:note-edit-line" />
-              </a-button>
-            </Tooltip>
-            <template v-if="handleIsStart(item)">
-              <Tooltip :title="t('setting.flinkCluster.stop')">
-                <a-button
-                  :disabled="item.executionMode === ExecModeEnum.STANDALONE"
-                  v-auth="'cluster:create'"
-                  @click="handleShutdownCluster(item)"
-                  shape="circle"
-                  size="large"
-                  style="margin-left: 3px"
-                  class="control-button"
-                >
-                  <PauseCircleOutlined />
-                </a-button>
-              </Tooltip>
-            </template>
-            <template v-else>
-              <Tooltip :title="t('setting.flinkCluster.start')">
-                <a-button
-                  :disabled="item.executionMode === ExecModeEnum.STANDALONE"
-                  v-auth="'cluster:create'"
-                  @click="handleDeployCluster(item)"
-                  shape="circle"
-                  size="large"
-                  class="control-button"
-                >
-                  <PlayCircleOutlined />
-                </a-button>
-              </Tooltip>
-            </template>
-            <Tooltip :title="t('setting.flinkCluster.detail')">
-              <a-button
-                :disabled="!handleIsStart(item)"
-                v-auth="'app:detail'"
-                shape="circle"
-                :href="`/proxy/cluster/${item.id}/`"
-                target="_blank"
-                size="large"
-                class="control-button"
-              >
-                <EyeOutlined />
-              </a-button>
-            </Tooltip>
-
-            <Popconfirm
-              :title="t('setting.flinkCluster.delete')"
-              :cancel-text="t('common.no')"
-              :ok-text="t('common.yes')"
-              @confirm="handleDelete(item)"
-            >
-              <a-button type="danger" shape="circle" size="large" class="control-button">
-                <DeleteOutlined />
-              </a-button>
-            </Popconfirm>
-          </template>
-        </ListItem>
-      </List>
-    </div>
+            {{ record.address }}
+          </a>
+          <span v-else> - </span>
+        </template>
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                auth: 'cluster:update',
+                tooltip: t('setting.flinkCluster.edit'),
+                disabled: handleIsStart(record),
+                onClick: handleEditCluster.bind(null, record),
+              },
+              {
+                icon: 'ant-design:pause-circle-outlined',
+                auth: 'cluster:create',
+                ifShow: handleIsStart(record),
+                disabled: record.executionMode === ExecModeEnum.STANDALONE,
+                tooltip: t('setting.flinkCluster.stop'),
+                onClick: handleShutdownCluster.bind(null, record),
+              },
+              {
+                icon: 'ant-design:play-circle-outlined',
+                auth: 'cluster:create',
+                ifShow: !handleIsStart(record),
+                disabled: record.executionMode === ExecModeEnum.STANDALONE,
+                tooltip: t('setting.flinkCluster.start'),
+                onClick: handleDeployCluster.bind(null, record),
+              },
+              {
+                icon: 'ant-design:eye-outlined',
+                auth: 'app:detail',
+                disabled: !handleIsStart(record),
+                tooltip: t('setting.flinkCluster.detail'),
+                href: `/proxy/cluster/${record.id}/`,
+                target: '_blank',
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('common.delText'),
+                popConfirm: {
+                  title: t('setting.flinkCluster.delete'),
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
+      </template>
+    </BasicTable>
   </PageWrapper>
 </template>
 <style lang="less" scoped>

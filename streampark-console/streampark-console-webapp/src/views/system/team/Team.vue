@@ -17,11 +17,13 @@
 <template>
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="4" :offset="10" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -48,15 +50,15 @@
         </template>
       </template>
     </BasicTable>
-    <TeamDrawer okText="Submit" @register="registerDrawer" @success="handleSuccess" />
+    <TeamModal @register="registerModal" @success="handleSuccess" />
   </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
-
+  import { Col } from 'ant-design-vue';
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import TeamDrawer from './TeamDrawer.vue';
-  import { useDrawer } from '/@/components/Drawer';
+  import TeamModal from './TeamModal.vue';
+  import { useModal } from '/@/components/Modal';
   import { columns, searchFormSchema } from './team.data';
   import { fetTeamList, fetchTeamDelete } from '/@/api/system/team';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -65,19 +67,22 @@
   import { PageWrapper } from '/@/components/Page';
   export default defineComponent({
     name: 'Team',
-    components: { BasicTable, TeamDrawer, TableAction, Icon, PageWrapper },
+    components: { BasicTable, TeamModal, TableAction, Icon, PageWrapper, Col },
     setup() {
-      const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload }] = useTable({
-        title: t('system.team.table.title'),
         api: fetTeamList,
         columns,
         formConfig: {
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
         rowKey: 'id',
         pagination: true,
@@ -93,13 +98,13 @@
       });
 
       function handleCreate() {
-        openDrawer(true, {
+        openModal(true, {
           isUpdate: false,
         });
       }
 
       function handleTeamEdit(record: Recordable) {
-        openDrawer(true, {
+        openModal(true, {
           record,
           isUpdate: true,
         });
@@ -129,7 +134,7 @@
       return {
         t,
         registerTable,
-        registerDrawer,
+        registerModal,
         handleCreate,
         handleTeamEdit,
         handleDelete,

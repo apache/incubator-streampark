@@ -45,15 +45,22 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'roleName',
-    label: t('system.role.form.roleName'),
+    label: '',
     component: 'Input',
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('system.role.form.roleName'),
+      allowClear: true,
+    },
+    colProps: { span: 4 },
   },
   {
     field: 'createTime',
-    label: t('common.createTime'),
+    label: '',
     component: 'RangePicker',
-    colProps: { span: 8 },
+    componentProps: {
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];
 export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {

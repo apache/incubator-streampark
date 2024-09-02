@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper contentFullHeight fixed-height content-background contentClass="px-20px">
+  <PageWrapper contentFullHeight fixed-height content-background contentClass="px-10px">
     <a-card class="header" :bordered="false">
       <template #title>
         <div class="flex items-center justify-between">

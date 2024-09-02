@@ -44,14 +44,21 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'teamName',
-    label: t('system.team.table.teamName'),
+    label: '',
     component: 'Input',
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('system.team.table.teamName'),
+      allowClear: true,
+    },
+    colProps: { span: 4 },
   },
   {
     field: 'createTime',
-    label: t('common.createTime'),
+    label: '',
     component: 'RangePicker',
-    colProps: { span: 8 },
+    componentProps: {
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];

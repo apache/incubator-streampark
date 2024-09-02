@@ -17,11 +17,13 @@
 <template>
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="4" :offset="8" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -48,19 +50,15 @@
         </template>
       </template>
     </BasicTable>
-    <YarnQueueDrawer
-      :okText="t('common.okText')"
-      @register="registerDrawer"
-      @success="handleSuccess"
-    />
+    <YarnQueueModal @register="registerModal" @success="handleSuccess" />
   </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
-
+  import { Col } from 'ant-design-vue';
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import YarnQueueDrawer from './YarnQueueDrawer.vue';
-  import { useDrawer } from '/@/components/Drawer';
+  import YarnQueueModal from './YarnQueueModal.vue';
+  import { useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
   import { columns, searchFormSchema } from './index.data';
   import { fetchYarnQueueList, fetchYarnQueueDelete } from '/@/api/flink/setting/yarnQueue';
@@ -70,19 +68,22 @@
 
   export default defineComponent({
     name: 'YarnQueue',
-    components: { BasicTable, YarnQueueDrawer, TableAction, Icon, PageWrapper },
+    components: { BasicTable, YarnQueueModal, TableAction, Icon, PageWrapper, Col },
     setup() {
-      const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload }] = useTable({
-        title: t('setting.yarnQueue.tableTitle'),
         api: fetchYarnQueueList,
         columns,
         formConfig: {
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
         rowKey: 'id',
         pagination: true,
@@ -98,13 +99,13 @@
       });
 
       function handleCreate() {
-        openDrawer(true, {
+        openModal(true, {
           isUpdate: false,
         });
       }
 
       function handleYarnQueueEdit(record: Recordable) {
-        openDrawer(true, {
+        openModal(true, {
           record,
           isUpdate: true,
         });
@@ -135,7 +136,7 @@
       return {
         t,
         registerTable,
-        registerDrawer,
+        registerModal,
         handleCreate,
         handleYarnQueueEdit,
         handleDelete,

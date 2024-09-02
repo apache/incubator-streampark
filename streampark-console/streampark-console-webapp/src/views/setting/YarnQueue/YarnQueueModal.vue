@@ -15,17 +15,24 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicModal
+    v-bind="$attrs"
+    centered
+    @register="registerModal"
+    showFooter
+    :width="900"
+    @ok="handleSubmit"
+  >
     <template #title>
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" :schemas="getYarnQueueFormSchema" />
-  </BasicDrawer>
+  </BasicModal>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import {
     fetchCheckYarnQueue,
@@ -37,7 +44,7 @@
 
   export default defineComponent({
     name: 'YarnQueueDrawer',
-    components: { BasicDrawer, BasicForm },
+    components: { BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
@@ -102,10 +109,10 @@
         wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
+      const [registerModal, { setModalProps, closeModal }] = useModalInner(
         async (data: Recordable) => {
           resetFields();
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
           isUpdate.value = !!data?.isUpdate;
           // if (isUpdate.value) teamId.value = data.record.id;
           if (unref(isUpdate)) {
@@ -123,21 +130,21 @@
       async function handleSubmit() {
         try {
           const values = await validate();
-          setDrawerProps({ confirmLoading: true });
+          setModalProps({ confirmLoading: true });
           if (isUpdate.value) {
             await fetchYarnQueueUpdate(values);
           } else {
             delete values.id;
             await fetchYarnQueueCreate(values);
           }
-          closeDrawer();
+          closeModal();
           emit('success', isUpdate.value);
         } finally {
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, getYarnQueueFormSchema, handleSubmit };
+      return { registerModal, registerForm, getTitle, getYarnQueueFormSchema, handleSubmit };
     },
   });
 </script>

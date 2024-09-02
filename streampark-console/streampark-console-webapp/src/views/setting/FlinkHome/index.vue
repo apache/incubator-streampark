@@ -44,7 +44,7 @@
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   const [registerTable, { reload, getDataSource }] = useTable({
-    title: t('setting.flinkHome.title'),
+    // title: t('setting.flinkHome.title'),
     api: fetchFlinkEnv,
     columns: [
       { dataIndex: 'flinkName', title: t('setting.flinkHome.flinkName') },
