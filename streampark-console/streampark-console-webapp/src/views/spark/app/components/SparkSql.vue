@@ -25,7 +25,7 @@
   import { Button } from 'ant-design-vue';
   import { isEmpty } from '/@/utils/is';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { format } from '../sqlFormatter';
+  import { format } from '/@/views/flink/app/FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFullContent } from '/@/hooks/event/useFullscreen';
   import { fetchSparkSqlVerify } from '/@/api/spark/sql';
@@ -35,7 +35,7 @@
   const ButtonGroup = Button.Group;
   const { t } = useI18n();
 
-  const flinkSql = ref();
+  const sparkSql = ref();
   const verifyRes = reactive({
     errorMsg: '',
     verified: false,
@@ -73,7 +73,7 @@
     }
 
     if (!props.versionId) {
-      createMessage.error(t('flink.app.dependencyError'));
+      createMessage.error(t('spark.app.dependencyError'));
       return false;
     } else {
       try {
@@ -150,7 +150,7 @@
   //   }, 500);
   // }
   const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
-    flinkSql,
+    sparkSql,
     {
       language: 'sql',
       code: props.value || defaultValue,
@@ -200,14 +200,14 @@
     </div>
 
     <div
-      ref="flinkSql"
+      ref="sparkSql"
       class="overflow-hidden w-full mt-5px sql-bordered"
       :class="flinkEditorClass"
     ></div>
     <ButtonGroup class="sql-tool" v-if="!fullScreenStatus">
       <a-button size="small" class="sql-tool-item" type="primary" @click="handleVerifySql">
         <Icon icon="ant-design:check-outlined" />
-        {{ t('flink.app.flinkSql.verify') }}
+        {{ t('spark.app.sparkSql.verify') }}
       </a-button>
       <a-button
         class="sql-tool-item"
@@ -217,15 +217,15 @@
         @click="emit('preview', value)"
       >
         <Icon icon="ant-design:eye-outlined" />
-        {{ t('flink.app.flinkSql.preview') }}
+        {{ t('spark.app.sparkSql.preview') }}
       </a-button>
       <a-button class="sql-tool-item" size="small" type="default" @click="handleFormatSql">
         <Icon icon="ant-design:thunderbolt-outlined" />
-        {{ t('flink.app.flinkSql.format') }}
+        {{ t('spark.app.sparkSql.format') }}
       </a-button>
       <a-button class="sql-tool-item" size="small" type="default" @click="toggle">
         <Icon icon="ant-design:fullscreen-outlined" />
-        {{ t('flink.app.flinkSql.fullScreen') }}
+        {{ t('spark.app.sparkSql.fullScreen') }}
       </a-button>
     </ButtonGroup>
     <div class="flex items-center justify-between" v-else>
@@ -234,26 +234,26 @@
           {{ verifyRes.errorMsg }}
         </div>
         <div v-else class="text-green-700">
-          <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+          <span v-if="verifyRes.verified"> {{ t('spark.app.sparkSql.successful') }} </span>
         </div>
       </div>
       <div class="sql-tool">
         <a-button type="primary" @click="handleVerifySql">
           <div class="flex items-center">
             <Icon icon="ant-design:check-outlined" />
-            {{ t('flink.app.flinkSql.verify') }}
+            {{ t('spark.app.sparkSql.verify') }}
           </div>
         </a-button>
         <a-button v-if="canPreview" @click="emit('preview', value)" class="ml-10px">
           <div class="flex items-center">
             <Icon icon="ant-design:eye-outlined" />
-            {{ t('flink.app.flinkSql.preview') }}
+            {{ t('spark.app.sparkSql.preview') }}
           </div>
         </a-button>
         <a-button type="default" @click="handleFormatSql" class="ml-10px">
           <div class="flex items-center">
             <Icon icon="ant-design:thunderbolt-outlined" />
-            {{ t('flink.app.flinkSql.format') }}
+            {{ t('spark.app.sparkSql.format') }}
           </div>
         </a-button>
         <a-button type="default" @click="toggle" class="ml-10px">
@@ -268,7 +268,7 @@
   <p class="conf-desc mt-10px" v-if="!fullScreenStatus">
     <span class="text-red-600" v-if="verifyRes.errorMsg"> {{ verifyRes.errorMsg }} </span>
     <span v-else class="text-green-700">
-      <span v-if="verifyRes.verified"> {{ t('flink.app.flinkSql.successful') }} </span>
+      <span v-if="verifyRes.verified"> {{ t('spark.app.sparkSql.successful') }} </span>
     </span>
   </p>
 </template>

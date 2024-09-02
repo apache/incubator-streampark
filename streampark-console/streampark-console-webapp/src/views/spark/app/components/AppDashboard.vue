@@ -32,40 +32,38 @@
       const res = await fetchSparkDashboard();
       if (res) {
         Object.assign(dashBigScreenMap, {
-          runningJob: {
-            staticstics: { title: t('flink.app.dashboard.runningJobs'), value: res.runningJob },
-            footer: [
-              { title: t('flink.app.dashboard.totalTask'), value: res?.task?.total || 0 },
-              { title: t('flink.app.dashboard.runningTask'), value: res?.task?.running || 0 },
-            ],
-          },
-          availiableTask: {
-            staticstics: {
-              title: t('flink.app.dashboard.availableTaskSlots'),
-              value: res.availableSlot,
+          runningTask: {
+            statistics: {
+              title: t('spark.app.dashboard.runningTasks'),
+              value: res.runningApplication,
             },
             footer: [
-              { title: t('flink.app.dashboard.taskSlots'), value: res.totalSlot },
-              { title: t('flink.app.dashboard.taskManagers'), value: res.totalTM },
+              { title: t('spark.app.dashboard.totalTask'), value: res?.numTasks || 0 },
+              { title: t('spark.app.dashboard.totalStage'), value: res?.numStages || 0 },
             ],
           },
-          jobManager: {
-            staticstics: { title: t('flink.app.dashboard.jobManagerMemory'), value: res.jmMemory },
+          completedTask: {
+            statistics: {
+              title: t('spark.app.dashboard.completedTask'),
+              value: res.numCompletedTasks,
+            },
             footer: [
-              {
-                title: t('flink.app.dashboard.totalJobManagerMemory'),
-                value: `${res.jmMemory} MB`,
-              },
+              { title: t('spark.app.dashboard.completedStage'), value: res.numCompletedStages },
             ],
+          },
+          memory: {
+            statistics: {
+              title: t('spark.app.dashboard.memory'),
+              value: `${res.usedMemory} MB`,
+            },
+            footer: [],
           },
           taskManager: {
-            staticstics: { title: t('flink.app.dashboard.taskManagerMemory'), value: res.tmMemory },
-            footer: [
-              {
-                title: t('flink.app.dashboard.totalTaskManagerMemory'),
-                value: `${res.tmMemory} MB`,
-              },
-            ],
+            statistics: {
+              title: t('spark.app.dashboard.VCore'),
+              value: res.usedVCores,
+            },
+            footer: [],
           },
         });
       }
@@ -92,7 +90,7 @@
       :key="key"
     >
       <StatisticCard
-        :statisticProps="value.staticstics"
+        :statisticProps="value.statistics"
         :footerList="value.footer"
         :loading="dashboardLoading"
       />

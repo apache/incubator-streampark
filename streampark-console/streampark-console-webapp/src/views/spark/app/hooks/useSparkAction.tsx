@@ -14,22 +14,233 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Alert, Form, Input } from 'ant-design-vue';
-import { h, onMounted, reactive, ref, unref } from 'vue';
+import { Alert, Form, Input, Tag } from 'ant-design-vue';
+import { h, onMounted, reactive, ref, unref, VNode } from 'vue';
+import { handleAppBuildStatueText } from '../utils';
+import {
+  fetchCheckSparkAppStart,
+  fetchCheckSparkName,
+  fetchCopySparkApp,
+  fetchSparkAppForcedStop,
+  fetchSparkAppStart,
+  fetchSparkMapping,
+} from '/@/api/spark/app';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
-import { AppExistsStateEnum } from '/@/enums/sparkEnum';
+import {
+  AppExistsStateEnum,
+  AppStateEnum,
+  ExecModeEnum,
+  OptionStateEnum,
+} from '/@/enums/sparkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { fetchCheckSparkName, fetchCopySparkApp, fetchSparkMapping } from '/@/api/spark/app';
+import { fetchBuildSparkApp, fetchBuildProgressDetail } from '/@/api/spark/build';
+import type { SparkApplication } from '/@/api/spark/app.type';
+import { exceptionPropWidth } from '/@/utils';
+import { useRouter } from 'vue-router';
 
-export const useSparkAction = () => {
+export const useSparkAction = (optionApps: Recordable) => {
   const { t } = useI18n();
-  const { Swal, createConfirm, createMessage } = useMessage();
+  const router = useRouter();
+  const { Swal, createConfirm, createMessage, createWarningModal } = useMessage();
   const users = ref<Recordable>([]);
+  const appBuildDetail = reactive<Recordable>({});
+
+  /* check */
+  function handleCheckReleaseApp(app: Recordable) {
+    if (app['appControl']['allowBuild'] === true) {
+      handleReleaseApp(app, false);
+    } else {
+      createWarningModal({
+        title: 'WARNING',
+        content: `
+          <p class="pt-10px">${t('flink.app.release.releaseTitle')}</p>
+          <p>${t('flink.app.release.releaseDesc')}</p>
+        `,
+        okType: 'danger',
+        onOk: () => handleReleaseApp(app, true),
+      });
+    }
+  }
+
+  /* Release App */
+  async function handleReleaseApp(app: Recordable, force: boolean) {
+    const res = await fetchBuildSparkApp({
+      appId: app.id,
+      forceBuild: force,
+    });
+    if (!res.data) {
+      let message = res.message || '';
+      if (!message) {
+        message = t('flink.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
+      }
+      Swal.fire('Failed', message, 'error');
+    } else {
+      Swal.fire({
+        icon: 'success',
+        title: t('flink.app.release.releasing'),
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    }
+  }
+
+  /* start application */
+  function handleAppCheckStart(app: Recordable) {
+    // when then app is building, show forced starting modal
+    if (app['appControl']['allowStart'] === false) {
+      handleFetchBuildDetail(app);
+      createWarningModal({
+        title: 'WARNING',
+        content: () => {
+          const content: Array<VNode> = [];
+          if (appBuildDetail.pipeline == null) {
+            content.push(
+              h('p', { class: 'pt-10px' }, 'No build record exists for the current application.'),
+            );
+          } else {
+            content.push(
+              h('p', { class: 'pt-10px' }, [
+                'The current build state of the application is',
+                h(
+                  Tag,
+                  { color: 'orange' },
+                  handleAppBuildStatueText(appBuildDetail.pipeline.pipeStatus),
+                ),
+              ]),
+            );
+          }
+          content.push(h('p', null, 'Are you sure to force the application to run?'));
+          return content;
+        },
+        okType: 'danger',
+        onOk: () => {
+          handleStart(app);
+          return Promise.resolve(true);
+        },
+      });
+    } else {
+      handleStart(app);
+    }
+  }
+
+  async function handleStart(app: SparkApplication) {
+    if (app.sparkVersion == null) {
+      Swal.fire('Failed', 'please set spark version first.', 'error');
+    } else {
+      if (!optionApps.starting.get(app.id) || app['optionState'] === OptionStateEnum.NONE) {
+        // when then app is building, show forced starting modal
+        const resp = await fetchCheckSparkAppStart({
+          id: app.id,
+        });
+        if (+resp === AppExistsStateEnum.IN_YARN) {
+          await fetchSparkAppForcedStop({
+            id: app.id,
+          });
+        }
+        await handleDoSubmit(app);
+      }
+    }
+  }
+  /* submit */
+  async function handleDoSubmit(data: SparkApplication) {
+    try {
+      const res = await fetchSparkAppStart({
+        id: data.id,
+      });
+      if (res.data) {
+        Swal.fire({
+          icon: 'success',
+          title: t('spark.app.operation.starting'),
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        optionApps.starting.set(data.id, new Date().getTime());
+      } else {
+        Swal.fire({
+          title: 'Failed',
+          icon: 'error',
+          width: exceptionPropWidth(),
+          html:
+            '<pre class="api-exception"> startup failed, ' +
+            res.message.replaceAll(/\[StreamPark]/g, '') +
+            '</pre>',
+          showCancelButton: true,
+          confirmButtonColor: '#55BDDDFF',
+          confirmButtonText: 'Detail',
+          cancelButtonText: 'Close',
+        }).then((isConfirm: Recordable) => {
+          if (isConfirm.value) {
+            router.push({
+              path: '/spark/app/detail',
+              query: { appId: data.id },
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  async function handleFetchBuildDetail(app: Recordable) {
+    const res = await fetchBuildProgressDetail(app.id);
+    appBuildDetail.pipeline = res.pipeline;
+    appBuildDetail.docker = res.docker;
+  }
+
+  function handleCanStop(app: Recordable) {
+    const optionTime = new Date(app['optionTime']).getTime();
+    const nowTime = new Date().getTime();
+    if (nowTime - optionTime >= 60 * 1000) {
+      const state = app['optionState'];
+      if (state === OptionStateEnum.NONE) {
+        return [AppStateEnum.STARTING, AppStateEnum.MAPPING].includes(app.state) || false;
+      }
+      return true;
+    }
+    return false;
+  }
+  function handleAbort(app: Recordable) {
+    let option = 'starting';
+    const optionState = app['optionState'];
+    const stateMap = {
+      [AppStateEnum.STARTING]: 'starting',
+    };
+    const optionStateMap = {
+      [OptionStateEnum.RELEASING]: 'releasing',
+      [OptionStateEnum.STARTING]: 'starting',
+    };
+    if (optionState === OptionStateEnum.NONE) {
+      option = stateMap[app.state];
+    } else {
+      option = optionStateMap[optionState];
+    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `current job is ${option}, are you sure abort the job?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, abort job!',
+      denyButtonText: `No, cancel`,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire('abort job', '', 'success');
+        const res = await fetchSparkAppForcedStop({
+          id: app.id,
+        });
+        if (res) {
+          createMessage.success('abort job starting');
+        }
+        return Promise.resolve();
+      }
+    });
+  }
 
   /* copy application */
-  function handleCopy(item: Recordable) {
+  function handleCopy(item) {
     const validateStatus = ref<'' | 'error' | 'validating' | 'success' | 'warning'>('');
     let help = '';
     let copyAppName: string | undefined = '';
@@ -74,14 +285,14 @@ export const useSparkAction = () => {
           return Promise.reject('copy application error');
         }
         //2) check name
-        const params = { jobName: copyAppName };
+        const params = { appName: copyAppName };
         const resp = await fetchCheckSparkName(params);
         const code = parseInt(resp);
-        if (code === AppExistsStateEnum.NO) {
+        if (code === 0) {
           try {
             const { data } = await fetchCopySparkApp({
               id: item.id,
-              jobName: copyAppName,
+              appName: copyAppName,
             });
             const status = data.status || 'error';
             if (status === 'success') {
@@ -103,11 +314,11 @@ export const useSparkAction = () => {
           }
         } else {
           validateStatus.value = 'error';
-          if (code === AppExistsStateEnum.IN_DB) {
+          if (code === 1) {
             help = t('flink.app.addAppTips.appNameNotUniqueMessage');
-          } else if (code === AppExistsStateEnum.IN_YARN) {
+          } else if (code === 2) {
             help = t('flink.app.addAppTips.appNameExistsInYarnMessage');
-          } else if (code === AppExistsStateEnum.IN_KUBERNETES) {
+          } else if (code === 3) {
             help = t('flink.app.addAppTips.appNameExistsInK8sMessage');
           } else {
             help = t('flink.app.addAppTips.appNameNotValid');
@@ -144,6 +355,15 @@ export const useSparkAction = () => {
             <Form.Item label="Application Name">
               <Alert message={app.jobName} type="info" />
             </Form.Item>
+            {[ExecModeEnum.YARN_CLIENT, ExecModeEnum.YARN_CLUSTER].includes(app.executionMode) && (
+              <Form.Item
+                label="YARN Application Id"
+                name="appId"
+                rules={[{ required: true, message: 'YARN ApplicationId is required' }]}
+              >
+                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
+              </Form.Item>
+            )}
             <Form.Item
               label="JobId"
               name="jobId"
@@ -162,7 +382,6 @@ export const useSparkAction = () => {
           await fetchSparkMapping({
             id: app.id,
             appId: formValue.appId,
-            jobId: formValue.jobId,
           });
           Swal.fire({
             icon: 'success',
@@ -185,6 +404,10 @@ export const useSparkAction = () => {
   });
 
   return {
+    handleCheckReleaseApp,
+    handleAppCheckStart,
+    handleCanStop,
+    handleAbort,
     handleCopy,
     handleMapping,
     users,

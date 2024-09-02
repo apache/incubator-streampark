@@ -26,31 +26,31 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { encryptByBase64 } from '/@/utils/cipher';
   import { AppTypeEnum, JobTypeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
-  import { fetchCreateSparkApp } from '/@/api/spark/app';
+  import { fetchGetSparkApp, fetchUpdateSparkApp } from '/@/api/spark/app';
   import { SparkApplication } from '/@/api/spark/app.type';
   import { fetchSparkEnvList } from '/@/api/spark/home';
   import { SparkEnv } from '/@/api/spark/home.type';
+  import { useRoute } from 'vue-router';
 
   defineOptions({
     name: 'SparkApplicationAction',
   });
   const go = useGo();
   const sparkSql = ref();
-  const submitLoading = ref(false);
 
   const { t } = useI18n();
+  const sparkApp = ref<SparkApplication>({});
+  const route = useRoute();
   const { createMessage } = useMessage();
   const ls = createLocalStorage();
 
   const sparkEnvs = ref<SparkEnv[]>([]);
 
   async function handleAppFieldValue() {
-    const defaultValue = {};
-    const v = sparkEnvs.value.filter((v) => v.isDefault)[0];
-    if (v) {
-      Object.assign(defaultValue, { versionId: v.id });
-    }
-    return defaultValue;
+    const appId = route.query.appId;
+    const res = await fetchGetSparkApp({ id: appId as string });
+    sparkApp.value = res;
+    return res;
   }
 
   /* custom mode */
@@ -73,7 +73,7 @@
       hadoopUser: values.hadoopUser,
       description: values.description,
     };
-    handleCreateAction(params);
+    handleUpdateAction(params);
   }
   /* spark sql mode */
   async function handleSQLMode(values: Recordable) {
@@ -83,7 +83,7 @@
     } else {
       config = null;
     }
-    handleCreateAction({
+    handleUpdateAction({
       jobType: JobTypeEnum.SQL,
       executionMode: values.executionMode,
       appType: AppTypeEnum.APACHE_SPARK,
@@ -120,7 +120,7 @@
     }
   }
   /* send create request */
-  async function handleCreateAction(params: Recordable) {
+  async function handleUpdateAction(params: Recordable) {
     const param: SparkApplication = {};
     for (const k in params) {
       const v = params[k];
@@ -131,11 +131,18 @@
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
     Object.assign(param, { socketId });
-    await fetchCreateSparkApp(param);
-    submitLoading.value = false;
-    go('/spark/app');
+    const updated = await fetchUpdateSparkApp(params);
+    if (updated) {
+      createMessage.success(t('spark.app.success'));
+      go('/spark/app');
+    }
   }
   onMounted(() => {
+    if (!route?.query?.appId) {
+      go('/spark/app');
+      createMessage.warning(t('spark.app.appidCheck'));
+      return;
+    }
     //get flinkEnv
     fetchSparkEnvList().then((res) => {
       sparkEnvs.value = res;
