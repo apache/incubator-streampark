@@ -105,8 +105,11 @@
                 icon: 'ant-design:thunderbolt-outlined',
                 auth: 'project:build',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
-                tooltip: t('flink.project.operationTips.buildProjectMessage'),
-                onClick: handleBuild.bind(null, record),
+                popConfirm: {
+                  title: t('flink.project.operationTips.buildProjectMessage'),
+                  placement: 'left',
+                  confirm: handleBuild.bind(null, record),
+                },
               },
               {
                 icon: 'clarity:note-edit-line',
