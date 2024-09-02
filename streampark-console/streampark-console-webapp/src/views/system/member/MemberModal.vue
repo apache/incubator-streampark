@@ -28,7 +28,9 @@
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getMemberFormSchema" />
+    <div class="mt-4">
+      <BasicForm @register="registerForm" :schemas="getMemberFormSchema" />
+    </div>
   </BasicModal>
 </template>
 
@@ -103,6 +105,7 @@
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
           placeholder: t('system.member.roleRequire'),
+          getPopupContainer: () => document.body,
         },
         rules: [{ required: true, message: t('system.member.roleRequire') }],
       },

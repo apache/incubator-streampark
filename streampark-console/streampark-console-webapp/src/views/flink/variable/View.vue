@@ -61,16 +61,15 @@
         </template>
       </template>
     </BasicTable>
-    <VariableDrawer @register="registerDrawer" @success="handleSuccess" />
+    <VariableModal @register="registerModal" @success="handleSuccess" />
     <VariableInfo @register="registerInfo" />
   </PageWrapper>
 </template>
 
 <script lang="ts" setup>
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
-  import VariableDrawer from './components/VariableDrawer.vue';
+  import VariableModal from './components/VariableModal.vue';
   import VariableInfo from './components/VariableInfo.vue';
-  import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -79,13 +78,14 @@
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
   import { PageWrapper } from '/@/components/Page';
+  import { useModal } from '/@/components/Modal';
 
   defineOptions({
     name: 'Variable',
   });
   const router = useRouter();
-  const [registerDrawer, { openDrawer }] = useDrawer();
-  const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
+  const [registerModal, { openModal }] = useModal();
+  const [registerInfo, { openModal: openInfoModal }] = useModal();
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
@@ -126,19 +126,19 @@
   });
 
   function handleCreate() {
-    openDrawer(true, {
+    openModal(true, {
       isUpdate: false,
     });
   }
 
   function handleEdit(record: Recordable) {
-    openDrawer(true, {
+    openModal(true, {
       record,
       isUpdate: true,
     });
   }
   function handleView(record: Recordable) {
-    openInfoDraw(true, record);
+    openInfoModal(true, record);
   }
   /* Delete the organization */
   async function handleDelete(record: Recordable) {

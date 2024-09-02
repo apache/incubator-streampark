@@ -27,7 +27,9 @@
       <Icon icon="ant-design:team-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
+    </div>
   </BasicModal>
 </template>
 <script lang="ts">

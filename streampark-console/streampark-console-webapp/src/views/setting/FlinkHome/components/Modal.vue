@@ -14,16 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-
-  export default defineComponent({
-    name: 'FlinkModal',
-  });
-</script>
 <script lang="ts" setup name="FlinkModal">
   import { h, ref } from 'vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -176,7 +169,9 @@
       <SvgIcon name="flink" />
       {{ t('common.add') }}
     </template>
-    <BasicForm @register="registerForm" />
+    <div class="mt-3">
+      <BasicForm @register="registerForm" />
+    </div>
   </BasicModal>
 </template>
 <style lang="less">
