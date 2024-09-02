@@ -21,6 +21,7 @@ export default {
   start: 'Start Cluster',
   edit: 'Edit Cluster',
   delete: 'Are you sure delete this cluster ?',
+  searchByName: 'Search by cluster name',
   form: {
     clusterName: 'Cluster Name',
     address: 'Cluster URL',

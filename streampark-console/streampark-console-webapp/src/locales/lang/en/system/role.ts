@@ -30,6 +30,7 @@ export default {
     exist: 'Sorry, the role name already exists',
     empty: 'Role name cannot be empty',
   },
+  searchByRole: 'Search by role name',
   roleInfo: 'Role Info',
   tableTitle: 'Role List',
   modifyTime: 'Not yet modified',

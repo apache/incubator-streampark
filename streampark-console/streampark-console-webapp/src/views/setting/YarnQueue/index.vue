@@ -18,7 +18,7 @@
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="4" :offset="8" class="text-right">
+        <Col :span="5" :offset="13" class="text-right">
           <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}
@@ -78,7 +78,6 @@
         columns,
         formConfig: {
           schemas: searchFormSchema,
-          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
           rowProps: {
             gutter: 14,
           },

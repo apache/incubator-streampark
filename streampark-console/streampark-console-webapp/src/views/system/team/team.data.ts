@@ -19,7 +19,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 export const columns: BasicColumn[] = [
   {
-    title: t('system.team.table.teamName'),
+    title: t('system.team.teamName'),
     dataIndex: 'teamName',
     sorter: true,
   },
@@ -47,18 +47,9 @@ export const searchFormSchema: FormSchema[] = [
     label: '',
     component: 'Input',
     componentProps: {
-      placeholder: t('system.team.table.teamName'),
+      placeholder: t('system.team.searchByTeam'),
       allowClear: true,
     },
-    colProps: { span: 4 },
-  },
-  {
-    field: 'createTime',
-    label: '',
-    component: 'RangePicker',
-    componentProps: {
-      allowClear: true,
-    },
-    colProps: { span: 6 },
+    colProps: { span: 5 },
   },
 ];

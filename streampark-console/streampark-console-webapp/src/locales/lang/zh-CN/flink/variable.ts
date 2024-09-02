@@ -23,6 +23,8 @@ export default {
   add: '添加',
   success: '成功',
   fail: '失败',
+  searchByCode: '根据变量 code 搜索',
+  searchByDesc: '根据变量描述搜索',
   table: {
     title: '变量列表',
     variableCode: '变量Code',

@@ -48,19 +48,10 @@ export const searchFormSchema: FormSchema[] = [
     label: '',
     component: 'Input',
     componentProps: {
-      placeholder: t('system.role.form.roleName'),
+      placeholder: t('system.role.searchByRole'),
       allowClear: true,
     },
-    colProps: { span: 4 },
-  },
-  {
-    field: 'createTime',
-    label: '',
-    component: 'RangePicker',
-    componentProps: {
-      allowClear: true,
-    },
-    colProps: { span: 6 },
+    colProps: { span: 5 },
   },
 ];
 export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {

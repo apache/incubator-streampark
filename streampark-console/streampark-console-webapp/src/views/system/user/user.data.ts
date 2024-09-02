@@ -73,19 +73,10 @@ export const searchFormSchema: FormSchema[] = [
     label: '',
     component: 'Input',
     componentProps: {
-      placeholder: t('system.user.form.userName'),
+      placeholder: t('system.user.searchByName'),
       allowClear: true,
     },
-    colProps: { span: 4 },
-  },
-  {
-    field: 'createTime',
-    label: '',
-    component: 'RangePicker',
-    componentProps: {
-      allowClear: true,
-    },
-    colProps: { span: 6 },
+    colProps: { span: 5 },
   },
 ];
 

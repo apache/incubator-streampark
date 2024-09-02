@@ -23,6 +23,7 @@ export default {
   add: 'Add',
   success: 'successful',
   fail: 'failed',
+  searchByTeam: 'Search by team name',
   table: {
     title: 'Team List',
     teamName: 'Team',

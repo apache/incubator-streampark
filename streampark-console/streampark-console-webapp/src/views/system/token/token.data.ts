@@ -83,10 +83,14 @@ export const columns: BasicColumn[] = [
 
 export const searchFormSchema: FormSchema[] = [
   {
-    field: 'user',
-    label: t('system.token.table.userName'),
+    field: 'username',
+    label: '',
     component: 'Input',
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('system.user.searchByName'),
+      allowClear: true,
+    },
+    colProps: { span: 5 },
   },
 ];
 

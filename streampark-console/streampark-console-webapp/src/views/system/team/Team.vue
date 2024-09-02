@@ -18,7 +18,7 @@
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="4" :offset="10" class="text-right">
+        <Col :span="5" :offset="14" class="text-right">
           <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}
@@ -77,7 +77,6 @@
         columns,
         formConfig: {
           schemas: searchFormSchema,
-          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
           rowProps: {
             gutter: 14,
           },

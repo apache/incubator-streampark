@@ -47,6 +47,7 @@ export default {
     edit: 'Edit User',
     view: 'View User',
   },
+  searchByName: 'Search by username',
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
   male: 'male',

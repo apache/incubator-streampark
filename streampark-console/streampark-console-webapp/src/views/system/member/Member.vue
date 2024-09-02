@@ -19,7 +19,7 @@
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" :formConfig="formConfig" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="4" :offset="5" class="text-right">
+        <Col :span="5" :offset="9" class="text-right">
           <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}
@@ -95,7 +95,7 @@
             placeholder: t('system.member.table.userName'),
             allowClear: true,
           },
-          colProps: { span: 4 },
+          colProps: { span: 5 },
         },
         {
           field: 'roleName',
@@ -109,17 +109,7 @@
           },
           colProps: { span: 5 },
         },
-        {
-          field: 'createTime',
-          label: '',
-          component: 'RangePicker',
-          componentProps: {
-            allowClear: true,
-          },
-          colProps: { span: 6 },
-        },
       ],
-      fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
       rowProps: {
         gutter: 14,
       },

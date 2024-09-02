@@ -17,29 +17,19 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.FlinkClusterMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkCluster">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="address" jdbcType="VARCHAR" property="address"/>
-        <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
-        <result column="cluster_name" jdbcType="VARCHAR" property="clusterName"/>
-        <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
-        <result column="execution_mode" jdbcType="TINYINT" property="executionMode"/>
-        <result column="version_id" jdbcType="BIGINT" property="versionId"/>
-        <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
-        <result column="service_account" jdbcType="VARCHAR" property="serviceAccount"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="user_id" jdbcType="BIGINT" property="userId"/>
-        <result column="flink_image" jdbcType="VARCHAR" property="flinkImage"/>
-        <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
-        <result column="k8s_rest_exposed_type" jdbcType="TINYINT" property="k8sRestExposedType"/>
-        <result column="k8s_hadoop_integration" jdbcType="BOOLEAN" property="k8sHadoopIntegration"/>
-        <result column="k8s_conf" jdbcType="VARCHAR" property="k8sConf"/>
-        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
-        <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
-        <result column="cluster_state" jdbcType="TINYINT" property="clusterState"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
+    <select id="findPage" resultType="org.apache.streampark.console.core.entity.FlinkCluster">
+        select * from t_flink_cluster
+        <where>
+            <if test="cluster.clusterName != null and cluster.clusterName != ''">
+                <if test="_databaseId == 'mysql'">
+                    and cluster_name like concat('%', #{cluster.clusterName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and cluster_name like '%' || #{cluster.clusterName} || '%'
+                </if>
+            </if>
+        </where>
+    </select>
 
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
         select
