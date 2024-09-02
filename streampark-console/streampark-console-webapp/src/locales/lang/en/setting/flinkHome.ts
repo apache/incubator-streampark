@@ -25,7 +25,7 @@ export default {
   flinkHome: 'Flink Home',
   flinkHomePlaceholder: 'Please enter flink home',
   flinkVersion: 'Flink Version',
-  searchByName: 'Search by Flink name',
+  searchByName: 'Search by flink name',
   description: 'description',
   descriptionPlaceholder: 'Please enter description',
   operateMessage: {
