@@ -26,8 +26,8 @@ export default {
   searchByRole: 'Search by role',
   table: {
     title: 'Member List',
-    userName: 'Search by username',
-    roleName: 'Search by role',
+    userName: 'user Name',
+    roleName: 'role Name',
     createTime: 'Create Time',
     modifyTime: 'Modify Time',
   },

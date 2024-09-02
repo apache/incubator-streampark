@@ -14,11 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default {
-    name: 'AppCreate',
-  };
-</script>
 <script setup lang="ts" name="AppCreate">
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
@@ -105,7 +100,7 @@
     options.forEach((item) => {
       defaultValue[item.key] = item.defaultValue;
     });
-    const v = flinkEnvs.value.filter((v) => v.isDefault)[0];
+    const v = flinkEnvs.value.filter((v) => v.isDefault)?.[0];
     if (v) {
       Object.assign(defaultValue, { versionId: v.id });
     }

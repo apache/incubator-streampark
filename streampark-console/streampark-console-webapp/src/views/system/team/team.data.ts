@@ -19,7 +19,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 export const columns: BasicColumn[] = [
   {
-    title: t('system.team.teamName'),
+    title: t('system.team.table.teamName'),
     dataIndex: 'teamName',
     sorter: true,
   },

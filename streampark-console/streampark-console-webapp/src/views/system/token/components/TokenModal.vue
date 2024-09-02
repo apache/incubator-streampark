@@ -15,29 +15,31 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    :okText="t('common.submitText')"
+  <BasicModal
     @register="registerDrawer"
     showFooter
     :title="getTitle"
-    width="40%"
+    :width="600"
+    :minHeight="140"
     @ok="handleSubmit"
   >
-    <BasicForm @register="registerForm" />
-  </BasicDrawer>
+    <div class="mt-18px">
+      <BasicForm @register="registerForm" />
+    </div>
+  </BasicModal>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from '../token.data';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { fetchTokenCreate } from '/@/api/system/token';
   import { useI18n } from '/@/hooks/web/useI18n';
 
   export default defineComponent({
-    name: 'TokenDrawer',
-    components: { BasicDrawer, BasicForm },
+    name: 'TokenModal',
+    components: { BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const isUpdate = ref(true);
@@ -51,9 +53,9 @@
         baseColProps: { lg: 22, md: 22 },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+      const [registerDrawer, { setModalProps, closeModal }] = useModalInner(async (data) => {
         resetFields();
-        setDrawerProps({ confirmLoading: false });
+        setModalProps({ confirmLoading: false });
         isUpdate.value = !!data?.isUpdate;
 
         if (unref(isUpdate)) {
@@ -70,12 +72,12 @@
       async function handleSubmit() {
         try {
           const values = await validate();
-          setDrawerProps({ confirmLoading: true });
+          setModalProps({ confirmLoading: true });
           const res = await fetchTokenCreate(values);
-          closeDrawer();
+          closeModal();
           emit('success', { isUpdate: unref(isUpdate), values: res });
         } finally {
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
         }
       }
 

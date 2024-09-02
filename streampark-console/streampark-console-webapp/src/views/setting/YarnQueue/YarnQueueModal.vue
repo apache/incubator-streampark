@@ -20,13 +20,15 @@
     centered
     @register="registerModal"
     showFooter
-    :width="900"
+    :width="750"
     @ok="handleSubmit"
   >
     <template #title>
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getYarnQueueFormSchema" />
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getYarnQueueFormSchema" />
+    </div>
   </BasicModal>
 </template>
 <script lang="ts">
@@ -95,7 +97,10 @@
             field: 'description',
             label: t('common.description'),
             component: 'InputTextArea',
-            componentProps: { rows: 4 },
+            componentProps: {
+              placeholder: t('setting.yarnQueue.placeholder.description'),
+              rows: 4,
+            },
             rules: [{ max: 512, message: t('setting.yarnQueue.descriptionMessage') }],
           },
         ];

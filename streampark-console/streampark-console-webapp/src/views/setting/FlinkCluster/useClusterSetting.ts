@@ -1,4 +1,3 @@
-import { ExecModeEnum } from '/@/enums/flinkEnum';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +14,7 @@ import { ExecModeEnum } from '/@/enums/flinkEnum';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { ExecModeEnum } from '/@/enums/flinkEnum';
 import { RuleObject } from 'ant-design-vue/lib/form';
 import { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { computed, onMounted, reactive, ref, unref } from 'vue';
@@ -162,7 +162,7 @@ export const useClusterSetting = () => {
         label: t('setting.flinkCluster.form.k8sClusterId'),
         ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
         component: 'Input',
-        defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)[0],
+        defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)?.[0],
         render: (renderCallbackParams) => renderClusterId(renderCallbackParams),
         rules: [{ required: true, message: t('setting.flinkCluster.required.clusterId') }],
       },

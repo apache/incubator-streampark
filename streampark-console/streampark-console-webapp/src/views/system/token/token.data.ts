@@ -106,6 +106,7 @@ export const formSchema: FormSchema[] = [
       resultField: 'records',
       labelField: 'username',
       valueField: 'userId',
+      getPopupContainer: () => document.body,
     },
     rules: [{ required: true, message: t('system.token.selectUserAlertMessage'), trigger: 'blur' }],
   },
