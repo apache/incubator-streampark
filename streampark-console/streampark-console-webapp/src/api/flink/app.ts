@@ -158,8 +158,8 @@ export function fetchOptionLog(data) {
   return defHttp.post({ url: APP_API.OPTION_LOG, data });
 }
 
-export function fetchDeleteOperationLog(id: string) {
-  return defHttp.post({ url: APP_API.DELETE_LOG, data: { id } });
+export function fetchDeleteOperationLog(appId: string, id: string) {
+  return defHttp.post({ url: APP_API.DELETE_LOG, data: { appId, id } });
 }
 
 /**
