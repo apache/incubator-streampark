@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
@@ -39,9 +41,15 @@ public class FlinkEnvController {
 
   @Autowired private FlinkEnvService flinkEnvService;
 
-  @PostMapping("list")
-  public RestResponse list(FlinkEnv flinkEnv, RestRequest restRequest) {
+  @PostMapping("page")
+  public RestResponse findPage(FlinkEnv flinkEnv, RestRequest restRequest) {
     IPage<FlinkEnv> envs = flinkEnvService.findPage(flinkEnv, restRequest);
+    return RestResponse.success(envs);
+  }
+
+  @PostMapping("list")
+  public RestResponse list() {
+    List<FlinkEnv> envs = flinkEnvService.list();
     return RestResponse.success(envs);
   }
 

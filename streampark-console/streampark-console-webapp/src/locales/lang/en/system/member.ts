@@ -22,6 +22,8 @@ export default {
   add: 'Add',
   success: 'successful',
   fail: 'failed',
+  searchByUser: 'Search by username',
+  searchByRole: 'Search by role',
   table: {
     title: 'Member List',
     userName: 'Search by username',

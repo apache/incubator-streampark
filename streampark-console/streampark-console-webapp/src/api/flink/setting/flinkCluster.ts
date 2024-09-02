@@ -21,6 +21,7 @@ import { defHttp } from '/@/utils/http/axios';
 import { BasicTableParams } from '/@/api/model/baseModel';
 
 enum FLINK_API {
+  PAGE = '/flink/cluster/page',
   LIST = '/flink/cluster/list',
   REMOTE_URL = '/flink/cluster/remoteUrl',
   CREATE = '/flink/cluster/create',
@@ -30,6 +31,17 @@ enum FLINK_API {
   START = '/flink/cluster/start',
   SHUTDOWN = '/flink/cluster/shutdown',
   DELETE = '/flink/cluster/delete',
+}
+
+/**
+ * flink cluster
+ * @returns Promise<FlinkEnv[]>
+ */
+export function pageFlinkCluster(data: BasicTableParams) {
+  return defHttp.post<FlinkCluster[]>({
+    url: FLINK_API.PAGE,
+    data,
+  });
 }
 /**
  * flink cluster

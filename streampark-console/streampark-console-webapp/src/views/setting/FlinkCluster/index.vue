@@ -26,7 +26,7 @@
     fetchClusterRemove,
     fetchClusterShutdown,
     fetchClusterStart,
-    fetchFlinkCluster,
+    pageFlinkCluster,
   } from '/@/api/flink/setting/flinkCluster';
   import { FlinkCluster } from '/@/api/flink/setting/types/flinkCluster.type';
   import { useGo } from '/@/hooks/web/usePage';
@@ -55,7 +55,7 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerTable, { reload, getLoading }] = useTable({
-    api: fetchFlinkCluster,
+    api: pageFlinkCluster,
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
       { dataIndex: 'executionMode', title: t('setting.flinkCluster.form.executionMode') },

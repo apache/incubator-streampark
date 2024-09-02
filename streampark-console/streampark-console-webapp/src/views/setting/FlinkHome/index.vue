@@ -25,7 +25,7 @@
   import {
     fetchValidity,
     fetchDefaultSet,
-    fetchFlinkEnv,
+    pageFlinkEnv,
     fetchFlinkEnvRemove,
     fetchFlinkInfo,
   } from '/@/api/flink/setting/flinkEnv';
@@ -44,7 +44,7 @@
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   const [registerTable, { reload, getDataSource }] = useTable({
-    api: fetchFlinkEnv,
+    api: pageFlinkEnv,
     columns: [
       { dataIndex: 'flinkName', title: t('setting.flinkHome.flinkName') },
       { dataIndex: 'flinkHome', title: t('setting.flinkHome.flinkHome') },
