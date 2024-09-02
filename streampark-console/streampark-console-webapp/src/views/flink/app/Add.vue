@@ -100,7 +100,7 @@
   async function handleInitForm() {
     const defaultValue = {
       resolveOrder: 0,
-      k8sRestExposedType: 0,
+      k8sRestExposedType: 1,
     };
     options.forEach((item) => {
       defaultValue[item.key] = item.defaultValue;
