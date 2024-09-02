@@ -47,10 +47,9 @@ export function pageFlinkCluster(data: BasicTableParams) {
  * flink cluster
  * @returns Promise<FlinkEnv[]>
  */
-export function fetchFlinkCluster(data: BasicTableParams) {
+export function fetchFlinkCluster() {
   return defHttp.post<FlinkCluster[]>({
     url: FLINK_API.LIST,
-    data,
   });
 }
 /**
