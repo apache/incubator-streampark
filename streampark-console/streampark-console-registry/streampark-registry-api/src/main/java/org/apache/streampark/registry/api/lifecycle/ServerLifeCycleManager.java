@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.lifecycle;
+package org.apache.streampark.registry.api.lifecycle;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
@@ -26,21 +26,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ServerLifeCycleManager {
 
     @Getter
-    private static volatile ServerStatus serverStatus = ServerStatus.RUNNING;
+    private static volatile ServerLifeCycle serverLifeCycle = ServerLifeCycle.RUNNING;
 
     @Getter
     private static long serverStartupTime = System.currentTimeMillis();
 
     public static boolean isRunning() {
-        return serverStatus == ServerStatus.RUNNING;
+        return serverLifeCycle == ServerLifeCycle.RUNNING;
     }
 
     public static boolean isStopped() {
-        return serverStatus == ServerStatus.STOPPED;
+        return serverLifeCycle == ServerLifeCycle.STOPPED;
     }
 
     /**
-     * Change the current server state to {@link ServerStatus#WAITING}, only {@link ServerStatus#RUNNING} can change to {@link ServerStatus#WAITING}.
+     * Change the current server state to {@link ServerLifeCycle#WAITING}, only {@link ServerLifeCycle#RUNNING} can change to {@link ServerLifeCycle#WAITING}.
      *
      * @throws ServerLifeCycleException if change failed.
      */
@@ -49,34 +49,34 @@ public class ServerLifeCycleManager {
             throw new ServerLifeCycleException("The current server is already stopped, cannot change to waiting");
         }
 
-        if (serverStatus == ServerStatus.WAITING) {
+        if (serverLifeCycle == ServerLifeCycle.WAITING) {
             log.warn("The current server is already at waiting status, cannot change to waiting");
             return;
         }
-        serverStatus = ServerStatus.WAITING;
+        serverLifeCycle = ServerLifeCycle.WAITING;
     }
 
     /**
-     * Recover from {@link ServerStatus#WAITING} to {@link ServerStatus#RUNNING}.
+     * Recover from {@link ServerLifeCycle#WAITING} to {@link ServerLifeCycle#RUNNING}.
      */
     public static synchronized void recoverFromWaiting() throws ServerLifeCycleException {
         if (isStopped()) {
             throw new ServerLifeCycleException("The current server is already stopped, cannot recovery");
         }
 
-        if (serverStatus == ServerStatus.RUNNING) {
+        if (serverLifeCycle == ServerLifeCycle.RUNNING) {
             log.warn("The current server status is already running, cannot recover form waiting");
             return;
         }
         serverStartupTime = System.currentTimeMillis();
-        serverStatus = ServerStatus.RUNNING;
+        serverLifeCycle = ServerLifeCycle.RUNNING;
     }
 
     public static synchronized boolean toStopped() {
-        if (serverStatus == ServerStatus.STOPPED) {
+        if (serverLifeCycle == ServerLifeCycle.STOPPED) {
             return false;
         }
-        serverStatus = ServerStatus.STOPPED;
+        serverLifeCycle = ServerLifeCycle.STOPPED;
         return true;
     }
 

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.plugin.registry.jdbc;
 
-import org.apache.streampark.common.thread.ThreadUtils;
+import org.apache.streampark.registry.api.thread.ThreadUtils;
 
 import java.util.concurrent.ScheduledExecutorService;
 

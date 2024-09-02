@@ -15,28 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.registry.api.ha;
+package org.apache.streampark.registry.api.thread;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-public abstract class AbstractServerStatusChangeListener implements ServerStatusChangeListener {
+import java.util.concurrent.atomic.LongAdder;
 
-    @Override
-    public void change(HAServer.ServerStatus originStatus, HAServer.ServerStatus currentStatus) {
-        log.info("The status change from {} to {}.", originStatus, currentStatus);
-        if (originStatus == HAServer.ServerStatus.ACTIVE) {
-            if (currentStatus == HAServer.ServerStatus.STAND_BY) {
-                changeToStandBy();
-            }
-        } else if (originStatus == HAServer.ServerStatus.STAND_BY) {
-            if (currentStatus == HAServer.ServerStatus.ACTIVE) {
-                changeToActive();
-            }
-        }
+@Slf4j
+public class DefaultUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    private static final DefaultUncaughtExceptionHandler INSTANCE = new DefaultUncaughtExceptionHandler();
+
+    private static final LongAdder uncaughtExceptionCount = new LongAdder();
+
+    private DefaultUncaughtExceptionHandler() {
     }
 
-    public abstract void changeToActive();
+    public static DefaultUncaughtExceptionHandler getInstance() {
+        return INSTANCE;
+    }
 
-    public abstract void changeToStandBy();
+    public static long getUncaughtExceptionCount() {
+        return uncaughtExceptionCount.longValue();
+    }
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        uncaughtExceptionCount.add(1);
+        log.error("Caught an exception in {}.", t, e);
+    }
 }

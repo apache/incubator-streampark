@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.model;
+package org.apache.streampark.registry.api.enums;
 
-import org.apache.streampark.common.enums.ServerStatus;
+public enum ServerStatusEnum {
 
-public interface HeartBeat {
-
-    ServerStatus getServerStatus();
+    NORMAL,
+    BUSY,
 
 }

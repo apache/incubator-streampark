@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.sql;
+package org.apache.streampark.registry.api.sql;
 
 import org.apache.commons.lang3.StringUtils;
 

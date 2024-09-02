@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.registry;
 
-import org.apache.streampark.common.lifecycle.ServerLifeCycleManager;
 import org.apache.streampark.registry.api.ConnectionListener;
 import org.apache.streampark.registry.api.ConnectionState;
+import org.apache.streampark.registry.api.lifecycle.ServerLifeCycleManager;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class ConsoleConnectionStateListener implements ConnectionListener {
     @Override
     public void onUpdate(ConnectionState state) {
         log.info("Master received a {} event from registry, the current server state is {}", state,
-            ServerLifeCycleManager.getServerStatus());
+            ServerLifeCycleManager.getServerLifeCycle());
         switch (state) {
             case CONNECTED:
                 break;

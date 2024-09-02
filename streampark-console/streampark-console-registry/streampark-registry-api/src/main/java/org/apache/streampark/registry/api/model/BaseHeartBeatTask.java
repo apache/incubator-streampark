@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.model;
+package org.apache.streampark.registry.api.model;
 
-import org.apache.streampark.common.lifecycle.ServerLifeCycleManager;
-import org.apache.streampark.common.thread.BaseDaemonThread;
+import org.apache.streampark.registry.api.lifecycle.ServerLifeCycleManager;
+import org.apache.streampark.registry.api.thread.BaseDaemonThread;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,13 +56,13 @@ public abstract class BaseHeartBeatTask<T extends HeartBeat> extends BaseDaemonT
             try {
                 if (!ServerLifeCycleManager.isRunning()) {
                     log.info("The current server status is {}, will not write heartBeatInfo into registry",
-                        ServerLifeCycleManager.getServerStatus());
+                        ServerLifeCycleManager.getServerLifeCycle());
                     continue;
                 }
                 T heartBeat = getHeartBeat();
                 // if first time or heartBeat status changed, write heartBeatInfo into registry
                 if (System.currentTimeMillis() - lastWriteTime >= heartBeatInterval
-                    || !lastHeartBeat.getServerStatus().equals(heartBeat.getServerStatus())) {
+                    || !lastHeartBeat.getServerStatusEnum().equals(heartBeat.getServerStatusEnum())) {
                     lastHeartBeat = heartBeat;
                     writeHeartBeat(heartBeat);
                     lastWriteTime = System.currentTimeMillis();

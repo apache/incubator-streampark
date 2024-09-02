@@ -17,11 +17,11 @@
 
 package org.apache.streampark.plugin.registry.jdbc.server;
 
-import org.apache.streampark.common.thread.ThreadUtils;
 import org.apache.streampark.plugin.registry.jdbc.JdbcRegistryProperties;
 import org.apache.streampark.plugin.registry.jdbc.LockUtils;
 import org.apache.streampark.plugin.registry.jdbc.model.DTO.JdbcRegistryLockDTO;
 import org.apache.streampark.plugin.registry.jdbc.repository.JdbcRegistryLockRepository;
+import org.apache.streampark.registry.api.thread.ThreadUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

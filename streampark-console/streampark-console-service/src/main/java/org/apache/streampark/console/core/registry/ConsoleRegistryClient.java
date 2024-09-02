@@ -18,9 +18,6 @@
 package org.apache.streampark.console.core.registry;
 
 import org.apache.streampark.common.IStoppable;
-import org.apache.streampark.common.enums.ServerStatus;
-import org.apache.streampark.common.model.ConsoleHeartBeat;
-import org.apache.streampark.common.thread.ThreadUtils;
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.streampark.console.core.config.ConsoleConfig;
@@ -28,6 +25,9 @@ import org.apache.streampark.console.core.task.ConsoleHeartBeatTask;
 import org.apache.streampark.registry.api.RegistryClient;
 import org.apache.streampark.registry.api.RegistryException;
 import org.apache.streampark.registry.api.enums.RegistryNodeType;
+import org.apache.streampark.registry.api.enums.ServerStatusEnum;
+import org.apache.streampark.registry.api.model.ConsoleHeartBeat;
+import org.apache.streampark.registry.api.thread.ThreadUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -118,7 +118,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
         String consoleRegistryPath = consoleConfig.getConsoleRegistryPath();
 
         ConsoleHeartBeat heartBeat = consoleHeartBeatTask.getHeartBeat();
-        while (ServerStatus.BUSY.equals(heartBeat.getServerStatus())) {
+        while (ServerStatusEnum.BUSY.equals(heartBeat.getServerStatusEnum())) {
             log.warn("Console node is BUSY: {}", heartBeat);
             ThreadUtils.sleep(SLEEP_TIME_MILLIS);
             heartBeat = consoleHeartBeatTask.getHeartBeat();

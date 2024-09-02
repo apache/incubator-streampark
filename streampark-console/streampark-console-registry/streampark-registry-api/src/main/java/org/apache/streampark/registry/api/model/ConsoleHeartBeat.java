@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.sql;
+package org.apache.streampark.registry.api.model;
 
-import java.io.IOException;
-import java.util.List;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-public interface SqlScriptParser {
-
-    List<String> getAllSql() throws IOException;
+@SuperBuilder
+@NoArgsConstructor
+public class ConsoleHeartBeat extends BaseHeartBeat implements HeartBeat {
 
 }

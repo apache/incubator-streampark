@@ -15,15 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.lifecycle;
+package org.apache.streampark.registry.api.lifecycle;
 
-public class ServerLifeCycleException extends Exception {
+import lombok.Getter;
 
-    public ServerLifeCycleException(String message) {
-        super(message);
-    }
+/**
+ * This enum is used to represent the server status, include master/worker.
+ */
+@Getter
+public enum ServerLifeCycle {
 
-    public ServerLifeCycleException(String message, Throwable throwable) {
-        super(message, throwable);
+    RUNNING(0, "The current server is running"),
+    WAITING(1, "The current server is waiting, this means it cannot work"),
+    STOPPED(2, "The current server is stopped"),
+    ;
+
+    private final int code;
+    private final String desc;
+
+    ServerLifeCycle(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
     }
 }

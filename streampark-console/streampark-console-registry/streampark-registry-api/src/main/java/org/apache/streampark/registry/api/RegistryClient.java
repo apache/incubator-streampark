@@ -19,10 +19,10 @@ package org.apache.streampark.registry.api;
 
 import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.constants.Constants;
-import org.apache.streampark.common.model.ConsoleHeartBeat;
-import org.apache.streampark.common.model.Server;
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.registry.api.enums.RegistryNodeType;
+import org.apache.streampark.registry.api.model.ConsoleHeartBeat;
+import org.apache.streampark.registry.api.model.Server;
 
 import org.apache.commons.lang3.StringUtils;
 

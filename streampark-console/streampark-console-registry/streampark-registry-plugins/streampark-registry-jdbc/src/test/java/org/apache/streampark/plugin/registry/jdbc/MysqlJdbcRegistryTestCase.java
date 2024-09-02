@@ -17,7 +17,7 @@
 
 package org.apache.streampark.plugin.registry.jdbc;
 
-import org.apache.streampark.common.sql.SqlScriptRunner;
+import org.apache.streampark.registry.api.sql.SqlScriptRunner;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

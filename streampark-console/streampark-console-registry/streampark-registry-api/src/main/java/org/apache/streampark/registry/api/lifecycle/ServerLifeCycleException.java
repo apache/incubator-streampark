@@ -15,24 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.thread;
+package org.apache.streampark.registry.api.lifecycle;
 
-/**
- * All thread used in StreamPark should extend with this class to avoid the server hang issue.
- */
-public abstract class BaseDaemonThread extends Thread {
+public class ServerLifeCycleException extends Exception {
 
-    protected BaseDaemonThread(Runnable runnable) {
-        super(runnable);
-        this.setDaemon(true);
-        this.setUncaughtExceptionHandler(DefaultUncaughtExceptionHandler.getInstance());
+    public ServerLifeCycleException(String message) {
+        super(message);
     }
 
-    protected BaseDaemonThread(String threadName) {
-        super();
-        this.setName(threadName);
-        this.setDaemon(true);
-        this.setUncaughtExceptionHandler(DefaultUncaughtExceptionHandler.getInstance());
+    public ServerLifeCycleException(String message, Throwable throwable) {
+        super(message, throwable);
     }
-
 }

@@ -15,27 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.model;
+package org.apache.streampark.registry.api.sql;
 
-import org.apache.streampark.common.enums.ServerStatus;
+import java.io.IOException;
+import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+public interface SqlScriptParser {
 
-@Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-public class BaseHeartBeat implements HeartBeat {
-
-    protected int processId;
-    protected long startupTime;
-    protected long reportTime;
-    protected ServerStatus serverStatus;
-
-    protected String host;
-    protected int port;
+    List<String> getAllSql() throws IOException;
 
 }

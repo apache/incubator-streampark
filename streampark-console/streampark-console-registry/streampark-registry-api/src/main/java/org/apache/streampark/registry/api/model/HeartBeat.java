@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.registry.api.ha;
+package org.apache.streampark.registry.api.model;
 
-public interface ServerStatusChangeListener {
+import org.apache.streampark.registry.api.enums.ServerStatusEnum;
 
-    void change(HAServer.ServerStatus originStatus, HAServer.ServerStatus currentStatus);
+public interface HeartBeat {
+
+    ServerStatusEnum getServerStatusEnum();
 
 }

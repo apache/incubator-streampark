@@ -15,13 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.model;
+package org.apache.streampark.registry.api.thread;
 
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+/**
+ * All thread used in StreamPark should extend with this class to avoid the server hang issue.
+ */
+public abstract class BaseDaemonThread extends Thread {
 
-@SuperBuilder
-@NoArgsConstructor
-public class ConsoleHeartBeat extends BaseHeartBeat implements HeartBeat {
+    protected BaseDaemonThread(Runnable runnable) {
+        super(runnable);
+        this.setDaemon(true);
+        this.setUncaughtExceptionHandler(DefaultUncaughtExceptionHandler.getInstance());
+    }
+
+    protected BaseDaemonThread(String threadName) {
+        super();
+        this.setName(threadName);
+        this.setDaemon(true);
+        this.setUncaughtExceptionHandler(DefaultUncaughtExceptionHandler.getInstance());
+    }
 
 }

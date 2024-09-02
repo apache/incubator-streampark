@@ -20,12 +20,12 @@ package org.apache.streampark.console;
 import org.apache.streampark.common.CommonConfiguration;
 import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.constants.Constants;
-import org.apache.streampark.common.lifecycle.ServerLifeCycleManager;
-import org.apache.streampark.common.thread.ThreadUtils;
 import org.apache.streampark.console.base.config.SpringProperties;
 import org.apache.streampark.console.base.util.SpringContextUtils;
 import org.apache.streampark.console.core.registry.ConsoleRegistryClient;
 import org.apache.streampark.registry.api.RegistryConfiguration;
+import org.apache.streampark.registry.api.lifecycle.ServerLifeCycleManager;
+import org.apache.streampark.registry.api.thread.ThreadUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

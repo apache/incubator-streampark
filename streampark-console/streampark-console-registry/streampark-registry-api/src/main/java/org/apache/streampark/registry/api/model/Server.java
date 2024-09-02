@@ -15,26 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.lifecycle;
+package org.apache.streampark.registry.api.model;
 
-import lombok.Getter;
+import lombok.Data;
 
-/**
- * This enum is used to represent the server status, include master/worker.
- */
-@Getter
-public enum ServerStatus {
+import java.util.Date;
 
-    RUNNING(0, "The current server is running"),
-    WAITING(1, "The current server is waiting, this means it cannot work"),
-    STOPPED(2, "The current server is stopped"),
-    ;
+@Data
+public class Server {
 
-    private final int code;
-    private final String desc;
+    private int id;
 
-    ServerStatus(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
+    private String host;
+
+    private int port;
+
+    private String zkDirectory;
+
+    /**
+     * resource info: CPU and memory
+     */
+    private String resInfo;
+
+    private Date createTime;
+
+    private Date lastHeartbeatTime;
+
 }

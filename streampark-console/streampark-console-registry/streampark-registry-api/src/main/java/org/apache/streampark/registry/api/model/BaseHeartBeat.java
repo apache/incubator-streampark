@@ -15,30 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.model;
+package org.apache.streampark.registry.api.model;
 
+import org.apache.streampark.registry.api.enums.ServerStatusEnum;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-public class Server {
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BaseHeartBeat implements HeartBeat {
 
-    private int id;
+    protected int processId;
+    protected long startupTime;
+    protected long reportTime;
+    protected ServerStatusEnum serverStatusEnum;
 
-    private String host;
-
-    private int port;
-
-    private String zkDirectory;
-
-    /**
-     * resource info: CPU and memory
-     */
-    private String resInfo;
-
-    private Date createTime;
-
-    private Date lastHeartbeatTime;
+    protected String host;
+    protected int port;
 
 }

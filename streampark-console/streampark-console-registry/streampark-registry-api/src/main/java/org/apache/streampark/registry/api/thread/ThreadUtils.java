@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.thread;
+package org.apache.streampark.registry.api.thread;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.experimental.UtilityClass;
