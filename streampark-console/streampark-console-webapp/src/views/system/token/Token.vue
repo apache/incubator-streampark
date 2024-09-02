@@ -73,7 +73,7 @@
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: t('system.token.table.title'),
+        // title: t('system.token.table.title'),
         api: fetTokenList,
         // beforeFetch: (params) => {
         //   if (params.user) {

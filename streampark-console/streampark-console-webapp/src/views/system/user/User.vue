@@ -17,11 +17,13 @@
 <template>
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="4" :offset="10" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -35,7 +37,7 @@
 </template>
 <script lang="ts">
   import { computed, defineComponent } from 'vue';
-
+  import { Col } from 'ant-design-vue';
   import { BasicTable, useTable, TableAction, ActionItem } from '/@/components/Table';
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
@@ -54,7 +56,7 @@
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon, PageWrapper },
+    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon, PageWrapper, Col },
     setup() {
       const { t } = useI18n();
       const userStore = useUserStoreWithOut();
@@ -65,14 +67,17 @@
       const [registerModal, { openModal }] = useModal();
       const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
-        title: t('system.user.table.title'),
         api: getUserList,
         columns,
         formConfig: {
           // labelWidth: 120,
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
           fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
         rowKey: 'userId',
         pagination: true,

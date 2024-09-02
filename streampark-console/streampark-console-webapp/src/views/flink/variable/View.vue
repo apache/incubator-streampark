@@ -17,11 +17,13 @@
 <template>
   <PageWrapper contentFullHeight fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="4" :offset="11" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -72,6 +74,7 @@
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { Col } from 'ant-design-vue';
   import { fetchVariableDelete, fetchVariableList } from '/@/api/flink/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
@@ -86,12 +89,15 @@
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    title: t('flink.variable.table.title'),
     api: fetchVariableList,
     columns,
     formConfig: {
-      baseColProps: { style: { paddingRight: '30px' } },
       schemas: searchFormSchema,
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
     },
     sortFn: (sortInfo: SorterResult) => {
       const { field, order } = sortInfo;

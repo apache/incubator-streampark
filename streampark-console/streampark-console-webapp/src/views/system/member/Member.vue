@@ -18,11 +18,13 @@
 <template>
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" :formConfig="formConfig" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="4" :offset="5" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -49,23 +51,23 @@
         </template>
       </template>
     </BasicTable>
-    <MemberDrawer
-      @register="registerDrawer"
+    <MemberModal
+      @register="registerModal"
       @success="handleSuccess"
       :roleOptions="roleListOptions"
-      okText="Submit"
     />
   </PageWrapper>
 </template>
 
 <script setup lang="ts" name="member">
   import { computed, onMounted, ref, unref } from 'vue';
+  import { Col } from 'ant-design-vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useGo } from '/@/hooks/web/usePage';
   import { BasicTable, useTable, TableAction, FormProps } from '/@/components/Table';
-  import MemberDrawer from './MemberDrawer.vue';
-  import { useDrawer } from '/@/components/Drawer';
+  import MemberModal from './MemberModal.vue';
+  import { useModal } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getRoleListByPage } from '/@/api/base/system';
@@ -77,43 +79,55 @@
   });
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
-  const [registerDrawer, { openDrawer }] = useDrawer();
+  const [registerModal, { openModal }] = useModal();
   const { createMessage } = useMessage();
   const go = useGo();
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const formConfig = computed((): Partial<FormProps> => {
     return {
-      baseColProps: { style: { paddingRight: '30px' } },
       schemas: [
         {
           field: 'userName',
-          label: t('system.member.table.userName'),
+          label: '',
           component: 'Input',
-          colProps: { span: 6 },
+          componentProps: {
+            placeholder: t('system.member.table.userName'),
+            allowClear: true,
+          },
+          colProps: { span: 4 },
         },
         {
           field: 'roleName',
-          label: t('system.member.table.roleName'),
+          label: '',
           component: 'Select',
           componentProps: {
+            placeholder: t('system.member.table.roleName'),
             options: unref(roleListOptions),
             fieldNames: { label: 'roleName', value: 'roleName' },
+            allowClear: true,
           },
-          colProps: { span: 6 },
+          colProps: { span: 5 },
         },
         {
           field: 'createTime',
-          label: t('common.createTime'),
+          label: '',
           component: 'RangePicker',
+          componentProps: {
+            allowClear: true,
+          },
           colProps: { span: 6 },
         },
       ],
       fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
     };
   });
   const [registerTable, { reload }] = useTable({
-    title: t('system.member.table.title'),
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
@@ -136,13 +150,13 @@
   });
 
   function handleCreate() {
-    openDrawer(true, {
+    openModal(true, {
       isUpdate: false,
     });
   }
 
   function handleEdit(record: Recordable) {
-    openDrawer(true, {
+    openModal(true, {
       record,
       isUpdate: true,
     });

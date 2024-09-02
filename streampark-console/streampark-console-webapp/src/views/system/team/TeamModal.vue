@@ -15,18 +15,25 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicModal
+    v-bind="$attrs"
+    @register="registerModal"
+    showFooter
+    width="650"
+    @ok="handleSubmit"
+    centered
+  >
     <template #title>
       <Icon icon="ant-design:team-outlined" />
       {{ getTitle }}
     </template>
     <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
-  </BasicDrawer>
+  </BasicModal>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/system/team';
   import { Icon } from '/@/components/Icon';
@@ -34,7 +41,7 @@
 
   export default defineComponent({
     name: 'TeamDrawer',
-    components: { BasicDrawer, BasicForm, Icon },
+    components: { BasicModal, BasicForm, Icon },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
@@ -77,11 +84,11 @@
         wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
+      const [registerModal, { setModalProps, closeModal }] = useModalInner(
         async (data: Recordable) => {
           teamId.value = null;
           resetFields();
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
           isUpdate.value = !!data?.isUpdate;
           if (isUpdate.value) teamId.value = data.record.id;
           if (unref(isUpdate)) {
@@ -99,18 +106,18 @@
       async function handleSubmit() {
         try {
           const values = await validate();
-          setDrawerProps({ confirmLoading: true });
+          setModalProps({ confirmLoading: true });
           await (isUpdate.value
             ? fetchTeamUpdate({ id: teamId.value, ...values })
             : fetchTeamCreate(values));
-          closeDrawer();
+          closeModal();
           emit('success', isUpdate.value);
         } finally {
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, getTeamFormSchema, handleSubmit };
+      return { registerModal, registerForm, getTitle, getTeamFormSchema, handleSubmit };
     },
   });
 </script>
