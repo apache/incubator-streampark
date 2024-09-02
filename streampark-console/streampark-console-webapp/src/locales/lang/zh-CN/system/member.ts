@@ -26,8 +26,8 @@ export default {
   searchByRole: '根据角色名称搜索',
   table: {
     title: '成员列表',
-    userName: '用户',
-    roleName: '角色',
+    userName: '根据用户名搜索',
+    roleName: '根据角色名称搜索',
     createTime: '创建时间',
     modifyTime: '修改时间',
   },

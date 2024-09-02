@@ -48,9 +48,10 @@ export function pageFlinkEnv(data: BasicTableParams) {
  * flink environment data
  * @returns Promise<FlinkEnv[]>
  */
-export function fetchFlinkEnv() {
+export function fetchFlinkEnv(data: BasicTableParams) {
   return defHttp.post<FlinkEnv[]>({
     url: FLINK_API.LIST,
+    data,
   });
 }
 
