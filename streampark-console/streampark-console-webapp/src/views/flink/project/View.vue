@@ -122,6 +122,7 @@
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
+                ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:delete',
                 popConfirm: {
                   title: t('flink.project.operationTips.deleteProjectMessage'),

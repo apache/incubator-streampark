@@ -74,7 +74,6 @@
   @prefix-cls: ~'@{namespace}-layout-footer';
 
   @normal-link-color: rgba(0, 0, 0, 0.45);
-
   @hover-color: rgba(0, 0, 0, 0.85);
 
   .@{prefix-cls} {
@@ -109,6 +108,45 @@
       &:hover {
         cursor: pointer;
         color: @hover-color;
+      }
+    }
+  }
+
+  [data-theme='dark'] {
+    @normal-link-color: rgba(255, 255, 255, 0.45);
+    @hover-color: rgba(255, 255, 255, 0.85);
+    .@{prefix-cls} {
+      color: @normal-link-color;
+      text-align: center;
+      padding: 10px 50px;
+
+      &__links {
+        margin-bottom: 8px;
+
+        a {
+          color: @normal-link-color;
+
+          &:hover {
+            color: @hover-color;
+            cursor: pointer;
+          }
+        }
+      }
+
+      &__github {
+        margin: 0 30px;
+        &:hover {
+          color: @hover-color;
+        }
+      }
+
+      &__copyright {
+        color: @normal-link-color;
+
+        &:hover {
+          cursor: pointer;
+          color: @hover-color;
+        }
       }
     }
   }

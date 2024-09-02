@@ -381,7 +381,6 @@
       .ant-table-wrapper,
       .ant-form {
         border: none;
-        box-shadow: 0 1px 6px #000;
       }
     }
   }
