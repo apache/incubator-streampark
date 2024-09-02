@@ -275,7 +275,7 @@
     >
       <template #tableTitle>
         <div class="flex justify-between" style="width: 100%">
-          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1">
+          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
             <Row :gutter="4" class="w-full">
               <Col :span="5">
                 <Form.Item>

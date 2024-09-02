@@ -57,13 +57,4 @@ export const searchFormSchema: FormSchema[] = [
     },
     colProps: { span: 6 },
   },
-  {
-    field: 'createTime',
-    label: '',
-    component: 'RangePicker',
-    componentProps: {
-      allowClear: true,
-    },
-    colProps: { span: 6 },
-  },
 ];

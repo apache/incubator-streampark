@@ -47,6 +47,7 @@ export default {
     edit: '编辑用户',
     view: '查看用户',
   },
+  searchByName: '根据用户名搜索',
   roleInfo: '角色信息',
   modifyTime: '尚未修改',
   male: '男',

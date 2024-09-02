@@ -19,7 +19,7 @@
   import { useModal } from '/@/components/Modal';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { SvgIcon } from '/@/components/Icon';
-  import { Switch } from 'ant-design-vue';
+  import { Col, Switch } from 'ant-design-vue';
   import { CheckOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
   import { FlinkEnvModal, FlinkEnvDrawer } from './components';
   import {
@@ -44,7 +44,6 @@
   const [registerModal, { openModal: openFlinkModal }] = useModal();
   const [registerFlinkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   const [registerTable, { reload, getDataSource }] = useTable({
-    // title: t('setting.flinkHome.title'),
     api: fetchFlinkEnv,
     columns: [
       { dataIndex: 'flinkName', title: t('setting.flinkHome.flinkName') },
@@ -53,12 +52,31 @@
       { dataIndex: 'default', title: 'Default' },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],
-    useSearchForm: false,
-    striped: false,
-    canResize: false,
-    bordered: false,
+    formConfig: {
+      schemas: [
+        {
+          field: 'flinkName',
+          label: '',
+          component: 'Input',
+          componentProps: {
+            placeholder: t('setting.flinkHome.searchByName'),
+            allowClear: true,
+          },
+          colProps: { span: 5 },
+        },
+      ],
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
+    },
+    rowKey: 'id',
+    pagination: true,
+    useSearchForm: true,
+    showTableSetting: false,
     showIndexColumn: false,
-    pagination: false,
+    canResize: false,
     actionColumn: {
       width: 200,
       title: t('component.table.operation'),
@@ -112,13 +130,13 @@
 <template>
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <div v-auth="'project:create'">
-          <a-button type="primary" class="w-full mt-10px" @click="openFlinkModal(true, {})">
+      <template #form-formFooter>
+        <Col :span="5" :offset="14" class="text-right">
+          <a-button type="primary" @click="openFlinkModal(true, {})">
             <PlusOutlined />
             {{ t('common.add') }}
           </a-button>
-        </div>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'flinkName'">

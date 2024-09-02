@@ -17,11 +17,13 @@
 <template>
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+      <template #form-formFooter>
+        <Col :span="5" :offset="14" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -64,16 +66,16 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
+  import { Col } from 'ant-design-vue';
   export default defineComponent({
     name: 'UserToken',
-    components: { BasicTable, TokenDrawer, TableAction, Icon, PageWrapper },
+    components: { Col, BasicTable, TokenDrawer, TableAction, Icon, PageWrapper },
     setup() {
       const { t } = useI18n();
       const { createMessage } = useMessage();
       const [registerDrawer, { openDrawer }] = useDrawer();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        // title: t('system.token.table.title'),
         api: fetTokenList,
         // beforeFetch: (params) => {
         //   if (params.user) {
@@ -84,12 +86,19 @@
         // },
         columns,
         formConfig: {
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
-        useSearchForm: false,
-        showTableSetting: false,
         rowKey: 'tokenId',
+        pagination: true,
+        striped: false,
+        useSearchForm: true,
+        showTableSetting: false,
+        bordered: false,
         showIndexColumn: false,
         canResize: false,
         actionColumn: {

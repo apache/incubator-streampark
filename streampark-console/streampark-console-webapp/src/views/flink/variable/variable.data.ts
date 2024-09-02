@@ -39,7 +39,7 @@ export const searchFormSchema: FormSchema[] = [
     label: '',
     component: 'Input',
     componentProps: {
-      placeholder: t('flink.variable.table.variableCode'),
+      placeholder: t('flink.variable.searchByCode'),
       allowClear: true,
     },
     colProps: { span: 4 },
@@ -49,7 +49,7 @@ export const searchFormSchema: FormSchema[] = [
     label: '',
     component: 'Input',
     componentProps: {
-      placeholder: t('flink.variable.table.description'),
+      placeholder: t('flink.variable.searchByDesc'),
       allowClear: true,
     },
     colProps: { span: 5 },

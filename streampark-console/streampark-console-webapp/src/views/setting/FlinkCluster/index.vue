@@ -18,7 +18,7 @@
   import { nextTick, onUnmounted } from 'vue';
   import { useTimeoutFn } from '@vueuse/core';
   import { SvgIcon } from '/@/components/Icon';
-  import { Tag } from 'ant-design-vue';
+  import { Col, Tag } from 'ant-design-vue';
   import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -55,7 +55,6 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerTable, { reload, getLoading }] = useTable({
-    // title: t('setting.flinkCluster.title'),
     api: fetchFlinkCluster,
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
@@ -63,12 +62,31 @@
       { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],
-    useSearchForm: false,
-    striped: false,
-    bordered: false,
-    canResize: false,
+    formConfig: {
+      schemas: [
+        {
+          field: 'clusterName',
+          label: '',
+          component: 'Input',
+          componentProps: {
+            placeholder: t('setting.flinkCluster.searchByName'),
+            allowClear: true,
+          },
+          colProps: { span: 5 },
+        },
+      ],
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
+    },
+    rowKey: 'id',
+    pagination: true,
+    useSearchForm: true,
+    showTableSetting: false,
     showIndexColumn: false,
-    pagination: false,
+    canResize: false,
     actionColumn: {
       width: 200,
       title: t('component.table.operation'),
@@ -142,13 +160,13 @@
 <template>
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
     <BasicTable @register="registerTable" class="flex flex-col">
-      <template #toolbar>
-        <div v-auth="'project:create'">
-          <a-button type="primary" class="w-full mt-10px" @click="() => go('/setting/add_cluster')">
+      <template #form-formFooter>
+        <Col :span="5" :offset="14" class="text-right">
+          <a-button type="primary" @click="() => go('/setting/add_cluster')">
             <PlusOutlined />
             {{ t('common.add') }}
           </a-button>
-        </div>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'clusterName'">

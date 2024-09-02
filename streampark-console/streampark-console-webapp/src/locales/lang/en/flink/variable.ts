@@ -23,6 +23,8 @@ export default {
   add: 'Add',
   success: ' successful',
   fail: ' failed',
+  searchByCode: 'Search by var code',
+  searchByDesc: 'Search by description',
   table: {
     title: 'Variable List',
     variableCode: 'Variable Code',

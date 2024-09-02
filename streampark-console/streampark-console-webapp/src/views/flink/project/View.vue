@@ -15,7 +15,13 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper contentFullHeight fixed-height content-background contentClass="px-10px">
+  <PageWrapper
+    contentFullHeight
+    fixed-height
+    content-background
+    contentClass="px-10px"
+    class="sp-project"
+  >
     <a-card class="header" :bordered="false">
       <template #title>
         <div class="flex items-center justify-between">
@@ -329,13 +335,17 @@
     },
   });
 </script>
-<style lang="less" scoped>
-  .search-input {
-    width: 272px;
-    margin-left: 16px;
-  }
-
-  .add-btn {
-    margin-left: 30px;
+<style lang="less">
+  .sp-project {
+    .search-input {
+      width: 272px;
+      margin-left: 16px;
+    }
+    .add-btn {
+      margin-left: 30px;
+    }
+    .ant-card-head {
+      padding: 0 2px !important;
+    }
   }
 </style>

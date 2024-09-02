@@ -17,8 +17,10 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
@@ -93,4 +95,6 @@ public interface FlinkEnvService extends IService<FlinkEnv> {
   void syncConf(Long id) throws IOException;
 
   void validity(Long id);
+
+  IPage<FlinkEnv> findPage(FlinkEnv flinkEnv, RestRequest restRequest);
 }
