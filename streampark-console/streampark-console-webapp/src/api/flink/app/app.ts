@@ -26,7 +26,6 @@ enum APP_API {
   COPY = '/flink/app/copy',
   UPLOAD = '/flink/app/upload',
   K8S_START_LOG = '/flink/app/k8sStartLog',
-  DEPLOY = '/flink/app/deploy',
   MAPPING = '/flink/app/mapping',
   YARN = '/flink/app/yarn',
   LIST = '/flink/app/list',

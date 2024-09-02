@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
@@ -45,9 +47,15 @@ public class FlinkClusterController {
 
   @Autowired private ServiceHelper serviceHelper;
 
-  @PostMapping("list")
-  public RestResponse list(FlinkCluster flinkCluster, RestRequest restRequest) {
+  @PostMapping("page")
+  public RestResponse findPage(FlinkCluster flinkCluster, RestRequest restRequest) {
     IPage<FlinkCluster> flinkClusters = flinkClusterService.findPage(flinkCluster, restRequest);
+    return RestResponse.success(flinkClusters);
+  }
+
+  @PostMapping("list")
+  public RestResponse list() {
+    List<FlinkCluster> flinkClusters = flinkClusterService.listCluster();
     return RestResponse.success(flinkClusters);
   }
 

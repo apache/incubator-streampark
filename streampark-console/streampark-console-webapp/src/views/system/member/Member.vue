@@ -92,7 +92,7 @@
           label: '',
           component: 'Input',
           componentProps: {
-            placeholder: t('system.member.table.userName'),
+            placeholder: t('system.member.searchByUser'),
             allowClear: true,
           },
           colProps: { span: 5 },
@@ -102,7 +102,7 @@
           label: '',
           component: 'Select',
           componentProps: {
-            placeholder: t('system.member.table.roleName'),
+            placeholder: t('system.member.searchByRole'),
             options: unref(roleListOptions),
             fieldNames: { label: 'roleName', value: 'roleName' },
             allowClear: true,

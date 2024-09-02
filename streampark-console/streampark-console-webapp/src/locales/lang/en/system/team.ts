@@ -26,7 +26,7 @@ export default {
   searchByTeam: 'Search by team name',
   table: {
     title: 'Team List',
-    teamName: 'Team',
+    teamName: 'Team name',
     teamNamePlaceholder: 'please enter Team Name',
     description: 'Description',
     descriptionMessage: 'exceeds maximum length limit of 100 characters',
