@@ -22,7 +22,7 @@
     showFooter
     width="650"
     @ok="handleSubmit"
-    :minHeight="150"
+    :minHeight="120"
   >
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
