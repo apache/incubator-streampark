@@ -110,6 +110,12 @@ jobs:
     strategy:
       matrix:
         case:
+          - name: Flink118OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnRemoteClusterDeployTest
+          - name: Flink117OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
+          - name: Flink116OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnRemoteClusterDeployTest
           - name: EnvironmentTest
             class: org.apache.streampark.e2e.cases.EnvironmentTest
           - name: AlarmTest

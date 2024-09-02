@@ -87,7 +87,7 @@ trait Spark extends Logger {
     val parameterTool = ParameterTool.fromArgs(args)
 
     val sparkSqls = {
-      val sql = parameterTool.get(KEY_FLINK_SQL())
+      val sql = parameterTool.get(KEY_SPARK_SQL())
       require(StringUtils.isNotBlank(sql), "Usage: spark sql cannot be null")
       Try(DeflaterUtils.unzipString(sql)) match {
         case Success(value) => value

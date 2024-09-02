@@ -32,13 +32,13 @@ trait SparkClientTrait extends Logger {
          |--------------------------------------- spark job start -----------------------------------
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
-         |    appName          : ${submitRequest.effectiveAppName}
+         |    appName          : ${submitRequest.appName}
          |    devMode          : ${submitRequest.developmentMode.name()}
          |    execMode         : ${submitRequest.executionMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
-         |    properties       : ${submitRequest.properties.mkString(" ")}
-         |    args             : ${submitRequest.args}
+         |    appArgs          : ${submitRequest.appArgs}
          |    appConf          : ${submitRequest.appConf}
+         |    properties       : ${submitRequest.appProperties.mkString(",")}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
@@ -66,7 +66,7 @@ trait SparkClientTrait extends Logger {
          |----------------------------------------- spark job stop ----------------------------------
          |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
          |     sparkVersion      : ${stopRequest.sparkVersion.version}
-         |     jobId             : ${stopRequest.jobId}
+         |     appId             : ${stopRequest.appId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
@@ -80,8 +80,8 @@ trait SparkClientTrait extends Logger {
   def doStop(stopRequest: StopRequest): StopResponse
 
   private def prepareConfig(submitRequest: SubmitRequest): Unit = {
-    // 1) set default config
-    val userConfig = submitRequest.properties.filter(c => {
+    // 1) filter illegal configuration key
+    val userConfig = submitRequest.appProperties.filter(c => {
       val k = c._1
       if (k.startsWith("spark.")) {
         true
@@ -90,10 +90,14 @@ trait SparkClientTrait extends Logger {
         false
       }
     })
-    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1))
-    submitRequest.properties.clear()
-    submitRequest.properties.putAll(userConfig)
-    submitRequest.properties.putAll(defaultConfig)
+    val defaultConfig = submitRequest.DEFAULT_SUBMIT_PARAM.filter(c => !userConfig.containsKey(c._1) && !submitRequest.sparkParameterMap.containsKey(c._1))
+    submitRequest.appProperties.clear()
+    // 2) put default configuration
+    submitRequest.appProperties.putAll(defaultConfig)
+    // 3) put configuration from template (spark-application.conf)
+    submitRequest.appProperties.putAll(submitRequest.sparkParameterMap)
+    // 4) put configuration from appProperties
+    submitRequest.appProperties.putAll(userConfig)
   }
 
 }

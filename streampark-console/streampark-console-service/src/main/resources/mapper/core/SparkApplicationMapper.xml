@@ -20,62 +20,57 @@
     <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.SparkApplication">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="team_id" jdbcType="BIGINT" property="teamId"/>
+        <result column="job_type" jdbcType="INTEGER" property="jobType"/>
+        <result column="app_type" jdbcType="INTEGER" property="appType"/>
+        <result column="version_id" jdbcType="BIGINT" property="versionId"/>
+        <result column="app_name" jdbcType="VARCHAR" property="appName"/>
+        <result column="execution_mode" jdbcType="INTEGER" property="executionMode"/>
+        <result column="resource_from" jdbcType="INTEGER" property="resourceFrom"/>
         <result column="project_id" jdbcType="BIGINT" property="projectId"/>
         <result column="module" jdbcType="VARCHAR" property="module"/>
-        <result column="args" jdbcType="LONGVARCHAR" property="args"/>
-        <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="dynamic_properties" jdbcType="LONGVARCHAR" property="dynamicProperties"/>
-        <result column="hot_params" jdbcType="VARCHAR" property="hotParams"/>
-        <result column="job_name" jdbcType="VARCHAR" property="jobName"/>
-        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
-        <result column="version_id" jdbcType="BIGINT" property="versionId"/>
-        <result column="cluster_id" jdbcType="VARCHAR" property="clusterId"/>
-        <result column="spark_cluster_id" jdbcType="BIGINT" property="sparkClusterId"/>
-        <result column="spark_image" jdbcType="VARCHAR" property="sparkImage"/>
-        <result column="k8s_name" jdbcType="VARCHAR" property="k8sName"/>
-        <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
-        <result column="app_type" jdbcType="INTEGER" property="appType"/>
-        <result column="job_type" jdbcType="INTEGER" property="jobType"/>
-        <result column="resource_from" jdbcType="INTEGER" property="resourceFrom"/>
-        <result column="execution_mode" jdbcType="INTEGER" property="executionMode"/>
-        <result column="tracking" jdbcType="INTEGER" property="tracking"/>
+        <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
         <result column="jar" jdbcType="VARCHAR" property="jar"/>
         <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
-        <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
-        <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
-        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
+        <result column="app_properties" jdbcType="LONGVARCHAR" property="appProperties"/>
+        <result column="app_args" jdbcType="LONGVARCHAR" property="appArgs"/>
+        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
+        <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
+        <result column="k8s_master_url" jdbcType="VARCHAR" property="k8sMasterUrl"/>
+        <result column="k8s_container_image" jdbcType="VARCHAR" property="k8sContainerImage"/>
+        <result column="k8s_image_pull_policy" jdbcType="TINYINT" property="k8sImagePullPolicy"/>
+        <result column="k8s_service_account" jdbcType="VARCHAR" property="k8sServiceAccount"/>
+        <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
+        <result column="hadoop_user" jdbcType="VARCHAR" property="hadoopUser"/>
+        <result column="restart_size" jdbcType="INTEGER" property="restartSize"/>
+        <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="options" jdbcType="LONGVARCHAR" property="options"/>
+        <result column="option_state" jdbcType="INTEGER" property="optionState"/>
+        <result column="option_time" jdbcType="DATE" property="optionTime"/>
         <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="tracking" jdbcType="INTEGER" property="tracking"/>
+        <result column="release" jdbcType="INTEGER" property="release"/>
+        <result column="build" jdbcType="BOOLEAN" property="build"/>
+        <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
+        <result column="create_time" jdbcType="DATE" property="createTime"/>
+        <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
         <result column="start_time" jdbcType="DATE" property="startTime"/>
         <result column="end_time" jdbcType="DATE" property="endTime"/>
         <result column="duration" jdbcType="BIGINT" property="duration"/>
-        <result column="state" jdbcType="INTEGER" property="state"/>
-        <result column="cp_max_failure_interval" jdbcType="INTEGER" property="cpMaxFailureInterval"/>
-        <result column="cp_failure_rate_interval" jdbcType="INTEGER" property="cpFailureRateInterval"/>
-        <result column="cp_failure_action" jdbcType="INTEGER" property="cpFailureAction"/>
-        <result column="restart_size" jdbcType="INTEGER" property="restartSize"/>
-        <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
-        <result column="release" jdbcType="INTEGER" property="release"/>
-        <result column="build" jdbcType="BOOLEAN" property="build"/>
-        <result column="resolve_order" jdbcType="INTEGER" property="resolveOrder"/>
-        <result column="total_tm" jdbcType="INTEGER" property="totalTM"/>
-        <result column="total_slot" jdbcType="INTEGER" property="totalSlot"/>
-        <result column="available_slot" jdbcType="INTEGER" property="availableSlot"/>
-        <result column="total_task" jdbcType="INTEGER" property="totalTask"/>
-        <result column="jm_memory" jdbcType="INTEGER" property="jmMemory"/>
-        <result column="tm_memory" jdbcType="INTEGER" property="tmMemory"/>
-        <result column="option_state" jdbcType="INTEGER" property="optionState"/>
-        <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-        <result column="option_time" jdbcType="DATE" property="optionTime"/>
-        <result column="k8s_rest_exposed_type" jdbcType="INTEGER" property="k8sRestExposedType"/>
-        <result column="k8s_pod_template" jdbcType="LONGVARCHAR" property="k8sPodTemplate"/>
-        <result column="k8s_jm_pod_template" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
-        <result column="k8s_tm_pod_template" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
-        <result column="k8s_hadoop_integration" jdbcType="TINYINT" property="k8sHadoopIntegration"/>
-        <result column="rest_url" jdbcType="VARCHAR" property="restUrl"/>
-        <result column="rest_port" jdbcType="INTEGER" property="restPort"/>
         <result column="tags" jdbcType="VARCHAR" property="tags"/>
+        <result column="driver_cores" jdbcType="VARCHAR" property="driverCores"/>
+        <result column="driver_memory" jdbcType="VARCHAR" property="driverMemory"/>
+        <result column="executor_cores" jdbcType="VARCHAR" property="executorCores"/>
+        <result column="executor_memory" jdbcType="VARCHAR" property="executorMemory"/>
+        <result column="executor_max_nums" jdbcType="VARCHAR" property="executorMaxNums"/>
+        <result column="num_tasks" jdbcType="BIGINT" property="numTasks"/>
+        <result column="num_completed_tasks" jdbcType="BIGINT" property="numCompletedTasks"/>
+        <result column="num_stages" jdbcType="BIGINT" property="numStages"/>
+        <result column="num_completed_stages" jdbcType="BIGINT" property="numCompletedStages"/>
+        <result column="used_memory" jdbcType="BIGINT" property="usedMemory"/>
+        <result column="used_v_cores" jdbcType="BIGINT" property="usedVCores"/>
+
     </resultMap>
 
     <update id="resetOptionState">
@@ -83,34 +78,6 @@
         set option_state = 0
     </update>
 
-    <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
-        select
-            CASE
-                WHEN  count(1) > 0 THEN true ELSE false
-            END
-        from t_spark_app
-            where spark_cluster_id = #{clusterId}
-             and state = 5
-             limit 1
-    </select>
-
-    <select id="countAffectedByClusterId" resultType="java.lang.Integer" parameterType="java.lang.Long">
-        select
-            count(1)
-        from t_spark_app
-        where
-            spark_cluster_id = #{clusterId}
-            and state in (5, 7, 9)
-            <choose>
-                <when test="dbType == 'pgsql'">
-                    and (end_time IS NULL or EXTRACT(EPOCH FROM (NOW() - end_time)) &lt;= 2)
-                </when>
-                <when test="dbType == 'mysql' or dbType == 'h2'">
-                    and (end_time IS NULL or TIMESTAMPDIFF(SECOND, end_time, NOW()) &lt;= 2)
-                </when>
-            </choose>
-            limit 1
-    </select>
 
     <select id="selectAppsByProjectId" resultType="org.apache.streampark.console.core.entity.SparkApplication" parameterType="java.lang.Long">
         select * from t_spark_app where project_id=#{projectId}
@@ -146,8 +113,8 @@
             <if test="app.executionMode != null and app.executionMode != ''">
                 and t.execution_mode = #{app.executionMode}
             </if>
-            <if test="app.jobName != null and app.jobName != ''">
-                and t.job_name like concat('%', '${app.jobName}', '%')
+            <if test="app.appName != null and app.appName != ''">
+                and t.app_name like concat('%', '${app.appName}', '%')
             </if>
             <if test="app.projectName != null and app.projectName != ''">
                 and p.name like concat('%', '${app.projectName}', '%')
@@ -192,9 +159,6 @@
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.SparkApplication">
         update t_spark_app
         <set>
-            <if test="app.jobId != null">
-                job_id=#{app.jobId},
-            </if>
             <if test="app.appId != null">
                 app_id=#{app.appId},
             </if>
@@ -217,66 +181,11 @@
         limit #{limitSize}
     </select>
 
-    <select id="selectRecentK8sClusterIds" resultType="java.lang.String" parameterType="java.util.Map">
-        select cluster_id
-        from (
-            select cluster_id, max(create_time) as ct
-            from t_spark_app
-            where cluster_id is not null
-            and execution_mode = #{executionMode}
-            group by cluster_id
-            order by ct desc
-        ) as ci
-        limit #{limitSize}
-    </select>
-
-    <select id="selectRecentK8sPodTemplates" resultType="java.lang.String" parameterType="java.lang.Integer">
-        select k8s_pod_template
-        from (
-            select k8s_pod_template, max(create_time) as ct
-            from t_spark_app
-            where k8s_pod_template is not null
-            and k8s_pod_template !=''
-            and execution_mode = 6
-            group by k8s_pod_template
-            order by ct desc
-        ) as pt
-        limit #{limitSize}
-    </select>
-
-    <select id="selectRecentK8sJmPodTemplates" resultType="java.lang.String" parameterType="java.lang.Integer">
-        select k8s_jm_pod_template
-        from (
-            select k8s_jm_pod_template, max(create_time) as ct
-            from t_spark_app
-            where k8s_jm_pod_template is not null
-            and k8s_jm_pod_template != ''
-            and execution_mode = 6
-            group by k8s_jm_pod_template
-            order by ct desc
-        ) as pt
-        limit #{limitSize}
-    </select>
-
-    <select id="selectRecentK8sTmPodTemplates" resultType="java.lang.String" parameterType="java.lang.Integer">
-        select k8s_tm_pod_template
-        from (
-            select k8s_tm_pod_template, max(create_time) as ct
-            from t_spark_app
-            where k8s_tm_pod_template is not null
-            and k8s_tm_pod_template != ''
-            and execution_mode = 6
-            group by k8s_tm_pod_template
-            order by ct desc
-        ) as pt
-        limit #{limitSize}
-    </select>
-
     <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.SparkApplication">
         update t_spark_app
         <set>
-            <if test="app.jobId != null and app.jobId != ''">
-                job_id=#{app.jobId},
+            <if test="app.appId != null and app.appId != ''">
+                app_id=#{app.appId},
             </if>
             <if test="app.tracking != null">
                 tracking=#{app.tracking},
@@ -295,31 +204,31 @@
             </if>
             <choose>
                 <when test="@org.apache.streampark.console.core.enums.SparkAppStateEnum@isEndState(app.state)">
-                    total_tm=null,
-                    total_slot=null,
-                    total_task=null,
-                    available_slot=null,
-                    jm_memory=null,
-                    tm_memory=null,
+                    num_tasks=null,
+                    num_completed_tasks=null,
+                    num_stages=null,
+                    num_completed_stages=null,
+                    used_memory=null,
+                    used_v_cores=null,
                 </when>
                 <otherwise>
-                    <if test="app.totalTM != null">
-                        total_tm=#{app.totalTM},
+                    <if test="app.numTasks != null">
+                        num_tasks=#{app.numTasks},
                     </if>
-                    <if test="app.totalSlot != null">
-                        total_slot=#{app.totalSlot},
+                    <if test="app.numCompletedTasks != null">
+                        num_completed_tasks=#{app.numCompletedTasks},
                     </if>
-                    <if test="app.totalTask != null">
-                        total_task=#{app.totalTask},
+                    <if test="app.numStages != null">
+                        num_stages=#{app.numStages},
                     </if>
-                    <if test="app.availableSlot != null">
-                        available_slot=#{app.availableSlot},
+                    <if test="app.numCompletedStages != null">
+                        num_completed_stages=#{app.numCompletedStages},
                     </if>
-                    <if test="app.jmMemory != null">
-                        jm_memory=#{app.jmMemory},
+                    <if test="app.usedMemory != null">
+                        used_memory=#{app.usedMemory},
                     </if>
-                    <if test="app.tmMemory != null">
-                        tm_memory=#{app.tmMemory},
+                    <if test="app.usedVCores != null">
+                        used_v_cores=#{app.usedVCores},
                     </if>
                 </otherwise>
             </choose>

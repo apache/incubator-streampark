@@ -50,6 +50,14 @@ public class ClusterDetailForm {
     public <T> T addCluster(ExecutionMode executionMode) {
         buttonExecutionModeDropdown.click();
         switch (executionMode) {
+            case REMOTE:
+                selectExecutionMode.stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Execution Mode not found: %s", executionMode.desc())))
+                    .click();
+                return (T) new RemoteForm(this);
             case YARN_SESSION:
                 selectExecutionMode.stream()
                     .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc()))

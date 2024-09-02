@@ -17,7 +17,9 @@
 
 package org.apache.streampark.console.core.aspect;
 
+import org.apache.streampark.console.core.controller.SparkApplicationController;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
+import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -36,6 +38,9 @@ public class AppChangeEventAspect {
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
+    @Autowired
+    private SparkAppHttpWatcher sparkAppHttpWatcher;
+
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.AppChangeEvent)")
     public void appChangeEventPointcut() {
     }
@@ -45,7 +50,11 @@ public class AppChangeEventAspect {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.debug("appUpdated aspect, method:{}", methodSignature.getName());
         Object target = joinPoint.proceed();
-        flinkAppHttpWatcher.init();
+        if (joinPoint.getTarget() instanceof SparkApplicationController) {
+            sparkAppHttpWatcher.init();
+        } else {
+            flinkAppHttpWatcher.init();
+        }
         return target;
     }
 
