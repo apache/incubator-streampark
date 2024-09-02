@@ -18,21 +18,21 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.TaskAction;
-import org.apache.streampark.console.core.enums.TaskActionEnum;
+import org.apache.streampark.console.core.entity.FlinkTask;
+import org.apache.streampark.console.core.enums.FlinkTaskEnum;
 
 import java.util.List;
 
 /**
- * TaskActionService is the interface for managing tasks.
+ * FlinkTaskService is the interface for managing tasks.
  */
-public interface TaskActionService {
+public interface FlinkTaskService {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param taskAction TaskAction
+     * @param flinkTask FlinkTask
      */
-    void executeTaskAction(TaskAction taskAction) throws Exception;
+    void executeFlinkTask(FlinkTask flinkTask) throws Exception;
 
     /**
      * Through this interface, the watcher obtains the list of tasks that need to be monitored.
@@ -62,11 +62,11 @@ public interface TaskActionService {
     public boolean isLocalProcessing(Long appId);
 
     /**
-     * Save task action
+     * Save flink task
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
-    public void saveTaskAction(Application appParam, boolean autoStart, TaskActionEnum action);
+    public void saveFlinkTask(Application appParam, boolean autoStart, FlinkTaskEnum action);
 }

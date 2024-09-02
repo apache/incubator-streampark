@@ -19,10 +19,10 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.base.util.ConsistentHash;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.TaskAction;
-import org.apache.streampark.console.core.enums.TaskActionEnum;
-import org.apache.streampark.console.core.mapper.TaskActionMapper;
-import org.apache.streampark.console.core.service.TaskActionService;
+import org.apache.streampark.console.core.entity.FlinkTask;
+import org.apache.streampark.console.core.enums.FlinkTaskEnum;
+import org.apache.streampark.console.core.mapper.FlinkTaskMapper;
+import org.apache.streampark.console.core.service.FlinkTaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -34,6 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +45,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAction> implements TaskActionService {
+public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask> implements FlinkTaskService {
 
     /**
      * Server name
@@ -55,9 +57,9 @@ public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAct
      */
     private ConsistentHash<String> consistentHash;
 
-    @Qualifier("streamparkTaskActionExecutor")
+    @Qualifier("streamparkFlinkTaskExecutor")
     @Autowired
-    private Executor taskActionExecutor;
+    private Executor flinkTaskExecutor;
 
     @Autowired
     private ApplicationActionService applicationActionService;
@@ -67,26 +69,27 @@ public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAct
      */
     private ConcurrentHashMap<Long, Boolean> runningTasks = new ConcurrentHashMap<>();
 
-    TaskActionServiceImpl() {
+    @PostConstruct
+    public void init() {
         serverName = "ServerA";
         consistentHash = new ConsistentHash<>(Collections.singletonList(serverName));
 
     }
 
     @Scheduled(fixedDelay = 50)
-    public void pollTaskAction() {
-        List<TaskAction> taskActionList = this.list();
-        for (TaskAction taskAction : taskActionList) {
-            long taskId = taskAction.getId();
+    public void pollFinkTask() {
+        List<FlinkTask> flinkTaskList = this.list();
+        for (FlinkTask flinkTask : flinkTaskList) {
+            long taskId = flinkTask.getId();
             if (runningTasks.putIfAbsent(taskId, true) == null) {
-                taskActionExecutor.execute(() -> {
+                flinkTaskExecutor.execute(() -> {
                     try {
-                        // Execute task action
-                        executeTaskAction(taskAction);
+                        // Execute flink task
+                        executeFlinkTask(flinkTask);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     } finally {
-                        runningTasks.remove(taskAction.getId());
+                        runningTasks.remove(flinkTask.getId());
                     }
                 });
             }
@@ -95,16 +98,16 @@ public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAct
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param taskAction TaskAction
+     * @param flinkTask FlinkTask
      */
     @Override
-    public void executeTaskAction(TaskAction taskAction) throws Exception {
-        // Execute task action
-        log.info("Execute task action: {}", taskAction);
-        Application appParam = getAppByTaskAction(taskAction);
-        switch (taskAction.getAction()) {
+    public void executeFlinkTask(FlinkTask flinkTask) throws Exception {
+        // Execute flink task
+        log.info("Execute flink task: {}", flinkTask);
+        Application appParam = getAppByTask(flinkTask);
+        switch (flinkTask.getAction()) {
             case START:
-                applicationActionService.start(appParam, taskAction.getAutoStart());
+                applicationActionService.start(appParam, flinkTask.getAutoStart());
                 break;
             case RESTART:
                 applicationActionService.restart(appParam);
@@ -119,7 +122,7 @@ public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAct
                 applicationActionService.abort(appParam.getId());
                 break;
             default:
-                log.error("Unsupported task action: {}", taskAction.getAction());
+                log.error("Unsupported task: {}", flinkTask.getAction());
         }
     }
 
@@ -167,43 +170,43 @@ public class TaskActionServiceImpl extends ServiceImpl<TaskActionMapper, TaskAct
     }
 
     /**
-     * Save task action
+     * Save flink task
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveTaskAction(Application appParam, boolean autoStart, TaskActionEnum action) {
-        TaskAction taskAction = getTaskActionByApp(appParam, autoStart, action);
-        this.save(taskAction);
+    public void saveFlinkTask(Application appParam, boolean autoStart, FlinkTaskEnum action) {
+        FlinkTask flinkTask = getTaskByApp(appParam, autoStart, action);
+        this.save(flinkTask);
     }
 
-    private TaskAction getTaskActionByApp(Application appParam, boolean autoStart, TaskActionEnum action) {
-        TaskAction taskAction = new TaskAction();
-        taskAction.setAction(action);
-        taskAction.setAppId(appParam.getId());
-        taskAction.setAutoStart(autoStart);
-        taskAction.setArgs(appParam.getArgs());
-        taskAction.setDynamicProperties(appParam.getDynamicProperties());
-        taskAction.setSavepointPath(appParam.getSavepointPath());
-        taskAction.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
-        taskAction.setDrain(appParam.getDrain());
-        taskAction.setNativeFormat(appParam.getNativeFormat());
-        taskAction.setRestoreMode(appParam.getRestoreMode());
-        return taskAction;
+    private FlinkTask getTaskByApp(Application appParam, boolean autoStart, FlinkTaskEnum action) {
+        FlinkTask flinkTask = new FlinkTask();
+        flinkTask.setAction(action);
+        flinkTask.setAppId(appParam.getId());
+        flinkTask.setAutoStart(autoStart);
+        flinkTask.setArgs(appParam.getArgs());
+        flinkTask.setDynamicProperties(appParam.getDynamicProperties());
+        flinkTask.setSavepointPath(appParam.getSavepointPath());
+        flinkTask.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
+        flinkTask.setDrain(appParam.getDrain());
+        flinkTask.setNativeFormat(appParam.getNativeFormat());
+        flinkTask.setRestoreMode(appParam.getRestoreMode());
+        return flinkTask;
     }
 
-    private Application getAppByTaskAction(TaskAction taskAction) {
+    private Application getAppByTask(FlinkTask flinkTask) {
         Application appParam = new Application();
-        appParam.setId(taskAction.getAppId());
-        appParam.setArgs(taskAction.getArgs());
-        appParam.setDynamicProperties(taskAction.getDynamicProperties());
-        appParam.setSavepointPath(taskAction.getSavepointPath());
-        appParam.setRestoreOrTriggerSavepoint(taskAction.getRestoreOrTriggerSavepoint());
-        appParam.setDrain(taskAction.getDrain());
-        appParam.setNativeFormat(taskAction.getNativeFormat());
-        appParam.setRestoreMode(taskAction.getRestoreMode());
+        appParam.setId(flinkTask.getAppId());
+        appParam.setArgs(flinkTask.getArgs());
+        appParam.setDynamicProperties(flinkTask.getDynamicProperties());
+        appParam.setSavepointPath(flinkTask.getSavepointPath());
+        appParam.setRestoreOrTriggerSavepoint(flinkTask.getRestoreOrTriggerSavepoint());
+        appParam.setDrain(flinkTask.getDrain());
+        appParam.setNativeFormat(flinkTask.getNativeFormat());
+        appParam.setRestoreMode(flinkTask.getRestoreMode());
         return appParam;
     }
 }

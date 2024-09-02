@@ -15,35 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.mapper;
 
-/**
- * The TaskActionEnum represents the possible actions that can be performed on a task.
- */
-public enum TaskActionEnum {
+import org.apache.streampark.console.core.entity.FlinkTask;
 
-    /**
-     * Starts the specified application.
-     */
-    START,
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-    /**
-     * Restarts the given application.
-     */
-    RESTART,
-
-    /**
-     * Revokes access for the given application.
-     */
-    REVOKE,
-
-    /**
-     * Cancels the given application. Throws an exception if cancellation fails.
-     */
-    CANCEL,
-
-    /**
-     * Forces the given application to stop.
-     */
-    ABORT,
+public interface FlinkTaskMapper extends BaseMapper<FlinkTask> {
 }

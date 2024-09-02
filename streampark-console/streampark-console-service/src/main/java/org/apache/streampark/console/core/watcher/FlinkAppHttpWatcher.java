@@ -36,8 +36,8 @@ import org.apache.streampark.console.core.metrics.flink.JobsOverview;
 import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.FlinkTaskService;
 import org.apache.streampark.console.core.service.SavepointService;
-import org.apache.streampark.console.core.service.TaskActionService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -100,7 +100,7 @@ public class FlinkAppHttpWatcher {
     private SavepointService savepointService;
 
     @Autowired
-    private TaskActionService taskActionService;
+    private FlinkTaskService flinkTaskService;
 
     // track interval every 5 seconds
     public static final Duration WATCHING_INTERVAL = Duration.ofSeconds(5);
@@ -180,7 +180,7 @@ public class FlinkAppHttpWatcher {
     @PostConstruct
     public void init() {
         WATCHING_APPS.clear();
-        List<Application> applications = taskActionService.getMonitoredTaskList(applicationManageService.list(
+        List<Application> applications = flinkTaskService.getMonitoredTaskList(applicationManageService.list(
             new LambdaQueryWrapper<Application>()
                 .eq(Application::getTracking, 1)
                 .notIn(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode())));

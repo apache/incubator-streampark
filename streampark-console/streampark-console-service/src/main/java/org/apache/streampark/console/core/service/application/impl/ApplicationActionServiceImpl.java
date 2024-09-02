@@ -49,10 +49,10 @@ import org.apache.streampark.console.core.entity.Savepoint;
 import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
+import org.apache.streampark.console.core.enums.FlinkTaskEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
-import org.apache.streampark.console.core.enums.TaskActionEnum;
 import org.apache.streampark.console.core.mapper.ApplicationMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
@@ -61,10 +61,10 @@ import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.FlinkTaskService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.service.TaskActionService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
@@ -178,7 +178,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     private ResourceService resourceService;
 
     @Autowired
-    private TaskActionService taskActionService;
+    private FlinkTaskService flinkTaskService;
 
     @Autowired
     private FlinkClusterWatcher flinkClusterWatcher;
@@ -196,9 +196,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s not found, revoke failed.", appId));
 
-        // For HA purposes, if the task is not processed locally, save the task action and return
-        if (!taskActionService.isLocalProcessing(appId)) {
-            taskActionService.saveTaskAction(application, false, TaskActionEnum.REVOKE);
+        // For HA purposes, if the task is not processed locally, save the flink task and return
+        if (!flinkTaskService.isLocalProcessing(appId)) {
+            flinkTaskService.saveFlinkTask(application, false, FlinkTaskEnum.REVOKE);
             return;
         }
 
@@ -224,9 +224,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void restart(Application appParam) throws Exception {
-        // For HA purposes, if the task is not processed locally, save the task action and return
-        if (!taskActionService.isLocalProcessing(appParam.getId())) {
-            taskActionService.saveTaskAction(appParam, false, TaskActionEnum.RESTART);
+        // For HA purposes, if the task is not processed locally, save the flink task and return
+        if (!flinkTaskService.isLocalProcessing(appParam.getId())) {
+            flinkTaskService.saveFlinkTask(appParam, false, FlinkTaskEnum.RESTART);
             return;
         }
         this.cancel(appParam);
@@ -236,9 +236,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public void abort(Long id) {
         Application application = this.baseMapper.selectApp(id);
-        // For HA purposes, if the task is not processed locally, save the task action and return
-        if (!taskActionService.isLocalProcessing(id)) {
-            taskActionService.saveTaskAction(application, false, TaskActionEnum.ABORT);
+        // For HA purposes, if the task is not processed locally, save the flink task and return
+        if (!flinkTaskService.isLocalProcessing(id)) {
+            flinkTaskService.saveFlinkTask(application, false, FlinkTaskEnum.ABORT);
             return;
         }
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
@@ -260,9 +260,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void cancel(Application appParam) throws Exception {
-        // For HA purposes, if the task is not processed locally, save the task action and return
-        if (!taskActionService.isLocalProcessing(appParam.getId())) {
-            taskActionService.saveTaskAction(appParam, false, TaskActionEnum.CANCEL);
+        // For HA purposes, if the task is not processed locally, save the flink task and return
+        if (!flinkTaskService.isLocalProcessing(appParam.getId())) {
+            flinkTaskService.saveFlinkTask(appParam, false, FlinkTaskEnum.CANCEL);
             return;
         }
         FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
@@ -399,9 +399,9 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
 
     @Override
     public void start(Application appParam, boolean auto) throws Exception {
-        // For HA purposes, if the task is not processed locally, save the task action and return
-        if (!taskActionService.isLocalProcessing(appParam.getId())) {
-            taskActionService.saveTaskAction(appParam, auto, TaskActionEnum.START);
+        // For HA purposes, if the task is not processed locally, save the flink task and return
+        if (!flinkTaskService.isLocalProcessing(appParam.getId())) {
+            flinkTaskService.saveFlinkTask(appParam, auto, FlinkTaskEnum.START);
             return;
         }
         // 1) check application

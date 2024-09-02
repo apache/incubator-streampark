@@ -184,18 +184,18 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     }
 
     /**
-     * Create a ThreadPoolTaskExecutor for TaskAction.
+     * Create a ThreadPoolTaskExecutor for FlinkTask.
      *
      * @return Executor
      */
-    @Bean("streamparkTaskActionExecutor")
-    public Executor taskActionExecutor() {
+    @Bean("streamparkFlinkTaskExecutor")
+    public Executor flinkTaskExecutor() {
         return new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 5,
             Runtime.getRuntime().availableProcessors() * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streampark-task-action-"));
+            ThreadUtils.threadFactory("streampark-flink-task-"));
     }
 }

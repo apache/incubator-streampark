@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.enums.TaskActionEnum;
+import org.apache.streampark.console.core.enums.FlinkTaskEnum;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -28,14 +28,14 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
-@TableName("t_task_action")
+@TableName("t_flink_task")
 @Slf4j
-public class TaskAction {
+public class FlinkTask {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private TaskActionEnum action;
+    private FlinkTaskEnum action;
 
     /** appId */
     private Long appId;
