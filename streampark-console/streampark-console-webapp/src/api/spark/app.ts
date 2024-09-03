@@ -119,7 +119,7 @@ export function fetchSparkYarn() {
 /**
  * check spark name
  */
-export function fetchCheckSparkName(data: { id?: string; jobName: string }) {
+export function fetchCheckSparkName(data: { id?: string; appName: string }) {
   return defHttp.post<AppExistsStateEnum>({ url: `${apiPrefix}/check/name`, data });
 }
 

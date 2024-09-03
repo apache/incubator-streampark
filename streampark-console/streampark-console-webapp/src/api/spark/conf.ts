@@ -14,18 +14,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { SparkApplication } from './app.type';
+import type { SparkApplicationConfig } from './conf.type';
 import { defHttp } from '/@/utils/http/axios';
 
 const apiPrefix = '/flink/conf';
 
 export function fetchGetSparkConf(data: { id: string }) {
-  return defHttp.post({ url: `${apiPrefix}/get`, data });
+  return defHttp.post<SparkApplicationConfig>({ url: `${apiPrefix}/get`, data });
 }
-export function handleSparkConfTemplate() {
+
+export function fetchSparkConfTemplate() {
   return defHttp.post<string>({
     url: `${apiPrefix}/template`,
   });
 }
+
+export function fetchSparkConfList(data: Recordable) {
+  return defHttp.post<{
+    total: number;
+    records: SparkApplicationConfig[];
+  }>({
+    url: `${apiPrefix}/list`,
+    data,
+  });
+}
+
+export function fetchSparkConfHistory(data: SparkApplication) {
+  return defHttp.post<SparkApplicationConfig[]>({
+    url: `${apiPrefix}/history`,
+    data,
+  });
+}
+export function fetchSparkConfRemove(data: { id: number }) {
+  return defHttp.post<boolean>({
+    url: `${apiPrefix}/delete`,
+    data,
+  });
+}
+
 export function fetchSysHadoopConf() {
   return defHttp.post({
     url: `${apiPrefix}/sysHadoopConf`,

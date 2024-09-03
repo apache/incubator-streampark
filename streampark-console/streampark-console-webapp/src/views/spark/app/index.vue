@@ -15,17 +15,30 @@
   limitations under the License.
 -->
 <script lang="ts" setup>
-  import { nextTick, ref, onUnmounted, onMounted } from 'vue';
+  import { nextTick, ref, onUnmounted, onMounted, unref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { AppStateEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
-  import { JobTypeEnum } from '/@/enums/sparkEnum';
-  import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
+  import { JobTypeEnum, AppStateEnum, OptionStateEnum } from '/@/enums/sparkEnum';
+  import { ReleaseStateEnum } from '/@/enums/flinkEnum';
+  import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
+  import {
+    Form,
+    Button,
+    Select,
+    Input,
+    Tooltip,
+    Badge,
+    Tag,
+    Popover,
+    Row,
+    Col,
+  } from 'ant-design-vue';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, TableAction } from '/@/components/Table';
   import { releaseTitleMap } from './data';
 
+  // import AppStopModal from './components/AppStop.vue';
+  import AppBuildDrawer from './components/BuildDrawer.vue';
   import AppDashboard from './components/AppDashboard.vue';
   import State, {
     buildStatusMap,
@@ -37,20 +50,30 @@
   import AppTableResize from '/@/views/flink/app/components/AppResize.vue';
   import { fetchSparkAppRecord } from '/@/api/spark/app';
   import { useSparkTableAction } from './hooks/useSparkTableAction';
+  import { SparkApplication } from '/@/api/spark/app.type';
+  import { handleView } from './utils';
+  import { useRouter } from 'vue-router';
   defineOptions({
     name: 'SparkApplication',
   });
   const { t } = useI18n();
+  const router = useRouter();
+  const yarn = ref<Nullable<string>>(null);
+  const searchRef = ref<Recordable>({
+    tags: undefined,
+    owner: undefined,
+    jobType: undefined,
+  });
   const optionApps = {
     starting: new Map(),
     stopping: new Map(),
     release: new Map(),
-    savepointing: new Map(),
   };
   const errorCount = ref(0);
   const appDashboardRef = ref<any>();
 
   const currentTablePage = ref(1);
+
   const { onTableColumnResize, tableColumnWidth, getAppColumns } = useSparkColumns();
   const titleLenRef = ref({
     maxState: '',
@@ -76,11 +99,6 @@
           expanded: [
             {
               appId: x.appId,
-              jmMemory: x.jmMemory,
-              tmMemory: x.tmMemory,
-              totalTM: x.totalTM,
-              totalSlot: x.totalSlot,
-              availableSlot: x.availableSlot,
             },
           ],
         });
@@ -98,11 +116,6 @@
           if (optionApps.release.get(x.id)) {
             if (timestamp - optionApps.release.get(x.id) > 2000) {
               optionApps.release.delete(x.id);
-            }
-          }
-          if (optionApps.savepointing.get(x.id)) {
-            if (timestamp - optionApps.savepointing.get(x.id) > 2000) {
-              optionApps.savepointing.delete(x.id);
             }
           }
         }
@@ -160,11 +173,12 @@
       console.error(error);
     }
   };
-  const [registerTable, { reload, getLoading, setPagination }] = useTable({
+  const [registerTable, { reload, getLoading, setPagination, getDataSource }] = useTable({
     rowKey: 'id',
     api: getSparkAppList,
     immediate: true,
-    canResize: false,
+    isCanResizeParent: true,
+    canResize: true,
     showIndexColumn: false,
     showTableSetting: true,
     useSearchForm: true,
@@ -176,7 +190,32 @@
     },
   });
 
-  const { getTableActions, formConfig } = useSparkTableAction(handlePageDataReload);
+  const {
+    // registerStartModal,
+    // registerStopModal,
+    registerBuildDrawer,
+    getTableActions,
+    tagsOptions,
+    users,
+  } = useSparkTableAction(handlePageDataReload, optionApps);
+
+  /* view */
+  async function handleJobView(app: SparkApplication) {
+    // Task is running, restarting, in savePoint
+    if (app.state && [AppStateEnum.RUNNIN].includes(app.state)) {
+      // yarn-per-job|yarn-session|yarn-application
+      await handleView(app, unref(yarn));
+    }
+  }
+
+  /* Update options data */
+  // function handleOptionApp(data: {
+  //   type: 'starting' | 'stopping' | 'release';
+  //   key: any;
+  //   value: any;
+  // }) {
+  //   optionApps[data.type].set(data.key, data.value);
+  // }
 
   function handlePageDataReload(polling = false) {
     nextTick(() => {
@@ -184,6 +223,13 @@
       reload({ polling });
     });
   }
+  const handleResetReload = useDebounceFn(() => {
+    setPagination({
+      current: 1,
+    });
+    reload();
+  }, 500);
+
   const { start, stop } = useTimeoutFn(() => {
     if (errorCount.value <= 3) {
       start();
@@ -211,17 +257,82 @@
   });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
+  <PageWrapper content-full-height content-class="flex flex-col">
     <AppDashboard ref="appDashboardRef" />
     <BasicTable
       @register="registerTable"
       :columns="getAppColumns"
       @resize-column="onTableColumnResize"
-      class="app_list !px-0 pt-20px"
-      :formConfig="formConfig"
+      class="app_list table-searchbar flex-1 pt-20px !px-0 flex flex-col"
     >
+      <template #tableTitle>
+        <div class="flex justify-between" style="width: calc(100% - 130px)">
+          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1">
+            <Row :gutter="10" class="w-full">
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.tags')">
+                  <Select
+                    :placeholder="t('flink.app.tags')"
+                    show-search
+                    v-model:value="searchRef.tags"
+                    @change="() => handleResetReload()"
+                    :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.owner')">
+                  <Select
+                    :placeholder="t('flink.app.owner')"
+                    show-search
+                    v-model:value="searchRef.userId"
+                    @change="() => handleResetReload()"
+                    :options="
+                      (users || []).map((u: Recordable) => ({
+                        label: u.nickName || u.username,
+                        value: u.userId,
+                      }))
+                    "
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.jobType')">
+                  <Select
+                    :placeholder="t('flink.app.jobType')"
+                    show-search
+                    v-model:value="searchRef.jobType"
+                    @change="() => handleResetReload()"
+                    :options="[
+                      { label: 'JAR', value: JobTypeEnum.JAR },
+                      { label: 'SQL', value: JobTypeEnum.SQL },
+                      { label: 'PySPARK', value: JobTypeEnum.PYSPARK },
+                    ]"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="5">
+                <Form.Item :label="t('flink.app.searchName')">
+                  <Input
+                    :placeholder="t('flink.app.searchName')"
+                    v-model:value="searchRef.appName"
+                    @change="() => handleResetReload()"
+                    @search="() => handleResetReload()"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+          <div v-auth="'app:create'">
+            <Button type="primary" @click="() => router.push({ path: '/spark/app/add' })">
+              <PlusOutlined />
+              {{ t('common.add') }}
+            </Button>
+          </div>
+        </div>
+      </template>
       <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'jobName'">
+        <template v-if="column.dataIndex === 'appName'">
           <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
           <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
           <span class="app_type app_py" v-if="record['jobType'] == JobTypeEnum.PYSPARK">
@@ -230,10 +341,9 @@
           <span
             class="link"
             :class="{
-              'cursor-pointer':
-                [AppStateEnum.RESTARTING, AppStateEnum.RUNNING].includes(record.state) ||
-                record['optionState'] === OptionStateEnum.SAVEPOINTING,
+              'cursor-pointer': [AppStateEnum.RUNNIN].includes(record.state),
             }"
+            @click="handleJobView(record)"
           >
             <Popover :title="t('common.detailText')">
               <template #content>
@@ -306,12 +416,16 @@
         <AppTableResize
           :table-container="tableContainer"
           :resize-min="100"
-          v-model:left="tableColumnWidth.jobName"
+          v-if="getDataSource()?.length > 0"
+          v-model:left="tableColumnWidth.appName"
         />
       </template>
     </BasicTable>
+    <!-- <AppStartModal @register="registerStartModal" @update-option="handleOptionApp" /> -->
+    <!-- <AppStopModal @register="registerStopModal" @update-option="handleOptionApp" /> -->
+    <AppBuildDrawer @register="registerBuildDrawer" />
   </PageWrapper>
 </template>
 <style lang="less">
-  @import url('./styles/View.less');
+  @import url('../../flink/app/styles/View.less');
 </style>
