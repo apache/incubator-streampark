@@ -1336,7 +1336,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String customSavepoint = null;
     if (appParam.getRestoreOrTriggerSavepoint()) {
       customSavepoint = appParam.getSavepointPath();
-      if (StringUtils.isBlank(customSavepoint)) {
+      if (customSavepoint == null) {
+        customSavepoint =
+            savepointService.processPath(
+                customSavepoint, application.getJobName(), application.getId());
+      } else {
         customSavepoint = savepointService.getSavePointPath(appParam);
       }
     }
@@ -1451,23 +1455,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
       final String scheme = uri.getScheme();
       final String pathPart = uri.getPath();
       if (scheme == null) {
-        return "This state.savepoints.dir value "
+        return "This state savepoint dir value "
             + savepointPath
             + " scheme (hdfs://, file://, etc) of  is null. Please specify the file system scheme explicitly in the URI.";
       }
       if (pathPart == null) {
-        return "This state.savepoints.dir value "
+        return "This state savepoint dir value "
             + savepointPath
             + " path part to store the checkpoint data in is null. Please specify a directory path for the checkpoint data.";
       }
       if (pathPart.isEmpty() || "/".equals(pathPart)) {
-        return "This state.savepoints.dir value "
+        return "This state savepoint dir value "
             + savepointPath
             + " Cannot use the root directory for checkpoints.";
       }
       return null;
     } else {
-      return "When custom savepoint is not set, state.savepoints.dir needs to be set in properties or flink-conf.yaml of application";
+      return "When a custom savepoint is not set, state.savepoints.dir or execution.checkpointing.savepoint-dir needs to be configured in the properties or flink-conf.yaml of the application.";
     }
   }
 
@@ -1660,7 +1664,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.getJobName(),
             appConf,
             application.getApplicationType(),
-            getSavepointPath(appParam),
+            getSavepointPath(appParam, application.getJobName(), application.getId()),
             applicationArgs,
             buildResult,
             extraParameter,
@@ -1877,19 +1881,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     return false;
   }
 
-  private String getSavepointPath(Application appParam) {
+  private String getSavepointPath(Application appParam, String jobName, Long jobId) {
+    String path = null;
     if (appParam.getRestoreOrTriggerSavepoint() != null
         && appParam.getRestoreOrTriggerSavepoint()) {
       if (StringUtils.isBlank(appParam.getSavepointPath())) {
         Savepoint savepoint = savepointService.getLatest(appParam.getId());
         if (savepoint != null) {
-          return savepoint.getPath();
+          path = savepoint.getPath();
         }
       } else {
-        return appParam.getSavepointPath();
+        path = appParam.getSavepointPath();
       }
     }
-    return null;
+    return savepointService.processPath(path, jobName, jobId);
   }
 
   /**

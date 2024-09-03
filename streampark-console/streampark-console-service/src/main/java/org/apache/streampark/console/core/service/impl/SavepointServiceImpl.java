@@ -70,6 +70,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -95,7 +96,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-  private static final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.dir";
+  private static final String SAVEPOINT_DIRECTORY_NEW_KEY = "execution.checkpointing.savepoint-dir";
 
   private static final String MAX_RETAINED_CHECKPOINTS_NEW_KEY =
       "execution.checkpointing.num-retained";
@@ -244,16 +245,13 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     Application application = applicationService.getById(appParam.getId());
 
     // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
-    String savepointPath =
-        PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
-            .get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
+    Map<String, String> properties =
+        PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties());
 
-    if (StringUtils.isBlank(savepointPath)) {
-      // for flink 1.20
-      savepointPath =
-          PropertiesUtils.extractDynamicPropertiesAsJava(application.getDynamicProperties())
-              .get(SAVEPOINT_DIRECTORY_NEW_KEY);
-    }
+    String savepointPath =
+        properties.getOrDefault(
+            CheckpointingOptions.SAVEPOINT_DIRECTORY.key(),
+            properties.get(SAVEPOINT_DIRECTORY_NEW_KEY));
 
     // Application conf configuration has the second priority. If it is a streampark|flinksql type
     // task,
@@ -266,11 +264,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
         if (applicationConfig != null) {
           Map<String, String> map = applicationConfig.readConfig();
           if (FlinkUtils.isCheckpointEnabled(map)) {
-            savepointPath = map.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-            if (StringUtils.isBlank(savepointPath)) {
-              // for flink 1.20
-              savepointPath = map.get(SAVEPOINT_DIRECTORY_NEW_KEY);
-            }
+            savepointPath =
+                map.getOrDefault(
+                    CheckpointingOptions.SAVEPOINT_DIRECTORY.key(),
+                    map.get(SAVEPOINT_DIRECTORY_NEW_KEY));
           }
         }
       }
@@ -290,11 +287,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
                 application.getFlinkClusterId()));
         Map<String, String> config = cluster.getFlinkConfig();
         if (!config.isEmpty()) {
-          savepointPath = config.get(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-          if (StringUtils.isBlank(savepointPath)) {
-            // for flink 1.20
-            savepointPath = config.get(SAVEPOINT_DIRECTORY_NEW_KEY);
-          }
+          savepointPath =
+              config.getOrDefault(
+                  CheckpointingOptions.SAVEPOINT_DIRECTORY.key(),
+                  config.get(SAVEPOINT_DIRECTORY_NEW_KEY));
         }
       }
     }
@@ -303,16 +299,25 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     if (StringUtils.isBlank(savepointPath)) {
       // flink
       FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
+      Properties flinkConfig = flinkEnv.getFlinkConfig();
       savepointPath =
-          flinkEnv.getFlinkConfig().getProperty(CheckpointingOptions.SAVEPOINT_DIRECTORY.key());
-
-      if (StringUtils.isBlank(savepointPath)) {
-        // for flink 1.20
-        savepointPath = flinkEnv.getFlinkConfig().getProperty(SAVEPOINT_DIRECTORY_NEW_KEY);
-      }
+          flinkConfig.getProperty(
+              CheckpointingOptions.SAVEPOINT_DIRECTORY.key(),
+              flinkConfig.getProperty(SAVEPOINT_DIRECTORY_NEW_KEY));
     }
 
-    return savepointPath;
+    return processPath(savepointPath, application.getJobName(), application.getId());
+  }
+
+  @Override
+  public String processPath(String path, String jobName, Long jobId) {
+    if (StringUtils.isNotBlank(path)) {
+      return path.replaceAll("\\$job(Id|id)", jobId.toString())
+          .replaceAll("\\$\\{job(Id|id)}", jobId.toString())
+          .replaceAll("\\$job(Name|name)", jobName)
+          .replaceAll("\\$\\{job(Name|name)}", jobName);
+    }
+    return path;
   }
 
   @Override
@@ -340,6 +345,9 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     // infer savepoint
     String customSavepoint = this.getFinalSavepointDir(savepointPath, application);
+    if (StringUtils.isNotBlank(customSavepoint)) {
+      customSavepoint = processPath(customSavepoint, application.getJobName(), application.getId());
+    }
 
     FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
     String clusterId = getClusterId(application, cluster);
