@@ -48,6 +48,9 @@
         <strong class="pl-10px">{{ item.value }}</strong>
         <Divider type="vertical" v-if="index !== footerList.length - 1" />
       </template>
+      <template v-if="footerList.length == 0">
+        <div class="inline-block h-18px"></div>
+      </template>
     </Skeleton>
   </div>
 </template>

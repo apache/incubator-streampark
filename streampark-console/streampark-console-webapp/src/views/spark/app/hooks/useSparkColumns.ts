@@ -25,8 +25,8 @@ const { t } = useI18n();
 export const useSparkColumns = () => {
   // app table column width
   const tableColumnWidth = ref({
-    jobName: 250,
-    flinkVersion: 110,
+    appName: 250,
+    sparkVersion: 110,
     tags: 150,
     state: 120,
     release: 190,
@@ -46,56 +46,65 @@ export const useSparkColumns = () => {
 
   const getAppColumns = computed((): BasicColumn[] => [
     {
-      title: t('flink.app.appName'),
-      dataIndex: 'jobName',
+      title: t('spark.app.appName'),
+      dataIndex: 'appName',
       align: 'left',
       fixed: 'left',
       resizable: true,
-      width: unref(tableColumnWidth).jobName,
+      width: unref(tableColumnWidth).appName,
     },
-    { title: t('flink.app.flinkVersion'), dataIndex: 'flinkVersion' },
-    { title: t('flink.app.tags'), ellipsis: true, dataIndex: 'tags', width: 150 },
     {
-      title: t('flink.app.runStatus'),
+      title: t('spark.app.sparkVersion'),
+      dataIndex: 'sparkVersion',
+      width: unref(tableColumnWidth).sparkVersion,
+    },
+    {
+      title: t('spark.app.tags'),
+      ellipsis: true,
+      dataIndex: 'tags',
+      width: unref(tableColumnWidth).tags,
+    },
+    {
+      title: t('spark.app.runStatus'),
       dataIndex: 'state',
       fixed: 'right',
       width: unref(tableColumnWidth).state,
       filters: [
-        { text: t('flink.app.runStatusOptions.added'), value: String(AppStateEnum.ADDED) },
-        { text: t('flink.app.runStatusOptions.starting'), value: String(AppStateEnum.STARTING) },
-        { text: t('flink.app.runStatusOptions.running'), value: String(AppStateEnum.RUNNING) },
-        { text: t('flink.app.runStatusOptions.failed'), value: String(AppStateEnum.FAILED) },
-        { text: t('flink.app.runStatusOptions.canceled'), value: String(AppStateEnum.CANCELED) },
-        { text: t('flink.app.runStatusOptions.finished'), value: String(AppStateEnum.FINISHED) },
-        { text: t('flink.app.runStatusOptions.suspended'), value: String(AppStateEnum.SUSPENDED) },
-        { text: t('flink.app.runStatusOptions.lost'), value: String(AppStateEnum.LOST) },
-        { text: t('flink.app.runStatusOptions.silent'), value: String(AppStateEnum.SILENT) },
+        { text: t('spark.app.runStatusOptions.added'), value: String(AppStateEnum.ADDED) },
+        { text: t('spark.app.runStatusOptions.starting'), value: String(AppStateEnum.STARTING) },
+        { text: t('spark.app.runStatusOptions.running'), value: String(AppStateEnum.RUNNING) },
+        { text: t('spark.app.runStatusOptions.failed'), value: String(AppStateEnum.FAILED) },
+        { text: t('spark.app.runStatusOptions.canceled'), value: String(AppStateEnum.CANCELED) },
+        { text: t('spark.app.runStatusOptions.finished'), value: String(AppStateEnum.FINISHED) },
+        { text: t('spark.app.runStatusOptions.suspended'), value: String(AppStateEnum.SUSPENDED) },
+        { text: t('spark.app.runStatusOptions.lost'), value: String(AppStateEnum.LOST) },
+        { text: t('spark.app.runStatusOptions.silent'), value: String(AppStateEnum.SILENT) },
         {
-          text: t('flink.app.runStatusOptions.terminated'),
+          text: t('spark.app.runStatusOptions.terminated'),
           value: String(AppStateEnum.TERMINATED),
         },
       ],
     },
     {
-      title: t('flink.app.releaseBuild'),
+      title: t('spark.app.releaseBuild'),
       dataIndex: 'release',
       width: unref(tableColumnWidth).release,
       fixed: 'right',
     },
     {
-      title: t('flink.app.duration'),
+      title: t('spark.app.duration'),
       dataIndex: 'duration',
       sorter: true,
       width: unref(tableColumnWidth).duration,
       customRender: ({ value }) => dateToDuration(value),
     },
     {
-      title: t('flink.app.modifiedTime'),
+      title: t('spark.app.modifiedTime'),
       dataIndex: 'modifyTime',
       sorter: true,
       width: unref(tableColumnWidth).modifyTime,
     },
-    { title: t('flink.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
+    { title: t('spark.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
   ]);
   return { getAppColumns, onTableColumnResize, tableColumnWidth };
 };
