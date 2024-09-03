@@ -268,9 +268,9 @@ public class SparkApplicationManageServiceImpl
         ApiAlertException.throwIfFalse(
             success,
             String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
-        if(appParam.isSparkOnYarnJob()){
+        if (appParam.isSparkOnYarnJob()) {
             appParam.resolveYarnQueue();
-            if(appParam.isSparkSqlJob()){
+            if (appParam.isSparkSqlJob()) {
                 appParam.setMainClass(Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS);
             }
         }

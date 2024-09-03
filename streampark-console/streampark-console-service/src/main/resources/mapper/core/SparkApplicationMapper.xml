@@ -86,7 +86,6 @@
     <select id="selectPage" resultType="org.apache.streampark.console.core.entity.SparkApplication" parameterType="org.apache.streampark.console.core.entity.SparkApplication">
         select
             t.*,
-            p.name as projectName,
             u.username,
            case
                when trim(u.nick_name) = ''
@@ -104,20 +103,11 @@
             <if test="app.jobType != null and app.jobType != ''">
                 and t.job_type = #{app.jobType}
             </if>
-            <if test="app.jobTypeArray != null and app.jobTypeArray.length>0">
-                and t.job_type in
-                <foreach item="item" index="index" collection="app.jobTypeArray" open="("  close=")" separator=",">
-                    #{item}
-                </foreach>
-            </if>
             <if test="app.executionMode != null and app.executionMode != ''">
                 and t.execution_mode = #{app.executionMode}
             </if>
             <if test="app.appName != null and app.appName != ''">
                 and t.app_name like concat('%', '${app.appName}', '%')
-            </if>
-            <if test="app.projectName != null and app.projectName != ''">
-                and p.name like concat('%', '${app.projectName}', '%')
             </if>
             <if test="app.appId != null and app.appId != ''">
                 and t.app_id = #{app.appId}
@@ -125,15 +115,8 @@
             <if test="app.state != null and app.state != ''">
                 and t.state = #{app.state}
             </if>
-
             <if test="app.userId != null and app.userId != ''">
                 and t.user_id = #{app.userId}
-            </if>
-            <if test="app.stateArray != null and app.stateArray.length>0">
-                and t.state in
-                <foreach item="item" index="index" collection="app.stateArray" open="("  close=")" separator=",">
-                    #{item}
-                </foreach>
             </if>
             <if test="app.tags != null and app.tags != ''">
                 and t.tags like concat('%', '${app.tags}', '%')

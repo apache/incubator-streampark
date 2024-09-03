@@ -420,7 +420,7 @@ public class SparkApplication extends BaseEntity {
     }
 
     public boolean isStreamParkJob() {
-        return this.getAppType() == ApplicationType.STREAMPARK_FLINK.getType();
+        return this.getAppType() == ApplicationType.APACHE_SPARK.getType();
     }
 
     @JsonIgnore
