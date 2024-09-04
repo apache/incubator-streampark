@@ -17,13 +17,13 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ExecutionMode;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
@@ -111,6 +111,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(),
           ThreadUtils.threadFactory("streampark-flink-savepoint-trigger"));
+  @Autowired private SavepointMapper savepointMapper;
 
   @Override
   public void expire(Long appId) {
@@ -119,13 +120,6 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     LambdaQueryWrapper<Savepoint> queryWrapper =
         new LambdaQueryWrapper<Savepoint>().eq(Savepoint::getAppId, appId);
     this.update(savepoint, queryWrapper);
-  }
-
-  @Override
-  public boolean save(Savepoint entity) {
-    this.expire(entity);
-    this.expire(entity.getAppId());
-    return super.save(entity);
   }
 
   private void expire(Savepoint entity) {
@@ -321,7 +315,19 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
   }
 
   @Override
-  public void trigger(Long appId, @Nullable String savepointPath) {
+  public boolean save(Savepoint savepoint) {
+    this.expire(savepoint);
+    this.expire(savepoint.getAppId());
+    this.cleanLatest(savepoint.getAppId());
+    return super.save(savepoint);
+  }
+
+  private void cleanLatest(Long appId) {
+    savepointMapper.cleanLatest(appId);
+  }
+
+  @Override
+  public void trigger(Long appId, @Nullable String savepointPath) throws Exception {
     log.info("Start to trigger savepoint for app {}", appId);
     Application application = applicationService.getById(appId);
 
@@ -407,21 +413,23 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
             });
   }
 
-  private String getFinalSavepointDir(@Nullable String savepointPath, Application application) {
+  private String getFinalSavepointDir(@Nullable String savepointPath, Application application)
+      throws Exception {
     String result = savepointPath;
-    if (StringUtils.isEmpty(savepointPath)) {
-      try {
-        result = this.getSavePointPath(application);
-      } catch (Exception e) {
-        log.error(
-            "Error in getting savepoint path for triggering savepoint for app:{}",
-            application.getId(),
-            e);
-        throw new ApiAlertException(
-            "Error in getting savepoint path for triggering savepoint for app "
-                + application.getId(),
-            e);
-      }
+    if (StringUtils.isBlank(savepointPath)) {
+      result = this.getSavePointPath(application);
+    }
+    if (StringUtils.isBlank(result)
+        || application.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+      result = Workspace.remote().APP_SAVEPOINTS();
+    }
+    if (StringUtils.isNotBlank(result)) {
+      processPath(result, application.getJobName(), application.getId());
+    } else {
+      throw new IllegalArgumentException(
+          String.format(
+              "[StreamPark] executionMode: %s, savePoint path is null or invalid.",
+              application.getExecutionModeEnum().getName()));
     }
     return result;
   }

@@ -34,4 +34,10 @@
         limit 1;
     </select>
 
+    <update id="cleanLatest">
+        update t_flink_savepoint
+        set latest = 0
+        where app_id = #{appId}
+    </update>
+
 </mapper>

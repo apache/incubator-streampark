@@ -1309,6 +1309,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     applicationLog.setAppId(application.getId());
     applicationLog.setJobManagerUrl(application.getJobManagerUrl());
     applicationLog.setOptionTime(new Date());
+
     if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
       applicationLog.setYarnAppId(application.getClusterId());
     }
@@ -1336,12 +1337,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     String customSavepoint = null;
     if (appParam.getRestoreOrTriggerSavepoint()) {
       customSavepoint = appParam.getSavepointPath();
-      if (customSavepoint == null) {
-        customSavepoint =
-            savepointService.processPath(
-                customSavepoint, application.getJobName(), application.getId());
-      } else {
+      if (StringUtils.isBlank(customSavepoint)) {
         customSavepoint = savepointService.getSavePointPath(appParam);
+      }
+      if (StringUtils.isBlank(customSavepoint)
+          || application.getExecutionModeEnum() == ExecutionMode.YARN_APPLICATION) {
+        customSavepoint = Workspace.remote().APP_SAVEPOINTS();
+      }
+      if (StringUtils.isNotBlank(customSavepoint)) {
+        savepointService.processPath(
+            customSavepoint, application.getJobName(), application.getId());
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "[StreamPark] executionMode: %s, savePoint path is null or invalid.",
+                application.getExecutionModeEnum().getName()));
       }
     }
 

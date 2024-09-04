@@ -25,4 +25,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 public interface SavepointMapper extends BaseMapper<Savepoint> {
   Savepoint findLatestByTime(@Param("appId") Long appId);
+
+  void cleanLatest(@Param("appId") Long appId);
 }

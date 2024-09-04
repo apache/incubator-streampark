@@ -475,8 +475,6 @@ trait FlinkClientTrait extends Logger {
       jobID: JobID,
       client: ClusterClient[_]): String = {
 
-    val savePointDir: String = tryGetSavepointPathIfNeed(cancelRequest)
-
     val clientWrapper = new FlinkClusterClient(client)
     val withSavepoint = Try(cancelRequest.withSavepoint).getOrElse(false)
     val withDrain = Try(cancelRequest.withDrain).getOrElse(false)
@@ -487,39 +485,12 @@ trait FlinkClientTrait extends Logger {
         null
       case (true, false) =>
         clientWrapper
-          .cancelWithSavepoint(jobID, savePointDir)
+          .cancelWithSavepoint(jobID, cancelRequest.savepointPath)
           .get()
       case (_, _) =>
         clientWrapper
-          .stopWithSavepoint(jobID, cancelRequest.withDrain, savePointDir)
+          .stopWithSavepoint(jobID, cancelRequest.withDrain, cancelRequest.savepointPath)
           .get()
-    }
-  }
-
-  private def tryGetSavepointPathIfNeed(request: SavepointRequestTrait): String = {
-    if (!request.withSavepoint) null
-    else {
-      if (StringUtils.isNotEmpty(request.savepointPath)) {
-        request.savepointPath
-      } else {
-        val configDir = getOptionFromDefaultFlinkConfig[String](
-          request.flinkVersion.flinkHome,
-          ConfigOptions
-            .key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-            .stringType()
-            .defaultValue {
-              if (request.executionMode == ExecutionMode.YARN_APPLICATION) {
-                Workspace.remote.APP_SAVEPOINTS
-              } else null
-            }
-        )
-
-        if (StringUtils.isEmpty(configDir)) {
-          throw new FlinkException(
-            s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
-        } else configDir
-
-      }
     }
   }
 
@@ -527,9 +498,8 @@ trait FlinkClientTrait extends Logger {
       savepointRequest: TriggerSavepointRequest,
       jobID: JobID,
       client: ClusterClient[_]): String = {
-    val savepointPath = tryGetSavepointPathIfNeed(savepointRequest)
     val clientWrapper = new FlinkClusterClient(client)
-    clientWrapper.triggerSavepoint(jobID, savepointPath).get()
+    clientWrapper.triggerSavepoint(jobID, savepointRequest.savepointPath).get()
   }
 
   def closeSubmit(submitRequest: SubmitRequest, close: AutoCloseable*): Unit = {
