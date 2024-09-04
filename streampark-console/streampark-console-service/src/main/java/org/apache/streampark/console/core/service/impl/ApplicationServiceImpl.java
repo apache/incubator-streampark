@@ -1477,7 +1477,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
   @Override
   public void persistMetrics(Application appParam) {
-    if (appParam.getFlinkAppStateEnum() == FlinkAppState.RUNNING) {
+    if (appParam.getState() != null && appParam.getFlinkAppStateEnum() == FlinkAppState.RUNNING) {
       appParam.setEndTime(null);
       appParam.setDuration(null);
     }
