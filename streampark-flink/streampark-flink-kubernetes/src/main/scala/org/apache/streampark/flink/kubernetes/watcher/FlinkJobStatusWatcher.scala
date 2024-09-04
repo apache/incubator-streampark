@@ -315,7 +315,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
     val jobState = trackId match {
       case id if watchController.canceling.has(id) =>
         logger.info(s"trackId ${trackId.toString} is canceling")
-        watchController.trackIds.invalidate(id)
         if (deployExists) FlinkJobState.CANCELLING else FlinkJobState.CANCELED
       case _ =>
         val isConnection = KubernetesDeploymentHelper.checkConnection()
