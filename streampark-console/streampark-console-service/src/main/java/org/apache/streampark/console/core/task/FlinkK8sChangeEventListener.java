@@ -115,12 +115,13 @@ public class FlinkK8sChangeEventListener {
       return;
     }
 
-    Application app = applicationService.getById(trackId.appId());
-    if (app == null) {
+    if (applicationService.getById(trackId.appId()) == null) {
       return;
     }
 
     FlinkMetricCV metrics = event.metrics();
+    Application app = new Application();
+    app.setId(trackId.appId());
     app.setJmMemory(metrics.totalJmMemory());
     app.setTmMemory(metrics.totalTmMemory());
     app.setTotalTM(metrics.totalTm());

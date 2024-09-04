@@ -168,6 +168,9 @@
             <if test="application.duration != null">
                 duration=#{application.duration},
             </if>
+            <if test="application.state != null">
+                state=#{application.state},
+            </if>
             <choose>
                 <when test="@org.apache.streampark.console.core.enums.FlinkAppState@isEndState(application.state)">
                     total_tm=null,
@@ -198,7 +201,6 @@
                     </if>
                 </otherwise>
             </choose>
-            state=#{application.state}
         </set>
         where id=#{application.id}
     </update>
