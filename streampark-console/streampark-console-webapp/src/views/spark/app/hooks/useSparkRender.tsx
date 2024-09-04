@@ -27,7 +27,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 import { ApiSelect } from '/@/components/Form';
 import { ResourceTypeEnum } from '/@/views/resource/upload/upload.data';
-import { handleSparkConfTemplate } from '/@/api/spark/conf';
+import { fetchSparkConfTemplate } from '/@/api/spark/conf';
 
 const { t } = useI18n();
 /* render input dropdown component */
@@ -161,7 +161,7 @@ export const renderIsSetConfig = (
           configOverride: unref(model.configOverride),
         });
       } else {
-        const res = await handleSparkConfTemplate();
+        const res = await fetchSparkConfTemplate();
         openConfDrawer(true, {
           configOverride: decodeByBase64(res),
         });

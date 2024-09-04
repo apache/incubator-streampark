@@ -36,7 +36,10 @@ export default {
   },
   spark: {
     application: 'Applications',
-    sparkHome: 'Spark Home'
+    sparkHome: 'Spark Home',
+    createApplication: 'Create Application',
+    updateApplication: 'Update Application',
+    applicationDetail: 'Application Detail',
   },
   setting: {
     menu: 'Settings',
