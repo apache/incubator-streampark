@@ -87,5 +87,5 @@ export const releaseTitleMap = {
   [ReleaseStateEnum.NEED_RELEASE]: 'current job need release',
   [ReleaseStateEnum.RELEASING]: 'releasing',
   [ReleaseStateEnum.NEED_RESTART]: 'release finished,need restart',
-  [ReleaseStateEnum.NEED_ROLLBACK]: 'application is rollbacked,need release',
+  [ReleaseStateEnum.NEED_ROLLBACK]: 'flink job is roll backed, need to release',
 };

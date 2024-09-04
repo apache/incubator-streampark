@@ -244,7 +244,7 @@ export default {
     success: '发布成功',
     waiting: '待发布',
     releasing: '发布中',
-    pending: '待回滚',
+    pending: '待重启',
   },
   addAppTips: {
     developmentModePlaceholder: '请选择开发模式',
