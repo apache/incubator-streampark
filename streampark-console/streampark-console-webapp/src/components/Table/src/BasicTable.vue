@@ -414,8 +414,6 @@
     .ant-table-wrapper {
       padding: 10px;
       background-color: @component-background;
-      border-radius: 4px !important;
-
       .ant-table-title {
         min-height: 40px;
         padding: 0 0 8px !important;
