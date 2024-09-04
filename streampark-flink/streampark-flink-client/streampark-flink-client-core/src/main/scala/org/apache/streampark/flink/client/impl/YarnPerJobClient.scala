@@ -109,7 +109,7 @@ object YarnPerJobClient extends YarnClientTrait {
     flinkConf
       .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     val response = super.doCancel(cancelRequest, flinkConf)
-    val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
+    val (_: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
       getYarnClusterDescriptor(flinkConf)
     clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response

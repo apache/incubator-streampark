@@ -87,9 +87,6 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       flinkConfig,
       (jobId, client) => {
         val resp = super.cancelJob(cancelRequest, jobId, client)
-        if (cancelRequest.executionMode == ExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
-          client.shutDownCluster()
-        }
         CancelResponse(resp)
       }
     )
