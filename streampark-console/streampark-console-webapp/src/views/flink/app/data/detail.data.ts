@@ -55,10 +55,7 @@ export const getDescSchema = (): DescItem[] => {
       render: (curVal) =>
         h(
           'div',
-          { class: 'bold-tag' },
-          h(Tag, { color: curVal === 1 ? '#545454' : '#0C7EF2' }, () =>
-            curVal === 1 ? 'Custom Code' : 'Flink SQL',
-          ),
+          h(Tag, { color: 'blue' }, () => (curVal === 1 ? 'Custom Code' : 'Flink SQL')),
         ),
     },
     {
@@ -84,8 +81,7 @@ export const getDescSchema = (): DescItem[] => {
       render: (curVal) =>
         h(
           'div',
-          { class: 'bold-tag' },
-          h(Tag, { color: '#108ee9' }, () =>
+          h(Tag, { color: 'blue' }, () =>
             curVal == AppTypeEnum.STREAMPARK_FLINK ? 'StreamPark Flink' : 'Apache Flink',
           ),
         ),

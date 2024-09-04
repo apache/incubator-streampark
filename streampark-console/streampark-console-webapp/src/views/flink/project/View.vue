@@ -57,12 +57,12 @@
         <template v-if="column.dataIndex === 'branches'">
           <a-tag
             v-if="record.refs.startsWith('refs/tags/') > 0"
-            color="#108ee9"
+            color="green"
             style="border-radius: 4px"
           >
             {{ record.refs.replace('refs/tags/', '') }}
           </a-tag>
-          <a-tag v-else color="#2db7f5" style="border-radius: 4px">
+          <a-tag v-else color="blue" style="border-radius: 4px">
             {{ record.refs.replace('refs/heads/', '') }}
           </a-tag>
         </template>
@@ -80,17 +80,18 @@
         </template>
         <template v-if="column.dataIndex === 'buildState'">
           <a-badge
-            status="processing"
+            status="success"
             title="installing"
             class="mr-10px"
             v-if="record.buildState == BuildStateEnum.BUILDING"
           />
-          <a-tag
+          <ATag
+            class="bold-tag"
             :color="buildStateMap[record.buildState]?.color || '#f5222d'"
             :class="buildStateMap[record.buildState]?.className"
           >
             {{ buildStateMap[record.buildState]?.label || t('flink.project.projectStatus.failed') }}
-          </a-tag>
+          </ATag>
         </template>
         <template v-if="column.dataIndex === 'action'">
           <TableAction
@@ -351,5 +352,8 @@
     .ant-card-head {
       padding: 0 2px !important;
     }
+  }
+  .status-processing-running {
+    animation: running-color 800ms ease-out infinite alternate;
   }
 </style>

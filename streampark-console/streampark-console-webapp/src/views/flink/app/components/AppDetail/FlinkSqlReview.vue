@@ -26,7 +26,7 @@
       <EyeOutlined style="color: green" />
       Flink SQL preview
     </template>
-    <div ref="flinkReviewRef" class="h-[calc(100vh-150px)] flink-preview"></div>
+    <div ref="flinkReviewRef" class="h-[calc(100vh-100px)] flink-preview"></div>
   </BasicDrawer>
 </template>
 
