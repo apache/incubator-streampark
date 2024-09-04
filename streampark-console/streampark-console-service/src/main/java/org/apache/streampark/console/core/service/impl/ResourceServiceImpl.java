@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
@@ -349,7 +349,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             jarFile == null || !jarFile.exists(), "flink app jar must exist.");
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
-        if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
+        if (jarFile.getName().endsWith(Constants.PYTHON_SUFFIX)) {
             return RestResponse.success().data(resp);
         }
         String mainClass = Utils.getJarManClass(jarFile);

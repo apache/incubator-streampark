@@ -17,8 +17,8 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{CommonConfig, InternalConfigHolder}
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.util.Implicits._
 
 import org.apache.commons.lang3.StringUtils
@@ -137,9 +137,9 @@ object YarnUtils extends Logger {
         val useHttps = YarnConfiguration.useHttps(conf)
         val (addressPrefix, defaultPort, protocol) = useHttps match {
           case x if x =>
-            (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", Constant.HTTPS_SCHEMA)
+            (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", Constants.HTTPS_SCHEMA)
           case _ =>
-            (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", Constant.HTTP_SCHEMA)
+            (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", Constants.HTTP_SCHEMA)
         }
 
         rmHttpURL = Option(conf.get("yarn.web-proxy.address", null)) match {

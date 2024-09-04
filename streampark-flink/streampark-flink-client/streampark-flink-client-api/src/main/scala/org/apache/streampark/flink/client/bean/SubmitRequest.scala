@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.client.bean
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util._
 import org.apache.streampark.common.util.Implicits._
@@ -66,8 +66,8 @@ case class SubmitRequest(
 
   lazy val appMain: String = this.developmentMode match {
     case FlinkDevelopmentMode.FLINK_SQL =>
-      Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS
-    case FlinkDevelopmentMode.PYFLINK => Constant.PYTHON_FLINK_DRIVER_CLASS_NAME
+      Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS
+    case FlinkDevelopmentMode.PYFLINK => Constants.PYTHON_FLINK_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 

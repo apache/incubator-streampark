@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.client.bean
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.FlinkVersion
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.enums.FlinkExecutionMode
 import org.apache.streampark.common.util.Implicits.JavaMap
 
@@ -34,5 +34,5 @@ case class TriggerSavepointRequest(
     jobId: String,
     savepointPath: String,
     nativeFormat: Boolean,
-    override val kubernetesNamespace: String = Constant.DEFAULT)
+    override val kubernetesNamespace: String = Constants.DEFAULT)
   extends SavepointRequestTrait
