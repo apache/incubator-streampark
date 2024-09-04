@@ -68,7 +68,8 @@ public class SavepointController {
   @PostMapping("trigger")
   @RequiresPermissions("savepoint:trigger")
   @PermissionScope(app = "#savepoint.appId", team = "#savepoint.teamId")
-  public RestResponse trigger(Savepoint savepoint, @Nullable String savepointPath) {
+  public RestResponse trigger(Savepoint savepoint, @Nullable String savepointPath)
+      throws Exception {
     savepointService.trigger(savepoint.getAppId(), savepointPath);
     return RestResponse.success(true);
   }
