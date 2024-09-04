@@ -305,21 +305,19 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
    */
   private def inferStateFromK8sEvent(@Nonnull trackId: TrackId)(implicit
       pollEmitTime: Long): Option[JobStatusCV] = {
-
     // infer from k8s deployment and event
     val latest: JobStatusCV = watchController.jobStatuses.get(trackId)
+    // whether deployment exists on kubernetes cluster
+    val deployExists = KubernetesRetriever.isDeploymentExists(
+      trackId.namespace,
+      trackId.clusterId
+    )
     val jobState = trackId match {
       case id if watchController.canceling.has(id) =>
         logger.info(s"trackId ${trackId.toString} is canceling")
         watchController.trackIds.invalidate(id)
-        FlinkJobState.CANCELED
+        if (deployExists) FlinkJobState.CANCELLING else FlinkJobState.CANCELED
       case _ =>
-        // whether deployment exists on kubernetes cluster
-        val deployExists = KubernetesRetriever.isDeploymentExists(
-          trackId.namespace,
-          trackId.clusterId
-        )
-
         val isConnection = KubernetesDeploymentHelper.checkConnection()
 
         if (deployExists) {
