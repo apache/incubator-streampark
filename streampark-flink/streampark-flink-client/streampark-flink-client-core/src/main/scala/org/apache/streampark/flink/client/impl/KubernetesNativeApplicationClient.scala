@@ -82,7 +82,6 @@ object KubernetesNativeApplicationClient extends KubernetesNativeClientTrait {
       flinkConf,
       (jobId, client) => {
         val resp = super.cancelJob(cancelRequest, jobId, client)
-        client.shutDownCluster()
         CancelResponse(resp)
       }
     )
