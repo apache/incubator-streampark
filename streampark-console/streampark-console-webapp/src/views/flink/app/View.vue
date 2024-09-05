@@ -267,167 +267,169 @@
 <template>
   <PageWrapper contentFullHeight content-class="flex flex-col">
     <AppDashboard ref="appDashboardRef" />
-    <BasicTable
-      @register="registerTable"
-      :columns="getAppColumns"
-      @resize-column="onTableColumnResize"
-      class="app_list !px-0 table-searchbar flex-1 pt-15px !px-0 flex flex-col"
-    >
-      <template #tableTitle>
-        <div class="flex justify-between" style="width: 100%">
-          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
-            <Row :gutter="4" class="w-full">
-              <Col :span="5">
-                <Form.Item>
-                  <Input
-                    :placeholder="t('flink.app.searchName')"
-                    allow-clear
-                    v-model:value="searchRef.jobName"
-                    @change="() => handleResetReload()"
-                    @search="() => handleResetReload()"
-                  />
-                </Form.Item>
-              </Col>
-              <Col :span="4">
-                <Form.Item>
-                  <Select
-                    :placeholder="t('flink.app.tags')"
-                    show-search
-                    allow-clear
-                    v-model:value="searchRef.tags"
-                    @change="() => handleResetReload()"
-                    :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
-                  />
-                </Form.Item>
-              </Col>
-              <Col :span="4">
-                <Form.Item>
-                  <Select
-                    :placeholder="t('flink.app.jobType')"
-                    show-search
-                    allow-clear
-                    v-model:value="searchRef.jobType"
-                    @change="() => handleResetReload()"
-                    :options="[
-                      { label: 'JAR', value: JobTypeEnum.JAR },
-                      { label: 'SQL', value: JobTypeEnum.SQL },
-                    ]"
-                  />
-                </Form.Item>
-              </Col>
-              <Col :span="4">
-                <Form.Item>
-                  <Select
-                    :placeholder="t('flink.app.owner')"
-                    show-search
-                    allow-clear
-                    v-model:value="searchRef.userId"
-                    @change="() => handleResetReload()"
-                    :options="
+    <div class="flex-1 bg-white mt-15px">
+      <BasicTable
+        @register="registerTable"
+        :columns="getAppColumns"
+        @resize-column="onTableColumnResize"
+        class="app_list !px-0 table-searchbar flex-1 !px-0"
+      >
+        <template #tableTitle>
+          <div class="flex justify-between" style="width: 100%">
+            <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
+              <Row :gutter="4" class="w-full">
+                <Col :span="5">
+                  <Form.Item>
+                    <Input
+                      :placeholder="t('flink.app.searchName')"
+                      allow-clear
+                      v-model:value="searchRef.jobName"
+                      @change="() => handleResetReload()"
+                      @search="() => handleResetReload()"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col :span="4">
+                  <Form.Item>
+                    <Select
+                      :placeholder="t('flink.app.tags')"
+                      show-search
+                      allow-clear
+                      v-model:value="searchRef.tags"
+                      @change="() => handleResetReload()"
+                      :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col :span="4">
+                  <Form.Item>
+                    <Select
+                      :placeholder="t('flink.app.jobType')"
+                      show-search
+                      allow-clear
+                      v-model:value="searchRef.jobType"
+                      @change="() => handleResetReload()"
+                      :options="[
+                        { label: 'JAR', value: JobTypeEnum.JAR },
+                        { label: 'SQL', value: JobTypeEnum.SQL },
+                      ]"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col :span="4">
+                  <Form.Item>
+                    <Select
+                      :placeholder="t('flink.app.owner')"
+                      show-search
+                      allow-clear
+                      v-model:value="searchRef.userId"
+                      @change="() => handleResetReload()"
+                      :options="
                       (users || []).map((u: Recordable) => ({
                         label: u.nickName || u.username,
                         value: u.userId,
                       }))
                     "
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form>
-          <div v-auth="'app:create'">
-            <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
-              <PlusOutlined />
-              {{ t('common.add') }}
-            </Button>
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+            <div v-auth="'app:create'">
+              <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
+                <PlusOutlined />
+                {{ t('common.add') }}
+              </Button>
+            </div>
           </div>
-        </div>
-      </template>
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'jobName'">
-          <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
-          <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
-          <span
-            class="link"
-            :class="{
-              'cursor-pointer': record['appControl']['allowView'] === true,
-            }"
-            @click="handleJobView(record)"
-          >
-            <Popover :title="t('common.detailText')">
-              <template #content>
-                <div class="flex">
-                  <span class="pr-6px font-bold">{{ t('flink.app.appName') }}:</span>
-                  <div class="max-w-300px break-words">{{ record.jobName }}</div>
-                </div>
-                <div class="pt-2px">
-                  <span class="pr-6px font-bold">{{ t('flink.app.jobType') }}:</span>
-                  <Tag color="blue">
-                    <span v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
-                    <span v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
-                  </Tag>
-                </div>
-                <div class="pt-2px flex">
-                  <span class="pr-6px font-bold">{{ t('common.description') }}:</span>
-                  <div class="max-w-300px break-words">{{ record.description }}</div>
-                </div>
-              </template>
-              {{ record.jobName }}
-            </Popover>
-          </span>
+        </template>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'jobName'">
+            <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
+            <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
+            <span
+              class="link"
+              :class="{
+                'cursor-pointer': record['appControl']['allowView'] === true,
+              }"
+              @click="handleJobView(record)"
+            >
+              <Popover :title="t('common.detailText')">
+                <template #content>
+                  <div class="flex">
+                    <span class="pr-6px font-bold">{{ t('flink.app.appName') }}:</span>
+                    <div class="max-w-300px break-words">{{ record.jobName }}</div>
+                  </div>
+                  <div class="pt-2px">
+                    <span class="pr-6px font-bold">{{ t('flink.app.jobType') }}:</span>
+                    <Tag color="blue">
+                      <span v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
+                      <span v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
+                    </Tag>
+                  </div>
+                  <div class="pt-2px flex">
+                    <span class="pr-6px font-bold">{{ t('common.description') }}:</span>
+                    <div class="max-w-300px break-words">{{ record.description }}</div>
+                  </div>
+                </template>
+                {{ record.jobName }}
+              </Popover>
+            </span>
 
-          <template v-if="record['jobType'] === JobTypeEnum.JAR">
-            <Badge
-              v-if="record.release === ReleaseStateEnum.NEED_CHECK"
-              class="build-badge"
-              count="NEW"
-              :title="t('flink.app.view.recheck')"
-            />
-            <Badge
-              v-else-if="record.release >= ReleaseStateEnum.RELEASING"
-              class="build-badge"
-              count="NEW"
-              :title="t('flink.app.view.changed')"
+            <template v-if="record['jobType'] === JobTypeEnum.JAR">
+              <Badge
+                v-if="record.release === ReleaseStateEnum.NEED_CHECK"
+                class="build-badge"
+                count="NEW"
+                :title="t('flink.app.view.recheck')"
+              />
+              <Badge
+                v-else-if="record.release >= ReleaseStateEnum.RELEASING"
+                class="build-badge"
+                count="NEW"
+                :title="t('flink.app.view.changed')"
+              />
+            </template>
+          </template>
+          <template v-if="column.dataIndex === 'tags'">
+            <Tooltip v-if="record.tags" :title="record.tags">
+              <span
+                v-for="(tag, index) in record.tags.split(',')"
+                :key="'tag-'.concat(index.toString())"
+                class="pl-4px"
+              >
+                <Tag color="blue">{{ tag }}</Tag>
+              </span>
+            </Tooltip>
+          </template>
+          <template v-if="column.dataIndex === 'task'">
+            <State option="task" :data="record" />
+          </template>
+          <template v-if="column.dataIndex === 'state'">
+            <State option="state" :data="record" :maxTitle="titleLenRef.maxState" />
+          </template>
+          <template v-if="column.dataIndex === 'release'">
+            <State
+              option="release"
+              :maxTitle="titleLenRef.maxRelease"
+              :title="releaseTitleMap[record.release] || ''"
+              :data="record"
             />
           </template>
+          <template v-if="column.dataIndex === 'operation'">
+            <TableAction v-bind="getTableActions(record, currentTablePage)" />
+          </template>
         </template>
-        <template v-if="column.dataIndex === 'tags'">
-          <Tooltip v-if="record.tags" :title="record.tags">
-            <span
-              v-for="(tag, index) in record.tags.split(',')"
-              :key="'tag-'.concat(index.toString())"
-              class="pl-4px"
-            >
-              <Tag color="blue">{{ tag }}</Tag>
-            </span>
-          </Tooltip>
-        </template>
-        <template v-if="column.dataIndex === 'task'">
-          <State option="task" :data="record" />
-        </template>
-        <template v-if="column.dataIndex === 'state'">
-          <State option="state" :data="record" :maxTitle="titleLenRef.maxState" />
-        </template>
-        <template v-if="column.dataIndex === 'release'">
-          <State
-            option="release"
-            :maxTitle="titleLenRef.maxRelease"
-            :title="releaseTitleMap[record.release] || ''"
-            :data="record"
+        <template #insertTable="{ tableContainer }">
+          <AppTableResize
+            v-if="!noData"
+            :table-container="tableContainer"
+            :resize-min="200"
+            v-model:left="tableColumnWidth.jobName"
           />
         </template>
-        <template v-if="column.dataIndex === 'operation'">
-          <TableAction v-bind="getTableActions(record, currentTablePage)" />
-        </template>
-      </template>
-      <template #insertTable="{ tableContainer }">
-        <AppTableResize
-          v-if="!noData"
-          :table-container="tableContainer"
-          :resize-min="200"
-          v-model:left="tableColumnWidth.jobName"
-        />
-      </template>
-    </BasicTable>
+      </BasicTable>
+    </div>
     <StartApplicationModal @register="registerStartModal" @update-option="handleOptionApp" />
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />

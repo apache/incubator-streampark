@@ -34,7 +34,7 @@
   const getStyle = computed(() => {
     return {
       left: `${props.left + 10}px`,
-      top: '20px',
+      top: '50px',
     };
   });
   const isMove = ref(false);
@@ -50,6 +50,7 @@
     };
 
     const offsetLeft = getOffsetLeft(props.tableContainer);
+    console.log('offsetLeft', offsetLeft);
     const maxResize = props.tableContainer!.getBoundingClientRect().width - 510;
     let newLeft = e.pageX - offsetLeft;
     if (newLeft > maxResize) newLeft = maxResize;
@@ -118,7 +119,8 @@
 
     &.app-vertical {
       width: 7px;
-      height: 100px;
+      height: calc(100% - 95px);
+      border-left: 1px solid var(--resize-border-color);
       cursor: col-resize;
     }
   }

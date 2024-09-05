@@ -20,13 +20,15 @@ import { computed, ref, unref } from 'vue';
 import { BasicColumn } from '/@/components/Table';
 import { AppStateEnum } from '/@/enums/flinkEnum';
 import { dateToDuration } from '/@/utils/dateUtil';
+import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
 const { t } = useI18n();
 
 export const useAppTableColumns = () => {
+  const { getCollapsed } = useMenuSetting();
   // app table column width
   const tableColumnWidth = ref({
     jobName: 250,
-    flinkVersion: 110,
+    flinkVersion: 150,
     tags: 150,
     state: 130,
     release: 120,
@@ -34,7 +36,6 @@ export const useAppTableColumns = () => {
     modifyTime: 165,
     nickName: 100,
   });
-
   function onTableColumnResize(width: number, columns: ColumnType) {
     if (!columns?.dataIndex) return;
     const dataIndexStr = columns?.dataIndex.toString() ?? '';
@@ -62,7 +63,13 @@ export const useAppTableColumns = () => {
       title: t('flink.app.tags'),
       ellipsis: true,
       dataIndex: 'tags',
-      width: unref(tableColumnWidth).tags,
+      ...(getCollapsed.value
+        ? {
+            minWidth: unref(tableColumnWidth).tags,
+          }
+        : {
+            width: unref(tableColumnWidth).tags,
+          }),
     },
     { title: t('flink.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
     {
