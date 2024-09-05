@@ -277,8 +277,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             if (error?.response?.data?.message) {
               createMessage.error(
                 error.response.data.message
-                  .replaceAll(/\[StreamPark\]/g, '')
-                  .replaceAll(/\[StreamPark\]/g, '') || 'copy failed',
+                  .replaceAll(/\[StreamPark]/g, '')
+                  .replaceAll(/\[StreamPark]/g, '') || 'copy failed',
               );
             }
             return Promise.reject('copy application error');
