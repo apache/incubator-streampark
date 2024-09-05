@@ -31,7 +31,7 @@
 
   import UploadJobJar from '/@/views/flink/app/components/UploadJobJar.vue';
   import { ResourceTypeEnum } from '../upload.data';
-  import { fetchMain } from '/@/api/resource/upload';
+  import { fetchMainClass } from '/@/api/resource/upload';
   interface DependencyType {
     artifactId: string;
     exclusions: string[];
@@ -142,7 +142,7 @@
       dependency.jar[data.file.name] = path;
       handleUpdateDependency();
       if (props.formModel.resourceType === ResourceTypeEnum.APP) {
-        const mainClass = await fetchMain({
+        const mainClass = await fetchMainClass({
           path: path,
         });
         if (mainClass) {

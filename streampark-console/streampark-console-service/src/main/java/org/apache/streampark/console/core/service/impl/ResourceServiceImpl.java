@@ -285,7 +285,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public String getMain(Long resourceId) {
+    public String getMainClass(Long resourceId) {
         Resource resource = getById(resourceId);
         if (resource.getResourceType() == ResourceTypeEnum.APP) {
             return resource.getMainClass();
@@ -294,7 +294,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public String getMainByPath(String path) {
+    public String getMainClassByPath(String path) {
         File file = new File(path);
         if (file.exists()) {
             return Utils.getJarManClass(file);

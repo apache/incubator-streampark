@@ -95,7 +95,7 @@ public interface ResourceService extends IService<Resource> {
 
     RestResponse checkResource(Resource resource) throws Exception;
 
-    String getMain(Long resourceId);
+    String getMainClass(Long resourceId);
 
-    String getMainByPath(String path);
+    String getMainClassByPath(String path);
 }
