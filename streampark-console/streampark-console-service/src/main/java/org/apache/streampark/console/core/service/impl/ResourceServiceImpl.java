@@ -174,7 +174,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         ApiAlertException.throwIfTrue(
             jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
         ApiAlertException.throwIfTrue(
-            resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
+            resource.getResourceType() == ResourceTypeEnum.APP && jars.isEmpty(),
             "Please upload jar for Flink_App resource");
         ApiAlertException.throwIfTrue(
             jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
@@ -206,7 +206,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             }
         }
 
-        if (resource.getResourceType() == ResourceTypeEnum.FLINK_APP) {
+        if (resource.getResourceType() == ResourceTypeEnum.APP) {
             findResource.setMainClass(resource.getMainClass());
         }
         findResource.setDescription(resource.getDescription());
@@ -276,12 +276,30 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
         ResourceTypeEnum type = resourceParam.getResourceType();
         switch (type) {
-            case FLINK_APP:
+            case APP:
                 return checkFlinkApp(resourceParam);
             case CONNECTOR:
                 return checkConnector(resourceParam);
         }
         return RestResponse.success().data(ImmutableMap.of(STATE, 0));
+    }
+
+    @Override
+    public String getMain(Long resourceId) {
+        Resource resource = getById(resourceId);
+        if (resource.getResourceType() == ResourceTypeEnum.APP) {
+            return resource.getMainClass();
+        }
+        return null;
+    }
+
+    @Override
+    public String getMainByPath(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            return Utils.getJarManClass(file);
+        }
+        return null;
     }
 
     private RestResponse checkConnector(Resource resourceParam) throws JsonProcessingException {

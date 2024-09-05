@@ -33,6 +33,7 @@ enum RESOURCE_API {
   DELETE = '/resource/delete',
   LIST = '/resource/list',
   CHECK = '/resource/check',
+  MAIN = '/resource/main',
 }
 
 /**
@@ -82,6 +83,10 @@ export function fetchTeamResource(data: Recordable): Promise<ResourceListRecord[
 
 export function checkResource(data: ResourceParam): Promise<AxiosResponse<Result>> {
   return defHttp.post({ url: RESOURCE_API.CHECK, data });
+}
+
+export function fetchMain(data: { path: string }): Promise<string> {
+  return defHttp.post({ url: RESOURCE_API.MAIN, data });
 }
 
 export function fetchUpload(params) {
