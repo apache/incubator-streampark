@@ -40,7 +40,7 @@
     Object.assign(flinkInfo, data);
     setContent(flinkInfo.flinkConf);
     const height = document.documentElement.offsetHeight || document.body.offsetHeight;
-    conf.value.style.height = height - 210 + 'px';
+    conf.value.style.height = height - 150 + 'px';
   });
 
   const { setContent } = useMonaco(conf, {
@@ -94,20 +94,12 @@
   }
 </script>
 <template>
-  <BasicDrawer title="Flink Conf" @register="registerDrawer" width="40%" placement="right">
-    <div style="padding-bottom: 15px">
-      {{ t('setting.flinkHome.title') }}: &nbsp;&nbsp; {{ flinkInfo.flinkHome }}
-    </div>
+  <BasicDrawer @register="registerDrawer" width="40%" placement="right">
+    <template #title> Flink Conf </template>
     <div>
-      {{ t('setting.flinkHome.sync') }} :
-      <div class="py-15px">
-        <div ref="conf" style="height: 120px"></div>
-        <a-button
-          type="primary"
-          class="float-right mt-10px mr-130px"
-          @click="handleSync"
-          :loading="syncLoading"
-        >
+      <div>
+        <div ref="conf"></div>
+        <a-button type="primary" class="mt-20px ml-20px" @click="handleSync" :loading="syncLoading">
           <SyncOutlined />
           {{ t('setting.flinkHome.sync') }}
         </a-button>

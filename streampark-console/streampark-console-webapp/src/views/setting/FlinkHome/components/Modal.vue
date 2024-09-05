@@ -28,10 +28,10 @@
   const { t } = useI18n();
   const { Swal } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
-    labelWidth: 120,
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { lg: 22, md: 22 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'flinkName',
@@ -162,7 +162,7 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModalInner" :width="550" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal :width="600" @register="registerModalInner" v-bind="$attrs" @ok="handleSubmit">
     <template #title>
       <SvgIcon name="flink" />
       {{ t('common.add') }}

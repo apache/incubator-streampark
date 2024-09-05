@@ -43,12 +43,10 @@
   const { Swal } = useMessage();
   const userStore = useUserStore();
   const [registerForm, { validateFields, resetFields, setFieldsValue }] = useForm({
-    labelWidth: 160,
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: 5, sm: 7 },
-    wrapperCol: { lg: 17, sm: 4 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'alertName',
@@ -193,9 +191,9 @@
 
 <template>
   <BasicModal
+    :width="600"
     :ok-text="t('common.submitText')"
     @register="registerModal"
-    :width="680"
     v-bind="$attrs"
     @ok="handleSubmit"
   >

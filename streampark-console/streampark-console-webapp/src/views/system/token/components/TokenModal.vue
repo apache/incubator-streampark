@@ -16,9 +16,9 @@
 -->
 <template>
   <BasicModal
+    :width="600"
     @register="registerDrawer"
     showFooter
-    :width="550"
     centered
     :minHeight="140"
     @ok="handleSubmit"
@@ -54,8 +54,8 @@
         colon: true,
         schemas: formSchema,
         showActionButtonGroup: false,
-        labelWidth: 120,
-        baseColProps: { lg: 22, md: 22 },
+        layout: 'vertical',
+        baseColProps: { span: 22, offset: 1 },
       });
 
       const [registerDrawer, { setModalProps, closeModal }] = useModalInner(async (data) => {

@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicModal :width="550" :show-cancel-btn="false" @register="registerModal" @ok="closeModal">
+  <BasicModal :width="600" :show-cancel-btn="false" @register="registerModal" @ok="closeModal">
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ t('system.user.userInfo') }}

@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicModal :showOkBtn="false" @register="registerModal" showFooter :width="550" @ok="closeModal">
+  <BasicModal :width="600" :showOkBtn="false" @register="registerModal" showFooter @ok="closeModal">
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       {{ t('flink.variable.variableInfoTitle') }}

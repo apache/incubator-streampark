@@ -16,11 +16,11 @@
 -->
 <template>
   <BasicModal
+    :width="600"
     v-bind="$attrs"
     centered
     @register="registerModal"
     showFooter
-    :width="600"
     @ok="handleSubmit"
   >
     <template #title>
@@ -111,8 +111,8 @@
         name: 'YarnQueueEditForm',
         colon: true,
         showActionButtonGroup: false,
-        labelWidth: 120,
-        baseColProps: { lg: 22, md: 22 },
+        layout: 'vertical',
+        baseColProps: { span: 22, offset: 1 },
       });
 
       const [registerModal, { setModalProps, closeModal }] = useModalInner(

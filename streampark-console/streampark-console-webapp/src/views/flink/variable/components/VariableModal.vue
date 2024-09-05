@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <template>
-  <BasicModal @register="registerModal" showFooter :width="600" @ok="handleSubmit">
+  <BasicModal :width="600" @register="registerModal" showFooter @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       {{ getTitle }}
@@ -105,7 +105,7 @@
         label: t('flink.variable.table.variableValue'),
         component: 'InputTextArea',
         componentProps: {
-          rows: 4,
+          rows: 2,
           placeholder: t('flink.variable.table.variableValuePlaceholder'),
         },
         rules: [{ required: true, message: t('flink.variable.table.variableValuePlaceholder') }],
@@ -126,7 +126,7 @@
         field: 'description',
         label: t('common.description'),
         component: 'InputTextArea',
-        componentProps: { rows: 4 },
+        componentProps: { rows: 2 },
         rules: [{ max: 100, message: t('flink.variable.form.descriptionMessage') }],
       },
     ];
@@ -136,8 +136,8 @@
     name: 'VariableForm',
     colon: true,
     showActionButtonGroup: false,
-    labelWidth: 140,
-    baseColProps: { lg: 22, md: 22 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
   const [registerModal, { setModalProps, changeLoading, closeModal }] = useModalInner(

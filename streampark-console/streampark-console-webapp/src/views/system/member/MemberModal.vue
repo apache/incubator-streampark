@@ -16,11 +16,11 @@
 -->
 <template>
   <BasicModal
+    :width="600"
     v-bind="$attrs"
     @register="registerModal"
     centered
     showFooter
-    :width="550"
     @ok="handleSubmit"
     :minHeight="120"
   >
@@ -115,8 +115,8 @@
     name: 'MemberForm',
     colon: true,
     showActionButtonGroup: false,
-    labelWidth: 120,
-    baseColProps: { lg: 22, md: 22 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
   const [registerModal, { setModalProps, closeModal }] = useModalInner(async (data: Recordable) => {

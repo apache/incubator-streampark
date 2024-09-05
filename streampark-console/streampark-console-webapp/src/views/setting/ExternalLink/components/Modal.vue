@@ -70,6 +70,27 @@
         ],
       },
       {
+        field: 'linkUrl',
+        label: t('setting.externalLink.form.linkUrl'),
+        component: 'Input',
+        componentProps: {
+          placeholder: t('setting.externalLink.form.linkUrlPlaceholder'),
+          allowClear: true,
+        },
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'conf-switch' },
+            'Supported variables: {job_id}, {yarn_id}, {job_name}, Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
+          ),
+        rules: [
+          {
+            required: true,
+            message: t('setting.externalLink.form.linkUrlIsRequired'),
+          },
+        ],
+      },
+      {
         field: 'badgeColor',
         label: t('setting.externalLink.form.badgeColor'),
         component: 'Input',
@@ -88,33 +109,11 @@
         component: 'Input',
         render: ({ model }) => renderPreview(model),
       },
-      {
-        field: 'linkUrl',
-        label: t('setting.externalLink.form.linkUrl'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('setting.externalLink.form.linkUrlPlaceholder'),
-          allowClear: true,
-        },
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'conf-switch' },
-            'Supported variables: {job_id}, {yarn_id}, {job_name} ' +
-              'Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
-          ),
-        rules: [
-          {
-            required: true,
-            message: t('setting.externalLink.form.linkUrlIsRequired'),
-          },
-        ],
-      },
     ],
     colon: true,
     showActionButtonGroup: false,
-    labelWidth: 120,
-    baseColProps: { lg: 22, md: 22 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
   const [registerModal, { closeModal, changeOkLoading }] = useModalInner((data: ExternalLink) => {
@@ -182,7 +181,7 @@
 <template>
   <BasicModal
     @register="registerModal"
-    :width="650"
+    :width="600"
     :ok-text="t('common.submitText')"
     v-bind="$attrs"
     @ok="handleSubmit"
