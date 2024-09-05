@@ -132,6 +132,6 @@
         </template>
       </a-table>
     </div>
-    <ExternalLinkModal @register="registerLinkModal" width="850px" @reload="getExternalLink" />
+    <ExternalLinkModal @register="registerLinkModal" @reload="getExternalLink" />
   </PageWrapper>
 </template>

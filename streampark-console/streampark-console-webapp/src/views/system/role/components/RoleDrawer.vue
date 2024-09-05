@@ -15,33 +15,32 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    v-bind="$attrs"
-    @register="registerDrawer"
-    showFooter
-    :title="getTitle"
-    width="40%"
-    @ok="handleSubmit"
-  >
-    <BasicForm @register="registerForm" :schemas="formSchemas">
-      <template #menu="{ model, field }">
-        <BasicTree
-          :default-expand-level="1"
-          v-model:value="model[field]"
-          :treeData="treeData"
-          :fieldNames="{ title: 'text', key: 'id' }"
-          v-if="treeData.length > 0"
-          @check="handleTreeCheck"
-          checkable
-          toolbar
-          :title="t('system.role.assignment')"
-        >
-          <template #title="{ text }">
-            {{ handleTreeTitle(text) }}
-          </template>
-        </BasicTree>
-      </template>
-    </BasicForm>
+  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="40%" @ok="handleSubmit">
+    <template #title>
+      <Icon icon="ant-design:user-switch-outlined" />
+      {{ getTitle }}
+    </template>
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="formSchemas">
+        <template #menu="{ model, field }">
+          <BasicTree
+            :default-expand-level="1"
+            v-model:value="model[field]"
+            :treeData="treeData"
+            :fieldNames="{ title: 'text', key: 'id' }"
+            v-if="treeData.length > 0"
+            @check="handleTreeCheck"
+            checkable
+            toolbar
+            :title="t('system.role.assignment')"
+          >
+            <template #title="{ text }">
+              {{ handleTreeTitle(text) }}
+            </template>
+          </BasicTree>
+        </template>
+      </BasicForm>
+    </div>
   </BasicDrawer>
 </template>
 <script lang="ts">
@@ -55,6 +54,7 @@
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
   const treeDataMap = new Map<string, string>();
   const handleTreeIcon = (treeData: TreeItem[]): TreeItem[] => {
     if (!treeData?.length) {
@@ -71,7 +71,7 @@
 
   export default defineComponent({
     name: 'RoleDrawer',
-    components: { BasicDrawer, BasicForm, BasicTree },
+    components: { Icon, BasicDrawer, BasicForm, BasicTree },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();

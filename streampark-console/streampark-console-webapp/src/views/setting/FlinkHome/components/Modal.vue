@@ -31,9 +31,7 @@
     labelWidth: 120,
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: 7, sm: 7 },
-    wrapperCol: { lg: 16, sm: 4 },
-    baseColProps: { span: 24 },
+    baseColProps: { lg: 22, md: 22 },
     schemas: [
       {
         field: 'flinkName',
@@ -164,7 +162,7 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModalInner" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal @register="registerModalInner" :width="550" v-bind="$attrs" @ok="handleSubmit">
     <template #title>
       <SvgIcon name="flink" />
       {{ t('common.add') }}

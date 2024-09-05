@@ -16,7 +16,7 @@
  */
 export default {
   tableTitle: 'Yarn Queue List',
-  createQueue: 'Create Yarn Queue',
+  createQueue: 'Add Yarn Queue',
   success: 'Success',
   descriptionMessage: 'exceeds maximum length limit of 512 characters',
   modifyYarnQueue: 'Edit Yarn Queue',

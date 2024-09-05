@@ -197,6 +197,7 @@
     @register="registerModal"
     :minHeight="100"
     @ok="handleSubmit"
+    :width="550"
     @cancel="handleReset"
     :okText="t('common.apply')"
     :cancelText="t('common.cancelText')"
@@ -206,7 +207,7 @@
       {{ t('flink.app.view.start') }}
     </template>
 
-    <BasicForm @register="registerForm" class="!pt-40px">
+    <BasicForm @register="registerForm" class="!pt-20px">
       <template #savepoint="{ model, field }">
         <template
           v-if="

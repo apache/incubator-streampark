@@ -18,11 +18,15 @@
   <BasicModal
     @register="registerDrawer"
     showFooter
-    :title="getTitle"
-    :width="600"
+    :width="550"
+    centered
     :minHeight="140"
     @ok="handleSubmit"
   >
+    <template #title>
+      <Icon icon="ant-design:key-outlined" />
+      {{ getTitle }}
+    </template>
     <div class="mt-18px">
       <BasicForm @register="registerForm" />
     </div>
@@ -36,20 +40,21 @@
 
   import { fetchTokenCreate } from '/@/api/system/token';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'TokenModal',
-    components: { BasicModal, BasicForm },
+    components: { Icon, BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const isUpdate = ref(true);
       const { t } = useI18n();
 
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-        labelWidth: 120,
         colon: true,
         schemas: formSchema,
         showActionButtonGroup: false,
+        labelWidth: 120,
         baseColProps: { lg: 22, md: 22 },
       });
 

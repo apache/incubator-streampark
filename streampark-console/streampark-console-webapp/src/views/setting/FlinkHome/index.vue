@@ -190,7 +190,7 @@
     </BasicTable>
 
     <FlinkEnvModal @register="registerModal" @reload="reload" />
-    <FlinkEnvDrawer @register="registerFlinkDraw" width="60%" />
+    <FlinkEnvDrawer @register="registerFlinkDraw" />
   </PageWrapper>
 </template>
 <style lang="less" scoped>

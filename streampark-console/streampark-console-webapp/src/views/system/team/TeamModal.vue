@@ -19,7 +19,7 @@
     v-bind="$attrs"
     @register="registerModal"
     showFooter
-    width="650"
+    :width="550"
     @ok="handleSubmit"
     centered
   >
@@ -81,9 +81,8 @@
         name: 'TeamEditForm',
         colon: true,
         showActionButtonGroup: false,
-        baseColProps: { span: 24 },
-        labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-        wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+        labelWidth: 120,
+        baseColProps: { lg: 22, md: 22 },
       });
 
       const [registerModal, { setModalProps, closeModal }] = useModalInner(

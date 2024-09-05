@@ -44,7 +44,6 @@
   const externalLinkId = ref<string | null>(null);
   const { Swal } = useMessage();
   const [registerForm, { validate, resetFields, setFieldsValue }] = useForm({
-    labelWidth: 120,
     schemas: [
       {
         field: 'badgeLabel',
@@ -101,7 +100,8 @@
           h(
             'span',
             { class: 'conf-switch' },
-            'Supported variables: {job_id}, {yarn_id}, {job_name},Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
+            'Supported variables: {job_id}, {yarn_id}, {job_name} ' +
+              'Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
           ),
         rules: [
           {
@@ -113,9 +113,8 @@
     ],
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: { span: 6, offset: 0 }, sm: { span: 6, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
-    baseColProps: { span: 24 },
+    labelWidth: 120,
+    baseColProps: { lg: 22, md: 22 },
   });
 
   const [registerModal, { closeModal, changeOkLoading }] = useModalInner((data: ExternalLink) => {
@@ -183,14 +182,17 @@
 <template>
   <BasicModal
     @register="registerModal"
+    :width="650"
     :ok-text="t('common.submitText')"
     v-bind="$attrs"
     @ok="handleSubmit"
   >
     <template #title>
-      <Icon icon="ant-design:link-outlined" color="blue" />
+      <Icon icon="ant-design:link-outlined" />
       {{ t('setting.externalLink.externalLinkSetting') }}
     </template>
-    <BasicForm @register="registerForm" />
+    <div class="mt-18px">
+      <BasicForm @register="registerForm" />
+    </div>
   </BasicModal>
 </template>

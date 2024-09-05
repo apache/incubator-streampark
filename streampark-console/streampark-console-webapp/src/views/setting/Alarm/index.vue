@@ -285,8 +285,8 @@
         </template>
       </List>
     </div>
-    <AlertModal @register="registerAlertModal" @reload="getAlertSetting" width="850px" />
-    <DetailModal @register="registerAlertDetailModal" width="850px" />
+    <AlertModal @register="registerAlertModal" @reload="getAlertSetting" />
+    <DetailModal @register="registerAlertDetailModal" />
   </PageWrapper>
 </template>
 <style lang="less">

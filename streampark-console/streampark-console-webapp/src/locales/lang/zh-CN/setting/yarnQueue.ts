@@ -16,7 +16,7 @@
  */
 export default {
   tableTitle: 'Yarn Queue 列表',
-  createQueue: '创建队列',
+  createQueue: '添加队列',
   success: '成功',
   modifyYarnQueue: '编辑队列',
   deleteYarnQueue: '删除队列',

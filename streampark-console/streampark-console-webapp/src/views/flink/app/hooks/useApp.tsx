@@ -216,7 +216,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     let help = '';
     let copyAppName: string | undefined = '';
     createConfirm({
-      width: '600px',
+      width: '550px',
       title: () => [
         h(SvgIcon, {
           name: 'copy',
@@ -226,11 +226,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       ],
       content: () => {
         return (
-          <Form class="!pt-50px">
+          <Form class="!pt-40px">
             <Form.Item
               label="Job Name"
-              labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
-              wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
+              labelCol={{ lg: { span: 5 }, sm: { span: 5 } }}
+              wrapperCol={{ lg: { span: 18 }, sm: { span: 18 } }}
               validateStatus={unref(validateStatus)}
               help={help}
               rules={[{ required: true }]}
@@ -305,7 +305,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
     const mappingRef = ref();
     const formValue = reactive<any>({});
     createConfirm({
-      width: '600px',
+      width: '550px',
       title: () => [
         h(SvgIcon, {
           name: 'mapping',
@@ -319,11 +319,11 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             class="!pt-40px"
             ref={mappingRef}
             name="mappingForm"
-            labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
-            wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
+            labelCol={{ lg: { span: 5 }, sm: { span: 5 } }}
+            wrapperCol={{ lg: { span: 18 }, sm: { span: 18 } }}
             v-model:model={formValue}
           >
-            <Form.Item label="Application Name">
+            <Form.Item label="Job Name">
               <Alert message={app.jobName} type="info" />
             </Form.Item>
             {[

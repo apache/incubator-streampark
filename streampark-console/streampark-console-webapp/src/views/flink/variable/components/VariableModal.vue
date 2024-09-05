@@ -15,12 +15,14 @@
   limitations under the License.
 -->
 <template>
-  <BasicModal @register="registerModal" showFooter :width="750" @ok="handleSubmit">
+  <BasicModal @register="registerModal" showFooter :width="600" @ok="handleSubmit">
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
+    </div>
   </BasicModal>
 </template>
 
@@ -134,9 +136,8 @@
     name: 'VariableForm',
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+    labelWidth: 140,
+    baseColProps: { lg: 22, md: 22 },
   });
 
   const [registerModal, { setModalProps, changeLoading, closeModal }] = useModalInner(

@@ -146,6 +146,7 @@
   <BasicModal
     @register="registerModal"
     @ok="handleSubmit"
+    :width="550"
     :okText="t('common.apply')"
     :cancelText="t('common.cancelText')"
   >
@@ -153,6 +154,6 @@
       <SvgIcon name="shutdown" style="color: red" />
       {{ t('flink.app.view.stop') }}
     </template>
-    <BasicForm @register="registerForm" class="!pt-40px" />
+    <BasicForm @register="registerForm" class="!pt-20px" />
   </BasicModal>
 </template>

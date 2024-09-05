@@ -20,10 +20,11 @@
     centered
     @register="registerModal"
     showFooter
-    :width="750"
+    :width="600"
     @ok="handleSubmit"
   >
     <template #title>
+      <Icon icon="ant-design:menu-outlined" />
       {{ getTitle }}
     </template>
     <div class="mt-3">
@@ -43,10 +44,11 @@
   } from '/@/api/flink/setting/yarnQueue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { renderYarnQueueLabel } from './useYarnQueueRender';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'YarnQueueDrawer',
-    components: { BasicModal, BasicForm },
+    components: { Icon, BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
@@ -109,9 +111,8 @@
         name: 'YarnQueueEditForm',
         colon: true,
         showActionButtonGroup: false,
-        baseColProps: { span: 24 },
-        labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-        wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+        labelWidth: 120,
+        baseColProps: { lg: 22, md: 22 },
       });
 
       const [registerModal, { setModalProps, closeModal }] = useModalInner(

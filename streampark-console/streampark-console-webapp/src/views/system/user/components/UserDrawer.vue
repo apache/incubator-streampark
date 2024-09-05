@@ -26,7 +26,10 @@
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" />
+
+    <div class="mt-3">
+      <BasicForm @register="registerForm" />
+    </div>
   </BasicDrawer>
 </template>
 <script lang="ts">
