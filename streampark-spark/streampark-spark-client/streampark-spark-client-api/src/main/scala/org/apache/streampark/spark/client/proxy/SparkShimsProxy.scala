@@ -17,8 +17,8 @@
 
 package org.apache.streampark.spark.client.proxy
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{ConfigKeys, SparkVersion}
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.util.{ChildFirstClassLoader, ClassLoaderObjectInputStream, ClassLoaderUtils, Logger}
 import org.apache.streampark.common.util.Implicits._
 
@@ -123,7 +123,7 @@ object SparkShimsProxy extends Logger {
       .listFiles()
       .foreach((jar: File) => {
         val jarName = jar.getName
-        if (jarName.endsWith(Constant.JAR_SUFFIX)) {
+        if (jarName.endsWith(Constants.JAR_SUFFIX)) {
           if (jarName.startsWith(SPARK_SHIMS_PREFIX)) {
             val prefixVer =
               s"$SPARK_SHIMS_PREFIX-${majorVersion}_$scalaVersion"

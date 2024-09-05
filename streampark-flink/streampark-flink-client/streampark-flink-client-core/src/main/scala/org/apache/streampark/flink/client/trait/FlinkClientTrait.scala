@@ -17,9 +17,9 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util._
@@ -108,9 +108,9 @@ trait FlinkClientTrait extends Logger {
           // python.archives
           .safeSet(PythonOptions.PYTHON_ARCHIVES, pythonVenv)
           // python.client.executable
-          .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+          .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE)
           // python.executable
-          .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+          .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE)
 
         val flinkOptPath: String =
           System.getenv(ConfigConstants.ENV_FLINK_OPT_DIR)

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.Workspace
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.enums.FlinkDevelopmentMode
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils}
@@ -117,16 +117,16 @@ object YarnApplicationClient extends YarnClientTrait {
         // python.archives
         .safeSet(PythonOptions.PYTHON_ARCHIVES, pyVenv)
         // python.client.executable
-        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+        .safeSet(PythonOptions.PYTHON_CLIENT_EXECUTABLE, Constants.PYTHON_EXECUTABLE)
         // python.executable
-        .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constant.PYTHON_EXECUTABLE)
+        .safeSet(PythonOptions.PYTHON_EXECUTABLE, Constants.PYTHON_EXECUTABLE)
 
       val args: util.List[String] =
         flinkConfig.get(ApplicationConfiguration.APPLICATION_ARGS)
       // Caused by: java.lang.UnsupportedOperationException
       val argsList: util.ArrayList[String] = new util.ArrayList[String](args)
       argsList.add("-pym")
-      argsList.add(submitRequest.userJarFile.getName.dropRight(Constant.PYTHON_SUFFIX.length))
+      argsList.add(submitRequest.userJarFile.getName.dropRight(Constants.PYTHON_SUFFIX.length))
       flinkConfig.safeSet(ApplicationConfiguration.APPLICATION_ARGS, argsList)
     }
 

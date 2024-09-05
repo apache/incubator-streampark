@@ -17,9 +17,9 @@
 
 package org.apache.streampark.spark.client.bean
 
-import org.apache.streampark.common.Constant
 import org.apache.streampark.common.conf.{SparkVersion, Workspace}
 import org.apache.streampark.common.conf.ConfigKeys._
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.enums._
 import org.apache.streampark.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import org.apache.streampark.common.util.Implicits._
@@ -60,7 +60,7 @@ case class SubmitRequest(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case SparkDevelopmentMode.SPARK_SQL => Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case SparkDevelopmentMode.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
     case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => mainClass
     case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }

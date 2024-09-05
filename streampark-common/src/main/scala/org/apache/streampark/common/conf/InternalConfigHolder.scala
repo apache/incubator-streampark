@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.conf
 
-import org.apache.streampark.common.Constant
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.util.{Logger, SystemPropertyUtils}
 import org.apache.streampark.common.util.Implicits._
 
@@ -160,7 +160,7 @@ object InternalConfigHolder extends Logger {
                |ConfigHub collected configs: ${configKeys.size}
                |  ${configKeys
                 .map(key =>
-                  s"$key = ${if (key.contains("password")) Constant.DEFAULT_DATAMASK_STRING
+                  s"$key = ${if (key.contains("password")) Constants.DEFAULT_DATAMASK_STRING
                     else get(key)}")
                 .mkString("\n  ")}""".stripMargin)
   }
