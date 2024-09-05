@@ -17,7 +17,7 @@
 
 package org.apache.streampark.common.util
 
-import org.apache.streampark.common.Constant
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.util.Implicits._
 
 import redis.clients.jedis._
@@ -92,7 +92,7 @@ object RedisClient extends Logger {
    * @return
    */
   def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
-    val endpointEn: RedisEndpoint = endpoint.copy(auth = Constant.DEFAULT_DATAMASK_STRING)
+    val endpointEn: RedisEndpoint = endpoint.copy(auth = Constants.DEFAULT_DATAMASK_STRING)
     logInfo(s"[StreamPark] RedisClient: createJedisPool with $endpointEn ")
     new JedisPool(
       poolConfig,

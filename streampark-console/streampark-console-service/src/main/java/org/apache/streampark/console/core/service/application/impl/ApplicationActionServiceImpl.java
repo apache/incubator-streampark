@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
@@ -684,7 +684,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                     resource.getFilePath(), "pyflink file can't be null, start application failed.");
 
                 ApiAlertException.throwIfFalse(
-                    resource.getFilePath().endsWith(Constant.PYTHON_SUFFIX),
+                    resource.getFilePath().endsWith(Constants.PYTHON_SUFFIX),
                     "pyflink format error, must be a \".py\" suffix, start application failed.");
 
                 flinkUserJar = resource.getFilePath();
@@ -724,7 +724,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
                             flinkUserJar = String.format(
                                 "%s/%s",
                                 application.getAppLib(),
-                                application.getModule().concat(Constant.JAR_SUFFIX));
+                                application.getModule().concat(Constants.JAR_SUFFIX));
                             break;
                         case APACHE_FLINK:
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());

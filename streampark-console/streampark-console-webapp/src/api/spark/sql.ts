@@ -15,16 +15,46 @@
  * limitations under the License.
  */
 
+import type { SparkSql } from './sql.type';
 import { defHttp } from '/@/utils/http/axios';
-const apiPrefix = '/flink/conf';
+const apiPrefix = '/spark/sql';
 
 export function fetchSparkSqlVerify(data: Recordable) {
   return defHttp.post({ url: `${apiPrefix}/verify`, data }, { isTransformResponse: false });
 }
 
+export function fetchSparkSqlList(data: Recordable) {
+  return defHttp.post<{
+    total: number;
+    records: SparkSql[];
+  }>({
+    url: `${apiPrefix}/list`,
+    data,
+  });
+}
+
+export function fetchSparkSqlRemove(data: SparkSql) {
+  return defHttp.post<boolean>({
+    url: `${apiPrefix}/delete`,
+    data,
+  });
+}
+
 export function fetchSparkSql(data: Recordable) {
   return defHttp.post({
     url: `${apiPrefix}/get`,
+    data,
+  });
+}
+export function fetchSparkSqlHistory(data: Recordable) {
+  return defHttp.post<SparkSql[]>({
+    url: `${apiPrefix}/history`,
+    data,
+  });
+}
+export function fetchSparkSqlComplete(data: Recordable) {
+  return defHttp.post({
+    url: `${apiPrefix}/sqlComplete`,
     data,
   });
 }

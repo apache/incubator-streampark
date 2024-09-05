@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.docker
 
-import org.apache.streampark.common.Constant
+import org.apache.streampark.common.constants.Constants
 import org.apache.streampark.common.fs.LfsOperator
 
 import org.apache.commons.io.FileUtils
@@ -81,12 +81,12 @@ trait FlinkDockerfileTemplateTrait {
     flinkExtraLibPaths
       .map(new File(_))
       .filter(_.exists())
-      .filter(_.getName.endsWith(Constant.JAR_SUFFIX))
+      .filter(_.getName.endsWith(Constants.JAR_SUFFIX))
       .flatMap {
         case f if f.isDirectory =>
           f.listFiles
             .filter(_.isFile)
-            .filter(_.getName.endsWith(Constant.JAR_SUFFIX))
+            .filter(_.getName.endsWith(Constants.JAR_SUFFIX))
             .map(_.getAbsolutePath)
         case f if f.isFile => Array(f.getAbsolutePath)
       }

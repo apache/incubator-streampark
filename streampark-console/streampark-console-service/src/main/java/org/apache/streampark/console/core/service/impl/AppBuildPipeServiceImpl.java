@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkDevelopmentMode;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
@@ -456,7 +456,7 @@ public class AppBuildPipeServiceImpl
         }
 
         FlinkExecutionMode executionModeEnum = app.getFlinkExecutionMode();
-        String mainClass = Constant.STREAMPARK_FLINKSQL_CLIENT_CLASS;
+        String mainClass = Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
         switch (executionModeEnum) {
             case YARN_APPLICATION:
                 String yarnProvidedPath = app.getAppLib();
@@ -580,7 +580,7 @@ public class AppBuildPipeServiceImpl
                 switch (app.getApplicationType()) {
                     case STREAMPARK_FLINK:
                         return String.format(
-                            "%s/%s", app.getAppLib(), app.getModule().concat(Constant.JAR_SUFFIX));
+                            "%s/%s", app.getAppLib(), app.getModule().concat(Constants.JAR_SUFFIX));
                     case APACHE_FLINK:
                         return String.format("%s/%s", app.getAppHome(), app.getJar());
                     default:

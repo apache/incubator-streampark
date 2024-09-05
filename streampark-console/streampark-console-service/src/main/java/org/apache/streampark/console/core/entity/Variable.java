@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.Constant;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -62,7 +62,7 @@ public class Variable extends BaseEntity {
 
     public void dataMasking() {
         if (desensitization) {
-            this.setVariableValue(Constant.DEFAULT_DATAMASK_STRING);
+            this.setVariableValue(Constants.DEFAULT_DATAMASK_STRING);
         }
     }
 }

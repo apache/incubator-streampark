@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.Constant;
+import org.apache.streampark.common.constants.Constants;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class ShaHashUtilsTest {
     @Test
     void testEncrypt() {
         String randomSalt = "rh8b1ojwog777yrg0daesf04gk";
-        String encryptPassword = ShaHashUtils.encrypt(randomSalt, Constant.STREAM_PARK);
+        String encryptPassword = ShaHashUtils.encrypt(randomSalt, Constants.STREAM_PARK);
         Assertions.assertEquals(
             "2513f3748847298ea324dffbf67fe68681dd92315bda830065facd8efe08f54f", encryptPassword);
     }
