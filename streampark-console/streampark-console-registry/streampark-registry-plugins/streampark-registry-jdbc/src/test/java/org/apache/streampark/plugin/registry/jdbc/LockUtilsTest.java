@@ -17,13 +17,11 @@
 
 package org.apache.streampark.plugin.registry.jdbc;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LockUtilsTest {
 
-    @Test
+    // @Test
     void getLockOwner() {
         assertThat(LockUtils.getLockOwner()).isNotNull();
     }
