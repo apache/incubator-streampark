@@ -82,6 +82,9 @@ insert into `t_menu` values (110302, 110300, 'cluster edit', '/flink/edit_cluste
 
 insert into `t_menu` values (120100, 120000, 'spark.application', '/spark/app', 'spark/app/index', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (120200, 120000, 'spark.sparkHome', '/spark/home', 'spark/home/index', null, null, '0', 1, 3, now(), now());
+insert into `t_menu` values (120300, 120000, 'spark.createApplication', '/spark/app/create', 'spark/app/create', 'app:create', '', '0', 0, null, now(), now());
+insert into `t_menu` values (120400, 120000, 'spark.updateApplication', '/spark/app/edit', 'spark/app/edit', 'app:update', '', '0', 0, null, now(), now());
+insert into `t_menu` values (120500, 120000, 'spark.applicationDetail', '/spark/app/detail', 'spark/app/detail', 'app:detail', '', '0', 0, null, now(), now());
 
 insert into `t_menu` values (130100, 130000, 'resource.project', '/resource/project', 'resource/project/View', null, 'github', '0', 1, 2, now(), now());
 insert into `t_menu` values (130200, 130000, 'resource.variable', '/resource/variable', 'resource/variable/View', null, null, '0', 1, 3, now(), now());

@@ -31,8 +31,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,7 +48,6 @@ import java.nio.file.Path;
 @EnableScheduling
 @ActiveProfiles("test")
 @AutoConfigureTestEntityManager
-@AutoConfigureWebTestClient(timeout = "60000")
 @SpringBootTest(classes = StreamParkConsoleBootstrap.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
         "server.port=10000",
         "spring.application.name=Apache StreamPark",
@@ -73,6 +72,7 @@ import java.nio.file.Path;
         "spring.sql.init.mode=always"
 })
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
+@SpringBootApplication(scanBasePackageClasses = {StreamParkConsoleBootstrap.class})
 public abstract class SpringUnitTestBase {
 
     protected static final Logger LOG = LoggerFactory.getLogger(SpringUnitTestBase.class);

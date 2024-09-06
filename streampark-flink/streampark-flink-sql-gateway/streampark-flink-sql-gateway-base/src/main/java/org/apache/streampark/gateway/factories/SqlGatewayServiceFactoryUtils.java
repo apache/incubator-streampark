@@ -17,7 +17,7 @@
 
 package org.apache.streampark.gateway.factories;
 
-import org.apache.streampark.common.Constant;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.gateway.ConfigOption;
 import org.apache.streampark.gateway.exception.ValidationException;
 import org.apache.streampark.gateway.service.SqlGatewayService;
@@ -55,7 +55,7 @@ public class SqlGatewayServiceFactoryUtils {
                         "Service options do not contain an option key '%s' for discovering an service.",
                         SQL_GATEWAY_SERVICE_TYPE.getKey())));
 
-        List<String> identifiers = Arrays.asList(identifiersStr.split(Constant.SEMICOLON));
+        List<String> identifiers = Arrays.asList(identifiersStr.split(Constants.SEMICOLON));
 
         if (identifiers.isEmpty()) {
             throw new ValidationException(

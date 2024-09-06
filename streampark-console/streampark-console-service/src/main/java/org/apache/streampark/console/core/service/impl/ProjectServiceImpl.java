@@ -17,10 +17,10 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.FileUtils;
@@ -291,7 +291,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         File projectModuleDir = new File(project.getDistHome(), project.getModule());
         return Arrays.stream(Objects.requireNonNull(projectModuleDir.listFiles()))
             .map(File::getName)
-            .filter(name -> name.endsWith(Constant.JAR_SUFFIX))
+            .filter(name -> name.endsWith(Constants.JAR_SUFFIX))
             .collect(Collectors.toList());
     }
 

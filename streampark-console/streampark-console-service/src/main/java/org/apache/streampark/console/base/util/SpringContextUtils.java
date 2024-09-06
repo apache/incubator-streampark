@@ -20,6 +20,7 @@ package org.apache.streampark.console.base.util;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 @Component
-public class SpringContextUtils implements ApplicationContextAware {
+public class SpringContextUtils implements ApplicationContextAware, AutoCloseable {
 
     private static ApplicationContext applicationContext;
 
@@ -63,5 +64,13 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
         return applicationContext.getBeansWithAnnotation(annotationType);
+    }
+
+    /**
+     * Close this application context, destroying all beans in its bean factory.
+     */
+    @Override
+    public void close() {
+        ((AbstractApplicationContext) applicationContext).close();
     }
 }
