@@ -34,7 +34,7 @@ github:
     dev:
       required_status_checks:
         # strict means "Require branches to be up to date before merging".
-        strict: true
+        strict: false
         contexts:
           - Backend - Result
           - E2E - Result
