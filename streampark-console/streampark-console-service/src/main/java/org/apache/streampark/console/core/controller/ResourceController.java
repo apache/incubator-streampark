@@ -93,4 +93,10 @@ public class ResourceController {
         String uploadPath = resourceService.upload(file);
         return RestResponse.success(uploadPath);
     }
+
+    @PostMapping("main_class")
+    public RestResponse getMainClass(String path) {
+        String mainClass = resourceService.getMainClassByPath(path);
+        return RestResponse.success(mainClass);
+    }
 }
