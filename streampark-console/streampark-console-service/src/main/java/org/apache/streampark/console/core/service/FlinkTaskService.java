@@ -31,6 +31,12 @@ import java.util.List;
 public interface FlinkTaskService extends IService<FlinkTask> {
 
     /**
+     * Add the current console server itself to the consistent hash ring.
+     * @param serverName String
+     */
+    void init(String serverName);
+
+    /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
      * @param flinkTask FlinkTask
      */

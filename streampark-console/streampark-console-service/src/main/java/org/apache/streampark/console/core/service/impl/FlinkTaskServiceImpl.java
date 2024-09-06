@@ -34,8 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,7 +53,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
     /**
      * Consistent hash algorithm for task distribution
      */
-    private ConsistentHash<String> consistentHash;
+    private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
 
     @Qualifier("streamparkFlinkTaskExecutor")
     @Autowired
@@ -67,13 +65,14 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
     /**
      * Task execution status
      */
-    private ConcurrentHashMap<Long, Boolean> runningTasks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Boolean> runningTasks = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void init() {
-        serverName = "ServerA";
-        consistentHash = new ConsistentHash<>(Collections.singletonList(serverName));
-
+    /**
+     * Add the current console server itself to the consistent hash ring.
+     */
+    public void init(String serverName) {
+        this.serverName = serverName;
+        consistentHash.add(serverName);
     }
 
     @Scheduled(fixedDelay = 50)
