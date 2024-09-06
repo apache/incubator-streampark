@@ -75,7 +75,7 @@ class UserServiceTest extends SpringUnitTestBase {
 
         Resource resource = new Resource();
         resource.setResourceName("test");
-        resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+        resource.setResourceType(ResourceTypeEnum.APP);
         resource.setEngineType(EngineTypeEnum.FLINK);
         resource.setTeamId(1L);
         resource.setCreatorId(user.getUserId());
@@ -100,7 +100,7 @@ class UserServiceTest extends SpringUnitTestBase {
 
         Resource resource = new Resource();
         resource.setResourceName("test");
-        resource.setResourceType(ResourceTypeEnum.FLINK_APP);
+        resource.setResourceType(ResourceTypeEnum.APP);
         resource.setEngineType(EngineTypeEnum.FLINK);
         resource.setTeamId(1L);
         resource.setCreatorId(user.getUserId());
