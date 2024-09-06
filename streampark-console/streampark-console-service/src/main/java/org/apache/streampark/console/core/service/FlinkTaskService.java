@@ -21,12 +21,14 @@ import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkTask;
 import org.apache.streampark.console.core.enums.FlinkTaskEnum;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+
 import java.util.List;
 
 /**
  * FlinkTaskService is the interface for managing tasks.
  */
-public interface FlinkTaskService {
+public interface FlinkTaskService extends IService<FlinkTask> {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.

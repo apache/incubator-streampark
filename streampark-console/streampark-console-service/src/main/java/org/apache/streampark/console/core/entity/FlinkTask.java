@@ -27,10 +27,12 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
+
 @Data
 @TableName("t_flink_task")
 @Slf4j
-public class FlinkTask {
+public class FlinkTask implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;

@@ -25,25 +25,35 @@ public enum FlinkTaskEnum {
     /**
      * Starts the specified application.
      */
-    START,
+    START(0),
 
     /**
      * Restarts the given application.
      */
-    RESTART,
+    RESTART(1),
 
     /**
      * Revokes access for the given application.
      */
-    REVOKE,
+    REVOKE(2),
 
     /**
      * Cancels the given application. Throws an exception if cancellation fails.
      */
-    CANCEL,
+    CANCEL(3),
 
     /**
      * Forces the given application to stop.
      */
-    ABORT,
+    ABORT(4);
+
+    private final int value;
+
+    FlinkTaskEnum(int value) {
+        this.value = value;
+    }
+
+    public int get() {
+        return this.value;
+    }
 }
