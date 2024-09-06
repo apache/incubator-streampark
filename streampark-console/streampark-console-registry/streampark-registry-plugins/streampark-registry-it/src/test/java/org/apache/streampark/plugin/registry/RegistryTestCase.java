@@ -25,7 +25,6 @@ import org.apache.streampark.registry.api.RegistryException;
 import org.apache.streampark.registry.api.SubscribeListener;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,15 +53,7 @@ public abstract class RegistryTestCase<R extends Registry> {
 
     @BeforeEach
     public void setupRegistry() {
-
         registry = createRegistry();
-    }
-
-    @SneakyThrows
-    @AfterEach
-    public void tearDownRegistry() {
-        try (R registry = this.registry) {
-        }
     }
 
     @Test
