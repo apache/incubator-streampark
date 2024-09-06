@@ -27,17 +27,13 @@ import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse
 
-import org.apache.commons.lang3.StringUtils
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
 import org.apache.flink.python.PythonOptions
-import org.apache.flink.runtime.util.HadoopUtils
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnConfigOptions
-import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.security.PrivilegedAction
 import java.util
 import java.util.Collections
 
@@ -50,18 +46,6 @@ object YarnApplicationClient extends YarnClientTrait {
 
   override def setConfig(submitRequest: SubmitRequest, flinkConfig: Configuration): Unit = {
     super.setConfig(submitRequest, flinkConfig)
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-      submitRequest.flinkVersion.flinkHome)
-    val currentUser = UserGroupInformation.getCurrentUser
-    logDebug(s"UserGroupInformation currentUser: $currentUser")
-    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
-      logDebug(s"kerberos Security is Enabled...")
-      val useTicketCache =
-        flinkDefaultConfiguration.get(SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
-      AssertUtils.required(
-        HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache),
-        s"Hadoop security with Kerberos is enabled but the login user $currentUser does not have Kerberos credentials or delegation tokens!")
-    }
     val providedLibs = {
       val array = ListBuffer(
         submitRequest.hdfsWorkspace.flinkLib,
@@ -140,53 +124,32 @@ object YarnApplicationClient extends YarnClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-    var proxyUserUgi: UserGroupInformation = UserGroupInformation.getCurrentUser
-    val currentUser = UserGroupInformation.getCurrentUser
-    val enableProxyState =
-      !HadoopUtils.isKerberosSecurityEnabled(currentUser) && StringUtils
-        .isNotEmpty(submitRequest.hadoopUser)
-    if (enableProxyState) {
-      proxyUserUgi = UserGroupInformation.createProxyUser(
-        submitRequest.hadoopUser,
-        currentUser)
-    }
+    val (clusterSpecification, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser)
+    logInfo(s"""
+               |------------------------<<specification>>-------------------------
+               |$clusterSpecification
+               |------------------------------------------------------------------
+               |""".stripMargin)
 
-    proxyUserUgi.doAs[SubmitResponse](new PrivilegedAction[SubmitResponse] {
-      override def run(): SubmitResponse = {
-        val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-        val clientFactory =
-          clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-        val clusterDescriptor =
-          clientFactory.createClusterDescriptor(flinkConfig)
-        val clusterSpecification =
-          clientFactory.getClusterSpecification(flinkConfig)
-        logInfo(s"""
-                   |------------------------<<specification>>-------------------------
-                   |$clusterSpecification
-                   |------------------------------------------------------------------
-                   |""".stripMargin)
+    val applicationConfiguration =
+      ApplicationConfiguration.fromConfiguration(flinkConfig)
+    var applicationId: ApplicationId = null
+    var jobManagerUrl: String = null
+    val clusterClient = clusterDescriptor
+      .deployApplicationCluster(clusterSpecification, applicationConfiguration)
+      .getClusterClient
+    applicationId = clusterClient.getClusterId
+    jobManagerUrl = clusterClient.getWebInterfaceURL
+    logInfo(s"""
+               |-------------------------<<applicationId>>------------------------
+               |Flink Job Started: applicationId: $applicationId
+               |__________________________________________________________________
+               |""".stripMargin)
 
-        val applicationConfiguration =
-          ApplicationConfiguration.fromConfiguration(flinkConfig)
-        var applicationId: ApplicationId = null
-        var jobManagerUrl: String = null
-        val clusterClient = clusterDescriptor
-          .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-          .getClusterClient
-        applicationId = clusterClient.getClusterId
-        jobManagerUrl = clusterClient.getWebInterfaceURL
-        logInfo(s"""
-                   |-------------------------<<applicationId>>------------------------
-                   |Flink Job Started: applicationId: $applicationId
-                   |__________________________________________________________________
-                   |""".stripMargin)
-
-        val resp =
-          SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
-        closeSubmit(submitRequest, clusterClient, clusterDescriptor)
-        resp
-      }
-    })
+    val resp =
+      SubmitResponse(applicationId.toString, flinkConfig.toMap, jobManagerUrl = jobManagerUrl)
+    closeSubmit(submitRequest, clusterClient, clusterDescriptor)
+    resp
   }
 
 }
