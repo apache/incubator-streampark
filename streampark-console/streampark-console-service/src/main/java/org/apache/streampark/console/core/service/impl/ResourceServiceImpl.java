@@ -275,7 +275,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 throw new ApiDetailException(e);
             }
         }
-        String mainClass = Utils.getJarManClass(saveFile);
+        String mainClass = null;
+        try {
+            mainClass = Utils.getJarManClass(saveFile);
+        } catch (Exception ignored) {
+        }
         String path = saveFile.getAbsolutePath();
         UploadResponse uploadResponse = new UploadResponse();
         uploadResponse.setMainClass(mainClass);
@@ -370,14 +374,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             jarFile == null || !jarFile.exists(), "flink app jar must exist.");
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
-        if (jarFile.getName().endsWith(Constants.PYTHON_SUFFIX)) {
-            return RestResponse.success().data(resp);
-        }
-        String mainClass = Utils.getJarManClass(jarFile);
-        if (mainClass == null) {
-            // main class is null
-            return buildExceptResponse(new RuntimeException("main class is null"), 2);
-        }
         return RestResponse.success().data(resp);
     }
 

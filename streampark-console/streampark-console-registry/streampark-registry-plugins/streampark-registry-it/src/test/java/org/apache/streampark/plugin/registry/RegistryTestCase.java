@@ -25,9 +25,11 @@ import org.apache.streampark.registry.api.RegistryException;
 import org.apache.streampark.registry.api.SubscribeListener;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
@@ -55,13 +57,19 @@ public abstract class RegistryTestCase<R extends Registry> {
         registry = createRegistry();
     }
 
-    // @Test
+    @SneakyThrows
+    @AfterEach
+    public void tearDownRegistry() {
+        this.registry.close();
+    }
+
+    @Test
     public void testIsConnected() {
         registry.start();
         assertThat(registry.isConnected()).isTrue();
     }
 
-    // @Test
+    @Test
     public void testConnectUntilTimeout() {
         registry.start();
         await().atMost(Duration.ofSeconds(10))
@@ -70,7 +78,7 @@ public abstract class RegistryTestCase<R extends Registry> {
     }
 
     @SneakyThrows
-    // @Test
+    @Test
     public void testSubscribe() {
         registry.start();
 
@@ -109,7 +117,7 @@ public abstract class RegistryTestCase<R extends Registry> {
     }
 
     @SneakyThrows
-    // @Test
+    @Test
     public void testAddConnectionStateListener() {
 
         AtomicReference<ConnectionState> connectionState = new AtomicReference<>();
@@ -123,7 +131,7 @@ public abstract class RegistryTestCase<R extends Registry> {
 
     }
 
-    // @Test
+    @Test
     public void testGet() {
         registry.start();
         String key = "/nodes/console-server" + System.nanoTime();
@@ -133,7 +141,7 @@ public abstract class RegistryTestCase<R extends Registry> {
         assertThat(registry.get(key)).isEqualTo(value);
     }
 
-    // @Test
+    @Test
     public void testPut() {
         registry.start();
         String key = "/nodes/console-server" + System.nanoTime();
@@ -146,7 +154,7 @@ public abstract class RegistryTestCase<R extends Registry> {
         assertThat(registry.get(key)).isEqualTo("123");
     }
 
-    // @Test
+    @Test
     public void testDelete() {
         registry.start();
         String key = "/nodes/console-server" + System.nanoTime();
@@ -161,7 +169,7 @@ public abstract class RegistryTestCase<R extends Registry> {
 
     }
 
-    // @Test
+    @Test
     public void testChildren() {
         registry.start();
         String master1 = "/nodes/children/childGroup1/127.0.0.1:8080";
@@ -174,7 +182,7 @@ public abstract class RegistryTestCase<R extends Registry> {
             "127.0.0.2:8080");
     }
 
-    // @Test
+    @Test
     public void testExists() {
         registry.start();
         String key = "/nodes/console-server" + System.nanoTime();
@@ -186,7 +194,7 @@ public abstract class RegistryTestCase<R extends Registry> {
     }
 
     @SneakyThrows
-    // @Test
+    @Test
     public void testAcquireLock() {
         registry.start();
         String lockKey = "/lock" + System.nanoTime();
@@ -205,7 +213,7 @@ public abstract class RegistryTestCase<R extends Registry> {
     }
 
     @SneakyThrows
-    // @Test
+    @Test
     public void testAcquireLock_withTimeout() {
         registry.start();
         String lockKey = "/lock" + System.nanoTime();
@@ -225,7 +233,7 @@ public abstract class RegistryTestCase<R extends Registry> {
     }
 
     @SneakyThrows
-    // @Test
+    @Test
     public void testReleaseLock() {
         registry.start();
         String lockKey = "/lock" + System.nanoTime();

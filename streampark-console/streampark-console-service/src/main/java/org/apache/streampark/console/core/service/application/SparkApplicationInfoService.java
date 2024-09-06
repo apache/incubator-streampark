@@ -104,14 +104,6 @@ public interface SparkApplicationInfoService extends IService<SparkApplication> 
     String readConf(String appConfig) throws IOException;
 
     /**
-     * Retrieves the main configuration value for the given Application.
-     *
-     * @param appParam the Application object for which to fetch the main configuration value
-     * @return the main configuration value as a String
-     */
-    String getMain(SparkApplication appParam);
-
-    /**
      * Returns the dashboard for the specified team.
      *
      * @param teamId the ID of the team
@@ -132,13 +124,6 @@ public interface SparkApplicationInfoService extends IService<SparkApplication> 
      * @return a List of Strings representing the recent K8s container images.
      */
     List<String> listRecentK8sContainerImage();
-
-    /**
-     * Uploads a list of jars to the server for historical reference.
-     *
-     * @return A list of strings representing the names of the uploaded jars.
-     */
-    List<String> listHistoryUploadJars();
 
     /**
      * check application before start

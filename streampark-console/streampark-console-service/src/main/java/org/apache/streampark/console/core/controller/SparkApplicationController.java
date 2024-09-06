@@ -195,12 +195,6 @@ public class SparkApplicationController {
         return RestResponse.success(config);
     }
 
-    @PostMapping("main")
-    public RestResponse getMain(SparkApplication application) {
-        String mainClass = applicationInfoService.getMain(application);
-        return RestResponse.success(mainClass);
-    }
-
     @PostMapping("backups")
     public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
         IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
