@@ -72,7 +72,7 @@
             placeholder: t('setting.flinkCluster.searchByName'),
             allowClear: true,
           },
-          colProps: { span: 5 },
+          colProps: { span: 6 },
         },
       ],
       rowProps: {
@@ -161,7 +161,7 @@
   <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="5" :offset="14" class="text-right">
+        <Col :span="5" :offset="13" class="text-right">
           <a-button type="primary" @click="() => go('/setting/add_cluster')">
             <PlusOutlined />
             {{ t('common.add') }}

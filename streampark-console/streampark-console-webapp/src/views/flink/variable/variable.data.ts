@@ -42,7 +42,7 @@ export const searchFormSchema: FormSchema[] = [
       placeholder: t('flink.variable.searchByCode'),
       allowClear: true,
     },
-    colProps: { span: 4 },
+    colProps: { span: 5 },
   },
   {
     field: 'description',

@@ -51,7 +51,7 @@ export const searchFormSchema: FormSchema[] = [
       placeholder: t('system.role.searchByRole'),
       allowClear: true,
     },
-    colProps: { span: 5 },
+    colProps: { span: 6 },
   },
 ];
 export async function handleRoleCheck(_rule: RuleObject, value: StoreValue) {

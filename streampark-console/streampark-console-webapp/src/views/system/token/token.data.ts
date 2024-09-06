@@ -90,7 +90,7 @@ export const searchFormSchema: FormSchema[] = [
       placeholder: t('system.user.searchByName'),
       allowClear: true,
     },
-    colProps: { span: 5 },
+    colProps: { span: 6 },
   },
 ];
 

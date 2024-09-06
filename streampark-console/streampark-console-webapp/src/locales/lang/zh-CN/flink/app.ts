@@ -162,7 +162,7 @@ export default {
     savepoint: '触发 Savepoint',
     recheck: '关联的项目已更新，需要重新发布此作业',
     changed: '作业已更新',
-    fromSavepoint: 'Savepoint 恢复',
+    fromSavepoint: '从 savepoint 恢复',
     savepointTip: '作业从 savepoint 或 checkpoint 恢复状态',
     savepointInput: '指定 savepoint/checkpoint 路径',
     savepointSwitch: '指定 savepoint/checkpoint 路径 (双击切换"下拉框选择"或"手动输入")',

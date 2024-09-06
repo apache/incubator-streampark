@@ -19,7 +19,7 @@
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" :formConfig="formConfig" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="5" :offset="9" class="text-right">
+        <Col :span="5" :offset="7" class="text-right">
           <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}
@@ -95,7 +95,7 @@
             placeholder: t('system.member.searchByUser'),
             allowClear: true,
           },
-          colProps: { span: 5 },
+          colProps: { span: 6 },
         },
         {
           field: 'roleName',
@@ -107,7 +107,7 @@
             fieldNames: { label: 'roleName', value: 'roleName' },
             allowClear: true,
           },
-          colProps: { span: 5 },
+          colProps: { span: 6 },
         },
       ],
       rowProps: {

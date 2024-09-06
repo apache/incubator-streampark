@@ -18,7 +18,7 @@
   <PageWrapper content-full-height fixed-height>
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
-        <Col :span="5" :offset="14" class="text-right">
+        <Col :span="5" :offset="13" class="text-right">
           <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}

@@ -50,6 +50,6 @@ export const searchFormSchema: FormSchema[] = [
       placeholder: t('system.team.searchByTeam'),
       allowClear: true,
     },
-    colProps: { span: 5 },
+    colProps: { span: 6 },
   },
 ];

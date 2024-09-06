@@ -170,7 +170,7 @@ export default {
     start: 'Start Job',
     stop: 'Stop Job',
     savepoint: 'Trigger Savepoint',
-    fromSavepoint: 'From savepoint',
+    fromSavepoint: 'Start job from savepoint',
     savepointTip: 'Restore the job from savepoint or latest checkpoint',
     savepointInput: 'Specify the savepoint/checkpoint path',
     savepointSwitch:
