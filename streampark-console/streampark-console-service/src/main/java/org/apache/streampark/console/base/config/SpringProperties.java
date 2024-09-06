@@ -83,7 +83,7 @@ public class SpringProperties {
                 springConfig.put(
                     "spring.datasource.url",
                     String.format(
-                        "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript from 'classpath:db/schema-h2.sql'",
+                        "jdbc:h2:file:%s;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;INIT=runscript;DB_CLOSE_ON_EXIT=true from 'classpath:db/schema-h2.sql'",
                         h2DataDir));
 
                 String userName = userConfig.getProperty("datasource.username", "admin");
