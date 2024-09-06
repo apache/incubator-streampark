@@ -24,7 +24,8 @@
   import { BasicForm, useForm } from '/@/components/Form';
   import { onMounted, reactive, ref, nextTick, unref } from 'vue';
   import { Alert } from 'ant-design-vue';
-  import { fetchMain, fetchUpload, fetchUpdate } from '/@/api/flink/app';
+  import { fetchUpdate } from '/@/api/flink/app';
+  import { fetchUpload } from '/@/api/resource/upload';
   import { handleSubmitParams } from './utils';
   import PomTemplateTab from './components/PodTemplate/PomTemplateTab.vue';
   import { fetchListJars } from '/@/api/resource/project';
@@ -137,13 +138,10 @@
     const formData = new FormData();
     formData.append('file', data.file);
     try {
-      const path = await fetchUpload(formData);
+      const response = await fetchUpload(formData);
       uploadJar.value = data.file.name;
-      const res = await fetchMain({
-        jar: path,
-      });
       uploadLoading.value = false;
-      setFieldsValue({ mainClass: res, jar: unref(uploadJar) });
+      setFieldsValue({ mainClass: response.mainClass, jar: unref(uploadJar) });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
