@@ -54,15 +54,13 @@ public abstract class RegistryTestCase<R extends Registry> {
 
     @BeforeEach
     public void setupRegistry() {
-
         registry = createRegistry();
     }
 
     @SneakyThrows
     @AfterEach
     public void tearDownRegistry() {
-        try (R registry = this.registry) {
-        }
+        this.registry.close();
     }
 
     @Test

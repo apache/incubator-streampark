@@ -43,7 +43,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -196,12 +195,6 @@ public class SparkApplicationController {
         return RestResponse.success(config);
     }
 
-    @PostMapping("main")
-    public RestResponse getMain(SparkApplication application) {
-        String mainClass = applicationInfoService.getMain(application);
-        return RestResponse.success(mainClass);
-    }
-
     @PostMapping("backups")
     public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
         IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
@@ -243,13 +236,6 @@ public class SparkApplicationController {
         } catch (IOException e) {
             return RestResponse.success(file).message(e.getLocalizedMessage());
         }
-    }
-
-    @PostMapping("upload")
-    @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws Exception {
-        String uploadPath = resourceService.upload(file);
-        return RestResponse.success(uploadPath);
     }
 
     @PostMapping("verify_schema")

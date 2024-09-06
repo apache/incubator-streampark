@@ -42,13 +42,6 @@ public class ApplicationHistoryController {
     @Autowired
     private ApplicationInfoService applicationInfoService;
 
-    @PostMapping("upload_jars")
-    @RequiresPermissions("app:create")
-    public RestResponse listUploadJars() {
-        List<String> jars = applicationInfoService.listHistoryUploadJars();
-        return RestResponse.success(jars);
-    }
-
     @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")
     public RestResponse listK8sNamespace() {

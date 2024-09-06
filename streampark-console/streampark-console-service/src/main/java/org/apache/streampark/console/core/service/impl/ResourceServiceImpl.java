@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -32,6 +33,7 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.console.core.bean.MavenPom;
+import org.apache.streampark.console.core.bean.UploadResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
@@ -73,7 +75,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +88,8 @@ import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+
+import static org.apache.streampark.common.enums.StorageType.LFS;
 
 @Slf4j
 @Service
@@ -257,7 +263,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
      * @return
      */
     @Override
-    public String upload(MultipartFile file) throws IOException {
+    public UploadResponse upload(MultipartFile file) throws IOException {
         File temp = WebUtils.getAppTempDir();
         String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
         File saveFile = new File(temp, fileName);
@@ -269,7 +275,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 throw new ApiDetailException(e);
             }
         }
-        return saveFile.getAbsolutePath();
+        String mainClass = null;
+        try {
+            mainClass = Utils.getJarManClass(saveFile);
+        } catch (Exception ignored) {
+        }
+        String path = saveFile.getAbsolutePath();
+        UploadResponse uploadResponse = new UploadResponse();
+        uploadResponse.setMainClass(mainClass);
+        uploadResponse.setPath(path);
+        return uploadResponse;
     }
 
     @Override
@@ -285,21 +300,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     @Override
-    public String getMainClass(Long resourceId) {
-        Resource resource = getById(resourceId);
-        if (resource.getResourceType() == ResourceTypeEnum.APP) {
-            return resource.getMainClass();
-        }
-        return null;
-    }
-
-    @Override
-    public String getMainClassByPath(String path) {
-        File file = new File(path);
-        if (file.exists()) {
-            return Utils.getJarManClass(file);
-        }
-        return null;
+    public List<String> listHistoryUploadJars() {
+        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+            .filter(File::isFile)
+            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+            .map(File::getName)
+            .filter(fn -> fn.endsWith(Constants.JAR_SUFFIX))
+            .collect(Collectors.toList());
     }
 
     private RestResponse checkConnector(Resource resourceParam) throws JsonProcessingException {
@@ -367,14 +374,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             jarFile == null || !jarFile.exists(), "flink app jar must exist.");
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
-        if (jarFile.getName().endsWith(Constants.PYTHON_SUFFIX)) {
-            return RestResponse.success().data(resp);
-        }
-        String mainClass = Utils.getJarManClass(jarFile);
-        if (mainClass == null) {
-            // main class is null
-            return buildExceptResponse(new RuntimeException("main class is null"), 2);
-        }
         return RestResponse.success().data(resp);
     }
 

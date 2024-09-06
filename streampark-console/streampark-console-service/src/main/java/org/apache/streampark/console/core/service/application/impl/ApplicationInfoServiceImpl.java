@@ -17,11 +17,8 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.conf.Workspace;
-import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
@@ -69,9 +66,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -81,8 +76,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.apache.streampark.common.enums.StorageType.LFS;
 
 @Slf4j
 @Service
@@ -332,16 +325,6 @@ public class ApplicationInfoServiceImpl extends ServiceImpl<ApplicationMapper, A
     @Override
     public List<String> listRecentK8sTmPodTemplate() {
         return baseMapper.selectRecentK8sTmPodTemplates(DEFAULT_HISTORY_POD_TMPL_RECORD_LIMIT);
-    }
-
-    @Override
-    public List<String> listHistoryUploadJars() {
-        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
-            .filter(File::isFile)
-            .sorted(Comparator.comparingLong(File::lastModified).reversed())
-            .map(File::getName)
-            .filter(fn -> fn.endsWith(Constants.JAR_SUFFIX))
-            .collect(Collectors.toList());
     }
 
     @Override

@@ -25,7 +25,8 @@
   import { onMounted, reactive, ref, nextTick, unref } from 'vue';
   import { AppListRecord } from '/@/api/flink/app.type';
   import configOptions from './data/option';
-  import { fetchMain, fetchUpload, fetchUpdate, fetchGet } from '/@/api/flink/app';
+  import { fetchUpdate, fetchGet } from '/@/api/flink/app';
+  import { fetchUpload } from '/@/api/resource/upload';
   import { useRoute } from 'vue-router';
   import { getAppConfType, handleSubmitParams, handleTeamResource } from './utils';
   import { fetchFlinkHistory } from '/@/api/flink/flinkSql';
@@ -149,11 +150,10 @@
     const formData = new FormData();
     formData.append('file', data.file);
     try {
-      const path = await fetchUpload(formData);
+      const resp = await fetchUpload(formData);
       uploadJar.value = data.file.name;
-      const res = await fetchMain({ jar: path });
       uploadLoading.value = false;
-      setFieldsValue({ jar: uploadJar.value, mainClass: res });
+      setFieldsValue({ jar: uploadJar.value, mainClass: resp.mainClass });
     } catch (error) {
       console.error(error);
       uploadLoading.value = false;
