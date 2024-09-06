@@ -17,11 +17,21 @@
 
 package org.apache.streampark.plugin.registry.jdbc;
 
+import org.apache.streampark.common.utils.NetworkUtils;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@SpringBootTest
+@ContextConfiguration(classes = {NetworkUtils.class})
+@TestPropertySource(locations = "classpath:application.yaml")
 class LockUtilsTest {
 
-    // @Test
+    @Test
     void getLockOwner() {
         assertThat(LockUtils.getLockOwner()).isNotNull();
     }
