@@ -34,6 +34,7 @@ drop table if exists "public"."t_flink_effective";
 drop table if exists "public"."t_flink_config";
 drop table if exists "public"."t_flink_cluster";
 drop table if exists "public"."t_flink_app";
+drop table if exists "public"."t_flink_task";
 drop table if exists "public"."t_app_build_pipe";
 drop table if exists "public"."t_app_backup";
 drop table if exists "public"."t_alert_config";
@@ -61,6 +62,7 @@ drop sequence if exists "public"."streampark_t_flink_effective_id_seq";
 drop sequence if exists "public"."streampark_t_flink_config_id_seq";
 drop sequence if exists "public"."streampark_t_flink_cluster_id_seq";
 drop sequence if exists "public"."streampark_t_flink_app_id_seq";
+drop sequence if exists "public"."streampark_t_flink_task_id_seq";
 drop sequence if exists "public"."streampark_t_app_backup_id_seq";
 drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
@@ -492,6 +494,29 @@ create table "public"."t_flink_sql" (
 )
 ;
 alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key ("id");
+
+
+-- ----------------------------
+-- table structure for t_flink_task
+-- ----------------------------
+create sequence "public"."streampark_t_flink_task_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+create table "public"."t_flink_task"
+(
+    "id"                           int8 not null default nextval('streampark_t_flink_task_id_seq'::regclass),
+    "action"                       int2,
+    "app_id"                       int8,
+    `auto_start`                   int2,
+    "args"                         text collate "pg_catalog"."default",
+    "dynamic_properties"           text collate "pg_catalog"."default",
+    `savepoint_path`               varchar(255) collate "pg_catalog"."default",
+    `restore_or_trigger_savepoint` int2,
+    `drain`                        int2,
+    `native_format`                int2,
+    `restore_mode`                 int8
+)
+;
+alter table "public"."t_flink_task" add constraint "t_flink_task_pkey" primary key ("id");
 
 
 -- ----------------------------
