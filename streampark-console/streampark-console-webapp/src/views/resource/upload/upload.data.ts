@@ -19,7 +19,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 const { t } = useI18n();
 
 export enum ResourceTypeEnum {
-  FLINK_APP = 'FLINK_APP',
+  APP = 'APP',
   CONNECTOR = 'CONNECTOR',
   UDXF = 'UDXF',
   JAR_LIBRARY = 'JAR_LIBRARY',

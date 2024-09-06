@@ -26,8 +26,8 @@ import java.util.Arrays;
 @Getter
 public enum ResourceTypeEnum {
 
-    /** Flink application */
-    FLINK_APP(0),
+    /** Flink or Spark application */
+    APP(0),
 
     /** connector plugin */
     CONNECTOR(1),

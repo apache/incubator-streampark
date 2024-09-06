@@ -131,7 +131,7 @@
         label: t('flink.app.mainClass'),
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
-        ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.FLINK_APP,
+        ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.APP,
         rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
@@ -240,7 +240,7 @@
             }
             break;
           case 2:
-            if (values.resourceType == ResourceTypeEnum.FLINK_APP) {
+            if (values.resourceType == ResourceTypeEnum.APP) {
               Swal.fire('Failed', t('flink.resource.mainNullTip'), 'error');
             }
             if (values.resourceType == ResourceTypeEnum.CONNECTOR) {

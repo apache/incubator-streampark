@@ -23,7 +23,6 @@
           {{ t('common.add') }}
         </a-button>
       </template>
-      <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'engineType'">
           <span v-if="record.engineType === EngineTypeEnum.FLINK">
@@ -34,11 +33,15 @@
           </span>
         </template>
         <template v-if="column.dataIndex === 'resourceType'">
-          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.FLINK_APP">
-            <template #icon>
+          <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.APP">
+            <span v-if="record.engineType === EngineTypeEnum.FLINK">
               <img :src="flinkAppSvg" class="svg-icon" alt="Flink App" />
-            </template>
-            Flink App
+              Flink App
+            </span>
+            <span v-else>
+              <img :src="sparkAppSvg" class="svg-icon" alt="Spark App" />
+              Spark App
+            </span>
           </Tag>
 
           <Tag color="processing" v-if="record.resourceType === ResourceTypeEnum.CONNECTOR">
@@ -124,6 +127,8 @@
   import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
 
   import flinkAppSvg from '/@/assets/icons/flink2.svg';
+  import sparkAppSvg from '/@/assets/icons/spark.svg';
+
   import connectorSvg from '/@/assets/icons/connector.svg';
   import udxfSvg from '/@/assets/icons/fx.svg';
   import jarSvg from '/@/assets/icons/jar.svg';
