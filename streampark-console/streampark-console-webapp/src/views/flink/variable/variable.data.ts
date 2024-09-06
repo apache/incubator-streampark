@@ -42,16 +42,6 @@ export const searchFormSchema: FormSchema[] = [
       placeholder: t('flink.variable.searchByCode'),
       allowClear: true,
     },
-    colProps: { span: 5 },
-  },
-  {
-    field: 'description',
-    label: '',
-    component: 'Input',
-    componentProps: {
-      placeholder: t('flink.variable.searchByDesc'),
-      allowClear: true,
-    },
-    colProps: { span: 5 },
+    colProps: { span: 6 },
   },
 ];
