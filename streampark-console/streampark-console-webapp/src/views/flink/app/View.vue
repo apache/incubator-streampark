@@ -14,18 +14,25 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default defineComponent({
-    name: 'AppView',
-  });
-</script>
 <script lang="ts" setup name="AppView">
-  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
+  import { PlusOutlined } from '@ant-design/icons-vue';
+  import { nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
-  import { useTimeoutFn } from '@vueuse/core';
-  import { Tooltip, Badge, Tag, Popover } from 'ant-design-vue';
+  import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
+  import {
+    Form,
+    Button,
+    Select,
+    Input,
+    Tooltip,
+    Badge,
+    Tag,
+    Popover,
+    Row,
+    Col,
+  } from 'ant-design-vue';
   import { fetchAppRecord } from '/@/api/flink/app';
   import { useTable } from '/@/components/Table';
   import { PageWrapper } from '/@/components/Page';
@@ -50,7 +57,14 @@
   import { useSavepoint } from './hooks/useSavepoint';
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
+  import { useRouter } from 'vue-router';
   const { t } = useI18n();
+  const router = useRouter();
+  const searchRef = ref<Recordable>({
+    tags: undefined,
+    owner: undefined,
+    jobType: undefined,
+  });
   const optionApps = {
     starting: new Map(),
     stopping: new Map(),
@@ -62,6 +76,7 @@
 
   const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
+  const noData = ref<boolean>();
   const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
   const { openSavepoint } = useSavepoint(handleOptionApp);
   const [registerStartModal, { openModal: openStartModal }] = useModal();
@@ -84,12 +99,14 @@
         }
         delete params.state;
       }
+      Object.assign(params, searchRef.value);
       currentTablePage.value = params.pageNum;
       // sessionStorage.setItem('appPageNo', params.pageNum);
       return params;
     },
     afterFetch: (dataSource) => {
       const timestamp = new Date().getTime();
+      noData.value = dataSource.length == 0;
       dataSource.forEach((x) => {
         x.expanded = [
           {
@@ -179,7 +196,7 @@
     tableSetting: { fullScreen: true, redo: false },
   });
 
-  const { getTableActions, formConfig } = useAppTableAction(
+  const { getTableActions, tagsOptions, users, formConfig } = useAppTableAction(
     openStartModal,
     openStopModal,
     openSavepoint,
@@ -234,6 +251,13 @@
     }
   });
 
+  const handleResetReload = useDebounceFn(() => {
+    setPagination({
+      current: 1,
+    });
+    reload();
+  }, 500);
+
   onUnmounted(() => {
     stop();
   });
@@ -248,6 +272,75 @@
       class="app_list !px-0 pt-20px"
       :formConfig="formConfig"
     >
+      <template #tableTitle>
+        <div class="flex justify-between" style="width: 100%">
+          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
+            <Row :gutter="4" class="w-full">
+              <Col :span="5">
+                <Form.Item>
+                  <Input
+                    :placeholder="t('flink.app.searchName')"
+                    allow-clear
+                    v-model:value="searchRef.jobName"
+                    @change="() => handleResetReload()"
+                    @search="() => handleResetReload()"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('flink.app.tags')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.tags"
+                    @change="() => handleResetReload()"
+                    :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('flink.app.jobType')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.jobType"
+                    @change="() => handleResetReload()"
+                    :options="[
+                      { label: 'JAR', value: JobTypeEnum.JAR },
+                      { label: 'SQL', value: JobTypeEnum.SQL },
+                    ]"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('flink.app.owner')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.userId"
+                    @change="() => handleResetReload()"
+                    :options="
+                      (users || []).map((u: Recordable) => ({
+                        label: u.nickName || u.username,
+                        value: u.userId,
+                      }))
+                    "
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+          <div v-auth="'app:create'">
+            <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
+              <PlusOutlined />
+              {{ t('common.add') }}
+            </Button>
+          </div>
+        </div>
+      </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'jobName'">
           <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
@@ -333,6 +426,7 @@
       </template>
       <template #insertTable="{ tableContainer }">
         <AppTableResize
+          v-if="!noData"
           :table-container="tableContainer"
           :resize-min="100"
           v-model:left="tableColumnWidth.jobName"
