@@ -75,17 +75,11 @@ object SparkShimsProxy extends Logger {
     logInfo(s"Add verify sql lib,spark version: $sparkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
-        val getSparkTable: File => Boolean = _.getName.startsWith("spark-table")
-        // 1) spark/lib/spark-table*
-        val libTableURL =
-          getSparkHomeLib(sparkVersion.sparkHome, "lib", getSparkTable)
+        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+        val shimsUrls = ListBuffer[URL](libUrl: _*)
 
-        // 2) After version 1.15 need add spark/opt/spark-table*
-        val optTableURL =
-          getSparkHomeLib(sparkVersion.sparkHome, "opt", getSparkTable)
-        val shimsUrls = ListBuffer[URL](libTableURL ++ optTableURL: _*)
+        // TODO If there are compatibility issues with different versions
 
-        // 3) add only streampark shims jar
         addShimsUrls(
           sparkVersion,
           file => {
