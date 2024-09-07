@@ -246,7 +246,7 @@ export default {
     appTypeIsRequiredMessage: '作业类型必填',
     programJarIsRequiredMessage: '程序jar文件必填',
     useSysHadoopConf: '使用系统hadoop配置',
-    flinkVersionIsRequiredMessage: 'Flink版本必填',
+    sparkVersionIsRequiredMessage: 'Spark版本必填',
     appNamePlaceholder: '请输入作业名称',
     appNameIsRequiredMessage: '作业名称必填',
     appNameNotUniqueMessage: '作业名称必须唯一, 输入的作业名称已经存在',

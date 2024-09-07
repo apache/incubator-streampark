@@ -248,7 +248,7 @@ export default {
     appTypeIsRequiredMessage: 'Job type is required',
     programJarIsRequiredMessage: 'Program jar file is required',
     useSysHadoopConf: 'Use system Hadoop configuration',
-    flinkVersionIsRequiredMessage: 'Flink version is required',
+    sparkVersionIsRequiredMessage: 'Spark version is required',
     appNamePlaceholder: 'Please enter job name',
     appNameIsRequiredMessage: 'Job name is required',
     appNameNotUniqueMessage: 'Job name must be unique; the entered job name already exists',

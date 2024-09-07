@@ -62,6 +62,9 @@
     showActionButtonGroup: false,
   });
 
+  defineExpose({
+    sparkSql,
+  });
   const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
 
   /* Initialize the form */

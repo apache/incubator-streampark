@@ -150,7 +150,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         component: 'Input',
         slot: 'sparkSql',
         ifShow: ({ values }) => values?.jobType == JobTypeEnum.SQL,
-        rules: [{ required: true, message: t('spark.app.addAppTips.flinkSqlIsRequiredMessage') }],
+        rules: [{ required: true, message: t('spark.app.addAppTips.sparkSqlIsRequiredMessage') }],
       },
       {
         field: 'teamResource',
