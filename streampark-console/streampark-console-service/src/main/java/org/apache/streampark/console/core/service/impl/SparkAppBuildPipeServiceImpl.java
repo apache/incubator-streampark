@@ -20,7 +20,6 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.SparkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
@@ -201,8 +200,8 @@ public class SparkAppBuildPipeServiceImpl
                     // 2) some preparatory work
                     String appUploads = app.getWorkspace().APP_UPLOADS();
 
-                    if (app.isCustomCodeOrPySparkJob()) {
-                        // customCode upload jar to appHome...
+                    if (app.isSparkJarOrPySparkJob()) {
+                        // spark jar and pyspark upload resource to appHome...
                         String appHome = app.getAppHome();
                         FsOperator fsOperator = app.getFsOperator();
                         fsOperator.delete(appHome);
@@ -286,7 +285,7 @@ public class SparkAppBuildPipeServiceImpl
                             // If the current task is not running, or the task has just been added, directly
                             // set
                             // the candidate version to the official version
-                            if (app.isCustomCodeOrSparkSqlJob()) {
+                            if (app.isSparkOnYarnJob()) {
                                 applicationManageService.toEffective(app);
                             } else {
                                 if (app.isStreamParkJob()) {
@@ -378,8 +377,7 @@ public class SparkAppBuildPipeServiceImpl
             case YARN_CLIENT:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                if (SparkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
-                    && ApplicationType.APACHE_SPARK == app.getApplicationType()) {
+                if (ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
@@ -400,7 +398,7 @@ public class SparkAppBuildPipeServiceImpl
 
     private String retrieveSparkUserJar(SparkEnv sparkEnv, SparkApplication app) {
         switch (app.getDevelopmentMode()) {
-            case CUSTOM_CODE:
+            case SPARK_JAR:
                 switch (app.getApplicationType()) {
                     case STREAMPARK_SPARK:
                         return String.format(

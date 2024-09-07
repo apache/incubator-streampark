@@ -156,11 +156,9 @@ trait Spark extends Logger {
           throw new IllegalArgumentException(
             "[StreamPark] Usage: config file error,must be [properties|yaml|conf]")
       }
-
-      sparkConf.setAll(localConf)
+      localConf.foreach(arg => sparkConf.set(arg._1, arg._2))
     }
-
-    sparkConf.setAll(userArgs)
+    userArgs.foreach(arg => sparkConf.set(arg._1, arg._2))
 
     val appMain = sparkConf.get(KEY_SPARK_MAIN_CLASS, "org.apache.streampark.spark.cli.SqlClient")
     if (appMain == null) {
