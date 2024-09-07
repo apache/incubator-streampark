@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
 import org.apache.streampark.common.enums.SparkDevelopmentMode;
 import org.apache.streampark.common.enums.SparkExecutionMode;
@@ -135,7 +135,7 @@ public class SparkApplication extends BaseEntity {
     private String k8sServiceAccount;
 
     /** k8s namespace */
-    private String k8sNamespace = Constant.DEFAULT;
+    private String k8sNamespace = Constants.DEFAULT;
 
     @TableField("HADOOP_USER")
     private String hadoopUser;
@@ -223,7 +223,7 @@ public class SparkApplication extends BaseEntity {
     private transient AppControl appControl;
 
     public void setK8sNamespace(String k8sNamespace) {
-        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constant.DEFAULT : k8sNamespace;
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constants.DEFAULT : k8sNamespace;
     }
 
     public void setState(Integer state) {

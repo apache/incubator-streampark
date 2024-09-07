@@ -44,7 +44,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -248,13 +247,6 @@ public class ApplicationController {
     public RestResponse checkjar(String jar) throws IOException {
         Utils.requireCheckJarFile(new File(jar).toURI().toURL());
         return RestResponse.success(true);
-    }
-
-    @PostMapping("upload")
-    @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws Exception {
-        String uploadPath = resourceService.upload(file);
-        return RestResponse.success(uploadPath);
     }
 
     @PostMapping("verify_schema")

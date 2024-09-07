@@ -17,24 +17,26 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.util.{AssertUtils, ExceptionUtils}
+import org.apache.streampark.common.util.{ExceptionUtils, HadoopUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.bean._
 
 import org.apache.flink.api.common.JobID
-import org.apache.flink.client.deployment.{ClusterDescriptor, ClusterSpecification, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.jobgraph.JobGraph
 import org.apache.flink.util.FlinkException
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.lang.{Boolean => JavaBool}
 import java.lang.reflect.Method
+import java.security.PrivilegedAction
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /** yarn application mode submit */
 trait YarnClientTrait extends FlinkClientTrait {
@@ -47,29 +49,23 @@ trait YarnClientTrait extends FlinkClientTrait {
   }
 
   private[this] def executeClientAction[R <: SavepointRequestTrait, O](
-      savepointRequestTrait: R,
+      request: R,
       flinkConf: Configuration,
       actionFunc: (JobID, ClusterClient[_]) => O): O = {
+    val jobID = getJobID(request.jobId)
+    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, request.clusterId)
+    // Get the ClusterClient from the YarnClusterDescriptor
+    val (applicationId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) = getYarnClusterDescriptor(flinkConf)
+    val clusterClient = clusterDescriptor.retrieve(applicationId).getClusterClient
 
-    flinkConf.safeSet(YarnConfigOptions.APPLICATION_ID, savepointRequestTrait.clusterId)
-    val clusterClientFactory = new YarnClusterClientFactory
-    val applicationId = clusterClientFactory.getClusterId(flinkConf)
-    AssertUtils.required(
-      applicationId != null,
-      "[StreamPark] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-
-    val clusterDescriptor =
-      clusterClientFactory.createClusterDescriptor(flinkConf)
-    clusterDescriptor
-      .retrieve(applicationId)
-      .getClusterClient
-      .autoClose(client =>
-        Try(actionFunc(getJobID(savepointRequestTrait.jobId), client)).recover {
-          case e =>
-            throw new FlinkException(
-              s"[StreamPark] Do ${savepointRequestTrait.getClass.getSimpleName} for the job ${savepointRequestTrait.jobId} failed. " +
-                s"detail: ${ExceptionUtils.stringifyException(e)}");
-        }.get)
+    Try {
+      actionFunc(jobID, clusterClient)
+    }.recover {
+      case e =>
+        throw new FlinkException(
+          s"[StreamPark] Do ${request.getClass.getSimpleName} for the job ${request.jobId} failed. " +
+            s"detail: ${ExceptionUtils.stringifyException(e)}");
+    }.get
   }
 
   override def doTriggerSavepoint(
@@ -124,27 +120,80 @@ trait YarnClientTrait extends FlinkClientTrait {
       .asInstanceOf[ClusterClientProvider[ApplicationId]]
   }
 
-  private[client] def getSessionClusterDescriptor[T <: ClusterDescriptor[ApplicationId]](
-      flinkConfig: Configuration): (ApplicationId, T) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory =
-      serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
-    require(yarnClusterId != null)
-    val clusterDescriptor =
-      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
-    (yarnClusterId, clusterDescriptor)
+  /**
+   * Retrieves the YarnClusterDescriptor and the application ID.
+   *
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the application ID and the YarnClusterDescriptor
+   */
+  private[client] def getYarnClusterDescriptor(
+      flinkConfig: Configuration,
+      user: String = ""): (ApplicationId, YarnClusterDescriptor) = {
+    Try {
+      doAsYarnClusterDescriptor[ApplicationId](
+        user,
+        () => {
+          val clientFactory = new YarnClusterClientFactory
+          // Get the cluster ID
+          val yarnClusterId: ApplicationId = clientFactory.getClusterId(flinkConfig)
+          require(yarnClusterId != null)
+          // Create the ClusterDescriptor
+          val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
+          (yarnClusterId, clusterDescriptor)
+        })
+    } match {
+      case Success(result) => result
+      case Failure(e) =>
+        throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
+    }
   }
 
-  private[client] def getSessionClusterDeployDescriptor[T <: ClusterDescriptor[ApplicationId]](
-      flinkConfig: Configuration): (ClusterSpecification, T) = {
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory =
-      serviceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-    val clusterSpecification =
-      clientFactory.getClusterSpecification(flinkConfig)
-    val clusterDescriptor =
-      clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[T]
-    (clusterSpecification, clusterDescriptor)
+  /**
+   * Retrieves the ClusterSpecification and the YarnClusterDescriptor for deployment.
+   *
+   * @param flinkConfig
+   *   the Flink configuration
+   * @return
+   *   a tuple containing the ClusterSpecification and the YarnClusterDescriptor
+   */
+  private[client] def getYarnClusterDeployDescriptor(
+      flinkConfig: Configuration,
+      user: String = ""): (ClusterSpecification, YarnClusterDescriptor) = {
+    Try {
+      doAsYarnClusterDescriptor[ClusterSpecification](
+        user,
+        () => {
+          val clientFactory = new YarnClusterClientFactory
+          // Get the ClusterSpecification
+          val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
+          // Create the ClusterDescriptor
+          val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
+          clusterSpecification -> clusterDescriptor
+        })
+    } match {
+      case Success(result) => result
+      case Failure(e) =>
+        throw new IllegalArgumentException(s"[StreamPark] access ClusterDescriptor error: $e")
+    }
   }
+
+  private[this] def doAsYarnClusterDescriptor[T](
+      user: String,
+      func: () => (T, YarnClusterDescriptor)): (T, YarnClusterDescriptor) = {
+    // Wrap the operation in ugi.doAs()
+    val ugi = HadoopUtils.getUgi()
+    val finalUgi = if (user != null && user.nonEmpty && ugi.getShortUserName != user) UserGroupInformation.createProxyUser(user, ugi) else ugi
+
+    try {
+      finalUgi.doAs(new PrivilegedAction[(T, YarnClusterDescriptor)] {
+        override def run(): (T, YarnClusterDescriptor) = func()
+      })
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException(s"[StreamPark] Error executing YarnClusterDescriptor operation as user $user", e)
+    }
+  }
+
 }

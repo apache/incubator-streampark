@@ -60,7 +60,7 @@ public class Resource extends BaseEntity {
 
     private EngineTypeEnum engineType;
 
-    // for flink app
+    // for flink or spark app
     private String mainClass;
 
     // for flink connector

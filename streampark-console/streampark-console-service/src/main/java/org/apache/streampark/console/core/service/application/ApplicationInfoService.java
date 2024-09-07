@@ -217,13 +217,6 @@ public interface ApplicationInfoService extends IService<Application> {
     List<String> listRecentK8sTmPodTemplate();
 
     /**
-     * Uploads a list of jars to the server for historical reference.
-     *
-     * @return A list of strings representing the names of the uploaded jars.
-     */
-    List<String> listHistoryUploadJars();
-
-    /**
      * check application before start
      *
      * @param id the application's id which need to check before start.

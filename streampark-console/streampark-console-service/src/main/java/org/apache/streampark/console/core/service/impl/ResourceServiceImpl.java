@@ -17,9 +17,10 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -32,6 +33,7 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.console.core.bean.MavenPom;
+import org.apache.streampark.console.core.bean.UploadResponse;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
@@ -73,7 +75,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +88,8 @@ import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+
+import static org.apache.streampark.common.enums.StorageType.LFS;
 
 @Slf4j
 @Service
@@ -174,7 +180,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         ApiAlertException.throwIfTrue(
             jars.isEmpty() && poms.isEmpty(), "Please add pom or jar resource.");
         ApiAlertException.throwIfTrue(
-            resource.getResourceType() == ResourceTypeEnum.FLINK_APP && jars.isEmpty(),
+            resource.getResourceType() == ResourceTypeEnum.APP && jars.isEmpty(),
             "Please upload jar for Flink_App resource");
         ApiAlertException.throwIfTrue(
             jars.size() + poms.size() > 1, "Please do not add multi dependency at one time.");
@@ -206,7 +212,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             }
         }
 
-        if (resource.getResourceType() == ResourceTypeEnum.FLINK_APP) {
+        if (resource.getResourceType() == ResourceTypeEnum.APP) {
             findResource.setMainClass(resource.getMainClass());
         }
         findResource.setDescription(resource.getDescription());
@@ -257,7 +263,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
      * @return
      */
     @Override
-    public String upload(MultipartFile file) throws IOException {
+    public UploadResponse upload(MultipartFile file) throws IOException {
         File temp = WebUtils.getAppTempDir();
         String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
         File saveFile = new File(temp, fileName);
@@ -269,19 +275,38 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
                 throw new ApiDetailException(e);
             }
         }
-        return saveFile.getAbsolutePath();
+        String mainClass = null;
+        try {
+            mainClass = Utils.getJarManClass(saveFile);
+        } catch (Exception ignored) {
+        }
+        String path = saveFile.getAbsolutePath();
+        UploadResponse uploadResponse = new UploadResponse();
+        uploadResponse.setMainClass(mainClass);
+        uploadResponse.setPath(path);
+        return uploadResponse;
     }
 
     @Override
     public RestResponse checkResource(Resource resourceParam) throws JsonProcessingException {
         ResourceTypeEnum type = resourceParam.getResourceType();
         switch (type) {
-            case FLINK_APP:
+            case APP:
                 return checkFlinkApp(resourceParam);
             case CONNECTOR:
                 return checkConnector(resourceParam);
         }
         return RestResponse.success().data(ImmutableMap.of(STATE, 0));
+    }
+
+    @Override
+    public List<String> listHistoryUploadJars() {
+        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+            .filter(File::isFile)
+            .sorted(Comparator.comparingLong(File::lastModified).reversed())
+            .map(File::getName)
+            .filter(fn -> fn.endsWith(Constants.JAR_SUFFIX))
+            .collect(Collectors.toList());
     }
 
     private RestResponse checkConnector(Resource resourceParam) throws JsonProcessingException {
@@ -349,14 +374,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             jarFile == null || !jarFile.exists(), "flink app jar must exist.");
         Map<String, Serializable> resp = new HashMap<>(0);
         resp.put(STATE, 0);
-        if (jarFile.getName().endsWith(Constant.PYTHON_SUFFIX)) {
-            return RestResponse.success().data(resp);
-        }
-        String mainClass = Utils.getJarManClass(jarFile);
-        if (mainClass == null) {
-            // main class is null
-            return buildExceptResponse(new RuntimeException("main class is null"), 2);
-        }
         return RestResponse.success().data(resp);
     }
 

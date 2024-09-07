@@ -31,7 +31,11 @@ const { t } = useI18n();
 export const renderResourceType = ({ model }) => {
   const renderOptions = () => {
     const options = [
-      { label: 'Flink App', value: ResourceTypeEnum.FLINK_APP, src: flinkAppSvg },
+      {
+        label: model.engineType === EngineTypeEnum.FLINK ? 'Flink App' : 'Spark App',
+        value: ResourceTypeEnum.APP,
+        src: model.engineType === EngineTypeEnum.FLINK ? flinkAppSvg : sparkSvg,
+      },
       { label: 'Connector', value: ResourceTypeEnum.CONNECTOR, src: connectorSvg },
       { label: 'UDXF', value: ResourceTypeEnum.UDXF, src: udxfSvg },
       { label: 'Jar Library', value: ResourceTypeEnum.JAR_LIBRARY, src: jarSvg },
@@ -102,7 +106,7 @@ export const renderStreamParkResourceGroup = ({ model, resources }) => {
     return (resources || [])
       .filter(
         (item) =>
-          item.resourceType !== ResourceTypeEnum.FLINK_APP &&
+          item.resourceType !== ResourceTypeEnum.APP &&
           item.resourceType !== ResourceTypeEnum.GROUP,
       )
       .map((resource) => {

@@ -22,10 +22,9 @@ import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.util.FlinkUtils
 
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.program.PackagedProgram
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
@@ -55,28 +54,16 @@ object YarnPerJobClient extends YarnClientTrait {
   override def doSubmit(
       submitRequest: SubmitRequest,
       flinkConfig: Configuration): SubmitResponse = {
-
     val flinkHome = submitRequest.flinkVersion.flinkHome
 
-    val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory =
-      clusterClientServiceLoader.getClusterClientFactory[ApplicationId](flinkConfig)
-
-    val clusterDescriptor = {
-      val clusterDescriptor =
-        clientFactory
-          .createClusterDescriptor(flinkConfig)
-          .asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
-      clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-      clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
-      clusterDescriptor
-    }
+    val (clusterSpecification, clusterDescriptor: YarnClusterDescriptor) =
+      getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser)
+    val flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome)
+    clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
+    clusterDescriptor.addShipFiles(List(new File(s"$flinkHome/lib")))
 
     var packagedProgram: PackagedProgram = null
     val clusterClient = {
-      val clusterSpecification =
-        clientFactory.getClusterSpecification(flinkConfig)
       logInfo(s"""
                  |------------------------<<specification>>-------------------------
                  |$clusterSpecification
@@ -119,9 +106,8 @@ object YarnPerJobClient extends YarnClientTrait {
       cancelRequest: CancelRequest,
       flinkConfig: Configuration): CancelResponse = {
     val response = super.doCancel(cancelRequest, flinkConfig)
-    val clusterClientFactory = new YarnClusterClientFactory
-    val clusterDescriptor =
-      clusterClientFactory.createClusterDescriptor(flinkConfig)
+    val (yarnClusterId: ApplicationId, clusterDescriptor: YarnClusterDescriptor) =
+      getYarnClusterDescriptor(flinkConfig)
     clusterDescriptor.killCluster(ApplicationId.fromString(cancelRequest.clusterId))
     response
   }

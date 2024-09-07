@@ -15,6 +15,9 @@
 # limitations under the License.
 #
 
+server:
+  port: 20000
+
 logging:
   level:
     root: debug
@@ -32,3 +35,21 @@ spring:
       username: sa
       password: sa
       mode: always
+
+streampark:
+  # console heartbeat interval
+  max-heartbeat-interval: 10s
+
+registry:
+  # default using jdbc as registry
+  type: jdbc
+  heartbeat-refresh-interval: 1s
+  session-timeout: 3s
+
+network:
+  # network interface preferred like eth0, default: empty
+  preferred-interface: ""
+  # network interface restricted like docker0, default: empty
+  restrict-interface: docker0
+  # network IP gets priority, default inner outer
+  priority-strategy: default

@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.bean.UploadResponse;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.service.ResourceService;
 
@@ -90,7 +91,14 @@ public class ResourceController {
     @PostMapping("upload")
     @RequiresPermissions("resource:add")
     public RestResponse upload(MultipartFile file) throws Exception {
-        String uploadPath = resourceService.upload(file);
+        UploadResponse uploadPath = resourceService.upload(file);
         return RestResponse.success(uploadPath);
     }
+
+    @PostMapping("upload_jars")
+    public RestResponse listUploadJars() {
+        List<String> jars = resourceService.listHistoryUploadJars();
+        return RestResponse.success(jars);
+    }
+
 }

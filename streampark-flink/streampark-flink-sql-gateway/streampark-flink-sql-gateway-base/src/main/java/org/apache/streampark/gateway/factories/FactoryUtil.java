@@ -17,7 +17,7 @@
 
 package org.apache.streampark.gateway.factories;
 
-import org.apache.streampark.common.Constant;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.gateway.ConfigOption;
 import org.apache.streampark.gateway.exception.ValidationException;
 
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 /** Factory utils for {@link Factory}. */
 public class FactoryUtil {
 
-    private static final String DEFAULT_IDENTIFIER = Constant.DEFAULT;
+    private static final String DEFAULT_IDENTIFIER = Constants.DEFAULT;
     private static final Logger LOG = LoggerFactory.getLogger(FactoryUtil.class);
     public static final ConfigOption<String> SQL_GATEWAY_SERVICE_TYPE = ConfigOption
         .key("streampark.sql-gateway.service")

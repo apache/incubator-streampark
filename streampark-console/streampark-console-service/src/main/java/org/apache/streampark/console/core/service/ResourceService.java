@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
+import org.apache.streampark.console.core.bean.UploadResponse;
 import org.apache.streampark.console.core.entity.Resource;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -91,7 +92,15 @@ public interface ResourceService extends IService<Resource> {
      */
     void changeOwnership(Long userId, Long targetUserId);
 
-    String upload(MultipartFile file) throws IOException;
+    UploadResponse upload(MultipartFile file) throws IOException;
 
     RestResponse checkResource(Resource resource) throws Exception;
+
+    /**
+     * Uploads a list of jars to the server for historical reference.
+     *
+     * @return A list of strings representing the names of the uploaded jars.
+     */
+    List<String> listHistoryUploadJars();
+
 }
