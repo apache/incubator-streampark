@@ -377,8 +377,6 @@ public class SparkAppBuildPipeServiceImpl
             case YARN_CLIENT:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                // if (SparkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
-                // && ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                 if (ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
