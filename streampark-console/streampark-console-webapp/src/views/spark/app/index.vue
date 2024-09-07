@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts" setup>
-  import {PlusOutlined} from '@ant-design/icons-vue';
+  import { PlusOutlined } from '@ant-design/icons-vue';
   import { nextTick, ref, onUnmounted, onMounted, unref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { JobTypeEnum, AppStateEnum, OptionStateEnum } from '/@/enums/sparkEnum';
@@ -76,7 +76,6 @@
   const currentTablePage = ref(1);
 
   const { onTableColumnResize, tableColumnWidth, getAppColumns } = useSparkColumns();
-  console.log("getAppColumns",getAppColumns)
   const titleLenRef = ref({
     maxState: '',
     maxRelease: '',
@@ -176,7 +175,7 @@
     rowKey: 'id',
     api: getSparkAppList,
     immediate: true,
-    canResize:false,
+    canResize: false,
     showIndexColumn: false,
     showTableSetting: false,
     actionColumn: {
@@ -263,77 +262,81 @@
     >
       <template #tableTitle>
         <div class="flex justify-between" style="width: 100%">
-            <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
-              <Row :gutter="4" class="w-full">
-                <Col :span="5">
-                  <Form.Item>
-                    <Input
-                      :placeholder="t('spark.app.searchName')"
-                      allow-clear
-                      v-model:value="searchRef.appName"
-                      @change="() => handleResetReload()"
-                      @search="() => handleResetReload()"
-                    />
-                  </Form.Item>
-                </Col>
-                <Col :span="4">
-                  <Form.Item>
-                    <Select
-                      :placeholder="t('spark.app.tags')"
-                      show-search
-                      allow-clear
-                      v-model:value="searchRef.tags"
-                      @change="() => handleResetReload()"
-                      :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
-                    />
-                  </Form.Item>
-                </Col>
-                <Col :span="4">
-                  <Form.Item>
-                    <Select
-                      :placeholder="t('spark.app.jobType')"
-                      show-search
-                      allow-clear
-                      v-model:value="searchRef.jobType"
-                      @change="() => handleResetReload()"
-                      :options="[
-                        { label: 'JAR', value: JobTypeEnum.JAR },
-                        { label: 'SQL', value: JobTypeEnum.SQL },
-                      ]"
-                    />
-                  </Form.Item>
-                </Col>
-                <Col :span="4">
-                  <Form.Item>
-                    <Select
-                      :placeholder="t('spark.app.owner')"
-                      show-search
-                      allow-clear
-                      v-model:value="searchRef.userId"
-                      @change="() => handleResetReload()"
-                      :options="
+          <Form name="appTableForm" :model="searchRef" layout="inline" class="flex-1 search-bar">
+            <Row :gutter="4" class="w-full">
+              <Col :span="5">
+                <Form.Item>
+                  <Input
+                    :placeholder="t('spark.app.searchName')"
+                    allow-clear
+                    v-model:value="searchRef.appName"
+                    @change="() => handleResetReload()"
+                    @search="() => handleResetReload()"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('spark.app.tags')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.tags"
+                    @change="() => handleResetReload()"
+                    :options="(tagsOptions || []).map((t: Recordable) => ({ label: t, value: t }))"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('spark.app.jobType')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.jobType"
+                    @change="() => handleResetReload()"
+                    :options="[
+                      { label: 'JAR', value: JobTypeEnum.JAR },
+                      { label: 'SQL', value: JobTypeEnum.SQL },
+                    ]"
+                  />
+                </Form.Item>
+              </Col>
+              <Col :span="4">
+                <Form.Item>
+                  <Select
+                    :placeholder="t('spark.app.owner')"
+                    show-search
+                    allow-clear
+                    v-model:value="searchRef.userId"
+                    @change="() => handleResetReload()"
+                    :options="
                       (users || []).map((u: Recordable) => ({
                         label: u.nickName || u.username,
                         value: u.userId,
                       }))
                     "
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Form>
-            <div v-auth="'app:create'">
-              <Button type="primary" @click="() => router.push({ path: '/spark/app/create' })">
-                <PlusOutlined />
-                {{ t('common.add') }}
-              </Button>
-            </div>
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+          <div v-auth="'app:create'">
+            <Button type="primary" @click="() => router.push({ path: '/spark/app/create' })">
+              <PlusOutlined />
+              {{ t('common.add') }}
+            </Button>
           </div>
+        </div>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'appName'">
-          <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> Spark JAR </span>
-          <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL"> Spark SQL </span>
+          <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR">
+            Spark JAR
+          </span>
+          <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL">
+            Spark SQL
+          </span>
           <span class="app_type app_py" v-if="record['jobType'] == JobTypeEnum.PYSPARK">
             PySpark
           </span>
