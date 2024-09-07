@@ -38,7 +38,7 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWait
 @Getter
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
 
-    @FindBy(xpath = "//div[contains(@class, 'app_list')]//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id="e2e_app_create_btn")
     private WebElement buttonCreateApplication;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
