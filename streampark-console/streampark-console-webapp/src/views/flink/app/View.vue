@@ -334,7 +334,11 @@
             </Row>
           </Form>
           <div v-auth="'app:create'">
-            <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
+            <Button
+              type="primary"
+              id="e2e_app_create_btn"
+              @click="() => router.push({ path: '/flink/app/add' })"
+            >
               <PlusOutlined />
               {{ t('common.add') }}
             </Button>
