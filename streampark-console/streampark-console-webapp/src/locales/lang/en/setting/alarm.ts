@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 export default {
-  alertSetting: 'Alert Setting',
+  alertSetting: 'Alarm Setting',
   tooltip: {
     test: 'Alert Test',
     detail: 'Alert Detail',

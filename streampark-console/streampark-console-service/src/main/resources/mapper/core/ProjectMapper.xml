@@ -18,7 +18,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.ProjectMapper">
 
-    <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+    <select id="existsByTeamId" resultType="java.lang.Boolean">
         select
             CASE
                 WHEN  count(1) > 0 THEN true ELSE false
@@ -28,25 +28,25 @@
             limit 1
     </select>
 
-    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Project" parameterType="java.lang.Long">
+    <select id="selectByTeamId" resultType="org.apache.streampark.console.core.entity.Project">
         select *
         from t_flink_project
         where team_id = #{teamId}
     </select>
 
-    <update id="updateBuildState" parameterType="java.util.Map">
+    <update id="updateBuildState">
         update t_flink_project
         set build_state = #{state}
         where id = #{id}
     </update>
 
-    <update id="updateBuildTime" parameterType="java.lang.Long">
+    <update id="updateBuildTime">
         update t_flink_project
         set last_build = now()
         where id = #{id}
     </update>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Project" parameterType="org.apache.streampark.console.core.entity.Project">
+    <select id="page" resultType="org.apache.streampark.console.core.entity.Project">
         select *
         from t_flink_project t
         <where>

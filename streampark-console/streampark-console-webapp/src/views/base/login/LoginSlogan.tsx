@@ -52,7 +52,6 @@ export default defineComponent({
                     StreamPark
                   </span>
                 </div>
-                <span className="badge bg-secondary-home text-xl tag">Incubating</span>
               </div>
             </div>
             <p className=" text-light-200 leading-40px" style={{ fontSize: '18px' }}>

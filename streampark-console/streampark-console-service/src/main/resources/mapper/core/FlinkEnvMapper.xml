@@ -32,7 +32,7 @@
         </where>
     </select>
 
-    <select id="getByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv" parameterType="java.lang.Long">
+    <select id="getByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv">
         select v.*
         from t_flink_env v
         inner join (
@@ -43,7 +43,7 @@
         on v.id = t.version_id
     </select>
 
-    <update id="setDefault" parameterType="java.lang.Long">
+    <update id="setDefault">
         update t_flink_env
         set is_default = case id when #{id} then true else false end
     </update>

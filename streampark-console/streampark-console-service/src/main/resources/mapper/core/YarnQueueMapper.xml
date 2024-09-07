@@ -17,14 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.YarnQueueMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.YarnQueue">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
-        <result column="queue_label" jdbcType="VARCHAR" property="queueLabel"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-        <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
-    </resultMap>
 
     <select id="findQueues" resultType="org.apache.streampark.console.core.entity.YarnQueue">
         select * from t_yarn_queue
@@ -49,7 +41,7 @@
         </where>
     </select>
 
-    <select id="existsByQueueLabel" resultType="java.lang.Boolean" parameterType="org.apache.streampark.console.core.entity.YarnQueue">
+    <select id="existsByQueueLabel" resultType="java.lang.Boolean">
         select
          CASE
           WHEN  count(1) > 0 THEN true ELSE false

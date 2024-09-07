@@ -24,7 +24,7 @@
         set option_state = 0
     </update>
 
-    <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+    <select id="existsByTeamId" resultType="java.lang.Boolean">
         select
             CASE
                 WHEN  count(1) > 0 THEN true ELSE false
@@ -34,7 +34,7 @@
         limit 1
     </select>
 
-    <select id="existsByJobName" resultType="java.lang.Boolean" parameterType="java.lang.String">
+    <select id="existsByJobName" resultType="java.lang.Boolean">
         select
             CASE
                 WHEN  count(1) > 0 THEN true ELSE false
@@ -44,7 +44,7 @@
         limit 1
     </select>
 
-    <select id="existsJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+    <select id="existsJobByClusterId" resultType="java.lang.Boolean">
         SELECT
             CASE
                 WHEN  count(1) > 0 THEN true ELSE false
@@ -54,7 +54,7 @@
         limit 1
     </select>
 
-    <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
+    <select id="existsRunningJobByClusterId" resultType="java.lang.Boolean">
         select
             CASE
                 WHEN  count(1) > 0 THEN true ELSE false
@@ -65,11 +65,11 @@
              limit 1
     </select>
 
-    <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
+    <select id="getByProjectId" resultType="org.apache.streampark.console.core.entity.Application">
         select * from t_flink_app where project_id=#{projectId}
     </select>
 
-    <select id="page" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
+    <select id="page" resultType="org.apache.streampark.console.core.entity.Application">
         select
             t.*,
             p.name as projectName,
@@ -140,14 +140,14 @@
         </where>
     </select>
 
-    <select id="getApp" resultType="org.apache.streampark.console.core.entity.Application" parameterType="org.apache.streampark.console.core.entity.Application">
+    <select id="getApp" resultType="org.apache.streampark.console.core.entity.Application">
         select t.*, p.name as projectName
         from t_flink_app t left join t_flink_project p
         on t.project_id = p.id
         where t.id = #{application.id}
     </select>
 
-    <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.Application">
+    <update id="persistMetrics">
         update t_flink_app
         <set>
             <if test="application.jobId != null and application.jobId != ''">
@@ -205,7 +205,7 @@
         where id=#{application.id}
     </update>
 
-    <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.Application" parameterType="java.lang.Long">
+    <select id="getByTeamId" resultType="org.apache.streampark.console.core.entity.Application">
         select
             t.*,
             u.username,
@@ -220,7 +220,7 @@
         where t.team_id=#{teamId}
     </select>
 
-    <update id="mapping" parameterType="org.apache.streampark.console.core.entity.Application">
+    <update id="mapping">
         update t_flink_app
         <set>
             <if test="application.clusterId != null">
@@ -242,7 +242,7 @@
         where id = #{id}
     </update>
 
-    <select id="getRecentK8sNamespace" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getRecentK8sNamespace" resultType="java.lang.String">
         select k8s_namespace
         from (
             select k8s_namespace, max(create_time) as ct
@@ -254,7 +254,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sClusterId" resultType="java.lang.String" parameterType="java.util.Map">
+    <select id="getRecentK8sClusterId" resultType="java.lang.String">
         select cluster_id
         from (
             select c.cluster_id, max(a.create_time) as ct
@@ -267,7 +267,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentFlinkBaseImage" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getRecentFlinkBaseImage" resultType="java.lang.String">
         select flink_image
         from (
             select flink_image, max(create_time) as ct
@@ -280,7 +280,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getRecentK8sPodTemplate" resultType="java.lang.String">
         select k8s_pod_template
         from (
             select k8s_pod_template, max(create_time) as ct
@@ -294,7 +294,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sJmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getRecentK8sJmPodTemplate" resultType="java.lang.String">
         select k8s_jm_pod_template
         from (
             select k8s_jm_pod_template, max(create_time) as ct
@@ -308,7 +308,7 @@
         limit #{limitSize}
     </select>
 
-    <select id="getRecentK8sTmPodTemplate" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getRecentK8sTmPodTemplate" resultType="java.lang.String">
         select k8s_tm_pod_template
         from (
             select k8s_tm_pod_template, max(create_time) as ct

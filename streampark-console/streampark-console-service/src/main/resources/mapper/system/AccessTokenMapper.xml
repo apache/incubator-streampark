@@ -30,8 +30,7 @@
         t2.status as userStatus
     </sql>
 
-    <select id="page" resultType="org.apache.streampark.console.system.entity.AccessToken"
-            parameterType="org.apache.streampark.console.system.entity.AccessToken">
+    <select id="page" resultType="org.apache.streampark.console.system.entity.AccessToken">
         select
         <include refid="Base_Column_List"/>
         from t_access_token t1 join t_user t2 on t1.user_id = t2.user_id

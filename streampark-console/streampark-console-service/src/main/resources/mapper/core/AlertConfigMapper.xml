@@ -31,7 +31,7 @@
         <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
 
-    <select id="getAlertConfByName" resultType="org.apache.streampark.console.core.entity.AlertConfig" parameterType="org.apache.streampark.console.core.entity.AlertConfig">
+    <select id="getAlertConfByName" resultType="org.apache.streampark.console.core.entity.AlertConfig">
         select id
         from t_alert_config t
         where t.alert_name = #{alertConfig.alertName}

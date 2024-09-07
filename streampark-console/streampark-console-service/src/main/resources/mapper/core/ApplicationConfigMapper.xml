@@ -18,30 +18,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.apache.streampark.console.core.mapper.ApplicationConfigMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.ApplicationConfig">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="app_id" jdbcType="BIGINT" property="appId"/>
-        <result column="format" jdbcType="INTEGER" property="format"/>
-        <result column="version" jdbcType="INTEGER" property="version"/>
-        <result column="latest" jdbcType="BOOLEAN" property="latest"/>
-        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
-
-    <select id="getLatest" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="getLatest" resultType="org.apache.streampark.console.core.entity.ApplicationConfig">
         select *
         from t_flink_config
         where app_id=#{appId}
         and latest=true
     </select>
 
-    <select id="getLastVersion" resultType="java.lang.Integer" parameterType="java.lang.Long">
+    <select id="getLastVersion" resultType="java.lang.Integer">
         select max(`version`) as lastVersion
         from t_flink_config
         where app_id = #{appId}
     </select>
 
-    <select id="getEffective" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="getEffective" resultType="org.apache.streampark.console.core.entity.ApplicationConfig">
         select s.*
         from t_flink_config s
         inner join t_flink_effective e
@@ -50,7 +40,7 @@
         and e.target_type = 1
     </select>
 
-    <select id="pageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig" parameterType="java.lang.Long">
+    <select id="pageByAppId" resultType="org.apache.streampark.console.core.entity.ApplicationConfig">
         select * from t_flink_config
         where app_id=#{appId}
     </select>

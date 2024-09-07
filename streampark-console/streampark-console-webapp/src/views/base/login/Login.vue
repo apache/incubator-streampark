@@ -59,7 +59,7 @@
       </div>
     </div>
     <footer class="w-1150px m-auto text-center bg-transparent opacity-60">
-      <a href="https://incubator.apache.org/" target="_blank" class="w-200px m-auto inline-block">
+      <a href="https://streampark.apache.org/" target="_blank" class="w-200px m-auto inline-block">
         <img
           src="/@/assets/svg/apache-incubator.svg"
           alt="Apache Incubator logo"

@@ -31,7 +31,7 @@
         </where>
     </select>
 
-    <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
+    <select id="existsByClusterId" resultType="java.lang.Boolean">
         select
          CASE
            WHEN  count(1) > 0 THEN true ELSE false
@@ -46,7 +46,7 @@
         limit 1
     </select>
 
-    <select id="existsByClusterName" resultType="java.lang.Boolean" parameterType="java.util.Map">
+    <select id="existsByClusterName" resultType="java.lang.Boolean">
         select
          CASE
            WHEN  count(1) > 0 THEN true ELSE false

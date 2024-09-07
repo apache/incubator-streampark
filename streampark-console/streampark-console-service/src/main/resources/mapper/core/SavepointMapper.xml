@@ -17,16 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.SavepointMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Savepoint">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
-        <result column="latest" jdbcType="BOOLEAN" property="latest"/>
-        <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="path" jdbcType="VARCHAR" property="path"/>
-        <result column="trigger_time" jdbcType="DATE" property="triggerTime"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
-
     <select id="findLatestByTime" resultType="org.apache.streampark.console.core.entity.Savepoint">
         select * from t_flink_savepoint
         where app_id = #{appId}

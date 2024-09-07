@@ -17,23 +17,7 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.system.mapper.MenuMapper">
-    <resultMap id="menu" type="org.apache.streampark.console.system.entity.Menu">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <id column="menu_id" jdbcType="BIGINT" property="menuId"/>
-        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
-        <result column="menu_name" jdbcType="VARCHAR" property="menuName"/>
-        <result column="path" jdbcType="VARCHAR" property="path"/>
-        <result column="component" jdbcType="VARCHAR" property="component"/>
-        <result column="perms" jdbcType="VARCHAR" property="perms"/>
-        <result column="icon" jdbcType="VARCHAR" property="icon"/>
-        <result column="type" jdbcType="CHAR" property="type"/>
-        <result column="display" jdbcType="BOOLEAN" property="display"/>
-        <result column="order_num" jdbcType="DOUBLE" property="orderNum"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
-    </resultMap>
-
-    <select id="findUserPermissions" resultType="string">
+    <select id="findUserPermissions" resultType="java.lang.String">
         select distinct m.perms
         from t_role r
         left join t_member ur on (r.role_id = ur.role_id)
@@ -47,7 +31,7 @@
         and m.perms &lt;&gt; ''
     </select>
 
-    <select id="findUserMenus" resultMap="menu">
+    <select id="findUserMenus" resultType="org.apache.streampark.console.system.entity.Menu">
         select m.*
         from t_menu m inner join t_role_menu rm
         on m.menu_id = rm.menu_id
@@ -59,7 +43,7 @@
         order by m.order_num
     </select>
 
-    <select id="findUserIdsByMenuId" parameterType="string" resultType="string">
+    <select id="findUserIdsByMenuId" resultType="java.lang.String">
         select user_id
         from t_member
         where role_id in
