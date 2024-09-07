@@ -336,7 +336,7 @@
           <div v-auth="'app:create'">
             <Button
               type="primary"
-              id="e2e_app_create_btn"
+              class="e2e_app_create_btn"
               @click="() => router.push({ path: '/flink/app/add' })"
             >
               <PlusOutlined />
