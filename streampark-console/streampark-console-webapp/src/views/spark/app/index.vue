@@ -90,6 +90,7 @@
         }
         delete params.state;
       }
+      Object.assign(params, searchRef.value);
       currentTablePage.value = params.pageNum;
       // sessionStorage.setItem('appPageNo', params.pageNum);
       const res = await fetchSparkAppRecord(params);

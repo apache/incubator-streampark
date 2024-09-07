@@ -168,7 +168,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         rules: [{ required: true, message: t('spark.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
-        field: 'jobName',
+        field: 'appName',
         label: t('spark.app.appName'),
         component: 'Input',
         componentProps: { placeholder: t('spark.app.addAppTips.appNamePlaceholder') },
