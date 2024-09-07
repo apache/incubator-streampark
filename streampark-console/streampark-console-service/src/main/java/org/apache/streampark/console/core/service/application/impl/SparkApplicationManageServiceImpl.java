@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.application.impl;
 
-import org.apache.streampark.common.Constant;
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
@@ -271,7 +271,7 @@ public class SparkApplicationManageServiceImpl
         if (appParam.isSparkOnYarnJob()) {
             appParam.resolveYarnQueue();
             if (appParam.isSparkSqlJob()) {
-                appParam.setMainClass(Constant.STREAMPARK_SPARKSQL_CLIENT_CLASS);
+                appParam.setMainClass(Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS);
             }
         }
         if (appParam.isUploadJob()) {
