@@ -89,6 +89,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
                         log.error(e.getMessage(), e);
                     } finally {
                         runningTasks.remove(flinkTask.getId());
+                        this.removeById(flinkTask.getId());
                     }
                 });
             }
