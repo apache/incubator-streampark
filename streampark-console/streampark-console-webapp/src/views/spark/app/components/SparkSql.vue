@@ -77,20 +77,20 @@
       return false;
     } else {
       try {
-        const { data } = await fetchSparkSqlVerify({
+        const res = await fetchSparkSqlVerify({
           sql: props.value,
           versionId: props.versionId,
         });
-        const success = data.data === true || data.data === 'true';
+        const success = res.data === true || res.data === 'true';
         if (success) {
           verifyRes.verified = true;
           verifyRes.errorMsg = '';
           syntaxError();
           return true;
         } else {
-          verifyRes.errorStart = parseInt(data.start);
-          verifyRes.errorEnd = parseInt(data.end);
-          switch (data.type) {
+          verifyRes.errorStart = parseInt(res.start);
+          verifyRes.errorEnd = parseInt(res.end);
+          switch (res.type) {
             case 4:
               verifyRes.errorMsg = 'Unsupported sql';
               break;
@@ -98,7 +98,7 @@
               verifyRes.errorMsg = "SQL is not endWith ';'";
               break;
             default:
-              verifyRes.errorMsg = data.message;
+              verifyRes.errorMsg = res.message;
               break;
           }
           syntaxError();

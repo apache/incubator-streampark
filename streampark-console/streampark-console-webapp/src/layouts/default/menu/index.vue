@@ -78,7 +78,7 @@
 
       const getWrapperStyle = computed((): CSSProperties => {
         return {
-          height: `calc(100% - ${unref(getIsShowLogo) ? '48px' : '0px'})`,
+          height: `calc(100% - ${unref(getIsShowLogo) ? '100px' : '50px'})`,
         };
       });
 

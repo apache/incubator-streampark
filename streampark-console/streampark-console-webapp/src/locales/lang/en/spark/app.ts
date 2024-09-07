@@ -97,7 +97,7 @@ export default {
   hadoopConfigTitle: 'System Hadoop',
   dragUploadTitle: 'Click or Drag jar or py to this area to upload',
   dragUploadTip: 'Supports single upload. You can upload local jar here to support the current job',
-  dependencyError: 'Please check the Flink version first.',
+  dependencyError: 'Please check the Spark version first.',
   status: 'Run Status',
   startTime: 'Start Time',
   endTime: 'End Time',
