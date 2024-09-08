@@ -53,6 +53,9 @@
                 tooltip: t('system.role.form.delete'),
                 ifShow: record.roleName !== 'admin',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-role-delete-confirm',
+                  },
                   title: t('system.role.deleteTip'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),

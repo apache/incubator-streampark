@@ -46,7 +46,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(id = "e2e-role-delete-confirm")
     private WebElement deleteConfirmButton;
 
     private final CreateRoleForm createRoleForm = new CreateRoleForm();
@@ -139,7 +139,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(xpath = "//div[@class='scrollbar__view']//*[@id='form_item_roleName']")
+        @FindBy(id = "form_item_roleName")
         private WebElement inputRoleName;
 
         @FindBy(id = "form_item_description")

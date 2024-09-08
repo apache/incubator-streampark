@@ -115,6 +115,7 @@
       <BasicTitle>{{ t('setting.flinkHome.title') }}</BasicTitle>
       <div v-auth="'project:create'">
         <a-button
+          id="e2e-env-add-btn"
           type="dashed"
           style="width: 100%; margin-top: 20px"
           @click="openFlinkModal(true, {})"

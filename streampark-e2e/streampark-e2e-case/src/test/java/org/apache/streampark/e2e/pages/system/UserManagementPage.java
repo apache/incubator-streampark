@@ -96,7 +96,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
             .stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
-                it -> it.findElements(By.id("//button[contains(@class,'e2e-user-modify-btn')]"))
+                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-user-modify-btn')]"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
