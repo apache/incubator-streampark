@@ -43,7 +43,7 @@ public final class LoginPage extends NavBarPage {
     @FindBy(id = "form_item_password")
     private WebElement inputPassword;
 
-    @FindBy(xpath = "//button[contains(@classnames, 'login-button')]")
+    @FindBy(id = "e2e-login-button")
     private WebElement buttonLogin;
 
     private final TeamForm teamForm = new TeamForm();

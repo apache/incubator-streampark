@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
+        <a-button id="e2e-user-create-btn" type="primary" @click="handleCreate" v-auth="'user:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -90,6 +90,7 @@
       function getUserAction(record: UserListRecord): ActionItem[] {
         return [
           {
+            className: 'e2e-user-modify-btn',
             icon: 'clarity:note-edit-line',
             tooltip: t('system.user.table.modify'),
             auth: 'user:update',
@@ -97,6 +98,7 @@
             onClick: handleEdit.bind(null, record),
           },
           {
+            id: '',
             icon: 'carbon:data-view-alt',
             tooltip: t('common.detail'),
             onClick: handleView.bind(null, record),

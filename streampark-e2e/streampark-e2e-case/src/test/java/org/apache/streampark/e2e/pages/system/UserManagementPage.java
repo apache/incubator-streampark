@@ -38,7 +38,7 @@ import java.util.List;
 @Getter
 public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'User List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-user-create-btn")
     private WebElement buttonCreateUser;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
@@ -92,10 +92,11 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
                                        UserManagementStatus userManagementStatus) {
         waitForPageLoading();
 
-        userList().stream()
+        userList()
+            .stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'modify user')]"))
+                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-user-modify-btn')]"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()

@@ -58,11 +58,11 @@
       <Button
         type="primary"
         class="my-10px"
+        id="e2e-login-button"
         size="large"
         block
         @click="handleLogin"
         :loading="loading"
-        classNames="login-button"
       >
         {{ loginText.buttonText }}
       </Button>
