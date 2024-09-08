@@ -9,7 +9,7 @@
       {{ getI18nName }}
     </div>
     <template #title>
-      <span :class="[`${prefixCls}-sub-title`, getMenuItemName]">
+      <span :class="[`${prefixCls}-sub-title`]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
@@ -32,7 +32,7 @@
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
         {{ getI18nName }}
       </div>
-      <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`]">
+      <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`, getMenuItemName]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="!!collapse && !!parent" />
