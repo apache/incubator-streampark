@@ -182,7 +182,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
         this.save(flinkTask);
     }
 
-    private FlinkTask getTaskByApp(Application appParam, boolean autoStart, FlinkTaskEnum action) {
+    public FlinkTask getTaskByApp(Application appParam, boolean autoStart, FlinkTaskEnum action) {
         FlinkTask flinkTask = new FlinkTask();
         flinkTask.setAction(action);
         flinkTask.setAppId(appParam.getId());
@@ -197,7 +197,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
         return flinkTask;
     }
 
-    private Application getAppByTask(FlinkTask flinkTask) {
+    public Application getAppByTask(FlinkTask flinkTask) {
         Application appParam = new Application();
         appParam.setId(flinkTask.getAppId());
         appParam.setArgs(flinkTask.getArgs());
@@ -208,5 +208,9 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
         appParam.setNativeFormat(flinkTask.getNativeFormat());
         appParam.setRestoreMode(flinkTask.getRestoreMode());
         return appParam;
+    }
+
+    public long getConsistentHashSize() {
+        return consistentHash.getSize();
     }
 }
