@@ -90,7 +90,7 @@
       function getUserAction(record: UserListRecord): ActionItem[] {
         return [
           {
-            className: 'e2e-user-modify-btn',
+            class: 'e2e-user-modify-btn',
             icon: 'clarity:note-edit-line',
             tooltip: t('system.user.table.modify'),
             auth: 'user:update',
@@ -98,7 +98,6 @@
             onClick: handleEdit.bind(null, record),
           },
           {
-            id: '',
             icon: 'carbon:data-view-alt',
             tooltip: t('common.detail'),
             onClick: handleView.bind(null, record),

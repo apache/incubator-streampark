@@ -5,7 +5,7 @@ export interface ActionItem extends ButtonProps {
   onClick?: Fn;
   label?: string;
   id?: string;
-  className?: string;
+  class?: string;
   color?: 'success' | 'error' | 'warning';
   icon?: string;
   popConfirm?: PopConfirm;
