@@ -85,10 +85,10 @@ export function checkResource(data: ResourceParam): Promise<AxiosResponse<Result
   return defHttp.post({ url: RESOURCE_API.CHECK, data });
 }
 
-export function fetchUpload(data) {
+export function fetchUpload(params) {
   return defHttp.post<string>({
     url: RESOURCE_API.UPLOAD,
-    data,
+    params,
     headers: {
       'Content-Type': ContentTypeEnum.FORM_DATA,
     },
