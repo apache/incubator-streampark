@@ -58,7 +58,7 @@
       <Button
         type="primary"
         class="my-10px"
-        id="e2e-login-button"
+        id="e2e-login-btn"
         size="large"
         block
         @click="handleLogin"

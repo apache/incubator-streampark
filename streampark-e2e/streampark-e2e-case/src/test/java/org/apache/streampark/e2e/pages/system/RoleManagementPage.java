@@ -36,16 +36,16 @@ import java.util.Objects;
 @Getter
 public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//button[contains(@class,'e2e-role-create-btn')]")
+    @FindBy(className = "e2e-role-create-btn")
     private WebElement buttonCreateRole;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> roleList;
 
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(@class,'e2e-role-delete-confirm')]")
+    @FindBy(className = "e2e-role-delete-confirm")
     private WebElement deleteConfirmButton;
 
     private final CreateRoleForm createRoleForm = new CreateRoleForm();

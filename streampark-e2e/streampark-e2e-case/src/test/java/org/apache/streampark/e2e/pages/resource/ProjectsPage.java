@@ -37,7 +37,7 @@ import java.util.List;
 @Getter
 public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn-dashed')]/span[contains(text(), 'Add New')]")
+    @FindBy(className = "e2e-project-create-btn")
     private WebElement buttonCreateProject;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-list')]")

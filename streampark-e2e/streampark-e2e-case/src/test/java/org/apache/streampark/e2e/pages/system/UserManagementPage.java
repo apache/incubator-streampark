@@ -41,7 +41,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
     @FindBy(id = "e2e-user-create-btn")
     private WebElement buttonCreateUser;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> userList;
 
     @FindBy(className = "ant-form-item-explain-error")
@@ -96,7 +96,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
             .stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-user-modify-btn')]"))
+                it -> it.findElements(By.className("e2e-user-modify-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
