@@ -30,7 +30,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,7 +71,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     public RoleManagementPage editRole(String roleName, String description, String menuName) {
         waitForPageLoading();
-        new WebDriverWait(driver, Duration.ofSeconds(2));
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
@@ -94,6 +93,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     public RoleManagementPage deleteRole(String roleName) {
         waitForPageLoading();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
