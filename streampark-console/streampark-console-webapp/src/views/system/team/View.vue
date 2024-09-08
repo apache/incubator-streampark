@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'team:add'">
+        <a-button id="e2e-team-create-btn" type="primary" @click="handleCreate" v-auth="'team:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -28,12 +28,14 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-team-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'team:update',
                 tooltip: t('system.team.modifyTeam'),
                 onClick: handleTeamEdit.bind(null, record),
               },
               {
+                class: 'e2e-team-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('system.team.deleteTeam'),

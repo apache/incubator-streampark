@@ -19,7 +19,7 @@
     <BasicTable @register="registerTable">
       <template #toolbar>
         <a-button
-          class="e2e-role-create-btn"
+          id="e2e-role-create-btn"
           type="primary"
           @click="handleCreate"
           v-auth="'role:add'"

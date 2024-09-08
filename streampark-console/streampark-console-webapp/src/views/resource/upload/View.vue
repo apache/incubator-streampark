@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'resource:add'">
+        <a-button id="e2e-upload-create-btn" type="primary" @click="handleCreate" v-auth="'resource:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -76,17 +76,22 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-upload-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'resource:update',
                 tooltip: t('flink.resource.modifyResource'),
                 onClick: handleEdit.bind(null, record),
               },
               {
+                class: 'e2e-upload-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('flink.resource.deleteResource'),
                 auth: 'resource:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-upload-delete-confirm',
+                  },
                   title: t('flink.resource.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },

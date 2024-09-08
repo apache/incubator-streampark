@@ -90,7 +90,7 @@
       function getUserAction(record: UserListRecord): ActionItem[] {
         return [
           {
-            class: 'e2e-user-modify-btn',
+            class: 'e2e-user-edit-btn',
             icon: 'clarity:note-edit-line',
             tooltip: t('system.user.table.modify'),
             auth: 'user:update',

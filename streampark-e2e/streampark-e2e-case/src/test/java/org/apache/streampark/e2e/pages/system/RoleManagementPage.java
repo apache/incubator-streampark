@@ -36,7 +36,7 @@ import java.util.Objects;
 @Getter
 public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(className = "e2e-role-create-btn")
+    @FindBy(id = "e2e-role-create-btn")
     private WebElement buttonCreateRole;
 
     @FindBy(className = "ant-table-tbody")

@@ -91,7 +91,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         tokenList().stream()
             .filter(it -> it.getText().contains(existUserName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Token')]")).stream())
+                it -> it.findElements(By.className("e2e-token-delete-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No delete button in token list"))

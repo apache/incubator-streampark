@@ -36,12 +36,12 @@ import java.util.List;
 @Getter
 public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Resource List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-upload-create-btn")
     private WebElement buttonCreateResource;
 
     private final CreateUploadForm createUploadForm = new CreateUploadForm();
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> resourceList;
 
     @FindBy(className = "swal2-html-container")
@@ -50,7 +50,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
     private WebElement errorMessageConfirmButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(id = "e2e-upload-delete-confirm")
     private WebElement deleteConfirmButton;
 
     public UploadsPage(RemoteWebDriver driver) {
@@ -105,7 +105,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         resourceList.stream()
             .filter(e -> e.getText().contains(resourceName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Resource')]")).stream())
+                it -> it.findElements(By.className("e2e-upload-edit-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No edit button in resource list"))
@@ -148,7 +148,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         resourceList.stream()
             .filter(e -> e.getText().contains(resourceName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Resource')]")).stream())
+                it -> it.findElements(By.className("e2e-upload-delete-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No delete button in resource list"))

@@ -40,6 +40,7 @@
                 onClick: handleCopy.bind(null, record),
               },
               {
+                class: 'e2e-token-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'token:delete',

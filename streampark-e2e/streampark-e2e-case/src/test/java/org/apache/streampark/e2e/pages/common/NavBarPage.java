@@ -39,7 +39,7 @@ public class NavBarPage {
     @FindBy(className = "menu-item-flink")
     private WebElement apacheFlinkTab;
 
-    @FindBy(className = "menu-item-resources")
+    @FindBy(className = "menu-item-resource")
     private WebElement resourcesTab;
 
     @FindBy(className = "menu-item-setting")

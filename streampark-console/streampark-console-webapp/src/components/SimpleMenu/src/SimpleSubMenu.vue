@@ -9,7 +9,7 @@
       {{ getI18nName }}
     </div>
     <template #title>
-      <span :class="[`${prefixCls}-sub-title`]">
+      <span :class="[`${prefixCls}-sub-title`, getMenuItemName]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
@@ -83,7 +83,7 @@
       );
       const getI18nName = computed(() => t(props.item?.name));
       const getMenuItemName = computed(() => {
-       return 'menu-item-' + props.item?.path.substring(1);
+       return 'menu-item-' + props.item?.path.substring(1).replaceAll('/','_')
       });
       const getShowSubTitle = computed(() => !props.collapse || !props.parent);
       const getIsCollapseParent = computed(() => !!props.collapse && !!props.parent);

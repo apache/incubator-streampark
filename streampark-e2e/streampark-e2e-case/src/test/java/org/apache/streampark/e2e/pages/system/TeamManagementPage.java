@@ -35,10 +35,10 @@ import java.util.List;
 @Getter
 public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Team List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-team-create-btn")
     private WebElement buttonCreateTeam;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> teamList;
 
     @FindBy(className = "swal2-html-container")
@@ -75,7 +75,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         teamList().stream()
             .filter(it -> it.getText().contains(teamName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Team')]"))
+                it -> it.findElements(By.className("e2e-team-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -99,7 +99,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         teamList().stream()
             .filter(it -> it.getText().contains(teamName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Team')]"))
+                it -> it.findElements(By.className("e2e-team-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
