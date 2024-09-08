@@ -36,7 +36,7 @@
       </template>
     </a-card>
     <div class="operate pt-20px bg-white" v-auth="'project:create'">
-      <a-button type="dashed" style="width: 100%" @click="onAdd">
+      <a-button id="e2e-project-create-btn" type="dashed" style="width: 100%" @click="onAdd">
         <Icon icon="ant-design:plus-outlined" />
         {{ t('common.add') }}
       </a-button>

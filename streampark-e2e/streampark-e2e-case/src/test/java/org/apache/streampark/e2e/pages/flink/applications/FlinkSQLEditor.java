@@ -32,6 +32,7 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -55,7 +56,7 @@ public final class FlinkSQLEditor {
 
         Actions actions = new Actions(this.driver);
 
-        List<String> contentList = List.of(content.split(Constants.LINE_SEPARATOR));
+        List<String> contentList = Arrays.asList(content.split(Constants.LINE_SEPARATOR));
 
         for (int i = 0; i < contentList.size(); i++) {
             String editorLineText;
@@ -82,12 +83,10 @@ public final class FlinkSQLEditor {
                         .perform();
                     Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
                 } else {
-                    for (int p = 0; p < editorLineText.strip().length(); p++) {
+                    for (int p = 0; p < editorLineText.trim().length(); p++) {
                         clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
                     }
-                    if (!editorLineText.isEmpty()) {
-                        clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
-                    }
+                    clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
                     actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
                         .click()
                         .sendKeys(inputContent)

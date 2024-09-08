@@ -35,10 +35,10 @@ import java.util.List;
 @Getter
 public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Member List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-member-create-btn")
     private WebElement buttonCreateMember;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> memberList;
 
     @FindBy(className = "swal2-html-container")
@@ -47,7 +47,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
     private WebElement errorMessageConfirmButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-member-delete-confirm")
     private WebElement deleteConfirmButton;
 
     private final CreateMemberForm createMemberForm = new CreateMemberForm();
@@ -96,7 +96,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         memberList().stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Modify Member')]"))
+                it -> it.findElements(By.className("e2e-member-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -124,7 +124,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         memberList().stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Member')]"))
+                it -> it.findElements(By.className("e2e-member-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()

@@ -31,19 +31,19 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Getter
 public final class SystemPage extends NavBarPage implements NavBarItem {
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'User Management')]//..")
+    @FindBy(className = "menu-item-system_user")
     private WebElement menuUserManagement;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Token Management')]//..")
+    @FindBy(className = "menu-item-system_token")
     private WebElement menuTokenManagement;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Role Management')]//..")
+    @FindBy(className = "menu-item-system_role")
     private WebElement menuRoleManagement;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Team Management')]//..")
+    @FindBy(className = "menu-item-system_team")
     private WebElement menuTeamManagement;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Member Management')]//..")
+    @FindBy(className = "menu-item-system_member")
     private WebElement menuMemberManagement;
 
     public SystemPage(RemoteWebDriver driver) {

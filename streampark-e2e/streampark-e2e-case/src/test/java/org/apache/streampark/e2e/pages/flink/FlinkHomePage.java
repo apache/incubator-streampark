@@ -35,7 +35,7 @@ import java.util.List;
 @Getter
 public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Flink Home')]/..//button[contains(@class, 'ant-btn')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-env-add-btn")
     private WebElement buttonCreateFlinkHome;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-spin-container')]")

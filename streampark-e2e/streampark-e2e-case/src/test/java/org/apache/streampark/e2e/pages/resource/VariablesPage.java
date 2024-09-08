@@ -34,10 +34,10 @@ import java.util.List;
 @Getter
 public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Variable List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-variable-create-btn")
     private WebElement buttonCreateVariable;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> variableList;
 
     @FindBy(className = "swal2-html-container")
@@ -46,7 +46,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
     private WebElement errorMessageConfirmButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-variable-delete-confirm")
     private WebElement deleteConfirmButton;
 
     private final CreateVariableForm createVariableForm = new CreateVariableForm();
@@ -81,7 +81,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
-                    By.xpath("//button[contains(@tooltip,'Modify Variable')]"))
+                    By.className("e2e-variable-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -109,7 +109,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
-                    By.xpath("//button[contains(@tooltip,'Delete Variable')]"))
+                    By.className("e2e-variable-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
