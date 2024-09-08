@@ -50,7 +50,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
     private WebElement errorMessageConfirmButton;
 
-    @FindBy(id = "e2e-upload-delete-confirm")
+    @FindBy(className = "e2e-upload-delete-confirm")
     private WebElement deleteConfirmButton;
 
     public UploadsPage(RemoteWebDriver driver) {
