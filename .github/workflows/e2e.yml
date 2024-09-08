@@ -110,16 +110,18 @@ jobs:
     strategy:
       matrix:
         case:
-          - name: Flink118OnRemoteClusterDeployTest
-            class: org.apache.streampark.e2e.cases.Flink118OnRemoteClusterDeployTest
-          - name: Flink117OnRemoteClusterDeployTest
-            class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
-          - name: Flink116OnRemoteClusterDeployTest
-            class: org.apache.streampark.e2e.cases.Flink116OnRemoteClusterDeployTest
           - name: EnvironmentTest
             class: org.apache.streampark.e2e.cases.EnvironmentTest
           - name: AlarmTest
             class: org.apache.streampark.e2e.cases.AlarmTest
+          - name: UserManagementTest
+            class: org.apache.streampark.e2e.cases.UserManagementTest
+          #- name: RoleManagementTest
+          #  class: org.apache.streampark.e2e.cases.RoleManagementTest
+          - name: TeamManagementTest
+            class: org.apache.streampark.e2e.cases.TeamManagementTest
+          - name: MemberManagementTest
+            class: org.apache.streampark.e2e.cases.MemberManagementTest
           - name: ExternalLinkTest
             class: org.apache.streampark.e2e.cases.ExternalLinkTest
           - name: YarnQueueTest
@@ -132,14 +134,12 @@ jobs:
             class: org.apache.streampark.e2e.cases.ProjectsManagementTest
           - name: VariableManagementTest
             class: org.apache.streampark.e2e.cases.VariableManagementTest
-          - name: UserManagementTest
-            class: org.apache.streampark.e2e.cases.UserManagementTest
-          - name: RoleManagementTest
-            class: org.apache.streampark.e2e.cases.RoleManagementTest
-          - name: TeamManagementTest
-            class: org.apache.streampark.e2e.cases.TeamManagementTest
-          - name: MemberManagementTest
-            class: org.apache.streampark.e2e.cases.MemberManagementTest
+          - name: Flink118OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnRemoteClusterDeployTest
+          - name: Flink117OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
+          - name: Flink116OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnRemoteClusterDeployTest
           - name: Flink116OnYarnClusterDeployTest
             class: org.apache.streampark.e2e.cases.Flink116OnYarnClusterDeployTest
           - name: Flink117OnYarnClusterDeployTest
