@@ -77,7 +77,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-role-edit-btn')]"))
+                it -> it.findElements(By.className("e2e-role-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -97,7 +97,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-role-delete-btn')]"))
+                it -> it.findElements(By.className("e2e-role-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
