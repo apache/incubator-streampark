@@ -46,7 +46,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
 
-    @FindBy(id = "e2e-role-delete-confirm")
+    @FindBy(xpath = "//button[contains(@class,'e2e-role-delete-confirm')]")
     private WebElement deleteConfirmButton;
 
     private final CreateRoleForm createRoleForm = new CreateRoleForm();
