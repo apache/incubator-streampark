@@ -18,7 +18,12 @@
   <PageWrapper>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'token:add'">
+        <a-button
+          id="e2e-token-create-btn"
+          type="primary"
+          @click="handleCreate"
+          v-auth="'token:add'"
+        >
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -28,17 +33,22 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-token-copy-btn',
                 icon: 'ant-design:copy-outlined',
                 tooltip: t('system.token.copyToken'),
                 auth: 'token:view',
                 onClick: handleCopy.bind(null, record),
               },
               {
+                class: 'e2e-token-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'token:delete',
                 tooltip: t('system.token.deleteToken'),
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-token-delete-confirm',
+                  },
                   title: t('system.token.operation.deleteTokenConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },

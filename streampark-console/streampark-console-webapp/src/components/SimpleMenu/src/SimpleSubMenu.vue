@@ -9,7 +9,7 @@
       {{ getI18nName }}
     </div>
     <template #title>
-      <span :class="[`${prefixCls}-sub-title`]">
+      <span :class="[`${prefixCls}-sub-title`, getMenuItemName]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="getIsCollapseParent" />
@@ -32,7 +32,7 @@
       <div v-if="collapsedShowTitle && getIsCollapseParent" class="mt-2 collapse-title">
         {{ getI18nName }}
       </div>
-      <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`]">
+      <span v-show="getShowSubTitle" :class="['ml-2', `${prefixCls}-sub-title`, getMenuItemName]">
         {{ getI18nName }}
       </span>
       <SimpleMenuTag :item="item" :collapseParent="!!collapse && !!parent" />
@@ -82,6 +82,9 @@
         props.item?.icon ? `ant-design:${props.item?.icon}-outlined` : '',
       );
       const getI18nName = computed(() => t(props.item?.name));
+      const getMenuItemName = computed(() => {
+       return 'menu-item-' + props.item?.path.substring(1).replaceAll('/','_')
+      });
       const getShowSubTitle = computed(() => !props.collapse || !props.parent);
       const getIsCollapseParent = computed(() => !!props.collapse && !!props.parent);
       const getLevelClass = computed(() => {
@@ -110,6 +113,7 @@
         getI18nName,
         getShowSubTitle,
         getLevelClass,
+        getMenuItemName,
         getIsCollapseParent,
       };
     },

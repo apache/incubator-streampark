@@ -31,13 +31,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Getter
 public final class ResourcePage extends NavBarPage implements NavBarItem {
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Variables')]//..")
+    @FindBy(className = "menu-item-resource_variable")
     private WebElement menuVariables;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Projects')]//..")
+    @FindBy(className = "menu-item-resource_project")
     private WebElement menuProjects;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Uploads')]//..")
+    @FindBy(className = "menu-item-resource_upload")
     private WebElement menuUploads;
 
     public ResourcePage(RemoteWebDriver driver) {

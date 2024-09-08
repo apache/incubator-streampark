@@ -35,13 +35,13 @@ import java.util.List;
 @Getter
 public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Token List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-token-create-btn")
     private WebElement buttonCreateToken;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> tokenList;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-token-delete-confirm")
     private WebElement deleteConfirmButton;
 
     @FindBy(className = "ant-form-item-explain-error")
@@ -76,7 +76,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         tokenList().stream()
             .filter(it -> it.getText().contains(existUserName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Copy Token')]")).stream())
+                it -> it.findElements(By.className("e2e-token-copy-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No Copy button in token list"))
@@ -91,7 +91,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         tokenList().stream()
             .filter(it -> it.getText().contains(existUserName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Token')]")).stream())
+                it -> it.findElements(By.className("e2e-token-delete-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No delete button in token list"))

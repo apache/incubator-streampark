@@ -18,7 +18,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'role:add'">
+        <a-button
+          id="e2e-role-create-btn"
+          type="primary"
+          @click="handleCreate"
+          v-auth="'role:add'"
+        >
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -28,6 +33,7 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-role-edit-btn',
                 icon: 'clarity:note-edit-line',
                 tooltip: t('system.role.form.edit'),
                 auth: 'role:update',
@@ -40,12 +46,16 @@
                 onClick: handleView.bind(null, record),
               },
               {
+                class: 'e2e-role-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 auth: 'role:delete',
                 tooltip: t('system.role.form.delete'),
                 ifShow: record.roleName !== 'admin',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-role-delete-confirm',
+                  },
                   title: t('system.role.deleteTip'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),

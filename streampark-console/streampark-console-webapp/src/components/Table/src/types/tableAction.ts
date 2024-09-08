@@ -4,6 +4,8 @@ import { RoleEnum } from '/@/enums/roleEnum';
 export interface ActionItem extends ButtonProps {
   onClick?: Fn;
   label?: string;
+  id?: string;
+  class?: string;
   color?: 'success' | 'error' | 'warning';
   icon?: string;
   popConfirm?: PopConfirm;
@@ -14,9 +16,13 @@ export interface ActionItem extends ButtonProps {
   // Whether business controls are displayed
   ifShow?: boolean | ((action: ActionItem) => boolean);
   tooltip?: string | TooltipProps;
+  okButtonProps?: ButtonProps & { class: string };
+  cancelButtonProps?: ButtonProps & { class: string };
 }
 
 export interface PopConfirm {
+  id?: string;
+  class?: string;
   title: string;
   okText?: string;
   cancelText?: string;
