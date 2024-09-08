@@ -37,7 +37,7 @@ import java.util.Objects;
 @Getter
 public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Role List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(xpath = "//button[contains(@class,'e2e-role-create-btn')]")
     private WebElement buttonCreateRole;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
@@ -77,7 +77,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Edit Role')]"))
+                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-role-edit-btn')]"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -97,7 +97,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Role')]"))
+                it -> it.findElements(By.xpath("//button[contains(@class,'e2e-role-delete-btn')]"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
