@@ -43,7 +43,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(className = "swal2-html-container")
     private List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(text(), 'OK')]")
+    @FindBy(xpath = "//button[contains(@class, 'swal2-confirm')]")
     private WebElement errorMessageConfirmButton;
 
     @FindBy(className = "e2e-variable-delete-confirm")
@@ -147,10 +147,10 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "VariableForm_desensitization")
         private WebElement buttonDesensitization;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+        @FindBy(className = "e2e_var_pop_ok")
         private WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(className = "e2e_var_pop_cancel")
         private WebElement buttonCancel;
     }
 }

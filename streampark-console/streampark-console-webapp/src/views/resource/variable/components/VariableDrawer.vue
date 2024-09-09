@@ -16,6 +16,8 @@
 -->
 <template>
   <BasicDrawer
+    :okButtonProps="{ 'class': 'e2e_var_pop_ok' }"
+    :cancelButtonProps="{ 'class': 'e2e_var_pop_cancel'}"
     :okText="t('common.submitText')"
     @register="registerDrawer"
     showFooter

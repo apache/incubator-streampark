@@ -23,7 +23,10 @@
     width="40%"
     @ok="handleSubmit"
   >
-    <BasicForm @register="registerForm" :schemas="formSchemas">
+    <BasicForm
+      :okButtonProps="{ 'class': 'e2e_role_pop_ok' }"
+      :cancelButtonProps="{ 'class': 'e2e_role_pop_cancel'}"
+      @register="registerForm" :schemas="formSchemas">
       <template #menu="{ model, field }">
         <BasicTree
           :default-expand-level="1"
