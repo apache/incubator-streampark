@@ -46,7 +46,7 @@
     optionStateMap,
     releaseStateMap,
     stateMap,
-  } from '/@/views/flink/app/components/State';
+  } from './components/State';
   import { useSparkColumns } from './hooks/useSparkColumns';
   import AppTableResize from '/@/views/flink/app/components/AppResize.vue';
   import { fetchSparkAppRecord } from '/@/api/spark/app';
