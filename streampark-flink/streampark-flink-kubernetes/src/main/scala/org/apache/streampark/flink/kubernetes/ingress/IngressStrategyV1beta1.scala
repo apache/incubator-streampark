@@ -47,7 +47,7 @@ class IngressStrategyV1beta1 extends IngressStrategy {
             Option(ingress)
               .map(ingress => ingress.getSpec.getRules.head)
               .map(rule => rule.getHost -> rule.getHttp.getPaths.head.getPath)
-              .map { case (host, path) => s"http://$host$path" }
+              .map { case (host, path) => s"http://$host${path.replaceAll("/$", "")}" }
               .getOrElse {
                 Utils.using(clusterClient)(client => client.getWebInterfaceURL)
               }
