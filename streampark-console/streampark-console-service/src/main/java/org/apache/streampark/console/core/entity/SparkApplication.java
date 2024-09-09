@@ -204,6 +204,7 @@ public class SparkApplication extends BaseEntity {
     private transient String teamResource;
     private transient String dependency;
     private transient Long sqlId;
+    private transient String nickName;
     private transient String sparkSql;
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
