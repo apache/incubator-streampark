@@ -18,17 +18,17 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkTask;
-import org.apache.streampark.console.core.enums.FlinkTaskEnum;
+import org.apache.streampark.console.core.entity.HATask;
+import org.apache.streampark.console.core.enums.HATaskEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
 /**
- * FlinkTaskService is the interface for managing tasks.
+ * HATaskService is the interface for managing tasks.
  */
-public interface FlinkTaskService extends IService<FlinkTask> {
+public interface HATaskService extends IService<HATask> {
 
     /**
      * Add the current console server itself to the consistent hash ring.
@@ -38,9 +38,9 @@ public interface FlinkTaskService extends IService<FlinkTask> {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param flinkTask FlinkTask
+     * @param HATask HATask
      */
-    void executeFlinkTask(FlinkTask flinkTask) throws Exception;
+    void executeHATask(HATask HATask) throws Exception;
 
     /**
      * Through this interface, the watcher obtains the list of tasks that need to be monitored.
@@ -62,7 +62,7 @@ public interface FlinkTaskService extends IService<FlinkTask> {
     void removeServerRedistribute(String server);
 
     /**
-     * Determine whether the task is processed locally
+     * Determine whether the task is processed locally.
      *
      * @param appId Long
      * @return boolean
@@ -70,11 +70,11 @@ public interface FlinkTaskService extends IService<FlinkTask> {
     public boolean isLocalProcessing(Long appId);
 
     /**
-     * Save flink task
+     * Save HA task.
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
-    public void saveFlinkTask(Application appParam, boolean autoStart, FlinkTaskEnum action);
+    public void saveHATask(Application appParam, boolean autoStart, HATaskEnum action);
 }

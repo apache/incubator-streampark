@@ -15,45 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.entity;
 
-/**
- * The FlinkTaskEnum represents the possible actions that can be performed on a task.
- */
-public enum FlinkTaskEnum {
+import lombok.Data;
 
-    /**
-     * Starts the specified application.
-     */
-    START(0),
+import java.io.Serializable;
 
-    /**
-     * Restarts the given application.
-     */
-    RESTART(1),
+@Data
+public class FlinkHATask implements Serializable {
 
-    /**
-     * Revokes access for the given application.
-     */
-    REVOKE(2),
+    /** appId */
+    private Long appId;
 
-    /**
-     * Cancels the given application. Throws an exception if cancellation fails.
-     */
-    CANCEL(3),
+    private Boolean autoStart;
 
-    /**
-     * Forces the given application to stop.
-     */
-    ABORT(4);
+    private String args;
 
-    private final int value;
+    private String dynamicProperties;
 
-    FlinkTaskEnum(int value) {
-        this.value = value;
-    }
+    /** running job */
+    private String savepointPath;
 
-    public int get() {
-        return this.value;
-    }
+    private Boolean restoreOrTriggerSavepoint = false;
+
+    private Boolean drain = false;
+
+    private Boolean nativeFormat = false;
+
+    private Integer restoreMode;
 }

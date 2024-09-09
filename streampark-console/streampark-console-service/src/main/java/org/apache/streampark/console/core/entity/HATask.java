@@ -17,11 +17,10 @@
 
 package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.enums.FlinkTaskEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
+import org.apache.streampark.console.core.enums.HATaskEnum;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -30,34 +29,17 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 
 @Data
-@TableName("t_flink_task")
+@TableName("t_ha_task")
 @Slf4j
-public class FlinkTask implements Serializable {
+public class HATask implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private FlinkTaskEnum action;
+    private HATaskEnum action;
 
-    /** appId */
-    private Long appId;
+    private EngineTypeEnum engineType;
 
-    private Boolean autoStart;
-
-    private String args;
-
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String dynamicProperties;
-
-    /** running job */
-    private transient String savepointPath;
-
-    private transient Boolean restoreOrTriggerSavepoint = false;
-
-    private transient Boolean drain = false;
-
-    private transient Boolean nativeFormat = false;
-
-    private transient Integer restoreMode;
+    private String properties;
 
 }

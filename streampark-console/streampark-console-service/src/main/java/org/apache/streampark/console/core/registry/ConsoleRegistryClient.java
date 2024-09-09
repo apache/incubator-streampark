@@ -21,7 +21,7 @@ import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.streampark.console.core.config.ConsoleConfig;
-import org.apache.streampark.console.core.service.FlinkTaskService;
+import org.apache.streampark.console.core.service.HATaskService;
 import org.apache.streampark.console.core.task.ConsoleHeartBeatTask;
 import org.apache.streampark.registry.api.RegistryClient;
 import org.apache.streampark.registry.api.RegistryException;
@@ -56,7 +56,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
     private ConsoleConnectStrategy consoleConnectStrategy;
 
     @Autowired
-    private FlinkTaskService flinkTaskService;
+    private HATaskService HATaskService;
 
     private ConsoleHeartBeatTask consoleHeartBeatTask;
 
@@ -142,7 +142,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
         ThreadUtils.sleep(SLEEP_TIME_MILLIS);
 
         consoleHeartBeatTask.start();
-        flinkTaskService.init(consoleConfig.getConsoleAddress());
+        HATaskService.init(consoleConfig.getConsoleAddress());
         log.info("Console node : {} registered to registry center successfully", consoleConfig.getConsoleAddress());
 
     }

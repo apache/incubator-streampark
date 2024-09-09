@@ -241,21 +241,14 @@ create table `t_flink_sql` (
 
 
 -- ----------------------------
--- Table structure for t_flink_task
+-- Table structure for t_ha_task
 -- ----------------------------
-drop table if exists `t_flink_task`;
-create table `t_flink_task` (
+drop table if exists `t_ha_task`;
+create table `t_ha_task` (
   `id` bigint not null auto_increment,
   `action` tinyint not null,
-  `app_id` bigint not null,
-  `auto_start` tinyint default null,
-  `args` text collate utf8mb4_general_ci,
-  `dynamic_properties` text collate utf8mb4_general_ci,
-  `savepoint_path` varchar(255) collate utf8mb4_general_ci default null,
-  `restore_or_trigger_savepoint` tinyint default null,
-  `drain` tinyint default null,
-  `native_format` tinyint default null,
-  `restore_mode` bigint default null,
+  `engine_type` tinyint not null,
+  `properties` text collate utf8mb4_general_ci,
   primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 

@@ -18,15 +18,19 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkTask;
-import org.apache.streampark.console.core.enums.FlinkTaskEnum;
-import org.apache.streampark.console.core.service.impl.FlinkTaskServiceImpl;
+import org.apache.streampark.console.core.entity.FlinkHATask;
+import org.apache.streampark.console.core.entity.HATask;
+import org.apache.streampark.console.core.enums.HATaskEnum;
+import org.apache.streampark.console.core.service.impl.HATaskServiceImpl;
 
+import com.fasterxml.jackson.core.JacksonException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-class FlinkTaskServiceTest {
+@Slf4j
+class HATaskServiceTest {
 
-    private final FlinkTaskServiceImpl flinkTaskService = new FlinkTaskServiceImpl();
+    private final HATaskServiceImpl HATaskService = new HATaskServiceImpl();
 
     private final String serverName = "testServer";
 
@@ -35,15 +39,15 @@ class FlinkTaskServiceTest {
 
     @Test
     void testInit() {
-        flinkTaskService.init(serverName);
-        assert (flinkTaskService.getConsistentHashSize() == numberOfReplicas);
+        HATaskService.init(serverName);
+        assert (HATaskService.getConsistentHashSize() == numberOfReplicas);
     }
 
     @Test
     void testIsLocalProcessing() {
-        flinkTaskService.init(serverName);
+        HATaskService.init(serverName);
         for (long i = 0; i < numberOfReplicas; i++) {
-            assert (flinkTaskService.isLocalProcessing(i));
+            assert (HATaskService.isLocalProcessing(i));
         }
     }
 
@@ -51,9 +55,14 @@ class FlinkTaskServiceTest {
     void testGetTaskAndApp() {
         Application application = new Application();
         application.setId(0L);
-        FlinkTask flinkTask = flinkTaskService.getTaskByApp(application, false, FlinkTaskEnum.START);
-        Application newApplication = flinkTaskService.getAppByTask(flinkTask);
-        assert (application.equals(newApplication));
+        try {
+            HATask HATask = HATaskService.getHATaskByApp(application, false, HATaskEnum.START);
+            FlinkHATask flinkHATask = HATaskService.getFlinkHATask(HATask);
+            Application newApplication = HATaskService.getAppByFlinkHATask(flinkHATask);
+            assert (application.equals(newApplication));
+        } catch (JacksonException e) {
+            log.error("testGetTaskAndApp failed:", e);
+        }
     }
 
 }

@@ -18,14 +18,18 @@
 package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.base.util.ConsistentHash;
+import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkTask;
-import org.apache.streampark.console.core.enums.FlinkTaskEnum;
-import org.apache.streampark.console.core.mapper.FlinkTaskMapper;
-import org.apache.streampark.console.core.service.FlinkTaskService;
+import org.apache.streampark.console.core.entity.FlinkHATask;
+import org.apache.streampark.console.core.entity.HATask;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
+import org.apache.streampark.console.core.enums.HATaskEnum;
+import org.apache.streampark.console.core.mapper.HATaskMapper;
+import org.apache.streampark.console.core.service.HATaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +47,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask> implements FlinkTaskService {
+public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> implements HATaskService {
 
     /**
      * Server name
@@ -55,9 +59,9 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
      */
     private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
 
-    @Qualifier("streamparkFlinkTaskExecutor")
+    @Qualifier("streamparkHATaskExecutor")
     @Autowired
-    private Executor flinkTaskExecutor;
+    private Executor taskExecutor;
 
     @Autowired
     private ApplicationActionService applicationActionService;
@@ -76,23 +80,23 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
     }
 
     @Scheduled(fixedDelay = 50)
-    public void pollFinkTask() {
-        List<FlinkTask> flinkTaskList = this.list();
-        for (FlinkTask flinkTask : flinkTaskList) {
-            long taskId = flinkTask.getId();
-            if (!isLocalProcessing(taskId)) {
+    public void pollHATask() {
+        List<HATask> HATaskList = this.list();
+        for (HATask HATask : HATaskList) {
+            long taskId = HATask.getId();
+            if (HATask.getEngineType() != EngineTypeEnum.FLINK || !isLocalProcessing(taskId)) {
                 continue;
             }
             if (runningTasks.putIfAbsent(taskId, true) == null) {
-                flinkTaskExecutor.execute(() -> {
+                taskExecutor.execute(() -> {
                     try {
-                        // Execute flink task
-                        executeFlinkTask(flinkTask);
+                        // Execute HA task
+                        executeHATask(HATask);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     } finally {
-                        runningTasks.remove(flinkTask.getId());
-                        this.removeById(flinkTask.getId());
+                        runningTasks.remove(HATask.getId());
+                        this.removeById(HATask.getId());
                     }
                 });
             }
@@ -101,16 +105,17 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param flinkTask FlinkTask
+     * @param HATask HATask
      */
     @Override
-    public void executeFlinkTask(FlinkTask flinkTask) throws Exception {
-        // Execute flink task
-        log.info("Execute flink task: {}", flinkTask);
-        Application appParam = getAppByTask(flinkTask);
-        switch (flinkTask.getAction()) {
+    public void executeHATask(HATask HATask) throws Exception {
+        // Execute HA task
+        log.info("Execute HA task: {}", HATask);
+        FlinkHATask flinkHATask = getFlinkHATask(HATask);
+        Application appParam = getAppByFlinkHATask(flinkHATask);
+        switch (HATask.getAction()) {
             case START:
-                applicationActionService.start(appParam, flinkTask.getAutoStart());
+                applicationActionService.start(appParam, flinkHATask.getAutoStart());
                 break;
             case RESTART:
                 applicationActionService.restart(appParam);
@@ -125,7 +130,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
                 applicationActionService.abort(appParam.getId());
                 break;
             default:
-                log.error("Unsupported task: {}", flinkTask.getAction());
+                log.error("Unsupported task: {}", HATask.getAction());
         }
     }
 
@@ -162,7 +167,7 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
     }
 
     /**
-     * Determine whether the task is processed locally
+     * Determine whether the task is processed locally.
      *
      * @param appId Long
      * @return boolean
@@ -173,43 +178,56 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
     }
 
     /**
-     * Save flink task
+     * Save HA task.
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveFlinkTask(Application appParam, boolean autoStart, FlinkTaskEnum action) {
-        FlinkTask flinkTask = getTaskByApp(appParam, autoStart, action);
-        this.save(flinkTask);
+    public void saveHATask(Application appParam, boolean autoStart, HATaskEnum action) {
+        try {
+            HATask HATask = getHATaskByApp(appParam, autoStart, action);
+            this.save(HATask);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to save HA task: {}", e.getMessage());
+        }
     }
 
-    public FlinkTask getTaskByApp(Application appParam, boolean autoStart, FlinkTaskEnum action) {
-        FlinkTask flinkTask = new FlinkTask();
-        flinkTask.setAction(action);
-        flinkTask.setAppId(appParam.getId());
-        flinkTask.setAutoStart(autoStart);
-        flinkTask.setArgs(appParam.getArgs());
-        flinkTask.setDynamicProperties(appParam.getDynamicProperties());
-        flinkTask.setSavepointPath(appParam.getSavepointPath());
-        flinkTask.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
-        flinkTask.setDrain(appParam.getDrain());
-        flinkTask.setNativeFormat(appParam.getNativeFormat());
-        flinkTask.setRestoreMode(appParam.getRestoreMode());
-        return flinkTask;
+    public HATask getHATaskByApp(Application appParam, boolean autoStart,
+                                 HATaskEnum action) throws JsonProcessingException {
+        FlinkHATask flinkHATask = new FlinkHATask();
+        flinkHATask.setAppId(appParam.getId());
+        flinkHATask.setAutoStart(autoStart);
+        flinkHATask.setArgs(appParam.getArgs());
+        flinkHATask.setDynamicProperties(appParam.getDynamicProperties());
+        flinkHATask.setSavepointPath(appParam.getSavepointPath());
+        flinkHATask.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
+        flinkHATask.setDrain(appParam.getDrain());
+        flinkHATask.setNativeFormat(appParam.getNativeFormat());
+        flinkHATask.setRestoreMode(appParam.getRestoreMode());
+
+        HATask haTask = new HATask();
+        haTask.setAction(action);
+        haTask.setEngineType(EngineTypeEnum.FLINK);
+        haTask.setProperties(JacksonUtils.write(flinkHATask));
+        return haTask;
     }
 
-    public Application getAppByTask(FlinkTask flinkTask) {
+    public FlinkHATask getFlinkHATask(HATask HATask) throws JsonProcessingException {
+        return JacksonUtils.read(HATask.getProperties(), FlinkHATask.class);
+    }
+
+    public Application getAppByFlinkHATask(FlinkHATask flinkHATask) {
         Application appParam = new Application();
-        appParam.setId(flinkTask.getAppId());
-        appParam.setArgs(flinkTask.getArgs());
-        appParam.setDynamicProperties(flinkTask.getDynamicProperties());
-        appParam.setSavepointPath(flinkTask.getSavepointPath());
-        appParam.setRestoreOrTriggerSavepoint(flinkTask.getRestoreOrTriggerSavepoint());
-        appParam.setDrain(flinkTask.getDrain());
-        appParam.setNativeFormat(flinkTask.getNativeFormat());
-        appParam.setRestoreMode(flinkTask.getRestoreMode());
+        appParam.setId(flinkHATask.getAppId());
+        appParam.setArgs(flinkHATask.getArgs());
+        appParam.setDynamicProperties(flinkHATask.getDynamicProperties());
+        appParam.setSavepointPath(flinkHATask.getSavepointPath());
+        appParam.setRestoreOrTriggerSavepoint(flinkHATask.getRestoreOrTriggerSavepoint());
+        appParam.setDrain(flinkHATask.getDrain());
+        appParam.setNativeFormat(flinkHATask.getNativeFormat());
+        appParam.setRestoreMode(flinkHATask.getRestoreMode());
         return appParam;
     }
 

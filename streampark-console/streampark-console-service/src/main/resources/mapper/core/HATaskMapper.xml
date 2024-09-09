@@ -18,18 +18,11 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.apache.streampark.console.core.mapper.FlinkTaskMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkTask">
+<mapper namespace="org.apache.streampark.console.core.mapper.HATaskMapper">
+    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.HATask">
             <id column="id" jdbcType="BIGINT" property="id"/>
             <result column="action" jdbcType="TINYINT" property="action"/>
-            <result column="app_id" jdbcType="BIGINT" property="appId"/>
-            <result column="auto_start" jdbcType="TINYINT" property="autoStart"/>
-            <result column="args" jdbcType="VARCHAR" property="args"/>
-            <result column="dynamic_properties" jdbcType="VARCHAR" property="dynamicProperties"/>
-            <result column="savepoint_path" jdbcType="VARCHAR" property="savepointPath"/>
-            <result column="restore_or_trigger_savepoint" jdbcType="TINYINT" property="restoreOrTriggerSavepoint"/>
-            <result column="drain" jdbcType="TINYINT" property="drain"/>
-            <result column="native_format" jdbcType="TINYINT" property="nativeFormat"/>
-            <result column="restore_mode" jdbcType="BIGINT" property="restoreMode"/>
+            <result column="engine_type" jdbcType="TINYINT" property="engineType"/>
+            <result column="properties" jdbcType="VARCHAR" property="properties"/>
     </resultMap>
 </mapper>
