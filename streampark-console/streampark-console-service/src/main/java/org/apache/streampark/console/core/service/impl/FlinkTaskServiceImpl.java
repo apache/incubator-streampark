@@ -80,6 +80,9 @@ public class FlinkTaskServiceImpl extends ServiceImpl<FlinkTaskMapper, FlinkTask
         List<FlinkTask> flinkTaskList = this.list();
         for (FlinkTask flinkTask : flinkTaskList) {
             long taskId = flinkTask.getId();
+            if (!isLocalProcessing(taskId)) {
+                continue;
+            }
             if (runningTasks.putIfAbsent(taskId, true) == null) {
                 flinkTaskExecutor.execute(() -> {
                     try {
