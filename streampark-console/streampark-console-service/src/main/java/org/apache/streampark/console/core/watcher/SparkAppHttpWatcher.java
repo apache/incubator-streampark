@@ -100,6 +100,8 @@ public class SparkAppHttpWatcher {
     private static final Map<Long, SparkApplication> WATCHING_APPS = new ConcurrentHashMap<>(0);
 
     /**
+     *
+     *
      * <pre>
      * StopFrom: Recording spark application stopped by streampark or stopped by other actions
      * </pre>
@@ -149,7 +151,7 @@ public class SparkAppHttpWatcher {
      *
      * <p><strong>2) Normal information obtain, once every 5 seconds</strong>
      */
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${job.state-watcher.fixed-delayed:1000}")
     public void start() {
         Long timeMillis = System.currentTimeMillis();
         if (lastWatchTime == null
@@ -217,7 +219,8 @@ public class SparkAppHttpWatcher {
                         summary.setUsedVCores(Long.parseLong(yarnAppInfo.getApp().getAllocatedVCores()));
                         application.fillRunningMetrics(summary);
                     } catch (IOException e) {
-                        // This may happen when the job is finished right after the job status is abtained from yarn.
+                        // This may happen when the job is finished right after the job status is abtained from
+                        // yarn.
                         log.warn(
                             "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, fetch spark job status failed. The job may have already been finished.");
                     }
@@ -310,8 +313,8 @@ public class SparkAppHttpWatcher {
     }
 
     /**
-     * Calculate spark stage and task metric from yarn rest api.
-     * Only available when yarn application status is RUNNING.
+     * Calculate spark stage and task metric from yarn rest api. Only available when yarn application
+     * status is RUNNING.
      *
      * @param application
      * @return task progress
@@ -323,12 +326,15 @@ public class SparkAppHttpWatcher {
         if (jobs == null) {
             return summary;
         }
-        Arrays.stream(jobs).forEach(job -> {
-            summary.setNumTasks(job.getNumTasks() + summary.getNumTasks());
-            summary.setNumCompletedTasks(job.getNumCompletedTasks() + summary.getNumCompletedTasks());
-            summary.setNumStages(job.getStageIds().size() + summary.getNumStages());
-            summary.setNumStages(job.getNumCompletedStages() + summary.getNumCompletedStages());
-        });
+        Arrays.stream(jobs)
+            .forEach(
+                job -> {
+                    summary.setNumTasks(job.getNumTasks() + summary.getNumTasks());
+                    summary.setNumCompletedTasks(
+                        job.getNumCompletedTasks() + summary.getNumCompletedTasks());
+                    summary.setNumStages(job.getStageIds().size() + summary.getNumStages());
+                    summary.setNumStages(job.getNumCompletedStages() + summary.getNumCompletedStages());
+                });
         return summary;
     }
 
