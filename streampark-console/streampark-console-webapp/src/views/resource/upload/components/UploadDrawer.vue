@@ -132,7 +132,6 @@
         component: 'Input',
         componentProps: { placeholder: t('flink.app.addAppTips.mainClassPlaceholder') },
         ifShow: ({ values }) => values?.resourceType === ResourceTypeEnum.APP,
-        rules: [{ required: true, message: t('flink.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
         field: 'description',
