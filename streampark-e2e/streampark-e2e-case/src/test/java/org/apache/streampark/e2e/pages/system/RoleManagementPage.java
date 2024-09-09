@@ -139,10 +139,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "form_item_roleName")
+        @FindBy(id = "role_form_roleName")
         private WebElement inputRoleName;
 
-        @FindBy(id = "form_item_description")
+        @FindBy(id = "role_form_description")
         private WebElement inputDescription;
 
         @FindBys({

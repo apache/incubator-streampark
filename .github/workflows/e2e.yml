@@ -116,8 +116,8 @@ jobs:
             class: org.apache.streampark.e2e.cases.AlarmTest
           - name: UserManagementTest
             class: org.apache.streampark.e2e.cases.UserManagementTest
-          #- name: RoleManagementTest
-          #  class: org.apache.streampark.e2e.cases.RoleManagementTest
+          - name: RoleManagementTest
+            class: org.apache.streampark.e2e.cases.RoleManagementTest
           - name: TeamManagementTest
             class: org.apache.streampark.e2e.cases.TeamManagementTest
           - name: MemberManagementTest
