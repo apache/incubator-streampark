@@ -26,10 +26,10 @@ export const useSparkColumns = () => {
   // app table column width
   const tableColumnWidth = ref({
     appName: 250,
-    sparkVersion: 110,
+    sparkVersion: 150,
     tags: 150,
-    state: 120,
-    release: 190,
+    state: 130,
+    release: 120,
     duration: 150,
     modifyTime: 165,
     nickName: 100,
@@ -55,7 +55,7 @@ export const useSparkColumns = () => {
     },
     {
       title: t('spark.app.sparkVersion'),
-      dataIndex: 'sparkVersion',
+      dataIndex: 'sparkVersion  ',
       width: unref(tableColumnWidth).sparkVersion,
     },
     {
@@ -63,6 +63,27 @@ export const useSparkColumns = () => {
       ellipsis: true,
       dataIndex: 'tags',
       width: unref(tableColumnWidth).tags,
+    },
+
+    {
+      title: t('spark.app.duration'),
+      dataIndex: 'duration',
+      sorter: true,
+      width: unref(tableColumnWidth).duration,
+      customRender: ({ value }) => dateToDuration(value),
+    },
+    {
+      title: t('spark.app.modifiedTime'),
+      dataIndex: 'modifyTime',
+      sorter: true,
+      width: unref(tableColumnWidth).modifyTime,
+    },
+    { title: t('spark.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
+    {
+      title: t('spark.app.releaseBuild'),
+      dataIndex: 'release',
+      width: unref(tableColumnWidth).release,
+      fixed: 'right',
     },
     {
       title: t('spark.app.runStatus'),
@@ -85,26 +106,6 @@ export const useSparkColumns = () => {
         },
       ],
     },
-    {
-      title: t('spark.app.releaseBuild'),
-      dataIndex: 'release',
-      width: unref(tableColumnWidth).release,
-      fixed: 'right',
-    },
-    {
-      title: t('spark.app.duration'),
-      dataIndex: 'duration',
-      sorter: true,
-      width: unref(tableColumnWidth).duration,
-      customRender: ({ value }) => dateToDuration(value),
-    },
-    {
-      title: t('spark.app.modifiedTime'),
-      dataIndex: 'modifyTime',
-      sorter: true,
-      width: unref(tableColumnWidth).modifyTime,
-    },
-    { title: t('spark.app.owner'), dataIndex: 'nickName', width: unref(tableColumnWidth).nickName },
   ]);
   return { getAppColumns, onTableColumnResize, tableColumnWidth };
 };

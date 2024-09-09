@@ -357,5 +357,5 @@ export const useAppTableAction = (
   onMounted(() => {
     handleInitTagsOptions();
   });
-  return { getTableActions, formConfig };
+  return { getTableActions, formConfig, tagsOptions, users };
 };

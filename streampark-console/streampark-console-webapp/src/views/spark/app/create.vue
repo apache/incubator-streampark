@@ -35,7 +35,9 @@
     name: 'SparkApplicationAction',
   });
   const go = useGo();
-  const sparkSql = ref();
+  const appFormRef = ref<{
+    sparkSql: any;
+  } | null>(null);
   const submitLoading = ref(false);
 
   const { t } = useI18n();
@@ -63,7 +65,7 @@
       sparkSql: null,
       jar: values.teamResource,
       mainClass: values.mainClass,
-      appName: values.jobName,
+      appName: values.appName,
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
@@ -91,7 +93,7 @@
       sparkSql: values.sparkSql,
       jar: null,
       mainClass: null,
-      appName: values.jobName,
+      appName: values.appName,
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
@@ -108,7 +110,7 @@
       if (formValue.sparkSql == null || formValue.sparkSql.trim() === '') {
         createMessage.warning(t('spark.app.addAppTips.sparkSqlIsRequiredMessage'));
       } else {
-        const access = await sparkSql?.value?.handleVerifySql();
+        const access = await appFormRef?.value?.sparkSql?.handleVerifySql();
         if (!access) {
           createMessage.warning(t('spark.app.addAppTips.sqlCheck'));
           throw new Error(access);
@@ -145,6 +147,11 @@
 
 <template>
   <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller">
-    <AppForm :initFormFn="handleAppFieldValue" :submit="handleAppSubmit" :spark-envs="sparkEnvs" />
+    <AppForm
+      ref="appFormRef"
+      :initFormFn="handleAppFieldValue"
+      :submit="handleAppSubmit"
+      :spark-envs="sparkEnvs"
+    />
   </PageWrapper>
 </template>

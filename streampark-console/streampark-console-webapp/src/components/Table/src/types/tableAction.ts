@@ -16,8 +16,6 @@ export interface ActionItem extends ButtonProps {
   // Whether business controls are displayed
   ifShow?: boolean | ((action: ActionItem) => boolean);
   tooltip?: string | TooltipProps;
-  okButtonProps?: ButtonProps & { class: string };
-  cancelButtonProps?: ButtonProps & { class: string };
 }
 
 export interface PopConfirm {
@@ -42,4 +40,6 @@ export interface PopConfirm {
     | 'rightBottom'
     | 'bottomLeft'
     | 'bottomRight';
+  okButtonProps?: ButtonProps & { class: string };
+  cancelButtonProps?: ButtonProps & { class: string };
 }
