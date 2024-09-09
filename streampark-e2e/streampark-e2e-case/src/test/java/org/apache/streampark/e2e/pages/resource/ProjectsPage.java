@@ -61,6 +61,10 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                       String projectBuildArgument,
                                       String projectDescription) {
         waitForPageLoading();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateProject));
+
         buttonCreateProject.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/add"));
