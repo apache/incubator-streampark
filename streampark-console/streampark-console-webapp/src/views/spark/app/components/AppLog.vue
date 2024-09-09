@@ -104,7 +104,7 @@
   >
     <template #title>
       <Icon icon="ant-design:code-outlined" style="color: #477de9" />&nbsp;
-      <span> {{ t('spark.app.view.logTitle', [app.jobName]) }}</span>
+      <span> {{ t('spark.app.view.logTitle', [app.appName]) }}</span>
     </template>
     <div ref="logRef" class="h-full min-h-500px"></div>
     <template #footer>

@@ -64,21 +64,21 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
       {
         label: h('div', {}, [
           h(SvgIcon, { name: 'code', color: '#108ee9' }, ''),
-          h('span', { class: 'pl-10px' }, 'Custom Code'),
+          h('span', { class: 'pl-10px' }, 'Spark Jar'),
         ]),
         value: String(JobTypeEnum.JAR),
       },
       {
         label: h('div', {}, [
           h(SvgIcon, { name: 'fql', color: '#108ee9' }, ''),
-          h('span', { class: 'pl-10px' }, 'Flink SQL'),
+          h('span', { class: 'pl-10px' }, 'Spark SQL'),
         ]),
         value: String(JobTypeEnum.SQL),
       },
       {
         label: h('div', {}, [
           h(SvgIcon, { name: 'py', color: '#108ee9' }, ''),
-          h('span', { class: 'pl-10px' }, 'Python Flink'),
+          h('span', { class: 'pl-10px' }, 'PySpark'),
         ]),
         value: String(JobTypeEnum.PYSPARK),
       },
@@ -150,7 +150,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         component: 'Input',
         slot: 'sparkSql',
         ifShow: ({ values }) => values?.jobType == JobTypeEnum.SQL,
-        rules: [{ required: true, message: t('spark.app.addAppTips.flinkSqlIsRequiredMessage') }],
+        rules: [{ required: true, message: t('spark.app.addAppTips.sparkSqlIsRequiredMessage') }],
       },
       {
         field: 'teamResource',
@@ -168,7 +168,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         rules: [{ required: true, message: t('spark.app.addAppTips.mainClassIsRequiredMessage') }],
       },
       {
-        field: 'jobName',
+        field: 'appName',
         label: t('spark.app.appName'),
         component: 'Input',
         componentProps: { placeholder: t('spark.app.addAppTips.appNamePlaceholder') },

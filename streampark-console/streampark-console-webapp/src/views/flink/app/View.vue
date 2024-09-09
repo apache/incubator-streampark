@@ -14,13 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default defineComponent({
-    name: 'AppView',
-  });
-</script>
 <script lang="ts" setup name="AppView">
-  import { defineComponent, nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
+  import { nextTick, ref, unref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { AppStateEnum, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
@@ -62,6 +57,7 @@
 
   const yarn = ref<Nullable<string>>(null);
   const currentTablePage = ref(1);
+  const noData = ref<boolean>();
   const { onTableColumnResize, tableColumnWidth, getAppColumns } = useAppTableColumns();
   const { openSavepoint } = useSavepoint(handleOptionApp);
   const [registerStartModal, { openModal: openStartModal }] = useModal();
@@ -90,6 +86,7 @@
     },
     afterFetch: (dataSource) => {
       const timestamp = new Date().getTime();
+      noData.value = dataSource.length == 0;
       dataSource.forEach((x) => {
         x.expanded = [
           {
@@ -338,6 +335,7 @@
       </template>
       <template #insertTable="{ tableContainer }">
         <AppTableResize
+          v-if="!noData"
           :table-container="tableContainer"
           :resize-min="100"
           v-model:left="tableColumnWidth.jobName"

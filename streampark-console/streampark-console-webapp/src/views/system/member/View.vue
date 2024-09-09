@@ -19,7 +19,7 @@
   <div>
     <BasicTable @register="registerTable" :formConfig="formConfig">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'member:add'">
+        <a-button type="primary" id="e2e-member-create-btn" @click="handleCreate" v-auth="'member:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -29,17 +29,22 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-member-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'member:update',
                 tooltip: t('system.member.modifyMember'),
                 onClick: handleEdit.bind(null, record),
               },
               {
+                class: 'e2e-member-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('system.member.deleteMember'),
                 auth: 'member:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-member-delete-confirm',
+                  },
                   title: t('system.member.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },

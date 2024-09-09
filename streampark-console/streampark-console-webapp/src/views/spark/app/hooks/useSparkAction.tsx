@@ -353,7 +353,7 @@ export const useSparkAction = (optionApps: Recordable) => {
             v-model:model={formValue}
           >
             <Form.Item label="Application Name">
-              <Alert message={app.jobName} type="info" />
+              <Alert message={app.appName} type="info" />
             </Form.Item>
             {[ExecModeEnum.YARN_CLIENT, ExecModeEnum.YARN_CLUSTER].includes(app.executionMode) && (
               <Form.Item
