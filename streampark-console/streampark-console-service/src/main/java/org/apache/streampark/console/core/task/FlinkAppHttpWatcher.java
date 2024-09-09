@@ -220,11 +220,13 @@ public class FlinkAppHttpWatcher {
               getFromFlinkRestApi(application);
               cleanupLost(application);
             } catch (Exception flinkException) {
+              log.warn("[StreamPark] get state from flink failed ", flinkException);
               // query status from yarn rest api
               try {
                 getFromYarnRestApi(application);
                 cleanupLost(application);
               } catch (Exception yarnException) {
+                log.error("[StreamPark] get state from yarn failed :", flinkException);
                 doStateFailed(application);
               }
             }
