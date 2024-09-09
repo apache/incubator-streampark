@@ -112,3 +112,8 @@ network:
   restrict-interface: docker0
   # network IP gets priority, default inner outer
   priority-strategy: default
+
+  # Add configurable job.state-watcher.fixed-delayed
+job:
+    state-watcher:
+        fixed-delayed: 1000

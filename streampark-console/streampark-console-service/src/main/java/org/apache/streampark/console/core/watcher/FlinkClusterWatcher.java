@@ -85,8 +85,8 @@ public class FlinkClusterWatcher {
     /** Watcher cluster lists */
     private static final Map<Long, FlinkCluster> WATCHER_CLUSTERS = new ConcurrentHashMap<>(8);
 
-    private static final Cache<Long, ClusterState> FAILED_STATES = Caffeine.newBuilder()
-        .expireAfterWrite(WATCHER_INTERVAL).build();
+    private static final Cache<Long, ClusterState> FAILED_STATES =
+        Caffeine.newBuilder().expireAfterWrite(WATCHER_INTERVAL).build();
 
     private boolean immediateWatch = false;
 
@@ -94,15 +94,16 @@ public class FlinkClusterWatcher {
     @PostConstruct
     private void init() {
         WATCHER_CLUSTERS.clear();
-        List<FlinkCluster> flinkClusters = flinkClusterService.list(
-            new LambdaQueryWrapper<FlinkCluster>()
-                .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
-                // excluding flink clusters on kubernetes
-                .notIn(FlinkCluster::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
+        List<FlinkCluster> flinkClusters =
+            flinkClusterService.list(
+                new LambdaQueryWrapper<FlinkCluster>()
+                    .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
+                    // excluding flink clusters on kubernetes
+                    .notIn(FlinkCluster::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
         flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${job.state-watcher.fixed-delayed:1000}")
     private void start() {
         Long timeMillis = System.currentTimeMillis();
         if (immediateWatch || timeMillis - lastWatchTime >= WATCHER_INTERVAL.toMillis()) {
@@ -117,8 +118,7 @@ public class FlinkClusterWatcher {
                             case LOST:
                             case UNKNOWN:
                             case KILLED:
-                                flinkClusterService.updateClusterState(flinkCluster.getId(),
-                                    state);
+                                flinkClusterService.updateClusterState(flinkCluster.getId(), state);
                                 unWatching(flinkCluster);
                                 alert(flinkCluster, state);
                                 break;
@@ -134,11 +134,11 @@ public class FlinkClusterWatcher {
             cluster.setAllJobs(applicationInfoService.countByClusterId(cluster.getId()));
             cluster.setAffectedJobs(
                 applicationInfoService.countAffectedByClusterId(
-                    cluster.getId(),
-                    InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
+                    cluster.getId(), InternalConfigHolder.get(CommonConfig.SPRING_PROFILES_ACTIVE())));
             cluster.setClusterState(state.getState());
             cluster.setEndTime(new Date());
-            alertService.alert(cluster.getAlertId(), AlertTemplateUtils.createAlertTemplate(cluster, state));
+            alertService.alert(
+                cluster.getAlertId(), AlertTemplateUtils.createAlertTemplate(cluster, state));
         }
     }
 
@@ -213,13 +213,15 @@ public class FlinkClusterWatcher {
     private ClusterState getStateFromFlinkRestApi(FlinkCluster flinkCluster) {
         String address = flinkCluster.getAddress();
         String jobManagerUrl = flinkCluster.getJobManagerUrl();
-        String flinkUrl = StringUtils.isBlank(jobManagerUrl)
-            ? address.concat("/overview")
-            : jobManagerUrl.concat("/overview");
+        String flinkUrl =
+            StringUtils.isBlank(jobManagerUrl)
+                ? address.concat("/overview")
+                : jobManagerUrl.concat("/overview");
         try {
-            String res = HttpClientUtils.httpGetRequest(
-                flinkUrl,
-                RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
+            String res =
+                HttpClientUtils.httpGetRequest(
+                    flinkUrl,
+                    RequestConfig.custom().setConnectTimeout(5000, TimeUnit.MILLISECONDS).build());
             JacksonUtils.read(res, Overview.class);
             return ClusterState.RUNNING;
         } catch (Exception ignored) {

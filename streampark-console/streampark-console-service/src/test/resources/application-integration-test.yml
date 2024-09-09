@@ -39,3 +39,7 @@ streampark:
     local: /tmp
     # remote: hdfs://hdfscluster/streampark
   # hadoop-user-name: root
+
+job:
+  state-watcher:
+    fixed-delayed: 1000

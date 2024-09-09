@@ -105,7 +105,9 @@
           },
         ];
       });
+
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
+        name: 'role_form',
         labelWidth: 120,
         colon: true,
         baseColProps: { span: 22 },
