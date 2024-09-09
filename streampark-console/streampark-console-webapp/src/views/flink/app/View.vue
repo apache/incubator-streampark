@@ -194,6 +194,11 @@
     showTableSetting: false,
     useSearchForm: false,
     tableSetting: { fullScreen: true, redo: false },
+    actionColumn: {
+      dataIndex: 'operation',
+      title: t('component.table.operation'),
+      width: 180,
+    },
   });
 
   const { getTableActions, tagsOptions, users, formConfig } = useAppTableAction(
