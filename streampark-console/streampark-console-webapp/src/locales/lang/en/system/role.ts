@@ -18,7 +18,7 @@ export default {
   deleteTip: 'Are you sure delete this Role',
   assignment: 'menu assignment',
   form: {
-    roleName: 'Role Name',
+    roleName: 'Role name',
     menuId: 'permission',
     menuIdRequired: 'Please select the permission.',
     create: 'Add Role',

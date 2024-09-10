@@ -50,7 +50,7 @@ export default {
       'By default,lookup pom.xml in root path,You can manually specify the module to compile pom.xml',
     buildArgs: 'Build Argument',
     buildArgsPlaceholder: 'Build Argument, e.g: -Pprod',
-    description: 'description',
+    description: 'Description',
     descriptionPlaceholder: 'Description for this project',
     lastBuild: 'Last Build',
     buildState: 'Build State',

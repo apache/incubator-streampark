@@ -186,39 +186,41 @@
   });
 </script>
 <template>
-  <PageWrapper content-full-height content-background contentClass="p-24px">
-    <div class="mb-15px">
-      <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
-      <Space class="-mt-8px">
-        <div v-for="link in externalLinks" :key="link.id">
-          <ExternalLinkBadge
-            :label="link.badgeLabel"
-            :redirect="link.renderedLinkUrl"
-            :color="link.badgeColor"
-            :message="link.badgeName"
-            :disabled="appNotRunning"
-          />
-        </div>
-      </Space>
-      <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
-        <Icon icon="ant-design:arrow-left-outlined" />
-      </a-button>
-      <a-button
-        type="primary"
-        @click="handleFlinkView"
-        :disabled="appNotRunning"
-        class="float-right -mt-8px mr-20px"
-      >
-        <Icon icon="ant-design:cloud-outlined" />
-        {{ t('flink.app.detail.flinkWebUi') }}
-      </a-button>
-    </div>
-    <Description @register="registerDescription" />
-    <Divider class="mt-20px -mb-17px" />
-    <DetailTab :app="app" :tabConf="detailTabs" />
+  <PageWrapper content-full-height content-background>
+    <div class="detail-pad">
+      <div class="mb-15px">
+        <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
+        <Space class="-mt-8px">
+          <div v-for="link in externalLinks" :key="link.id">
+            <ExternalLinkBadge
+              :label="link.badgeLabel"
+              :redirect="link.renderedLinkUrl"
+              :color="link.badgeColor"
+              :message="link.badgeName"
+              :disabled="appNotRunning"
+            />
+          </div>
+        </Space>
+        <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
+          <Icon icon="ant-design:arrow-left-outlined" />
+        </a-button>
+        <a-button
+          type="primary"
+          @click="handleFlinkView"
+          :disabled="appNotRunning"
+          class="float-right -mt-8px mr-20px"
+        >
+          <Icon icon="ant-design:cloud-outlined" />
+          {{ t('flink.app.detail.flinkWebUi') }}
+        </a-button>
+      </div>
+      <Description @register="registerDescription" />
+      <Divider class="mt-20px -mb-17px" />
+      <DetailTab :app="app" :tabConf="detailTabs" />
 
-    <Mergely @register="registerConfDrawer" :readOnly="true" />
-    <RequestModal @register="registerOpenApi" />
+      <Mergely @register="registerConfDrawer" :readOnly="true" />
+      <RequestModal @register="registerOpenApi" />
+    </div>
   </PageWrapper>
 </template>
 <style lang="less">

@@ -121,8 +121,13 @@
   });
 </script>
 <template>
-  <PageWrapper content-background content-class="py-30px">
-    <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
+  <PageWrapper content-full-height fixed-height content-class="flex flex-col bg-white">
+    <BasicForm
+      @register="registerForm"
+      @submit="handleSubmitCluster"
+      :schemas="getClusterSchema"
+      class="mt-30px"
+    >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
           <a-button @click="go('/setting/flinkCluster')">
