@@ -24,7 +24,6 @@
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Button } from 'ant-design-vue';
   import { isEmpty } from '/@/utils/is';
-  import { useMessage } from '/@/hooks/web/useMessage';
   import { format } from '/@/views/flink/app/FlinkSqlFormatter';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFullContent } from '/@/hooks/event/useFullscreen';
@@ -45,7 +44,6 @@
 
   const { toggle, fullContentClass, fullEditorClass, fullScreenStatus } = useFullContent();
   const emit = defineEmits(['update:value', 'preview']);
-  const { createMessage } = useMessage();
 
   const props = defineProps({
     value: {
@@ -72,42 +70,37 @@
       return false;
     }
 
-    if (!props.versionId) {
-      createMessage.error(t('spark.app.dependencyError'));
-      return false;
-    } else {
-      try {
-        const { data } = await fetchSparkSqlVerify({
-          sql: props.value,
-          versionId: props.versionId,
-        });
-        const success = data.data === true || data.data === 'true';
-        if (success) {
-          verifyRes.verified = true;
-          verifyRes.errorMsg = '';
-          syntaxError();
-          return true;
-        } else {
-          verifyRes.errorStart = parseInt(data.start);
-          verifyRes.errorEnd = parseInt(data.end);
-          switch (data.type) {
-            case 4:
-              verifyRes.errorMsg = 'Unsupported sql';
-              break;
-            case 5:
-              verifyRes.errorMsg = "SQL is not endWith ';'";
-              break;
-            default:
-              verifyRes.errorMsg = data.message;
-              break;
-          }
-          syntaxError();
-          return false;
+    try {
+      const res = await fetchSparkSqlVerify({
+        sql: props.value,
+        versionId: props.versionId,
+      });
+      const success = res.data === true || res.data === 'true';
+      if (success) {
+        verifyRes.verified = true;
+        verifyRes.errorMsg = '';
+        syntaxError();
+        return true;
+      } else {
+        verifyRes.errorStart = parseInt(res.start);
+        verifyRes.errorEnd = parseInt(res.end);
+        switch (res.type) {
+          case 4:
+            verifyRes.errorMsg = 'Unsupported sql';
+            break;
+          case 5:
+            verifyRes.errorMsg = "SQL is not endWith ';'";
+            break;
+          default:
+            verifyRes.errorMsg = res.message;
+            break;
         }
-      } catch (error) {
-        console.error(error);
+        syntaxError();
         return false;
       }
+    } catch (error) {
+      console.error(error);
+      return false;
     }
   }
 

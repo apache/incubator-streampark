@@ -50,6 +50,7 @@
     };
 
     const offsetLeft = getOffsetLeft(props.tableContainer);
+    console.log('offsetLeft', offsetLeft);
     const maxResize = props.tableContainer!.getBoundingClientRect().width - 510;
     let newLeft = e.pageX - offsetLeft;
     if (newLeft > maxResize) newLeft = maxResize;

@@ -297,7 +297,7 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
         },
         {
           label: t('spark.app.searchName'),
-          field: 'jobName',
+          field: 'appName',
           component: 'Input',
           componentProps: {
             placeholder: t('spark.app.searchName'),

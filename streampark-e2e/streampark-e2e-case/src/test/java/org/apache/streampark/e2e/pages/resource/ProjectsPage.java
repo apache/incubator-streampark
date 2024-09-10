@@ -37,7 +37,7 @@ import java.util.List;
 @Getter
 public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn-dashed')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-project-create-btn")
     private WebElement buttonCreateProject;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-list')]")
@@ -61,6 +61,10 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                       String projectBuildArgument,
                                       String projectDescription) {
         waitForPageLoading();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(buttonCreateProject));
+
         buttonCreateProject.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/add"));

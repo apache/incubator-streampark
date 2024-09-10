@@ -30,23 +30,22 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
 @Getter
 public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Role List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-role-create-btn")
     private WebElement buttonCreateRole;
 
-    @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
+    @FindBy(className = "ant-table-tbody")
     private List<WebElement> roleList;
 
     @FindBy(className = "ant-form-item-explain-error")
     private List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-role-delete-confirm")
     private WebElement deleteConfirmButton;
 
     private final CreateRoleForm createRoleForm = new CreateRoleForm();
@@ -72,12 +71,12 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     public RoleManagementPage editRole(String roleName, String description, String menuName) {
         waitForPageLoading();
-        new WebDriverWait(driver, Duration.ofSeconds(2));
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Edit Role')]"))
+                it -> it.findElements(By.className("e2e-role-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -94,10 +93,11 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     public RoleManagementPage deleteRole(String roleName) {
         waitForPageLoading();
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         roleList().stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@tooltip,'Delete Role')]"))
+                it -> it.findElements(By.className("e2e-role-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -139,10 +139,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(xpath = "//div[@class='scrollbar__view']//*[@id='form_item_roleName']")
+        @FindBy(id = "role_form_roleName")
         private WebElement inputRoleName;
 
-        @FindBy(id = "form_item_description")
+        @FindBy(id = "role_form_description")
         private WebElement inputDescription;
 
         @FindBys({

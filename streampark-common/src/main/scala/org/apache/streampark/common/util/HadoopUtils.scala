@@ -233,10 +233,21 @@ object HadoopUtils extends Logger {
 
   def yarnClient: YarnClient = {
     if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
-      reusableYarnClient = YarnClient.createYarnClient
-      val yarnConf = new YarnConfiguration(hadoopConf)
-      reusableYarnClient.init(yarnConf)
-      reusableYarnClient.start()
+      reusableYarnClient = Try {
+        getUgi().doAs(new PrivilegedAction[YarnClient]() {
+          override def run(): YarnClient = {
+            val yarnConf = new YarnConfiguration(hadoopConf);
+            val client = YarnClient.createYarnClient;
+            client.init(yarnConf);
+            client.start();
+            client
+          }
+        })
+      } match {
+        case Success(client) => client
+        case Failure(e) =>
+          throw new IllegalArgumentException(s"[StreamPark] access yarnClient error: $e")
+      }
     }
     reusableYarnClient
   }

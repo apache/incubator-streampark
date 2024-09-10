@@ -29,7 +29,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,18 +43,20 @@ class ResourceServiceTest extends SpringUnitTestBase {
     @Test
     void testUpload(@TempDir Path tempDir) throws Exception {
         // specify the file path
-        File fileToStoreUploadFile = new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
+        File fileToStoreUploadFile =
+            new File(tempDir.toFile().getAbsolutePath() + "/fileToStoreUploadFile");
         FileUtils.createFile(fileToStoreUploadFile.getAbsolutePath());
 
         File fileToUpload = new File(tempDir.toFile().getAbsolutePath() + "/fileToUpload.jar");
         FileUtils.createFile(fileToUpload.getAbsolutePath());
         assertThat(fileToUpload).exists();
-        MultipartFile mulFile = new MockMultipartFile(
-            "test", // fileName (eg: streampark.jar)
-            fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
-            // /tmp/file/streampark.jar)
-            ContentType.APPLICATION_OCTET_STREAM.toString(),
-            new FileInputStream(fileToStoreUploadFile));
+        MultipartFile mulFile =
+            new MockMultipartFile(
+                "test", // fileName (eg: streampark.jar)
+                fileToUpload.getAbsolutePath(), // originalFilename (eg: path + fileName =
+                // /tmp/file/streampark.jar)
+                ContentType.APPLICATION_OCTET_STREAM.toString(),
+                Files.newInputStream(fileToStoreUploadFile.toPath()));
         resourceService.upload(mulFile);
     }
 }

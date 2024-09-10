@@ -61,7 +61,7 @@ case class SubmitRequest(
 
   lazy val appMain: String = this.developmentMode match {
     case SparkDevelopmentMode.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case SparkDevelopmentMode.CUSTOM_CODE | SparkDevelopmentMode.PYSPARK => mainClass
+    case SparkDevelopmentMode.SPARK_JAR | SparkDevelopmentMode.PYSPARK => mainClass
     case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }
 

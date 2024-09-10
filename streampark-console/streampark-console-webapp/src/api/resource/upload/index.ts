@@ -33,7 +33,7 @@ enum RESOURCE_API {
   DELETE = '/resource/delete',
   LIST = '/resource/list',
   CHECK = '/resource/check',
-  MAIN_CLASS = '/resource/main_class',
+  UPLOAD_JARS = '/resource/upload_jars',
 }
 
 /**
@@ -85,10 +85,6 @@ export function checkResource(data: ResourceParam): Promise<AxiosResponse<Result
   return defHttp.post({ url: RESOURCE_API.CHECK, data });
 }
 
-export function fetchMainClass(data: { path: string }): Promise<string> {
-  return defHttp.post({ url: RESOURCE_API.MAIN_CLASS, data });
-}
-
 export function fetchUpload(params) {
   return defHttp.post<string>({
     url: RESOURCE_API.UPLOAD,
@@ -98,4 +94,12 @@ export function fetchUpload(params) {
     },
     timeout: 1000 * 60 * 10, // Uploading files timed out for 10 minutes
   });
+}
+
+/**
+ * upload jar
+ * @returns {Promise<string[]>}
+ */
+export function fetchUploadJars(): Promise<string[]> {
+  return defHttp.post({ url: RESOURCE_API.UPLOAD_JARS });
 }

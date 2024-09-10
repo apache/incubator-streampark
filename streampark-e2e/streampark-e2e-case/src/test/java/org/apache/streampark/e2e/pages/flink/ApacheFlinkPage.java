@@ -33,13 +33,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Getter
 public final class ApacheFlinkPage extends NavBarPage implements NavBarItem {
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Applications')]//..")
+    @FindBy(className = "menu-item-flink_app")
     private WebElement menuApplications;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Flink Home')]//..")
+    @FindBy(className = "menu-item-flink_home")
     private WebElement menuFlinkHome;
 
-    @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Clusters')]//..")
+    @FindBy(className = "menu-item-flink_cluster")
     private WebElement menuClusters;
 
     public ApacheFlinkPage(RemoteWebDriver driver) {

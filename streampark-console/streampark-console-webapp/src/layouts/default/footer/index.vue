@@ -16,13 +16,6 @@
 -->
 <template>
   <Footer :class="prefixCls" v-if="getShowLayoutFooter" ref="footerRef">
-    <div :class="`${prefixCls}__links`">
-      <a @click="openWindow(SITE_URL)">{{ t('layout.footer.website') }}</a>
-
-      <GithubFilled :class="`${prefixCls}__github`" />
-
-      <a @click="openWindow(DOC_URL)">{{ t('layout.footer.onlineDocument') }}</a>
-    </div>
     <div :class="`${prefixCls}__copyright`" @click="openWindow('https://incubator.apache.org/')">
       Copyright &copy;{{ new Date().getFullYear() }} The Apache Software Foundation. Apache
       StreamPark, StreamPark, and its feather logo are trademarks of The Apache Software Foundation
@@ -33,8 +26,6 @@
 <script lang="ts">
   import { computed, defineComponent, unref, ref } from 'vue';
   import { Layout } from 'ant-design-vue';
-
-  import { GithubFilled } from '@ant-design/icons-vue';
 
   import { DOC_URL, GITHUB_URL, SITE_URL } from '/@/settings/siteSetting';
   import { openWindow } from '/@/utils';
@@ -47,7 +38,7 @@
 
   export default defineComponent({
     name: 'LayoutFooter',
-    components: { Footer: Layout.Footer, GithubFilled },
+    components: { Footer: Layout.Footer },
     setup() {
       const { t } = useI18n();
       const { getShowFooter } = useRootSetting();
@@ -83,12 +74,12 @@
   @prefix-cls: ~'@{namespace}-layout-footer';
 
   @normal-link-color: rgba(0, 0, 0, 0.45);
-
   @hover-color: rgba(0, 0, 0, 0.85);
 
   .@{prefix-cls} {
     color: @normal-link-color;
     text-align: center;
+    padding: 10px 50px;
 
     &__links {
       margin-bottom: 8px;
@@ -117,6 +108,45 @@
       &:hover {
         cursor: pointer;
         color: @hover-color;
+      }
+    }
+  }
+
+  [data-theme='dark'] {
+    @normal-link-color: rgba(255, 255, 255, 0.45);
+    @hover-color: rgba(255, 255, 255, 0.85);
+    .@{prefix-cls} {
+      color: @normal-link-color;
+      text-align: center;
+      padding: 10px 50px;
+
+      &__links {
+        margin-bottom: 8px;
+
+        a {
+          color: @normal-link-color;
+
+          &:hover {
+            color: @hover-color;
+            cursor: pointer;
+          }
+        }
+      }
+
+      &__github {
+        margin: 0 30px;
+        &:hover {
+          color: @hover-color;
+        }
+      }
+
+      &__copyright {
+        color: @normal-link-color;
+
+        &:hover {
+          cursor: pointer;
+          color: @hover-color;
+        }
       }
     }
   }

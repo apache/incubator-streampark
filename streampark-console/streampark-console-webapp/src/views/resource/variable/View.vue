@@ -18,7 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'variable:add'">
+        <a-button id="e2e-variable-create-btn" type="primary" @click="handleCreate" v-auth="'variable:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
@@ -29,6 +29,7 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-variable-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'variable:update',
                 tooltip: t('flink.variable.modifyVariable'),
@@ -47,11 +48,15 @@
                   router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
+                class: 'e2e-variable-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('flink.variable.deleteVariable'),
                 auth: 'variable:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-variable-delete-confirm',
+                  },
                   title: t('flink.variable.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },

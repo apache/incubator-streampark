@@ -18,6 +18,7 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.SparkExecutionMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
@@ -267,8 +268,12 @@ public class SparkApplicationManageServiceImpl
         ApiAlertException.throwIfFalse(
             success,
             String.format(ERROR_APP_QUEUE_HINT, appParam.getYarnQueue(), appParam.getTeamId()));
-        appParam.resolveYarnQueue();
-
+        if (appParam.isSparkOnYarnJob()) {
+            appParam.resolveYarnQueue();
+            if (appParam.isSparkSqlJob()) {
+                appParam.setMainClass(Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS);
+            }
+        }
         if (appParam.isUploadJob()) {
             String jarPath = String.format(
                 "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());

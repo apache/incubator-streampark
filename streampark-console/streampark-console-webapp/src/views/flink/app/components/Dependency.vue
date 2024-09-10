@@ -30,8 +30,7 @@
   import { useMonaco } from '/@/hooks/web/useMonaco';
   import { Select, Tabs, Alert, Tag, Space, Form } from 'ant-design-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { fetchUpload } from '/@/api/flink/app';
-  import { fetchUploadJars } from '/@/api/flink/flinkHistory';
+  import { fetchUpload, fetchUploadJars } from '/@/api/resource/upload';
   import UploadJobJar from './UploadJobJar.vue';
   import { fetchFlinkEnv } from '/@/api/flink/flinkEnv';
 

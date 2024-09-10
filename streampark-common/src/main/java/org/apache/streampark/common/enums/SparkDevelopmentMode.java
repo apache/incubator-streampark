@@ -26,8 +26,8 @@ public enum SparkDevelopmentMode {
     /** Unknown type replace null */
     UNKNOWN("Unknown", -1),
 
-    /** custom code */
-    CUSTOM_CODE("Custom Code", 1),
+    /** Spark Jar */
+    SPARK_JAR("Spark Jar", 1),
 
     /** Spark SQL */
     SPARK_SQL("Spark SQL", 2),
