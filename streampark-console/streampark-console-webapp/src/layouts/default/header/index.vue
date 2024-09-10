@@ -43,7 +43,7 @@
         <template #content>
           <img src="/@/assets/images/join_wechat.png" alt="qrcode" class="h-150px w-150px" />
         </template>
-        <Icon icon="ant-design:qrcode-outlined" :class="`${prefixCls}-action__item`" />
+        <Icon icon="cib:wechat" :class="`${prefixCls}-action__item`" />
       </Popover>
 
       <!-- Github info -->
