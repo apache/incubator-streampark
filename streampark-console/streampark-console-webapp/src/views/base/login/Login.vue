@@ -76,6 +76,13 @@
           </Popover>
         </div>
         <a
+          :href="EMAIL_URL"
+          target="_blank"
+          class="text-light-100 mx-3 cursor-pointer hover:text-light-100 dark:text-light-100"
+        >
+          <Icon icon="ic:round-email" />
+        </a>
+        <a
           :href="GITHUB_URL"
           target="_blank"
           class="text-light-100 mx-3 cursor-pointer hover:text-light-100 dark:text-light-100"
@@ -99,7 +106,7 @@
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { useLocale } from '/@/locales/useLocale';
   import { AppLocalePicker } from '/@/components/Application';
-  import { GITHUB_URL, TWITTER_URL } from '/@/settings/siteSetting';
+  import { GITHUB_URL, EMAIL_URL, TWITTER_URL } from '/@/settings/siteSetting';
   defineProps({
     sessionTimeout: {
       type: Boolean,
