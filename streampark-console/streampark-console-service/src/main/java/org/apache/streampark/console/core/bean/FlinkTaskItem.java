@@ -15,31 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.entity;
+package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.console.core.enums.EngineTypeEnum;
-import org.apache.streampark.console.core.enums.HATaskEnum;
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
 @Data
-@TableName("t_ha_task")
-@Slf4j
-public class HATask implements Serializable {
+public class FlinkTaskItem implements Serializable {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    /** appId */
+    private Long appId;
 
-    private HATaskEnum action;
+    private Boolean autoStart;
 
-    private EngineTypeEnum engineType;
+    private String args;
 
-    private String properties;
+    private String dynamicProperties;
 
+    /** running job */
+    private String savepointPath;
+
+    private Boolean restoreOrTriggerSavepoint = false;
+
+    private Boolean drain = false;
+
+    private Boolean nativeFormat = false;
+
+    private Integer restoreMode;
 }

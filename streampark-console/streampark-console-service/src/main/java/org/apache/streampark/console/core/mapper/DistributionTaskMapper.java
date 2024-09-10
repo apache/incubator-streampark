@@ -15,45 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.mapper;
 
-/**
- * The HATaskEnum represents the possible actions that can be performed on a task.
- */
-public enum HATaskEnum {
+import org.apache.streampark.console.core.entity.DistributionTask;
 
-    /**
-     * Starts the specified application.
-     */
-    START(0),
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-    /**
-     * Restarts the given application.
-     */
-    RESTART(1),
-
-    /**
-     * Revokes access for the given application.
-     */
-    REVOKE(2),
-
-    /**
-     * Cancels the given application. Throws an exception if cancellation fails.
-     */
-    CANCEL(3),
-
-    /**
-     * Forces the given application to stop.
-     */
-    ABORT(4);
-
-    private final int value;
-
-    HATaskEnum(int value) {
-        this.value = value;
-    }
-
-    public int get() {
-        return this.value;
-    }
+public interface DistributionTaskMapper extends BaseMapper<DistributionTask> {
 }

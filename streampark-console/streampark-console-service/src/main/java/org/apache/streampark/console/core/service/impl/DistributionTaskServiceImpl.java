@@ -19,13 +19,13 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.console.base.util.ConsistentHash;
 import org.apache.streampark.console.base.util.JacksonUtils;
+import org.apache.streampark.console.core.bean.FlinkTaskItem;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.FlinkHATask;
-import org.apache.streampark.console.core.entity.HATask;
+import org.apache.streampark.console.core.entity.DistributionTask;
+import org.apache.streampark.console.core.enums.DistributionTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
-import org.apache.streampark.console.core.enums.HATaskEnum;
-import org.apache.streampark.console.core.mapper.HATaskMapper;
-import org.apache.streampark.console.core.service.HATaskService;
+import org.apache.streampark.console.core.mapper.DistributionTaskMapper;
+import org.apache.streampark.console.core.service.DistributionTaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -47,7 +47,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> implements HATaskService {
+public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMapper, DistributionTask>
+    implements
+        DistributionTaskService {
 
     /**
      * Server name
@@ -59,7 +61,7 @@ public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> impleme
      */
     private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
 
-    @Qualifier("streamparkHATaskExecutor")
+    @Qualifier("streamparkDistributionTaskExecutor")
     @Autowired
     private Executor taskExecutor;
 
@@ -80,23 +82,23 @@ public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> impleme
     }
 
     @Scheduled(fixedDelay = 50)
-    public void pollHATask() {
-        List<HATask> HATaskList = this.list();
-        for (HATask HATask : HATaskList) {
-            long taskId = HATask.getId();
-            if (HATask.getEngineType() != EngineTypeEnum.FLINK || !isLocalProcessing(taskId)) {
+    public void pollDistributionTask() {
+        List<DistributionTask> DistributionTaskList = this.list();
+        for (DistributionTask DistributionTask : DistributionTaskList) {
+            long taskId = DistributionTask.getId();
+            if (DistributionTask.getEngineType() != EngineTypeEnum.FLINK || !isLocalProcessing(taskId)) {
                 continue;
             }
             if (runningTasks.putIfAbsent(taskId, true) == null) {
                 taskExecutor.execute(() -> {
                     try {
-                        // Execute HA task
-                        executeHATask(HATask);
+                        // Execute Distribution task
+                        executeDistributionTask(DistributionTask);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     } finally {
-                        runningTasks.remove(HATask.getId());
-                        this.removeById(HATask.getId());
+                        runningTasks.remove(DistributionTask.getId());
+                        this.removeById(DistributionTask.getId());
                     }
                 });
             }
@@ -105,17 +107,17 @@ public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> impleme
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param HATask HATask
+     * @param DistributionTask DistributionTask
      */
     @Override
-    public void executeHATask(HATask HATask) throws Exception {
-        // Execute HA task
-        log.info("Execute HA task: {}", HATask);
-        FlinkHATask flinkHATask = getFlinkHATask(HATask);
-        Application appParam = getAppByFlinkHATask(flinkHATask);
-        switch (HATask.getAction()) {
+    public void executeDistributionTask(DistributionTask DistributionTask) throws Exception {
+        // Execute Distribution task
+        log.info("Execute Distribution task: {}", DistributionTask);
+        FlinkTaskItem flinkTaskItem = getFlinkTaskItem(DistributionTask);
+        Application appParam = getAppByFlinkTaskItem(flinkTaskItem);
+        switch (DistributionTask.getAction()) {
             case START:
-                applicationActionService.start(appParam, flinkHATask.getAutoStart());
+                applicationActionService.start(appParam, flinkTaskItem.getAutoStart());
                 break;
             case RESTART:
                 applicationActionService.restart(appParam);
@@ -130,7 +132,7 @@ public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> impleme
                 applicationActionService.abort(appParam.getId());
                 break;
             default:
-                log.error("Unsupported task: {}", HATask.getAction());
+                log.error("Unsupported task: {}", DistributionTask.getAction());
         }
     }
 
@@ -178,56 +180,56 @@ public class HATaskServiceImpl extends ServiceImpl<HATaskMapper, HATask> impleme
     }
 
     /**
-     * Save HA task.
+     * Save Distribution task.
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveHATask(Application appParam, boolean autoStart, HATaskEnum action) {
+    public void saveDistributionTask(Application appParam, boolean autoStart, DistributionTaskEnum action) {
         try {
-            HATask HATask = getHATaskByApp(appParam, autoStart, action);
-            this.save(HATask);
+            DistributionTask DistributionTask = getDistributionTaskByApp(appParam, autoStart, action);
+            this.save(DistributionTask);
         } catch (JsonProcessingException e) {
-            log.error("Failed to save HA task: {}", e.getMessage());
+            log.error("Failed to save Distribution task: {}", e.getMessage());
         }
     }
 
-    public HATask getHATaskByApp(Application appParam, boolean autoStart,
-                                 HATaskEnum action) throws JsonProcessingException {
-        FlinkHATask flinkHATask = new FlinkHATask();
-        flinkHATask.setAppId(appParam.getId());
-        flinkHATask.setAutoStart(autoStart);
-        flinkHATask.setArgs(appParam.getArgs());
-        flinkHATask.setDynamicProperties(appParam.getDynamicProperties());
-        flinkHATask.setSavepointPath(appParam.getSavepointPath());
-        flinkHATask.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
-        flinkHATask.setDrain(appParam.getDrain());
-        flinkHATask.setNativeFormat(appParam.getNativeFormat());
-        flinkHATask.setRestoreMode(appParam.getRestoreMode());
+    public DistributionTask getDistributionTaskByApp(Application appParam, boolean autoStart,
+                                                     DistributionTaskEnum action) throws JsonProcessingException {
+        FlinkTaskItem flinkTaskItem = new FlinkTaskItem();
+        flinkTaskItem.setAppId(appParam.getId());
+        flinkTaskItem.setAutoStart(autoStart);
+        flinkTaskItem.setArgs(appParam.getArgs());
+        flinkTaskItem.setDynamicProperties(appParam.getDynamicProperties());
+        flinkTaskItem.setSavepointPath(appParam.getSavepointPath());
+        flinkTaskItem.setRestoreOrTriggerSavepoint(appParam.getRestoreOrTriggerSavepoint());
+        flinkTaskItem.setDrain(appParam.getDrain());
+        flinkTaskItem.setNativeFormat(appParam.getNativeFormat());
+        flinkTaskItem.setRestoreMode(appParam.getRestoreMode());
 
-        HATask haTask = new HATask();
-        haTask.setAction(action);
-        haTask.setEngineType(EngineTypeEnum.FLINK);
-        haTask.setProperties(JacksonUtils.write(flinkHATask));
-        return haTask;
+        DistributionTask distributionTask = new DistributionTask();
+        distributionTask.setAction(action);
+        distributionTask.setEngineType(EngineTypeEnum.FLINK);
+        distributionTask.setProperties(JacksonUtils.write(flinkTaskItem));
+        return distributionTask;
     }
 
-    public FlinkHATask getFlinkHATask(HATask HATask) throws JsonProcessingException {
-        return JacksonUtils.read(HATask.getProperties(), FlinkHATask.class);
+    public FlinkTaskItem getFlinkTaskItem(DistributionTask DistributionTask) throws JsonProcessingException {
+        return JacksonUtils.read(DistributionTask.getProperties(), FlinkTaskItem.class);
     }
 
-    public Application getAppByFlinkHATask(FlinkHATask flinkHATask) {
+    public Application getAppByFlinkTaskItem(FlinkTaskItem flinkTaskItem) {
         Application appParam = new Application();
-        appParam.setId(flinkHATask.getAppId());
-        appParam.setArgs(flinkHATask.getArgs());
-        appParam.setDynamicProperties(flinkHATask.getDynamicProperties());
-        appParam.setSavepointPath(flinkHATask.getSavepointPath());
-        appParam.setRestoreOrTriggerSavepoint(flinkHATask.getRestoreOrTriggerSavepoint());
-        appParam.setDrain(flinkHATask.getDrain());
-        appParam.setNativeFormat(flinkHATask.getNativeFormat());
-        appParam.setRestoreMode(flinkHATask.getRestoreMode());
+        appParam.setId(flinkTaskItem.getAppId());
+        appParam.setArgs(flinkTaskItem.getArgs());
+        appParam.setDynamicProperties(flinkTaskItem.getDynamicProperties());
+        appParam.setSavepointPath(flinkTaskItem.getSavepointPath());
+        appParam.setRestoreOrTriggerSavepoint(flinkTaskItem.getRestoreOrTriggerSavepoint());
+        appParam.setDrain(flinkTaskItem.getDrain());
+        appParam.setNativeFormat(flinkTaskItem.getNativeFormat());
+        appParam.setRestoreMode(flinkTaskItem.getRestoreMode());
         return appParam;
     }
 

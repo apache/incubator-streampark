@@ -184,18 +184,18 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     }
 
     /**
-     * Create a ThreadPoolTaskExecutor for HATask.
+     * Create a ThreadPoolTaskExecutor for DistributionTask.
      *
      * @return Executor
      */
-    @Bean("streamparkHATaskExecutor")
-    public Executor HATaskExecutor() {
+    @Bean("streamparkDistributionTaskExecutor")
+    public Executor distributionTaskExecutor() {
         return new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 5,
             Runtime.getRuntime().availableProcessors() * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streampark-ha-task-"));
+            ThreadUtils.threadFactory("streampark-distribution-task-"));
     }
 }

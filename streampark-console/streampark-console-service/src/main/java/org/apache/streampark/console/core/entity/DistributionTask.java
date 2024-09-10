@@ -17,30 +17,29 @@
 
 package org.apache.streampark.console.core.entity;
 
+import org.apache.streampark.console.core.enums.DistributionTaskEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
 @Data
-public class FlinkHATask implements Serializable {
+@TableName("t_distribution_task")
+@Slf4j
+public class DistributionTask implements Serializable {
 
-    /** appId */
-    private Long appId;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
-    private Boolean autoStart;
+    private DistributionTaskEnum action;
 
-    private String args;
+    private EngineTypeEnum engineType;
 
-    private String dynamicProperties;
+    private String properties;
 
-    /** running job */
-    private String savepointPath;
-
-    private Boolean restoreOrTriggerSavepoint = false;
-
-    private Boolean drain = false;
-
-    private Boolean nativeFormat = false;
-
-    private Integer restoreMode;
 }

@@ -18,17 +18,17 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.HATask;
-import org.apache.streampark.console.core.enums.HATaskEnum;
+import org.apache.streampark.console.core.entity.DistributionTask;
+import org.apache.streampark.console.core.enums.DistributionTaskEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
 /**
- * HATaskService is the interface for managing tasks.
+ * DistributionTaskService is the interface for managing tasks.
  */
-public interface HATaskService extends IService<HATask> {
+public interface DistributionTaskService extends IService<DistributionTask> {
 
     /**
      * Add the current console server itself to the consistent hash ring.
@@ -38,9 +38,9 @@ public interface HATaskService extends IService<HATask> {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param HATask HATask
+     * @param DistributionTask DistributionTask
      */
-    void executeHATask(HATask HATask) throws Exception;
+    void executeDistributionTask(DistributionTask DistributionTask) throws Exception;
 
     /**
      * Through this interface, the watcher obtains the list of tasks that need to be monitored.
@@ -70,11 +70,11 @@ public interface HATaskService extends IService<HATask> {
     public boolean isLocalProcessing(Long appId);
 
     /**
-     * Save HA task.
+     * Save Distribution task.
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
-    public void saveHATask(Application appParam, boolean autoStart, HATaskEnum action);
+    public void saveDistributionTask(Application appParam, boolean autoStart, DistributionTaskEnum action);
 }

@@ -241,10 +241,10 @@ create table `t_flink_sql` (
 
 
 -- ----------------------------
--- Table structure for t_ha_task
+-- Table structure for t_distribution_task
 -- ----------------------------
-drop table if exists `t_ha_task`;
-create table `t_ha_task` (
+drop table if exists `t_distribution_task`;
+create table `t_distribution_task` (
   `id` bigint not null auto_increment,
   `action` tinyint not null,
   `engine_type` tinyint not null,
