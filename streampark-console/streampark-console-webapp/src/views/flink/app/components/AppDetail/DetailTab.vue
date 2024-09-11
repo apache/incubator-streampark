@@ -395,7 +395,7 @@
               <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
             <template v-if="column.dataIndex === 'yarnAppId'">
-              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
+              <a type="link" @click="handleYarnUrl(record.id)" target="_blank">
                 {{ record.yarnAppId }}
               </a>
             </template>
