@@ -19,10 +19,4 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.DistributionTaskMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.DistributionTask">
-            <id column="id" jdbcType="BIGINT" property="id"/>
-            <result column="action" jdbcType="TINYINT" property="action"/>
-            <result column="engine_type" jdbcType="TINYINT" property="engineType"/>
-            <result column="properties" jdbcType="VARCHAR" property="properties"/>
-    </resultMap>
 </mapper>

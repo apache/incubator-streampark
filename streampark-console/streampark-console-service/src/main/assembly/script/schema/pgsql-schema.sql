@@ -34,7 +34,7 @@ drop table if exists "public"."t_flink_effective";
 drop table if exists "public"."t_flink_config";
 drop table if exists "public"."t_flink_cluster";
 drop table if exists "public"."t_flink_app";
-drop table if exists "public"."t_distribution_task";
+drop table if exists "public"."t_distributed_task";
 drop table if exists "public"."t_app_build_pipe";
 drop table if exists "public"."t_app_backup";
 drop table if exists "public"."t_alert_config";
@@ -62,7 +62,7 @@ drop sequence if exists "public"."streampark_t_flink_effective_id_seq";
 drop sequence if exists "public"."streampark_t_flink_config_id_seq";
 drop sequence if exists "public"."streampark_t_flink_cluster_id_seq";
 drop sequence if exists "public"."streampark_t_flink_app_id_seq";
-drop sequence if exists "public"."streampark_t_distribution_task_id_seq";
+drop sequence if exists "public"."streampark_t_distributed_task_id_seq";
 drop sequence if exists "public"."streampark_t_app_backup_id_seq";
 drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
@@ -497,19 +497,19 @@ alter table "public"."t_flink_sql" add constraint "t_flink_sql_pkey" primary key
 
 
 -- ----------------------------
--- table structure for t_distribution_task
+-- table structure for t_distributed_task
 -- ----------------------------
-create sequence "public"."streampark_t_distribution_task_id_seq"
+create sequence "public"."streampark_t_distributed_task_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
-create table "public"."t_distribution_task"
+create table "public"."t_distributed_task"
 (
-    "id"                           int8 not null default nextval('streampark_t_distribution_task_id_seq'::regclass),
+    "id"                           int8 not null default nextval('streampark_t_distributed_task_id_seq'::regclass),
     "action"                       int2,
     "engine_type"                  int2,
     "properties"                   text collate "pg_catalog"."default"
 )
 ;
-alter table "public"."t_distribution_task" add constraint "t_distribution_task_pkey" primary key ("id");
+alter table "public"."t_distributed_task" add constraint "t_distributed_task_pkey" primary key ("id");
 
 
 -- ----------------------------

@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 
 @Data
-@TableName("t_distribution_task")
+@TableName("t_distributed_task")
 @Slf4j
 public class DistributionTask implements Serializable {
 

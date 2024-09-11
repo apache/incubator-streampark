@@ -54,7 +54,7 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
     /**
      * Server name
      */
-    private String serverName;
+    private String serverId;
 
     /**
      * Consistent hash algorithm for task distribution
@@ -77,7 +77,7 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
      * Add the current console server itself to the consistent hash ring.
      */
     public void init(String serverName) {
-        this.serverName = serverName;
+        this.serverId = serverName;
         consistentHash.add(serverName);
     }
 
@@ -176,7 +176,7 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
      */
     @Override
     public boolean isLocalProcessing(Long appId) {
-        return consistentHash.get(appId).equals(serverName);
+        return consistentHash.get(appId).equals(serverId);
     }
 
     /**
