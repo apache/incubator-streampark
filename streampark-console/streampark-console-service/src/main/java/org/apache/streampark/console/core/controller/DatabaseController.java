@@ -41,7 +41,7 @@ import java.util.List;
 public class DatabaseController {
 
     @Autowired
-    DatabaseService databaseService;
+    private DatabaseService databaseService;
 
     @PostMapping("create")
     @RequiresPermissions("database:create")
