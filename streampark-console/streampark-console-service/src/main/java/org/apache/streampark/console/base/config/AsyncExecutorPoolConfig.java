@@ -184,18 +184,18 @@ public class AsyncExecutorPoolConfig extends AsyncConfigurerSupport {
     }
 
     /**
-     * Create a ThreadPoolTaskExecutor for DistributionTask.
+     * Create a ThreadPoolTaskExecutor for DistributedTask.
      *
      * @return Executor
      */
-    @Bean("streamparkDistributionTaskExecutor")
-    public Executor distributionTaskExecutor() {
+    @Bean("streamparkDistributedTaskExecutor")
+    public Executor distributedTaskExecutor() {
         return new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 5,
             Runtime.getRuntime().availableProcessors() * 10,
             60L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streampark-distribution-task-"));
+            ThreadUtils.threadFactory("streampark-distributed-task-"));
     }
 }

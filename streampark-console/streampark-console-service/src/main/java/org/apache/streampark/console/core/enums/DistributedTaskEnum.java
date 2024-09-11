@@ -18,9 +18,9 @@
 package org.apache.streampark.console.core.enums;
 
 /**
- * The DistributionTaskEnum represents the possible actions that can be performed on a task.
+ * The DistributedTaskEnum represents the possible actions that can be performed on a task.
  */
-public enum DistributionTaskEnum {
+public enum DistributedTaskEnum {
 
     /**
      * Starts the specified application.
@@ -49,7 +49,7 @@ public enum DistributionTaskEnum {
 
     private final int value;
 
-    DistributionTaskEnum(int value) {
+    DistributedTaskEnum(int value) {
         this.value = value;
     }
 

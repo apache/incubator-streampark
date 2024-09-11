@@ -15,31 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.entity;
+package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.core.enums.DistributionTaskEnum;
-import org.apache.streampark.console.core.enums.EngineTypeEnum;
+import org.apache.streampark.console.core.entity.DistributedTask;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-import java.io.Serializable;
-
-@Data
-@TableName("t_distributed_task")
-@Slf4j
-public class DistributionTask implements Serializable {
-
-    @TableId(type = IdType.AUTO)
-    private Long id;
-
-    private DistributionTaskEnum action;
-
-    private EngineTypeEnum engineType;
-
-    private String properties;
-
+public interface DistributedTaskMapper extends BaseMapper<DistributedTask> {
 }

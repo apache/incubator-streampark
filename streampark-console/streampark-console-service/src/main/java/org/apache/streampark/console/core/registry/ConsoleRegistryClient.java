@@ -21,7 +21,7 @@ import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.streampark.console.core.config.ConsoleConfig;
-import org.apache.streampark.console.core.service.DistributionTaskService;
+import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.task.ConsoleHeartBeatTask;
 import org.apache.streampark.registry.api.RegistryClient;
 import org.apache.streampark.registry.api.RegistryException;
@@ -56,7 +56,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
     private ConsoleConnectStrategy consoleConnectStrategy;
 
     @Autowired
-    private DistributionTaskService distributionTaskService;
+    private DistributedTaskService distributedTaskService;
 
     private ConsoleHeartBeatTask consoleHeartBeatTask;
 
@@ -142,7 +142,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
         ThreadUtils.sleep(SLEEP_TIME_MILLIS);
 
         consoleHeartBeatTask.start();
-        distributionTaskService.init(consoleConfig.getConsoleAddress());
+        distributedTaskService.init(consoleConfig.getConsoleAddress());
         log.info("Console node : {} registered to registry center successfully", consoleConfig.getConsoleAddress());
 
     }

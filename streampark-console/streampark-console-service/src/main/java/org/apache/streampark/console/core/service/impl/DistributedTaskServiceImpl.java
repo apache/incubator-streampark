@@ -21,11 +21,11 @@ import org.apache.streampark.console.base.util.ConsistentHash;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.FlinkTaskItem;
 import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.DistributionTask;
-import org.apache.streampark.console.core.enums.DistributionTaskEnum;
+import org.apache.streampark.console.core.entity.DistributedTask;
+import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
-import org.apache.streampark.console.core.mapper.DistributionTaskMapper;
-import org.apache.streampark.console.core.service.DistributionTaskService;
+import org.apache.streampark.console.core.mapper.DistributedTaskMapper;
+import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -47,9 +47,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMapper, DistributionTask>
+public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMapper, DistributedTask>
     implements
-        DistributionTaskService {
+        DistributedTaskService {
 
     /**
      * Server name
@@ -61,7 +61,7 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
      */
     private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
 
-    @Qualifier("streamparkDistributionTaskExecutor")
+    @Qualifier("streamparkDistributedTaskExecutor")
     @Autowired
     private Executor taskExecutor;
 
@@ -82,23 +82,23 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
     }
 
     @Scheduled(fixedDelay = 50)
-    public void pollDistributionTask() {
-        List<DistributionTask> DistributionTaskList = this.list();
-        for (DistributionTask DistributionTask : DistributionTaskList) {
-            long taskId = DistributionTask.getId();
-            if (DistributionTask.getEngineType() != EngineTypeEnum.FLINK || !isLocalProcessing(taskId)) {
+    public void pollDistributedTask() {
+        List<DistributedTask> distributedTaskList = this.list();
+        for (DistributedTask DistributedTask : distributedTaskList) {
+            long taskId = DistributedTask.getId();
+            if (DistributedTask.getEngineType() != EngineTypeEnum.FLINK || !isLocalProcessing(taskId)) {
                 continue;
             }
             if (runningTasks.putIfAbsent(taskId, true) == null) {
                 taskExecutor.execute(() -> {
                     try {
-                        // Execute Distribution task
-                        executeDistributionTask(DistributionTask);
+                        // Execute Distributed task
+                        executeDistributedTask(DistributedTask);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     } finally {
-                        runningTasks.remove(DistributionTask.getId());
-                        this.removeById(DistributionTask.getId());
+                        runningTasks.remove(DistributedTask.getId());
+                        this.removeById(DistributedTask.getId());
                     }
                 });
             }
@@ -107,15 +107,15 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param DistributionTask DistributionTask
+     * @param DistributedTask DistributedTask
      */
     @Override
-    public void executeDistributionTask(DistributionTask DistributionTask) throws Exception {
-        // Execute Distribution task
-        log.info("Execute Distribution task: {}", DistributionTask);
-        FlinkTaskItem flinkTaskItem = getFlinkTaskItem(DistributionTask);
+    public void executeDistributedTask(DistributedTask DistributedTask) throws Exception {
+        // Execute Distributed task
+        log.info("Execute Distributed task: {}", DistributedTask);
+        FlinkTaskItem flinkTaskItem = getFlinkTaskItem(DistributedTask);
         Application appParam = getAppByFlinkTaskItem(flinkTaskItem);
-        switch (DistributionTask.getAction()) {
+        switch (DistributedTask.getAction()) {
             case START:
                 applicationActionService.start(appParam, flinkTaskItem.getAutoStart());
                 break;
@@ -132,7 +132,7 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
                 applicationActionService.abort(appParam.getId());
                 break;
             default:
-                log.error("Unsupported task: {}", DistributionTask.getAction());
+                log.error("Unsupported task: {}", DistributedTask.getAction());
         }
     }
 
@@ -180,24 +180,24 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
     }
 
     /**
-     * Save Distribution task.
+     * Save Distributed task.
      *
      * @param appParam  Application
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveDistributionTask(Application appParam, boolean autoStart, DistributionTaskEnum action) {
+    public void saveDistributedTask(Application appParam, boolean autoStart, DistributedTaskEnum action) {
         try {
-            DistributionTask DistributionTask = getDistributionTaskByApp(appParam, autoStart, action);
-            this.save(DistributionTask);
+            DistributedTask DistributedTask = getDistributedTaskByApp(appParam, autoStart, action);
+            this.save(DistributedTask);
         } catch (JsonProcessingException e) {
-            log.error("Failed to save Distribution task: {}", e.getMessage());
+            log.error("Failed to save Distributed task: {}", e.getMessage());
         }
     }
 
-    public DistributionTask getDistributionTaskByApp(Application appParam, boolean autoStart,
-                                                     DistributionTaskEnum action) throws JsonProcessingException {
+    public DistributedTask getDistributedTaskByApp(Application appParam, boolean autoStart,
+                                                   DistributedTaskEnum action) throws JsonProcessingException {
         FlinkTaskItem flinkTaskItem = new FlinkTaskItem();
         flinkTaskItem.setAppId(appParam.getId());
         flinkTaskItem.setAutoStart(autoStart);
@@ -209,15 +209,15 @@ public class DistributionTaskServiceImpl extends ServiceImpl<DistributionTaskMap
         flinkTaskItem.setNativeFormat(appParam.getNativeFormat());
         flinkTaskItem.setRestoreMode(appParam.getRestoreMode());
 
-        DistributionTask distributionTask = new DistributionTask();
-        distributionTask.setAction(action);
-        distributionTask.setEngineType(EngineTypeEnum.FLINK);
-        distributionTask.setProperties(JacksonUtils.write(flinkTaskItem));
-        return distributionTask;
+        DistributedTask distributedTask = new DistributedTask();
+        distributedTask.setAction(action);
+        distributedTask.setEngineType(EngineTypeEnum.FLINK);
+        distributedTask.setProperties(JacksonUtils.write(flinkTaskItem));
+        return distributedTask;
     }
 
-    public FlinkTaskItem getFlinkTaskItem(DistributionTask DistributionTask) throws JsonProcessingException {
-        return JacksonUtils.read(DistributionTask.getProperties(), FlinkTaskItem.class);
+    public FlinkTaskItem getFlinkTaskItem(DistributedTask DistributedTask) throws JsonProcessingException {
+        return JacksonUtils.read(DistributedTask.getProperties(), FlinkTaskItem.class);
     }
 
     public Application getAppByFlinkTaskItem(FlinkTaskItem flinkTaskItem) {

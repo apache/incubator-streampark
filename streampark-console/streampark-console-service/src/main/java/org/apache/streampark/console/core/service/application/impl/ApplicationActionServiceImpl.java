@@ -48,7 +48,7 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.Savepoint;
 import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
-import org.apache.streampark.console.core.enums.DistributionTaskEnum;
+import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
@@ -58,7 +58,7 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ApplicationBackUpService;
 import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.DistributionTaskService;
+import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -178,7 +178,7 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     private ResourceService resourceService;
 
     @Autowired
-    private DistributionTaskService distributionTaskService;
+    private DistributedTaskService distributedTaskService;
 
     @Autowired
     private FlinkClusterWatcher flinkClusterWatcher;
@@ -197,8 +197,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
             application, String.format("The application id=%s not found, revoke failed.", appId));
 
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
-        if (!distributionTaskService.isLocalProcessing(appId)) {
-            distributionTaskService.saveDistributionTask(application, false, DistributionTaskEnum.REVOKE);
+        if (!distributedTaskService.isLocalProcessing(appId)) {
+            distributedTaskService.saveDistributedTask(application, false, DistributedTaskEnum.REVOKE);
             return;
         }
 
@@ -225,8 +225,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public void restart(Application appParam) throws Exception {
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
-        if (!distributionTaskService.isLocalProcessing(appParam.getId())) {
-            distributionTaskService.saveDistributionTask(appParam, false, DistributionTaskEnum.RESTART);
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.RESTART);
             return;
         }
         this.cancel(appParam);
@@ -237,8 +237,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     public void abort(Long id) {
         Application application = this.baseMapper.selectApp(id);
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
-        if (!distributionTaskService.isLocalProcessing(id)) {
-            distributionTaskService.saveDistributionTask(application, false, DistributionTaskEnum.ABORT);
+        if (!distributedTaskService.isLocalProcessing(id)) {
+            distributedTaskService.saveDistributedTask(application, false, DistributedTaskEnum.ABORT);
             return;
         }
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
@@ -261,8 +261,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public void cancel(Application appParam) throws Exception {
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
-        if (!distributionTaskService.isLocalProcessing(appParam.getId())) {
-            distributionTaskService.saveDistributionTask(appParam, false, DistributionTaskEnum.CANCEL);
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.CANCEL);
             return;
         }
         FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
@@ -400,8 +400,8 @@ public class ApplicationActionServiceImpl extends ServiceImpl<ApplicationMapper,
     @Override
     public void start(Application appParam, boolean auto) throws Exception {
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
-        if (!distributionTaskService.isLocalProcessing(appParam.getId())) {
-            distributionTaskService.saveDistributionTask(appParam, auto, DistributionTaskEnum.START);
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, auto, DistributedTaskEnum.START);
             return;
         }
         // 1) check application
