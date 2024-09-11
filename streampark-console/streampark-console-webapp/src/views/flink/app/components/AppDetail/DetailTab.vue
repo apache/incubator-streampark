@@ -65,6 +65,7 @@
   import FlinkSqlReview from './FlinkSqlReview.vue';
   import FlinkSqlCompareModal from './FlinkSqlCompareModal.vue';
   import { OperationEnum } from '/@/enums/flinkEnum';
+  import { baseUrl } from '/@/api';
   const DescriptionItem = Descriptions.Item;
   const TabPane = Tabs.TabPane;
 
@@ -272,9 +273,12 @@
     });
   }
 
-  async function handleYarnUrl(yarnAppId: string) {
-    const res = await fetchYarn();
-    window.open(res + '/proxy/' + yarnAppId + '/');
+  async function handleYarnUrl(id: string) {
+    window.open(baseUrl() + '/proxy/yarn/' + id + '/');
+  }
+
+  async function handleViewHistory(id: string) {
+    window.open(baseUrl() + '/proxy/history/' + id + '/');
   }
 
   function getSavePointAction(record: Recordable): ActionItem[] {
@@ -396,7 +400,7 @@
               </a>
             </template>
             <template v-if="column.dataIndex === 'jobManagerUrl'">
-              <a type="link" :href="record.jobManagerUrl" target="_blank">
+              <a type="link" @click="handleViewHistory(record.id)" target="_blank">
                 {{ record.jobManagerUrl }}
               </a>
             </template>

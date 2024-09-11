@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 import { optionsKeyMapping } from '../data/option';
-import { fetchYarn } from '/@/api/flink/app';
 import { AppListRecord } from '/@/api/flink/app.type';
-import { fetchRemoteURL } from '/@/api/flink/flinkCluster';
 import {
   AppStateEnum,
   ConfigTypeEnum,
@@ -26,6 +24,7 @@ import {
   OptionStateEnum,
   PipelineStepEnum,
 } from '/@/enums/flinkEnum';
+import { baseUrl } from '/@/api';
 
 export function handleAppBuildStatusColor(statusCode: number) {
   switch (statusCode) {
@@ -103,27 +102,8 @@ export function descriptionFilter(option) {
   }
 }
 
-export async function handleView(app: AppListRecord, yarn: Nullable<string>) {
-  const executionMode = app['executionMode'];
-  if (executionMode == ExecModeEnum.REMOTE) {
-    const res = await fetchRemoteURL(app.flinkClusterId);
-    window.open(res + '/#/job/' + app.jobId + '/overview');
-  } else if (
-    [ExecModeEnum.YARN_PER_JOB, ExecModeEnum.YARN_SESSION, ExecModeEnum.YARN_APPLICATION].includes(
-      executionMode,
-    )
-  ) {
-    if (!yarn) {
-      const res = await fetchYarn();
-      window.open(res + '/proxy/' + app['clusterId'] + '/');
-    } else {
-      window.open(yarn + '/proxy/' + app['clusterId'] + '/');
-    }
-  } else {
-    if (app.flinkRestUrl) {
-      window.open(app.flinkRestUrl);
-    }
-  }
+export async function handleView(app: AppListRecord) {
+  window.open(baseUrl() + '/proxy/flink/' + app.id + '/');
 }
 
 export function handleIsStart(app: Recordable, optionApps: Recordable) {
