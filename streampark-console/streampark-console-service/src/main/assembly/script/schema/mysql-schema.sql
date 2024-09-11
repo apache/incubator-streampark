@@ -241,6 +241,19 @@ create table `t_flink_sql` (
 
 
 -- ----------------------------
+-- Table structure for t_distributed_task
+-- ----------------------------
+drop table if exists `t_distributed_task`;
+create table `t_distributed_task` (
+  `id` bigint not null auto_increment,
+  `action` tinyint not null,
+  `engine_type` tinyint not null,
+  `properties` text collate utf8mb4_general_ci,
+  primary key (`id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
 -- Table structure for t_menu
 -- ----------------------------
 drop table if exists `t_menu`;
