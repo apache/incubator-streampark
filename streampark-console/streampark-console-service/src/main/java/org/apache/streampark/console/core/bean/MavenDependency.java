@@ -47,6 +47,7 @@ public class MavenDependency {
   @SneakyThrows
   public static MavenDependency of(String dependency) {
     if (StringUtils.isNotBlank(dependency)) {
+      dependency = dependency.replaceAll(",\\s*\"exclusions\"\\s*:\\s*\\{\\s*}", "");
       return JacksonUtils.read(dependency, MavenDependency.class);
     }
     return new MavenDependency();
