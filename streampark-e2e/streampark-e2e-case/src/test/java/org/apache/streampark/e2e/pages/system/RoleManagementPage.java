@@ -151,10 +151,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         })
         private List<WebElement> inputMenus;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+        @FindBy(className = "e2e_role_pop_ok")
         private WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(className = "e2e_role_pop_cancel")
         private WebElement buttonCancel;
     }
 }
