@@ -127,10 +127,10 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         @FindBy(id = "YarnQueueEditForm_description")
         private WebElement inputDescription;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
+        @FindBy(className = "e2e_yarn_queue_pop_ok")
         private WebElement buttonOk;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        @FindBy(className = "e2e_yarn_queue_pop_cancel")
         private WebElement buttonCancel;
     }
 }

@@ -15,7 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicDrawer
+    :okButtonProps="{ class: 'e2e_yarn_queue_pop_ok' }"
+    :cancelButtonProps="{ class: 'e2e_yarn_queue_pop_cancel' }"
+    v-bind="$attrs"
+    @register="registerDrawer"
+    showFooter
+    width="650"
+    @ok="handleSubmit"
+  >
     <template #title>
       {{ getTitle }}
     </template>

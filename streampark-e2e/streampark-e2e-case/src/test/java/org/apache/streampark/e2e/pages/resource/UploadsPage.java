@@ -195,10 +195,10 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "ResourceForm_description")
         private WebElement inputDescription;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+        @FindBy(className = "e2e_upload_pop_ok")
         private WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        @FindBy(className = "e2e_upload_pop_cancel")
         private WebElement buttonCancel;
     }
 }

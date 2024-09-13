@@ -15,7 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicDrawer
+    :okButtonProps="{ class: 'e2e_member_pop_ok' }"
+    :cancelButtonProps="{ class: 'e2e_member_pop_cancel' }"
+    v-bind="$attrs"
+    @register="registerDrawer"
+    showFooter
+    width="650"
+    @ok="handleSubmit"
+  >
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}

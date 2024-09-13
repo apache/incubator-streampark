@@ -406,10 +406,15 @@
 
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="go('/flink/app')">
+          <a-button class="e2e_flink_app_cancel" @click="go('/flink/app')">
             {{ t('common.cancelText') }}
           </a-button>
-          <a-button class="ml-4" :loading="submitLoading" type="primary" @click="submit()">
+          <a-button
+            class="e2e_flink_app_submit"
+            :loading="submitLoading"
+            type="primary"
+            @click="submit()"
+          >
             {{ t('common.submitText') }}
           </a-button>
         </div>

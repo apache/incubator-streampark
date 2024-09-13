@@ -230,10 +230,10 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "form_item_description")
         private WebElement inputDescription;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+        @FindBy(className = "e2e_project_submit")
         private WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        @FindBy(className = "e2e_project_cancel")
         private WebElement buttonCancel;
     }
 }

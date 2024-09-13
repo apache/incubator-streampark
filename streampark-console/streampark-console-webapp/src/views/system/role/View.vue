@@ -18,12 +18,7 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button
-          id="e2e-role-create-btn"
-          type="primary"
-          @click="handleCreate"
-          v-auth="'role:add'"
-        >
+        <a-button id="e2e-role-create-btn" type="primary" @click="handleCreate" v-auth="'role:add'">
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>
