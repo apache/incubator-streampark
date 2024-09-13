@@ -69,6 +69,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
@@ -111,15 +112,12 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
           TimeUnit.SECONDS,
           new LinkedBlockingQueue<>(),
           ThreadUtils.threadFactory("streampark-flink-savepoint-trigger"));
+
   @Autowired private SavepointMapper savepointMapper;
 
   @Override
   public void expire(Long appId) {
-    Savepoint savepoint = new Savepoint();
-    savepoint.setLatest(false);
-    LambdaQueryWrapper<Savepoint> queryWrapper =
-        new LambdaQueryWrapper<Savepoint>().eq(Savepoint::getAppId, appId);
-    this.update(savepoint, queryWrapper);
+    savepointMapper.cleanLatest(appId);
   }
 
   private void expire(Savepoint entity) {
@@ -226,12 +224,13 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     LambdaQueryWrapper<Savepoint> queryWrapper =
         new LambdaQueryWrapper<Savepoint>()
             .eq(Savepoint::getAppId, id)
-            .eq(Savepoint::getLatest, true);
-    Savepoint savepoint = this.baseMapper.selectOne(queryWrapper);
-    if (savepoint == null) {
-      savepoint = this.baseMapper.findLatestByTime(id);
+            .eq(Savepoint::getLatest, true)
+            .orderByDesc(Savepoint::getCreateTime);
+    List<Savepoint> savepointList = this.baseMapper.selectList(queryWrapper);
+    if (!savepointList.isEmpty()) {
+      return savepointList.get(0);
     }
-    return savepoint;
+    return this.baseMapper.findLatestByTime(id);
   }
 
   @Override
@@ -315,11 +314,10 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
   }
 
   @Override
-  public boolean save(Savepoint savepoint) {
+  public void saveSavePoint(Savepoint savepoint) {
     this.expire(savepoint);
-    this.expire(savepoint.getAppId());
     this.cleanLatest(savepoint.getAppId());
-    return super.save(savepoint);
+    super.save(savepoint);
   }
 
   private void cleanLatest(Long appId) {

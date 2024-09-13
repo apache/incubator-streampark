@@ -1444,7 +1444,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             savepoint.setType(CheckPointType.SAVEPOINT.get());
             savepoint.setCreateTime(new Date());
             savepoint.setTriggerTime(triggerTime);
-            savepointService.save(savepoint);
+            savepointService.saveSavePoint(savepoint);
           }
 
           if (application.isKubernetesModeJob()) {

@@ -181,7 +181,7 @@ public class CheckpointProcessor {
     savepoint.setPath(checkPoint.getExternalPath());
     savepoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
     savepoint.setCreateTime(new Date());
-    savepointService.save(savepoint);
+    savepointService.saveSavePoint(savepoint);
   }
 
   public static class Counter {
