@@ -281,11 +281,9 @@ public class Project implements Serializable {
   @JsonIgnore
   public String getBuildDir() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (buildType.equals(BuildType.MAVEN.get())) {
-      if (CommonUtils.notEmpty(this.getPom())) {
-        buildHome =
-            new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
-      }
+    if (buildType.equals(BuildType.MAVEN.get()) && CommonUtils.notEmpty(this.getPom())) {
+      buildHome =
+          new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
     }
     return buildHome;
   }
