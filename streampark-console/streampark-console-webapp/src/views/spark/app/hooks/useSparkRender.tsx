@@ -248,11 +248,11 @@ export const renderResourceFrom = (model: Recordable) => {
 export const renderStreamParkResource = ({ model, resources }) => {
   const renderOptions = () => {
     return (resources || [])
-      .filter((item) => item.resourceType !== ResourceTypeEnum.APP)
+      .filter((item) => item.resourceType === ResourceTypeEnum.APP)
       .map((resource) => {
         return (
           <Select.Option
-            key={resource.id}
+            key={resource.resourceName}
             label={resource.resourceType + '-' + resource.resourceName}
           >
             <div>
