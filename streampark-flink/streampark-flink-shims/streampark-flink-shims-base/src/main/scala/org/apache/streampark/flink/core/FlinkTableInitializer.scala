@@ -19,7 +19,7 @@ package org.apache.streampark.flink.core
 import org.apache.streampark.common.conf.ConfigConst._
 import org.apache.streampark.common.enums.{ApiType, PlannerType}
 import org.apache.streampark.common.enums.ApiType.ApiType
-import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
+import org.apache.streampark.common.util.DeflaterUtils
 import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import org.apache.flink.api.java.utils.ParameterTool
@@ -28,10 +28,8 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableConfig, TableEnvironment}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
-import java.io.File
-
-import scala.collection.{mutable, Map}
 import scala.collection.JavaConversions._
+import scala.collection.Map
 import scala.util.{Failure, Success, Try}
 
 private[flink] object FlinkTableInitializer {
@@ -175,57 +173,46 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   /** In case of table SQL, the parameter conf is not required, it depends on the developer. */
 
   override def initParameter(): FlinkConfiguration = {
-    val configuration = {
-      val configMap = parseConfig()
-      if (configMap.isEmpty) {
-        logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
+    val cliParameterTool = ParameterTool.fromArgs(args)
+    val configMap = super.parseConfig(cliParameterTool)
+    val flinkConfiguration = {
+      if (!cliParameterTool.has(KEY_APP_CONF()) && configMap.isEmpty) {
+        logWarn(
+          "Usage: can't fond config, this config is not required, you can set \"--conf $path \" in main arguments")
+        FlinkConfiguration(cliParameterTool, new Configuration(), new Configuration())
+      } else {
+        // config priority: explicitly specified priority > project profiles > system profiles
+        val flinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+        val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
+        val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
+        val sqlConf = extractConfigByPrefix(configMap, KEY_SQL_PREFIX)
+
+        val envConfig = Configuration.fromMap(flinkConf)
+        val tableConfig = Configuration.fromMap(tableConf)
+
+        val parameterTool = ParameterTool
+          .fromSystemProperties()
+          .mergeWith(ParameterTool.fromMap(flinkConf))
+          .mergeWith(ParameterTool.fromMap(appConf))
+          .mergeWith(ParameterTool.fromMap(tableConf))
+          .mergeWith(ParameterTool.fromMap(sqlConf))
+
+        FlinkConfiguration(parameterTool, envConfig, tableConfig)
       }
-      // set sql..
-      val sqlConf = mutable.Map[String, String]()
-      configMap.foreach(
-        x => {
-          if (x._1.startsWith(KEY_SQL_PREFIX)) {
-            sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
-          }
-        })
-
-      // config priority: explicitly specified priority > project profiles > system profiles
-      val flinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
-      val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
-      val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
-
-      val tableConfig = Configuration.fromMap(tableConf)
-      val envConfig = Configuration.fromMap(flinkConf)
-
-      val parameter = ParameterTool
-        .fromSystemProperties()
-        .mergeWith(ParameterTool.fromMap(flinkConf))
-        .mergeWith(ParameterTool.fromMap(tableConf))
-        .mergeWith(ParameterTool.fromMap(appConf))
-        .mergeWith(ParameterTool.fromMap(sqlConf))
-
-      FlinkConfiguration(parameter, envConfig, tableConfig)
     }
 
-    configuration.parameter.get(KEY_FLINK_SQL()) match {
-      case null => configuration
-      case param =>
-        // for streampark-console
-        Try(DeflaterUtils.unzipString(param)) match {
-          case Success(value) =>
-            configuration.copy(parameter = configuration.parameter.mergeWith(
-              ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value))))
-          case Failure(_) =>
-            val sqlFile = new File(param)
-            Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
-              case Success(value) =>
-                configuration.copy(parameter =
-                  configuration.parameter.mergeWith(ParameterTool.fromMap(value)))
-              case Failure(e) =>
-                new IllegalArgumentException(s"[StreamPark] init sql error.$e")
-                configuration
-            }
-        }
+    if (cliParameterTool.has(KEY_FLINK_SQL())) {
+      // for streampark-console
+      Try(DeflaterUtils.unzipString(cliParameterTool.get(KEY_FLINK_SQL()))) match {
+        case Success(value) =>
+          flinkConfiguration.copy(parameter = flinkConfiguration.parameter.mergeWith(
+            ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value))))
+        case Failure(e) =>
+          new IllegalArgumentException(s"[StreamPark] --sql parsing failed. $e")
+          flinkConfiguration
+      }
+    } else {
+      flinkConfiguration
     }
   }
 

@@ -80,10 +80,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   lazy val configuration: FlinkConfiguration = initParameter()
 
   def initParameter(): FlinkConfiguration = {
-    val configMap = parseConfig()
-    if (configMap.isEmpty) {
+    val argsMap = ParameterTool.fromArgs(args)
+    val configMap = parseConfig(argsMap)
+    if (!argsMap.has(KEY_APP_CONF()) && configMap.isEmpty) {
       throw new IllegalArgumentException(
-        "[StreamPark] Usage:can't fond config,please set \"--conf $path \" in main arguments")
+        "[StreamPark] Usage:can't fond config, please set \"--conf $path \" in main arguments")
     }
     val flinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
     val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
@@ -92,23 +93,21 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       .fromSystemProperties()
       .mergeWith(ParameterTool.fromMap(flinkConf))
       .mergeWith(ParameterTool.fromMap(appConf))
+      .mergeWith(argsMap)
 
     val envConfig = Configuration.fromMap(flinkConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 
-  def parseConfig(): Map[String, String] = {
-    val argsMap = ParameterTool.fromArgs(args)
-    val configAsMap = argsMap.get(KEY_APP_CONF(), null) match {
+  def parseConfig(parameterTool: ParameterTool): Map[String, String] = {
+    parameterTool.get(KEY_APP_CONF(), null) match {
       case null | "" =>
-        logWarn("[StreamPark] Usage:can't fond config, Now try to find from jar")
-        val propFormats =
+        logWarn("Usage:can't fond config, now trying to find from jar")
+        val configs =
           Set("application.yml", "application.yaml", "application.conf", "application.properties")
-        propFormats
+        configs
           .find(
-            f => {
-              Try(this.getClass.getClassLoader.getResource(f).getPath != null).getOrElse(false)
-            })
+            f => Try(this.getClass.getClassLoader.getResource(f).getPath != null).getOrElse(false))
           .map(
             f => {
               val input = this.getClass.getClassLoader.getResourceAsStream(f)
@@ -117,11 +116,10 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
               readConfig(format, content)
             })
           .getOrElse(return Map.empty[String, String])
-
       case config =>
         lazy val content = DeflaterUtils.unzipString(config.drop(7))
         lazy val format = config.split("\\.").last.toLowerCase
-        val map = config match {
+        val configAsMap = config match {
           case x if x.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
           case x if x.startsWith("conf://") => PropertiesUtils.fromHoconText(content)
           case x if x.startsWith("prop://") => PropertiesUtils.fromPropertiesText(content)
@@ -137,10 +135,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
             val text = FileUtils.readString(configFile)
             readConfig(format, text)
         }
-        map
+        configAsMap.filter(_._2.nonEmpty)
     }
-    // overwrite config...
-    (configAsMap ++ argsMap.toMap).filter(x => x._1 != KEY_APP_CONF() || x._2.nonEmpty)
   }
 
   private[this] def readConfig(format: String, text: String): Map[String, String] = {
