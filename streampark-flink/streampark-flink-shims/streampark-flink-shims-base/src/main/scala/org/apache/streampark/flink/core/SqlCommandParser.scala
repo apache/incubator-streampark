@@ -30,7 +30,7 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks.{break, breakable}
 
-object SqlCommandParser extends Logger {
+private[flink] object SqlCommandParser extends Logger {
 
   def parseSQL(
       sql: String,

@@ -19,7 +19,7 @@ package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
-import org.apache.streampark.flink.core.YarnClusterDescriptorWrapper
+import org.apache.streampark.flink.deployment.YarnClusterDescriptorWrapper
 import org.apache.streampark.flink.util.FlinkUtils
 
 import org.apache.flink.client.program.PackagedProgram

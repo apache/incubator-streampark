@@ -33,7 +33,7 @@ import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 
 import scala.util.{Failure, Try}
 
-object FlinkSqlValidator extends Logger {
+private[flink] object FlinkSqlValidator extends Logger {
 
   private[this] val FLINK112_CALCITE_PARSER_CLASS =
     "org.apache.flink.table.planner.calcite.CalciteParser"

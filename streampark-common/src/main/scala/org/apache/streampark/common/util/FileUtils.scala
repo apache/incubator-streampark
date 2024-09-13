@@ -170,4 +170,20 @@ object FileUtils {
     buffer.toString()
   }
 
+  @throws[IOException]
+  def readString(in: InputStream): String = {
+    require(in != null)
+    val scanner = new Scanner(in)
+    val buffer = new mutable.StringBuilder()
+    if (scanner.hasNextLine) {
+      buffer.append(scanner.nextLine())
+    }
+    while (scanner.hasNextLine) {
+      buffer.append("\r\n")
+      buffer.append(scanner.nextLine())
+    }
+    Utils.close(scanner)
+    buffer.toString()
+  }
+
 }

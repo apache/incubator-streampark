@@ -21,7 +21,6 @@ import org.apache.streampark.common.enums.{ApiType, PlannerType}
 import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.flink.core.EnhancerImplicit._
-import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
@@ -177,41 +176,35 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
 
   override def initParameter(): FlinkConfiguration = {
     val configuration = {
-      val argsMap = ParameterTool.fromArgs(args)
-      argsMap.get(KEY_APP_CONF(), null) match {
-        case null | "" =>
-          logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
-          val parameter = ParameterTool.fromSystemProperties().mergeWith(argsMap)
-          FlinkConfiguration(parameter, new Configuration(), new Configuration())
-        case file =>
-          val configMap = parseConfig(file)
-          // set sql..
-          val sqlConf = mutable.Map[String, String]()
-          configMap.foreach(
-            x => {
-              if (x._1.startsWith(KEY_SQL_PREFIX)) {
-                sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
-              }
-            })
-
-          // config priority: explicitly specified priority > project profiles > system profiles
-          val properConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
-          val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
-          val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
-
-          val tableConfig = Configuration.fromMap(tableConf)
-          val envConfig = Configuration.fromMap(properConf)
-
-          val parameter = ParameterTool
-            .fromSystemProperties()
-            .mergeWith(ParameterTool.fromMap(properConf))
-            .mergeWith(ParameterTool.fromMap(tableConf))
-            .mergeWith(ParameterTool.fromMap(appConf))
-            .mergeWith(ParameterTool.fromMap(sqlConf))
-            .mergeWith(argsMap)
-
-          FlinkConfiguration(parameter, envConfig, tableConfig)
+      val configMap = parseConfig()
+      if (configMap.isEmpty) {
+        logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
       }
+      // set sql..
+      val sqlConf = mutable.Map[String, String]()
+      configMap.foreach(
+        x => {
+          if (x._1.startsWith(KEY_SQL_PREFIX)) {
+            sqlConf += x._1.drop(KEY_SQL_PREFIX.length) -> x._2
+          }
+        })
+
+      // config priority: explicitly specified priority > project profiles > system profiles
+      val flinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+      val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
+      val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
+
+      val tableConfig = Configuration.fromMap(tableConf)
+      val envConfig = Configuration.fromMap(flinkConf)
+
+      val parameter = ParameterTool
+        .fromSystemProperties()
+        .mergeWith(ParameterTool.fromMap(flinkConf))
+        .mergeWith(ParameterTool.fromMap(tableConf))
+        .mergeWith(ParameterTool.fromMap(appConf))
+        .mergeWith(ParameterTool.fromMap(sqlConf))
+
+      FlinkConfiguration(parameter, envConfig, tableConfig)
     }
 
     configuration.parameter.get(KEY_FLINK_SQL()) match {

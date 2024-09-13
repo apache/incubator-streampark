@@ -17,8 +17,8 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.flink.core.EnhancerImplicit._
 
+import EnhancerImplicit._
 import com.esotericsoftware.kryo.Serializer
 import org.apache.flink.api.common.{JobExecutionResult, RuntimeExecutionMode}
 import org.apache.flink.api.common.cache.DistributedCache
