@@ -15,13 +15,25 @@
  * limitations under the License.
  */
 
-use streampark;
+package org.apache.streampark.console.core.enums;
 
-ALTER TABLE `t_external_link`
-    MODIFY `link_url` text collate utf8mb4_general_ci default null;
+import java.io.Serializable;
 
-ALTER TABLE `t_flink_project`
-    change column `branches` `refs` varchar(255) collate utf8mb4_general_ci default null;
+public enum BuildType implements Serializable {
 
-ALTER TABLE `t_flink_project`
-    add column `build_type` tinyint default null;
+  /** maven */
+  MAVEN(1),
+
+  /** gradle */
+  GRADLE(2);
+
+  private final int value;
+
+  BuildType(int value) {
+    this.value = value;
+  }
+
+  public int get() {
+    return this.value;
+  }
+}

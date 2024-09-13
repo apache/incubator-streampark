@@ -139,8 +139,8 @@ public class ProjectBuildTask extends AbstractLogFileTask {
   private boolean projectBuild(Project project) {
     int code =
         CommandUtils.execute(
-            project.getMavenWorkHome(),
-            Collections.singletonList(project.getMavenArgs()),
+            project.getBuildDir(),
+            Collections.singletonList(project.getBuildCommand()),
             (line) -> fileLogger.info(line));
     return code == 0;
   }
@@ -189,7 +189,7 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     for (File file : path.listFiles()) {
       // navigate to the target directory:
       if (file.isDirectory()) {
-        if ("target".equals(file.getName())) {
+        if ("target".equals(file.getName()) || "libs".equals(file.getName())) {
           // find the tar.gz file or the jar file in the target path.
           // note: only one of the two can be selected, which cannot be satisfied at the same time.
           File tar = null;

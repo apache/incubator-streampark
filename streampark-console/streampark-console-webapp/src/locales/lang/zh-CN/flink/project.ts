@@ -1,3 +1,5 @@
+import project from "../../en/flink/project";
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,7 +32,9 @@ export default {
     projectName: '项目名称',
     projectNamePlaceholder: '请输入项目名称',
     projectType: '项目类型',
+    projectBuildType: '项目构建类型',
     projectTypePlaceholder: '请选择项目类型',
+    projectBuildTypePlaceholder: '请选择项目构建类型，gradle需要在streampark环境中自己安装gradle环境',
     cvs: 'CVS',
     prvkeyPath: '私钥路径',
     prvkeyPathPlaceholder: '私钥文件路径, 如: ~/.ssh/id_rsa',
@@ -47,9 +51,9 @@ export default {
     branches: 'Branch/Tag',
     branchesPlaceholder: '请选择 Branch 或 Tag',
     pom: 'POM依赖',
-    pomPlaceholder: '默认情况下，在根路径中查找pom.xml，你可以手动指定模块来编译pom.xml',
+    pomPlaceholder: '默认情况下，在根路径中查找pom.xml，你可以手动指定模块来编译pom.xml。gradle不支持此功能。',
     buildArgs: '构建(项目)参数',
-    buildArgsPlaceholder: '构建参数, 比如: -Pprod',
+    buildArgsPlaceholder: '构建参数, 在Maven环境中只需要填入编译参数，比如: -Pprod；在Gradle环境中需要填入完整命令，比如：./gradlew shadowJar -p project_a',
     description: '描述',
     descriptionPlaceholder: '请输入对该项目的描述信息',
     lastBuild: '最后构建',
@@ -59,6 +63,7 @@ export default {
     projectNameIsRequiredMessage: '项目名称必填',
     projectNameIsUniqueMessage: '项目名称已存在，请再次输入',
     projectTypeIsRequiredMessage: '项目类型必选',
+    projectBuildTypeIsRequiredMessage: '项目构建类型必选',
     cvsIsRequiredMessage: '资源来源必选',
     repositoryURLIsRequiredMessage: '(项目)仓库地址必填',
     pomSpecifiesModuleMessage: '指定编译pom.xml的模块 如未指定，则在根路径pom.xml下找到',

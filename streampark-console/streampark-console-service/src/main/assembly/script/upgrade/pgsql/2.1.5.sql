@@ -24,3 +24,5 @@ ALTER TABLE "public"."t_flink_project"
 ALTER TABLE "public"."t_flink_project"
     rename column "branches" to "refs";
 
+ALTER TABLE "public"."t_flink_project"
+    add column "build_type" int2 after "type";

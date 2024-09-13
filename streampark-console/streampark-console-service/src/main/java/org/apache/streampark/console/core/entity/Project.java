@@ -23,6 +23,7 @@ import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
+import org.apache.streampark.console.core.enums.BuildType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,6 +92,9 @@ public class Project implements Serializable {
 
   /** 1) flink 2) spark */
   private Integer type;
+
+  /** 1) maven 2) gradle */
+  private Integer buildType;
 
   private Date createTime;
 
@@ -179,7 +183,16 @@ public class Project implements Serializable {
   }
 
   @JsonIgnore
-  public String getMavenArgs() {
+  public String getBuildCommand() {
+    if (this.buildType.equals(BuildType.MAVEN.get())) {
+      return getMavenArgs();
+    } else {
+      return buildArgs;
+    }
+  }
+
+  @JsonIgnore
+  private String getMavenArgs() {
     StringBuilder mvnArgBuffer = new StringBuilder(" clean package -DskipTests ");
     if (StringUtils.isNotBlank(this.buildArgs)) {
       mvnArgBuffer.append(this.buildArgs.trim());
@@ -266,11 +279,13 @@ public class Project implements Serializable {
   }
 
   @JsonIgnore
-  public String getMavenWorkHome() {
+  public String getBuildDir() {
     String buildHome = this.getAppSource().getAbsolutePath();
-    if (CommonUtils.notEmpty(this.getPom())) {
-      buildHome =
-          new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+    if (buildType.equals(BuildType.MAVEN.get())) {
+      if (CommonUtils.notEmpty(this.getPom())) {
+        buildHome =
+            new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+      }
     }
     return buildHome;
   }

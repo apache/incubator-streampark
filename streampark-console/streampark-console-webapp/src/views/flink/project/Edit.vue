@@ -63,6 +63,7 @@
         url: values.url,
         repository: values.repository,
         type: values.type,
+        buildType: values.buildType,
         refs: values.refs,
         userName: values.userName,
         password: values.password,
