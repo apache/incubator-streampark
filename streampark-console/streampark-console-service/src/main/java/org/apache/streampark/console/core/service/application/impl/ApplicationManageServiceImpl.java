@@ -492,6 +492,7 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                         long checkSum = org.apache.commons.io.FileUtils.checksumCRC32(jarFile);
                         if (!Objects.equals(checkSum, application.getJarCheckSum())) {
                             application.setBuild(true);
+                            application.setJarCheckSum(checkSum);
                         }
                     } catch (IOException e) {
                         log.error("Error in checksumCRC32 for {}.", jarFile);
