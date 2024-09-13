@@ -107,7 +107,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         propFormats
           .find(
             f => {
-              Try(this.getClass.getClassLoader.getResource(f)).getOrElse(false) == true
+              Try(this.getClass.getClassLoader.getResource(f).getPath != null).getOrElse(false)
             })
           .map(
             f => {
@@ -139,9 +139,8 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         }
         map
     }
-    // overview config...
-    configAsMap.putAll(argsMap.toMap.filter(_._1 != KEY_APP_CONF()))
-    configAsMap.filter(_._2.nonEmpty)
+    // overwrite config...
+    (configAsMap ++ argsMap.toMap).filter(x => x._1 != KEY_APP_CONF() || x._2.nonEmpty)
   }
 
   private[this] def readConfig(format: String, text: String): Map[String, String] = {
