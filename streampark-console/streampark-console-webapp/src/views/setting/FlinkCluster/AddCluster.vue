@@ -14,14 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'AddCluster',
-  });
-</script>
-<script setup lang="ts" name="AddCluster">
+<script setup lang="ts">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -82,12 +75,12 @@
   }
 </script>
 <template>
-  <PageWrapper content-full-height fixed-height content-class="flex flex-col bg-white">
+  <PageWrapper content-full-height content-background>
     <BasicForm
       @register="registerForm"
       @submit="handleSubmitCluster"
       :schemas="getClusterSchema"
-      class="mt-30px"
+      class="!my-30px"
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">

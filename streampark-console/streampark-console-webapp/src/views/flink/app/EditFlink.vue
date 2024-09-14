@@ -14,11 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default {
-    name: 'EditFlink',
-  };
-</script>
 <script setup lang="ts" name="EditFlink">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';

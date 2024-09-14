@@ -14,15 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useGo } from '/@/hooks/web/usePage';
-  export default defineComponent({
-    name: 'EditCluster',
-  });
-</script>
-<script setup lang="ts" name="EditCluster">
+<script setup lang="ts">
   import { PageWrapper } from '/@/components/Page';
+  import { useGo } from '/@/hooks/web/usePage';
   import { BasicForm, useForm } from '/@/components/Form';
   import { useMessage } from '/@/hooks/web/useMessage';
   import {
@@ -121,12 +115,12 @@
   });
 </script>
 <template>
-  <PageWrapper content-full-height fixed-height content-class="flex flex-col bg-white">
+  <PageWrapper content-full-height content-background>
     <BasicForm
       @register="registerForm"
       @submit="handleSubmitCluster"
       :schemas="getClusterSchema"
-      class="mt-30px"
+      class="!my-30px"
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
