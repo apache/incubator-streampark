@@ -25,88 +25,93 @@ const { t } = useI18n();
 
 /*  state map*/
 export const stateMap = {
-  [AppStateEnum.ADDED]: { color: '#2f54eb', title: t('flink.app.runState.added') },
+  [AppStateEnum.ADDED]: { color: '#2f54eb', title: t('spark.app.runState.added') },
   [AppStateEnum.NEW_SAVING]: {
     color: '#738df8',
-    title: t('flink.app.runState.saving'),
+    title: t('spark.app.runState.saving'),
     class: 'status-processing-initializing',
   },
-  [AppStateEnum.NEW]: { color: '#2f54eb', title: t('flink.app.runState.created') },
+  [AppStateEnum.NEW]: { color: '#2f54eb', title: t('spark.app.runState.new') },
   [AppStateEnum.STARTING]: {
     color: '#1AB58E',
-    title: t('flink.app.runState.starting'),
+    title: t('spark.app.runState.starting'),
     class: 'status-processing-starting',
   },
-  [AppStateEnum.SUBMITTE]: {
+  [AppStateEnum.SUBMITTED]: {
     color: '#13c2c2',
-    title: t('flink.app.runState.submitted'),
+    title: t('spark.app.runState.submitted'),
     class: 'status-processing-restarting',
   },
-  [AppStateEnum.ACCEPTE]: {
+  [AppStateEnum.ACCEPTED]: {
     color: '#52c41a',
-    title: t('flink.app.runState.accept'),
+    title: t('spark.app.runState.accept'),
     class: 'status-processing-running',
   },
-  [AppStateEnum.RUNNIN]: {
+  [AppStateEnum.SUCCEEDED]: {
+    color: '#52c41a',
+    title: t('spark.app.runState.success'),
+    class: 'status-processing-success',
+  },
+  [AppStateEnum.RUNNING]: {
     color: '#fa541c',
-    title: t('flink.app.runState.running'),
+    title: t('spark.app.runState.running'),
     class: 'status-processing-failing',
   },
-  [AppStateEnum.FINISHE]: { color: '#1890ff', title: t('flink.app.runState.finished') },
-  [AppStateEnum.FAILE]: { color: '#f5222d', title: t('flink.app.runState.failed') },
-  [AppStateEnum.LOS]: { color: '#333333', title: t('flink.app.runState.lost') },
+  [AppStateEnum.FINISHED]: { color: '#1890ff', title: t('spark.app.runState.finished') },
+  [AppStateEnum.FAILED]: { color: '#f5222d', title: t('spark.app.runState.failed') },
+  [AppStateEnum.LOST]: { color: '#333333', title: t('spark.app.runState.lost') },
   [AppStateEnum.MAPPING]: {
     color: '#13c2c2',
-    title: t('flink.app.runState.mapping'),
+    title: t('spark.app.runState.mapping'),
     class: 'status-processing-restarting',
   },
-  [AppStateEnum.OTHER]: { color: '#722ed1', title: t('flink.app.runState.other') },
+  [AppStateEnum.OTHER]: { color: '#722ed1', title: t('spark.app.runState.other') },
   [AppStateEnum.REVOKED]: {
     color: '#eb2f96',
-    title: t('flink.app.runState.revoked'),
+    title: t('spark.app.runState.revoked'),
     class: 'status-processing-reconciling',
   },
 
   [AppStateEnum.STOPPING]: {
     color: '#738df8',
-    title: t('flink.app.runState.stopping'),
+    title: t('spark.app.runState.stopping'),
     class: 'status-processing-initializing',
   },
-  [AppStateEnum.KILLED]: { color: '#8E50FF', title: t('flink.app.runState.killed') },
+  [AppStateEnum.KILLED]: { color: '#8E50FF', title: t('spark.app.runState.killed') },
 };
 /*  option state map*/
 export const optionStateMap = {
   [OptionStateEnum.RELEASING]: {
     color: '#1ABBDC',
-    title: t('flink.app.releaseState.releasing'),
+    title: t('spark.app.releaseState.releasing'),
     class: 'status-processing-deploying',
   },
   [OptionStateEnum.STOPPING]: {
     color: '#faad14',
-    title: t('flink.app.runState.cancelling'),
+    title: t('spark.app.runState.cancelling'),
     class: 'status-processing-cancelling',
   },
   [OptionStateEnum.STARTING]: {
     color: '#1AB58E',
-    title: t('flink.app.runState.starting'),
+    title: t('spark.app.runState.starting'),
     class: 'status-processing-starting',
   },
 };
 
 /* release state map*/
 export const releaseStateMap = {
-  [ReleaseStateEnum.FAILED]: { color: '#f5222d', title: t('flink.app.releaseState.failed') },
-  [ReleaseStateEnum.DONE]: { color: '#52c41a', title: t('flink.app.releaseState.success') },
-  [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: t('flink.app.releaseState.waiting') },
+  [ReleaseStateEnum.FAILED]: { color: '#f5222d', title: t('spark.app.releaseState.failed') },
+  [ReleaseStateEnum.DONE]: { color: '#52c41a', title: t('spark.app.releaseState.success') },
+  [ReleaseStateEnum.NEED_RELEASE]: { color: '#fa8c16', title: t('spark.app.releaseState.waiting') },
   [ReleaseStateEnum.RELEASING]: {
     color: '#52c41a',
-    title: t('flink.app.releaseState.releasing'),
+    title: t('spark.app.releaseState.releasing'),
     class: 'status-processing-deploying',
   },
-  [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: t('flink.app.releaseState.pending') },
+  [ReleaseStateEnum.NEED_RESTART]: { color: '#fa8c16', title: t('spark.app.releaseState.pending') },
   [ReleaseStateEnum.NEED_ROLLBACK]: {
     color: '#fa8c16',
-    title: t('flink.app.releaseState.waiting'),
+    title: t('spark.app.releaseState.waiting'),
   },
 };
 
@@ -206,7 +211,7 @@ export default defineComponent({
       });
     }
     const renderOtherOption = () => {
-      if ([AppStateEnum.RUNNIN, AppStateEnum.FAILE].includes(unref(data)?.state)) {
+      if ([AppStateEnum.RUNNING, AppStateEnum.FAILED].includes(unref(data)?.state)) {
         return (
           <div class="bold-tag">
             {unref(data).totalTask && (

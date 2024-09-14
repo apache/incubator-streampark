@@ -198,7 +198,7 @@
   /* view */
   async function handleJobView(app: SparkApplication) {
     // Task is running, restarting, in savePoint
-    if (app.state && [AppStateEnum.RUNNIN].includes(app.state)) {
+    if (app.state && [AppStateEnum.RUNNING].includes(app.state)) {
       // yarn-per-job|yarn-session|yarn-application
       await handleView(app, unref(yarn));
     }
@@ -323,7 +323,7 @@
             </Row>
           </Form>
           <div v-auth="'app:create'">
-            <Button type="primary" @click="() => router.push({ path: '/spark/app/create' })">
+            <Button type="primary" @click="() => router.push({ path: '/spark/app/add' })">
               <PlusOutlined />
               {{ t('common.add') }}
             </Button>
@@ -344,7 +344,7 @@
           <span
             class="link"
             :class="{
-              'cursor-pointer': [AppStateEnum.RUNNIN].includes(record.state),
+              'cursor-pointer': [AppStateEnum.RUNNING].includes(record.state),
             }"
             @click="handleJobView(record)"
           >

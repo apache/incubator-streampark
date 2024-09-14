@@ -55,7 +55,7 @@ export const useSparkColumns = () => {
     },
     {
       title: t('spark.app.sparkVersion'),
-      dataIndex: 'sparkVersion  ',
+      dataIndex: 'sparkVersion',
       width: unref(tableColumnWidth).sparkVersion,
     },
     {

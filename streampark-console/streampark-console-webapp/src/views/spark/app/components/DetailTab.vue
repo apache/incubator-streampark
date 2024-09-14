@@ -363,7 +363,11 @@
           </template>
         </BasicTable>
       </TabPane>
-      <TabPane key="2" :tab="t('spark.app.detail.detailTab.detailTabName.option')">
+      <TabPane
+        key="2"
+        :tab="t('spark.app.detail.detailTab.detailTabName.option')"
+        v-if="app.options"
+      >
         <Descriptions bordered size="middle" layout="vertical">
           <DescriptionItem v-for="(v, k) in JSON.parse(app.options || '{}')" :key="k" :label="k">
             {{ v }}
