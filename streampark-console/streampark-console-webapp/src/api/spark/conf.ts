@@ -18,7 +18,7 @@ import type { SparkApplication } from './app.type';
 import type { SparkApplicationConfig } from './conf.type';
 import { defHttp } from '/@/utils/http/axios';
 
-const apiPrefix = '/flink/conf';
+const apiPrefix = '/spark/conf';
 
 export function fetchGetSparkConf(data: { id: string }) {
   return defHttp.post<SparkApplicationConfig>({ url: `${apiPrefix}/get`, data });

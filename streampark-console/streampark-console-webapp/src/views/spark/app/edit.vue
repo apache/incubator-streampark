@@ -56,12 +56,12 @@
   /* custom mode */
   async function handleCustomJobMode(values: Recordable) {
     const params = {
-      jobType: JobTypeEnum.SQL,
+      jobType: JobTypeEnum.JAR,
       executionMode: values.executionMode,
       appType: AppTypeEnum.APACHE_SPARK,
       versionId: values.versionId,
       sparkSql: null,
-      jar: values.teamResource,
+      jar: values.jar,
       mainClass: values.mainClass,
       appName: values.appName,
       tags: values.tags,
@@ -121,17 +121,20 @@
   }
   /* send create request */
   async function handleUpdateAction(params: Recordable) {
-    const param: SparkApplication = {};
+    const fetchParams: SparkApplication = {};
     for (const k in params) {
       const v = params[k];
       if (v != null && v !== undefined) {
-        param[k] = v;
+        fetchParams[k] = v;
       }
     }
     const socketId = buildUUID();
     ls.set('DOWN_SOCKET_ID', socketId);
-    Object.assign(param, { socketId });
-    const updated = await fetchUpdateSparkApp(params);
+    Object.assign(fetchParams, {
+      socketId,
+      id: route.query.appId,
+    });
+    const updated = await fetchUpdateSparkApp(fetchParams);
     if (updated) {
       createMessage.success(t('spark.app.success'));
       go('/spark/app');

@@ -98,7 +98,7 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
       {
         tooltip: { title: t('spark.app.operation.cancel') },
         ifShow:
-          record.state == AppStateEnum.RUNNIN && record['optionState'] == OptionStateEnum.NONE,
+          record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         popConfirm: {
@@ -136,12 +136,12 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
         label: t('spark.app.operation.remapping'),
         ifShow: [
           AppStateEnum.ADDED,
-          AppStateEnum.FAILE,
+          AppStateEnum.FAILED,
           AppStateEnum.STOPPING,
           AppStateEnum.KILLED,
           AppStateEnum.SUCCEEDED,
-          AppStateEnum.FINISHE,
-          AppStateEnum.LOS,
+          AppStateEnum.FINISHED,
+          AppStateEnum.LOST,
         ].includes(record.state as AppStateEnum),
         auth: 'app:mapping',
         icon: 'ant-design:deployment-unit-outlined',
@@ -157,9 +157,9 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
           !isNullAndUnDef(record.state) &&
           [
             AppStateEnum.ADDED,
-            AppStateEnum.FAILE,
-            AppStateEnum.FINISHE,
-            AppStateEnum.LOS,
+            AppStateEnum.FAILED,
+            AppStateEnum.FINISHED,
+            AppStateEnum.LOST,
             AppStateEnum.SUCCEEDED,
             AppStateEnum.KILLED,
           ].includes(record.state),
@@ -253,7 +253,7 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
       showSubmitButton: false,
       showResetButton: false,
       async resetFunc() {
-        router.push({ path: '/spark/app/create' });
+        router.push({ path: '/spark/app/add' });
       },
       schemas: [
         {

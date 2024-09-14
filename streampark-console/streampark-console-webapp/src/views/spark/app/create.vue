@@ -63,7 +63,7 @@
       appType: AppTypeEnum.APACHE_SPARK,
       versionId: values.versionId,
       sparkSql: null,
-      jar: values.teamResource,
+      jar: values.jar,
       mainClass: values.mainClass,
       appName: values.appName,
       tags: values.tags,
