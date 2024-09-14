@@ -32,6 +32,8 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 
 import javax.annotation.Nonnull
 
+import java.util.{HashMap => JavaHashMap, Map => JavaMap}
+
 import scala.language.postfixOps
 
 /** kubernetes native mode submit */
@@ -69,6 +71,10 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
     if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
     }
+
+    // add pod labels, mainly to facilitate the management of k8s resources
+    addPodLabels(flinkConfig, KubernetesConfigOptions.JOB_MANAGER_LABELS, submitRequest)
+    addPodLabels(flinkConfig, KubernetesConfigOptions.TASK_MANAGER_LABELS, submitRequest)
 
     logInfo(s"""
                |------------------------------------------------------------------
@@ -180,6 +186,17 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       return k8sConf.replace("~", homePath)
     }
     null
+  }
+
+  private def addPodLabels(
+      flinkConfig: Configuration,
+      opt: ConfigOption[JavaMap[String, String]],
+      submitRequest: SubmitRequest): Unit = {
+    val labels = flinkConfig
+      .getOptional[JavaMap[String, String]](opt)
+      .orElse(new JavaHashMap[String, String]())
+    labels.put("jobId", submitRequest.jobId)
+    flinkConfig.safeSet(opt, labels)
   }
 
 }
