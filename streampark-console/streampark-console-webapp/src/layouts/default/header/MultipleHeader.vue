@@ -19,9 +19,9 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useLayoutHeight } from '../content/useContentViewHeight';
 
-  const HEADER_HEIGHT = 48;
-
+  const HEADER_HEIGHT = 64;
   const TABS_HEIGHT = 32;
+
   export default defineComponent({
     name: 'LayoutMultipleHeader',
     components: { LayoutHeader, MultipleTabs },
