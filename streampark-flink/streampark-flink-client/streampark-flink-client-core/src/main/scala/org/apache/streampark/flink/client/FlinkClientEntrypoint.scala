@@ -23,7 +23,7 @@ import org.apache.streampark.flink.client.`trait`.FlinkClientTrait
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.impl._
 
-object FlinkClientHandler {
+object FlinkClientEntrypoint {
 
   private[this] val clients: Map[ExecutionMode, FlinkClientTrait] = Map(
     LOCAL -> LocalClient,
