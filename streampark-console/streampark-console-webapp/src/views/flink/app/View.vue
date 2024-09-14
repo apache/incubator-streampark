@@ -39,7 +39,6 @@
   import { BasicTable, TableAction } from '/@/components/Table';
   import { AppListRecord } from '/@/api/flink/app/app.type';
   import { releaseTitleMap } from './data';
-  import { handleView } from './utils';
   import { useDrawer } from '/@/components/Drawer';
   import { useModal } from '/@/components/Modal';
 
@@ -213,10 +212,8 @@
   );
 
   /* view */
-  async function handleJobView(app: AppListRecord) {
-    if (app['appControl']['allowView'] === true) {
-      await handleView(app);
-    }
+  function handleJobView(app: AppListRecord) {
+    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
   }
 
   /* Update options data */
@@ -347,13 +344,7 @@
           <template v-if="column.dataIndex === 'jobName'">
             <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
             <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
-            <span
-              class="link"
-              :class="{
-                'cursor-pointer': record['appControl']['allowView'] === true,
-              }"
-              @click="handleJobView(record)"
-            >
+            <span class="link cursor-pointer" @click="handleJobView(record)">
               <Popover :title="t('common.detailText')">
                 <template #content>
                   <div class="flex">

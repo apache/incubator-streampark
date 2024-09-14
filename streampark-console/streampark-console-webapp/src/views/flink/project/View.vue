@@ -294,7 +294,7 @@
           handlePageDataReload(true);
         }
         start();
-      }, 2000);
+      }, 5000);
 
       /* View log */
       function handleViewLog(value: Recordable) {

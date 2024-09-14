@@ -226,11 +226,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       ],
       content: () => {
         return (
-          <Form
-            class="!pt-40px"
-            layout='vertical'
-            baseColProps = {{ span: 20, offset: 2 }}
-          >
+          <Form class="!pt-40px" layout="vertical" baseColProps={{ span: 20, offset: 2 }}>
             <Form.Item
               label="Job Name"
               validateStatus={unref(validateStatus)}
@@ -321,8 +317,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             class="!pt-40px"
             ref={mappingRef}
             name="mappingForm"
-            baseColProps = {{ span: 20, offset: 2 }}
-            layout='vertical'
+            baseColProps={{ span: 20, offset: 2 }}
+            layout="vertical"
             v-model:model={formValue}
           >
             <Form.Item label="Job Name">
