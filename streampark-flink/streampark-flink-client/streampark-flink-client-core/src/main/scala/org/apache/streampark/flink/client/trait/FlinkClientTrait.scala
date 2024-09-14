@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
 import org.apache.streampark.common.utils.CommonUtils
 import org.apache.streampark.flink.client.bean._
