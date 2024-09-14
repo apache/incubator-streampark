@@ -55,7 +55,7 @@ object SqlClient extends App {
     case Some(e) =>
       // 1) flink sql execution.runtime-mode has highest priority
       val m = e.operands(1).toUpperCase()
-      arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+      arguments += s"--${ExecutionOptions.RUNTIME_MODE.key()} $m"
       m
     case None =>
       // 2) dynamic properties execution.runtime-mode
@@ -68,7 +68,7 @@ object SqlClient extends App {
               // 3) application conf execution.runtime-mode
               parameter.getOrElse(KEY_FLINK_TABLE_MODE, defaultMode).toUpperCase()
           }
-          arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
+          arguments += s"--${ExecutionOptions.RUNTIME_MODE.key()} $m"
           m
         case m => m
       }

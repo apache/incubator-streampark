@@ -226,11 +226,13 @@ export const useFlinkApplication = (openStartModal: Fn) => {
       ],
       content: () => {
         return (
-          <Form class="!pt-40px">
+          <Form
+            class="!pt-40px"
+            layout='vertical'
+            baseColProps = {{ span: 20, offset: 2 }}
+          >
             <Form.Item
               label="Job Name"
-              labelCol={{ lg: { span: 5 }, sm: { span: 5 } }}
-              wrapperCol={{ lg: { span: 18 }, sm: { span: 18 } }}
               validateStatus={unref(validateStatus)}
               help={help}
               rules={[{ required: true }]}
@@ -319,8 +321,8 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             class="!pt-40px"
             ref={mappingRef}
             name="mappingForm"
-            labelCol={{ lg: { span: 5 }, sm: { span: 5 } }}
-            wrapperCol={{ lg: { span: 18 }, sm: { span: 18 } }}
+            baseColProps = {{ span: 20, offset: 2 }}
+            layout='vertical'
             v-model:model={formValue}
           >
             <Form.Item label="Job Name">

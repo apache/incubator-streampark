@@ -27,7 +27,7 @@ import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 import scala.util.Try
 
-object EnhancerImplicit {
+private[flink] object EnhancerImplicit {
 
   implicit class EnhanceParameterTool(parameterTool: ParameterTool) {
 

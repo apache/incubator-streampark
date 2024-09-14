@@ -17,8 +17,8 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigConst.printLogo
-import org.apache.streampark.flink.core.EnhancerImplicit._
 
+import EnhancerImplicit._
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api._

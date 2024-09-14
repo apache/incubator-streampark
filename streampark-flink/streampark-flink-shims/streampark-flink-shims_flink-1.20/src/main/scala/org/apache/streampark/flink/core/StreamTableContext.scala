@@ -17,6 +17,8 @@
 
 package org.apache.streampark.flink.core
 
+import org.apache.streampark.flink.core.FlinkTableInitializer
+
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.table.api.{CompiledPlan, ExplainDetail, ExplainFormat, PlanReference, Schema, Table, TableDescriptor, TableResult}

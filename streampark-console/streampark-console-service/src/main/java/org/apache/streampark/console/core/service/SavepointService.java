@@ -44,4 +44,6 @@ public interface SavepointService extends IService<Savepoint> {
   String getSavePointPath(Application app) throws Exception;
 
   String processPath(String path, String jobName, Long jobId);
+
+  void saveSavePoint(Savepoint savepoint);
 }
