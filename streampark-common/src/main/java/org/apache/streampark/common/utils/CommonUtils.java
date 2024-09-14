@@ -18,6 +18,8 @@
 package org.apache.streampark.common.utils;
 
 public class CommonUtils {
+  private CommonUtils() {}
+
   public static String fixedValueBaseVar(String configValue, String jobName) {
     return configValue.replace("${jobName}", jobName);
   }
