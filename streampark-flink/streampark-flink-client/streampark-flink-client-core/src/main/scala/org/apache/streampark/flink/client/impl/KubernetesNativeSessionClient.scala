@@ -27,7 +27,6 @@ import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
-import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._
@@ -212,10 +211,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
   }
 
   private[this] def getFlinkK8sConfig(deployRequest: KubernetesDeployRequest): Configuration = {
-    extractConfiguration(
-      deployRequest.flinkVersion.flinkHome,
-      deployRequest.properties,
-      deployRequest.clusterName)
+    extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
       .safeSet(DeploymentOptions.TARGET, KubernetesDeploymentTarget.SESSION.getName)
       .safeSet(KubernetesConfigOptions.NAMESPACE, deployRequest.kubernetesNamespace)
       .safeSet(KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT, deployRequest.serviceAccount)
