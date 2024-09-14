@@ -138,10 +138,7 @@ object YarnSessionClient extends YarnClientTrait {
     var client: ClusterClient[ApplicationId] = null
     try {
       val flinkConfig =
-        extractConfiguration(
-          deployRequest.flinkVersion.flinkHome,
-          deployRequest.properties,
-          deployRequest.clusterName)
+        extractConfiguration(deployRequest.flinkVersion.flinkHome, deployRequest.properties)
 
       deployClusterConfig(deployRequest, flinkConfig)
 
