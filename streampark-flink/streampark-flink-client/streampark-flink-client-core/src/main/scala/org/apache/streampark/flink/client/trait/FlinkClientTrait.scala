@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.`trait`
 
 import org.apache.streampark.common.conf.ConfigConst._
-import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode, ExecutionMode}
+import org.apache.streampark.common.enums.{ApplicationType, DevelopmentMode}
 import org.apache.streampark.common.util.{DeflaterUtils, Logger, PropertiesUtils, Utils}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.core.conf.FlinkRunOption
@@ -34,7 +34,6 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointConfigOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 
@@ -151,27 +150,10 @@ trait FlinkClientTrait extends Logger {
           })
     }
 
-    // 5) add jobId Label To Kubernetes Pod, convenient for query in prometheus
-    if (ExecutionMode.isKubernetesMode(submitRequest.executionMode)) {
-      addPodJobIdLabels(flinkConfig, KubernetesConfigOptions.JOB_MANAGER_LABELS, submitRequest)
-      addPodJobIdLabels(flinkConfig, KubernetesConfigOptions.TASK_MANAGER_LABELS, submitRequest)
-    }
-
     flinkConfig
   }
 
   def setConfig(submitRequest: SubmitRequest, flinkConf: Configuration): Unit
-
-  private def addPodJobIdLabels(
-      flinkConfig: Configuration,
-      opt: ConfigOption[java.util.Map[String, String]],
-      submitRequest: SubmitRequest): Unit = {
-    val labels = flinkConfig
-      .getOptional[java.util.Map[String, String]](opt)
-      .orElse(new java.util.HashMap[String, String]())
-    labels.put("jobId", submitRequest.jobId)
-    flinkConfig.safeSet(opt, labels)
-  }
 
   @throws[Exception]
   def triggerSavepoint(savepointRequest: TriggerSavepointRequest): SavepointResponse = {
