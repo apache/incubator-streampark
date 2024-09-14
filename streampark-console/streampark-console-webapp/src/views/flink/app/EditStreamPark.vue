@@ -14,11 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default {
-    name: 'EditStreamPark',
-  };
-</script>
 <script setup lang="ts" name="EditStreamPark">
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
