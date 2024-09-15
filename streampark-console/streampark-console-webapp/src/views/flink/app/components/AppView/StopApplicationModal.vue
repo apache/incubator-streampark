@@ -54,9 +54,8 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        defaultValue: true,
-        afterItem: () =>
-          h('span', { class: 'conf-switch' }, t('flink.app.operation.enableSavePoint')),
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.operation.enableSavePoint')),
       },
       {
         field: 'customSavepoint',
@@ -78,7 +77,7 @@
         },
         defaultValue: false,
         ifShow: ({ values }) => !!values.triggerSavepoint,
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.operation.enableDrain')),
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.operation.enableDrain')),
       },
     ],
     colon: true,

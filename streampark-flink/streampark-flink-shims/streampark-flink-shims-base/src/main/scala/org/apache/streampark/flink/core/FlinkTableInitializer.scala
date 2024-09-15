@@ -196,6 +196,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           .mergeWith(ParameterTool.fromMap(appConf))
           .mergeWith(ParameterTool.fromMap(tableConf))
           .mergeWith(ParameterTool.fromMap(sqlConf))
+          .mergeWith(cliParameterTool)
 
         FlinkConfiguration(parameterTool, envConfig, tableConfig)
       }

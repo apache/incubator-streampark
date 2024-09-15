@@ -232,7 +232,7 @@ export const renderOptionsItems = (
             rules={[{ validator: conf.validator }]}
           />
         )}
-        {conf.type === 'switch' && <span class="conf-switch">({conf.placeholder})</span>}
+        {conf.type === 'switch' && <span>({conf.placeholder})</span>}
         <p class="conf-desc"> {descriptionFilter(conf)} </p>
       </Form.Item>
     );

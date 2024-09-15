@@ -156,7 +156,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
 
     if (cpThreshold == 0) {
       String flinkConfNumRetained =
-          flinkEnv.getFlinkConfig(application).getProperty(numRetainedKey);
+          flinkEnvService.getFlinkConfig(flinkEnv, application).getProperty(numRetainedKey);
       int numRetainedDefaultValue = 1;
       if (flinkConfNumRetained != null) {
         try {
@@ -293,7 +293,7 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
     if (StringUtils.isBlank(savepointPath)) {
       // flink
       FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
-      Properties flinkConfig = flinkEnv.getFlinkConfig(application);
+      Properties flinkConfig = flinkEnvService.getFlinkConfig(flinkEnv, application);
       savepointPath =
           flinkConfig.getProperty(
               CheckpointingOptions.SAVEPOINT_DIRECTORY.key(),
@@ -306,10 +306,8 @@ public class SavepointServiceImpl extends ServiceImpl<SavepointMapper, Savepoint
   @Override
   public String processPath(String path, String jobName, Long jobId) {
     if (StringUtils.isNotBlank(path)) {
-      return path.replaceAll("\\$job(Id|id)", jobId.toString())
-          .replaceAll("\\$\\{job(Id|id)}", jobId.toString())
-          .replaceAll("\\$job(Name|name)", jobName)
-          .replaceAll("\\$\\{job(Name|name)}", jobName);
+      return path.replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", jobName)
+          .replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", jobId.toString());
     }
     return path;
   }

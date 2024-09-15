@@ -114,11 +114,11 @@ trait FlinkClientTrait extends Logger {
       .safeSet(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID, submitRequest.jobId)
 
     if (!submitRequest.hasProp(CheckpointingOptions.MAX_RETAINED_CHECKPOINTS.key())) {
-      val flinkDefaultConfiguration = getFlinkDefaultConfiguration(
-        submitRequest.flinkVersion.flinkHome)
       // state.checkpoints.num-retained
       val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
-      flinkConfig.safeSet(retainedOption, flinkDefaultConfiguration.get(retainedOption))
+      flinkConfig.safeSet(
+        retainedOption,
+        submitRequest.flinkDefaultConfiguration.get(retainedOption))
     }
 
     // 2) set savepoint parameter
@@ -279,29 +279,20 @@ trait FlinkClientTrait extends Logger {
     throw new IllegalStateException("No valid command-line found.")
   }
 
-  private[client] def getFlinkDefaultConfiguration(flinkHome: String): Configuration = {
-    Try(GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")).getOrElse(new Configuration())
-  }
-
-  private[client] def getOptionFromDefaultFlinkConfig[T](
-      flinkHome: String,
-      option: ConfigOption[T]): T = {
-    getFlinkDefaultConfiguration(flinkHome).get(option)
-  }
-
   private[this] def getCustomCommandLines(flinkHome: String): JavaList[CustomCommandLine] = {
-    val flinkDefaultConfiguration: Configuration = getFlinkDefaultConfiguration(flinkHome)
     // 1. find the configuration directory
     val configurationDirectory = s"$flinkHome/conf"
     // 2. load the custom command lines
-    loadCustomCommandLines(flinkDefaultConfiguration, configurationDirectory)
+    val flinkConfig =
+      Try(GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")).getOrElse(new Configuration())
+    loadCustomCommandLines(flinkConfig, configurationDirectory)
   }
 
   private[client] def getParallelism(submitRequest: SubmitRequest): Integer = {
     if (submitRequest.properties.containsKey(KEY_FLINK_PARALLELISM())) {
       Integer.valueOf(submitRequest.properties.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
-      getFlinkDefaultConfiguration(submitRequest.flinkVersion.flinkHome)
+      submitRequest.flinkDefaultConfiguration
         .getInteger(CoreOptions.DEFAULT_PARALLELISM, CoreOptions.DEFAULT_PARALLELISM.defaultValue())
     }
   }
@@ -371,20 +362,20 @@ trait FlinkClientTrait extends Logger {
 
     val commandLine = FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
-    val activeCommandLine = validateAndGetActiveCommandLine(
-      getCustomCommandLines(submitRequest.flinkVersion.flinkHome),
-      commandLine)
+    val activeCommandLine = {
+      val customCommandLines: JavaList[CustomCommandLine] = {
+        // 1. find the configuration directory
+        val configurationDirectory = s"${submitRequest.flinkVersion.flinkHome}/conf"
+        // 2. load the custom command lines
+        loadCustomCommandLines(submitRequest.flinkDefaultConfiguration, configurationDirectory)
+      }
+      validateAndGetActiveCommandLine(customCommandLines, commandLine)
+    }
 
-    val configuration =
-      applyConfiguration(
-        submitRequest.flinkVersion.flinkHome,
-        activeCommandLine,
-        commandLine,
-        submitRequest.id.toString,
-        submitRequest.effectiveAppName)
+    val configuration = new Configuration(submitRequest.flinkDefaultConfiguration)
+    configuration.addAll(activeCommandLine.toConfiguration(commandLine))
 
     commandLine -> configuration
-
   }
 
   private[client] def getCommandLineOptions(flinkHome: String) = {
@@ -417,10 +408,16 @@ trait FlinkClientTrait extends Logger {
       }
       FlinkRunOption.parse(commandLineOptions, cliArgs, true)
     }
+
     val activeCommandLine =
       validateAndGetActiveCommandLine(getCustomCommandLines(flinkHome), commandLine)
-    val flinkConfig = applyConfiguration(flinkHome, activeCommandLine, commandLine)
-    flinkConfig
+
+    val flinkDefaultConfiguration =
+      Try(GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")).getOrElse(new Configuration())
+
+    val configuration = new Configuration(flinkDefaultConfiguration)
+    configuration.addAll(activeCommandLine.toConfiguration(commandLine))
+    configuration
   }
 
   private[this] def extractProgramArgs(submitRequest: SubmitRequest): JavaList[String] = {
@@ -443,32 +440,6 @@ trait FlinkClientTrait extends Logger {
       }
     }
     Lists.newArrayList(programArgs: _*)
-  }
-
-  private[this] def applyConfiguration(
-      flinkHome: String,
-      activeCustomCommandLine: CustomCommandLine,
-      commandLine: CommandLine,
-      jobId: String = null,
-      jobName: String = null): Configuration = {
-
-    require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
-    val configuration = new Configuration()
-    val flinkDefaultConfiguration = getFlinkDefaultConfiguration(flinkHome)
-    flinkDefaultConfiguration.keySet.foreach(
-      key => {
-        val value = flinkDefaultConfiguration.getString(key, null)
-        var result = value
-        if (value != null && StringUtils.isNotBlank(jobName)) {
-          result = value.replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", jobName)
-        }
-        if (jobId != null) {
-          result = result.replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", jobId)
-        }
-        configuration.setString(key, result)
-      })
-    configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
-    configuration
   }
 
   implicit private[client] class EnhanceFlinkConfiguration(flinkConfig: Configuration) {

@@ -26,6 +26,7 @@ import org.apache.streampark.flink.util.FlinkUtils
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
 import org.apache.commons.io.FileUtils
+import org.apache.flink.configuration.{Configuration, GlobalConfiguration}
 import org.apache.flink.runtime.jobgraph.{SavepointConfigOptions, SavepointRestoreSettings}
 
 import javax.annotation.Nullable
@@ -34,7 +35,7 @@ import java.io.File
 import java.util.{Map => JavaMap}
 
 import scala.collection.JavaConversions._
-import scala.util.Try
+import scala.util.{Success, Try}
 
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
@@ -95,6 +96,26 @@ case class SubmitRequest(
     flinkVersion.version.split("\\.").map(_.trim.toInt) match {
       case Array(a, b, c) if a >= 1 => b > 12 || (b == 12 && c >= 2)
       case _ => false
+    }
+  }
+
+  lazy val flinkDefaultConfiguration: Configuration = {
+    Try(GlobalConfiguration.loadConfiguration(s"${flinkVersion.flinkHome}/conf")) match {
+      case Success(value) =>
+        value
+          .keySet()
+          .foreach(
+            k => {
+              val v = value.getString(k, null)
+              if (v != null) {
+                val result = v
+                  .replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", effectiveAppName)
+                  .replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", id.toString)
+                value.setString(k, result)
+              }
+            })
+        value
+      case _ => new Configuration()
     }
   }
 
