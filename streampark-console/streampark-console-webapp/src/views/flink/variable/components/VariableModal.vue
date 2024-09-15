@@ -120,7 +120,7 @@
         },
         defaultValue: false,
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, t('flink.variable.form.desensitizationDesc')),
+          h('span', { class: 'pop-tip' }, t('flink.variable.form.desensitizationDesc')),
       },
       {
         field: 'description',
@@ -188,11 +188,3 @@
     }
   }
 </script>
-
-<style lang="less">
-  .conf-switch {
-    display: inline-block;
-    margin-top: 10px;
-    color: darkgrey;
-  }
-</style>

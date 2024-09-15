@@ -75,8 +75,8 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        defaultValue: true,
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointTip')),
+        defaultValue: receiveData.historySavePoint && receiveData.historySavePoint.length,
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.savepointTip')),
       },
       {
         field: 'savepointPath',
@@ -86,7 +86,7 @@
             ? 'Select'
             : 'Input',
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, handleSavePointTip(receiveData.historySavePoint)),
+          h('span', { class: 'pop-tip' }, handleSavePointTip(receiveData.historySavePoint)),
         slot: 'savepoint',
         ifShow: ({ values }) => values.restoreSavepoint,
         required: true,
@@ -99,7 +99,7 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.ignoreRestoredTip')),
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.ignoreRestoredTip')),
         defaultValue: false,
         ifShow: ({ values }) => values.restoreSavepoint,
       },

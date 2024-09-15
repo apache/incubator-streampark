@@ -56,7 +56,7 @@
           allowClear: true,
           placeholder: t('setting.alarm.alertNamePlaceHolder'),
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, t('setting.alarm.alertNameTips')),
+        afterItem: () => h('span', { class: 'pop-tip' }, t('setting.alarm.alertNameTips')),
         dynamicRules: () => {
           return [
             {
