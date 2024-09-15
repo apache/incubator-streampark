@@ -17,15 +17,20 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -40,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
 
 @Slf4j
 @Service
@@ -162,6 +169,25 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
   public IPage<FlinkEnv> findPage(FlinkEnv flinkEnv, RestRequest restRequest) {
     Page<Project> page = MybatisPager.getPage(restRequest);
     return this.baseMapper.findPage(page, flinkEnv);
+  }
+
+  @Override
+  public Properties getFlinkConfig(FlinkEnv flinkEnv, Application application) {
+    String flinkYamlString = DeflaterUtils.unzipString(flinkEnv.getFlinkConf());
+    Properties flinkConfig = new Properties();
+    Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
+    for (Map.Entry<String, String> entry : config.entrySet()) {
+      String value = entry.getValue();
+      if (StringUtils.isNotBlank(application.getJobName())) {
+        value =
+            value.replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", application.getJobName());
+      }
+      if (application.getId() != null) {
+        value = value.replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", application.getId().toString());
+      }
+      flinkConfig.setProperty(entry.getKey(), value);
+    }
+    return flinkConfig;
   }
 
   private void checkOrElseAlert(FlinkEnv flinkEnv) {

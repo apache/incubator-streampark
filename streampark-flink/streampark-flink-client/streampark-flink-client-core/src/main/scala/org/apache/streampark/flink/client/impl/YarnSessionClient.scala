@@ -184,15 +184,11 @@ object YarnSessionClient extends YarnClientTrait {
     var clusterDescriptor: YarnClusterDescriptor = null
     var client: ClusterClient[ApplicationId] = null
     try {
-      val flinkConfig = getFlinkDefaultConfiguration(shutDownRequest.flinkVersion.flinkHome)
-      shutDownRequest.properties.foreach(
-        m =>
-          m._2 match {
-            case v if v != null => flinkConfig.setString(m._1, m._2.toString)
-            case _ =>
-          })
-      flinkConfig.safeSet(YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId)
-      flinkConfig.safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+      val flinkConfig = new Configuration()
+      flinkConfig
+        .safeSet(YarnConfigOptions.APPLICATION_ID, shutDownRequest.clusterId)
+        .safeSet(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+        .safeSet(YarnConfigOptions.APPLICATION_TAGS, "streampark")
       val yarnClusterDescriptor = getYarnClusterDescriptor(flinkConfig)
       val applicationId: ApplicationId = yarnClusterDescriptor._1
       clusterDescriptor = yarnClusterDescriptor._2

@@ -119,7 +119,7 @@ public class FlinkK8sWatcherWrapper {
 
   public TrackId toTrackId(Application app) {
     FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
-    Properties properties = flinkEnv.getFlinkConfig(app);
+    Properties properties = flinkEnvService.getFlinkConfig(flinkEnv, app);
 
     Map<String, String> dynamicProperties =
         PropertiesUtils.extractDynamicPropertiesAsJava(app.getDynamicProperties());
