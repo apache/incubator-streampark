@@ -75,7 +75,7 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        defaultValue: receiveData.historySavePoint && receiveData.historySavePoint.length,
+        defaultValue: receiveData.historySavePoint && receiveData.historySavePoint.length > 0,
         afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.savepointTip')),
       },
       {

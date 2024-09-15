@@ -101,12 +101,6 @@ export const useAppTableAction = (
         onClick: handleCancel.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.detail') },
-        auth: 'app:detail',
-        icon: 'carbon:data-view-alt',
-        onClick: handleDetail.bind(null, record),
-      },
-      {
         tooltip: { title: t('flink.app.operation.edit') },
         auth: 'app:update',
         icon: 'clarity:note-edit-line',
@@ -230,11 +224,6 @@ export const useAppTableAction = (
     }
   }
 
-  /* Click for details */
-  function handleDetail(app: AppListRecord) {
-    flinkAppStore.setApplicationId(app.id);
-    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
-  }
   // click savepoint for application
   function handleSavepoint(app: AppListRecord) {
     if (!optionApps.savepointing.get(app.id) || app['optionState'] == OptionStateEnum.NONE) {
