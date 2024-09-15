@@ -77,6 +77,8 @@ object YarnSessionClient extends YarnClientTrait {
       // app name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, deployRequest.clusterName)
 
+    replaceConfig(flinkConfig, "\\$\\{job(Name|name)}|\\$job(Name|name)", deployRequest.clusterName)
+
     logInfo(s"""
                |------------------------------------------------------------------
                |Effective submit configuration: $flinkConfig

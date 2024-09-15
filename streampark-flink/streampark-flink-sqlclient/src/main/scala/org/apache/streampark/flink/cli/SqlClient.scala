@@ -53,7 +53,7 @@ object SqlClient extends App {
 
   private[this] val mode = sets.find(_.operands.head == ExecutionOptions.RUNTIME_MODE.key()) match {
     case Some(e) =>
-      // 1) flink sql execution.runtime-mode has highest priority
+      // 1) flink sql execution.runtime-mode has the highest priority
       val m = e.operands(1).toUpperCase()
       arguments += s"--${ExecutionOptions.RUNTIME_MODE.key()} $m"
       m

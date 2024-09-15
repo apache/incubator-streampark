@@ -72,7 +72,7 @@ abstract class FlinkStreamTableTrait(
 
   /** Recommended to use this Api to start tasks */
   def start(name: String = null): JobExecutionResult = {
-    val appName = parameter.getAppName(name, true)
+    val appName = parameter.getAppName(name, required = true)
     execute(appName)
   }
 

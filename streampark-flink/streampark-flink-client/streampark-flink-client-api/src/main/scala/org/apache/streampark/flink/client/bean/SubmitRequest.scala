@@ -102,19 +102,25 @@ case class SubmitRequest(
   lazy val flinkDefaultConfiguration: Configuration = {
     Try(GlobalConfiguration.loadConfiguration(s"${flinkVersion.flinkHome}/conf")) match {
       case Success(value) =>
-        value
-          .keySet()
-          .foreach(
-            k => {
-              val v = value.getString(k, null)
-              if (v != null) {
-                val result = v
-                  .replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", effectiveAppName)
-                  .replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", id.toString)
-                value.setString(k, result)
-              }
-            })
-        value
+        executionMode match {
+          case ExecutionMode.YARN_SESSION | ExecutionMode.KUBERNETES_NATIVE_SESSION |
+              ExecutionMode.REMOTE =>
+            value
+          case _ =>
+            value
+              .keySet()
+              .foreach(
+                k => {
+                  val v = value.getString(k, null)
+                  if (v != null) {
+                    val result = v
+                      .replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", effectiveAppName)
+                      .replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", id.toString)
+                    value.setString(k, result)
+                  }
+                })
+            value
+        }
       case _ => new Configuration()
     }
   }

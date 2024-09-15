@@ -150,6 +150,9 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |""".stripMargin)
 
     val flinkConfig = getFlinkK8sConfig(deployRequest)
+
+    replaceConfig(flinkConfig, "\\$\\{job(Name|name)}|\\$job(Name|name)", deployRequest.clusterName)
+
     val kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
