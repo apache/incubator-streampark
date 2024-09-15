@@ -49,7 +49,7 @@
 
   const { t } = useI18n();
 
-  const appNotRunning = ref(false);
+  const appNotRunning = ref(true);
 
   const yarn = ref('');
   const externalLinks = ref<ExternalLink[]>([]);

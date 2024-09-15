@@ -101,16 +101,16 @@ export const useAppTableAction = (
         onClick: handleCancel.bind(null, record),
       },
       {
-        tooltip: { title: t('flink.app.operation.edit') },
-        auth: 'app:update',
-        icon: 'clarity:note-edit-line',
-        onClick: handleEdit.bind(null, record, currentPageNo),
-      },
-      {
         tooltip: { title: t('flink.app.operation.detail') },
         auth: 'app:detail',
         icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
+      },
+      {
+        tooltip: { title: t('flink.app.operation.edit') },
+        auth: 'app:update',
+        icon: 'clarity:note-edit-line',
+        onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
         tooltip: { title: t('flink.app.operation.startLog') },
