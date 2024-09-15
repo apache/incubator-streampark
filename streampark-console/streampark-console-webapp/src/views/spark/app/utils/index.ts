@@ -107,9 +107,9 @@ export async function handleView(app: SparkApplication, yarn: Nullable<string>) 
 export function handleIsStart(app: Recordable, optionApps: Recordable) {
   const status = [
     AppStateEnum.ADDED,
-    AppStateEnum.FAILE,
-    AppStateEnum.FINISHE,
-    AppStateEnum.LOS,
+    AppStateEnum.FAILED,
+    AppStateEnum.FINISHED,
+    AppStateEnum.LOST,
     AppStateEnum.REVOKED,
     AppStateEnum.SUCCEEDED,
     AppStateEnum.KILLED,
