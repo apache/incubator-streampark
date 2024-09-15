@@ -27,7 +27,6 @@ import org.apache.streampark.flink.kubernetes.KubernetesRetriever
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
-import io.fabric8.kubernetes.api.model.{Config => _}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram}
 import org.apache.flink.configuration._

@@ -376,7 +376,12 @@ trait FlinkClientTrait extends Logger {
       commandLine)
 
     val configuration =
-      applyConfiguration(submitRequest.flinkVersion.flinkHome, activeCommandLine, commandLine)
+      applyConfiguration(
+        submitRequest.flinkVersion.flinkHome,
+        activeCommandLine,
+        commandLine,
+        submitRequest.id.toString,
+        submitRequest.effectiveAppName)
 
     commandLine -> configuration
 
@@ -443,7 +448,9 @@ trait FlinkClientTrait extends Logger {
   private[this] def applyConfiguration(
       flinkHome: String,
       activeCustomCommandLine: CustomCommandLine,
-      commandLine: CommandLine): Configuration = {
+      commandLine: CommandLine,
+      jobId: String = null,
+      jobName: String = null): Configuration = {
 
     require(activeCustomCommandLine != null, "activeCustomCommandLine must not be null.")
     val configuration = new Configuration()
@@ -451,9 +458,14 @@ trait FlinkClientTrait extends Logger {
     flinkDefaultConfiguration.keySet.foreach(
       key => {
         val value = flinkDefaultConfiguration.getString(key, null)
-        if (value != null) {
-          configuration.setString(key, value)
+        var result = value
+        if (value != null && StringUtils.isNotBlank(jobName)) {
+          result = value.replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", jobName)
         }
+        if (jobId != null) {
+          result = result.replaceAll("\\$\\{job(Id|id)}|\\$job(Id|id)", jobId)
+        }
+        configuration.setString(key, result)
       })
     configuration.addAll(activeCustomCommandLine.toConfiguration(commandLine))
     configuration

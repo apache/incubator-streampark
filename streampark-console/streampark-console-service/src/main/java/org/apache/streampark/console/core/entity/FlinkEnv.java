@@ -20,6 +20,7 @@ package org.apache.streampark.console.core.entity;
 import org.apache.streampark.common.conf.FlinkVersion;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
+import org.apache.streampark.common.utils.CommonUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 
@@ -115,11 +116,14 @@ public class FlinkEnv implements Serializable {
   }
 
   @JsonIgnore
-  public Properties getFlinkConfig() {
+  public Properties getFlinkConfig(Application application) {
     String flinkYamlString = DeflaterUtils.unzipString(flinkConf);
     Properties flinkConfig = new Properties();
     Map<String, String> config = PropertiesUtils.loadFlinkConfYaml(flinkYamlString);
-    flinkConfig.putAll(config);
+    for (Map.Entry<String, String> entry : config.entrySet()) {
+      String value = CommonUtils.fixedValueBaseVar(entry.getValue(), application.getJobName());
+      flinkConfig.setProperty(entry.getKey(), value);
+    }
     return flinkConfig;
   }
 
