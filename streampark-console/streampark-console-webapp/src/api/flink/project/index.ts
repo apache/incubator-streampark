@@ -105,7 +105,7 @@ export function closeBuild(data: Recordable) {
 }
 
 export function deleteProject(data: Recordable): Promise<AxiosResponse<Result<boolean>>> {
-  return defHttp.post({ url: Api.DELETE, data }, { isReturnNativeResponse: true });
+  return defHttp.post({ url: Api.DELETE, data }, { isTransformResponse: false });
 }
 
 export function modules(data: Recordable) {

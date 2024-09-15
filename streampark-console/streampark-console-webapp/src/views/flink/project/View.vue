@@ -106,11 +106,7 @@
                 icon: 'ant-design:thunderbolt-outlined',
                 auth: 'project:build',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
-                popConfirm: {
-                  title: t('flink.project.operationTips.buildProjectMessage'),
-                  placement: 'left',
-                  confirm: handleBuild.bind(null, record),
-                },
+                onClick: handleBuild.bind(null, record),
               },
               {
                 icon: 'clarity:note-edit-line',
@@ -125,11 +121,7 @@
                 tooltip: t('common.delText'),
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:delete',
-                popConfirm: {
-                  title: t('flink.project.operationTips.deleteProjectMessage'),
-                  placement: 'left',
-                  confirm: handleDelete.bind(null, record),
-                },
+                onClick: handleDelete.bind(null, record),
               },
             ]"
           />
@@ -182,7 +174,7 @@
       const userStore = useUserStoreWithOut();
       const { t } = useI18n();
       const router = useRouter();
-      const { Swal, createMessage } = useMessage();
+      const { Swal, createConfirm, createMessage } = useMessage();
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
       const loading = ref(false);
@@ -242,45 +234,61 @@
         });
       }
       async function handleBuild(record: ProjectRecord) {
-        try {
-          await buildProject({
-            id: record.id,
-            socketId: buildUUID(),
-          });
-          Swal.fire({
-            icon: 'success',
-            title: t('flink.project.operationTips.projectIsbuildingMessage'),
-            showConfirmButton: false,
-            timer: 2000,
-          });
-        } catch (e) {
-          createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
-        }
+        createConfirm({
+          iconType: 'warning',
+          title: t('flink.project.operationTips.buildProject'),
+          centered: true,
+          content: t('flink.project.operationTips.buildProjectMessage'),
+          onOk: async () => {
+            try {
+              await buildProject({
+                id: record.id,
+                socketId: buildUUID(),
+              });
+              Swal.fire({
+                icon: 'success',
+                title: t('flink.project.operationTips.projectIsbuildingMessage'),
+                showConfirmButton: false,
+                timer: 2000,
+              });
+            } catch (e) {
+              createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
+            }
+          },
+        });
       }
       const handleEdit = function (record: ProjectRecord) {
         router.push({ path: '/flink/project/edit', query: { id: record.id } });
       };
       async function handleDelete(record: ProjectRecord) {
-        try {
-          const { data } = await deleteProject({ id: record.id });
-          if (data.data) {
-            Swal.fire({
-              icon: 'success',
-              title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
-              showConfirmButton: false,
-              timer: 2000,
-            });
-            reload();
-          } else {
-            Swal.fire(
-              'Failed',
-              t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
-              'error',
-            );
-          }
-        } catch (e) {
-          createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
-        }
+        createConfirm({
+          iconType: 'warning',
+          title: t('flink.project.operationTips.deleteProject'),
+          content: t('flink.project.operationTips.deleteProjectMessage'),
+          centered: true,
+          onOk: async () => {
+            try {
+              const res = await deleteProject({ id: record.id });
+              if (res.data) {
+                Swal.fire({
+                  icon: 'success',
+                  title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
+                  showConfirmButton: false,
+                  timer: 2000,
+                });
+                reload();
+              } else {
+                Swal.fire(
+                  'Failed',
+                  t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+                  'error',
+                );
+              }
+            } catch (e) {
+              createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
+            }
+          },
+        });
       }
 
       const handleQuery = function (val: string | undefined) {
@@ -294,7 +302,7 @@
           handlePageDataReload(true);
         }
         start();
-      }, 5000);
+      }, 2000);
 
       /* View log */
       function handleViewLog(value: Recordable) {
