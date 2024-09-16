@@ -18,7 +18,7 @@ export default {
   deleteTip: 'Are you sure delete this Role',
   assignment: 'menu assignment',
   form: {
-    roleName: 'Role Name',
+    roleName: 'Role name',
     menuId: 'permission',
     menuIdRequired: 'Please select the permission.',
     create: 'Add Role',
@@ -30,6 +30,7 @@ export default {
     exist: 'Sorry, the role name already exists',
     empty: 'Role name cannot be empty',
   },
+  searchByRole: 'Search by role name',
   roleInfo: 'Role Info',
   tableTitle: 'Role List',
   modifyTime: 'Not yet modified',

@@ -83,14 +83,8 @@
   defineExpose({ handleDashboard });
 </script>
 <template>
-  <Row :gutter="24" class="dashboard">
-    <Col
-      class="gutter-row mt-10px"
-      :md="6"
-      :xs="24"
-      v-for="(value, key) in dashBigScreenMap"
-      :key="key"
-    >
+  <Row :gutter="24">
+    <Col class="gutter-row" :md="6" :xs="24" v-for="(value, key) in dashBigScreenMap" :key="key">
       <StatisticCard
         :statisticProps="value.staticstics"
         :footerList="value.footer"

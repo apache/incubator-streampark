@@ -36,7 +36,7 @@ export default {
   },
   spark: {
     application: 'Applications',
-    sparkHome: 'Spark Home'
+    sparkHome: 'Spark Home',
   },
   setting: {
     menu: 'Settings',

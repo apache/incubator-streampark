@@ -21,10 +21,13 @@ export default {
     modify: 'modify user',
     reset: 'reset password',
     resetTip: 'reset password, are you sure',
+    delete: 'delete user',
+    deleteTip: 'delete user, are you sure',
+    deleteSuccess: 'delete successful',
     resetSuccess: 'reset password successful, user [ {0} ] new password is streampark666',
   },
   form: {
-    userName: 'User Name',
+    userName: 'Username',
     required: 'username is required',
     min: 'username length cannot be less than 2 characters',
     max: 'exceeds maximum length limit of 20 characters',
@@ -47,6 +50,7 @@ export default {
     transferResource:
       'Please transfer the resources of the user who needs to be disabled to a new user',
   },
+  searchByName: 'Search by username',
   roleInfo: 'Role Info',
   modifyTime: 'Not yet modified',
   male: 'male',

@@ -19,6 +19,8 @@ import { FlinkCreate, FlinkEnv } from './flinkEnv.type';
 import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
 
+export function pageFlinkEnv() {}
+
 enum FLINK_API {
   LIST = '/flink/env/list',
   CREATE = '/flink/env/create',

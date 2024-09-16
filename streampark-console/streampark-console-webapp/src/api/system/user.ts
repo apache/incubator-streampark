@@ -22,6 +22,8 @@ import { GetUserInfoModel, TeamSetResponse, UserListRecord } from './model/userM
 import { Result } from '/#/axios';
 import { BasicTableParams } from '../model/baseModel';
 
+export function deleteUser(p: { userId: string }) {}
+
 enum Api {
   Login = '/passport/signin',
   GetPermCode = '/getPermCode',

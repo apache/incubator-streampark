@@ -15,45 +15,52 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    :okText="t('common.submitText')"
+  <BasicModal
+    :width="600"
     @register="registerDrawer"
     showFooter
-    :title="getTitle"
-    width="40%"
+    centered
+    :minHeight="140"
     @ok="handleSubmit"
   >
-    <BasicForm @register="registerForm" />
-  </BasicDrawer>
+    <template #title>
+      <Icon icon="ant-design:key-outlined" />
+      {{ getTitle }}
+    </template>
+    <div class="mt-18px">
+      <BasicForm @register="registerForm" />
+    </div>
+  </BasicModal>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from '../token.data';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { fetchTokenCreate } from '/@/api/system/token';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
-    name: 'TokenDrawer',
-    components: { BasicDrawer, BasicForm },
+    name: 'TokenModal',
+    components: { Icon, BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const isUpdate = ref(true);
       const { t } = useI18n();
 
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-        labelWidth: 120,
         colon: true,
         schemas: formSchema,
         showActionButtonGroup: false,
-        baseColProps: { lg: 22, md: 22 },
+        layout: 'vertical',
+        baseColProps: { span: 22, offset: 1 },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
+      const [registerDrawer, { setModalProps, closeModal }] = useModalInner(async (data) => {
         resetFields();
-        setDrawerProps({ confirmLoading: false });
+        setModalProps({ confirmLoading: false });
         isUpdate.value = !!data?.isUpdate;
 
         if (unref(isUpdate)) {
@@ -70,12 +77,12 @@
       async function handleSubmit() {
         try {
           const values = await validate();
-          setDrawerProps({ confirmLoading: true });
+          setModalProps({ confirmLoading: true });
           const res = await fetchTokenCreate(values);
-          closeDrawer();
+          closeModal();
           emit('success', { isUpdate: unref(isUpdate), values: res });
         } finally {
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
         }
       }
 

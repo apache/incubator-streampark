@@ -36,7 +36,7 @@ export default {
   },
   spark: {
     application: '作业管理',
-    flinkHome: 'Spark 版本'
+    flinkHome: 'Spark 版本',
   },
   setting: {
     menu: '设置中心',

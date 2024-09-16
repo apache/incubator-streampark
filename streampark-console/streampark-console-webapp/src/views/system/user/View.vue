@@ -15,13 +15,15 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="5" :offset="13" class="text-right">
+          <a-button type="primary" @click="handleCreate" v-auth="'user:add'">
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -31,16 +33,16 @@
     </BasicTable>
     <UserDrawer @register="registerDrawer" @success="handleSuccess" />
     <UserModal @register="registerModal" />
-  </div>
+  </PageWrapper>
 </template>
 <script lang="ts">
   import { computed, defineComponent } from 'vue';
-
+  import { Col } from 'ant-design-vue';
   import { BasicTable, useTable, TableAction, ActionItem } from '/@/components/Table';
   import UserDrawer from './components/UserDrawer.vue';
   import UserModal from './components/UserModal.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { getUserList, resetPassword } from '/@/api/system/user';
+  import { deleteUser, getUserList, resetPassword } from '/@/api/system/user';
   import { columns, searchFormSchema } from './user.data';
   import { FormTypeEnum } from '/@/enums/formEnum';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -50,10 +52,11 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { LoginTypeEnum } from '/@/views/base/login/useLogin';
+  import { PageWrapper } from '/@/components/Page';
 
   export default defineComponent({
     name: 'User',
-    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon },
+    components: { BasicTable, UserModal, UserDrawer, TableAction, Icon, PageWrapper, Col },
     setup() {
       const { t } = useI18n();
       const userStore = useUserStoreWithOut();
@@ -64,25 +67,27 @@
       const [registerModal, { openModal }] = useModal();
       const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
-        title: t('system.user.table.title'),
         api: getUserList,
         columns,
         formConfig: {
           // labelWidth: 120,
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
-          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
         rowKey: 'userId',
         pagination: true,
         striped: false,
         useSearchForm: true,
-        showTableSetting: true,
+        showTableSetting: false,
         bordered: false,
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
-          width: 150,
+          width: 200,
           title: t('component.table.operation'),
           dataIndex: 'action',
         },
@@ -113,6 +118,17 @@
               confirm: handleReset.bind(null, record),
             },
           },
+          {
+            icon: 'ant-design:delete-outlined',
+            color: 'error',
+            auth: 'user:delete',
+            ifShow: record.username !== 'admin',
+            tooltip: t('system.user.table.delete'),
+            popConfirm: {
+              title: t('system.user.table.deleteTip'),
+              confirm: handleDelete.bind(null, record),
+            },
+          },
         ];
       }
       // user create
@@ -130,6 +146,20 @@
       // see detail
       function handleView(record: UserListRecord) {
         openModal(true, record);
+      }
+
+      // delete current user
+      async function handleDelete(record: UserListRecord) {
+        const hide = createMessage.loading('deleteing');
+        try {
+          await deleteUser({ userId: record.userId });
+          createMessage.success(t('system.user.table.deleteSuccess'));
+          await reload();
+        } catch (error) {
+          console.error('user delete fail:', error);
+        } finally {
+          hide();
+        }
       }
 
       async function handleReset(record: Recordable) {
@@ -164,9 +194,9 @@
         registerModal,
         handleCreate,
         handleEdit,
+        handleDelete,
         handleSuccess,
         handleView,
-        handleReset,
         getUserAction,
       };
     },

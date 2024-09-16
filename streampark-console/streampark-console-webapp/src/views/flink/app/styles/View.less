@@ -34,8 +34,22 @@
   width: 100%;
 }
 
-.ant-statistic {
-  line-height: 1.8;
+.gutter-row {
+  padding-left: 4px !important;
+}
+
+.search-bar {
+  .ant-input-affix-wrapper {
+    padding: 3px 5px;
+    border-radius: 6px;
+  }
+  .ant-select-single:not(.ant-select-customize-input) {
+    .ant-select-selector {
+      padding: 0 7px;
+      height: 30px;
+      border-radius: 6px;
+    }
+  }
 }
 
 .gutter-box {
@@ -47,7 +61,6 @@
   list-style: none;
   font-feature-settings: 'tnum';
   position: relative;
-  border-radius: 4px;
   transition: all 0.3s;
 
   .ant-divider-horizontal {
@@ -56,7 +69,7 @@
 
   .dash-statistic {
     .ant-card-body {
-      padding: 8px !important;
+      padding: 2px !important;
     }
   }
 

@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { reactive, defineComponent } from 'vue';
+  import { defineComponent, reactive } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { exceptionPropWidth } from '/@/utils';
 
@@ -50,6 +50,7 @@
       Object.assign(receiveData, data);
       resetFields();
       setFieldsValue({
+        restoreSavepoint: receiveData.selected != null,
         savepointPath: receiveData.selected?.path,
       });
     }
@@ -64,7 +65,8 @@
 
   const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
     name: 'startApplicationModal',
-    labelWidth: 120,
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'restoreSavepoint',
@@ -74,8 +76,8 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        defaultValue: true,
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.savepointTip')),
+        defaultValue: false,
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.savepointTip')),
       },
       {
         field: 'savepointPath',
@@ -85,7 +87,7 @@
             ? 'Select'
             : 'Input',
         afterItem: () =>
-          h('span', { class: 'conf-switch' }, handleSavePointTip(receiveData.historySavePoint)),
+          h('span', { class: 'pop-tip' }, handleSavePointTip(receiveData.historySavePoint)),
         slot: 'savepoint',
         ifShow: ({ values }) => values.restoreSavepoint,
         required: true,
@@ -98,16 +100,13 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        afterItem: () => h('span', { class: 'conf-switch' }, t('flink.app.view.ignoreRestoredTip')),
+        afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.ignoreRestoredTip')),
         defaultValue: false,
         ifShow: ({ values }) => values.restoreSavepoint,
       },
     ],
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: { span: 7, offset: 0 }, sm: { span: 7, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
-    baseColProps: { span: 24 },
   });
 
   async function handleSubmit() {
@@ -134,7 +133,7 @@
       const formValue = (await validate()) as Recordable;
       const restoreOrTriggerSavepoint = formValue.restoreSavepoint;
       const savepointPath = restoreOrTriggerSavepoint ? formValue['savepointPath'] : null;
-      handleReset();
+      await handleReset();
       const { data } = await fetchStart({
         id: receiveData.application.id,
         restoreOrTriggerSavepoint,
@@ -206,7 +205,7 @@
       {{ t('flink.app.view.start') }}
     </template>
 
-    <BasicForm @register="registerForm" class="!pt-40px">
+    <BasicForm @register="registerForm" class="!pt-20px">
       <template #savepoint="{ model, field }">
         <template
           v-if="
