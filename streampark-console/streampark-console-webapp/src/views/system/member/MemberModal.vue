@@ -15,27 +15,29 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicModal
+    :width="600"
+    v-bind="$attrs"
+    @register="registerModal"
+    centered
+    showFooter
+    @ok="handleSubmit"
+    :minHeight="120"
+  >
     <template #title>
       <Icon icon="ant-design:user-add-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getMemberFormSchema" />
-  </BasicDrawer>
+    <div class="mt-4">
+      <BasicForm @register="registerForm" :schemas="getMemberFormSchema" />
+    </div>
+  </BasicModal>
 </template>
-
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'MemberDrawer',
-  });
-</script>
 
 <script setup lang="ts" name="MemberDrawer">
   import { ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -43,7 +45,9 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { fetchAddMember, fetchCandidateUsers, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
-
+  defineOptions({
+    name: 'MemberDrawer',
+  });
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const { getItemProp, setValidateStatus, setHelp } = useFormValidate();
@@ -101,6 +105,7 @@
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
           placeholder: t('system.member.roleRequire'),
+          getPopupContainer: () => document.body,
         },
         rules: [{ required: true, message: t('system.member.roleRequire') }],
       },
@@ -110,34 +115,31 @@
     name: 'MemberForm',
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
-  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
-    async (data: Recordable) => {
-      setValidateStatus('');
-      setHelp('');
-      Object.assign(editParams, { userId: null, id: null });
-      resetFields();
-      setDrawerProps({ confirmLoading: false });
-      isUpdate.value = !!data?.isUpdate;
-      if (isUpdate.value) {
-        Object.assign(editParams, {
-          userId: data.record.userId,
-          id: data.record.id,
-          teamId: userStore.getTeamId,
-        });
-      }
-      if (unref(isUpdate)) {
-        setFieldsValue({
-          userName: data.record.userName,
-          roleId: data.record.roleId,
-        });
-      }
-    },
-  );
+  const [registerModal, { setModalProps, closeModal }] = useModalInner(async (data: Recordable) => {
+    setValidateStatus('');
+    setHelp('');
+    Object.assign(editParams, { userId: null, id: null });
+    resetFields();
+    setModalProps({ confirmLoading: false });
+    isUpdate.value = !!data?.isUpdate;
+    if (isUpdate.value) {
+      Object.assign(editParams, {
+        userId: data.record.userId,
+        id: data.record.id,
+        teamId: userStore.getTeamId,
+      });
+    }
+    if (unref(isUpdate)) {
+      setFieldsValue({
+        userName: data.record.userName,
+        roleId: data.record.roleId,
+      });
+    }
+  });
 
   const getTitle = computed(() =>
     !unref(isUpdate) ? t('system.member.addMember') : t('system.member.modifyMember'),
@@ -146,16 +148,16 @@
   async function handleSubmit() {
     try {
       const values = await validate();
-      setDrawerProps({ confirmLoading: true });
+      setModalProps({ confirmLoading: true });
       await (isUpdate.value
         ? fetchUpdateMember({ ...editParams, ...values })
         : fetchAddMember({ ...values }));
-      closeDrawer();
+      closeModal();
       emit('success', isUpdate.value);
     } catch (e) {
       console.error(e);
     } finally {
-      setDrawerProps({ confirmLoading: false });
+      setModalProps({ confirmLoading: false });
     }
   }
 </script>

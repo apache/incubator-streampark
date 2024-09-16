@@ -214,7 +214,6 @@
       background-color: @component-background;
 
       .scrollbar__wrap {
-        padding: 16px !important;
         margin-bottom: 0 !important;
       }
 

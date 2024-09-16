@@ -16,13 +16,20 @@
 -->
 
 <template>
-  <div>
-    <BasicTable @register="registerTable" :formConfig="formConfig">
-      <template #toolbar>
-        <a-button type="primary" id="e2e-member-create-btn" @click="handleCreate" v-auth="'member:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" :formConfig="formConfig" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="5" :offset="7" class="text-right">
+          <a-button
+            id="e2e-member-create-btn"
+            type="primary"
+            @click="handleCreate"
+            v-auth="'member:add'"
+          >
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -54,75 +61,73 @@
         </template>
       </template>
     </BasicTable>
-    <MemberDrawer
-      @register="registerDrawer"
+    <MemberModal
+      @register="registerModal"
       @success="handleSuccess"
       :roleOptions="roleListOptions"
-      okText="Submit"
     />
-  </div>
+  </PageWrapper>
 </template>
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'Member',
-  });
-</script>
 
 <script setup lang="ts" name="member">
   import { computed, onMounted, ref, unref } from 'vue';
+  import { Col } from 'ant-design-vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { RoleListItem } from '/@/api/base/model/systemModel';
   import { useGo } from '/@/hooks/web/usePage';
   import { BasicTable, useTable, TableAction, FormProps } from '/@/components/Table';
-  import MemberDrawer from './MemberDrawer.vue';
-  import { useDrawer } from '/@/components/Drawer';
+  import MemberModal from './MemberModal.vue';
+  import { useModal } from '/@/components/Modal';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getRoleListByPage } from '/@/api/base/system';
   import { fetchMemberDelete, fetchMemberList } from '/@/api/system/member';
   import Icon from '/@/components/Icon';
-
+  import { PageWrapper } from '/@/components/Page';
+  defineOptions({
+    name: 'Member',
+  });
   const roleListOptions = ref<Array<Partial<RoleListItem>>>([]);
 
-  const [registerDrawer, { openDrawer }] = useDrawer();
+  const [registerModal, { openModal }] = useModal();
   const { createMessage } = useMessage();
   const go = useGo();
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const formConfig = computed((): Partial<FormProps> => {
     return {
-      baseColProps: { style: { paddingRight: '30px' } },
       schemas: [
         {
           field: 'userName',
-          label: t('system.member.table.userName'),
+          label: '',
           component: 'Input',
-          colProps: { span: 6 },
-        },
-        {
-          field: 'roleName',
-          label: t('system.member.table.roleName'),
-          component: 'Select',
           componentProps: {
-            options: unref(roleListOptions),
-            fieldNames: { label: 'roleName', value: 'roleName' },
+            placeholder: t('system.member.searchByUser'),
+            allowClear: true,
           },
           colProps: { span: 6 },
         },
         {
-          field: 'createTime',
-          label: t('common.createTime'),
-          component: 'RangePicker',
+          field: 'roleName',
+          label: '',
+          component: 'Select',
+          componentProps: {
+            placeholder: t('system.member.searchByRole'),
+            options: unref(roleListOptions),
+            fieldNames: { label: 'roleName', value: 'roleName' },
+            allowClear: true,
+          },
           colProps: { span: 6 },
         },
       ],
-      fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
     };
   });
   const [registerTable, { reload }] = useTable({
-    title: t('system.member.table.title'),
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
@@ -133,7 +138,7 @@
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: true,
+    showTableSetting: false,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {
@@ -145,13 +150,13 @@
   });
 
   function handleCreate() {
-    openDrawer(true, {
+    openModal(true, {
       isUpdate: false,
     });
   }
 
   function handleEdit(record: Recordable) {
-    openDrawer(true, {
+    openModal(true, {
       record,
       isUpdate: true,
     });

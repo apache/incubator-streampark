@@ -23,9 +23,9 @@ export default {
   add: '创建',
   success: '成功',
   fail: '失败',
+  searchByTeam: '根据团队名称搜索',
   table: {
-    title: 'Team列表',
-    teamName: 'Team名称',
+    teamName: '团队',
     description: '描述',
     descriptionMessage: '超过了100个字符的最大长度限制',
     teamNamePlaceholder: '请输入team名称',
