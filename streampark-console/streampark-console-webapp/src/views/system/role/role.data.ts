@@ -37,7 +37,7 @@ export const columns: BasicColumn[] = [
   },
   {
     title: t('common.description'),
-    dataIndex: 'remark',
+    dataIndex: 'description',
     ellipsis: true,
   },
 ];
@@ -88,7 +88,7 @@ export const formSchema: FormSchema[] = [
   },
   {
     label: t('common.description'),
-    field: 'remark',
+    field: 'description',
     component: 'InputTextArea',
   },
   {

@@ -103,7 +103,7 @@
               ? [{ required: true, validator: handleRoleCheck, trigger: 'blur' }]
               : [],
           },
-          { label: t('common.description'), field: 'remark', component: 'InputTextArea' },
+          { label: t('common.description'), field: 'description', component: 'InputTextArea' },
           {
             label: t('system.role.form.menuId'),
             field: 'menuId',
@@ -115,6 +115,7 @@
       });
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
         layout: 'vertical',
+        name: 'role_form',
         baseColProps: { span: 20, offset: 2 },
         colon: true,
         showActionButtonGroup: false,
@@ -122,7 +123,7 @@
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
         // childrenNodeKeys = [];
-        resetFields();
+        await resetFields();
         setDrawerProps({
           confirmLoading: false,
           showFooter: data.formType !== FormTypeEnum.View,
@@ -154,7 +155,7 @@
             setFieldsValue({
               roleName: data.record.roleName,
               roleId: data.record.roleId,
-              remark: data.record.remark,
+              description: data.record.description,
               menuId: [...result],
             });
           });
