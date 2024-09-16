@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class YarnQueueTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 

@@ -37,7 +37,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ProjectsManagementTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
