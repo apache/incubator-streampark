@@ -15,17 +15,27 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer v-bind="$attrs" @register="registerDrawer" showFooter width="650" @ok="handleSubmit">
+  <BasicModal
+    :width="600"
+    v-bind="$attrs"
+    centered
+    @register="registerModal"
+    showFooter
+    @ok="handleSubmit"
+  >
     <template #title>
+      <Icon icon="ant-design:menu-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getYarnQueueFormSchema" />
-  </BasicDrawer>
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getYarnQueueFormSchema" />
+    </div>
+  </BasicModal>
 </template>
 <script lang="ts">
   import { defineComponent, ref, computed, unref } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import {
     fetchCheckYarnQueue,
@@ -34,10 +44,11 @@
   } from '/@/api/setting/yarnQueue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { renderYarnQueueLabel } from './useYarnQueueRender';
+  import Icon from '/@/components/Icon';
 
   export default defineComponent({
     name: 'YarnQueueDrawer',
-    components: { BasicDrawer, BasicForm },
+    components: { Icon, BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
@@ -88,7 +99,10 @@
             field: 'description',
             label: t('common.description'),
             component: 'InputTextArea',
-            componentProps: { rows: 4 },
+            componentProps: {
+              placeholder: t('setting.yarnQueue.placeholder.description'),
+              rows: 4,
+            },
             rules: [{ max: 512, message: t('setting.yarnQueue.descriptionMessage') }],
           },
         ];
@@ -97,15 +111,14 @@
         name: 'YarnQueueEditForm',
         colon: true,
         showActionButtonGroup: false,
-        baseColProps: { span: 24 },
-        labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-        wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+        layout: 'vertical',
+        baseColProps: { span: 22, offset: 1 },
       });
 
-      const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
+      const [registerModal, { setModalProps, closeModal }] = useModalInner(
         async (data: Recordable) => {
           resetFields();
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
           isUpdate.value = !!data?.isUpdate;
           // if (isUpdate.value) teamId.value = data.record.id;
           if (unref(isUpdate)) {
@@ -123,21 +136,21 @@
       async function handleSubmit() {
         try {
           const values = await validate();
-          setDrawerProps({ confirmLoading: true });
+          setModalProps({ confirmLoading: true });
           if (isUpdate.value) {
             await fetchYarnQueueUpdate(values);
           } else {
             delete values.id;
             await fetchYarnQueueCreate(values);
           }
-          closeDrawer();
+          closeModal();
           emit('success', isUpdate.value);
         } finally {
-          setDrawerProps({ confirmLoading: false });
+          setModalProps({ confirmLoading: false });
         }
       }
 
-      return { registerDrawer, registerForm, getTitle, getYarnQueueFormSchema, handleSubmit };
+      return { registerModal, registerForm, getTitle, getYarnQueueFormSchema, handleSubmit };
     },
   });
 </script>
