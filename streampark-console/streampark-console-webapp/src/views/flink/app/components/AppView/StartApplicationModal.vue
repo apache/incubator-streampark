@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts">
-  import { reactive, defineComponent } from 'vue';
+  import { defineComponent, reactive } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { exceptionPropWidth } from '/@/utils';
 
@@ -50,6 +50,7 @@
       Object.assign(receiveData, data);
       resetFields();
       setFieldsValue({
+        restoreSavepoint: receiveData.selected != null,
         savepointPath: receiveData.selected?.path,
       });
     }
@@ -75,7 +76,7 @@
           checkedChildren: 'ON',
           unCheckedChildren: 'OFF',
         },
-        defaultValue: receiveData.selected != null,
+        defaultValue: false,
         afterItem: () => h('span', { class: 'pop-tip' }, t('flink.app.view.savepointTip')),
       },
       {
@@ -132,7 +133,7 @@
       const formValue = (await validate()) as Recordable;
       const restoreOrTriggerSavepoint = formValue.restoreSavepoint;
       const savepointPath = restoreOrTriggerSavepoint ? formValue['savepointPath'] : null;
-      handleReset();
+      await handleReset();
       const { data } = await fetchStart({
         id: receiveData.application.id,
         restoreOrTriggerSavepoint,
