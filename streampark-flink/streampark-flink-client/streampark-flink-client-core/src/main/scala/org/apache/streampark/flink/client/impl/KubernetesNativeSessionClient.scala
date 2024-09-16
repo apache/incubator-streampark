@@ -151,7 +151,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
 
     val flinkConfig = getFlinkK8sConfig(deployRequest)
 
-    replaceConfig(flinkConfig, "\\$\\{job(Name|name)}|\\$job(Name|name)", deployRequest.clusterName)
+    FlinkSessionSubmitHelper.doReplaceJobName(flinkConfig, deployRequest.clusterName)
 
     val kubeClient = FlinkKubeClientFactory.getInstance.fromConfiguration(flinkConfig, "client")
 

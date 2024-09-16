@@ -65,6 +65,12 @@ export const useAppTableAction = (
   function getActionList(record: AppListRecord, currentPageNo: number): ActionItem[] {
     return [
       {
+        tooltip: { title: t('flink.app.operation.detail') },
+        auth: 'app:detail',
+        icon: 'carbon:data-view-alt',
+        onClick: handleDetail.bind(null, record),
+      },
+      {
         tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
@@ -210,6 +216,13 @@ export const useAppTableAction = (
       }),
     };
   }
+
+  /* Click for details */
+  function handleDetail(app: AppListRecord) {
+    flinkAppStore.setApplicationId(app.id);
+    router.push({ path: '/flink/app/detail', query: { appId: app.id } });
+  }
+
   /* Click to edit */
   function handleEdit(app: AppListRecord, currentPageNo: number) {
     // Record the current page number

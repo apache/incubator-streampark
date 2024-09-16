@@ -496,18 +496,4 @@ trait FlinkClientTrait extends Logger {
       })
   }
 
-  def replaceConfig(flinkConfig: Configuration, regexp: String, replacement: String): Unit = {
-    flinkConfig
-      .keySet()
-      .foreach(
-        k => {
-          val v = flinkConfig.getString(k, null)
-          if (v != null) {
-            val result = v
-              .replaceAll(regexp, replacement)
-            flinkConfig.setString(k, result)
-          }
-        })
-  }
-
 }

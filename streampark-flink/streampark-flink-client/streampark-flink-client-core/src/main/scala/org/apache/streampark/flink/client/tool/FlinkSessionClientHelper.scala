@@ -34,6 +34,7 @@ import org.json4s.jackson.Serialization
 import java.io.File
 import java.nio.charset.StandardCharsets
 
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 object FlinkSessionSubmitHelper extends Logger {
@@ -100,6 +101,20 @@ object FlinkSessionSubmitHelper extends Logger {
       case Success(ok) => (ok \ "jobid").extractOpt[String].orNull
       case Failure(_) => null
     }
+  }
+
+  private[client] def doReplaceJobName(flinkConfig: Configuration, replacement: String): Unit = {
+    flinkConfig
+      .keySet()
+      .foreach(
+        k => {
+          val v = flinkConfig.getString(k, null)
+          if (v != null) {
+            val result = v
+              .replaceAll("\\$\\{job(Name|name)}|\\$job(Name|name)", replacement)
+            flinkConfig.setString(k, result)
+          }
+        })
   }
 
 }

@@ -20,6 +20,7 @@ package org.apache.streampark.flink.client.impl
 import org.apache.streampark.common.util.Utils
 import org.apache.streampark.flink.client.`trait`.YarnClientTrait
 import org.apache.streampark.flink.client.bean._
+import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.client.deployment.ClusterSpecification
@@ -77,7 +78,7 @@ object YarnSessionClient extends YarnClientTrait {
       // app name
       .safeSet(YarnConfigOptions.APPLICATION_NAME, deployRequest.clusterName)
 
-    replaceConfig(flinkConfig, "\\$\\{job(Name|name)}|\\$job(Name|name)", deployRequest.clusterName)
+    FlinkSessionSubmitHelper.doReplaceJobName(flinkConfig, deployRequest.clusterName)
 
     logInfo(s"""
                |------------------------------------------------------------------
