@@ -30,11 +30,10 @@
   const route = useRoute();
   const router = useRouter();
   const [registerTable] = useTable({
-    title: t('flink.variable.depend.title'),
     api: fetchDependApps,
     canResize: false,
     showIndexColumn: false,
-    showTableSetting: true,
+    showTableSetting: false,
     tableSetting: { setting: true },
     beforeFetch(params: Recordable) {
       Object.assign(params, {
@@ -51,7 +50,7 @@
 </script>
 
 <template>
-  <PageWrapper content-full-height>
+  <PageWrapper content-full-height fixed-height class="flex flex-col">
     <div class="mb-15px py-24px px-10px bg-white">
       <a-button
         type="primary"
@@ -65,6 +64,6 @@
         {{ t('flink.variable.depend.headerTitle', [route.query.id]) }}
       </span>
     </div>
-    <BasicTable @register="registerTable" />
+    <BasicTable @register="registerTable" class="flex flex-col" />
   </PageWrapper>
 </template>

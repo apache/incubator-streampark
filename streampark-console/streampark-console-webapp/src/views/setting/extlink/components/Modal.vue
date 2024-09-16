@@ -41,7 +41,6 @@
   const externalLinkId = ref<string | null>(null);
   const { Swal } = useMessage();
   const [registerForm, { validate, resetFields, setFieldsValue }] = useForm({
-    labelWidth: 120,
     schemas: [
       {
         field: 'badgeLabel',
@@ -68,6 +67,27 @@
         ],
       },
       {
+        field: 'linkUrl',
+        label: t('setting.externalLink.form.linkUrl'),
+        component: 'Input',
+        componentProps: {
+          placeholder: t('setting.externalLink.form.linkUrlPlaceholder'),
+          allowClear: true,
+        },
+        afterItem: () =>
+          h(
+            'span',
+            { class: 'pop-tip' },
+            'Supported variables: {job_id}, {yarn_id}, {job_name}, Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
+          ),
+        rules: [
+          {
+            required: true,
+            message: t('setting.externalLink.form.linkUrlIsRequired'),
+          },
+        ],
+      },
+      {
         field: 'badgeColor',
         label: t('setting.externalLink.form.badgeColor'),
         component: 'Input',
@@ -86,33 +106,11 @@
         component: 'Input',
         render: ({ model }) => renderPreview(model),
       },
-      {
-        field: 'linkUrl',
-        label: t('setting.externalLink.form.linkUrl'),
-        component: 'Input',
-        componentProps: {
-          placeholder: t('setting.externalLink.form.linkUrlPlaceholder'),
-          allowClear: true,
-        },
-        afterItem: () =>
-          h(
-            'span',
-            { class: 'tip-info' },
-            'Supported variables: {id}, {job_id}, {yarn_id}, {job_name},Example: https://grafana/flink-monitoring?var-JobId=var-JobId={job_id}',
-          ),
-        rules: [
-          {
-            required: true,
-            message: t('setting.externalLink.form.linkUrlIsRequired'),
-          },
-        ],
-      },
     ],
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: { span: 6, offset: 0 }, sm: { span: 6, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } },
-    baseColProps: { span: 24 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
   const [registerModal, { closeModal, changeOkLoading }] = useModalInner((data: ExternalLink) => {
@@ -180,14 +178,17 @@
 <template>
   <BasicModal
     @register="registerModal"
+    :width="600"
     :ok-text="t('common.submitText')"
     v-bind="$attrs"
     @ok="handleSubmit"
   >
     <template #title>
-      <Icon icon="ant-design:link-outlined" color="blue" />
+      <Icon icon="ant-design:link-outlined" />
       {{ t('setting.externalLink.externalLinkSetting') }}
     </template>
-    <BasicForm @register="registerForm" />
+    <div class="mt-18px">
+      <BasicForm @register="registerForm" />
+    </div>
   </BasicModal>
 </template>
