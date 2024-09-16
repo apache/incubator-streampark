@@ -64,7 +64,7 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .as("Role list should contain newly-created role")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newRoleName)));
@@ -78,13 +78,13 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.errorMessageList())
+                () -> assertThat(roleManagementPage.errorMessageList)
                     .as("Role Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "Sorry, the role name already exists")));
 
-        roleManagementPage.createRoleForm().buttonCancel().click();
+        roleManagementPage.createRoleForm.buttonCancel.click();
     }
     @Test
     @Order(30)
@@ -97,7 +97,7 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .as("Role list should contain edited role")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newEditDescription)));
@@ -112,7 +112,7 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(newRoleName)));
     }

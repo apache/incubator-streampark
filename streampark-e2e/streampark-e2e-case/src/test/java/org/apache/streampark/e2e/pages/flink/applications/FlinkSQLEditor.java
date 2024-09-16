@@ -40,9 +40,9 @@ import java.util.List;
 public final class FlinkSQLEditor {
 
     @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line') and not(contains(@class, 'view-lines'))]")
-    private List<WebElement> flinkSqlEditor;
+    public List<WebElement> flinkSqlEditor;
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     public FlinkSQLEditor(WebDriver driver) {
         PageFactory.initElements(driver, this);

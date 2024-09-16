@@ -74,7 +74,7 @@ public class UploadManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList)
                     .as("Resource list should contain newly-created resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
@@ -92,14 +92,14 @@ public class UploadManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.errorMessageList())
+                () -> assertThat(uploadsPage.errorMessageList)
                     .as("Resource Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         String.format("the resource %s already exists, please check.", resourceName))));
 
-        uploadsPage.errorMessageConfirmButton().click();
-        uploadsPage.createUploadForm().buttonCancel().click();
+        uploadsPage.errorMessageConfirmButton.click();
+        uploadsPage.createUploadForm.buttonCancel.click();
     }
 
     @Test
@@ -121,7 +121,7 @@ public class UploadManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList)
                     .as("Resource list should contain edit resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
@@ -140,7 +140,7 @@ public class UploadManagementTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(uploadsPage.resourceList())
+                    assertThat(uploadsPage.resourceList)
                         .noneMatch(it -> it.getText().contains(resourceName));
                 });
     }

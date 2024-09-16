@@ -77,7 +77,7 @@ public class ProjectsManagementTest {
 
         await()
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain newly-created project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(projectName)));
@@ -92,7 +92,7 @@ public class ProjectsManagementTest {
 
         await()
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain edited project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editedProjectName)));
@@ -107,7 +107,7 @@ public class ProjectsManagementTest {
 
         await().timeout(Duration.ofMinutes(Constants.DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES))
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain build successful project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("SUCCESSFUL")));
@@ -126,7 +126,7 @@ public class ProjectsManagementTest {
                     browser.navigate().refresh();
                     Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
 
-                    assertThat(projectsPage.projectList())
+                    assertThat(projectsPage.projectList)
                         .noneMatch(it -> it.getText().contains(editedProjectName));
                 });
     }

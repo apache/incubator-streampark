@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class AlarmTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -102,15 +102,15 @@ public class AlarmTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(alarmPage.alarmList())
+                () -> assertThat(alarmPage.alarmList)
                     .as("Alarm list should contain newly-created alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newAlarmName))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc))
                     .anyMatch(it -> it.contains(newEmail))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc()))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc()))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc()))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc))
                     .anyMatch(it -> it.contains(dingTalkReceiveUser)));
     }
 
@@ -127,14 +127,14 @@ public class AlarmTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(alarmPage.alarmList())
+                () -> assertThat(alarmPage.alarmList)
                     .as("Alarm list should contain edited alarm")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editAlarmName))
-                    .noneMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc()))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc()))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc()))
-                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc()))
+                    .noneMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.EMAIL.desc))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.DINGTALK.desc))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.WECHAT.desc))
+                    .anyMatch(it -> it.contains(AlertTypeDetailForm.AlertTypeEnum.LARK.desc))
                     .noneMatch(it -> it.contains(newEmail)));
     }
 
@@ -147,7 +147,7 @@ public class AlarmTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(alarmPage.alarmList())
+                () -> assertThat(alarmPage.alarmList)
                     .as(String.format("Alarm list shouldn't contain alarm witch named %s", editAlarmName))
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(editAlarmName)));

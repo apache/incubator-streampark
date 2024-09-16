@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/environment/docker-compose.yaml")
 public class EnvironmentTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -100,7 +100,7 @@ public class EnvironmentTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(environmentPage.settingList())
+                () -> assertThat(environmentPage.settingList)
                     .as("Setting list should contain newly-created setting")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(mavenFilePath))
@@ -131,13 +131,13 @@ public class EnvironmentTest {
             .untilAsserted(
                 () -> {
                     new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList())
+                    assertThat(environmentPage.errorMessageList)
                         .as("Connect failed error message should be displayed")
                         .extracting(WebElement::getText)
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
         emailSettingForm.cancel();
     }
 
@@ -156,11 +156,11 @@ public class EnvironmentTest {
                 .password(emailPassword)
                 .ok();
 
-        emailSettingForm.buttonOk().click();
+        emailSettingForm.buttonOk.click();
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(environmentPage.settingList())
+                () -> assertThat(environmentPage.settingList)
                     .as("Setting list should contain newly-created email setting")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editEmailAddress)));
@@ -187,13 +187,13 @@ public class EnvironmentTest {
             .untilAsserted(
                 () -> {
                     new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList())
+                    assertThat(environmentPage.errorMessageList)
                         .as("Failed to validate docker registry error message should be displayed")
                         .extracting(WebElement::getText)
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
         dockerSettingForm.cancel();
     }
 }

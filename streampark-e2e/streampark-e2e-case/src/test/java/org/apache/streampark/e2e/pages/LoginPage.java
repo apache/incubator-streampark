@@ -38,15 +38,15 @@ import java.util.List;
 public final class LoginPage extends NavBarPage {
 
     @FindBy(id = "form_item_account")
-    private WebElement inputUsername;
+    public WebElement inputUsername;
 
     @FindBy(id = "form_item_password")
-    private WebElement inputPassword;
+    public WebElement inputPassword;
 
     @FindBy(id = "e2e-login-btn")
-    private WebElement buttonLogin;
+    public WebElement buttonLogin;
 
-    private final TeamForm teamForm = new TeamForm();
+    public final TeamForm teamForm = new TeamForm();
 
     public LoginPage(RemoteWebDriver driver) {
         super(driver);
@@ -57,9 +57,9 @@ public final class LoginPage extends NavBarPage {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonLogin));
 
-        inputUsername().sendKeys(username);
-        inputPassword().sendKeys(password);
-        buttonLogin().click();
+        inputUsername.sendKeys(username);
+        inputPassword.sendKeys(password);
+        buttonLogin.click();
 
         try {
             new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -97,12 +97,12 @@ public final class LoginPage extends NavBarPage {
         private List<WebElement> selectTeam;
 
         @FindBy(css = "[popupClassName=team-select-popup] > .ant-select-selector")
-        private WebElement btnSelectTeamDropdown;
+        public WebElement btnSelectTeamDropdown;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

@@ -35,21 +35,21 @@ import java.util.List;
 public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
 
     @FindBy(id = "e2e-variable-create-btn")
-    private WebElement buttonCreateVariable;
+    public WebElement buttonCreateVariable;
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> variableList;
+    public List<WebElement> variableList;
 
     @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(@class, 'swal2-confirm')]")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     @FindBy(className = "e2e-variable-delete-confirm")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
-    private final CreateVariableForm createVariableForm = new CreateVariableForm();
+    public final CreateVariableForm createVariableForm = new CreateVariableForm();
 
     public VariablesPage(RemoteWebDriver driver) {
         super(driver);
@@ -62,14 +62,14 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateVariable));
         buttonCreateVariable.click();
-        createVariableForm.inputVariableCode().sendKeys(variableCode);
-        createVariableForm.inputVariableValue().sendKeys(variableValue);
-        createVariableForm.inputDescription().sendKeys(description);
+        createVariableForm.inputVariableCode.sendKeys(variableCode);
+        createVariableForm.inputVariableValue.sendKeys(variableValue);
+        createVariableForm.inputDescription.sendKeys(description);
         if (notVisible) {
             createVariableForm.buttonDesensitization.click();
         }
 
-        createVariableForm.buttonSubmit().click();
+        createVariableForm.buttonSubmit.click();
         return this;
     }
 
@@ -77,7 +77,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
                                       boolean notVisible) {
         waitForPageLoading();
 
-        variableList().stream()
+        variableList.stream()
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
@@ -90,14 +90,14 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(createVariableForm.buttonSubmit));
-        createVariableForm.inputVariableValue().clear();
-        createVariableForm.inputVariableValue().sendKeys(variableValue);
-        createVariableForm.inputDescription().clear();
-        createVariableForm.inputDescription().sendKeys(description);
+        createVariableForm.inputVariableValue.clear();
+        createVariableForm.inputVariableValue.sendKeys(variableValue);
+        createVariableForm.inputDescription.clear();
+        createVariableForm.inputDescription.sendKeys(description);
         if (notVisible) {
             createVariableForm.buttonDesensitization.click();
         }
-        createVariableForm.buttonSubmit().click();
+        createVariableForm.buttonSubmit.click();
 
         return this;
     }
@@ -105,7 +105,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
     public VariablesPage deleteVariable(String variableCode) {
         waitForPageLoading();
 
-        variableList().stream()
+        variableList.stream()
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
@@ -136,21 +136,21 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         }
 
         @FindBy(id = "VariableForm_variableCode")
-        private WebElement inputVariableCode;
+        public WebElement inputVariableCode;
 
         @FindBy(id = "VariableForm_variableValue")
-        private WebElement inputVariableValue;
+        public WebElement inputVariableValue;
 
         @FindBy(id = "VariableForm_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBy(id = "VariableForm_desensitization")
-        private WebElement buttonDesensitization;
+        public WebElement buttonDesensitization;
 
         @FindBy(className = "e2e_var_btn_submit")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(className = "e2e_var_btn_cancel")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

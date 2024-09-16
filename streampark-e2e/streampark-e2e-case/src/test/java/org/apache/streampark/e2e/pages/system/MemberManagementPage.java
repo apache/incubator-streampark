@@ -36,21 +36,21 @@ import java.util.List;
 public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
     @FindBy(id = "e2e-member-create-btn")
-    private WebElement buttonCreateMember;
+    public WebElement buttonCreateMember;
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> memberList;
+    public List<WebElement> memberList;
 
     @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     @FindBy(className = "e2e-member-delete-confirm")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
-    private final CreateMemberForm createMemberForm = new CreateMemberForm();
+    public final CreateMemberForm createMemberForm = new CreateMemberForm();
 
     public MemberManagementPage(RemoteWebDriver driver) {
         super(driver);
@@ -63,7 +63,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(buttonCreateMember));
         buttonCreateMember.click();
 
-        createMemberForm.btnSelectUserNameDropDown().click();
+        createMemberForm.btnSelectUserNameDropDown.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectUserName));
@@ -75,7 +75,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                     String.format("No %s in username dropdown list", userName)))
             .click();
 
-        createMemberForm().btnSelectRoleDropDown().click();
+        createMemberForm.btnSelectRoleDropDown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
@@ -93,7 +93,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     public MemberManagementPage editMember(String userName, String role) {
         waitForPageLoading();
 
-        memberList().stream()
+        memberList.stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-member-edit-btn"))
@@ -103,7 +103,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in member list"))
             .click();
 
-        createMemberForm().btnSelectRoleDropDown().click();
+        createMemberForm.btnSelectRoleDropDown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
         createMemberForm.selectRole.stream()
@@ -121,7 +121,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     public MemberManagementPage deleteMember(String userName) {
         waitForPageLoading();
 
-        memberList().stream()
+        memberList.stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-member-delete-btn"))
@@ -152,7 +152,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         }
 
         @FindBy(css = "div[optionfiltergroup='username'][codefield='userName']")
-        private WebElement btnSelectUserNameDropDown;
+        public WebElement btnSelectUserNameDropDown;
 
         @FindBys({
                 @FindBy(css = "[codefield='userName']"),
@@ -161,7 +161,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         private List<WebElement> selectUserName;
 
         @FindBy(css = "[codefield='roleId']")
-        private WebElement btnSelectRoleDropDown;
+        public WebElement btnSelectRoleDropDown;
 
         @FindBys({
                 @FindBy(css = "[codefield='roleId']"),
@@ -170,9 +170,9 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         private List<WebElement> selectRole;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

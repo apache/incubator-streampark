@@ -35,21 +35,21 @@ import java.util.List;
 public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
 
     @FindBy(xpath = "//span[contains(., 'External Link')]/..//button[contains(@class, 'ant-btn-dashed')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateExternalLink;
+    public WebElement buttonCreateExternalLink;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
-    private List<WebElement> externalLinkList;
+    public List<WebElement> externalLinkList;
 
     @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
-    private final CreateExternalLinkForm createExternalLinkForm = new CreateExternalLinkForm();
+    public final CreateExternalLinkForm createExternalLinkForm = new CreateExternalLinkForm();
 
     public ExternalLinkPage(RemoteWebDriver driver) {
         super(driver);
@@ -66,7 +66,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         createExternalLinkForm.inputColor.sendKeys(color);
         createExternalLinkForm.inputLink.sendKeys(link);
 
-        createExternalLinkForm.buttonSubmit().click();
+        createExternalLinkForm.buttonSubmit.click();
         return this;
     }
 
@@ -74,7 +74,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
                                              String editLink) {
         waitForPageLoading();
 
-        externalLinkList().stream()
+        externalLinkList.stream()
             .filter(it -> it.getText().contains(label))
             .flatMap(
                 it -> it.findElements(By.xpath("//button[contains(@class, 'ant-btn-link')]//span[text()='Edit']/.."))
@@ -84,23 +84,23 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in external link list"))
             .click();
 
-        createExternalLinkForm.inputLabel().clear();
-        createExternalLinkForm.inputLabel().sendKeys(editLabel);
-        createExternalLinkForm.inputName().clear();
-        createExternalLinkForm.inputName().sendKeys(editName);
-        createExternalLinkForm.inputColor().clear();
-        createExternalLinkForm.inputColor().sendKeys(color);
-        createExternalLinkForm.inputLink().clear();
-        createExternalLinkForm.inputLink().sendKeys(editLink);
+        createExternalLinkForm.inputLabel.clear();
+        createExternalLinkForm.inputLabel.sendKeys(editLabel);
+        createExternalLinkForm.inputName.clear();
+        createExternalLinkForm.inputName.sendKeys(editName);
+        createExternalLinkForm.inputColor.clear();
+        createExternalLinkForm.inputColor.sendKeys(color);
+        createExternalLinkForm.inputLink.clear();
+        createExternalLinkForm.inputLink.sendKeys(editLink);
 
-        createExternalLinkForm.buttonSubmit().click();
+        createExternalLinkForm.buttonSubmit.click();
         return this;
     }
 
     public ExternalLinkPage deleteExternalLink(String label) {
         waitForPageLoading();
 
-        externalLinkList().stream()
+        externalLinkList.stream()
             .filter(it -> it.getText().contains(label))
             .flatMap(
                 it -> it
@@ -132,21 +132,21 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         }
 
         @FindBy(id = "form_item_badgeLabel")
-        private WebElement inputLabel;
+        public WebElement inputLabel;
 
         @FindBy(id = "form_item_badgeName")
-        private WebElement inputName;
+        public WebElement inputName;
 
         @FindBy(id = "form_item_badgeColor")
-        private WebElement inputColor;
+        public WebElement inputColor;
 
         @FindBy(id = "form_item_linkUrl")
-        private WebElement inputLink;
+        public WebElement inputLink;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

@@ -65,7 +65,7 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.userList())
+                () -> assertThat(userManagementPage.userList)
                     .as("User list should contain newly-created user")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newUserName)));
@@ -80,13 +80,13 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.errorMessageList())
+                () -> assertThat(userManagementPage.errorMessageList)
                     .as("User Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "Sorry the username already exists")));
 
-        userManagementPage.createUserForm().buttonCancel().click();
+        userManagementPage.createUserForm.buttonCancel.click();
     }
 
     @Test
@@ -100,7 +100,7 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.userList())
+                () -> assertThat(userManagementPage.userList)
                     .as("User list should contain edited user")
                     .extracting(WebElement::getText)
                     .anyMatch(

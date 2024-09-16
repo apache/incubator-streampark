@@ -39,19 +39,19 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWait
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
 
     @FindBy(className = "e2e-flinkapp-create-btn")
-    private WebElement buttonCreateApplication;
+    public WebElement buttonCreateApplication;
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> applicationsList;
+    public List<WebElement> applicationsList;
 
     @FindBy(className = "ant-form-item-explain-error")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-dropdown-content')]//span[contains(text(), 'Delete')]")
-    private WebElement deleteButton;
+    public WebElement deleteButton;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
     public ApplicationsPage(RemoteWebDriver driver) {
         super(driver);
@@ -72,7 +72,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     public ApplicationsPage deleteApplication(String applicationName) {
         waitForPageLoading();
 
-        WebElement extraButton = applicationsList().stream()
+        WebElement extraButton = applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
                 it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/.."))
@@ -91,7 +91,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     public ApplicationsPage startApplication(String applicationName) {
         waitForPageLoading();
 
-        applicationsList().stream()
+        applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:start')]")).stream())
             .filter(WebElement::isDisplayed)
@@ -107,9 +107,9 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         startJobFormMessage))));
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint()));
-        startJobForm.radioFromSavepoint().click();
-        startJobForm.buttonSubmit().click();
+            .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint));
+        startJobForm.radioFromSavepoint.click();
+        startJobForm.buttonSubmit.click();
         String startPopUpMessage = "The current job is starting";
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(
@@ -128,7 +128,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     public ApplicationsPage releaseApplication(String applicationName) {
         waitForPageLoading();
 
-        applicationsList().stream()
+        applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
                 it -> it.findElements(By.xpath("//button[contains(@auth, 'app:release')]"))
@@ -144,7 +144,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     public ApplicationsPage cancelApplication(String applicationName) {
         waitForPageLoading();
 
-        applicationsList().stream()
+        applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
                 it -> it.findElements(By.xpath("//button[contains(@auth, 'app:cancel')]"))
@@ -162,9 +162,9 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         cancelJobFormMessage))));
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint()));
-        cancelJobForm.radioFromSavepoint().click();
-        cancelJobForm.buttonSubmit().click();
+            .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint));
+        cancelJobForm.radioFromSavepoint.click();
+        cancelJobForm.buttonSubmit.click();
         String cancelPopUpMessage = "The current job is canceling";
         WebDriverWaitForElementVisibilityAndInvisibility(driver, cancelPopUpMessage);
 
@@ -184,13 +184,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         }
 
         @FindBy(xpath = "//button[@id='startApplicationModal_restoreSavepoint']//span[contains(text(), 'ON')]")
-        private WebElement radioFromSavepoint;
+        public WebElement radioFromSavepoint;
 
         @FindBy(xpath = "//div[contains(.,'Start Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 
     @Getter
@@ -201,12 +201,12 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         }
 
         @FindBy(xpath = "//span[contains(text(), 'ON')]")
-        private WebElement radioFromSavepoint;
+        public WebElement radioFromSavepoint;
 
         @FindBy(xpath = "//div[contains(.,'Stop Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

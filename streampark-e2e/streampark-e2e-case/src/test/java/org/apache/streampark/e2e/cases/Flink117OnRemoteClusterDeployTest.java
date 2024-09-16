@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/flink-1.17-on-remote/docker-compose.yaml")
 public class Flink117OnRemoteClusterDeployTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -85,7 +85,7 @@ public class Flink117OnRemoteClusterDeployTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkClustersPage.flinkClusterList())
+                () -> assertThat(flinkClustersPage.flinkClusterList)
                     .as("Flink clusters list should contain newly-created application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(flinkClusterName)));
@@ -103,7 +103,7 @@ public class Flink117OnRemoteClusterDeployTest {
                 () -> {
                     browser.navigate().refresh();
                     Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-                    assertThat(flinkClustersPage.flinkClusterList())
+                    assertThat(flinkClustersPage.flinkClusterList)
                         .noneMatch(it -> it.getText().contains(flinkClusterName));
                 });
     }

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ExternalLinkTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -68,7 +68,7 @@ public class ExternalLinkTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.externalLinkList())
+                () -> assertThat(externalLinkPage.externalLinkList)
                     .as("External link list should contain newly-created link")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newLabel))
@@ -84,14 +84,14 @@ public class ExternalLinkTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.errorMessageList())
+                () -> assertThat(externalLinkPage.errorMessageList)
                     .as("Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         String.format("The name: %s is already existing.", newName))));
 
-        externalLinkPage.errorMessageConfirmButton().click();
-        externalLinkPage.createExternalLinkForm().buttonCancel().click();
+        externalLinkPage.errorMessageConfirmButton.click();
+        externalLinkPage.createExternalLinkForm.buttonCancel.click();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ExternalLinkTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.externalLinkList())
+                () -> assertThat(externalLinkPage.externalLinkList)
                     .as("External link list should contain edited link")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editLabel))
@@ -122,7 +122,7 @@ public class ExternalLinkTest {
         Awaitility.await()
             .untilAsserted(
                 () -> {
-                    assertThat(externalLinkPage.externalLinkList())
+                    assertThat(externalLinkPage.externalLinkList)
                         .noneMatch(it -> it.getText().contains(editLabel));
                 });
     }

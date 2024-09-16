@@ -64,7 +64,7 @@ public class YarnQueueTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList())
+                () -> assertThat(queuePage.yarnQueueList)
                     .as("Yarn Queue list should contain newly-created item")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newQueueLabel))
@@ -78,12 +78,12 @@ public class YarnQueueTest {
         queuePage.createYarnQueue(newQueueLabel, description);
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.errorMessageList())
+                () -> assertThat(queuePage.errorMessageList)
                     .as("Yarn Queue Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("The queue label existed in the current team")));
 
-        queuePage.createYarnQueueForm().buttonCancel().click();
+        queuePage.createYarnQueueForm.buttonCancel.click();
     }
 
     @Test
@@ -96,7 +96,7 @@ public class YarnQueueTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList())
+                () -> assertThat(queuePage.yarnQueueList)
                     .as("Yarn queue list should contain edited yarn queue")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editQueueLabel))
@@ -112,7 +112,7 @@ public class YarnQueueTest {
         Awaitility.await()
             .untilAsserted(
                 () -> {
-                    assertThat(queuePage.yarnQueueList())
+                    assertThat(queuePage.yarnQueueList)
                         .noneMatch(it -> it.getText().contains(editQueueLabel));
                 });
     }

@@ -66,7 +66,7 @@ public class VariableManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .as("Variable list should contain newly-created variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(variableCode)));
@@ -80,14 +80,14 @@ public class VariableManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.errorMessageList())
+                () -> assertThat(variablesPage.errorMessageList)
                     .as("Variable Code Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "The variable code already exists.")));
 
-        variablesPage.errorMessageConfirmButton().click();
-        variablesPage.createVariableForm().buttonCancel().click();
+        variablesPage.errorMessageConfirmButton.click();
+        variablesPage.createVariableForm.buttonCancel.click();
     }
 
     @Test
@@ -100,7 +100,7 @@ public class VariableManagementTest {
         variablesPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .as("Variable list should contain edited variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editVariableValue))
@@ -116,7 +116,7 @@ public class VariableManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(variableCode)));
     }

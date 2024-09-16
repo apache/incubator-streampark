@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
 public class FlinkHomeTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -66,7 +66,7 @@ public class FlinkHomeTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkHomePage.flinkHomeList())
+                () -> assertThat(flinkHomePage.flinkHomeList)
                     .as("Flink Home list should contain newly-created flink home")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(flinkName)));
@@ -80,7 +80,7 @@ public class FlinkHomeTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkHomePage.flinkHomeList())
+                () -> assertThat(flinkHomePage.flinkHomeList)
                     .as("Flink Home list should contain edited flink home")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newFlinkHome)));
@@ -97,7 +97,7 @@ public class FlinkHomeTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(flinkHomePage.flinkHomeList())
+                    assertThat(flinkHomePage.flinkHomeList)
                         .noneMatch(it -> it.getText().contains(newFlinkHome));
                 });
     }

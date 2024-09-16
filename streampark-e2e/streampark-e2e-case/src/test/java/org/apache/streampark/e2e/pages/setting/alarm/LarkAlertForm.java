@@ -27,24 +27,23 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class LarkAlertForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_larkToken")
-    private WebElement inputLarkToken;
+    public WebElement inputLarkToken;
 
     @FindBy(id = "form_item_larkSecretToken")
-    private WebElement inputLarkSecretToken;
+    public WebElement inputLarkSecretToken;
 
     @FindBy(id = "form_item_larkSecretEnable")
-    private WebElement btnLarkSecret;
+    public WebElement btnLarkSecret;
 
     @FindBy(id = "form_item_larkIsAtAll")
-    private WebElement btnLarkEffectToAllUsers;
+    public WebElement btnLarkEffectToAllUsers;
 
     public LarkAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
         super(alertTypeDetailForm);
-
-        this.driver = alertTypeDetailForm.driver();
+        this.driver = alertTypeDetailForm.driver;
     }
 
     public LarkAlertForm token(String token) {

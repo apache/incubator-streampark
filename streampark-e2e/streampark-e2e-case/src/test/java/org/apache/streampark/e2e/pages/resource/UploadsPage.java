@@ -39,19 +39,19 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(id = "e2e-upload-create-btn")
     private WebElement buttonCreateResource;
 
-    private final CreateUploadForm createUploadForm = new CreateUploadForm();
+    public final CreateUploadForm createUploadForm = new CreateUploadForm();
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> resourceList;
+    public List<WebElement> resourceList;
 
     @FindBy(className = "swal2-html-container")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(text(), 'OK')]")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     @FindBy(className = "e2e-upload-delete-confirm")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
     public UploadsPage(RemoteWebDriver driver) {
         super(driver);
@@ -68,9 +68,9 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         buttonCreateResource.click();
 
         // select engine type.
-        createUploadForm.btnSelectEngineTypeDropDown().click();
+        createUploadForm.btnSelectEngineTypeDropDown.click();
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        createUploadForm.selectEngineType().stream()
+        createUploadForm.selectEngineType.stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
@@ -79,9 +79,9 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
             .click();
 
         // select resource type.
-        createUploadForm.btnSelectResourceTypeDropDown().click();
+        createUploadForm.btnSelectResourceTypeDropDown.click();
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        createUploadForm.selectResourceType().stream()
+        createUploadForm.selectResourceType.stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
             .orElseThrow(
@@ -89,11 +89,11 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
                     String.format("No %s in resourceType dropdown list", resourceType)))
             .click();
 
-        createUploadForm.inputResourceName().sendKeys(resourceName);
-        createUploadForm.textPom().sendKeys(resource);
-        createUploadForm.inputDescription().sendKeys(description);
+        createUploadForm.inputResourceName.sendKeys(resourceName);
+        createUploadForm.textPom.sendKeys(resource);
+        createUploadForm.inputDescription.sendKeys(description);
 
-        createUploadForm.buttonSubmit().click();
+        createUploadForm.buttonSubmit.click();
         return this;
     }
 
@@ -112,9 +112,9 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
             .click();
 
         // select engine type.
-        createUploadForm.btnSelectEngineTypeDropDown().click();
+        createUploadForm.btnSelectEngineTypeDropDown.click();
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        createUploadForm.selectEngineType().stream()
+        createUploadForm.selectEngineType.stream()
             .filter(e -> e.getText().equals(engineType))
             .findFirst()
             .orElseThrow(
@@ -123,9 +123,9 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
             .click();
 
         // select resource type.
-        createUploadForm.btnSelectResourceTypeDropDown().click();
+        createUploadForm.btnSelectResourceTypeDropDown.click();
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        createUploadForm.selectResourceType().stream()
+        createUploadForm.selectResourceType.stream()
             .filter(e -> e.getText().equals(resourceType))
             .findFirst()
             .orElseThrow(
@@ -133,12 +133,12 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
                     String.format("No %s in resourceType dropdown list", resourceType)))
             .click();
 
-        createUploadForm.textPom().sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-        createUploadForm.textPom().sendKeys(resource);
-        createUploadForm.inputDescription().clear();
-        createUploadForm.inputDescription().sendKeys(description);
+        createUploadForm.textPom.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+        createUploadForm.textPom.sendKeys(resource);
+        createUploadForm.inputDescription.clear();
+        createUploadForm.inputDescription.sendKeys(description);
 
-        createUploadForm.buttonSubmit().click();
+        createUploadForm.buttonSubmit.click();
         return this;
     }
 
@@ -178,27 +178,27 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         private WebElement btnSelectEngineTypeDropDown;
 
         @FindBy(xpath = "//*[@id='form_item_engineType']//following::div[@class='ant-select-item-option-content']")
-        private List<WebElement> selectEngineType;
+        public List<WebElement> selectEngineType;
 
         @FindBy(xpath = "//*[@id='form_item_resourceType']/ancestor::div[contains(@class, 'ant-select-selector')]")
-        private WebElement btnSelectResourceTypeDropDown;
+        public WebElement btnSelectResourceTypeDropDown;
 
         @FindBy(xpath = "//*[@id='form_item_resourceType']//following::div[@class='ant-select-item-option-content']")
-        private List<WebElement> selectResourceType;
+        public List<WebElement> selectResourceType;
 
         @FindBy(id = "ResourceForm_resourceName")
-        private WebElement inputResourceName;
+        public WebElement inputResourceName;
 
         @FindBy(css = "textarea.inputarea.monaco-mouse-cursor-text")
-        private WebElement textPom;
+        public WebElement textPom;
 
         @FindBy(id = "ResourceForm_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

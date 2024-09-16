@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/flink-1.17-on-yarn/docker-compose.yaml")
 public class FlinkSQL117OnYarnTest {
 
-    private static RemoteWebDriver browser;
+    public static RemoteWebDriver browser;
 
     private static final String userName = "admin";
 
@@ -101,7 +101,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain newly-created application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(applicationName)));
@@ -116,7 +116,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain released application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("SUCCESS")));
@@ -131,14 +131,14 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain started application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("RUNNING")));
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain finished application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("FINISHED")));
@@ -155,7 +155,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain restarted application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("RUNNING")));
@@ -164,7 +164,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain canceled application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("CANCELED")));
@@ -182,7 +182,7 @@ public class FlinkSQL117OnYarnTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(applicationsPage.applicationsList())
+                    assertThat(applicationsPage.applicationsList)
                         .noneMatch(it -> it.getText().contains(applicationName));
                 });
     }
@@ -204,7 +204,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain newly-created application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(applicationName)));
@@ -219,7 +219,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain released application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("SUCCESS")));
@@ -234,14 +234,14 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain started application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("RUNNING")));
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain finished application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("FINISHED")));
@@ -259,7 +259,7 @@ public class FlinkSQL117OnYarnTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(applicationsPage.applicationsList())
+                    assertThat(applicationsPage.applicationsList)
                         .noneMatch(it -> it.getText().contains(applicationName));
                 });
     }
@@ -282,7 +282,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain newly-created application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(applicationName)));
@@ -297,7 +297,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain released application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("SUCCESS")));
@@ -312,14 +312,14 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain started application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("RUNNING")));
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain finished application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("FINISHED")));
@@ -336,7 +336,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain restarted application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("RUNNING")));
@@ -345,7 +345,7 @@ public class FlinkSQL117OnYarnTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(applicationsPage.applicationsList())
+                () -> assertThat(applicationsPage.applicationsList)
                     .as("Applications list should contain canceled application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("CANCELED")));
@@ -363,7 +363,7 @@ public class FlinkSQL117OnYarnTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(applicationsPage.applicationsList())
+                    assertThat(applicationsPage.applicationsList)
                         .noneMatch(it -> it.getText().contains(applicationName));
                 });
     }

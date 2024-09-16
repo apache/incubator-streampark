@@ -29,10 +29,10 @@ import java.util.List;
 @Getter
 public class ClusterDetailForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(xpath = "//div[contains(@codefield, 'executionMode')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonExecutionModeDropdown;
+    public WebElement buttonExecutionModeDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=executionMode]"),
@@ -52,23 +52,23 @@ public class ClusterDetailForm {
         switch (executionMode) {
             case REMOTE:
                 selectExecutionMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc()))
+                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Execution Mode not found: %s", executionMode.desc())))
+                        String.format("Execution Mode not found: %s", executionMode.desc)))
                     .click();
                 return (T) new RemoteForm(this);
             case YARN_SESSION:
                 selectExecutionMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc()))
+                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Execution Mode not found: %s", executionMode.desc())))
+                        String.format("Execution Mode not found: %s", executionMode.desc)))
                     .click();
                 return (T) new YarnSessionForm(this);
             default:
                 throw new UnsupportedOperationException(
-                    String.format("Unknown execution mode: %s", executionMode.desc()));
+                    String.format("Unknown execution mode: %s", executionMode.desc));
         }
     }
 

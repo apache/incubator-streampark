@@ -36,18 +36,18 @@ import java.util.List;
 public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
 
     @FindBy(id = "e2e-token-create-btn")
-    private WebElement buttonCreateToken;
+    public WebElement buttonCreateToken;
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> tokenList;
+    public List<WebElement> tokenList;
 
     @FindBy(className = "e2e-token-delete-confirm")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
     @FindBy(className = "ant-form-item-explain-error")
-    private WebElement errorMessageSearchLayout;
+    public WebElement errorMessageSearchLayout;
 
-    private final CreateTokenForm createTokenForm = new CreateTokenForm();
+    public final CreateTokenForm createTokenForm = new CreateTokenForm();
 
     public TokenManagementPage(RemoteWebDriver driver) {
         super(driver);
@@ -61,19 +61,19 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         buttonCreateToken.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName()));
-        createTokenForm.inputUserName().sendKeys(existUserName);
-        createTokenForm.inputUserName().sendKeys(Keys.RETURN);
+            .until(ExpectedConditions.elementToBeClickable(createTokenForm.inputUserName));
+        createTokenForm.inputUserName.sendKeys(existUserName);
+        createTokenForm.inputUserName.sendKeys(Keys.RETURN);
 
-        createTokenForm.inputDescription().sendKeys(description);
-        createTokenForm.buttonSubmit().click();
+        createTokenForm.inputDescription.sendKeys(description);
+        createTokenForm.buttonSubmit.click();
         return this;
     }
 
     public TokenManagementPage copyToken(String existUserName) {
         waitForPageLoading();
 
-        tokenList().stream()
+        tokenList.stream()
             .filter(it -> it.getText().contains(existUserName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-token-copy-btn")).stream())
@@ -88,7 +88,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
     public TokenManagementPage deleteToken(String existUserName) {
         waitForPageLoading();
 
-        tokenList().stream()
+        tokenList.stream()
             .filter(it -> it.getText().contains(existUserName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-token-delete-btn")).stream())
@@ -117,15 +117,15 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         }
 
         @FindBy(id = "form_item_userId")
-        private WebElement inputUserName;
+        public WebElement inputUserName;
 
         @FindBy(id = "form_item_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

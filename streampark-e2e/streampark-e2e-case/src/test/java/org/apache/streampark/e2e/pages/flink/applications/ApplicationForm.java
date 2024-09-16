@@ -35,49 +35,49 @@ import java.util.List;
 @Getter
 public final class ApplicationForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(xpath = "//div[contains(@codefield, 'jobType')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonDevelopmentModeDropdown;
+    public WebElement buttonDevelopmentModeDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=jobType]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    private List<WebElement> selectDevelopmentMode;
+    public List<WebElement> selectDevelopmentMode;
 
     @FindBy(xpath = "//div[contains(@codefield, 'executionMode')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonExecutionModeDropdown;
+    public WebElement buttonExecutionModeDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=executionMode]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    private List<WebElement> selectExecutionMode;
+    public List<WebElement> selectExecutionMode;
 
     @FindBy(id = "form_item_jobName")
-    private WebElement inputApplicationName;
+    public WebElement inputApplicationName;
 
     @FindBy(xpath = "//div[contains(@codefield, 'yarnSessionClusterId')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonFlinkClusterDropdown;
+    public WebElement buttonFlinkClusterDropdown;
 
     @FindBy(className = "ant-select-item-option-content")
     private List<WebElement> selectFlinkCluster;
 
     @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonFlinkVersionDropdown;
+    public WebElement buttonFlinkVersionDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=versionId]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    private List<WebElement> selectFlinkVersion;
+    public List<WebElement> selectFlinkVersion;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
-    private WebElement buttonSubmit;
+    public WebElement buttonSubmit;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-    private WebElement buttonCancel;
+    public WebElement buttonCancel;
 
     public ApplicationForm(WebDriver driver) {
         this.driver = driver;
@@ -98,93 +98,93 @@ public final class ApplicationForm {
         switch (developmentMode) {
             case CUSTOM_CODE:
                 selectDevelopmentMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.CUSTOM_CODE.desc()))
+                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.CUSTOM_CODE.desc))
                     .findFirst()
                     .orElseThrow(
                         () -> new IllegalArgumentException(
                             String.format("Development mode not found: %s",
-                                developmentMode.desc())))
+                                developmentMode.desc)))
                     .click();
                 break;
             case FLINK_SQL:
                 selectDevelopmentMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.FLINK_SQL.desc()))
+                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.FLINK_SQL.desc))
                     .findFirst()
                     .orElseThrow(
                         () -> new IllegalArgumentException(
                             String.format("Development mode not found: %s",
-                                developmentMode.desc())))
+                                developmentMode.desc)))
                     .click();
                 buttonExecutionModeDropdown.click();
                 switch (executionMode) {
                     case REMOTE:
                         selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc()))
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
                         break;
                     case YARN_APPLICATION:
                         selectExecutionMode.stream()
                             .filter(e -> e.getText()
-                                .equalsIgnoreCase(ExecutionMode.YARN_APPLICATION.desc()))
+                                .equalsIgnoreCase(ExecutionMode.YARN_APPLICATION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
 
                         break;
                     case YARN_SESSION:
                         selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc()))
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
                         break;
                     case KUBERNETES_SESSION:
                         selectExecutionMode.stream()
                             .filter(e -> e.getText()
-                                .equalsIgnoreCase(ExecutionMode.KUBERNETES_SESSION.desc()))
+                                .equalsIgnoreCase(ExecutionMode.KUBERNETES_SESSION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
                         break;
                     case KUBERNETES_APPLICATION:
                         selectExecutionMode.stream()
                             .filter(
                                 e -> e.getText().equalsIgnoreCase(
-                                    ExecutionMode.KUBERNETES_APPLICATION.desc()))
+                                    ExecutionMode.KUBERNETES_APPLICATION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
                         break;
                     case YARN_PER_JOB:
                         selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc()))
+                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc())))
+                                        executionMode.desc)))
                             .click();
                         break;
                     default:
                         throw new IllegalArgumentException(
-                            String.format("Unknown execution mode: %s", executionMode.desc()));
+                            String.format("Unknown execution mode: %s", executionMode.desc));
                 }
                 break;
             case PYTHON_FLINK:

@@ -63,7 +63,7 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList())
+                () -> assertThat(memberManagementPage.memberList)
                     .as("Member list should contain newly-created member")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(existUserName)));
@@ -78,7 +78,7 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.errorMessageList())
+                () -> assertThat(memberManagementPage.errorMessageList)
                     .as("Member Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
@@ -86,8 +86,8 @@ public class MemberManagementTest {
                             "The user [%s] has been added the team [%s], please don't add it again.",
                             existUserName, teamName))));
 
-        memberManagementPage.errorMessageConfirmButton().click();
-        memberManagementPage.createMemberForm().buttonCancel().click();
+        memberManagementPage.errorMessageConfirmButton.click();
+        memberManagementPage.createMemberForm.buttonCancel.click();
     }
 
     @Test
@@ -100,7 +100,7 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList())
+                () -> assertThat(memberManagementPage.memberList)
                     .as("Team list should contain edited team")
                     .extracting(WebElement::getText)
                     .anyMatch(
@@ -119,7 +119,7 @@ public class MemberManagementTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(memberManagementPage.memberList())
+                    assertThat(memberManagementPage.memberList)
                         .noneMatch(it -> it.getText().contains(existUserName));
                 });
     }

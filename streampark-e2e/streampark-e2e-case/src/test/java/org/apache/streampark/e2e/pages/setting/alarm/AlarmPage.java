@@ -35,19 +35,19 @@ import java.util.List;
 public class AlarmPage extends NavBarPage implements SettingPage.Tab {
 
     @FindBy(xpath = "//span[contains(., 'Alarms Setting')]/..//button[contains(@class, 'ant-btn-dashed')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateAlarm;
+    public WebElement buttonCreateAlarm;
 
     @FindBy(xpath = "//div[@class='ant-row']")
-    private List<WebElement> alarmList;
+    public List<WebElement> alarmList;
 
     @FindBy(className = "ant-form-item-explain-error")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(text(), 'Submit')]")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'Yes')]")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
     public AlarmPage(RemoteWebDriver driver) {
         super(driver);
@@ -66,7 +66,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
     public AlertTypeDetailForm editAlarm(String alarmName) {
         waitForPageLoading();
 
-        alarmList().stream()
+        alarmList.stream()
             // Filter out cards containing a specific alertName.
             .filter(card -> {
                 WebElement titleElement = new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -96,7 +96,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
     public AlarmPage deleteAlarm(String alarmName) {
         waitForPageLoading();
 
-        alarmList().stream()
+        alarmList.stream()
             // Filter out cards containing a specific alertName.
             .filter(card -> {
                 WebElement titleElement = new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)

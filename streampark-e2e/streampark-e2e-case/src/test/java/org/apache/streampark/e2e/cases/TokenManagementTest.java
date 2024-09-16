@@ -64,7 +64,7 @@ public class TokenManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(tokenManagementPage.tokenList())
+                () -> assertThat(tokenManagementPage.tokenList)
                     .as("Token list should contain newly-created token")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(existUserName)));
@@ -77,14 +77,14 @@ public class TokenManagementTest {
         tokenManagementPage.copyToken(existUserName);
 
         // put clipboard value into createTokenForm.description
-        tokenManagementPage.buttonCreateToken().click();
-        tokenManagementPage.createTokenForm().inputDescription().sendKeys(Keys.CONTROL, "v");
-        String token = tokenManagementPage.createTokenForm().inputDescription().getAttribute("value");
-        tokenManagementPage.createTokenForm().buttonCancel().click();
+        tokenManagementPage.buttonCreateToken.click();
+        tokenManagementPage.createTokenForm.inputDescription.sendKeys(Keys.CONTROL, "v");
+        String token = tokenManagementPage.createTokenForm.inputDescription.getAttribute("value");
+        tokenManagementPage.createTokenForm.buttonCancel.click();
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(tokenManagementPage.tokenList())
+                () -> assertThat(tokenManagementPage.tokenList)
                     .as("Clipboard should contain existing token.")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(token)));
@@ -102,7 +102,7 @@ public class TokenManagementTest {
                 () -> assertThat(browser.findElement(By.tagName("body")).getText())
                     .contains(String.format("user %s already has a token", existUserName)));
 
-        tokenManagementPage.createTokenForm().buttonCancel().click();
+        tokenManagementPage.createTokenForm.buttonCancel.click();
     }
 
     @Test
@@ -115,7 +115,7 @@ public class TokenManagementTest {
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
-                    assertThat(teamManagementPage.tokenList())
+                    assertThat(teamManagementPage.tokenList)
                         .noneMatch(it -> it.getText().contains(existUserName));
                 });
     }

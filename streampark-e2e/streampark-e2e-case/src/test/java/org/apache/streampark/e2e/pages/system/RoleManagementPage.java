@@ -37,18 +37,18 @@ import java.util.Objects;
 public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
     @FindBy(id = "e2e-role-create-btn")
-    private WebElement buttonCreateRole;
+    public WebElement buttonCreateRole;
 
     @FindBy(className = "ant-table-tbody")
-    private List<WebElement> roleList;
+    public List<WebElement> roleList;
 
     @FindBy(className = "ant-form-item-explain-error")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(className = "e2e-role-delete-confirm")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
-    private final CreateRoleForm createRoleForm = new CreateRoleForm();
+    public final CreateRoleForm createRoleForm = new CreateRoleForm();
 
     public RoleManagementPage(RemoteWebDriver driver) {
         super(driver);
@@ -61,11 +61,11 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(buttonCreateRole));
         buttonCreateRole.click();
 
-        createRoleForm.inputRoleName().sendKeys(roleName);
-        createRoleForm.inputDescription().sendKeys(description);
+        createRoleForm.inputRoleName.sendKeys(roleName);
+        createRoleForm.inputDescription.sendKeys(description);
         editRoleMenu(menuName);
 
-        createRoleForm.buttonSubmit().click();
+        createRoleForm.buttonSubmit.click();
         return this;
     }
 
@@ -73,7 +73,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
-        roleList().stream()
+        roleList.stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-role-edit-btn"))
@@ -83,10 +83,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in role list"))
             .click();
 
-        createRoleForm.inputDescription().sendKeys(description);
+        createRoleForm.inputDescription.sendKeys(description);
         editRoleMenu(menuName);
 
-        createRoleForm.buttonSubmit().click();
+        createRoleForm.buttonSubmit.click();
 
         return this;
     }
@@ -94,7 +94,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     public RoleManagementPage deleteRole(String roleName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-        roleList().stream()
+        roleList.stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
                 it -> it.findElements(By.className("e2e-role-delete-btn"))
@@ -140,10 +140,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         }
 
         @FindBy(id = "role_form_roleName")
-        private WebElement inputRoleName;
+        public WebElement inputRoleName;
 
         @FindBy(id = "role_form_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBys({
                 @FindBy(className = "ant-tree-list"),
@@ -152,9 +152,9 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         private List<WebElement> inputMenus;
 
         @FindBy(className = "e2e_role_pop_ok")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(className = "e2e_role_pop_cancel")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }
