@@ -54,7 +54,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public RoleManagementPage createRole(String roleName, String description, String menuName) {
+    public void createRole(String roleName, String description, String menuName) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -66,10 +66,9 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         editRoleMenu(menuName);
 
         createRoleForm.buttonSubmit.click();
-        return this;
     }
 
-    public RoleManagementPage editRole(String roleName, String description, String menuName) {
+    public void editRole(String roleName, String description, String menuName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
@@ -88,10 +87,9 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createRoleForm.buttonSubmit.click();
 
-        return this;
     }
 
-    public RoleManagementPage deleteRole(String roleName) {
+    public void deleteRole(String roleName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         roleList.stream()
@@ -109,7 +107,6 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
 
         deleteConfirmButton.click();
 
-        return this;
     }
 
     private void waitForPageLoading() {

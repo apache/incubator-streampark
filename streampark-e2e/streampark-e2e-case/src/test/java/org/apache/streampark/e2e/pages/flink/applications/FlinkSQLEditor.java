@@ -75,25 +75,18 @@ public final class FlinkSQLEditor {
             }
 
             if (StringUtils.isNotBlank(inputContent)) {
-                if (editorLineText.isEmpty()) {
-                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
-                        .click()
-                        .sendKeys(inputContent)
-                        .sendKeys(Constants.LINE_SEPARATOR)
-                        .perform();
-                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
-                } else {
+                if (!editorLineText.isEmpty()) {
                     for (int p = 0; p < editorLineText.trim().length(); p++) {
                         clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
                     }
                     clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
-                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                }
+                actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
                         .click()
                         .sendKeys(inputContent)
                         .sendKeys(Constants.LINE_SEPARATOR)
                         .perform();
-                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
-                }
+                Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
             } else {
                 actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
                     .click()

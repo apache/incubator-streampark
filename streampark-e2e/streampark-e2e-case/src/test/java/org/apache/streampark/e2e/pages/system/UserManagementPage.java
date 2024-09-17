@@ -53,7 +53,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public UserManagementPage createUser(
+    public void createUser(
                                          String userName,
                                          String nickName,
                                          String password,
@@ -82,10 +82,9 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createUserForm.buttonSubmit.click();
-        return this;
     }
 
-    public UserManagementPage editUser(
+    public void editUser(
                                        String userName,
                                        String email,
                                        UserManagementUserType userManagementUserType,
@@ -132,7 +131,6 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createUserForm.buttonSubmit.click();
 
-        return this;
     }
 
     private void waitForPageLoading() {

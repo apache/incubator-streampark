@@ -56,7 +56,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public TeamManagementPage createTeam(String teamName, String description) {
+    public void createTeam(String teamName, String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -66,10 +66,9 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         createTeamForm.inputDescription.sendKeys(description);
 
         createTeamForm.buttonSubmit.click();
-        return this;
     }
 
-    public TeamManagementPage editTeam(String teamName, String description) {
+    public void editTeam(String teamName, String description) {
         waitForPageLoading();
 
         teamList.stream()
@@ -90,10 +89,9 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createTeamForm.buttonSubmit.click();
 
-        return this;
     }
 
-    public TeamManagementPage deleteTeam(String teamName) {
+    public void deleteTeam(String teamName) {
         waitForPageLoading();
 
         teamList.stream()
@@ -111,7 +109,6 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
         deleteConfirmButton.click();
 
-        return this;
     }
 
     private void waitForPageLoading() {

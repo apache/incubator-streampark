@@ -56,11 +56,13 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public MemberManagementPage createMember(String userName, String role) {
+    public void createMember(String userName, String role) {
+
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateMember));
+
         buttonCreateMember.click();
 
         createMemberForm.btnSelectUserNameDropDown.click();
@@ -87,11 +89,12 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm.buttonSubmit.click();
-        return this;
     }
 
-    public MemberManagementPage editMember(String userName, String role) {
+    public void editMember(String userName, String role) {
         waitForPageLoading();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
         memberList.stream()
             .filter(it -> it.getText().contains(userName))
@@ -116,11 +119,10 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createMemberForm.buttonSubmit.click();
 
-        return this;
     }
-    public MemberManagementPage deleteMember(String userName) {
+    public void deleteMember(String userName) {
         waitForPageLoading();
-
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         memberList.stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
@@ -136,7 +138,6 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
         deleteConfirmButton.click();
 
-        return this;
     }
 
     private void waitForPageLoading() {

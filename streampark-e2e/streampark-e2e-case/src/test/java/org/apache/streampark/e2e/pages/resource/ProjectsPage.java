@@ -54,12 +54,12 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     }
 
     @SneakyThrows
-    public ProjectsPage createProject(String projectName,
-                                      String projectCvs,
-                                      String projectUrl,
-                                      String projectBranch,
-                                      String projectBuildArgument,
-                                      String projectDescription) {
+    public void createProject(String projectName,
+                              String projectCvs,
+                              String projectUrl,
+                              String projectBranch,
+                              String projectBuildArgument,
+                              String projectDescription) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -91,17 +91,16 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.inputDescription.sendKeys(projectDescription);
         createProjectForm.buttonSubmit.click();
 
-        return this;
     }
 
     @SneakyThrows
-    public ProjectsPage editProject(String oldProjectName,
-                                    String newProjectName,
-                                    String projectCvs,
-                                    String projectUrl,
-                                    String projectBranch,
-                                    String projectBuildArgument,
-                                    String projectDescription) {
+    public void editProject(String oldProjectName,
+                            String newProjectName,
+                            String projectCvs,
+                            String projectUrl,
+                            String projectBranch,
+                            String projectBuildArgument,
+                            String projectDescription) {
         waitForPageLoading();
         projectList.stream()
             .filter(project -> project.getText().contains(oldProjectName))
@@ -145,11 +144,10 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         createProjectForm.inputDescription.sendKeys(projectDescription);
         createProjectForm.buttonSubmit.click();
 
-        return this;
     }
 
     @SneakyThrows
-    public ProjectsPage buildProject(String projectName) {
+    public void buildProject(String projectName) {
         waitForPageLoading();
         projectList.stream()
             .filter(project -> project.getText().contains(projectName))
@@ -159,11 +157,10 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                 By.xpath("//..//li[contains(@class, 'ant-list-item')]//button[contains(@class, 'ant-btn')][2]"))
             .click();
         popupConfirmButton.click();
-        return this;
     }
 
     @SneakyThrows
-    public ProjectsPage deleteProject(String projectName) {
+    public void deleteProject(String projectName) {
         waitForPageLoading();
         projectList.stream()
             .filter(project -> project.getText().contains(projectName))
@@ -185,7 +182,6 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         deletePopUpMessage))));
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        return this;
     }
 
     private void waitForPageLoading() {

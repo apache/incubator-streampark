@@ -52,7 +52,7 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         super(driver);
     }
 
-    public YarnQueuePage createYarnQueue(String queueLabel, String description) {
+    public void createYarnQueue(String queueLabel, String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -63,10 +63,9 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         createYarnQueueForm.inputDescription.sendKeys(description);
 
         createYarnQueueForm.buttonOk.click();
-        return this;
     }
 
-    public YarnQueuePage editYarnQueue(String queueLabel, String editQueueLabel, String description) {
+    public void editYarnQueue(String queueLabel, String editQueueLabel, String description) {
         waitForPageLoading();
 
         yarnQueueList.stream()
@@ -86,10 +85,9 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         createYarnQueueForm.inputDescription.sendKeys(description);
 
         createYarnQueueForm.buttonOk.click();
-        return this;
     }
 
-    public YarnQueuePage deleteYarnQueue(String queueLabel) {
+    public void deleteYarnQueue(String queueLabel) {
         waitForPageLoading();
 
         yarnQueueList.stream()
@@ -106,7 +104,6 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
 
         deleteConfirmButton.click();
 
-        return this;
     }
 
     private void waitForPageLoading() {

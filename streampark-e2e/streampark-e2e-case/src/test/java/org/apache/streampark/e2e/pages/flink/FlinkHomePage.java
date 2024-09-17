@@ -65,7 +65,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         return this;
     }
 
-    public FlinkHomePage editFlinkHome(String oldFlinkName, String newFlinkName) {
+    public void editFlinkHome(String oldFlinkName, String newFlinkName) {
         waitForPageLoading();
 
         flinkHomeList.stream()
@@ -87,7 +87,6 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         createFlinkHomeForm.buttonSubmit.click();
 
         waitForClickFinish("update successful");
-        return this;
     }
 
     public FlinkHomePage deleteFlinkHome(String flinkName) {
