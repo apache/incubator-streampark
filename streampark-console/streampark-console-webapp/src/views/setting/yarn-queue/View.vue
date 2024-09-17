@@ -19,7 +19,12 @@
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
         <Col :span="5" :offset="13" class="text-right">
-          <a-button type="primary" @click="handleCreate" v-auth="'yarnQueue:create'">
+          <a-button
+            id="e2e-yarnqueue-create-btn"
+            type="primary"
+            @click="handleCreate"
+            v-auth="'yarnQueue:create'"
+          >
             <Icon icon="ant-design:plus-outlined" />
             {{ t('common.add') }}
           </a-button>
@@ -30,17 +35,22 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-yarnqueue-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'yarnQueue:update',
                 tooltip: t('common.edit'),
                 onClick: handleYarnQueueEdit.bind(null, record),
               },
               {
+                class: 'e2e-yarnqueue-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 auth: 'yarnQueue:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-yarnqueue-delete-confirm',
+                  },
                   title: t('setting.yarnQueue.deleteConfirm'),
                   confirm: handleDelete.bind(null, record),
                 },

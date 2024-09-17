@@ -34,7 +34,7 @@ import java.util.List;
 @Getter
 public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
 
-    @FindBy(xpath = "//span[contains(., 'Yarn Queue List')]/..//button[contains(@class, 'ant-btn-primary')]/span[contains(text(), 'Add New')]")
+    @FindBy(id = "e2e-yarnqueue-create-btn")
     public WebElement buttonCreateYarnQueue;
 
     @FindBy(xpath = "//tbody[contains(@class, 'ant-table-tbody')]")
@@ -43,7 +43,7 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
     @FindBy(className = "ant-form-item-explain-error")
     public List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-yarnqueue-delete-confirm")
     public WebElement deleteConfirmButton;
 
     public final CreateYarnQueueForm createYarnQueueForm = new CreateYarnQueueForm();
@@ -72,7 +72,7 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         yarnQueueList.stream()
             .filter(it -> it.getText().contains(queueLabel))
             .flatMap(
-                it -> it.findElements(By.xpath(".//button[contains(@tooltip, 'Edit')]")).stream())
+                it -> it.findElements(By.className("e2e-yarnqueue-edit-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No edit button in yarn queue list"))
@@ -127,10 +127,10 @@ public class YarnQueuePage extends NavBarPage implements SettingPage.Tab {
         @FindBy(id = "YarnQueueEditForm_description")
         public WebElement inputDescription;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
+        @FindBy(className = "e2e-yarnqueue-submit-btn")
         public WebElement buttonOk;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+        @FindBy(className = "e2e-yarnqueue-cancel-btn")
         public WebElement buttonCancel;
     }
 }

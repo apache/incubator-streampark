@@ -16,6 +16,8 @@
 -->
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-yarnqueue-submit-btn' }"
+    :cancelButtonProps="{ class: 'e2e-yarnqueue-cancel-btn' }"
     :width="600"
     v-bind="$attrs"
     centered
