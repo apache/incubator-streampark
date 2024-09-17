@@ -42,11 +42,10 @@
   import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/system/team';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { BasicDrawer } from '/@/components/Drawer';
 
   export default defineComponent({
     name: 'TeamDrawer',
-    components: { BasicDrawer, BasicModal, BasicForm, Icon },
+    components: { BasicModal, BasicForm, Icon },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();

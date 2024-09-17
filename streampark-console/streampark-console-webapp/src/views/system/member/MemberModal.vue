@@ -47,10 +47,6 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { fetchAddMember, fetchCandidateUsers, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
-  import { BasicDrawer } from '/@/components/Drawer';
-  defineOptions({
-    name: 'MemberDrawer',
-  });
   const { t } = useI18n();
   const userStore = useUserStoreWithOut();
   const { getItemProp, setValidateStatus, setHelp } = useFormValidate();

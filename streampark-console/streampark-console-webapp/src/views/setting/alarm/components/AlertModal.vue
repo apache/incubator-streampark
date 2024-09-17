@@ -31,7 +31,6 @@
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { BasicDrawer } from '/@/components/Drawer';
 
   const FormItem = Form.Item;
   const SelectOption = Select.Option;
