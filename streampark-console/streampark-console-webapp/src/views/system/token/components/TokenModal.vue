@@ -16,6 +16,8 @@
 -->
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-token-create-btn' }"
+    :cancelButtonProps="{ class: 'e2e-token-cancel-btn' }"
     :width="600"
     @register="registerDrawer"
     showFooter
@@ -41,10 +43,11 @@
   import { fetchTokenCreate } from '/@/api/system/token';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { BasicDrawer } from '/@/components/Drawer';
 
   export default defineComponent({
     name: 'TokenModal',
-    components: { Icon, BasicModal, BasicForm },
+    components: { BasicDrawer, Icon, BasicModal, BasicForm },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const isUpdate = ref(true);

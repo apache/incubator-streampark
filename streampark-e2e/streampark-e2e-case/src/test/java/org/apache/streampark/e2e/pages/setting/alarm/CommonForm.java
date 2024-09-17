@@ -33,10 +33,10 @@ public abstract class CommonForm {
     @FindBy(id = "form_item_alertName")
     public WebElement inputAlertName;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+    @FindBy(className = "e2e-alert-create-btn")
     public WebElement buttonSubmit;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+    @FindBy(className = "e2e-alert-cancel-btn")
     public WebElement buttonCancel;
 
     private final AlertTypeDetailForm parent;

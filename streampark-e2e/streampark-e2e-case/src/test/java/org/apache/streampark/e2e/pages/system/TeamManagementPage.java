@@ -132,10 +132,10 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         @FindBy(id = "TeamEditForm_description")
         public WebElement inputDescription;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+        @FindBy(className = "e2e-team-create-btn")
         public WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(className = "e2e-team-cancel-btn")
         public WebElement buttonCancel;
     }
 }

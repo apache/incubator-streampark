@@ -31,6 +31,7 @@
   import { useUserStore } from '/@/store/modules/user';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { BasicDrawer } from '/@/components/Drawer';
 
   const FormItem = Form.Item;
   const SelectOption = Select.Option;
@@ -191,6 +192,8 @@
 
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-alert-create-btn' }"
+    :cancelButtonProps="{ class: 'e2e-alert-cancel-btn' }"
     :width="650"
     :ok-text="t('common.submitText')"
     @register="registerModal"

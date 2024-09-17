@@ -16,6 +16,8 @@
 -->
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-team-create-btn' }"
+    :cancelButtonProps="{ class: 'e2e-team-cancel-btn' }"
     :width="600"
     v-bind="$attrs"
     @register="registerModal"
@@ -40,10 +42,11 @@
   import { fetchTeamCreate, fetchTeamUpdate } from '/@/api/system/team';
   import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { BasicDrawer } from '/@/components/Drawer';
 
   export default defineComponent({
     name: 'TeamDrawer',
-    components: { BasicModal, BasicForm, Icon },
+    components: { BasicDrawer, BasicModal, BasicForm, Icon },
     emits: ['success', 'register'],
     setup(_, { emit }) {
       const { t } = useI18n();
