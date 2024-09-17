@@ -143,10 +143,10 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         @FindBy(id = "form_item_linkUrl")
         public WebElement inputLink;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+        @FindBy(className = "e2e-extlink-create-btn")
         public WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(className = "e2e-extlink-cancel-btn")
         public WebElement buttonCancel;
     }
 }

@@ -149,12 +149,12 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
                 @FindBy(className = "ant-tree-list"),
                 @FindBy(className = "ant-tree-treenode")
         })
-        private List<WebElement> inputMenus;
+        public List<WebElement> inputMenus;
 
-        @FindBy(className = "e2e_role_pop_ok")
+        @FindBy(className = "e2e-role-pop-ok")
         public WebElement buttonSubmit;
 
-        @FindBy(className = "e2e_role_pop_cancel")
+        @FindBy(className = "e2e-role-pop-cancel")
         public WebElement buttonCancel;
     }
 }

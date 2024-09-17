@@ -158,7 +158,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                 @FindBy(css = "[codefield='userName']"),
                 @FindBy(className = "ant-select-item-option-content")
         })
-        private List<WebElement> selectUserName;
+        public List<WebElement> selectUserName;
 
         @FindBy(css = "[codefield='roleId']")
         public WebElement btnSelectRoleDropDown;
@@ -167,12 +167,12 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                 @FindBy(css = "[codefield='roleId']"),
                 @FindBy(className = "ant-select-item-option-content")
         })
-        private List<WebElement> selectRole;
+        public List<WebElement> selectRole;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Submit')]")
+        @FindBy(className = "e2e-member-create-btn")
         public WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(className = "e2e-member-cancel-btn")
         public WebElement buttonCancel;
     }
 }

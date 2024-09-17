@@ -16,6 +16,8 @@
 -->
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-member-create-btn' }"
+    :cancelButtonProps="{ class: 'e2e-member-cancel-btn' }"
     :width="600"
     v-bind="$attrs"
     @register="registerModal"
@@ -45,6 +47,7 @@
   import { useUserStoreWithOut } from '/@/store/modules/user';
   import { fetchAddMember, fetchCandidateUsers, fetchUpdateMember } from '/@/api/system/member';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
+  import { BasicDrawer } from '/@/components/Drawer';
   defineOptions({
     name: 'MemberDrawer',
   });

@@ -147,10 +147,10 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "VariableForm_desensitization")
         public WebElement buttonDesensitization;
 
-        @FindBy(className = "e2e_var_btn_submit")
+        @FindBy(className = "e2e-var-create-btn")
         public WebElement buttonSubmit;
 
-        @FindBy(className = "e2e_var_btn_cancel")
+        @FindBy(className = "e2e-var-cancel-btn")
         public WebElement buttonCancel;
     }
 }

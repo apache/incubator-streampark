@@ -177,6 +177,8 @@
 </script>
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-extlink-create-btn' }"
+    :cancelButtonProps="{ class: 'e2e-extlink-cancel-btn' }"
     @register="registerModal"
     :width="600"
     :ok-text="t('common.submitText')"
