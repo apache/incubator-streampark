@@ -82,10 +82,10 @@ public final class FlinkSQLEditor {
                     clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
                 }
                 actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
-                        .click()
-                        .sendKeys(inputContent)
-                        .sendKeys(Constants.LINE_SEPARATOR)
-                        .perform();
+                    .click()
+                    .sendKeys(inputContent)
+                    .sendKeys(Constants.LINE_SEPARATOR)
+                    .perform();
                 Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
             } else {
                 actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))

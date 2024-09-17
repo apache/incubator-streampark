@@ -54,11 +54,11 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     public void createUser(
-                                         String userName,
-                                         String nickName,
-                                         String password,
-                                         String email,
-                                         UserManagementUserType userManagementUserType) {
+                           String userName,
+                           String nickName,
+                           String password,
+                           String email,
+                           UserManagementUserType userManagementUserType) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -85,10 +85,10 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     public void editUser(
-                                       String userName,
-                                       String email,
-                                       UserManagementUserType userManagementUserType,
-                                       UserManagementStatus userManagementStatus) {
+                         String userName,
+                         String email,
+                         UserManagementUserType userManagementUserType,
+                         UserManagementStatus userManagementStatus) {
         waitForPageLoading();
 
         userList
