@@ -93,7 +93,7 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
         return new AlertTypeDetailForm(driver);
     }
 
-    public void deleteAlarm(String alarmName) {
+    public AlarmPage deleteAlarm(String alarmName) {
         waitForPageLoading();
 
         alarmList.stream()
@@ -124,8 +124,9 @@ public class AlarmPage extends NavBarPage implements SettingPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
+        return this;
     }
+
     private void waitForPageLoading() {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/setting/alarm"));

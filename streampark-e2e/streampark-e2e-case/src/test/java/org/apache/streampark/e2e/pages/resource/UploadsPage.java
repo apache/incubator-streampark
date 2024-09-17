@@ -58,9 +58,9 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
     }
 
     @SneakyThrows
-    public void createUpload(String engineType, String resourceType, String resourceName,
-                             String resource,
-                             String description) {
+    public UploadsPage createUpload(String engineType, String resourceType, String resourceName,
+                                    String resource,
+                                    String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -94,11 +94,13 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         createUploadForm.inputDescription.sendKeys(description);
 
         createUploadForm.buttonSubmit.click();
+
+        return this;
     }
 
     @SneakyThrows
-    public void editUpload(String engineType, String resourceType, String resourceName,
-                           String resource, String description) {
+    public UploadsPage editUpload(String engineType, String resourceType, String resourceName,
+                                  String resource, String description) {
         waitForPageLoading();
 
         resourceList.stream()
@@ -138,9 +140,11 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         createUploadForm.inputDescription.sendKeys(description);
 
         createUploadForm.buttonSubmit.click();
+
+        return this;
     }
 
-    public void deleteUpload(String resourceName) {
+    public UploadsPage deleteUpload(String resourceName) {
         waitForPageLoading();
 
         resourceList.stream()
@@ -157,6 +161,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
         deleteConfirmButton.click();
 
+        return this;
     }
 
     private void waitForPageLoading() {

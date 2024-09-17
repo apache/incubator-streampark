@@ -55,7 +55,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         super(driver);
     }
 
-    public void createExternalLink(String label, String name, String color, String link) {
+    public ExternalLinkPage createExternalLink(String label, String name, String color, String link) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -67,10 +67,12 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         createExternalLinkForm.inputLink.sendKeys(link);
 
         createExternalLinkForm.buttonSubmit.click();
+
+        return this;
     }
 
-    public void editExternalLink(String label, String editLabel, String editName, String color,
-                                 String editLink) {
+    public ExternalLinkPage editExternalLink(String label, String editLabel, String editName, String color,
+                                             String editLink) {
         waitForPageLoading();
 
         externalLinkList.stream()
@@ -93,9 +95,10 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         createExternalLinkForm.inputLink.sendKeys(editLink);
 
         createExternalLinkForm.buttonSubmit.click();
+        return this;
     }
 
-    public void deleteExternalLink(String label) {
+    public ExternalLinkPage deleteExternalLink(String label) {
         waitForPageLoading();
 
         externalLinkList.stream()
@@ -113,7 +116,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
+        return this;
     }
 
     private void waitForPageLoading() {

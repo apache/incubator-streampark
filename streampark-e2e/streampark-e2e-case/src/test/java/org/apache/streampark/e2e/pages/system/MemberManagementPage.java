@@ -56,8 +56,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public void createMember(String userName, String role) {
-
+    public MemberManagementPage createMember(String userName, String role) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -69,6 +68,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectUserName));
+
         createMemberForm.selectUserName.stream()
             .filter(e -> e.getText().equals(userName))
             .findFirst()
@@ -78,8 +78,10 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm.btnSelectRoleDropDown.click();
+
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
+
         createMemberForm.selectRole.stream()
             .filter(e -> e.getText().equals(role))
             .findFirst()
@@ -89,9 +91,10 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm.buttonSubmit.click();
+        return this;
     }
 
-    public void editMember(String userName, String role) {
+    public MemberManagementPage editMember(String userName, String role) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
@@ -118,9 +121,10 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .click();
 
         createMemberForm.buttonSubmit.click();
-
+        return this;
     }
-    public void deleteMember(String userName) {
+
+    public MemberManagementPage deleteMember(String userName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         memberList.stream()
@@ -137,7 +141,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
+        return this;
     }
 
     private void waitForPageLoading() {

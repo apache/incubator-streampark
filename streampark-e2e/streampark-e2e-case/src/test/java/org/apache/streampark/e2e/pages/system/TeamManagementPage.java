@@ -68,7 +68,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
         createTeamForm.buttonSubmit.click();
     }
 
-    public void editTeam(String teamName, String description) {
+    public TeamManagementPage editTeam(String teamName, String description) {
         waitForPageLoading();
 
         teamList.stream()
@@ -89,9 +89,10 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createTeamForm.buttonSubmit.click();
 
+        return this;
     }
 
-    public void deleteTeam(String teamName) {
+    public TeamManagementPage deleteTeam(String teamName) {
         waitForPageLoading();
 
         teamList.stream()
@@ -108,7 +109,7 @@ public class TeamManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
+        return this;
     }
 
     private void waitForPageLoading() {

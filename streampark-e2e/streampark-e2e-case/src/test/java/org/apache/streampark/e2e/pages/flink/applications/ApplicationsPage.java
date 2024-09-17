@@ -69,7 +69,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         return new ApplicationForm(driver);
     }
 
-    public void deleteApplication(String applicationName) {
+    public ApplicationsPage deleteApplication(String applicationName) {
         waitForPageLoading();
 
         WebElement extraButton = applicationsList.stream()
@@ -85,9 +85,10 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         deleteButton.click();
         deleteConfirmButton.click();
 
+        return this;
     }
 
-    public void startApplication(String applicationName) {
+    public ApplicationsPage startApplication(String applicationName) {
         waitForPageLoading();
 
         applicationsList.stream()
@@ -121,9 +122,10 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         startPopUpMessage))));
 
+        return this;
     }
 
-    public void releaseApplication(String applicationName) {
+    public ApplicationsPage releaseApplication(String applicationName) {
         waitForPageLoading();
 
         applicationsList.stream()
@@ -136,9 +138,10 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No release button in applications list"))
             .click();
 
+        return this;
     }
 
-    public void cancelApplication(String applicationName) {
+    public ApplicationsPage cancelApplication(String applicationName) {
         waitForPageLoading();
 
         applicationsList.stream()
@@ -165,6 +168,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         String cancelPopUpMessage = "The current job is canceling";
         WebDriverWaitForElementVisibilityAndInvisibility(driver, cancelPopUpMessage);
 
+        return this;
     }
 
     private void waitForPageLoading() {

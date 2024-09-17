@@ -55,8 +55,8 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         super(driver);
     }
 
-    public void createVariable(String variableCode, String variableValue, String description,
-                               boolean notVisible) {
+    public VariablesPage createVariable(String variableCode, String variableValue, String description,
+                                        boolean notVisible) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -70,10 +70,12 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         }
 
         createVariableForm.buttonSubmit.click();
+
+        return this;
     }
 
-    public void editVariable(String variableCode, String variableValue, String description,
-                             boolean notVisible) {
+    public VariablesPage editVariable(String variableCode, String variableValue, String description,
+                                      boolean notVisible) {
         waitForPageLoading();
 
         variableList.stream()
@@ -97,10 +99,10 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             createVariableForm.buttonDesensitization.click();
         }
         createVariableForm.buttonSubmit.click();
-
+        return this;
     }
 
-    public void deleteVariable(String variableCode) {
+    public VariablesPage deleteVariable(String variableCode) {
         waitForPageLoading();
 
         variableList.stream()
@@ -118,6 +120,8 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
+
+        return this;
     }
 
     private void waitForPageLoading() {

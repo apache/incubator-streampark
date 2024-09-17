@@ -108,7 +108,6 @@
           options: props.roleOptions,
           fieldNames: { label: 'roleName', value: 'roleId' },
           placeholder: t('system.member.roleRequire'),
-          getPopupContainer: () => document.body,
         },
         rules: [{ required: true, message: t('system.member.roleRequire') }],
       },

@@ -53,7 +53,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public void createToken(String existUserName, String description) {
+    public TokenManagementPage createToken(String existUserName, String description) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -67,9 +67,10 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
 
         createTokenForm.inputDescription.sendKeys(description);
         createTokenForm.buttonSubmit.click();
+        return this;
     }
 
-    public void copyToken(String existUserName) {
+    public TokenManagementPage copyToken(String existUserName) {
         waitForPageLoading();
 
         tokenList.stream()
@@ -80,10 +81,10 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No Copy button in token list"))
             .click();
-
+        return this;
     }
 
-    public void deleteToken(String existUserName) {
+    public TokenManagementPage deleteToken(String existUserName) {
         waitForPageLoading();
 
         tokenList.stream()
@@ -99,6 +100,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
         deleteConfirmButton.click();
 
+        return this;
     }
 
     private void waitForPageLoading() {

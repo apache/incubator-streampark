@@ -54,7 +54,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public void createRole(String roleName, String description, String menuName) {
+    public RoleManagementPage createRole(String roleName, String description, String menuName) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -66,9 +66,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         editRoleMenu(menuName);
 
         createRoleForm.buttonSubmit.click();
+        return this;
     }
 
-    public void editRole(String roleName, String description, String menuName) {
+    public RoleManagementPage editRole(String roleName, String description, String menuName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
@@ -86,10 +87,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         editRoleMenu(menuName);
 
         createRoleForm.buttonSubmit.click();
-
+        return this;
     }
 
-    public void deleteRole(String roleName) {
+    public RoleManagementPage deleteRole(String roleName) {
         waitForPageLoading();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         roleList.stream()
@@ -106,7 +107,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
+        return this;
     }
 
     private void waitForPageLoading() {
@@ -114,7 +115,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
             .until(ExpectedConditions.urlContains("/system/role"));
     }
 
-    private void editRoleMenu(String menuName) {
+    private RoleManagementPage editRoleMenu(String menuName) {
         createRoleForm.inputMenus.stream()
             .filter(e -> Objects.equals(
                 e.findElement(By.xpath(
@@ -127,6 +128,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
                     String.format("No %s in menus checkbox tree", menuName)))
             .findElement(By.className("ant-tree-checkbox-inner"))
             .click();
+        return this;
     }
 
     @Getter
