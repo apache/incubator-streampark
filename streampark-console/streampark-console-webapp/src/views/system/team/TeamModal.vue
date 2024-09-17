@@ -16,7 +16,7 @@
 -->
 <template>
   <BasicModal
-    :okButtonProps="{ class: 'e2e-team-create-btn' }"
+    :okButtonProps="{ class: 'e2e-team-submit-btn' }"
     :cancelButtonProps="{ class: 'e2e-team-cancel-btn' }"
     :width="600"
     v-bind="$attrs"

@@ -16,7 +16,7 @@
 -->
 <template>
   <BasicModal
-    :okButtonProps="{ class: 'e2e-token-create-btn' }"
+    :okButtonProps="{ class: 'e2e-token-submit-btn' }"
     :cancelButtonProps="{ class: 'e2e-token-cancel-btn' }"
     :width="600"
     @register="registerDrawer"

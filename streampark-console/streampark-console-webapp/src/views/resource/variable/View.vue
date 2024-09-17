@@ -20,7 +20,7 @@
       <template #form-formFooter>
         <Col :span="4" :offset="14" class="text-right">
           <a-button
-            id="e2e-variable-create-btn"
+            id="e2e-var-create-btn"
             type="primary"
             @click="handleCreate"
             v-auth="'variable:add'"
@@ -35,7 +35,7 @@
           <TableAction
             :actions="[
               {
-                class: 'e2e-variable-edit-btn',
+                class: 'e2e-var-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'variable:update',
                 tooltip: t('flink.variable.modifyVariable'),
@@ -54,14 +54,14 @@
                   router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
-                class: 'e2e-variable-delete-btn',
+                class: 'e2e-var-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('flink.variable.deleteVariable'),
                 auth: 'variable:delete',
                 popConfirm: {
                   okButtonProps: {
-                    class: 'e2e-variable-delete-confirm',
+                    class: 'e2e-var-delete-confirm',
                   },
                   title: t('flink.variable.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),

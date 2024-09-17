@@ -33,7 +33,7 @@ public abstract class CommonForm {
     @FindBy(id = "form_item_alertName")
     public WebElement inputAlertName;
 
-    @FindBy(className = "e2e-alert-create-btn")
+    @FindBy(className = "e2e-alert-submit-btn")
     public WebElement buttonSubmit;
 
     @FindBy(className = "e2e-alert-cancel-btn")

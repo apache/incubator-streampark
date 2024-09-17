@@ -169,7 +169,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         })
         public List<WebElement> selectRole;
 
-        @FindBy(className = "e2e-member-create-btn")
+        @FindBy(className = "e2e-member-submit-btn")
         public WebElement buttonSubmit;
 
         @FindBy(className = "e2e-member-cancel-btn")

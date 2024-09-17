@@ -34,7 +34,7 @@ import java.util.List;
 @Getter
 public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
 
-    @FindBy(id = "e2e-variable-create-btn")
+    @FindBy(id = "e2e-var-create-btn")
     public WebElement buttonCreateVariable;
 
     @FindBy(className = "ant-table-tbody")
@@ -46,7 +46,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
     @FindBy(xpath = "//button[contains(@class, 'swal2-confirm')]")
     public WebElement errorMessageConfirmButton;
 
-    @FindBy(className = "e2e-variable-delete-confirm")
+    @FindBy(className = "e2e-var-delete-confirm")
     public WebElement deleteConfirmButton;
 
     public final CreateVariableForm createVariableForm = new CreateVariableForm();
@@ -81,7 +81,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
-                    By.className("e2e-variable-edit-btn"))
+                    By.className("e2e-var-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -109,7 +109,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
             .filter(it -> it.getText().contains(variableCode))
             .flatMap(
                 it -> it.findElements(
-                    By.className("e2e-variable-delete-btn"))
+                    By.className("e2e-var-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -147,7 +147,7 @@ public class VariablesPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "VariableForm_desensitization")
         public WebElement buttonDesensitization;
 
-        @FindBy(className = "e2e-var-create-btn")
+        @FindBy(className = "e2e-var-submit-btn")
         public WebElement buttonSubmit;
 
         @FindBy(className = "e2e-var-cancel-btn")

@@ -327,7 +327,7 @@ export const useAppTableAction = (
       Object.assign(tableFormConfig, {
         showResetButton: true,
         resetButtonOptions: {
-          class: 'e2e-flinkapp-create-btn',
+          class: 'e2e-flinkapp-submit-btn',
           text: t('common.add'),
           color: 'primary',
           preIcon: 'ant-design:plus-outlined',

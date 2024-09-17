@@ -37,7 +37,7 @@ import java.util.List;
 public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
 
     @FindBy(id = "e2e-upload-create-btn")
-    private WebElement buttonCreateResource;
+    public WebElement buttonCreateResource;
 
     public final CreateUploadForm createUploadForm = new CreateUploadForm();
 
@@ -195,7 +195,7 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(id = "ResourceForm_description")
         public WebElement inputDescription;
 
-        @FindBy(className = "e2e-upload-create-btn")
+        @FindBy(className = "e2e-upload-submit-btn")
         public WebElement buttonSubmit;
 
         @FindBy(className = "e2e-upload-cancel-btn")

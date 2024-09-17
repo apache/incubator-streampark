@@ -122,7 +122,7 @@ public class TokenManagementPage extends NavBarPage implements SystemPage.Tab {
         @FindBy(id = "form_item_description")
         public WebElement inputDescription;
 
-        @FindBy(className = "e2e-token-create-btn")
+        @FindBy(className = "e2e-token-submit-btn")
         public WebElement buttonSubmit;
 
         @FindBy(className = "e2e-token-cancel-btn")

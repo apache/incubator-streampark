@@ -28,7 +28,7 @@
         <a-button class="e2e-var-cancel-btn" @click="closeModal">
           {{ t('common.cancelText') }}
         </a-button>
-        <a-button class="e2e-var-create-btn" type="primary" @click="handleSubmit()">
+        <a-button class="e2e-var-submit-btn" type="primary" @click="handleSubmit()">
           {{ t('common.submitText') }}
         </a-button>
       </div>

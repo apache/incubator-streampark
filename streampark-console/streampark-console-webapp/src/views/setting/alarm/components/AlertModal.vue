@@ -192,7 +192,7 @@
 
 <template>
   <BasicModal
-    :okButtonProps="{ class: 'e2e-alert-create-btn' }"
+    :okButtonProps="{ class: 'e2e-alert-submit-btn' }"
     :cancelButtonProps="{ class: 'e2e-alert-cancel-btn' }"
     :width="650"
     :ok-text="t('common.submitText')"

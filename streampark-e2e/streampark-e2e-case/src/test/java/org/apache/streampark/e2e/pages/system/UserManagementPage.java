@@ -174,7 +174,7 @@ public class UserManagementPage extends NavBarPage implements SystemPage.Tab {
         @FindBy(xpath = "//label[contains(@class, 'ant-radio-wrapper')]/span[contains(., 'effective')]")
         public WebElement radioEffective;
 
-        @FindBy(className = "e2e-user-create-btn")
+        @FindBy(className = "e2e-user-submit-btn")
         public WebElement buttonSubmit;
 
         @FindBy(className = "e2e-user-cancel-btn")
