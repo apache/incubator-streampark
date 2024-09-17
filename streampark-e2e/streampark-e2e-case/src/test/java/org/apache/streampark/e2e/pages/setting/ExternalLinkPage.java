@@ -77,7 +77,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
         externalLinkList.stream()
             .filter(it -> it.getText().contains(label))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@class, 'ant-btn-link')]//span[text()='Edit']/.."))
+                it -> it.findElements(By.className("e2e-extlink-edit-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -104,7 +104,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
             .filter(it -> it.getText().contains(label))
             .flatMap(
                 it -> it
-                    .findElements(By.xpath("//button[contains(@class, 'ant-btn-dangerous')]//span[text()='Delete']/.."))
+                    .findElements(By.className("e2e-extlink-delete-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()

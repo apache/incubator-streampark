@@ -113,6 +113,7 @@
           <template v-else-if="column.key === 'action'">
             <span>
               <a-button
+                class="e2e-extlink-edit-btn"
                 v-auth="'externalLink:update'"
                 type="link"
                 @click="handleEditExternalLink(record)"
@@ -124,7 +125,12 @@
                 @confirm="handleDeleteExternalLink(record.id)"
                 placement="topRight"
               >
-                <a-button v-auth="'externalLink:delete'" danger type="text">
+                <a-button
+                  class="e2e-extlink-delete-btn"
+                  v-auth="'externalLink:delete'"
+                  danger
+                  type="text"
+                >
                   <DeleteOutlined />
                 </a-button>
               </a-popconfirm>
