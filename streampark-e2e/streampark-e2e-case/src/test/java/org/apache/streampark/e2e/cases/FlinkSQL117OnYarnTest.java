@@ -43,12 +43,6 @@ public class FlinkSQL117OnYarnTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String flinkName = "flink-1.17.2";
 
     private static final String flinkHome = "/flink-1.17.2";
@@ -62,7 +56,7 @@ public class FlinkSQL117OnYarnTest {
     @BeforeAll
     public static void setup() {
         FlinkHomePage flinkHomePage = new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ApacheFlinkPage.class)
             .goToTab(FlinkHomePage.class);
 

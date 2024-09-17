@@ -44,12 +44,6 @@ public class EnvironmentTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     // maven
     final String mavenFilePath = "/maven/file/path";
     final String mavenCentralRepository = "https://mvnrepository.com/";
@@ -77,7 +71,7 @@ public class EnvironmentTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(EnvironmentPage.class);
     }

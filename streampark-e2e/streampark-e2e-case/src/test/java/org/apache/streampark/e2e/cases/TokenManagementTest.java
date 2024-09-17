@@ -38,12 +38,6 @@ public class TokenManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String existUserName = "admin";
 
     private static final String newTokenDescription = "test_new_token_description";
@@ -51,7 +45,7 @@ public class TokenManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(TokenManagementPage.class);
     }

@@ -40,12 +40,6 @@ public class Flink117OnRemoteClusterDeployTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String flinkName = "flink-1.17.2";
 
     private static final String flinkHome = "/opt/flink/";
@@ -61,7 +55,7 @@ public class Flink117OnRemoteClusterDeployTest {
     @BeforeAll
     public static void setUp() {
         FlinkHomePage flinkHomePage = new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ApacheFlinkPage.class)
             .goToTab(FlinkHomePage.class);
 

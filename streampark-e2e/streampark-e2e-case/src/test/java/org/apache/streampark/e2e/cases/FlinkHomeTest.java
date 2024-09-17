@@ -36,12 +36,6 @@ public class FlinkHomeTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String flinkName = "flink-1.18.1";
 
     private static final String flinkHome = "/flink-1.18.1";
@@ -53,7 +47,7 @@ public class FlinkHomeTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ApacheFlinkPage.class)
             .goToTab(FlinkHomePage.class);
     }

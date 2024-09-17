@@ -36,12 +36,6 @@ public class RoleManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String newRoleName = "new_role";
 
     private static final String newDescription = "new_description";
@@ -51,7 +45,7 @@ public class RoleManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(RoleManagementPage.class);
     }

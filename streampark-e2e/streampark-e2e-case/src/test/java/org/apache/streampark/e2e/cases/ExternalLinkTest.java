@@ -36,12 +36,6 @@ public class ExternalLinkTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String newLabel = "new_label";
 
     private static final String editLabel = "edit_label";
@@ -55,7 +49,7 @@ public class ExternalLinkTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(ExternalLinkPage.class);
     }

@@ -36,12 +36,6 @@ public class UploadManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String engineType = "Apache Flink";
 
     private static final String resourceType = "Jar Library";
@@ -61,7 +55,7 @@ public class UploadManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(UploadsPage.class);
     }

@@ -36,12 +36,6 @@ public class YarnQueueTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String newQueueLabel = "new_label";
 
     private static final String editQueueLabel = "edit_label";
@@ -51,7 +45,7 @@ public class YarnQueueTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(YarnQueuePage.class);
     }

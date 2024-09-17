@@ -36,12 +36,6 @@ public class VariableManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String variableCode = "10000";
 
     private static final String variableValue = "3306";
@@ -53,7 +47,7 @@ public class VariableManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(VariablesPage.class);
     }

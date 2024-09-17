@@ -39,12 +39,6 @@ public class ProjectsManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String projectName = "e2e_test_project";
 
     private static final String editedProjectName = "e2e_test_project_edited";
@@ -63,7 +57,7 @@ public class ProjectsManagementTest {
     @BeforeAll
     public static void setup() {
         ProjectsPage projectsPage = new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(ProjectsPage.class);
     }

@@ -36,10 +36,6 @@ public class MemberManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
     private static final String teamName = "default";
 
     private static final String existUserName = "test3";
@@ -49,7 +45,7 @@ public class MemberManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(MemberManagementPage.class);
     }

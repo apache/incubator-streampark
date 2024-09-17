@@ -46,10 +46,30 @@ public final class LoginPage extends NavBarPage {
     @FindBy(id = "e2e-login-btn")
     public WebElement buttonLogin;
 
+    private static final String userName = "admin";
+
+    private static final String password = "streampark";
+
+    private static final String teamName = "default";
+
     public final TeamForm teamForm = new TeamForm();
 
     public LoginPage(RemoteWebDriver driver) {
         super(driver);
+    }
+
+    @SneakyThrows
+    public NavBarPage login() {
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(buttonLogin));
+
+        inputUsername.sendKeys(userName);
+        inputPassword.sendKeys(password);
+        buttonLogin.click();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.urlContains("/flink/app"));
+        return new NavBarPage(driver);
     }
 
     @SneakyThrows

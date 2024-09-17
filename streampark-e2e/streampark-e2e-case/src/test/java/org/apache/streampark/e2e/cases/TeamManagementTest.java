@@ -36,12 +36,6 @@ public class TeamManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
-
     private static final String newTeamName = "test_new_team";
 
     private static final String newTeamDescription = "test_new_team_description";
@@ -49,7 +43,7 @@ public class TeamManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(TeamManagementPage.class);
     }
