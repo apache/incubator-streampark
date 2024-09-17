@@ -50,8 +50,6 @@ public final class LoginPage extends NavBarPage {
 
     private static final String password = "streampark";
 
-    private static final String teamName = "default";
-
     public final TeamForm teamForm = new TeamForm();
 
     public LoginPage(RemoteWebDriver driver) {
@@ -62,44 +60,9 @@ public final class LoginPage extends NavBarPage {
     public NavBarPage login() {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonLogin));
-
         inputUsername.sendKeys(userName);
         inputPassword.sendKeys(password);
         buttonLogin.click();
-
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.urlContains("/flink/app"));
-        return new NavBarPage(driver);
-    }
-
-    @SneakyThrows
-    public NavBarPage login(String username, String password, String teamName) {
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(buttonLogin));
-
-        inputUsername.sendKeys(username);
-        inputPassword.sendKeys(password);
-        buttonLogin.click();
-
-        try {
-            new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-                .until(ExpectedConditions.visibilityOfAllElements(teamForm.btnSelectTeamDropdown));
-
-            teamForm.btnSelectTeamDropdown.click();
-            teamForm.selectTeam.stream()
-                .filter(it -> it.getText().contains(teamName))
-                .findFirst()
-                .orElseThrow(
-                    () -> new RuntimeException(
-                        String.format("No %s in team dropdown list", teamName)))
-                .click();
-            teamForm.buttonSubmit.click();
-        } catch (Exception e) {
-            log.warn("No team selection required:", e);
-        }
-
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.urlContains("/flink/app"));
         return new NavBarPage(driver);
     }
 
@@ -114,7 +77,7 @@ public final class LoginPage extends NavBarPage {
                 @FindBy(css = "[popupClassName=team-select-popup]"),
                 @FindBy(className = "ant-select-item-option-content")
         })
-        private List<WebElement> selectTeam;
+        public List<WebElement> selectTeam;
 
         @FindBy(css = "[popupClassName=team-select-popup] > .ant-select-selector")
         public WebElement btnSelectTeamDropdown;
