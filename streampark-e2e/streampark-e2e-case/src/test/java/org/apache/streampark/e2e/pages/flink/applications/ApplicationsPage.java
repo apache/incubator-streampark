@@ -38,7 +38,7 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWait
 @Getter
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
 
-    @FindBy(className = "e2e-flinkapp-submit-btn")
+    @FindBy(className = "e2e-flinkapp-create-btn")
     public WebElement buttonCreateApplication;
 
     @FindBy(className = "ant-table-tbody")
@@ -47,10 +47,10 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     @FindBy(className = "ant-form-item-explain-error")
     public List<WebElement> errorMessageList;
 
-    @FindBy(xpath = "//div[contains(@class, 'ant-dropdown-content')]//span[contains(text(), 'Delete')]")
+    @FindBy(className = "e2e-flinkapp-delete-btn")
     public WebElement deleteButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-flinkapp-delete-confirm")
     public WebElement deleteConfirmButton;
 
     public ApplicationsPage(RemoteWebDriver driver) {
@@ -93,7 +93,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
 
         applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
-            .flatMap(it -> it.findElements(By.xpath("//button[contains(@auth, 'app:start')]")).stream())
+            .flatMap(it -> it.findElements(By.className("e2e-flinkapp-startup-btn")).stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No start button in applications list"))
@@ -131,7 +131,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@auth, 'app:release')]"))
+                it -> it.findElements(By.className("e2e-flinkapp-release-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -147,7 +147,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
-                it -> it.findElements(By.xpath("//button[contains(@auth, 'app:cancel')]"))
+                it -> it.findElements(By.className("e2e-flinkapp-cancel-btn"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
@@ -161,6 +161,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         cancelJobFormMessage))));
+
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint));
         cancelJobForm.radioFromSavepoint.click();
@@ -183,13 +184,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(xpath = "//button[@id='startApplicationModal_restoreSavepoint']//span[contains(text(), 'ON')]")
+        @FindBy(id = "e2e-flinkapp-start-form-restoreSavepoint")
         public WebElement radioFromSavepoint;
 
-        @FindBy(xpath = "//div[contains(.,'Start Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
+        @FindBy(id = "e2e-flinkapp-start-submit")
         public WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(id = "e2e-flinkapp-start-cancel")
         public WebElement buttonCancel;
     }
 
@@ -200,13 +201,13 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(xpath = "//span[contains(text(), 'ON')]")
+        @FindBy(className = "e2e-flinkapp-stop-form-triggerSavepoint")
         public WebElement radioFromSavepoint;
 
-        @FindBy(xpath = "//div[contains(.,'Stop Job')]//button[contains(@class, 'ant-btn')]//span[contains(., 'Apply')]")
+        @FindBy(id = "e2e-flinkapp-stop-submit")
         public WebElement buttonSubmit;
 
-        @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(., 'Cancel')]")
+        @FindBy(id = "e2e-flinkapp-stop-cancel")
         public WebElement buttonCancel;
     }
 }

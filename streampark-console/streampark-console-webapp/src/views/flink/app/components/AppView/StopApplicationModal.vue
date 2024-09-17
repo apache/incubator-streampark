@@ -47,6 +47,7 @@
     baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
+        class: 'e2e-flinkapp-stop-form-triggerSavepoint',
         field: 'triggerSavepoint',
         label: t('flink.app.operation.triggerSavePoint'),
         component: 'Switch',
@@ -141,6 +142,8 @@
 </script>
 <template>
   <BasicModal
+    :okButtonProps="{ id: 'e2e-flinkapp-stop-submit' }"
+    :cancelButtonProps="{ id: 'e2e-flinkapp-stop-cancel' }"
     @register="registerModal"
     @ok="handleSubmit"
     :okText="t('common.apply')"

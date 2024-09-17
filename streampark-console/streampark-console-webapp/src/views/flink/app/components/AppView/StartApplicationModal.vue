@@ -69,6 +69,7 @@
     baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
+        id: 'e2e-flinkapp-start-form-restoreSavepoint',
         field: 'restoreSavepoint',
         label: t('flink.app.view.fromSavepoint'),
         component: 'Switch',
@@ -193,6 +194,8 @@
 </script>
 <template>
   <BasicModal
+    :okButtonProps="{ id: 'e2e-flinkapp-start-submit' }"
+    :cancelButtonProps="{ id: 'e2e-flinkapp-start-cancel' }"
     @register="registerModal"
     :minHeight="100"
     @ok="handleSubmit"

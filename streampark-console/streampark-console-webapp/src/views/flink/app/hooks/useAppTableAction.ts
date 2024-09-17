@@ -71,6 +71,7 @@ export const useAppTableAction = (
         onClick: handleEdit.bind(null, record, currentPageNo),
       },
       {
+        class: 'e2e-flinkapp-release-btn',
         tooltip: { title: t('flink.app.operation.release') },
         ifShow:
           [
@@ -92,6 +93,7 @@ export const useAppTableAction = (
         onClick: () => openBuildDrawer(true, { appId: record.id }),
       },
       {
+        class: 'e2e-flinkapp-startup-btn',
         tooltip: { title: t('flink.app.operation.start') },
         ifShow: handleIsStart(record, optionApps),
         auth: 'app:start',
@@ -99,6 +101,7 @@ export const useAppTableAction = (
         onClick: handleAppCheckStart.bind(null, record),
       },
       {
+        class: 'e2e-flinkapp-cancel-btn',
         tooltip: { title: t('flink.app.operation.cancel') },
         ifShow:
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
@@ -161,11 +164,11 @@ export const useAppTableAction = (
         onClick: handleMapping.bind(null, record),
       },
       {
-        popConfirm: {
-          title: t('flink.app.operation.deleteTip'),
-          confirm: handleDelete.bind(null, record),
-        },
+        class: 'e2e-flinkapp-delete-btn',
         label: t('common.delText'),
+        auth: 'app:delete',
+        icon: 'ant-design:delete-outlined',
+        color: 'error',
         ifShow: [
           AppStateEnum.ADDED,
           AppStateEnum.FAILED,
@@ -177,9 +180,13 @@ export const useAppTableAction = (
           AppStateEnum.SUCCEEDED,
           AppStateEnum.KILLED,
         ].includes(record.state),
-        auth: 'app:delete',
-        icon: 'ant-design:delete-outlined',
-        color: 'error',
+        popConfirm: {
+          okButtonProps: {
+            class: 'e2e-flinkapp-delete-confirm',
+          },
+          title: t('flink.app.operation.deleteTip'),
+          confirm: handleDelete.bind(null, record),
+        },
       },
     ];
   }
@@ -327,7 +334,7 @@ export const useAppTableAction = (
       Object.assign(tableFormConfig, {
         showResetButton: true,
         resetButtonOptions: {
-          class: 'e2e-flinkapp-submit-btn',
+          class: 'e2e-flinkapp-create-btn',
           text: t('common.add'),
           color: 'primary',
           preIcon: 'ant-design:plus-outlined',
