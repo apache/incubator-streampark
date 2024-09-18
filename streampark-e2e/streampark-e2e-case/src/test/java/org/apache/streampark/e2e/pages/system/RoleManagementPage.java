@@ -55,7 +55,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     public RoleManagementPage createRole(String roleName, String description,
-                                         String menuName) throws InterruptedException {
+                                         String menuName) {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -72,7 +72,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
     }
 
     public RoleManagementPage editRole(String roleName, String description,
-                                       String menuName) throws InterruptedException {
+                                       String menuName) {
         waitForPageLoading();
 
         roleList.stream()
@@ -92,7 +92,7 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public RoleManagementPage deleteRole(String roleName) throws InterruptedException {
+    public RoleManagementPage deleteRole(String roleName) {
 
         waitForPageLoading();
 
@@ -113,10 +113,9 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    private void waitForPageLoading() throws InterruptedException {
+    private void waitForPageLoading() {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/role"));
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION).wait();
     }
 
     private RoleManagementPage editRoleMenu(String menuName) {
