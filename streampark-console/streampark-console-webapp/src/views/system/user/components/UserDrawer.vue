@@ -56,7 +56,7 @@
           schemas: formSchema(unref(formType)),
           showActionButtonGroup: false,
           layout: 'vertical',
-          baseColProps: { span: 20, offset: 2 },
+          baseColProps: { span: 22, offset: 1 },
         });
 
       const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {

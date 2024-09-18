@@ -107,7 +107,7 @@
       });
       const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
         layout: 'vertical',
-        baseColProps: { span: 20, offset: 2 },
+        baseColProps: { span: 22, offset: 1 },
         colon: true,
         showActionButtonGroup: false,
       });

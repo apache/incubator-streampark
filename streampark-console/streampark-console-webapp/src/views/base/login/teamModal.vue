@@ -60,7 +60,7 @@
     colon: true,
     showActionButtonGroup: false,
     layout: 'vertical',
-    baseColProps: { span: 24 },
+    baseColProps: { span: 22, offset: 1 },
   });
   // submit
   async function handleUserTeamSubmit() {
