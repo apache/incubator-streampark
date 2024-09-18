@@ -480,7 +480,7 @@ public class SparkApplicationActionServiceImpl
                     }
                 }
 
-                if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
+                if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
                             sparkUserJar = String.format(

@@ -21,12 +21,16 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
+import org.apache.streampark.console.core.enums.SparkOperationEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
+import org.apache.streampark.console.core.service.SparkApplicationLogService;
+import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
@@ -73,6 +77,12 @@ public class SparkAppHttpWatcher {
 
     @Autowired
     private SparkApplicationInfoService applicationInfoService;
+
+    @Autowired
+    private SparkApplicationLogService applicationLogService;
+
+    @Autowired
+    private SparkEnvService sparkEnvService;
 
     @Autowired
     private AlertService alertService;
@@ -210,8 +220,13 @@ public class SparkAppHttpWatcher {
                         application.getAppId(),
                         sparkAppStateEnum);
                     application.setEndTime(new Date());
+                    doPersistRunningOperation(application);
                 }
                 if (SparkAppStateEnum.RUNNING == sparkAppStateEnum) {
+                    if (application.getStartTime() != null
+                        && application.getStartTime().getTime() > 0) {
+                        application.setDuration(System.currentTimeMillis() - application.getStartTime().getTime());
+                    }
                     SparkApplicationSummary summary;
                     try {
                         summary = httpStageAndTaskStatus(application);
@@ -257,6 +272,16 @@ public class SparkAppHttpWatcher {
             WATCHING_APPS.put(application.getId(), application);
         }
         applicationManageService.persistMetrics(application);
+    }
+
+    private void doPersistRunningOperation(SparkApplication application) {
+        SparkApplicationLog applicationLog = new SparkApplicationLog();
+        applicationLog.setOptionName(SparkOperationEnum.RUNNING.getValue());
+        applicationLog.setAppId(application.getId());
+        applicationLog.setOptionTime(new Date());
+        applicationLog.setSparkAppId(application.getAppId());
+        application.setOptionTime(new Date());
+        applicationLogService.save(applicationLog);
     }
 
     private void cleanOptioning(SparkOptionStateEnum optionStateEnum, Long key) {
@@ -305,7 +330,6 @@ public class SparkAppHttpWatcher {
         String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
         return yarnRestRequest(reqURL, YarnAppInfo.class);
     }
-
     private Job[] httpJobsStatus(SparkApplication application) throws IOException {
         String format = "proxy/%s/api/v1/applications/%s/jobs";
         String reqURL = String.format(format, application.getAppId(), application.getAppId());
