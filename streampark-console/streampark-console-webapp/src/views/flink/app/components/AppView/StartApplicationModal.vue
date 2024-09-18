@@ -69,7 +69,6 @@
     baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
-        id: 'e2e-flinkapp-start-form-restoreSavepoint',
         field: 'restoreSavepoint',
         label: t('flink.app.view.fromSavepoint'),
         component: 'Switch',

@@ -184,7 +184,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "e2e-flinkapp-start-form-restoreSavepoint")
+        @FindBy(id = "startApplicationModal_restoreSavepoint")
         public WebElement radioFromSavepoint;
 
         @FindBy(id = "e2e-flinkapp-start-submit")
@@ -201,7 +201,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(className = "e2e-flinkapp-stop-form-triggerSavepoint")
+        @FindBy(className = "stopApplicationModal_triggerSavepoint")
         public WebElement radioFromSavepoint;
 
         @FindBy(id = "e2e-flinkapp-stop-submit")
