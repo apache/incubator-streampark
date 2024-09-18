@@ -201,7 +201,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(className = "stopApplicationModal_triggerSavepoint")
+        @FindBy(id = "stopApplicationModal_triggerSavepoint")
         public WebElement radioFromSavepoint;
 
         @FindBy(id = "e2e-flinkapp-stop-submit")
