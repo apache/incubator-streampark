@@ -57,7 +57,6 @@
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
   import { useRouter } from 'vue-router';
-  import Icon from '/@/components/Icon';
 
   defineOptions({
     name: 'AppView',
