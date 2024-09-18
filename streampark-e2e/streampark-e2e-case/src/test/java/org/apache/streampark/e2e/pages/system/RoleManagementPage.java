@@ -54,11 +54,12 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public RoleManagementPage createRole(String roleName, String description, String menuName) {
+    public RoleManagementPage createRole(String roleName, String description, String menuName) throws InterruptedException {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateRole));
+
         buttonCreateRole.click();
 
         createRoleForm.inputRoleName.sendKeys(roleName);
@@ -69,9 +70,8 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public RoleManagementPage editRole(String roleName, String description, String menuName) {
+    public RoleManagementPage editRole(String roleName, String description, String menuName) throws InterruptedException {
         waitForPageLoading();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
         roleList.stream()
             .filter(it -> it.getText().contains(roleName))
@@ -90,9 +90,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public RoleManagementPage deleteRole(String roleName) {
+    public RoleManagementPage deleteRole(String roleName) throws InterruptedException {
+
         waitForPageLoading();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
+
         roleList.stream()
             .filter(it -> it.getText().contains(roleName))
             .flatMap(
@@ -110,9 +111,10 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    private void waitForPageLoading() {
+    private void waitForPageLoading() throws InterruptedException {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/role"));
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION).wait();
     }
 
     private RoleManagementPage editRoleMenu(String menuName) {

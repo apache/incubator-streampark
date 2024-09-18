@@ -56,7 +56,7 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public MemberManagementPage createMember(String userName, String role) {
+    public MemberManagementPage createMember(String userName, String role) throws InterruptedException {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -94,10 +94,8 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public MemberManagementPage editMember(String userName, String role) {
+    public MemberManagementPage editMember(String userName, String role) throws InterruptedException {
         waitForPageLoading();
-
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
 
         memberList.stream()
             .filter(it -> it.getText().contains(userName))
@@ -124,9 +122,8 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public MemberManagementPage deleteMember(String userName) {
+    public MemberManagementPage deleteMember(String userName) throws InterruptedException {
         waitForPageLoading();
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
         memberList.stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(
@@ -144,9 +141,11 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    private void waitForPageLoading() {
+    private void waitForPageLoading() throws InterruptedException {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/system/member"));
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION).wait();
     }
 
     @Getter
