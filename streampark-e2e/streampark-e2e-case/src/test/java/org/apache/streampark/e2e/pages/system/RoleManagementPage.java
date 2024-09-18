@@ -54,7 +54,8 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         super(driver);
     }
 
-    public RoleManagementPage createRole(String roleName, String description, String menuName) throws InterruptedException {
+    public RoleManagementPage createRole(String roleName, String description,
+                                         String menuName) throws InterruptedException {
         waitForPageLoading();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -70,7 +71,8 @@ public class RoleManagementPage extends NavBarPage implements SystemPage.Tab {
         return this;
     }
 
-    public RoleManagementPage editRole(String roleName, String description, String menuName) throws InterruptedException {
+    public RoleManagementPage editRole(String roleName, String description,
+                                       String menuName) throws InterruptedException {
         waitForPageLoading();
 
         roleList.stream()
