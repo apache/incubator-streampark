@@ -275,9 +275,6 @@ export const useAppTableAction = (
       actionColOptions: { span: 4 },
       showSubmitButton: false,
       showResetButton: false,
-      async resetFunc() {
-        router.push({ path: '/flink/app/add' });
-      },
       schemas: [
         {
           label: t('flink.app.tags'),
@@ -330,17 +327,6 @@ export const useAppTableAction = (
         },
       ],
     };
-    if (hasPermission('app:create')) {
-      Object.assign(tableFormConfig, {
-        showResetButton: true,
-        resetButtonOptions: {
-          class: 'e2e-flinkapp-create-btn',
-          text: t('common.add'),
-          color: 'primary',
-          preIcon: 'ant-design:plus-outlined',
-        },
-      });
-    }
     return tableFormConfig;
   });
 

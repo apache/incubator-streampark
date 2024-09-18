@@ -57,6 +57,7 @@
   import { useAppTableColumns } from './hooks/useAppTableColumns';
   import AppTableResize from './components/AppResize.vue';
   import { useRouter } from 'vue-router';
+  import Icon from '/@/components/Icon';
 
   defineOptions({
     name: 'AppView',
@@ -335,7 +336,11 @@
               </Row>
             </Form>
             <div v-auth="'app:create'">
-              <Button type="primary" @click="() => router.push({ path: '/flink/app/add' })">
+              <Button
+                id="e2e-flinkapp-create-btn"
+                type="primary"
+                @click="() => router.push({ path: '/flink/app/add' })"
+              >
                 <PlusOutlined />
                 {{ t('common.add') }}
               </Button>
