@@ -19,7 +19,12 @@
   <div>
     <BasicTable @register="registerTable" :formConfig="formConfig">
       <template #toolbar>
-        <a-button type="primary" id="e2e-member-create-btn" @click="handleCreate" v-auth="'member:add'">
+        <a-button
+          type="primary"
+          id="e2e-member-create-btn"
+          @click="handleCreate"
+          v-auth="'member:add'"
+        >
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>

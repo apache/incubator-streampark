@@ -18,7 +18,12 @@
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button id="e2e-upload-create-btn" type="primary" @click="handleCreate" v-auth="'resource:add'">
+        <a-button
+          id="e2e-upload-create-btn"
+          type="primary"
+          @click="handleCreate"
+          v-auth="'resource:add'"
+        >
           <Icon icon="ant-design:plus-outlined" />
           {{ t('common.add') }}
         </a-button>

@@ -48,7 +48,7 @@ public abstract class CommonForm {
     })
     private List<WebElement> selectFlinkVersion;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+    @FindBy(className = "e2e_flink_cluster_submit")
     private WebElement buttonSubmit;
 
     private final ClusterDetailForm parent;

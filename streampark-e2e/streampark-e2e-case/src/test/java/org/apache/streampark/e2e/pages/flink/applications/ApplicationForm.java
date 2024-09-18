@@ -73,10 +73,10 @@ public final class ApplicationForm {
     })
     private List<WebElement> selectFlinkVersion;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+    @FindBy(className = "e2e_flink_app_submit")
     private WebElement buttonSubmit;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
+    @FindBy(className = "e2e_flink_app_cancel")
     private WebElement buttonCancel;
 
     public ApplicationForm(WebDriver driver) {

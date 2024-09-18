@@ -16,8 +16,8 @@
 -->
 <template>
   <BasicDrawer
-    :okButtonProps="{ 'class': 'e2e_role_pop_ok' }"
-    :cancelButtonProps="{ 'class': 'e2e_role_pop_cancel'}"
+    :okButtonProps="{ class: 'e2e_role_pop_ok' }"
+    :cancelButtonProps="{ class: 'e2e_role_pop_cancel' }"
     v-bind="$attrs"
     @register="registerDrawer"
     showFooter

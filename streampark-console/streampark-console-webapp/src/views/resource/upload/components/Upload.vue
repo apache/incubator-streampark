@@ -142,6 +142,7 @@
       dependency.jar[data.file.name] = uploadResponse.path;
       handleUpdateDependency();
       if (props.formModel.resourceType === ResourceTypeEnum.APP) {
+        // eslint-disable-next-line vue/no-mutating-props
         props.formModel.mainClass = uploadResponse.mainClass;
       }
     } catch (error) {
