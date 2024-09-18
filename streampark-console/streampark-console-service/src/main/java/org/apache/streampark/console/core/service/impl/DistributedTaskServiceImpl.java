@@ -25,6 +25,7 @@ import org.apache.streampark.console.core.entity.DistributedTask;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.mapper.DistributedTaskMapper;
+import org.apache.streampark.console.core.registry.ConsoleRegistryClient;
 import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -51,6 +53,16 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     implements
         DistributedTaskService {
 
+    @Qualifier("streamparkDistributedTaskExecutor")
+    @Autowired
+    private Executor taskExecutor;
+
+    @Autowired
+    private ApplicationActionService applicationActionService;
+
+    @Autowired
+    private ConsoleRegistryClient consoleRegistryClient;
+
     /**
      * Server name
      */
@@ -61,24 +73,21 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
      */
     private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
 
-    @Qualifier("streamparkDistributedTaskExecutor")
-    @Autowired
-    private Executor taskExecutor;
-
-    @Autowired
-    private ApplicationActionService applicationActionService;
-
     /**
      * Task execution status
      */
     private final ConcurrentHashMap<Long, Boolean> runningTasks = new ConcurrentHashMap<>();
 
     /**
-     * Add the current console server itself to the consistent hash ring.
+     * Initialize the consistent hash ring.
+     * @param allServers All servers
+     * @param serverId The name of the current server
      */
-    public void init(String serverName) {
-        this.serverId = serverName;
-        consistentHash.add(serverName);
+    public void init(Set<String> allServers, String serverId) {
+        this.serverId = serverId;
+        for (String server : allServers) {
+            consistentHash.add(server);
+        }
     }
 
     @Scheduled(fixedDelay = 50)
@@ -151,21 +160,21 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     /**
      * This interface handles task redistribution when server nodes are added.
      *
-     * @param server String
+     * @param serverName String
      */
     @Override
-    public void addServerRedistribute(String server) {
-
+    public void addServer(String serverName) {
+        consistentHash.add(serverName);
     }
 
     /**
      * This interface handles task redistribution when server nodes are removed.
      *
-     * @param server String
+     * @param serverName String
      */
     @Override
-    public void removeServerRedistribute(String server) {
-
+    public void removeServer(String serverName) {
+        consistentHash.remove(serverName);
     }
 
     /**

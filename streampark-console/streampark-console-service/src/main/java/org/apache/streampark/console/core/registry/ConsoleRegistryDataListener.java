@@ -52,6 +52,7 @@ public class ConsoleRegistryDataListener implements SubscribeListener {
         switch (event.type()) {
             case ADD:
                 log.info("console node added : {}", path);
+                consoleRegistryClient.addConsoleNodePath(path, RegistryNodeType.CONSOLE_SERVER);
                 break;
             case REMOVE:
                 log.info("console node deleted : {}", path);

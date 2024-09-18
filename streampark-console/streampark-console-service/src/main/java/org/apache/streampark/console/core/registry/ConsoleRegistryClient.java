@@ -36,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 import static org.apache.streampark.common.constants.Constants.SLEEP_TIME_MILLIS;
 
 /**
@@ -81,6 +83,36 @@ public class ConsoleRegistryClient implements AutoCloseable {
     public void close() {
         // TODO unsubscribe ConsoleRegistryDataListener
         deregister();
+    }
+
+    /**
+     * add console node path
+     *
+     * @param path     node path
+     * @param nodeType node type
+     */
+    public void addConsoleNodePath(String path, RegistryNodeType nodeType) {
+        log.info("{} node added : {}", nodeType, path);
+
+        if (StringUtils.isEmpty(path)) {
+            log.error("server start error: empty path: {}, nodeType:{}", path, nodeType);
+            return;
+        }
+
+        String serverHost = registryClient.getHostByEventDataPath(path);
+        if (StringUtils.isEmpty(serverHost)) {
+            log.error("server start error: unknown path: {}, nodeType:{}", path, nodeType);
+            return;
+        }
+
+        try {
+            if (!registryClient.exists(path)) {
+                log.info("path: {} not exists", path);
+            }
+            distributedTaskService.addServer(serverHost);
+        } catch (Exception e) {
+            log.error("{} server failover failed, host:{}", nodeType, serverHost, e);
+        }
     }
 
     /**
@@ -142,7 +174,8 @@ public class ConsoleRegistryClient implements AutoCloseable {
         ThreadUtils.sleep(SLEEP_TIME_MILLIS);
 
         consoleHeartBeatTask.start();
-        distributedTaskService.init(consoleConfig.getConsoleAddress());
+        Set<String> allServers = getServerNodes(RegistryNodeType.CONSOLE_SERVER);
+        distributedTaskService.init(allServers, consoleConfig.getConsoleAddress());
         log.info("Console node : {} registered to registry center successfully", consoleConfig.getConsoleAddress());
 
     }
@@ -162,5 +195,9 @@ public class ConsoleRegistryClient implements AutoCloseable {
 
     public boolean isAvailable() {
         return registryClient.isConnected();
+    }
+
+    public Set<String> getServerNodes(RegistryNodeType nodeType) {
+        return registryClient.getServerNodeSet(nodeType);
     }
 }

@@ -27,25 +27,30 @@ import com.fasterxml.jackson.core.JacksonException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 @Slf4j
 class DistributedTaskServiceTest {
 
     private final DistributedTaskServiceImpl distributionTaskService = new DistributedTaskServiceImpl();
 
     private final String serverName = "testServer";
+    private final Set<String> allServers = new HashSet<>(Collections.singleton(serverName));
 
     // the number of virtual nodes for each server
     private final int numberOfReplicas = 2 << 16;
 
     @Test
     void testInit() {
-        distributionTaskService.init(serverName);
+        distributionTaskService.init(allServers, serverName);
         assert (distributionTaskService.getConsistentHashSize() == numberOfReplicas);
     }
 
     @Test
     void testIsLocalProcessing() {
-        distributionTaskService.init(serverName);
+        distributionTaskService.init(allServers, serverName);
         for (long i = 0; i < numberOfReplicas; i++) {
             assert (distributionTaskService.isLocalProcessing(i));
         }
