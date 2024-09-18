@@ -213,6 +213,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         component: 'Input',
         render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
       },
+      { field: 'configOverride', label: '', component: 'Input', show: false },
       {
         field: 'isSetConfig',
         label: t('spark.app.appConf'),
