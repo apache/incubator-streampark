@@ -28,11 +28,13 @@
       <SvgIcon name="resource" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
-      <template #resource="{ model, field }">
-        <Upload ref="resourceRef" v-model:value="model[field]" :form-model="model" />
-      </template>
-    </BasicForm>
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getResourceFormSchema">
+        <template #resource="{ model, field }">
+          <Upload ref="resourceRef" v-model:value="model[field]" :form-model="model" />
+        </template>
+      </BasicForm>
+    </div>
   </BasicDrawer>
 </template>
 <script lang="ts">
@@ -146,12 +148,11 @@
   });
 
   const [registerForm, { resetFields, setFieldsValue, validate }] = useForm({
-    name: 'ResourceForm',
     colon: true,
+    layout: 'vertical',
+    name: 'upload_form',
+    baseColProps: { span: 22, offset: 1 },
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
   });
 
   const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(
