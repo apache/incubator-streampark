@@ -188,13 +188,13 @@ public class UploadsPage extends NavBarPage implements ResourcePage.Tab {
         @FindBy(xpath = "//*[@id='form_item_resourceType']//following::div[@class='ant-select-item-option-content']")
         public List<WebElement> selectResourceType;
 
-        @FindBy(id = "ResourceForm_resourceName")
+        @FindBy(id = "upload_form_resourceName")
         public WebElement inputResourceName;
 
         @FindBy(css = "textarea.inputarea.monaco-mouse-cursor-text")
         public WebElement textPom;
 
-        @FindBy(id = "ResourceForm_description")
+        @FindBy(id = "upload_form_description")
         public WebElement inputDescription;
 
         @FindBy(className = "e2e-upload-submit-btn")
