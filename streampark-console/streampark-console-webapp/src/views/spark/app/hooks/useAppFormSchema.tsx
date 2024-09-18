@@ -22,24 +22,21 @@ import { ResourceFromEnum } from '/@/enums/flinkEnum';
 import type { SparkEnv } from '/@/api/spark/home.type';
 import type { RuleObject } from 'ant-design-vue/lib/form';
 import type { StoreValue } from 'ant-design-vue/lib/form/interface';
-import {
-  renderIsSetConfig,
-  renderStreamParkResource,
-  renderYarnQueue,
-  sparkJobTypeMap,
-} from './useSparkRender';
+import { renderIsSetConfig, renderStreamParkResource, sparkJobTypeMap } from './useSparkRender';
 import { executionModes } from '../data';
 import { useDrawer } from '/@/components/Drawer';
 import { fetchVariableAll } from '/@/api/resource/variable';
 import { fetchTeamResource } from '/@/api/resource/upload';
 import { fetchCheckSparkName } from '/@/api/spark/app';
 import { useRoute } from 'vue-router';
-import { Alert } from 'ant-design-vue';
+import { Alert, Select, Tag } from 'ant-design-vue';
+import { fetchYarnQueueList } from '/@/api/setting/yarnQueue';
 
 export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
   const { t } = useI18n();
   const route = useRoute();
   const teamResource = ref<Array<any>>([]);
+  const yarnQueue = ref<Array<any>>([]);
   const suggestions = ref<Array<{ text: string; description: string; value: string }>>([]);
 
   const [registerConfDrawer, { openDrawer: openConfDrawer }] = useDrawer();
@@ -211,8 +208,29 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         field: 'yarnQueue',
         label: t('spark.app.yarnQueue'),
         component: 'Input',
-        render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
+        render: ({ model, field }) => {
+          return (
+            <div>
+              <Select
+                name="yarnQueue"
+                placeholder={t('setting.yarnQueue.placeholder.yarnQueueLabelExpression')}
+                fieldNames={{ label: 'queueLabel', value: 'queueLabel' }}
+                v-model={[model[field], 'value']}
+                showSearch={true}
+              />
+              <p class="conf-desc mt-10px">
+                <span class="note-info">
+                  <Tag color="#2db7f5" class="tag-note">
+                    {t('flink.app.noteInfo.note')}
+                  </Tag>
+                  {t('setting.yarnQueue.selectionHint')}
+                </span>
+              </p>
+            </div>
+          );
+        },
       },
+      { field: 'configOverride', label: '', component: 'Input', show: false },
       {
         field: 'isSetConfig',
         label: t('spark.app.appConf'),
@@ -256,6 +274,12 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
     /* Get team dependencies */
     fetchTeamResource({}).then((res) => {
       teamResource.value = res;
+    });
+    fetchYarnQueueList({
+      page: 1,
+      pageSize: 9999,
+    }).then((res) => {
+      yarnQueue.value = res.records;
     });
     fetchVariableAll().then((res) => {
       suggestions.value = res.map((v) => {

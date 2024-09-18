@@ -17,14 +17,14 @@
 <script setup lang="ts">
   import { useGo } from '/@/hooks/web/usePage';
   import AppForm from './components/AppForm.vue';
-  import { onMounted, ref } from 'vue';
+  import { nextTick, onMounted, ref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
 
   import { useMessage } from '/@/hooks/web/useMessage';
   import { createLocalStorage } from '/@/utils/cache';
   import { buildUUID } from '/@/utils/uuid';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { encryptByBase64 } from '/@/utils/cipher';
+  import { decodeByBase64, encryptByBase64 } from '/@/utils/cipher';
   import { AppTypeEnum, JobTypeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
   import { fetchGetSparkApp, fetchUpdateSparkApp } from '/@/api/spark/app';
   import { SparkApplication } from '/@/api/spark/app.type';
@@ -36,7 +36,9 @@
     name: 'SparkApplicationAction',
   });
   const go = useGo();
-  const sparkSql = ref();
+  const appFormRef = ref<{
+    sparkSql: any;
+  } | null>(null);
 
   const { t } = useI18n();
   const sparkApp = ref<SparkApplication>({});
@@ -48,8 +50,23 @@
 
   async function handleAppFieldValue() {
     const appId = route.query.appId;
+
     const res = await fetchGetSparkApp({ id: appId as string });
+    let isSetConfig = false;
+    let configOverride = '';
+    if (res.config && res.config.trim() !== '') {
+      configOverride = decodeByBase64(res.config);
+      isSetConfig = true;
+    }
+    Object.assign(res, {
+      sparkSql: res.sparkSql ? decodeByBase64(res.sparkSql) : '',
+      isSetConfig,
+      configOverride,
+    });
     sparkApp.value = res;
+    nextTick(() => {
+      if (res.sparkSql) appFormRef.value?.sparkSql?.setContent(decodeByBase64(res.sparkSql));
+    });
     return res;
   }
 
@@ -77,12 +94,6 @@
   }
   /* spark sql mode */
   async function handleSQLMode(values: Recordable) {
-    let config = values.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
-      config = encryptByBase64(config);
-    } else {
-      config = null;
-    }
     handleUpdateAction({
       jobType: JobTypeEnum.SQL,
       executionMode: values.executionMode,
@@ -95,7 +106,7 @@
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
-      config,
+      config: values.config,
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
@@ -104,19 +115,33 @@
   }
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
+    let config = formValue.configOverride;
+    console.log(config, formValue);
+    if (config != null && config !== undefined && config.trim() != '') {
+      config = encryptByBase64(config);
+    } else {
+      config = null;
+    }
+
     if (formValue.jobType == JobTypeEnum.SQL) {
       if (formValue.sparkSql == null || formValue.sparkSql.trim() === '') {
         createMessage.warning(t('spark.app.addAppTips.sparkSqlIsRequiredMessage'));
       } else {
-        const access = await sparkSql?.value?.handleVerifySql();
+        const access = await appFormRef?.value?.sparkSql?.handleVerifySql();
         if (!access) {
           createMessage.warning(t('spark.app.addAppTips.sqlCheck'));
           throw new Error(access);
         }
       }
-      handleSQLMode(formValue);
+      handleSQLMode({
+        ...formValue,
+        config,
+      });
     } else {
-      handleCustomJobMode(formValue);
+      handleCustomJobMode({
+        ...formValue,
+        config,
+      });
     }
   }
   /* send create request */
@@ -155,6 +180,11 @@
 
 <template>
   <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller">
-    <AppForm :initFormFn="handleAppFieldValue" :submit="handleAppSubmit" :spark-envs="sparkEnvs" />
+    <AppForm
+      ref="appFormRef"
+      :initFormFn="handleAppFieldValue"
+      :submit="handleAppSubmit"
+      :spark-envs="sparkEnvs"
+    />
   </PageWrapper>
 </template>
