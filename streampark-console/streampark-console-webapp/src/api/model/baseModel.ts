@@ -27,6 +27,6 @@ export interface BasicFetchResult<T> {
 export interface BasicTableParams {
   page: number;
   pageSize: number;
-  teamId: string;
+  teamId?: string;
   [key: string]: Nullable<string | number>;
 }

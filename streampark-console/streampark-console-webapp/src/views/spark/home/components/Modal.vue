@@ -83,43 +83,35 @@
 
   /* form submit */
   async function handleSubmit() {
-    changeOkLoading(true);
-    let formValue;
     try {
-      formValue = await validate();
-    } catch (error) {
-      console.warn('validate error:', error);
-      return;
-    } finally {
-      changeOkLoading(false);
-    }
-    // Detection environment
-    const resp = await fetchSparkEnvCheck({
-      id: versionId.value,
-      sparkName: formValue.sparkName,
-      sparkHome: formValue.sparkHome,
-    });
-    const checkResp = parseInt(resp);
-    if (checkResp !== SparkEnvCheckEnum.OK) {
-      switch (checkResp) {
-        case SparkEnvCheckEnum.INVALID_PATH:
-          Swal.fire('Failed', t('spark.home.tips.sparkHomePathIsInvalid'), 'error');
-          break;
-        case SparkEnvCheckEnum.NAME_REPEATED:
-          Swal.fire('Failed', t('spark.home.tips.sparkNameIsRepeated'), 'error');
-          break;
-        case SparkEnvCheckEnum.SPARK_DIST_NOT_FOUND:
-          Swal.fire('Failed', t('spark.home.tips.sparkDistNotFound'), 'error');
-          break;
-        case SparkEnvCheckEnum.SPARK_DIST_REPEATED:
-          Swal.fire('Failed', t('spark.home.tips.sparkDistIsRepeated'), 'error');
-          break;
+      const formValue = await validate();
+      changeOkLoading(true);
+      // Detection environment
+      const resp = await fetchSparkEnvCheck({
+        id: versionId.value,
+        sparkName: formValue.sparkName,
+        sparkHome: formValue.sparkHome,
+      });
+      const checkResp = parseInt(resp);
+      if (checkResp !== SparkEnvCheckEnum.OK) {
+        switch (checkResp) {
+          case SparkEnvCheckEnum.INVALID_PATH:
+            Swal.fire('Failed', t('spark.home.tips.sparkHomePathIsInvalid'), 'error');
+            break;
+          case SparkEnvCheckEnum.NAME_REPEATED:
+            Swal.fire('Failed', t('spark.home.tips.sparkNameIsRepeated'), 'error');
+            break;
+          case SparkEnvCheckEnum.SPARK_DIST_NOT_FOUND:
+            Swal.fire('Failed', t('spark.home.tips.sparkDistNotFound'), 'error');
+            break;
+          case SparkEnvCheckEnum.SPARK_DIST_REPEATED:
+            Swal.fire('Failed', t('spark.home.tips.sparkDistIsRepeated'), 'error');
+            break;
+        }
+        changeOkLoading(false);
+        return;
       }
-      changeOkLoading(false);
-      return;
-    }
 
-    try {
       let message: string;
       let success = false;
       // create
@@ -156,6 +148,9 @@
       } else {
         Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
       }
+    } catch (error) {
+      console.warn('validate error:', error);
+      return;
     } finally {
       changeOkLoading(false);
     }
