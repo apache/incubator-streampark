@@ -131,10 +131,18 @@
       </Card>
     </div>
     <div class="pod-template-tool-drawer-submit-cancel">
-      <a-button :style="{ marginRight: '8px' }" @click="handleCloseDrawer()">
+      <a-button
+        class="e2e_flink_app_pod_cancel"
+        :style="{ marginRight: '8px' }"
+        @click="handleCloseDrawer()"
+      >
         {{ t('common.cancelText') }}
       </a-button>
-      <a-button type="primary" @click="handleSubmitHostAliasToPodTemplate()">
+      <a-button
+        class="e2e_flink_app_pod_submit"
+        type="primary"
+        @click="handleSubmitHostAliasToPodTemplate()"
+      >
         {{ t('common.submitText') }}
       </a-button>
     </div>
