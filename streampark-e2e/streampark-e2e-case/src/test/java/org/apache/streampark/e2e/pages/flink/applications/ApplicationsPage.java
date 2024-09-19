@@ -106,9 +106,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         startJobFormMessage))));
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(startJobForm.radioFromSavepoint));
-        startJobForm.radioFromSavepoint.click();
+
         startJobForm.buttonSubmit.click();
         String startPopUpMessage = "The current job is starting";
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -162,9 +160,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                     By.xpath(String.format("//*[contains(.,'%s')]",
                         cancelJobFormMessage))));
 
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(cancelJobForm.radioFromSavepoint));
-        cancelJobForm.radioFromSavepoint.click();
         cancelJobForm.buttonSubmit.click();
         String cancelPopUpMessage = "The current job is canceling";
         WebDriverWaitForElementVisibilityAndInvisibility(driver, cancelPopUpMessage);
@@ -184,9 +179,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             PageFactory.initElements(driver, this);
         }
 
-        @FindBy(id = "startApplicationModal_restoreSavepoint")
-        public WebElement radioFromSavepoint;
-
         @FindBy(id = "e2e-flinkapp-start-submit")
         public WebElement buttonSubmit;
 
@@ -200,9 +192,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         CancelJobForm() {
             PageFactory.initElements(driver, this);
         }
-
-        @FindBy(id = "stopApplicationModal_triggerSavepoint")
-        public WebElement radioFromSavepoint;
 
         @FindBy(id = "e2e-flinkapp-stop-submit")
         public WebElement buttonSubmit;

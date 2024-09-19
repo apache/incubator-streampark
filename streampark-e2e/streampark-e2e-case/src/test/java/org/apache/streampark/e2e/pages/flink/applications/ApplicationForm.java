@@ -250,8 +250,9 @@ public final class ApplicationForm {
     @Getter
     public enum DevelopmentMode {
 
-        CUSTOM_CODE("custom code"), FLINK_SQL("flink sql"), PYTHON_FLINK("python flink"),
-        ;
+        CUSTOM_CODE("custom code"),
+        FLINK_SQL("flink sql"),
+        PYTHON_FLINK("python flink");
 
         private final String desc;
 
@@ -263,11 +264,12 @@ public final class ApplicationForm {
     @Getter
     public enum ExecutionMode {
 
-        REMOTE("remote"), YARN_APPLICATION("yarn application"), YARN_SESSION("yarn session"), KUBERNETES_SESSION(
-            "kubernetes session"),
-        KUBERNETES_APPLICATION("kubernetes application"), YARN_PER_JOB(
-            "yarn per-job (deprecated, please use yarn-application mode)"),
-            ;
+        REMOTE("remote"),
+        YARN_APPLICATION("yarn application"),
+        YARN_SESSION("yarn session"),
+        KUBERNETES_SESSION("kubernetes session"),
+        KUBERNETES_APPLICATION("kubernetes application"),
+        YARN_PER_JOB("yarn per-job (deprecated, please use yarn-application mode)");
 
         private final String desc;
 
