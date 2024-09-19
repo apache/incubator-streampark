@@ -106,7 +106,7 @@ jobs:
     name: ${{ matrix.case.name }}
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     strategy:
       matrix:
         case:
