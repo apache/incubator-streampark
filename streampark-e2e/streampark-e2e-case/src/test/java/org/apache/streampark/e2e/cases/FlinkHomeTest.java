@@ -53,7 +53,7 @@ public class FlinkHomeTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
@@ -67,7 +67,7 @@ public class FlinkHomeTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testEditFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.editFlinkHome(flinkName, newFlinkHome);
@@ -81,7 +81,7 @@ public class FlinkHomeTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testDeleteFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.deleteFlinkHome(newFlinkHome);

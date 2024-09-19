@@ -53,7 +53,7 @@ public class VariableManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
@@ -67,7 +67,7 @@ public class VariableManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
@@ -85,7 +85,7 @@ public class VariableManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         String editVariableValue = "6379";
@@ -102,7 +102,7 @@ public class VariableManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
 

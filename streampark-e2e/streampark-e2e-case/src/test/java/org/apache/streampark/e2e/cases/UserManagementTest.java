@@ -53,7 +53,7 @@ public class UserManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         userManagementPage.createUser(
@@ -68,7 +68,7 @@ public class UserManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         userManagementPage.createUser(
@@ -86,7 +86,7 @@ public class UserManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         String editEmail = "edit_" + newUserEmail;

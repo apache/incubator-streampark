@@ -51,7 +51,7 @@ public class TokenManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
         tokenManagementPage.createToken(existUserName, newTokenDescription);
@@ -65,7 +65,7 @@ public class TokenManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCopyToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
         tokenManagementPage.copyToken(existUserName);
@@ -85,7 +85,7 @@ public class TokenManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testCreateDuplicateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
 
@@ -100,7 +100,7 @@ public class TokenManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteToken() {
         final TokenManagementPage teamManagementPage = new TokenManagementPage(browser);
         teamManagementPage.deleteToken(existUserName);

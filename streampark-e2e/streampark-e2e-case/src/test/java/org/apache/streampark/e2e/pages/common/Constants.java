@@ -30,7 +30,7 @@ public class Constants {
 
     public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
 
-    public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
+    public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(2);
 
     public static final String LINE_SEPARATOR = "\n";
 

@@ -56,7 +56,7 @@ public class AlarmTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     public void testCreateAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
@@ -109,7 +109,7 @@ public class AlarmTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     public void testEditAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 
@@ -133,7 +133,7 @@ public class AlarmTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     public void testDeleteAlarm() {
         final AlarmPage alarmPage = new AlarmPage(browser);
 

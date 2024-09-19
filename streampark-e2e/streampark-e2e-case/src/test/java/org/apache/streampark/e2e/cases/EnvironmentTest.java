@@ -77,7 +77,7 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     public void testCreateEnvironment() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -104,7 +104,7 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     public void testCreateEmailSettingFailedWithAuth() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -136,7 +136,7 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     public void testCreateEmailSettingSuccessful() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -161,7 +161,7 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     public void testCreateDockerSettingFailed() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
         DockerSettingForm dockerSettingForm =

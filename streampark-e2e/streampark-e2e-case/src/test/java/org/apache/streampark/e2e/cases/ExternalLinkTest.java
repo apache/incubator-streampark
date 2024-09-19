@@ -55,7 +55,7 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         externalLinkPage.createExternalLink(newLabel, newName, color, newLink);
@@ -71,7 +71,7 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         externalLinkPage.createExternalLink(newLabel, newName, color, newLink);
@@ -89,7 +89,7 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         String editName = "edit_name";
@@ -107,7 +107,7 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
 

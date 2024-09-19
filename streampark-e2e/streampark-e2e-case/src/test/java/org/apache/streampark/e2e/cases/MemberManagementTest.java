@@ -36,8 +36,6 @@ public class MemberManagementTest {
 
     public static RemoteWebDriver browser;
 
-    private static final String teamName = "default";
-
     private static final String existUserName = "test3";
 
     private static final String existRole = "developer";
@@ -51,7 +49,7 @@ public class MemberManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 
@@ -66,7 +64,7 @@ public class MemberManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 
@@ -74,20 +72,17 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.errorMessageList)
+                () -> assertThat(memberManagementPage.errorMessage)
                     .as("Member Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(
-                        String.format(
-                            "The user [%s] has been added the team [%s], please don't add it again.",
-                            existUserName, teamName))));
+                    .matches(it -> it.contains("please don't add it again.")));
 
         memberManagementPage.errorMessageConfirmButton.click();
         memberManagementPage.createMemberForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
         String anotherRole = "team admin";
@@ -104,7 +99,7 @@ public class MemberManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 

@@ -79,7 +79,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -102,7 +102,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testReleaseFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -117,7 +117,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testStartFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -165,7 +165,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteFlinkApplicationOnYarnApplicationMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -182,7 +182,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(50)
+    @Order(5)
     void testCreateFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -205,7 +205,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(60)
+    @Order(6)
     void testReleaseFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -220,7 +220,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(70)
+    @Order(7)
     void testStartFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -268,7 +268,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(80)
+    @Order(8)
     void testDeleteFlinkApplicationOnYarnPerJobMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -285,7 +285,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(90)
+    @Order(9)
     void testCreateFlinkApplicationOnYarnSessionMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -309,7 +309,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(100)
+    @Order(10)
     void testReleaseFlinkApplicationOnYarnSessionMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -324,7 +324,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(110)
+    @Order(11)
     void testStartFlinkApplicationOnYarnSessionMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 
@@ -346,7 +346,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(120)
+    @Order(12)
     @SneakyThrows
     void testRestartAndCancelFlinkApplicationOnYarnSessionMode() {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
@@ -372,7 +372,7 @@ public class FlinkSQL118OnYarnTest {
     }
 
     @Test
-    @Order(130)
+    @Order(13)
     void testDeleteFlinkApplicationOnYarnSessionMode() {
         final ApplicationsPage applicationsPage = new ApplicationsPage(browser);
 

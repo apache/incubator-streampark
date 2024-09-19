@@ -66,7 +66,7 @@ public class Flink117OnYarnClusterDeployTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     public void testCreateFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -86,7 +86,7 @@ public class Flink117OnYarnClusterDeployTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     public void testEditFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -104,7 +104,7 @@ public class Flink117OnYarnClusterDeployTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     public void testStartFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -119,7 +119,7 @@ public class Flink117OnYarnClusterDeployTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     public void testStopFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -134,7 +134,7 @@ public class Flink117OnYarnClusterDeployTest {
     }
 
     @Test
-    @Order(50)
+    @Order(5)
     public void testDeleteFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 

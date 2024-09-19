@@ -49,7 +49,7 @@ public class TeamManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
@@ -63,7 +63,7 @@ public class TeamManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
@@ -80,7 +80,7 @@ public class TeamManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         String editDescription = "edit_" + newTeamDescription;
@@ -96,7 +96,7 @@ public class TeamManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
 

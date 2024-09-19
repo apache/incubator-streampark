@@ -61,7 +61,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         uploadsPage.createUpload(engineType, resourceType, resourceName, mavenPom, description);
@@ -78,7 +78,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
 
@@ -97,7 +97,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         browser.navigate().refresh();
@@ -125,7 +125,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         uploadsPage.deleteUpload(resourceName);

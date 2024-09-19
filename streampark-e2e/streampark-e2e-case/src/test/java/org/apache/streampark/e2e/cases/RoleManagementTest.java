@@ -51,7 +51,7 @@ public class RoleManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
         roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
@@ -65,7 +65,7 @@ public class RoleManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
         roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
@@ -81,7 +81,7 @@ public class RoleManagementTest {
         roleManagementPage.createRoleForm.buttonCancel.click();
     }
     @Test
-    @Order(30)
+    @Order(3)
     void testEditRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
 
@@ -98,7 +98,7 @@ public class RoleManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
 

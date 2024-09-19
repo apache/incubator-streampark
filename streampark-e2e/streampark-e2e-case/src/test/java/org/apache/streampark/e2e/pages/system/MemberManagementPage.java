@@ -41,10 +41,10 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
     @FindBy(className = "ant-table-tbody")
     public List<WebElement> memberList;
 
-    @FindBy(className = "swal2-html-container")
-    public List<WebElement> errorMessageList;
+    @FindBy(id = "swal2-html-container")
+    public WebElement errorMessage;
 
-    @FindBy(xpath = "//button[contains(text(), 'OK')]")
+    @FindBy(className = "swal2-confirm")
     public WebElement errorMessageConfirmButton;
 
     @FindBy(className = "e2e-member-delete-confirm")
@@ -65,6 +65,9 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
 
         buttonCreateMember.click();
 
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(createMemberForm.btnSelectUserNameDropDown));
+
         createMemberForm.btnSelectUserNameDropDown.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -78,6 +81,9 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                     String.format("No %s in username dropdown list", userName)))
             .click();
 
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.btnSelectRoleDropDown));
+
         createMemberForm.btnSelectRoleDropDown.click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -90,6 +96,9 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                 () -> new RuntimeException(
                     String.format("No %s in role dropdown list", role)))
             .click();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.buttonSubmit));
 
         createMemberForm.buttonSubmit.click();
         return this;
@@ -108,9 +117,13 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in member list"))
             .click();
 
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.btnSelectRoleDropDown));
         createMemberForm.btnSelectRoleDropDown.click();
+
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.selectRole));
+
         createMemberForm.selectRole.stream()
             .filter(e -> e.getText().equals(role))
             .findFirst()
@@ -119,12 +132,16 @@ public class MemberManagementPage extends NavBarPage implements SystemPage.Tab {
                     String.format("No %s in role dropdown list", role)))
             .click();
 
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.visibilityOfAllElements(createMemberForm.buttonSubmit));
+
         createMemberForm.buttonSubmit.click();
         return this;
     }
 
     public MemberManagementPage deleteMember(String userName) {
         waitForPageLoading();
+
         memberList.stream()
             .filter(it -> it.getText().contains(userName))
             .flatMap(

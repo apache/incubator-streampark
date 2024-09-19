@@ -63,7 +63,7 @@ public class ProjectsManagementTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -78,7 +78,7 @@ public class ProjectsManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testEditProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -93,7 +93,7 @@ public class ProjectsManagementTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testBuildProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -108,7 +108,7 @@ public class ProjectsManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 

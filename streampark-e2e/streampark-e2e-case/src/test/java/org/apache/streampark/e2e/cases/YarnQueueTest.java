@@ -51,7 +51,7 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
@@ -66,7 +66,7 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
@@ -81,7 +81,7 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         String editDescription = "edit_" + description;
@@ -98,7 +98,7 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
 
