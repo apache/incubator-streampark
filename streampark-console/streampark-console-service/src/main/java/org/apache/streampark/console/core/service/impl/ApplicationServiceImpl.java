@@ -993,7 +993,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     application.setDynamicProperties(appParam.getDynamicProperties());
     application.setResolveOrder(appParam.getResolveOrder());
     application.setExecutionMode(appParam.getExecutionMode());
-    application.setFlinkClusterId(appParam.getFlinkClusterId());
     application.setFlinkImage(appParam.getFlinkImage());
     application.updateHotParams(appParam);
     application.setK8sRestExposedType(appParam.getK8sRestExposedType());
