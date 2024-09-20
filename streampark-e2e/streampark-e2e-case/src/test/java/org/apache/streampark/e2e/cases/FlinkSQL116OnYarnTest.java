@@ -176,7 +176,6 @@ public class FlinkSQL116OnYarnTest {
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
-
                     assertThat(applicationsPage.applicationsList)
                         .noneMatch(it -> it.getText().contains(applicationName));
                 });

@@ -33,8 +33,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
-import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWaitForElementVisibilityAndInvisibility;
-
 @Getter
 public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab {
 
@@ -47,10 +45,16 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     @FindBy(className = "ant-form-item-explain-error")
     public List<WebElement> errorMessageList;
 
-    @FindBy(className = "e2e-flinkapp-delete-btn")
+    /*
+     * @FindBy(className = "e2e-flinkapp-delete-btn") public WebElement deleteButton;
+     * 
+     * @FindBy(className = "e2e-flinkapp-delete-confirm") public WebElement deleteConfirmButton;
+     */
+
+    @FindBy(xpath = "//div[contains(@class, 'ant-dropdown-content')]//span[contains(text(), 'Delete')]")
     public WebElement deleteButton;
 
-    @FindBy(className = "e2e-flinkapp-delete-confirm")
+    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
     public WebElement deleteConfirmButton;
 
     public ApplicationsPage(RemoteWebDriver driver) {
@@ -82,7 +86,12 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
             .orElseThrow(() -> new RuntimeException("No extra button in applications list"));
         Actions actions = new Actions(this.driver);
         actions.moveToElement(extraButton).perform();
+
         deleteButton.click();
+
+        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
+            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+
         deleteConfirmButton.click();
 
         return this;
@@ -108,18 +117,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                         startJobFormMessage))));
 
         startJobForm.buttonSubmit.click();
-        String startPopUpMessage = "The current job is starting";
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(String.format("//*[contains(text(),'%s')]",
-                        startPopUpMessage))));
-        new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(
-                ExpectedConditions.invisibilityOfElementLocated(
-                    By.xpath(String.format("//*[contains(text(),'%s')]",
-                        startPopUpMessage))));
-
         return this;
     }
 
@@ -161,8 +158,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
                         cancelJobFormMessage))));
 
         cancelJobForm.buttonSubmit.click();
-        String cancelPopUpMessage = "The current job is canceling";
-        WebDriverWaitForElementVisibilityAndInvisibility(driver, cancelPopUpMessage);
 
         return this;
     }
