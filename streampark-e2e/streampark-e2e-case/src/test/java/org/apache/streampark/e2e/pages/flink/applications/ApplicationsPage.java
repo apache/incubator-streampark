@@ -75,7 +75,7 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
         WebElement extraButton = applicationsList.stream()
             .filter(it -> it.getText().contains(applicationName))
             .flatMap(
-                it -> it.findElements(By.xpath("//span[contains(@aria-label, 'more')]/.."))
+                it -> it.findElements(By.className("anticon-more"))
                     .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
