@@ -16,6 +16,7 @@
 #
 
 FROM apache/streampark:ci as base-image
+FROM flink:1.16.3-scala_2.12-java8 as flink-image
 
 # Install streampark
 FROM sbloodys/hadoop:3.3.6
@@ -24,8 +25,7 @@ RUN sudo chown -R hadoop.hadoop /streampark \
     && sed -i "s/hadoop-user-name: hdfs$/hadoop-user-name: hadoop/g" /streampark/conf/config.yaml
 
 # Install Flink
-FROM flink:1.16.3-scala_2.12-java8 as flink
-COPY --from=flink /opt/flink /flink-1.16.3
+COPY --from=flink-image /opt/flink /flink-1.16.3
 RUN sudo chown -R hadoop.hadoop /flink-1.16.3
 
 # Install javac
