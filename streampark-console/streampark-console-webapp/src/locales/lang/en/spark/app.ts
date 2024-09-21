@@ -16,7 +16,7 @@
  */
 export default {
   dashboard: {
-    runningTasks: 'Number of Running Applications',
+    runningTasks: 'Running Jobs',
     totalTask: 'Total Tasks',
     totalStage: 'Total Stages',
     completedTask: 'Total Completed Tasks',
@@ -50,9 +50,9 @@ export default {
     pending: 'Pending Rollback',
   },
   id: 'Applications ID',
-  appName: 'Applications Name',
-  searchName: 'Applications Name',
-  tags: 'Applications Tags',
+  appName: 'Job Name',
+  searchName: 'Job Name',
+  tags: 'Tags',
   owner: 'Creator',
   sparkVersion: 'Spark Version',
   duration: 'Runtime',

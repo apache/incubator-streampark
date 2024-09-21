@@ -45,16 +45,10 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
     @FindBy(className = "ant-form-item-explain-error")
     public List<WebElement> errorMessageList;
 
-    /*
-     * @FindBy(className = "e2e-flinkapp-delete-btn") public WebElement deleteButton;
-     * 
-     * @FindBy(className = "e2e-flinkapp-delete-confirm") public WebElement deleteConfirmButton;
-     */
-
-    @FindBy(xpath = "//div[contains(@class, 'ant-dropdown-content')]//span[contains(text(), 'Delete')]")
+    @FindBy(className = "e2e-flinkapp-delete-btn")
     public WebElement deleteButton;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
+    @FindBy(className = "e2e-flinkapp-delete-confirm")
     public WebElement deleteConfirmButton;
 
     public ApplicationsPage(RemoteWebDriver driver) {

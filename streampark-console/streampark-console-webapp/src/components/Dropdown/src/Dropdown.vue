@@ -5,9 +5,9 @@
     </span>
     <template #overlay>
       <a-menu :selectedKeys="selectedKeys">
-        <template v-for="item in dropMenuList" :key="`${item.event}`">
+        <template v-for="(item, index) in dropMenuList" :key="`${item.event || index}`">
           <a-menu-item
-            v-bind="getAttr(item.event)"
+            v-bind="getAttr(item)"
             @click="handleClickMenu(item)"
             :disabled="item.disabled"
           >
@@ -71,7 +71,6 @@
       default: () => [],
     },
   });
-
   const emit = defineEmits(['menuEvent']);
 
   function handleClickMenu(item: DropMenu) {
@@ -92,7 +91,12 @@
     };
   });
 
-  const getAttr = (key: string | number) => ({ key });
+  const getAttr = (item: Recordable) => {
+    return {
+      class: item.class,
+      key: item.event,
+    };
+  };
 
   const getClass = (record) => {
     const { color, disabled } = record;
