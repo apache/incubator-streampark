@@ -111,6 +111,7 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },
+        class: 'e2e-flinkapp-detail-btn',
         auth: 'app:detail',
         icon: 'carbon:data-view-alt',
         onClick: handleDetail.bind(null, record),
@@ -142,6 +143,7 @@ export const useAppTableAction = (
       {
         label: t('flink.app.operation.copy'),
         auth: 'app:copy',
+        class: 'e2e-flinkapp-copy-btn',
         icon: 'ant-design:copy-outlined',
         onClick: handleCopy.bind(null, record),
       },
@@ -160,6 +162,7 @@ export const useAppTableAction = (
           AppStateEnum.LOST,
         ].includes(record.state),
         auth: 'app:mapping',
+        class: 'e2e-flinkapp-remapping-btn',
         icon: 'ant-design:deployment-unit-outlined',
         onClick: handleMapping.bind(null, record),
       },
