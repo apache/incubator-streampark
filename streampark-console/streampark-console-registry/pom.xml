@@ -29,8 +29,8 @@
 
     <modules>
         <module>streampark-registry-api</module>
-        <module>streampark-registry-plugins</module>
-        <module>streampark-registry-all</module>
+        <module>streampark-registry-core</module>
+        <module>streampark-registry-it</module>
     </modules>
 
     <dependencies>
@@ -88,4 +88,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
