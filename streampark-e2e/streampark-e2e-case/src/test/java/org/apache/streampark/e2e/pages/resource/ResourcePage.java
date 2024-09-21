@@ -32,13 +32,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public final class ResourcePage extends NavBarPage implements NavBarItem {
 
     @FindBy(className = "menu-item-resource_variable")
-    private WebElement menuVariables;
+    public WebElement menuVariables;
 
     @FindBy(className = "menu-item-resource_project")
-    private WebElement menuProjects;
+    public WebElement menuProjects;
 
     @FindBy(className = "menu-item-resource_upload")
-    private WebElement menuUploads;
+    public WebElement menuUploads;
 
     public ResourcePage(RemoteWebDriver driver) {
         super(driver);

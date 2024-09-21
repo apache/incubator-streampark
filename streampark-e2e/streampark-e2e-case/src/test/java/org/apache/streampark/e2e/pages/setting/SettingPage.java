@@ -33,16 +33,16 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class SettingPage extends NavBarPage implements NavBarPage.NavBarItem {
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Yarn Queue')]//..")
-    private WebElement menuYarnQueueManagement;
+    public WebElement menuYarnQueueManagement;
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'External Link')]//..")
-    private WebElement menuExternalLinkManagement;
+    public WebElement menuExternalLinkManagement;
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Alarms')]//..")
-    private WebElement menuAlarmManagement;
+    public WebElement menuAlarmManagement;
 
     @FindBy(xpath = "//span[contains(@class, 'streampark-simple-menu-sub-title') and contains(text(), 'Environments')]//..")
-    private WebElement menuEnvManagement;
+    public WebElement menuEnvManagement;
 
     public SettingPage(RemoteWebDriver driver) {
         super(driver);

@@ -15,31 +15,19 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    :showOkBtn="false"
-    @register="registerDrawer"
-    showFooter
-    width="40%"
-    @ok="closeDrawer"
-  >
+  <BasicModal :width="600" :showOkBtn="false" @register="registerModal" showFooter @ok="closeModal">
     <template #title>
       <Icon icon="ant-design:code-outlined" />
       {{ t('flink.variable.variableInfoTitle') }}
     </template>
     <Description class="variable-desc" :column="1" :data="variableInfo" :schema="roleColumn" />
-  </BasicDrawer>
+  </BasicModal>
 </template>
-<script lang="ts">
-  export default defineComponent({
-    name: 'VariableInfo',
-  });
-</script>
-
 <script setup lang="ts">
-  import { defineComponent, h, ref } from 'vue';
+  import { h, ref } from 'vue';
   import { Description, DescItem } from '/@/components/Description';
   import Icon from '/@/components/Icon';
-  import { useDrawerInner, BasicDrawer } from '/@/components/Drawer';
+  import { useModalInner, BasicModal } from '/@/components/Modal';
   import { fetchVariableInfo } from '/@/api/resource/variable';
   import { usePermission } from '/@/hooks/web/usePermission';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -48,7 +36,7 @@
   const showVariableDetail = ref(false);
   let realVariable = '';
   let desenVariable = '';
-  const [registerDrawer, { closeDrawer }] = useDrawerInner((data: Recordable) => {
+  const [registerModal, { closeModal }] = useModalInner((data: Recordable) => {
     data && onReceiveModalData(data);
   });
   const { t } = useI18n();

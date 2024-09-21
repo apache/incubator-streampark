@@ -29,20 +29,20 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class IngressSettingForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBys({
             @FindBy(xpath = "//h4[text()='Ingress domain address Setting']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn') and contains(@class, 'ant-btn-primary') and contains(@class, 'ant-btn-circle')]")
     })
-    private WebElement btnDomainAddressSetting;
+    public WebElement btnDomainAddressSetting;
 
     @FindBy(className = "ingress_mode_default")
-    private WebElement inputDomainAddress;
+    public WebElement inputDomainAddress;
 
     IngressSettingForm(EnvironmentDetailForm environmentDetailForm) {
         super(environmentDetailForm);
-        this.driver = environmentDetailForm.driver();
+        this.driver = environmentDetailForm.driver;
     }
 
     public IngressSettingForm domainAddress(String domainAddress) {

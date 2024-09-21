@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class YarnQueueTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String newQueueLabel = "new_label";
 
@@ -51,20 +45,20 @@ public class YarnQueueTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(YarnQueuePage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList())
+                () -> assertThat(queuePage.yarnQueueList)
                     .as("Yarn Queue list should contain newly-created item")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newQueueLabel))
@@ -72,22 +66,22 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         queuePage.createYarnQueue(newQueueLabel, description);
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.errorMessageList())
+                () -> assertThat(queuePage.errorMessageList)
                     .as("Yarn Queue Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("The queue label existed in the current team")));
 
-        queuePage.createYarnQueueForm().buttonCancel().click();
+        queuePage.createYarnQueueForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
         String editDescription = "edit_" + description;
@@ -96,7 +90,7 @@ public class YarnQueueTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(queuePage.yarnQueueList())
+                () -> assertThat(queuePage.yarnQueueList)
                     .as("Yarn queue list should contain edited yarn queue")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editQueueLabel))
@@ -104,7 +98,7 @@ public class YarnQueueTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteYarnQueue() {
         final YarnQueuePage queuePage = new YarnQueuePage(browser);
 
@@ -112,7 +106,7 @@ public class YarnQueueTest {
         Awaitility.await()
             .untilAsserted(
                 () -> {
-                    assertThat(queuePage.yarnQueueList())
+                    assertThat(queuePage.yarnQueueList)
                         .noneMatch(it -> it.getText().contains(editQueueLabel));
                 });
     }

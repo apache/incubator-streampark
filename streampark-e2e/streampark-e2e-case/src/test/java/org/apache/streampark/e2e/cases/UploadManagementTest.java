@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class UploadManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String engineType = "Apache Flink";
 
@@ -61,20 +55,20 @@ public class UploadManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(UploadsPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         uploadsPage.createUpload(engineType, resourceType, resourceName, mavenPom, description);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList)
                     .as("Resource list should contain newly-created resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
@@ -84,7 +78,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
 
@@ -92,18 +86,18 @@ public class UploadManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.errorMessageList())
+                () -> assertThat(uploadsPage.errorMessageList)
                     .as("Resource Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         String.format("the resource %s already exists, please check.", resourceName))));
 
-        uploadsPage.errorMessageConfirmButton().click();
-        uploadsPage.createUploadForm().buttonCancel().click();
+        uploadsPage.errorMessageConfirmButton.click();
+        uploadsPage.createUploadForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         browser.navigate().refresh();
@@ -121,7 +115,7 @@ public class UploadManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(uploadsPage.resourceList())
+                () -> assertThat(uploadsPage.resourceList)
                     .as("Resource list should contain edit resource")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(resourceName))
@@ -131,7 +125,7 @@ public class UploadManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteUpload() {
         final UploadsPage uploadsPage = new UploadsPage(browser);
         uploadsPage.deleteUpload(resourceName);
@@ -140,7 +134,7 @@ public class UploadManagementTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(uploadsPage.resourceList())
+                    assertThat(uploadsPage.resourceList)
                         .noneMatch(it -> it.getText().contains(resourceName));
                 });
     }

@@ -38,15 +38,15 @@ import java.util.List;
 public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
 
     @FindBy(id = "e2e-project-create-btn")
-    private WebElement buttonCreateProject;
+    public WebElement buttonCreateProject;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-list')]")
-    private List<WebElement> projectList;
+    public List<WebElement> projectList;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'OK')]")
-    private WebElement popupConfirmButton;
+    public WebElement popupConfirmButton;
 
-    private CreateProjectForm createProjectForm;
+    public CreateProjectForm createProjectForm;
 
     public ProjectsPage(RemoteWebDriver driver) {
         super(driver);
@@ -69,27 +69,27 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/add"));
 
-        createProjectForm.inputProjectName().sendKeys(projectName);
-        createProjectForm.selectCveDropdown().click();
-        createProjectForm.selectCveText().stream()
+        createProjectForm.inputProjectName.sendKeys(projectName);
+        createProjectForm.selectCveDropdown.click();
+        createProjectForm.selectCveText.stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectCvs))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Cvs not found: %s", projectCvs)))
             .click();
 
-        createProjectForm.inputProjectUrl().sendKeys(projectUrl);
-        createProjectForm.selectBranchDropdown().click();
+        createProjectForm.inputProjectUrl.sendKeys(projectUrl);
+        createProjectForm.selectBranchDropdown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText()));
-        createProjectForm.selectBranchText().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText));
+        createProjectForm.selectBranchText.stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectBranch))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Branch not found: %s", projectBranch)))
             .click();
 
-        createProjectForm.inputBuildArgument().sendKeys(projectBuildArgument);
-        createProjectForm.inputDescription().sendKeys(projectDescription);
-        createProjectForm.buttonSubmit().click();
+        createProjectForm.inputBuildArgument.sendKeys(projectBuildArgument);
+        createProjectForm.inputDescription.sendKeys(projectDescription);
+        createProjectForm.buttonSubmit.click();
 
         return this;
     }
@@ -103,7 +103,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                                     String projectBuildArgument,
                                     String projectDescription) {
         waitForPageLoading();
-        projectList().stream()
+        projectList.stream()
             .filter(project -> project.getText().contains(oldProjectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project edit button not found"))
@@ -113,37 +113,37 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/project/edit"));
 
-        createProjectForm.inputProjectName().sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputProjectName().sendKeys(Keys.BACK_SPACE);
-        createProjectForm.inputProjectName().sendKeys(newProjectName);
-        createProjectForm.selectCveDropdown().click();
+        createProjectForm.inputProjectName.sendKeys(Keys.CONTROL + "a");
+        createProjectForm.inputProjectName.sendKeys(Keys.BACK_SPACE);
+        createProjectForm.inputProjectName.sendKeys(newProjectName);
+        createProjectForm.selectCveDropdown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectCveText()));
-        createProjectForm.selectCveText().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectCveText));
+        createProjectForm.selectCveText.stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectCvs))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Cvs not found: %s", projectCvs)))
             .click();
 
-        createProjectForm.inputProjectUrl().sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputProjectUrl().sendKeys(Keys.BACK_SPACE);
-        createProjectForm.inputProjectUrl().sendKeys(projectUrl);
-        createProjectForm.selectBranchDropdown().click();
+        createProjectForm.inputProjectUrl.sendKeys(Keys.CONTROL + "a");
+        createProjectForm.inputProjectUrl.sendKeys(Keys.BACK_SPACE);
+        createProjectForm.inputProjectUrl.sendKeys(projectUrl);
+        createProjectForm.selectBranchDropdown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText()));
-        createProjectForm.selectBranchText().stream()
+            .until(ExpectedConditions.visibilityOfAllElements(createProjectForm.selectBranchText));
+        createProjectForm.selectBranchText.stream()
             .filter(e -> e.getText().equalsIgnoreCase(projectBranch))
             .findFirst()
             .orElseThrow(() -> new Exception(String.format("Branch not found: %s", projectBranch)))
             .click();
 
-        createProjectForm.inputBuildArgument().sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputBuildArgument().sendKeys(Keys.BACK_SPACE);
-        createProjectForm.inputBuildArgument().sendKeys(projectBuildArgument);
-        createProjectForm.inputDescription().sendKeys(Keys.CONTROL + "a");
-        createProjectForm.inputDescription().sendKeys(Keys.BACK_SPACE);
-        createProjectForm.inputDescription().sendKeys(projectDescription);
-        createProjectForm.buttonSubmit().click();
+        createProjectForm.inputBuildArgument.sendKeys(Keys.CONTROL + "a");
+        createProjectForm.inputBuildArgument.sendKeys(Keys.BACK_SPACE);
+        createProjectForm.inputBuildArgument.sendKeys(projectBuildArgument);
+        createProjectForm.inputDescription.sendKeys(Keys.CONTROL + "a");
+        createProjectForm.inputDescription.sendKeys(Keys.BACK_SPACE);
+        createProjectForm.inputDescription.sendKeys(projectDescription);
+        createProjectForm.buttonSubmit.click();
 
         return this;
     }
@@ -151,7 +151,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @SneakyThrows
     public ProjectsPage buildProject(String projectName) {
         waitForPageLoading();
-        projectList().stream()
+        projectList.stream()
             .filter(project -> project.getText().contains(projectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project build button not found"))
@@ -159,13 +159,14 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                 By.xpath("//..//li[contains(@class, 'ant-list-item')]//button[contains(@class, 'ant-btn')][2]"))
             .click();
         popupConfirmButton.click();
+
         return this;
     }
 
     @SneakyThrows
     public ProjectsPage deleteProject(String projectName) {
         waitForPageLoading();
-        projectList().stream()
+        projectList.stream()
             .filter(project -> project.getText().contains(projectName))
             .findFirst()
             .orElseThrow(() -> new Exception("Project delete button not found"))
@@ -185,6 +186,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
                     By.xpath(String.format("//*[contains(text(),'%s')]",
                         deletePopUpMessage))));
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
+
         return this;
     }
 
@@ -201,39 +203,39 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
         }
 
         @FindBy(id = "form_item_name")
-        private WebElement inputProjectName;
+        public WebElement inputProjectName;
 
         @FindBy(xpath = "//div[contains(@codefield, 'repository')]//div[contains(@class, 'ant-select-selector')]")
-        private WebElement selectCveDropdown;
+        public WebElement selectCveDropdown;
 
         @FindBys({
                 @FindBy(css = "[codefield=repository]"),
                 @FindBy(className = "ant-select-item-option-content")
         })
-        private List<WebElement> selectCveText;
+        public List<WebElement> selectCveText;
 
         @FindBy(name = "url")
-        private WebElement inputProjectUrl;
+        public WebElement inputProjectUrl;
 
         @FindBy(xpath = "//div[contains(@codefield, 'branches')]//div[contains(@class, 'ant-select-selector')]")
-        private WebElement selectBranchDropdown;
+        public WebElement selectBranchDropdown;
 
         @FindBys({
                 @FindBy(css = "[codefield=branches]"),
                 @FindBy(className = "ant-select-item-option-content")
         })
-        private List<WebElement> selectBranchText;
+        public List<WebElement> selectBranchText;
 
         @FindBy(id = "form_item_buildArgs")
-        private WebElement inputBuildArgument;
+        public WebElement inputBuildArgument;
 
         @FindBy(id = "form_item_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

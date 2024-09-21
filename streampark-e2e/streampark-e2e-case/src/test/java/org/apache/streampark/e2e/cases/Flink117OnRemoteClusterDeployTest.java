@@ -38,13 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/flink-1.17-on-remote/docker-compose.yaml")
 public class Flink117OnRemoteClusterDeployTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String flinkName = "flink-1.17.2";
 
@@ -61,7 +55,7 @@ public class Flink117OnRemoteClusterDeployTest {
     @BeforeAll
     public static void setUp() {
         FlinkHomePage flinkHomePage = new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ApacheFlinkPage.class)
             .goToTab(FlinkHomePage.class);
 
@@ -72,7 +66,7 @@ public class Flink117OnRemoteClusterDeployTest {
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     public void testCreateFlinkCluster() {
         FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -85,14 +79,14 @@ public class Flink117OnRemoteClusterDeployTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkClustersPage.flinkClusterList())
+                () -> assertThat(flinkClustersPage.flinkClusterList)
                     .as("Flink clusters list should contain newly-created application")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(flinkClusterName)));
     }
 
     @Test
-    @Order(50)
+    @Order(5)
     public void testDeleteFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
@@ -103,7 +97,7 @@ public class Flink117OnRemoteClusterDeployTest {
                 () -> {
                     browser.navigate().refresh();
                     Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-                    assertThat(flinkClustersPage.flinkClusterList())
+                    assertThat(flinkClustersPage.flinkClusterList)
                         .noneMatch(it -> it.getText().contains(flinkClusterName));
                 });
     }

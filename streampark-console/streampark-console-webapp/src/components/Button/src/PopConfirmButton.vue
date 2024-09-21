@@ -38,6 +38,7 @@
 
       return () => {
         const bindValues = omit(unref(getBindValues), 'icon');
+        const filterClass = omit(unref(bindValues), 'class');
         const btnBind = omit(bindValues, 'title') as Recordable;
         if (btnBind.disabled) btnBind.color = '';
         const Button = h(BasicButton, btnBind, extendSlots(slots));
@@ -46,7 +47,7 @@
         if (!props.enable) {
           return Button;
         }
-        return h(Popconfirm, bindValues, { default: () => Button });
+        return h(Popconfirm, filterClass, { default: () => Button });
       };
     },
   });

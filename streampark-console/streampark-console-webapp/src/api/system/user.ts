@@ -28,6 +28,7 @@ enum Api {
   UserList = '/user/list',
   NoTokenUsers = '/user/getNoTokenUser',
   UserUpdate = '/user/update',
+  UserDelete = '/user/delete',
   UserAdd = '/user/post',
   ResetPassword = '/user/password/reset',
   Password = '/user/password',
@@ -60,6 +61,10 @@ export function getNoTokenUserList(data: Recordable): Promise<GetUserInfoModel> 
 
 export function updateUser(data: Recordable) {
   return defHttp.put({ url: Api.UserUpdate, data });
+}
+
+export function deleteUser(data) {
+  return defHttp.delete({ url: Api.UserDelete, data });
 }
 
 export function addUser(data: Recordable) {

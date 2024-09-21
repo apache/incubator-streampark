@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/flink-1.18-on-yarn/docker-compose.yaml")
 public class FlinkHomeTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String flinkName = "flink-1.18.1";
 
@@ -53,41 +47,41 @@ public class FlinkHomeTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ApacheFlinkPage.class)
             .goToTab(FlinkHomePage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.createFlinkHome(flinkName, flinkHome, flinkDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkHomePage.flinkHomeList())
+                () -> assertThat(flinkHomePage.flinkHomeList)
                     .as("Flink Home list should contain newly-created flink home")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(flinkName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testEditFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.editFlinkHome(flinkName, newFlinkHome);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(flinkHomePage.flinkHomeList())
+                () -> assertThat(flinkHomePage.flinkHomeList)
                     .as("Flink Home list should contain edited flink home")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newFlinkHome)));
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testDeleteFlinkHome() {
         final FlinkHomePage flinkHomePage = new FlinkHomePage(browser);
         flinkHomePage.deleteFlinkHome(newFlinkHome);
@@ -97,7 +91,7 @@ public class FlinkHomeTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(flinkHomePage.flinkHomeList())
+                    assertThat(flinkHomePage.flinkHomeList)
                         .noneMatch(it -> it.getText().contains(newFlinkHome));
                 });
     }

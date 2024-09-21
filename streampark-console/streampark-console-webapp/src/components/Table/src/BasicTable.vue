@@ -397,14 +397,11 @@
     }
 
     &-form-container {
-      padding: 16px;
-
       .ant-form {
-        padding: 12px 10px 6px;
-        margin-bottom: 16px;
+        padding: 20px 10px 0;
+        margin-bottom: 0;
         background-color: @component-background;
         border: none;
-        border-radius: 4px;
       }
     }
 
@@ -415,8 +412,6 @@
     .ant-table-wrapper {
       padding: 10px;
       background-color: @component-background;
-      border-radius: 4px !important;
-
       .ant-table-title {
         min-height: 40px;
         padding: 0 0 8px !important;

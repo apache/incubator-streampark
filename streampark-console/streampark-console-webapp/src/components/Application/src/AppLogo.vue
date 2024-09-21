@@ -61,10 +61,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 8px;
     padding-left: 7px;
     cursor: pointer;
     transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(192, 192, 192, 0.1);
 
     &.light {
       border-bottom: 1px solid @border-color-base;

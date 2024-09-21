@@ -49,14 +49,12 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'queueLabel',
-    label: t('setting.yarnQueue.yarnQueueLabelExpression'),
+    label: '',
     component: 'Input',
-    colProps: { span: 8 },
-  },
-  {
-    field: 'createTime',
-    label: t('common.createTime'),
-    component: 'RangePicker',
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('setting.yarnQueue.yarnQueueLabelExpression'),
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];

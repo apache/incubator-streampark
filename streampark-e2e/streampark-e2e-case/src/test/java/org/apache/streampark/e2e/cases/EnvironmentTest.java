@@ -42,13 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/environment/docker-compose.yaml")
 public class EnvironmentTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     // maven
     final String mavenFilePath = "/maven/file/path";
@@ -77,13 +71,13 @@ public class EnvironmentTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(EnvironmentPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     public void testCreateEnvironment() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -100,7 +94,7 @@ public class EnvironmentTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(environmentPage.settingList())
+                () -> assertThat(environmentPage.settingList)
                     .as("Setting list should contain newly-created setting")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(mavenFilePath))
@@ -110,7 +104,7 @@ public class EnvironmentTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     public void testCreateEmailSettingFailedWithAuth() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -131,18 +125,18 @@ public class EnvironmentTest {
             .untilAsserted(
                 () -> {
                     new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList())
+                    assertThat(environmentPage.errorMessageList)
                         .as("Connect failed error message should be displayed")
                         .extracting(WebElement::getText)
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
         emailSettingForm.cancel();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     public void testCreateEmailSettingSuccessful() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
 
@@ -156,18 +150,18 @@ public class EnvironmentTest {
                 .password(emailPassword)
                 .ok();
 
-        emailSettingForm.buttonOk().click();
+        emailSettingForm.buttonOk.click();
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(environmentPage.settingList())
+                () -> assertThat(environmentPage.settingList)
                     .as("Setting list should contain newly-created email setting")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editEmailAddress)));
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     public void testCreateDockerSettingFailed() {
         final EnvironmentPage environmentPage = new EnvironmentPage(browser);
         DockerSettingForm dockerSettingForm =
@@ -187,13 +181,13 @@ public class EnvironmentTest {
             .untilAsserted(
                 () -> {
                     new WebDriverWait(browser, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION);
-                    assertThat(environmentPage.errorMessageList())
+                    assertThat(environmentPage.errorMessageList)
                         .as("Failed to validate docker registry error message should be displayed")
                         .extracting(WebElement::getText)
                         .anyMatch(it -> it.contains(expectedErrorMessage));
                 });
 
-        WebElementClick(browser, environmentPage.errorMessageConfirmButton());
+        WebElementClick(browser, environmentPage.errorMessageConfirmButton);
         dockerSettingForm.cancel();
     }
 }

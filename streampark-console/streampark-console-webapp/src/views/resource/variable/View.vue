@@ -15,21 +15,27 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button id="e2e-variable-create-btn" type="primary" @click="handleCreate" v-auth="'variable:add'">
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+  <PageWrapper contentFullHeight fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="4" :offset="14" class="text-right">
+          <a-button
+            id="e2e-var-create-btn"
+            type="primary"
+            @click="handleCreate"
+            v-auth="'variable:add'"
+          >
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
-      <template #resetBefore> 1111 </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <TableAction
             :actions="[
               {
-                class: 'e2e-variable-edit-btn',
+                class: 'e2e-var-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'variable:update',
                 tooltip: t('flink.variable.modifyVariable'),
@@ -48,14 +54,14 @@
                   router.push('/resource/variable/depend_apps?id=' + record.variableCode),
               },
               {
-                class: 'e2e-variable-delete-btn',
+                class: 'e2e-var-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('flink.variable.deleteVariable'),
                 auth: 'variable:delete',
                 popConfirm: {
                   okButtonProps: {
-                    class: 'e2e-variable-delete-confirm',
+                    class: 'e2e-var-delete-confirm',
                   },
                   title: t('flink.variable.deletePopConfirm'),
                   confirm: handleDelete.bind(null, record),
@@ -66,41 +72,43 @@
         </template>
       </template>
     </BasicTable>
-    <VariableDrawer @register="registerDrawer" @success="handleSuccess" />
+    <VariableModal @register="registerModal" @success="handleSuccess" />
     <VariableInfo @register="registerInfo" />
-  </div>
+  </PageWrapper>
 </template>
-<script lang="ts">
-  export default defineComponent({
-    name: 'Variable',
-  });
-</script>
 
 <script lang="ts" setup>
-  import { defineComponent } from 'vue';
   import { BasicTable, useTable, TableAction, SorterResult } from '/@/components/Table';
-  import VariableDrawer from './components/VariableDrawer.vue';
+  import VariableModal from './components/VariableModal.vue';
   import VariableInfo from './components/VariableInfo.vue';
-  import { useDrawer } from '/@/components/Drawer';
   import { columns, searchFormSchema } from './variable.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { Col } from 'ant-design-vue';
   import { fetchVariableDelete, fetchVariableList } from '/@/api/resource/variable';
   import Icon from '/@/components/Icon';
   import { useRouter } from 'vue-router';
+  import { PageWrapper } from '/@/components/Page';
+  import { useModal } from '/@/components/Modal';
 
+  defineOptions({
+    name: 'Variable',
+  });
   const router = useRouter();
-  const [registerDrawer, { openDrawer }] = useDrawer();
-  const [registerInfo, { openDrawer: openInfoDraw }] = useDrawer();
+  const [registerModal, { openModal }] = useModal();
+  const [registerInfo, { openModal: openInfoModal }] = useModal();
   const { createMessage } = useMessage();
   const { t } = useI18n();
   const [registerTable, { reload }] = useTable({
-    title: t('flink.variable.table.title'),
     api: fetchVariableList,
     columns,
     formConfig: {
-      baseColProps: { style: { paddingRight: '30px' } },
       schemas: searchFormSchema,
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
     },
     sortFn: (sortInfo: SorterResult) => {
       const { field, order } = sortInfo;
@@ -118,7 +126,7 @@
     rowKey: 'id',
     pagination: true,
     useSearchForm: true,
-    showTableSetting: true,
+    showTableSetting: false,
     showIndexColumn: false,
     canResize: false,
     actionColumn: {
@@ -129,19 +137,19 @@
   });
 
   function handleCreate() {
-    openDrawer(true, {
+    openModal(true, {
       isUpdate: false,
     });
   }
 
   function handleEdit(record: Recordable) {
-    openDrawer(true, {
+    openModal(true, {
       record,
       isUpdate: true,
     });
   }
   function handleView(record: Recordable) {
-    openInfoDraw(true, record);
+    openInfoModal(true, record);
   }
   /* Delete the organization */
   async function handleDelete(record: Recordable) {

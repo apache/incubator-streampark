@@ -15,18 +15,20 @@
   limitations under the License.
 -->
 <template>
-  <div>
-    <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button
-          id="e2e-role-create-btn"
-          type="primary"
-          @click="handleCreate"
-          v-auth="'role:add'"
-        >
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="5" :offset="13" class="text-right">
+          <a-button
+            id="e2e-role-create-btn"
+            type="primary"
+            @click="handleCreate"
+            v-auth="'role:add'"
+          >
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -72,12 +74,12 @@
       @success="handleSuccess"
     />
     <RoleInfo @register="registerInfo" />
-  </div>
+  </PageWrapper>
 </template>
 
 <script lang="ts">
   import { defineComponent } from 'vue';
-
+  import { Col } from 'ant-design-vue';
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
   import { getRoleListByPage } from '/@/api/base/system';
 
@@ -93,10 +95,11 @@
   import { RoleListRecord } from '/@/api/system/model/roleModel';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { PageWrapper } from '/@/components/Page';
 
   export default defineComponent({
     name: 'RoleManagement',
-    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon },
+    components: { BasicTable, RoleInfo, RoleDrawer, TableAction, Icon, PageWrapper, Col },
     setup() {
       const { t } = useI18n();
       const [registerDrawer, { openDrawer }] = useDrawer();
@@ -104,15 +107,17 @@
       const { createMessage } = useMessage();
       const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
-        title: t('system.role.tableTitle'),
         api: getRoleListByPage,
         columns,
         formConfig: {
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
-          fieldMapToTime: [['createTime', ['createTimeFrom', 'createTimeTo'], 'YYYY-MM-DD']],
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
-        showTableSetting: true,
+        showTableSetting: false,
         useSearchForm: true,
         showIndexColumn: false,
         canResize: false,

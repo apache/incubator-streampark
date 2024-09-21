@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class VariableManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String variableCode = "10000";
 
@@ -53,45 +47,45 @@ public class VariableManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(VariablesPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .as("Variable list should contain newly-created variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(variableCode)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         variablesPage.createVariable(variableCode, variableValue, description, isNotVisible);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.errorMessageList())
+                () -> assertThat(variablesPage.errorMessageList)
                     .as("Variable Code Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "The variable code already exists.")));
 
-        variablesPage.errorMessageConfirmButton().click();
-        variablesPage.createVariableForm().buttonCancel().click();
+        variablesPage.errorMessageConfirmButton.click();
+        variablesPage.createVariableForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
         String editVariableValue = "6379";
@@ -100,7 +94,7 @@ public class VariableManagementTest {
         variablesPage.editVariable(variableCode, editVariableValue, editDescription, isNotVisible);
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .as("Variable list should contain edited variable")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editVariableValue))
@@ -108,7 +102,7 @@ public class VariableManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteVariable() {
         final VariablesPage variablesPage = new VariablesPage(browser);
 
@@ -116,7 +110,7 @@ public class VariableManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(variablesPage.variableList())
+                () -> assertThat(variablesPage.variableList)
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(variableCode)));
     }

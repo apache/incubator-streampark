@@ -15,35 +15,34 @@
   limitations under the License.
 -->
 <template>
-  <BasicDrawer
-    :okButtonProps="{ 'class': 'e2e_var_pop_ok' }"
-    :cancelButtonProps="{ 'class': 'e2e_var_pop_cancel'}"
-    :okText="t('common.submitText')"
-    @register="registerDrawer"
-    showFooter
-    width="650"
-    @ok="handleSubmit"
-  >
+  <BasicModal :width="600" @register="registerModal" showFooter>
     <template #title>
-      <SvgIcon name="variable" />
+      <Icon icon="ant-design:code-outlined" />
       {{ getTitle }}
     </template>
-    <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
-  </BasicDrawer>
+    <div class="mt-3">
+      <BasicForm @register="registerForm" :schemas="getTeamFormSchema" />
+    </div>
+    <template #footer>
+      <div>
+        <a-button class="e2e-var-cancel-btn" @click="closeModal">
+          {{ t('common.cancelText') }}
+        </a-button>
+        <a-button class="e2e-var-submit-btn" type="primary" @click="handleSubmit()">
+          {{ t('common.submitText') }}
+        </a-button>
+      </div>
+    </template>
+  </BasicModal>
 </template>
-<script lang="ts">
-  export default {
-    name: 'TeamDrawer',
-  };
-</script>
 
 <script lang="ts" setup>
   import { ref, h, computed, unref, reactive } from 'vue';
   import { BasicForm, FormSchema, useForm } from '/@/components/Form';
-  import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { BasicModal, useModalInner } from '/@/components/Modal';
+  import { Icon } from '/@/components/Icon';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useFormValidate } from '/@/hooks/web/useFormValidate';
-  import SvgIcon from '/@/components/Icon/src/SvgIcon.vue';
   import {
     fetchAddVariable,
     fetchCheckVariableCode,
@@ -103,7 +102,11 @@
         field: 'variableCode',
         label: t('flink.variable.table.variableCode'),
         component: 'Input',
-        componentProps: { disabled: unref(isUpdate), onblur: handleVariableCodeBlur },
+        componentProps: {
+          placeholder: t('flink.variable.table.variableCode'),
+          disabled: unref(isUpdate),
+          onblur: handleVariableCodeBlur,
+        },
         itemProps: getItemProp.value,
         rules: unref(isUpdate) ? [] : [{ required: true }],
       },
@@ -112,17 +115,10 @@
         label: t('flink.variable.table.variableValue'),
         component: 'InputTextArea',
         componentProps: {
-          rows: 4,
+          rows: 2,
           placeholder: t('flink.variable.table.variableValuePlaceholder'),
         },
         rules: [{ required: true, message: t('flink.variable.table.variableValuePlaceholder') }],
-      },
-      {
-        field: 'description',
-        label: t('common.description'),
-        component: 'InputTextArea',
-        componentProps: { rows: 4 },
-        rules: [{ max: 100, message: t('flink.variable.form.descriptionMessage') }],
       },
       {
         field: 'desensitization',
@@ -134,7 +130,14 @@
         },
         defaultValue: false,
         afterItem: () =>
-          h('span', { class: 'tip-info' }, t('flink.variable.form.desensitizationDesc')),
+          h('span', { class: 'pop-tip' }, t('flink.variable.form.desensitizationDesc')),
+      },
+      {
+        field: 'description',
+        label: t('common.description'),
+        component: 'InputTextArea',
+        componentProps: { rows: 2 },
+        rules: [{ max: 100, message: t('flink.variable.form.descriptionMessage') }],
       },
     ];
   });
@@ -143,19 +146,18 @@
     name: 'VariableForm',
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
-    wrapperCol: { lg: { span: 16, offset: 0 }, sm: { span: 17, offset: 0 } },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
   });
 
-  const [registerDrawer, { setDrawerProps, changeLoading, closeDrawer }] = useDrawerInner(
+  const [registerModal, { setModalProps, changeLoading, closeModal }] = useModalInner(
     async (data: Recordable) => {
       try {
         variableId.value = null;
         resetFields();
         setValidateStatus('');
         setHelp('');
-        setDrawerProps({ confirmLoading: false });
+        setModalProps({ confirmLoading: false });
         isUpdate.value = !!data?.isUpdate;
         if (unref(isUpdate)) {
           // is desensitization variable
@@ -185,14 +187,14 @@
   async function handleSubmit() {
     try {
       const values = await validate();
-      setDrawerProps({ confirmLoading: true });
+      setModalProps({ confirmLoading: true });
       await (isUpdate.value
         ? fetchUpdateVariable({ id: variableId.value, ...values })
         : fetchAddVariable(values));
-      closeDrawer();
+      closeModal();
       emit('success', isUpdate.value);
     } finally {
-      setDrawerProps({ confirmLoading: false });
+      setModalProps({ confirmLoading: false });
     }
   }
 </script>

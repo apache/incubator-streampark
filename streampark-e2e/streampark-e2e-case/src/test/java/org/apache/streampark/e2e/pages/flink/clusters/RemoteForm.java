@@ -27,15 +27,14 @@ import org.openqa.selenium.support.FindBy;
 @Getter
 public class RemoteForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_address")
-    private WebElement inputJobManagerURL;
+    public WebElement inputJobManagerURL;
 
     public RemoteForm(ClusterDetailForm clusterDetailForm) {
         super(clusterDetailForm);
-
-        this.driver = clusterDetailForm.driver();
+        this.driver = clusterDetailForm.driver;
     }
 
     public RemoteForm jobManagerURL(String address) {
