@@ -19,21 +19,12 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
-import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.ProxyService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
-import org.apache.streampark.console.system.entity.Member;
-import org.apache.streampark.console.system.entity.User;
-import org.apache.streampark.console.system.service.MemberService;
-import org.apache.streampark.console.system.service.UserService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 
 import org.apache.commons.io.IOUtils;
@@ -74,19 +65,7 @@ import java.util.Enumeration;
 public class ProxyServiceImpl implements ProxyService {
 
     @Autowired
-    private ApplicationManageService applicationManageService;
-
-    @Autowired
     private FlinkClusterService flinkClusterService;
-
-    @Autowired
-    private MemberService memberService;
-
-    @Autowired
-    private ApplicationLogService logService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private FlinkK8sWatcher flinkK8sWatcher;
@@ -113,11 +92,9 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     @Override
-    public ResponseEntity<?> proxyFlink(HttpServletRequest request, Long appId) throws Exception {
+    public ResponseEntity<?> proxyFlink(HttpServletRequest request, Application app) throws Exception {
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
-        Application app = applicationManageService.getApp(appId);
-        checkProxyApp(app);
         String url = null;
         switch (app.getFlinkExecutionMode()) {
             case YARN_PER_JOB:
@@ -125,7 +102,7 @@ public class ProxyServiceImpl implements ProxyService {
             case YARN_SESSION:
                 String yarnURL = YarnUtils.getRMWebAppProxyURL();
                 url = yarnURL + "/proxy/" + app.getClusterId();
-                url += getRequestURL(request, "/proxy/flink/" + appId);
+                url += getRequestURL(request, "/proxy/flink/" + app.getId());
                 return proxyYarnRequest(request, url);
             case REMOTE:
                 FlinkCluster cluster = flinkClusterService.getById(app.getFlinkClusterId());
@@ -135,6 +112,9 @@ public class ProxyServiceImpl implements ProxyService {
             case KUBERNETES_NATIVE_SESSION:
                 url = flinkK8sWatcher.getRemoteRestUrl(k8sWatcherWrapper.toTrackId(app));
                 break;
+            default:
+                throw new UnsupportedOperationException(
+                    "unsupported executionMode ".concat(app.getFlinkExecutionMode().getName()));
         }
 
         if (url == null) {
@@ -143,39 +123,29 @@ public class ProxyServiceImpl implements ProxyService {
             return builder.build();
         }
 
-        url += getRequestURL(request, "/proxy/flink/" + appId);
+        url += getRequestURL(request, "/proxy/flink/" + app.getId());
         return proxyRequest(request, url);
     }
 
     @Override
-    public ResponseEntity<?> proxyYarn(HttpServletRequest request, Long logId) throws Exception {
+    public ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
-        ApplicationLog log = logService.getById(logId);
-        if (log == null) {
-            return builder.body("The application log not found.");
-        }
-        checkProxyAppLog(log);
         String yarnId = log.getYarnAppId();
         String yarnURL = YarnUtils.getRMWebAppProxyURL();
         String url = yarnURL + "/proxy/" + yarnId + "/";
-        url += getRequestURL(request, "/proxy/yarn/" + logId);
+        url += getRequestURL(request, "/proxy/yarn/" + log.getId());
         return proxyYarnRequest(request, url);
     }
 
     @Override
-    public ResponseEntity<?> proxyHistory(HttpServletRequest request, Long logId) throws Exception {
+    public ResponseEntity<?> proxyHistory(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
-        ApplicationLog log = logService.getById(logId);
-        if (log == null) {
-            return builder.body("The application log not found.");
-        }
-        checkProxyAppLog(log);
         String url = log.getJobManagerUrl();
         if (StringUtils.isBlank(url)) {
             return builder.body("The jobManager url is null.");
         }
-        url += getRequestURL(request, "/proxy/history/" + logId);
+        url += getRequestURL(request, "/proxy/history/" + log.getId());
         return proxyRequest(request, url);
     }
 
@@ -197,28 +167,14 @@ public class ProxyServiceImpl implements ProxyService {
             case YARN_APPLICATION:
             case YARN_SESSION:
                 return proxyYarnRequest(request, url);
+            case REMOTE:
+            case KUBERNETES_NATIVE_APPLICATION:
+            case KUBERNETES_NATIVE_SESSION:
+                return proxyRequest(request, url);
+            default:
+                throw new UnsupportedOperationException(
+                    "unsupported executionMode ".concat(cluster.getFlinkExecutionModeEnum().getName()));
         }
-
-        return proxyRequest(request, url);
-    }
-
-    public void checkProxyApp(Application app) {
-        ApiAlertException.throwIfNull(app, "Invalid operation, application is invalid.");
-
-        User user = ServiceHelper.getLoginUser();
-        ApiAlertException.throwIfNull(user, "Permission denied, please login first.");
-
-        if (user.getUserType() != UserTypeEnum.ADMIN) {
-            Member member = memberService.getByTeamIdUserName(app.getTeamId(), user.getUsername());
-            ApiAlertException.throwIfNull(member,
-                "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
-        }
-    }
-
-    public void checkProxyAppLog(ApplicationLog log) {
-        ApiAlertException.throwIfNull(log, "Invalid operation, The application log not found.");
-        Application app = applicationManageService.getById(log.getAppId());
-        checkProxyApp(app);
     }
 
     private HttpEntity<?> getRequestEntity(HttpServletRequest request, String url) throws Exception {

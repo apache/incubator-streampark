@@ -29,15 +29,12 @@ import org.apache.streampark.console.system.service.UserService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Service
 public class ServiceHelper {
 
     private static String flinkSqlClientJar = null;

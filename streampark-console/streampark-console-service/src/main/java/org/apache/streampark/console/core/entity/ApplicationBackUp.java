@@ -47,6 +47,8 @@ public class ApplicationBackUp {
 
     private transient boolean backup;
 
+    private transient String teamId;
+
     public ApplicationBackUp() {
     }
 
