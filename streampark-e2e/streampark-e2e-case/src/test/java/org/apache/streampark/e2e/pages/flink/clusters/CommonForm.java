@@ -34,27 +34,27 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public abstract class CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_clusterName")
-    private WebElement inputFlinkClusterName;
+    public WebElement inputFlinkClusterName;
 
     @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonFlinkVersionDropdown;
+    public WebElement buttonFlinkVersionDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=versionId]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    private List<WebElement> selectFlinkVersion;
+    public List<WebElement> selectFlinkVersion;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
-    private WebElement buttonSubmit;
+    public WebElement buttonSubmit;
 
     private final ClusterDetailForm parent;
 
     CommonForm(ClusterDetailForm clusterDetailForm) {
-        final WebDriver driver = clusterDetailForm.driver();
+        final WebDriver driver = clusterDetailForm.driver;
 
         PageFactory.initElements(driver, this);
 
@@ -81,7 +81,6 @@ public abstract class CommonForm {
 
     public ClusterDetailForm submit() {
         buttonSubmit.click();
-
-        return parent();
+        return parent;
     }
 }

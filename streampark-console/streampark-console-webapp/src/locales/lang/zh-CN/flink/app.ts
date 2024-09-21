@@ -222,7 +222,7 @@ export default {
     availableTaskSlots: '可用的任务槽数',
     taskSlots: '任务槽数',
     taskManagers: 'Task Managers',
-    runningJobs: '运行的作业',
+    runningJobs: '运行中的作业',
     totalTask: '总任务',
     runningTask: '运行的任务',
     jobManagerMemory: 'JobManager内存',

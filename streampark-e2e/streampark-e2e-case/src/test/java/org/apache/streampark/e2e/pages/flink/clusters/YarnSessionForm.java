@@ -28,10 +28,10 @@ import java.util.List;
 @Getter
 public class YarnSessionForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(xpath = "//div[contains(@codefield, 'resolveOrder')]//div[contains(@class, 'ant-select-selector')]")
-    private WebElement buttonResolveOrderDropdown;
+    public WebElement buttonResolveOrderDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=resolveOrder]"),
@@ -41,17 +41,16 @@ public class YarnSessionForm extends CommonForm {
 
     public YarnSessionForm(ClusterDetailForm clusterDetailForm) {
         super(clusterDetailForm);
-
-        this.driver = clusterDetailForm.driver();
+        this.driver = clusterDetailForm.driver;
     }
 
     public YarnSessionForm resolveOrder(ResolveOrder resolveOrder) {
         buttonResolveOrderDropdown.click();
         selectResolveOrder.stream()
-            .filter(e -> e.getText().equalsIgnoreCase(resolveOrder.desc()))
+            .filter(e -> e.getText().equalsIgnoreCase(resolveOrder.desc))
             .findFirst()
             .orElseThrow(
-                () -> new IllegalArgumentException(String.format("Resolve Order not found: %s", resolveOrder.desc())))
+                () -> new IllegalArgumentException(String.format("Resolve Order not found: %s", resolveOrder.desc)))
             .click();
 
         return this;

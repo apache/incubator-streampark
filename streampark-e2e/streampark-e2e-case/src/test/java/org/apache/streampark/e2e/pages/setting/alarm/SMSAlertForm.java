@@ -23,11 +23,10 @@ import org.openqa.selenium.WebDriver;
 @Getter
 public class SMSAlertForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     public SMSAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
         super(alertTypeDetailForm);
-
-        this.driver = alertTypeDetailForm.driver();
+        this.driver = alertTypeDetailForm.driver;
     }
 }

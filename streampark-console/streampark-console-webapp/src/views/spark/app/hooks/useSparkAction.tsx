@@ -290,11 +290,11 @@ export const useSparkAction = (optionApps: Recordable) => {
         const code = parseInt(resp);
         if (code === 0) {
           try {
-            const { data } = await fetchCopySparkApp({
+            const res = await fetchCopySparkApp({
               id: item.id,
               appName: copyAppName,
             });
-            const status = data.status || 'error';
+            const status = res.status || 'error';
             if (status === 'success') {
               Swal.fire({
                 icon: 'success',

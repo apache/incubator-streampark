@@ -29,48 +29,48 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class MavenSettingForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
     @FindBys({
             @FindBy(xpath = "//h4[text()='Maven Settings File Path']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn-primary')]")
     })
-    private WebElement btnSettingsFilePath;
+    public WebElement btnSettingsFilePath;
 
     @FindBys({
             @FindBy(xpath = "//h4[text()='Maven Central Repository']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn-primary')]")
     })
-    private WebElement btnCentralRepository;
+    public WebElement btnCentralRepository;
 
     @FindBys({
             @FindBy(xpath = "//h4[text()='Maven Central Repository Auth User']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn-primary')]")
     })
     // Maven central repository authentication username.
-    private WebElement btnAuthUser;
+    public WebElement btnAuthUser;
 
     @FindBys({
             @FindBy(xpath = "//h4[text()='Maven Central Repository Auth Password']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn-primary')]")
     })
     // Maven central repository authentication password.
-    private WebElement btnAuthPassword;
+    public WebElement btnAuthPassword;
 
     @FindBy(className = "streampark_maven_settings")
-    private WebElement inputSettingsFilePath;
+    public WebElement inputSettingsFilePath;
 
     @FindBy(className = "streampark_maven_central_repository")
-    private WebElement inputCentralRepository;
+    public WebElement inputCentralRepository;
 
     @FindBy(className = "streampark_maven_auth_user")
-    private WebElement inputAuthUser;
+    public WebElement inputAuthUser;
 
     @FindBy(className = "streampark_maven_auth_password")
-    private WebElement inputAuthPassword;
+    public WebElement inputAuthPassword;
 
     MavenSettingForm(EnvironmentDetailForm environmentDetailForm) {
         super(environmentDetailForm);
-        this.driver = environmentDetailForm.driver();
+        this.driver = environmentDetailForm.driver;
     }
 
     public MavenSettingForm filePath(String filePath) {

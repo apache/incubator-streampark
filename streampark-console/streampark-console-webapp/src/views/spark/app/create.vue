@@ -58,12 +58,12 @@
   /* custom mode */
   async function handleCustomJobMode(values: Recordable) {
     const params = {
-      jobType: JobTypeEnum.SQL,
+      jobType: JobTypeEnum.JAR,
       executionMode: values.executionMode,
       appType: AppTypeEnum.APACHE_SPARK,
       versionId: values.versionId,
       sparkSql: null,
-      jar: values.teamResource,
+      jar: values.jar,
       mainClass: values.mainClass,
       appName: values.appName,
       tags: values.tags,
@@ -79,12 +79,6 @@
   }
   /* spark sql mode */
   async function handleSQLMode(values: Recordable) {
-    let config = values.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
-      config = encryptByBase64(config);
-    } else {
-      config = null;
-    }
     handleCreateAction({
       jobType: JobTypeEnum.SQL,
       executionMode: values.executionMode,
@@ -97,7 +91,7 @@
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
-      config,
+      config: values.config,
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
@@ -106,6 +100,12 @@
   }
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
+    let config = formValue.configOverride;
+    if (config != null && config !== undefined && config.trim() != '') {
+      formValue.config = encryptByBase64(config);
+    } else {
+      formValue.config = null;
+    }
     if (formValue.jobType == JobTypeEnum.SQL) {
       if (formValue.sparkSql == null || formValue.sparkSql.trim() === '') {
         createMessage.warning(t('spark.app.addAppTips.sparkSqlIsRequiredMessage'));

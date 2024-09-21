@@ -86,7 +86,7 @@ export function checkResource(data: ResourceParam): Promise<AxiosResponse<Result
 }
 
 export function fetchUpload(params) {
-  return defHttp.post<string>({
+  return defHttp.post({
     url: RESOURCE_API.UPLOAD,
     params,
     headers: {

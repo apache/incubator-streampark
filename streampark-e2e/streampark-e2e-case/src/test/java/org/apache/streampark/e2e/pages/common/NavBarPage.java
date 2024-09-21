@@ -34,19 +34,19 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Getter
 public class NavBarPage {
 
-    protected final RemoteWebDriver driver;
+    public final RemoteWebDriver driver;
 
     @FindBy(className = "menu-item-flink")
-    private WebElement apacheFlinkTab;
+    public WebElement apacheFlinkTab;
 
     @FindBy(className = "menu-item-resource")
-    private WebElement resourcesTab;
+    public WebElement resourcesTab;
 
     @FindBy(className = "menu-item-setting")
-    private WebElement settingsTab;
+    public WebElement settingsTab;
 
     @FindBy(className = "menu-item-system")
-    private WebElement systemTab;
+    public WebElement systemTab;
 
     public NavBarPage(RemoteWebDriver driver) {
         this.driver = driver;

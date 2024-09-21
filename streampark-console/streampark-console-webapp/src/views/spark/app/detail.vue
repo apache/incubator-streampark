@@ -15,25 +15,25 @@
   limitations under the License.
 -->
 <script setup lang="ts">
-  import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
+  import { onUnmounted, reactive, unref, ref, onMounted, computed } from 'vue';
   import { AppStateEnum, ExecModeEnum } from '/@/enums/sparkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { fetchAppExternalLink } from '/@/api/setting/externalLink';
+  // import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
-  import { useModal } from '/@/components/Modal';
+  // import { useModal } from '/@/components/Modal';
   import { PageWrapper } from '/@/components/Page';
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { useIntervalFn } from '@vueuse/core';
-  import { Tooltip, Divider, Space } from 'ant-design-vue';
+  import { Divider, Space } from 'ant-design-vue';
   import { handleView } from './utils';
-  import { Button } from '/@/components/Button';
+  // import { Button } from '/@/components/Button';
   import { getDescSchema } from './data/detail.data';
   import { fetchSparkConfList } from '/@/api/spark/conf';
   import Mergely from './components/Mergely.vue';
   import DetailTab from './components/DetailTab.vue';
-  import RequestModal from '/@/views/flink/app/components/RequestModal';
+  // import RequestModal from '/@/views/flink/app/components/RequestModal';
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
@@ -69,47 +69,47 @@
   const [registerDescription] = useDescription({
     schema: [
       ...(getDescSchema() as any),
-      {
-        field: 'resetApi',
-        span: 2,
-        label: h('div', null, [
-          t('spark.app.detail.resetApi'),
-          h(Tooltip, { title: t('spark.app.detail.resetApiToolTip'), placement: 'top' }, () =>
-            h(Icon, { icon: 'ant-design:question-circle-outlined', class: 'pl-5px', color: 'red' }),
-          ),
-        ]),
-        render: () => [
-          h(
-            Button,
-            {
-              type: 'primary',
-              size: 'small',
-              class: 'mx-3px px-5px',
-              onClick: () =>
-                openApiModal(true, {
-                  name: 'flinkStart',
-                  app,
-                }),
-            },
-            () => [t('spark.app.detail.copyStartcURL')],
-          ),
-          h(
-            Button,
-            {
-              type: 'primary',
-              size: 'small',
-              class: 'mx-3px px-5px',
-              onClick: () => {
-                openApiModal(true, {
-                  name: 'flinkCancel',
-                  app,
-                });
-              },
-            },
-            () => [t('spark.app.detail.copyCancelcURL')],
-          ),
-        ],
-      },
+      // {
+      //   field: 'resetApi',
+      //   span: 2,
+      //   label: h('div', null, [
+      //     t('spark.app.detail.resetApi'),
+      //     h(Tooltip, { title: t('spark.app.detail.resetApiToolTip'), placement: 'top' }, () =>
+      //       h(Icon, { icon: 'ant-design:question-circle-outlined', class: 'pl-5px', color: 'red' }),
+      //     ),
+      //   ]),
+      //   render: () => [
+      //     h(
+      //       Button,
+      //       {
+      //         type: 'primary',
+      //         size: 'small',
+      //         class: 'mx-3px px-5px',
+      //         onClick: () =>
+      //           openApiModal(true, {
+      //             name: 'flinkStart',
+      //             app,
+      //           }),
+      //       },
+      //       () => [t('spark.app.detail.copyStartcURL')],
+      //     ),
+      //     h(
+      //       Button,
+      //       {
+      //         type: 'primary',
+      //         size: 'small',
+      //         class: 'mx-3px px-5px',
+      //         onClick: () => {
+      //           openApiModal(true, {
+      //             name: 'flinkCancel',
+      //             app,
+      //           });
+      //         },
+      //       },
+      //       () => [t('spark.app.detail.copyCancelcURL')],
+      //     ),
+      //   ],
+      // },
     ],
     data: app,
     layout: 'vertical',
@@ -117,7 +117,7 @@
   });
 
   const [registerConfDrawer] = useDrawer();
-  const [registerOpenApi, { openModal: openApiModal }] = useModal();
+  // const [registerOpenApi, { openModal: openApiModal }] = useModal();
 
   /* Flink Web UI */
   function handleFlinkView() {
@@ -171,20 +171,20 @@
     yarn.value = await fetchSparkYarn();
   }
 
-  async function getExternalLinks() {
-    const { data: links } = await fetchAppExternalLink({ appId: route.query.appId as string });
-    externalLinks.value = links.data;
-  }
+  // async function getExternalLinks() {
+  //   const { data: links } = await fetchAppExternalLink({ appId: route.query.appId as string });
+  //   externalLinks.value = links.data;
+  // }
 
   onMounted(() => {
-    getExternalLinks();
+    // getExternalLinks();
   });
 
   onUnmounted(() => {
     pause();
   });
 
-  const appNotRunning = computed(() => app.state !== AppStateEnum.RUNNIN || yarn.value === null);
+  const appNotRunning = computed(() => app.state !== AppStateEnum.RUNNING || yarn.value === null);
 </script>
 <template>
   <PageWrapper content-full-height content-background contentClass="p-24px">
@@ -218,7 +218,7 @@
     <Divider class="mt-20px -mb-17px" />
     <DetailTab :app="app" :tabConf="detailTabs" />
     <Mergely @register="registerConfDrawer" :readOnly="true" />
-    <RequestModal @register="registerOpenApi" />
+    <!-- <RequestModal @register="registerOpenApi" /> -->
   </PageWrapper>
 </template>
 <style lang="less">

@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class TeamManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String newTeamName = "test_new_team";
 
@@ -49,44 +43,44 @@ public class TeamManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(TeamManagementPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(teamManagementPage.teamList())
+                () -> assertThat(teamManagementPage.teamList)
                     .as("Team list should contain newly-created team")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newTeamName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         teamManagementPage.createTeam(newTeamName, newTeamDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(teamManagementPage.errorMessageList())
+                () -> assertThat(teamManagementPage.errorMessageList)
                     .as("Team Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("Create team failed.")));
 
-        teamManagementPage.errorMessageConfirmButton().click();
-        teamManagementPage.createTeamForm().buttonCancel().click();
+        teamManagementPage.errorMessageConfirmButton.click();
+        teamManagementPage.createTeamForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
         String editDescription = "edit_" + newTeamDescription;
@@ -95,14 +89,14 @@ public class TeamManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(teamManagementPage.teamList())
+                () -> assertThat(teamManagementPage.teamList)
                     .as("Team list should contain edited team")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editDescription)));
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteTeam() {
         final TeamManagementPage teamManagementPage = new TeamManagementPage(browser);
 
@@ -113,7 +107,7 @@ public class TeamManagementTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(teamManagementPage.teamList())
+                    assertThat(teamManagementPage.teamList)
                         .noneMatch(it -> it.getText().contains(newTeamName));
                 });
     }

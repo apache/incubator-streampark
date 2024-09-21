@@ -584,17 +584,6 @@
                 <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
-
-            <dependency>
-                <groupId>org.apache.streampark</groupId>
-                <artifactId>streampark-registry-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.streampark</groupId>
-                <artifactId>streampark-registry-all</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
 
     </dependencyManagement>

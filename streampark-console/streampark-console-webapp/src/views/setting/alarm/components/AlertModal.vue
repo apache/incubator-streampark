@@ -43,12 +43,10 @@
   const { Swal } = useMessage();
   const userStore = useUserStore();
   const [registerForm, { validateFields, resetFields, setFieldsValue }] = useForm({
-    labelWidth: 160,
     colon: true,
     showActionButtonGroup: false,
-    baseColProps: { span: 24 },
-    labelCol: { lg: 5, sm: 7 },
-    wrapperCol: { lg: 16, sm: 4 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'alertName',
@@ -58,7 +56,7 @@
           allowClear: true,
           placeholder: t('setting.alarm.alertNamePlaceHolder'),
         },
-        afterItem: () => h('span', { class: 'tip-info' }, t('setting.alarm.alertNameTips')),
+        afterItem: () => h('span', { class: 'pop-tip' }, t('setting.alarm.alertNameTips')),
         dynamicRules: () => {
           return [
             {
@@ -193,6 +191,9 @@
 
 <template>
   <BasicModal
+    :okButtonProps="{ class: 'e2e-alert-submit-btn' }"
+    :cancelButtonProps="{ class: 'e2e-alert-cancel-btn' }"
+    :width="650"
     :ok-text="t('common.submitText')"
     @register="registerModal"
     v-bind="$attrs"
@@ -202,109 +203,111 @@
       <SvgIcon name="alarm" size="25" />
       {{ t('setting.alarm.alertSetting') }}
     </template>
-    <BasicForm @register="registerForm" class="!mt-15px">
-      <template #type="{ model, field }">
-        <Select
-          v-model:value="model[field]"
-          :placeholder="t('setting.alarm.faultAlertType')"
-          allowClear
-          mode="multiple"
-          @change="(value: string[]) => (alertType = value)"
-        >
-          <SelectOption
-            v-for="(v, k) in alertTypes"
-            :key="`alertType_${k}`"
-            :disabled="v.disabled"
-            :value="k"
+    <div class="mt-3">
+      <BasicForm @register="registerForm" class="!mt-15px">
+        <template #type="{ model, field }">
+          <Select
+            v-model:value="model[field]"
+            :placeholder="t('setting.alarm.faultAlertType')"
+            allowClear
+            mode="multiple"
+            @change="(value: string[]) => (alertType = value)"
           >
-            <SvgIcon :name="v.icon" />
-            {{ v.name }}
-          </SelectOption>
-        </Select>
-      </template>
-      <template #alertEmail="{ model, field }">
-        <!-- Alert Email -->
-        <template v-if="(alertType || []).includes('1')">
+            <SelectOption
+              v-for="(v, k) in alertTypes"
+              :key="`alertType_${k}`"
+              :disabled="v.disabled"
+              :value="k"
+            >
+              <SvgIcon :name="v.icon" />
+              {{ v.name }}
+            </SelectOption>
+          </Select>
+        </template>
+        <template #alertEmail="{ model, field }">
+          <!-- Alert Email -->
+          <template v-if="(alertType || []).includes('1')">
+            <Divider>
+              <SvgIcon name="mail" size="20" />
+              {{ t('setting.alarm.email') }}
+            </Divider>
+            <FormItem
+              :label="t('setting.alarm.alertEmail')"
+              :rules="[
+                {
+                  required: true,
+                  message: t('setting.alarm.alertEmailAddressIsRequired'),
+                  trigger: 'blur',
+                },
+                {
+                  pattern:
+                    /^([a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})(,[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})*?$/,
+                  message: t('setting.alarm.alertEmailFormatIsInvalid'),
+                  trigger: 'blur',
+                },
+              ]"
+              name="alertEmail"
+            >
+              <Input
+                v-model:value="model[field]"
+                :placeholder="t('setting.alarm.alertEmailPlaceholder')"
+              />
+            </FormItem>
+          </template>
+        </template>
+
+        <template #alertDingURL="{ model, field }" v-if="(alertType || []).includes('2')">
           <Divider>
-            <SvgIcon name="mail" size="20" />
-            {{ t('setting.alarm.email') }}
+            <SvgIcon name="dingtalk" size="20" />
+            {{ t('setting.alarm.dingTalk') }}
           </Divider>
           <FormItem
-            :label="t('setting.alarm.alertEmail')"
+            :label="t('setting.alarm.dingTalkUrl')"
+            name="alertDingURL"
             :rules="[
               {
-                required: true,
-                message: t('setting.alarm.alertEmailAddressIsRequired'),
-                trigger: 'blur',
-              },
-              {
                 pattern:
-                  /^([a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})(,[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6})*?$/,
-                message: t('setting.alarm.alertEmailFormatIsInvalid'),
+                  /^((https?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?/,
+                message: t('setting.alarm.dingTalkUrlFormatIsInvalid'),
                 trigger: 'blur',
               },
             ]"
-            name="alertEmail"
           >
             <Input
               v-model:value="model[field]"
-              :placeholder="t('setting.alarm.alertEmailPlaceholder')"
+              :placeholder="t('setting.alarm.dingTalkPlaceholder')"
+              allowClear
             />
           </FormItem>
         </template>
-      </template>
 
-      <template #alertDingURL="{ model, field }" v-if="(alertType || []).includes('2')">
-        <Divider>
-          <SvgIcon name="dingtalk" size="20" />
-          {{ t('setting.alarm.dingTalk') }}
-        </Divider>
-        <FormItem
-          :label="t('setting.alarm.dingTalkUrl')"
-          name="alertDingURL"
-          :rules="[
-            {
-              pattern:
-                /^((https?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?/,
-              message: t('setting.alarm.dingTalkUrlFormatIsInvalid'),
-              trigger: 'blur',
-            },
-          ]"
-        >
-          <Input
-            v-model:value="model[field]"
-            :placeholder="t('setting.alarm.dingTalkPlaceholder')"
-            allowClear
-          />
-        </FormItem>
-      </template>
+        <!-- WeChat -->
+        <template #weToken="{ model, field, schema }" v-if="(alertType || []).includes('4')">
+          <Divider> <SvgIcon name="wecom" size="20" /> {{ t('setting.alarm.weChat') }} </Divider>
+          <FormItem :label="schema.label" :name="field" :rules="schema.rules">
+            <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
+          </FormItem>
+        </template>
 
-      <!-- WeChat -->
-      <template #weToken="{ model, field, schema }" v-if="(alertType || []).includes('4')">
-        <Divider> <SvgIcon name="wecom" size="20" /> {{ t('setting.alarm.weChat') }} </Divider>
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <InputTextArea v-model:value="model[field]" v-bind="schema.componentProps" />
-        </FormItem>
-      </template>
+        <template #alertSms="{ model, field, schema }" v-if="(alertType || []).includes('8')">
+          <Divider> <SvgIcon name="message" size="20" /> {{ t('setting.alarm.sms') }} </Divider>
+          <FormItem :label="schema.label" :name="field" :rules="schema.rules">
+            <Input v-model:value="model[field]" v-bind="schema.componentProps" />
+          </FormItem>
+        </template>
 
-      <template #alertSms="{ model, field, schema }" v-if="(alertType || []).includes('8')">
-        <Divider> <SvgIcon name="message" size="20" /> {{ t('setting.alarm.sms') }} </Divider>
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Input v-model:value="model[field]" v-bind="schema.componentProps" />
-        </FormItem>
-      </template>
-
-      <!-- lark -->
-      <template #larkToken="{ model, field, schema }" v-if="(alertType || []).includes('16')">
-        <Divider> <SvgIcon name="lark" size="20" /> {{ t('setting.alarm.lark') }} </Divider>
-        <FormItem :label="schema.label" :name="field" :rules="schema.rules">
-          <Input
-            v-model:value="model[field]"
-            :placeholder="t('setting.alarm.larkTokenPlaceholder')"
-            allow-clear
-          />
-        </FormItem>
-      </template>
-    </BasicForm>
+        <!-- lark -->
+        <template #larkToken="{ model, field, schema }" v-if="(alertType || []).includes('16')">
+          <Divider> <SvgIcon name="lark" size="20" /> {{ t('setting.alarm.lark') }} </Divider>
+          <FormItem :label="schema.label" :name="field" :rules="schema.rules">
+            <Input
+              v-model:value="model[field]"
+              :placeholder="t('setting.alarm.larkTokenPlaceholder')"
+              allow-clear
+            />
+          </FormItem>
+        </template>
+      </BasicForm>
+    </div>
   </BasicModal>
 </template>

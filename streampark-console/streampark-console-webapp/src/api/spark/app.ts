@@ -41,7 +41,7 @@ export function fetchCreateSparkApp(data: SparkApplication) {
  * @param params get parameters
  */
 export function fetchCopySparkApp(data: SparkApplication) {
-  return defHttp.post({ url: `${apiPrefix}/copy`, data });
+  return defHttp.post({ url: `${apiPrefix}/copy`, data }, { isTransformResponse: false });
 }
 /**
  * update spark application information

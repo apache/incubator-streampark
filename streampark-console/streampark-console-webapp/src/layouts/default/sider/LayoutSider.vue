@@ -24,7 +24,7 @@
     <LayoutMenu :theme="getMenuTheme" :menuMode="getMode" :splitType="getSplitType" />
     <DragBar ref="dragBarRef" />
     <div
-      class="flex justify-between items-center border-t-1 border-[#c0c0c01a] h-50px px-4"
+      class="flex justify-between items-center border-t-1 border-[#c0c0c01a] h-35px px-4"
       v-if="!getCollapsed"
     >
       <a @click="openWindow(SITE_URL)" class="text-gray-400 hover:text-white">

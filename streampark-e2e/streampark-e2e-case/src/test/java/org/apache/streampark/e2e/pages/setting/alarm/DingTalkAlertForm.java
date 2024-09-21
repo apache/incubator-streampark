@@ -27,30 +27,29 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class DingTalkAlertForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_alertDingURL")
-    private WebElement inputDingTalkURL;
+    public WebElement inputDingTalkURL;
 
     @FindBy(id = "form_item_dingtalkToken")
-    private WebElement inputDingTalkToken;
+    public WebElement inputDingTalkToken;
 
     @FindBy(id = "form_item_dingtalkSecretEnable")
-    private WebElement btnDingTalkSecret;
+    public WebElement btnDingTalkSecret;
 
     @FindBy(id = "form_item_dingtalkSecretToken")
-    private WebElement inputDingTalkSecretToken;
+    public WebElement inputDingTalkSecretToken;
 
     @FindBy(id = "form_item_alertDingUser")
-    private WebElement inputDingTalkReceiveUser;
+    public WebElement inputDingTalkReceiveUser;
 
     @FindBy(id = "form_item_dingtalkIsAtAll")
-    private WebElement btnDingTalkEffectToAllUsers;
+    public WebElement btnDingTalkEffectToAllUsers;
 
     public DingTalkAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
         super(alertTypeDetailForm);
-
-        this.driver = alertTypeDetailForm.driver();
+        this.driver = alertTypeDetailForm.driver;
     }
 
     public DingTalkAlertForm url(String url) {

@@ -40,13 +40,13 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebDriverWait
 public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab {
 
     @FindBy(xpath = "//span[contains(., 'Flink Cluster')]/..//button[contains(@class, 'ant-btn')]/span[contains(text(), 'Add New')]")
-    private WebElement buttonCreateFlinkCluster;
+    public WebElement buttonCreateFlinkCluster;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-spin-container')]")
-    private List<WebElement> flinkClusterList;
+    public List<WebElement> flinkClusterList;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'Yes')]")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
     public FlinkClustersPage(RemoteWebDriver driver) {
         super(driver);
@@ -67,7 +67,7 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
     public ClusterDetailForm editFlinkCluster(String flinkClusterName) {
         waitForPageLoading();
 
-        flinkClusterList().stream()
+        flinkClusterList.stream()
             .filter(it -> it.getText().contains(flinkClusterName))
             .flatMap(
                 it -> it
@@ -88,7 +88,7 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
     public FlinkClustersPage startFlinkCluster(String flinkClusterName) {
         waitForPageLoading();
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
-        flinkClusterList().stream()
+        flinkClusterList.stream()
             .filter(it -> it.getText().contains(flinkClusterName))
             .flatMap(
                 it -> it
@@ -108,7 +108,7 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
     public FlinkClustersPage stopFlinkCluster(String flinkClusterName) {
         waitForPageLoading();
 
-        flinkClusterList().stream()
+        flinkClusterList.stream()
             .filter(it -> it.getText().contains(flinkClusterName))
             .flatMap(
                 it -> it
@@ -128,7 +128,7 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
     public FlinkClustersPage deleteFlinkCluster(String flinkName) {
         waitForPageLoading();
 
-        flinkClusterList().stream()
+        flinkClusterList.stream()
             .filter(it -> it.getText().contains(flinkName))
             .flatMap(
                 it -> it

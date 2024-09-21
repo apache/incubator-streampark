@@ -22,10 +22,12 @@ export default {
   add: '添加',
   success: '成功',
   fail: '失败',
+  searchByUser: '根据用户名搜索',
+  searchByRole: '根据角色名称搜索',
   table: {
     title: '成员列表',
     userName: '用户名',
-    roleName: '角色',
+    roleName: '角色名称',
     createTime: '创建时间',
     modifyTime: '修改时间',
   },

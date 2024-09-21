@@ -466,7 +466,8 @@
 
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-registry-all</artifactId>
+            <artifactId>streampark-registry-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

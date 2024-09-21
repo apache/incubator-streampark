@@ -30,6 +30,7 @@ export default {
     exist: '角色名已存在',
     empty: '角色名不能为空',
   },
+  searchByRole: '根据角色名称搜索',
   roleInfo: '角色信息',
   tableTitle: '角色列表',
   modifyTime: '尚未修改',

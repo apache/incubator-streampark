@@ -40,9 +40,9 @@ import java.util.List;
 public final class FlinkSQLEditor {
 
     @FindBy(xpath = "//label[contains(@for, 'form_item_flinkSql')]/../..//div[contains(@class, 'monaco-editor')]//div[contains(@class, 'view-line') and not(contains(@class, 'view-lines'))]")
-    private List<WebElement> flinkSqlEditor;
+    public List<WebElement> flinkSqlEditor;
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     public FlinkSQLEditor(WebDriver driver) {
         PageFactory.initElements(driver, this);
@@ -75,25 +75,18 @@ public final class FlinkSQLEditor {
             }
 
             if (StringUtils.isNotBlank(inputContent)) {
-                if (editorLineText.isEmpty()) {
-                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
-                        .click()
-                        .sendKeys(inputContent)
-                        .sendKeys(Constants.LINE_SEPARATOR)
-                        .perform();
-                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
-                } else {
+                if (!editorLineText.isEmpty()) {
                     for (int p = 0; p < editorLineText.trim().length(); p++) {
                         clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
                     }
                     clearLine(actions, flinkSqlEditor.get(flinkSqlEditorIndex));
-                    actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
-                        .click()
-                        .sendKeys(inputContent)
-                        .sendKeys(Constants.LINE_SEPARATOR)
-                        .perform();
-                    Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
                 }
+                actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
+                    .click()
+                    .sendKeys(inputContent)
+                    .sendKeys(Constants.LINE_SEPARATOR)
+                    .perform();
+                Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
             } else {
                 actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
                     .click()

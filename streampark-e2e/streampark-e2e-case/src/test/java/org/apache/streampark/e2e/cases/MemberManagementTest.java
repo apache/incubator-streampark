@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class MemberManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String existUserName = "test3";
 
@@ -49,13 +43,13 @@ public class MemberManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(MemberManagementPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 
@@ -63,14 +57,14 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList())
+                () -> assertThat(memberManagementPage.memberList)
                     .as("Member list should contain newly-created member")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(existUserName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 
@@ -78,20 +72,17 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.errorMessageList())
+                () -> assertThat(memberManagementPage.errorMessage)
                     .as("Member Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains(
-                        String.format(
-                            "The user [%s] has been added the team [%s], please don't add it again.",
-                            existUserName, teamName))));
+                    .matches(it -> it.contains("please don't add it again.")));
 
-        memberManagementPage.errorMessageConfirmButton().click();
-        memberManagementPage.createMemberForm().buttonCancel().click();
+        memberManagementPage.errorMessageConfirmButton.click();
+        memberManagementPage.createMemberForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
         String anotherRole = "team admin";
@@ -100,7 +91,7 @@ public class MemberManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(memberManagementPage.memberList())
+                () -> assertThat(memberManagementPage.memberList)
                     .as("Team list should contain edited team")
                     .extracting(WebElement::getText)
                     .anyMatch(
@@ -108,7 +99,7 @@ public class MemberManagementTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteMember() {
         final MemberManagementPage memberManagementPage = new MemberManagementPage(browser);
 
@@ -119,7 +110,7 @@ public class MemberManagementTest {
                 () -> {
                     browser.navigate().refresh();
 
-                    assertThat(memberManagementPage.memberList())
+                    assertThat(memberManagementPage.memberList)
                         .noneMatch(it -> it.getText().contains(existUserName));
                 });
     }

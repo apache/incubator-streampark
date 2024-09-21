@@ -24,12 +24,12 @@ import org.openqa.selenium.support.PageFactory;
 @Getter
 public abstract class CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
-    private final EnvironmentDetailForm parent;
+    public final EnvironmentDetailForm parent;
 
     public CommonForm(EnvironmentDetailForm environmentDetailForm) {
-        final WebDriver driver = environmentDetailForm.driver();
+        final WebDriver driver = environmentDetailForm.driver;
         PageFactory.initElements(driver, this);
         this.parent = environmentDetailForm;
     }

@@ -48,22 +48,22 @@ public class EnvironmentPage extends NavBarPage implements SettingPage.Tab {
             @FindBy(xpath = "//h4[text()='Docker Setting']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn') and contains(@class, 'ant-btn-primary') and contains(@class, 'ant-btn-circle')]")
     })
-    private WebElement btnCreateDockerSetting;
+    public WebElement btnCreateDockerSetting;
 
     @FindBys({
             @FindBy(xpath = "//h4[text()='Alert Mailbox Setting']"),
             @FindBy(xpath = "./ancestor::li[@class='ant-list-item']//button[contains(@class, 'ant-btn') and contains(@class, 'ant-btn-primary') and contains(@class, 'ant-btn-circle')]")
     })
-    private WebElement btnCreateEmailSetting;
+    public WebElement btnCreateEmailSetting;
 
     @FindBy(xpath = "//div[contains(@class, 'system-setting')]")
-    private List<WebElement> settingList;
+    public List<WebElement> settingList;
 
     @FindBy(className = "swal2-container")
-    private List<WebElement> errorMessageList;
+    public List<WebElement> errorMessageList;
 
     @FindBy(xpath = "//button[contains(@class, 'swal2-confirm') and contains(@class, 'swal2-styled') and text()='OK']")
-    private WebElement errorMessageConfirmButton;
+    public WebElement errorMessageConfirmButton;
 
     public EnvironmentDetailForm createEnvironment(EnvironmentDetailForm.EnvSettingTypeEnum envSettingTypeEnum) {
         waitForPageLoading();
@@ -79,7 +79,7 @@ public class EnvironmentPage extends NavBarPage implements SettingPage.Tab {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                    String.format("Unsupported environment type %s", envSettingTypeEnum.desc()));
+                    String.format("Unsupported environment type %s", envSettingTypeEnum.desc));
         }
         return new EnvironmentDetailForm(driver);
     }

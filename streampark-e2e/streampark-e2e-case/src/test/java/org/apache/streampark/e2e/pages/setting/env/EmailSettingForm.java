@@ -28,35 +28,35 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class EmailSettingForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "SettingForm_host")
-    private WebElement inputSmtpHost;
+    public WebElement inputSmtpHost;
 
     @FindBy(xpath = "//input[@placeholder='Smtp Port']")
-    private WebElement inputSmtpPort;
+    public WebElement inputSmtpPort;
 
     @FindBy(id = "SettingForm_from")
-    private WebElement inputAddress;
+    public WebElement inputAddress;
 
     @FindBy(id = "SettingForm_userName")
-    private WebElement inputUsername;
+    public WebElement inputUsername;
 
     @FindBy(xpath = "//input[@placeholder='Email Password']")
-    private WebElement inputPassword;
+    public WebElement inputPassword;
 
     @FindBy(id = "SettingForm_ssl")
-    private WebElement btnEnableSSL;
+    public WebElement btnEnableSSL;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Sender Email Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
-    private WebElement buttonOk;
+    public WebElement buttonOk;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Sender Email Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-    private WebElement buttonCancel;
+    public WebElement buttonCancel;
 
     EmailSettingForm(EnvironmentDetailForm environmentDetailForm) {
         super(environmentDetailForm);
-        this.driver = environmentDetailForm.driver();
+        this.driver = environmentDetailForm.driver;
     }
 
     public EmailSettingForm host(String host) {

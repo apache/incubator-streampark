@@ -63,22 +63,22 @@ export enum AppStateEnum {
   STARTING = 3,
 
   /** (From Yarn)Application which has been submitted. */
-  SUBMITTE = 4,
+  SUBMITTED = 4,
 
   /** (From Yarn)Application has been accepted by the scheduler. */
-  ACCEPTE = 5,
+  ACCEPTED = 5,
 
   /** The job has failed and is currently waiting for the cleanup to complete. */
-  RUNNIN = 6,
+  RUNNING = 6,
 
   /** (From Yarn)Application which finished successfully. */
-  FINISHE = 7,
+  FINISHED = 7,
 
   /** (From Yarn)Application which failed. */
-  FAILE = 8,
+  FAILED = 8,
 
   /** Loss of mapping. */
-  LOS = 9,
+  LOST = 9,
 
   /** Mapping. */
   MAPPING = 10,

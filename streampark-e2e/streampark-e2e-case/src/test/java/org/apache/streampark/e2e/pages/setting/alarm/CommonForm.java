@@ -28,21 +28,21 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public abstract class CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_alertName")
-    private WebElement inputAlertName;
+    public WebElement inputAlertName;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
-    private WebElement buttonSubmit;
+    @FindBy(className = "e2e-alert-submit-btn")
+    public WebElement buttonSubmit;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-    private WebElement buttonCancel;
+    @FindBy(className = "e2e-alert-cancel-btn")
+    public WebElement buttonCancel;
 
     private final AlertTypeDetailForm parent;
 
     CommonForm(AlertTypeDetailForm alertTypeDetailForm) {
-        final WebDriver driver = alertTypeDetailForm.driver();
+        final WebDriver driver = alertTypeDetailForm.driver;
         PageFactory.initElements(driver, this);
         this.parent = alertTypeDetailForm;
     }
