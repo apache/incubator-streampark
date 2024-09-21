@@ -16,7 +16,7 @@
  */
 export default {
   dashboard: {
-    runningTasks: 'Number of Running Applications',
+    runningTasks: 'Running Jobs',
     totalTask: 'Total Tasks',
     totalStage: 'Total Stages',
     completedTask: 'Total Completed Tasks',

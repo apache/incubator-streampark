@@ -16,13 +16,13 @@
  */
 export default {
   dashboard: {
-    runningTasks: '运行中的应用数',
+    runningTasks: '运行中的作业',
     totalTask: 'Task 总数',
     totalStage: 'Stage 总数',
-    completedTask: '完成的 Task 总数',
+    completedTask: '已进完成的作业数',
     completedStage: '完成的 Stage 总数',
     memory: '占用的总内存',
-    VCore: '占用的总VCores',
+    VCore: '占用的总 VCores',
   },
   runState: {
     added: 'Added',
