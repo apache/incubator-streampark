@@ -355,7 +355,7 @@
   }
 
   async function handleDeleteOperationLog(record: Recordable) {
-    await fetchDeleteOperationLog(record.id);
+    await fetchDeleteOperationLog(record.appId, record.id);
     await reloadOperationLog();
   }
 

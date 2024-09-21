@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
@@ -77,7 +78,19 @@ public class PermissionAspect {
                 "Permission denied, operations can only be performed with the permissions of the currently logged-in user.");
 
             // 2) check team
-            Long teamId = getId(joinPoint, methodSignature, permission.team());
+            Long teamId = null;
+            try {
+                teamId = getId(joinPoint, methodSignature, permission.team());
+            } catch (SpelEvaluationException e) {
+                try {
+                    Long appId = getId(joinPoint, methodSignature, permission.app());
+                    Application app = applicationManageService.getById(appId);
+                    teamId = app.getTeamId();
+                } catch (SpelEvaluationException e1) {
+                    log.error(
+                        "Failed to get teamId from permission annotation, please check the annotation configuration.");
+                }
+            }
             if (teamId != null) {
                 Member member = memberService.getByTeamIdUserName(teamId, currentUser.getUsername());
                 ApiAlertException.throwIfTrue(

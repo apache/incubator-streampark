@@ -201,8 +201,8 @@ public class ApplicationController {
 
     @PostMapping("main")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse getMain(Application application) {
-        String mainClass = applicationInfoService.getMain(application);
+    public RestResponse getMain(Application app) {
+        String mainClass = applicationInfoService.getMain(app);
         return RestResponse.success(mainClass);
     }
 
@@ -214,16 +214,16 @@ public class ApplicationController {
     }
 
     @PostMapping("opt_log")
-    @Permission(app = "#log.appId", team = "#log.teamId")
+    @Permission(app = "#applicationLog.appId")
     public RestResponse log(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 
-    @Permission(app = "#log.appId", team = "#log.teamId")
+    @Permission(app = "#appId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponse deleteLog(Long id) {
+    public RestResponse deleteLog(Long id, Long appId) {
         Boolean deleted = applicationLogService.removeById(id);
         return RestResponse.success(deleted);
     }
