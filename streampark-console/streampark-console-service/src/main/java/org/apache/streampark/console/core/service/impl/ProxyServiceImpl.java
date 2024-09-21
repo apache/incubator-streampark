@@ -131,6 +131,9 @@ public class ProxyServiceImpl implements ProxyService {
     public ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
         String yarnId = log.getYarnAppId();
+        if (StringUtils.isBlank(yarnId)) {
+            return builder.body("The yarn application id is null.");
+        }
         String yarnURL = YarnUtils.getRMWebAppProxyURL();
         String url = yarnURL + "/proxy/" + yarnId + "/";
         url += getRequestURL(request, "/proxy/yarn/" + log.getId());
