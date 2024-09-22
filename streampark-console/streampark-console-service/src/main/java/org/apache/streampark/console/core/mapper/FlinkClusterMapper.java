@@ -32,5 +32,5 @@ public interface FlinkClusterMapper extends BaseMapper<FlinkCluster> {
     boolean existsByClusterName(@Param("clusterName") String clusterName, @Param("id") Long id);
 
     IPage<FlinkCluster> findPage(
-        Page<FlinkCluster> page, @Param("cluster") FlinkCluster flinkCluster);
+                                 Page<FlinkCluster> page, @Param("cluster") FlinkCluster flinkCluster);
 }

@@ -47,7 +47,6 @@ public class FlinkClusterController {
     @Autowired
     private FlinkClusterService flinkClusterService;
 
-
     @PostMapping("page")
     public RestResponse findPage(FlinkCluster flinkCluster, RestRequest restRequest) {
         IPage<FlinkCluster> flinkClusters = flinkClusterService.findPage(flinkCluster, restRequest);

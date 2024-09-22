@@ -17,17 +17,14 @@
 
 package org.apache.streampark.console.core.service;
 
-
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.FlinkEnv;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
-import java.util.Properties;
 
 public interface FlinkEnvService extends IService<FlinkEnv> {
 
