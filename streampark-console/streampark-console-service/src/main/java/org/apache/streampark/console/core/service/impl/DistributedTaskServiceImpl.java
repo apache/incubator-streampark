@@ -25,7 +25,6 @@ import org.apache.streampark.console.core.entity.DistributedTask;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.mapper.DistributedTaskMapper;
-import org.apache.streampark.console.core.registry.ConsoleRegistryClient;
 import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.application.ApplicationActionService;
 
@@ -60,11 +59,8 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     @Autowired
     private ApplicationActionService applicationActionService;
 
-    @Autowired
-    private ConsoleRegistryClient consoleRegistryClient;
-
     /**
-     * Server name
+     * Server Id
      */
     private String serverId;
 
@@ -160,21 +156,21 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     /**
      * This interface handles task redistribution when server nodes are added.
      *
-     * @param serverName String
+     * @param serverId String
      */
     @Override
-    public void addServer(String serverName) {
-        consistentHash.add(serverName);
+    public void addServer(String serverId) {
+        consistentHash.add(serverId);
     }
 
     /**
      * This interface handles task redistribution when server nodes are removed.
      *
-     * @param serverName String
+     * @param serverId String
      */
     @Override
-    public void removeServer(String serverName) {
-        consistentHash.remove(serverName);
+    public void removeServer(String serverId) {
+        consistentHash.remove(serverId);
     }
 
     /**

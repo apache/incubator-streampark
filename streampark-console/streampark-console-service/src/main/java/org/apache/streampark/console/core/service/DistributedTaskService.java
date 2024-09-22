@@ -53,15 +53,15 @@ public interface DistributedTaskService extends IService<DistributedTask> {
 
     /**
      * This interface handles task redistribution when server nodes are added.
-     * @param serverName String
+     * @param serverId String
      */
-    void addServer(String serverName);
+    void addServer(String serverId);
 
     /**
      * This interface handles task redistribution when server nodes are removed.
-     * @param serverName String
+     * @param serverId String
      */
-    void removeServer(String serverName);
+    void removeServer(String serverId);
 
     /**
      * Determine whether the task is processed locally.

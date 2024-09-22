@@ -36,21 +36,21 @@ class DistributedTaskServiceTest {
 
     private final DistributedTaskServiceImpl distributionTaskService = new DistributedTaskServiceImpl();
 
-    private final String serverName = "testServer";
-    private final Set<String> allServers = new HashSet<>(Collections.singleton(serverName));
+    private final String serverId = "testServer";
+    private final Set<String> allServers = new HashSet<>(Collections.singleton(serverId));
 
     // the number of virtual nodes for each server
     private final int numberOfReplicas = 2 << 16;
 
     @Test
     void testInit() {
-        distributionTaskService.init(allServers, serverName);
+        distributionTaskService.init(allServers, serverId);
         assert (distributionTaskService.getConsistentHashSize() == numberOfReplicas);
     }
 
     @Test
     void testIsLocalProcessing() {
-        distributionTaskService.init(allServers, serverName);
+        distributionTaskService.init(allServers, serverId);
         for (long i = 0; i < numberOfReplicas; i++) {
             assert (distributionTaskService.isLocalProcessing(i));
         }
