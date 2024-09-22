@@ -128,6 +128,26 @@ export const useProject = () => {
         },
       },
       {
+        field: 'refs',
+        label: t('flink.project.form.branches'),
+        component: 'Select',
+        required: true,
+        componentProps: ({ formModel }) => {
+          return {
+            showSearch: true,
+            filterOption,
+            placeholder: t('flink.project.form.branchesPlaceholder'),
+            options: unref(branchList),
+            onDropdownVisibleChange: (open: boolean) => {
+              console.log('open', open);
+              if (open) {
+                handleBranches(formModel);
+              }
+            },
+          };
+        },
+      },
+      {
         field: 'prvkeyPath',
         label: t('flink.project.form.prvkeyPath'),
         component: 'Input',
@@ -153,26 +173,6 @@ export const useProject = () => {
         componentProps: {
           placeholder: t('flink.project.form.passwordPlaceholder'),
           autocomplete: 'new-password',
-        },
-      },
-      {
-        field: 'branches',
-        label: t('flink.project.form.branches'),
-        component: 'Select',
-        required: true,
-        componentProps: ({ formModel }) => {
-          return {
-            showSearch: true,
-            filterOption,
-            placeholder: t('flink.project.form.branchesPlaceholder'),
-            options: unref(branchList),
-            onDropdownVisibleChange: (open: boolean) => {
-              console.log('open', open);
-              if (open) {
-                handleBranches(formModel);
-              }
-            },
-          };
         },
       },
       {
@@ -240,25 +240,15 @@ export const useProject = () => {
     try {
       const res = await gitCheck({
         url: values.url,
-        branches: values.branches,
         userName: values.userName || null,
         password: values.password || null,
         prvkeyPath: values.prvkeyPath || null,
-        id: route?.query?.id || null,
       });
       if (res === 0) {
         if (branchList.value.length === 0) {
           await handleBranches(values);
         }
-        if (!branchList.value.find((v) => v.value == values.branches)) {
-          createErrorSwal(
-            'branch [' +
-              values.branches +
-              '] does not exist<br>or authentication error,please check',
-          );
-        } else {
-          await FetchAction(values);
-        }
+        await FetchAction(values);
       } else {
         createErrorSwal(
           res === 1
@@ -283,10 +273,32 @@ export const useProject = () => {
         const prvkeyPath = values.prvkeyPath || null;
         const userNull = userName === null || userName === undefined || userName === '';
         const passNull = password === null || password === undefined || password === '';
-        const id = route?.query?.id || null;
         if ((userNull && passNull) || (!userNull && !passNull)) {
-          const res = await fetchBranches({ url, userName, password, prvkeyPath, id });
-          if (res) branchList.value = res.map((i) => ({ label: i, value: i }));
+          const resp = await fetchBranches({ url, userName, password, prvkeyPath });
+          if (resp) {
+            const branches = (resp['branches'] || []).map((c: string) => {
+              return {
+                label: c,
+                value: 'refs/heads/' + c,
+              };
+            });
+            const tags = (resp['tags'] || []).map((c: string) => {
+              return {
+                label: c,
+                value: 'refs/tags/' + c,
+              };
+            });
+            branchList.value = [
+              {
+                label: 'Branches',
+                options: branches,
+              },
+              {
+                label: 'Tags',
+                options: tags,
+              },
+            ];
+          }
         }
       }
     } catch (error) {
@@ -308,7 +320,7 @@ export const useProject = () => {
         userName: res.userName,
         password: res.password,
         prvkeyPath: res.prvkeyPath || null,
-        branches: res.branches,
+        refs: res.refs.replace('refs/heads/', '').replace('refs/tags/', ''),
         pom: res.pom,
         buildArgs: res.buildArgs,
         description: res.description,

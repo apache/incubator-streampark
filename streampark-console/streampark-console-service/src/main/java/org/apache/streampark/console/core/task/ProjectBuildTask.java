@@ -27,7 +27,6 @@ import org.apache.streampark.console.core.enums.BuildStateEnum;
 import ch.qos.logback.classic.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.lib.StoredConfig;
 
 import java.io.File;
@@ -93,35 +92,32 @@ public class ProjectBuildTask extends AbstractLogFileTask {
             project.cleanCloned();
             fileLogger.info("clone {}, {} starting...", project.getName(), project.getUrl());
             fileLogger.info(project.getLog4CloneStart());
-            Git git = GitUtils.clone(project);
+
+            GitUtils.GitCloneRequest request = new GitUtils.GitCloneRequest();
+            request.setUrl(project.getUrl());
+            request.setRefs(project.getRefs());
+            request.setStoreDir(project.getAppSource());
+            request.setUsername(project.getUserName());
+            request.setPassword(project.getPassword());
+            request.setPrivateKey(project.getPrvkeyPath());
+
+            Git git = GitUtils.clone(request);
             StoredConfig config = git.getRepository().getConfig();
             config.setBoolean("http", project.getUrl(), "sslVerify", false);
             config.setBoolean("https", project.getUrl(), "sslVerify", false);
             config.save();
             File workTree = git.getRepository().getWorkTree();
             printWorkTree(workTree, "");
-            String successMsg = String.format("[StreamPark] project [%s] git clone successful!%n", project.getName());
+            String successMsg =
+                String.format("[StreamPark] project [%s] git clone successful!\n", project.getName());
             fileLogger.info(successMsg);
             git.close();
             return true;
         } catch (Exception e) {
-            if (e instanceof InvalidRemoteException) {
-                if (project.isHttpRepositoryUrl()) {
-                    String url = project
-                        .getUrl()
-                        .replaceAll(
-                            "(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$",
-                            "git@$2:$3/$4.git");
-                    project.setUrl(url);
-                    fileLogger.info(
-                        "clone project by https(http) failed, Now try to clone project by ssh...");
-                    return cloneSourceCode(project);
-                }
-            }
             fileLogger.error(
                 String.format(
-                    "[StreamPark] project [%s] branch [%s] git clone failed, err: %s",
-                    project.getName(), project.getBranches(), e));
+                    "[StreamPark] project [%s] refs [%s] git clone failed, err: %s",
+                    project.getName(), project.getRefs(), e));
             fileLogger.error(String.format("project %s clone error ", project.getName()), e);
             return false;
         }
@@ -143,10 +139,11 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     }
 
     private boolean projectBuild(Project project) {
-        int code = CommandUtils.execute(
-            project.getMavenWorkHome(),
-            Collections.singletonList(project.getMavenArgs()),
-            (line) -> fileLogger.info(line));
+        int code =
+            CommandUtils.execute(
+                project.getMavenWorkHome(),
+                Collections.singletonList(project.getMavenArgs()),
+                (line) -> fileLogger.info(line));
         return code == 0;
     }
 
@@ -170,14 +167,15 @@ public class ProjectBuildTask extends AbstractLogFileTask {
                 }
                 // xzvf jar
                 if (app.exists()) {
-                    String cmd = String.format(
-                        "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
+                    String cmd =
+                        String.format(
+                            "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
                     CommandUtils.execute(cmd);
                 }
             } else {
                 // 2) .jar file(normal or official standard flink project)
                 Utils.requireCheckJarFile(app.toURI().toURL());
-                String moduleName = app.getName().replace(Constants.JAR_SUFFIX, "");
+                String moduleName = app.getName().replace(".jar", "");
                 File distHome = project.getDistHome();
                 File targetDir = new File(distHome, moduleName);
                 if (!targetDir.exists()) {

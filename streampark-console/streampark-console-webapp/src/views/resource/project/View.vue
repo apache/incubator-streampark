@@ -55,19 +55,16 @@
     <BasicTable @register="registerTable">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'branches'">
-          <div v-if="record.refs">
-            <a-tag
-              v-if="record.refs?.startsWith('refs/tags/') > 0"
-              color="green"
-              style="border-radius: 4px"
-            >
-              {{ record.refs?.replace('refs/tags/', '') }}
-            </a-tag>
-            <a-tag v-else color="blue" style="border-radius: 4px">
-              {{ record.refs?.replace('refs/heads/', '') }}
-            </a-tag>
-          </div>
-          <span v-else>-</span>
+          <a-tag
+            v-if="record.refs.startsWith('refs/tags/') > 0"
+            color="green"
+            style="border-radius: 4px"
+          >
+            {{ record.refs.replace('refs/tags/', '') }}
+          </a-tag>
+          <a-tag v-else color="blue" style="border-radius: 4px">
+            {{ record.refs.replace('refs/heads/', '') }}
+          </a-tag>
         </template>
         <template v-if="column.dataIndex === 'type'">
           <a-badge
@@ -146,10 +143,12 @@
   import { defineComponent, nextTick, onUnmounted, reactive, ref, watch } from 'vue';
 
   import { PageWrapper } from '/@/components/Page';
-  import { buildStateMap, statusList } from './project.data';
-  import { RadioGroup, Radio, Card, Tag, Badge, Input } from 'ant-design-vue';
+  import { statusList } from './project.data';
+  import { RadioGroup, Radio, Card, Tag, Badge } from 'ant-design-vue';
+  import { buildStateMap } from './project.data';
   import { buildProject, deleteProject, getList } from '/@/api/resource/project';
   import { ProjectRecord } from '/@/api/resource/project/model/projectModel';
+  import Icon, { SvgIcon } from '/@/components/Icon';
   import { useGo } from '/@/hooks/web/usePage';
   import { useTimeoutFn } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -162,7 +161,6 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
   import { ProjectTypeEnum } from '/@/enums/projectEnum';
-  import Icon, { SvgIcon } from '/@/components/Icon';
 
   export default defineComponent({
     name: 'ProjectView',
@@ -173,7 +171,6 @@
       ACard: Card,
       ATag: Tag,
       ABadge: Badge,
-      AInput: Input,
       Icon,
       SvgIcon,
       LogModal,
@@ -185,7 +182,7 @@
       const userStore = useUserStoreWithOut();
       const { t } = useI18n();
       const router = useRouter();
-      const { Swal, createMessage } = useMessage();
+      const { Swal, createConfirm, createMessage } = useMessage();
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
       const loading = ref(false);
@@ -199,6 +196,7 @@
 
       const queryParams = reactive<{ buildState: string; name?: string }>({
         buildState: '',
+        name: '',
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);
@@ -227,7 +225,6 @@
           { dataIndex: 'lastBuild', title: t('flink.project.form.lastBuild') },
           { dataIndex: 'buildState', title: t('flink.project.form.buildState') },
         ],
-        rowKey: 'id',
         useSearchForm: false,
         striped: false,
         canResize: false,
@@ -239,47 +236,67 @@
           dataIndex: 'action',
         },
       });
-
+      function handlePageDataReload(polling = false) {
+        nextTick(() => {
+          reload({ polling });
+        });
+      }
       async function handleBuild(record: ProjectRecord) {
-        try {
-          await buildProject({
-            id: record.id,
-            socketId: buildUUID(),
-          });
-          Swal.fire({
-            icon: 'success',
-            title: t('flink.project.operationTips.projectIsbuildingMessage'),
-            showConfirmButton: false,
-            timer: 2000,
-          });
-        } catch (e) {
-          createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
-        }
+        createConfirm({
+          iconType: 'warning',
+          title: t('flink.project.operationTips.buildProject'),
+          centered: true,
+          content: t('flink.project.operationTips.buildProjectMessage'),
+          onOk: async () => {
+            try {
+              await buildProject({
+                id: record.id,
+                socketId: buildUUID(),
+              });
+              Swal.fire({
+                icon: 'success',
+                title: t('flink.project.operationTips.projectIsbuildingMessage'),
+                showConfirmButton: false,
+                timer: 2000,
+              });
+            } catch (e) {
+              createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
+            }
+          },
+        });
       }
       const handleEdit = function (record: ProjectRecord) {
-        router.push({ path: '/flink/project/edit', query: { id: record.id } });
+        router.push({ path: '/project/edit', query: { id: record.id } });
       };
       async function handleDelete(record: ProjectRecord) {
-        try {
-          const res = await deleteProject({ id: record.id });
-          if (res.data) {
-            Swal.fire({
-              icon: 'success',
-              title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
-              showConfirmButton: false,
-              timer: 2000,
-            });
-            reload();
-          } else {
-            Swal.fire(
-              'Failed',
-              t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
-              'error',
-            );
-          }
-        } catch (e) {
-          createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
-        }
+        createConfirm({
+          iconType: 'warning',
+          title: t('flink.project.operationTips.deleteProject'),
+          content: t('flink.project.operationTips.deleteProjectMessage'),
+          centered: true,
+          onOk: async () => {
+            try {
+              const res = await deleteProject({ id: record.id });
+              if (res.data) {
+                Swal.fire({
+                  icon: 'success',
+                  title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
+                  showConfirmButton: false,
+                  timer: 2000,
+                });
+                reload();
+              } else {
+                Swal.fire(
+                  'Failed',
+                  t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+                  'error',
+                );
+              }
+            } catch (e) {
+              createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
+            }
+          },
+        });
       }
 
       const handleQuery = function (val: string | undefined) {
@@ -288,18 +305,13 @@
         reload();
       };
 
-      function handlePageDataReload(polling = false) {
-        nextTick(() => {
-          reload({ polling });
-        });
-      }
-
       const { start, stop } = useTimeoutFn(() => {
         if (!getLoading()) {
           handlePageDataReload(true);
         }
         start();
       }, 2000);
+
       /* View log */
       function handleViewLog(value: Recordable) {
         openLogModal(true, { project: value });
@@ -344,13 +356,20 @@
     },
   });
 </script>
-<style lang="less" scoped>
-  .search-input {
-    width: 272px;
-    margin-left: 16px;
+<style lang="less">
+  .sp-project {
+    .search-input {
+      width: 272px;
+      margin-left: 16px;
+    }
+    .add-btn {
+      margin-left: 30px;
+    }
+    .ant-card-head {
+      padding: 0 2px !important;
+    }
   }
-
-  .add-btn {
-    margin-left: 30px;
+  .status-processing-running {
+    animation: running-color 800ms ease-out infinite alternate;
   }
 </style>

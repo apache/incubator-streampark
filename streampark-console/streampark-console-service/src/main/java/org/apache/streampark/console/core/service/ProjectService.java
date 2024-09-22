@@ -39,6 +39,8 @@ public interface ProjectService extends IService<Project> {
      */
     RestResponse create(Project project);
 
+    boolean checkExists(Project project);
+
     /**
      * Update the given Project
      *
@@ -162,4 +164,6 @@ public interface ProjectService extends IService<Project> {
      * @return Check git
      */
     GitAuthorizedErrorEnum gitCheck(Project project);
+
+    List<String> getAllTags(Project project);
 }

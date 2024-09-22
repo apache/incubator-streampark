@@ -18,26 +18,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.ProjectMapper">
 
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Project">
-        <id column="id" jdbcType="INTEGER" property="id"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="url" jdbcType="VARCHAR" property="url"/>
-        <result column="repository" jdbcType="INTEGER" property="repository"/>
-        <result column="branches" jdbcType="VARCHAR" property="branches"/>
-        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
-        <result column="password" jdbcType="VARCHAR" property="password"/>
-        <result column="prvkey_path" jdbcType="VARCHAR" property="prvkeyPath"/>
-        <result column="pom" jdbcType="VARCHAR" property="pom"/>
-        <result column="build_args" jdbcType="VARCHAR" property="buildArgs"/>
-        <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="last_build" jdbcType="TIMESTAMP" property="lastBuild"/>
-        <result column="build_state" jdbcType="INTEGER" property="buildState"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
-    </resultMap>
-
     <select id="existsByTeamId" resultType="java.lang.Boolean" parameterType="java.lang.Long">
         select
             CASE
