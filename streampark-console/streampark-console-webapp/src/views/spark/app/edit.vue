@@ -84,7 +84,7 @@
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
-      config: null,
+      config: values.config,
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
@@ -116,7 +116,6 @@
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
     let config = formValue.configOverride;
-    console.log(config, formValue);
     if (config != null && config !== undefined && config.trim() != '') {
       config = encryptByBase64(config);
     } else {

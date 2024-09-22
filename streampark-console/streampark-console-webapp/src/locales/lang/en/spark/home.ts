@@ -16,6 +16,11 @@
  */
 export default {
   title: 'Spark Home',
+  sparkVersion: 'Spark Version',
+  searchByName: 'Search by Spark Name',
+  conf: 'Spark Conf',
+  sync: 'Sync Conf',
+  edit: 'Edit Spark Env',
   tips: {
     remove: 'The current spark home has been successfully deleted.',
     setDefault: 'Successfully set the default spark home.',

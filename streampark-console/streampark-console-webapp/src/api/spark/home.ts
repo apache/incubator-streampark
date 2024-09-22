@@ -18,21 +18,21 @@
 import type { SparkCreate, SparkEnv } from './home.type';
 import { defHttp } from '/@/utils/http/axios';
 
-enum FLINK_API {
-  LIST = '/spark/env/list',
-  CHECK = '/spark/env/check',
-  CREATE = '/spark/env/create',
-  UPDATE = '/spark/env/update',
-  DELETE = '/spark/env/delete',
-  DEFAULT = '/spark/env/default',
-}
+const apiPrefix = '/spark/env';
 /**
  * spark environment data
  * @returns Promise<SparkEnv[]>
  */
 export function fetchSparkEnvList() {
   return defHttp.post<SparkEnv[]>({
-    url: FLINK_API.LIST,
+    url: `${apiPrefix}/list`,
+  });
+}
+
+export function fetchSparkEnv(id: string) {
+  return defHttp.post<SparkEnv>({
+    url: `${apiPrefix}/get`,
+    data: { id: id },
   });
 }
 
@@ -42,7 +42,7 @@ export function fetchSparkEnvList() {
  */
 export function fetchSetDefault(id: string) {
   return defHttp.post({
-    url: FLINK_API.DEFAULT,
+    url: `${apiPrefix}/default`,
     data: { id },
   });
 }
@@ -53,7 +53,7 @@ export function fetchSetDefault(id: string) {
  */
 export function fetchSparkEnvRemove(id: string) {
   return defHttp.post({
-    url: FLINK_API.DELETE,
+    url: `${apiPrefix}/delete`,
     data: { id },
   });
 }
@@ -67,7 +67,10 @@ export function fetchSparkEnvCheck(data: {
   sparkName: string;
   sparkHome: string;
 }) {
-  return defHttp.post({ url: FLINK_API.CHECK, data });
+  return defHttp.post({
+    url: `${apiPrefix}/check`,
+    data,
+  });
 }
 
 /**
@@ -75,7 +78,13 @@ export function fetchSparkEnvCheck(data: {
  *
  */
 export function fetchSparkEnvCreate(data: SparkCreate) {
-  return defHttp.post({ url: FLINK_API.CREATE, data }, { isTransformResponse: false });
+  return defHttp.post(
+    {
+      url: `${apiPrefix}/create`,
+      data,
+    },
+    { isTransformResponse: false },
+  );
 }
 
 /**
@@ -83,5 +92,21 @@ export function fetchSparkEnvCreate(data: SparkCreate) {
  * @param data
  */
 export function fetchSparkEnvUpdate(data: SparkCreate) {
-  return defHttp.post({ url: FLINK_API.UPDATE, data }, { isTransformResponse: false });
+  return defHttp.post(
+    {
+      url: `${apiPrefix}/update`,
+      data,
+    },
+    { isTransformResponse: false },
+  );
+}
+
+/**
+ * Configure synchronization
+ */
+export function fetchSparkSync(id: string): Promise<boolean> {
+  return defHttp.post<boolean>({
+    url: `${apiPrefix}/sync`,
+    data: { id },
+  });
 }

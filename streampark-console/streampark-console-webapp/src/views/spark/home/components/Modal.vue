@@ -33,12 +33,10 @@
   const { t } = useI18n();
   const { Swal } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
-    labelWidth: 120,
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: 7, sm: 7 },
-    wrapperCol: { lg: 16, sm: 4 },
-    baseColProps: { span: 24 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'sparkName',
@@ -69,6 +67,7 @@
         componentProps: {
           placeholder: t('spark.home.placeholder.description'),
           allowClear: true,
+          rows: 3,
         },
       },
     ],
@@ -157,10 +156,16 @@
   }
 </script>
 <template>
-  <BasicModal @register="registerModalInner" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal
+    @register="registerModalInner"
+    :width="600"
+    centered
+    v-bind="$attrs"
+    @ok="handleSubmit"
+  >
     <template #title>
       <SvgIcon name="spark" />
-      {{ t('common.add') }}
+      {{ versionId ? t('common.edit') : t('common.') }}
     </template>
     <BasicForm @register="registerForm" />
   </BasicModal>

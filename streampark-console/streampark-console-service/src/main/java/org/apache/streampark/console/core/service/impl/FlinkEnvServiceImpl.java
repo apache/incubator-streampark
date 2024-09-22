@@ -17,8 +17,11 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
+import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.FlinkEnv;
+import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -26,6 +29,8 @@ import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.application.ApplicationInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +162,11 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     public void validity(Long id) {
         FlinkEnv flinkEnv = getById(id);
         checkOrElseAlert(flinkEnv);
+    }
+    @Override
+    public IPage<FlinkEnv> findPage(FlinkEnv flinkEnv, RestRequest restRequest) {
+        Page<Project> page = MybatisPager.getPage(restRequest);
+        return this.baseMapper.findPage(page, flinkEnv);
     }
 
     private void checkOrElseAlert(FlinkEnv flinkEnv) {

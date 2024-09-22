@@ -249,7 +249,7 @@ function getFlinkClusterId(values: Recordable) {
   if (values.executionMode == ExecModeEnum.YARN_SESSION) {
     return values.yarnSessionClusterId;
   }
-  if (values.executionMode == ExecModeEnum.REMOTE) {
+  if (values.executionMode == ExecModeEnum.STANDALONE) {
     return values.remoteClusterId;
   }
   if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {

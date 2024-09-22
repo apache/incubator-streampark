@@ -45,6 +45,20 @@
         <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
     </resultMap>
 
+    <select id="findPage" resultType="org.apache.streampark.console.core.entity.FlinkCluster">
+        select * from t_flink_cluster
+        <where>
+            <if test="cluster.clusterName != null and cluster.clusterName != ''">
+                <if test="_databaseId == 'mysql'">
+                    and cluster_name like concat('%', #{cluster.clusterName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and cluster_name like '%' || #{cluster.clusterName} || '%'
+                </if>
+            </if>
+        </where>
+    </select>
+
     <select id="existsByClusterId" resultType="java.lang.Boolean" parameterType="java.lang.String">
         select
          CASE
