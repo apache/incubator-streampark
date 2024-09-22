@@ -14,14 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent, unref, ref } from 'vue';
-  import { useGo } from '/@/hooks/web/usePage';
-  export default defineComponent({
-    name: 'EditCluster',
-  });
-</script>
 <script setup lang="ts" name="EditCluster">
+  import { unref, ref } from 'vue';
+  import { useGo } from '/@/hooks/web/usePage';
   import { PageWrapper } from '/@/components/Page';
   import { BasicForm, useForm } from '/@/components/Form';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -132,8 +127,13 @@
   });
 </script>
 <template>
-  <PageWrapper content-background content-class="py-30px">
-    <BasicForm @register="registerForm" @submit="handleSubmitCluster" :schemas="getClusterSchema">
+  <PageWrapper content-background content-full-height>
+    <BasicForm
+      @register="registerForm"
+      @submit="handleSubmitCluster"
+      :schemas="getClusterSchema"
+      class="!my-30px"
+    >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
           <a-button @click="go('/flink/cluster')">

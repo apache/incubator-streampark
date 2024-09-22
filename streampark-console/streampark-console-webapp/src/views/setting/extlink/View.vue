@@ -54,7 +54,7 @@
       await fetchExternalLinkDelete(id);
       Swal.fire({
         icon: 'success',
-        title: 'Delete Alert Config successful!',
+        title: 'Delete successful!',
         showConfirmButton: false,
         timer: 2000,
       });

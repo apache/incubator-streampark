@@ -126,7 +126,7 @@
         ...resetParams,
       };
       switch (app.executionMode) {
-        case ExecModeEnum.REMOTE:
+        case ExecModeEnum.STANDALONE:
           defaultParams['remoteClusterId'] = app.flinkClusterId;
           break;
         case ExecModeEnum.YARN_SESSION:

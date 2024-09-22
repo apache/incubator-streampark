@@ -29,6 +29,20 @@
         <result column="create_time" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
+    <select id="findPage" resultType="org.apache.streampark.console.core.entity.FlinkEnv">
+        select * from t_flink_env
+        <where>
+            <if test="flinkEnv.flinkName != null and flinkEnv.flinkName != ''">
+                <if test="_databaseId == 'mysql'">
+                    and flink_name like concat('%', #{flinkEnv.flinkName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and flink_name like '%' || #{flinkEnv.flinkName} || '%'
+                </if>
+            </if>
+        </where>
+    </select>
+
     <select id="selectByAppId" resultType="org.apache.streampark.console.core.entity.FlinkEnv" parameterType="java.lang.Long">
         select v.*
         from t_flink_env v

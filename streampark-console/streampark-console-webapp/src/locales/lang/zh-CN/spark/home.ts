@@ -16,6 +16,11 @@
  */
 export default {
   title: 'Spark Home',
+  sparkVersion: 'Spark 版本',
+  searchByName: '按Spark名称搜索',
+  conf: 'Spark Conf',
+  sync: '同步 Conf',
+  edit: '编辑 Spark 环境',
   tips: {
     remove: '当前的 spark home 已被成功删除。',
     setDefault: '成功设置默认spark home',

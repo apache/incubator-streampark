@@ -14,33 +14,34 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'FlinkEnvDraw',
-  });
-</script>
-<script lang="ts" setup name="FlinkEnvDraw">
+<script lang="ts" setup>
   import { ref, reactive } from 'vue';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { SyncOutlined } from '@ant-design/icons-vue';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  import { FlinkEnv } from '/@/api/flink/flinkEnv.type';
-  import { fetchFlinkInfo, fetchFlinkSync } from '/@/api/flink/flinkEnv';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { SparkEnv } from '/@/api/spark/home.type';
+  import { fetchSparkEnv, fetchSparkSync } from '/@/api/spark/home';
 
   const { t } = useI18n();
-  const flinkInfo = reactive<Recordable>({});
+  const sparkInfo = reactive({} as SparkEnv);
   const conf = ref();
   const syncLoading = ref(false);
   const { Swal } = useMessage();
-  const [registerDrawer] = useDrawerInner((data: FlinkEnv) => {
-    Object.assign(flinkInfo, data);
-    setContent(flinkInfo.flinkConf);
-    const height = document.documentElement.offsetHeight || document.body.offsetHeight;
-    conf.value.style.height = height - 210 + 'px';
+  const [registerDrawer, { changeLoading }] = useDrawerInner(async (data: SparkEnv) => {
+    try {
+      changeLoading(true);
+      const res = await fetchSparkEnv(data.id);
+      Object.assign(sparkInfo, res);
+      setContent(res.sparkConf || '');
+      const height = document.documentElement.offsetHeight || document.body.offsetHeight;
+      conf.value.style.height = height - 210 + 'px';
+    } catch (error) {
+      console.error(error);
+    } finally {
+      changeLoading(false);
+    }
   });
 
   const { setContent } = useMonaco(conf, {
@@ -77,13 +78,13 @@
   async function handleSync() {
     try {
       syncLoading.value = true;
-      await fetchFlinkSync(flinkInfo.id);
-      const flinkResult = await fetchFlinkInfo(flinkInfo.id);
-      Object.assign(flinkInfo, flinkResult);
-      setContent(flinkInfo.flinkConf);
+      await fetchSparkSync(sparkInfo.id);
+      const res = await fetchSparkEnv(sparkInfo.id);
+      Object.assign(sparkInfo, res);
+      setContent(res.sparkConf);
       Swal.fire({
         icon: 'success',
-        title: flinkResult.flinkName.concat(' conf sync successful!'),
+        title: res.sparkName.concat(' conf sync successful!'),
         showConfirmButton: false,
         timer: 2000,
       });
@@ -95,22 +96,22 @@
   }
 </script>
 <template>
-  <BasicDrawer title="Flink Conf" @register="registerDrawer" width="40%" placement="right">
+  <BasicDrawer title="Spark Conf" @register="registerDrawer" width="70%" placement="right">
     <div class="py-15px pl-10px">
-      {{ t('setting.flinkHome.title') }}: &nbsp;&nbsp; {{ flinkInfo.flinkHome }}
+      {{ t('spark.home.title') }}: &nbsp;&nbsp; {{ sparkInfo.sparkHome }}
     </div>
     <div>
-      <div class="pl-10px">{{ t('setting.flinkHome.sync') }} :</div>
+      <div class="pl-10px">{{ t('spark.home.sync') }} :</div>
       <div class="py-15px">
         <div ref="conf" style="height: 120px"></div>
         <a-button
           type="primary"
-          class="float-right mt-10px mr-130px"
+          class="float-right mt-10px mr-10px"
           @click="handleSync"
           :loading="syncLoading"
         >
           <SyncOutlined />
-          {{ t('setting.flinkHome.sync') }}
+          {{ t('spark.home.sync') }}
         </a-button>
       </div>
     </div>

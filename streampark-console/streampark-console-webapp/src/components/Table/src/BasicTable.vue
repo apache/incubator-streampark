@@ -16,7 +16,7 @@
       </template>
     </BasicForm>
 
-    <div ref="tableContainerRef" class="relative">
+    <div ref="tableContainerRef" class="relative flex-1 table-box">
       <Table
         ref="tableElRef"
         v-bind="getBindValues"
@@ -409,6 +409,9 @@
       margin-right: 0;
     }
 
+    .table-box {
+      background-color: @component-background;
+    }
     .ant-table-wrapper {
       padding: 10px;
       background-color: @component-background;
