@@ -48,4 +48,6 @@ public class ApplicationLog {
     private String exception;
     /** The user who operates the application */
     private Long userId;
+
+    private transient String teamId;
 }

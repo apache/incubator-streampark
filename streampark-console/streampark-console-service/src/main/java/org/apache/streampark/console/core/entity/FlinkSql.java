@@ -61,6 +61,8 @@ public class FlinkSql {
     /** dependency diff */
     private transient boolean dependencyDifference = false;
 
+    private transient Long teamId;
+
     public FlinkSql() {
     }
 

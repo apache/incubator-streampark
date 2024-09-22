@@ -15,41 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.entity;
+package org.apache.streampark.console.core.service;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 
-import java.util.Date;
+import org.springframework.http.ResponseEntity;
 
-@Data
-@TableName("t_flink_savepoint")
-@Slf4j
-public class Savepoint {
+import javax.servlet.http.HttpServletRequest;
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public interface ProxyService {
 
-    private Long appId;
+    ResponseEntity<?> proxyFlink(HttpServletRequest request, Application app) throws Exception;
 
-    private Long chkId;
+    ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception;
 
-    private Boolean latest;
+    ResponseEntity<?> proxyHistory(HttpServletRequest request, ApplicationLog log) throws Exception;
 
-    /**
-     * 1) checkPoint <br>
-     * 2) savepoint
-     */
-    private Integer type;
-
-    private String path;
-
-    private Date triggerTime;
-
-    private Date createTime;
-
-    private transient Long teamId;
+    ResponseEntity<?> proxyCluster(HttpServletRequest request, Long clusterId) throws Exception;
 }

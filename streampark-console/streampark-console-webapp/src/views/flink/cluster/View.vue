@@ -181,7 +181,7 @@
             <div class="list-content-item">
               <span>{{ t('setting.flinkCluster.form.address') }}</span>
               <p style="margin-top: 10px">
-                <a :href="item.address" target="_blank">
+                <a :href="`/proxy/cluster/${item.id}/`" target="_blank">
                   {{ item.address }}
                 </a>
               </p>
@@ -249,7 +249,7 @@
                 :disabled="!handleIsStart(item)"
                 v-auth="'app:detail'"
                 shape="circle"
-                :href="item.address"
+                :href="`/proxy/cluster/${item.id}/`"
                 target="_blank"
                 size="large"
                 class="control-button"

@@ -41,4 +41,6 @@ public interface ApplicationLogService extends IService<ApplicationLog> {
      * @param appId The id of the application to be removed
      */
     void removeByAppId(Long appId);
+
+    Boolean delete(ApplicationLog applicationLog);
 }
