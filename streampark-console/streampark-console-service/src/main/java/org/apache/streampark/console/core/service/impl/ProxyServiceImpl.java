@@ -22,6 +22,7 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.ProxyService;
 import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
@@ -131,6 +132,19 @@ public class ProxyServiceImpl implements ProxyService {
     public ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
         String yarnId = log.getYarnAppId();
+        if (StringUtils.isBlank(yarnId)) {
+            return builder.body("The yarn application id is null.");
+        }
+        String yarnURL = YarnUtils.getRMWebAppProxyURL();
+        String url = yarnURL + "/proxy/" + yarnId + "/";
+        url += getRequestURL(request, "/proxy/yarn/" + log.getId());
+        return proxyYarnRequest(request, url);
+    }
+
+    @Override
+    public ResponseEntity<?> proxyYarn(HttpServletRequest request, SparkApplicationLog log) throws Exception {
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
+        String yarnId = log.getSparkAppId();
         if (StringUtils.isBlank(yarnId)) {
             return builder.body("The yarn application id is null.");
         }

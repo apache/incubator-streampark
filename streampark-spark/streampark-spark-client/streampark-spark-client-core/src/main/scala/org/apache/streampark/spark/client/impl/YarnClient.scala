@@ -19,7 +19,7 @@ package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
 import org.apache.streampark.common.enums.SparkExecutionMode
-import org.apache.streampark.common.util.HadoopUtils
+import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
@@ -83,7 +83,8 @@ object YarnClient extends SparkClientTrait {
             s"appid: ${handle.getAppId}, " +
             s"state: ${handle.getState}")
           sparkHandles += handle.getAppId -> handle
-          SubmitResponse(handle.getAppId, submitRequest.appProperties)
+          val trackingUrl = YarnUtils.getYarnAppTrackingUrl(HadoopUtils.toApplicationId(handle.getAppId))
+          SubmitResponse(handle.getAppId, trackingUrl, submitRequest.appProperties)
         }
       case Failure(e) => throw e
     }

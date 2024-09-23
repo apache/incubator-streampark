@@ -17,13 +17,12 @@
 
 package org.apache.streampark.console.core.watcher;
 
+import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
-import org.apache.streampark.console.core.enums.SparkOperationEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
@@ -38,6 +37,7 @@ import org.apache.streampark.console.core.service.application.SparkApplicationMa
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hc.core5.util.Timeout;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -209,6 +209,8 @@ public class SparkAppHttpWatcher {
         } else {
             try {
                 String state = yarnAppInfo.getApp().getState();
+                FinalApplicationStatus appFinalStatus =
+                    HadoopUtils.toYarnFinalStatus(yarnAppInfo.getApp().getFinalStatus());
                 SparkAppStateEnum sparkAppStateEnum = SparkAppStateEnum.of(state);
                 if (SparkAppStateEnum.OTHER == sparkAppStateEnum) {
                     return;
@@ -220,6 +222,9 @@ public class SparkAppHttpWatcher {
                         application.getAppId(),
                         sparkAppStateEnum);
                     application.setEndTime(new Date());
+                    if (appFinalStatus.equals(FinalApplicationStatus.FAILED)) {
+                        sparkAppStateEnum = SparkAppStateEnum.FAILED;
+                    }
                 }
                 if (SparkAppStateEnum.RUNNING == sparkAppStateEnum) {
                     if (application.getStartTime() != null

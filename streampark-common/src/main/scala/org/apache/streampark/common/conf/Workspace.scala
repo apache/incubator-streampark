@@ -109,6 +109,8 @@ case class Workspace(storageType: StorageType) {
 
   lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
 
+  lazy val SPARK_APP_WORKSPACE = s"$WORKSPACE/spark-workspace"
+
   lazy val APP_FLINK = s"$WORKSPACE/flink"
 
   lazy val APP_SPARK = s"$WORKSPACE/spark"

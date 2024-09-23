@@ -336,14 +336,14 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public String getLocalAppHome() {
-        String path = String.format("%s/%s", Workspace.local().APP_WORKSPACE(), id.toString());
+        String path = String.format("%s/%s", Workspace.local().SPARK_APP_WORKSPACE(), id.toString());
         log.info("local appHome:{}", path);
         return path;
     }
 
     @JsonIgnore
     public String getRemoteAppHome() {
-        String path = String.format("%s/%s", Workspace.remote().APP_WORKSPACE(), id.toString());
+        String path = String.format("%s/%s", Workspace.remote().SPARK_APP_WORKSPACE(), id.toString());
         log.info("remote appHome:{}", path);
         return path;
     }

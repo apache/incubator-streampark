@@ -113,7 +113,8 @@ export const getBackupColumns = (): BasicColumn[] => [
 
 export const getOptionLogColumns = (): BasicColumn[] => [
   { title: 'Operation Name', dataIndex: 'optionName' },
-  { title: 'Cluster Id', dataIndex: 'yarnAppId' },
+  { title: 'Application Id', dataIndex: 'sparkAppId' },
+  { title: 'Tracking Url', dataIndex: 'trackUrl' },
   { title: 'Start Status', dataIndex: 'success' },
   { title: 'Option Time', dataIndex: 'optionTime' },
 ];
