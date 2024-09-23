@@ -527,7 +527,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
         application.setDynamicProperties(appParam.getDynamicProperties());
         application.setResolveOrder(appParam.getResolveOrder());
         application.setExecutionMode(appParam.getExecutionMode());
-        application.setClusterId(appParam.getClusterId());
         application.setFlinkImage(appParam.getFlinkImage());
         application.setK8sNamespace(appParam.getK8sNamespace());
         application.updateHotParams(appParam);
