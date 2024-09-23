@@ -44,6 +44,8 @@ public final class FlinkSQLEditor {
 
     public WebDriver driver;
 
+    public static final Integer FLINK_SQL_EDITOR_SLEEP_MILLISECONDS = 1000;
+
     public FlinkSQLEditor(WebDriver driver) {
         PageFactory.initElements(driver, this);
         this.driver = driver;
@@ -86,13 +88,13 @@ public final class FlinkSQLEditor {
                     .sendKeys(inputContent)
                     .sendKeys(Constants.LINE_SEPARATOR)
                     .perform();
-                Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
+                Thread.sleep(FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
             } else {
                 actions.moveToElement(flinkSqlEditor.get(flinkSqlEditorIndex))
                     .click()
                     .sendKeys(Constants.LINE_SEPARATOR)
                     .perform();
-                Thread.sleep(Constants.DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
+                Thread.sleep(FLINK_SQL_EDITOR_SLEEP_MILLISECONDS);
             }
         }
 

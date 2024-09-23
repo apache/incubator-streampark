@@ -146,7 +146,7 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
             .click();
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
+            .until(ExpectedConditions.elementToBeClickable(buildConfirmButton));
 
         buildConfirmButton.click();
 
@@ -156,11 +156,12 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
     @SneakyThrows
     public ProjectsPage deleteProject(String projectName) {
         waitForPageLoading();
-
         projectList.stream()
             .filter(it -> it.getText().contains(projectName))
             .flatMap(
-                it -> it.findElements(By.className("e2e-project-delete-btn")).stream())
+                it -> it
+                    .findElements(By.className("e2e-project-delete-btn"))
+                    .stream())
             .filter(WebElement::isDisplayed)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("No delete button in project list"))
@@ -170,7 +171,6 @@ public class ProjectsPage extends NavBarPage implements ResourcePage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
-
         return this;
     }
 

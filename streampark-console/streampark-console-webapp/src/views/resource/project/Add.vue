@@ -74,7 +74,7 @@
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button id="e2e-project-cancel-btn" @click="router.go(-1)">
+          <a-button @click="router.go(-1)">
             {{ t('common.cancelText') }}
           </a-button>
           <a-button

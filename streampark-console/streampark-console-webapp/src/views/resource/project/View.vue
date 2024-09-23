@@ -191,7 +191,7 @@
       const userStore = useUserStoreWithOut();
       const { t } = useI18n();
       const router = useRouter();
-      const { Swal, createConfirm, createMessage } = useMessage();
+      const { Swal, createMessage } = useMessage();
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
       const loading = ref(false);
@@ -253,61 +253,45 @@
         });
       }
       async function handleBuild(record: ProjectRecord) {
-        createConfirm({
-          iconType: 'warning',
-          title: t('flink.project.operationTips.buildProject'),
-          centered: true,
-          content: t('flink.project.operationTips.buildProjectMessage'),
-          onOk: async () => {
-            try {
-              await buildProject({
-                id: record.id,
-                socketId: buildUUID(),
-              });
-              Swal.fire({
-                icon: 'success',
-                title: t('flink.project.operationTips.projectIsbuildingMessage'),
-                showConfirmButton: false,
-                timer: 2000,
-              });
-            } catch (e) {
-              createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
-            }
-          },
-        });
+        try {
+          await buildProject({
+            id: record.id,
+            socketId: buildUUID(),
+          });
+          Swal.fire({
+            icon: 'success',
+            title: t('flink.project.operationTips.projectIsbuildingMessage'),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } catch (e) {
+          createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
+        }
       }
       const handleEdit = function (record: ProjectRecord) {
         router.push({ path: '/project/edit', query: { id: record.id } });
       };
       async function handleDelete(record: ProjectRecord) {
-        createConfirm({
-          iconType: 'warning',
-          title: t('flink.project.operationTips.deleteProject'),
-          content: t('flink.project.operationTips.deleteProjectMessage'),
-          centered: true,
-          onOk: async () => {
-            try {
-              const res = await deleteProject({ id: record.id });
-              if (res.data) {
-                Swal.fire({
-                  icon: 'success',
-                  title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
-                  showConfirmButton: false,
-                  timer: 2000,
-                });
-                reload();
-              } else {
-                Swal.fire(
-                  'Failed',
-                  t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
-                  'error',
-                );
-              }
-            } catch (e) {
-              createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
-            }
-          },
-        });
+        try {
+          const res = await deleteProject({ id: record.id });
+          if (res.data) {
+            Swal.fire({
+              icon: 'success',
+              title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            reload();
+          } else {
+            Swal.fire(
+              'Failed',
+              t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+              'error',
+            );
+          }
+        } catch (e) {
+          createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
+        }
       }
 
       const handleQuery = function (val: string | undefined) {
