@@ -50,7 +50,7 @@ public class Flink118OnRemoteClusterDeployTest {
 
     private static final String flinkJobManagerUrl = "http://jobmanager:8081";
 
-    private static final ClusterDetailForm.ExecutionMode executionMode = ClusterDetailForm.ExecutionMode.REMOTE;
+    private static final ClusterDetailForm.ExecutionMode executionMode = ClusterDetailForm.ExecutionMode.STANDALONE;
 
     @BeforeAll
     public static void setUp() {
