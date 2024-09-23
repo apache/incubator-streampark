@@ -56,7 +56,8 @@ object SparkShimsProxy extends Logger {
     "ch.qos.logback",
     "org.xml",
     "org.w3c",
-    "org.apache.hadoop")
+    "org.apache.hadoop",
+    "org.apache.spark.launcher")
 
   def proxy[T](sparkVersion: SparkVersion, func: ClassLoader => T): T = {
     val shimsClassLoader = getSparkShimsClassLoader(sparkVersion)

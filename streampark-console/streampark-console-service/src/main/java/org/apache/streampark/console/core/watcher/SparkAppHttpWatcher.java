@@ -220,7 +220,6 @@ public class SparkAppHttpWatcher {
                         application.getAppId(),
                         sparkAppStateEnum);
                     application.setEndTime(new Date());
-                    doPersistRunningOperation(application);
                 }
                 if (SparkAppStateEnum.RUNNING == sparkAppStateEnum) {
                     if (application.getStartTime() != null
@@ -272,16 +271,6 @@ public class SparkAppHttpWatcher {
             WATCHING_APPS.put(application.getId(), application);
         }
         applicationManageService.persistMetrics(application);
-    }
-
-    private void doPersistRunningOperation(SparkApplication application) {
-        SparkApplicationLog applicationLog = new SparkApplicationLog();
-        applicationLog.setOptionName(SparkOperationEnum.RUNNING.getValue());
-        applicationLog.setAppId(application.getId());
-        applicationLog.setOptionTime(new Date());
-        applicationLog.setSparkAppId(application.getAppId());
-        application.setOptionTime(new Date());
-        applicationLogService.save(applicationLog);
     }
 
     private void cleanOptioning(SparkOptionStateEnum optionStateEnum, Long key) {

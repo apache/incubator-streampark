@@ -19,7 +19,7 @@ package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
 import org.apache.streampark.common.enums.SparkExecutionMode
-import org.apache.streampark.common.util.{ExceptionUtils, HadoopUtils}
+import org.apache.streampark.common.util.HadoopUtils
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
