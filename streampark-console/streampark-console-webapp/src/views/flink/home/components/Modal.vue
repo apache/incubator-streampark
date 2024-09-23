@@ -28,6 +28,7 @@
   const { t } = useI18n();
   const { Swal } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
+    name: 'flink_env',
     colon: true,
     showActionButtonGroup: false,
     layout: 'vertical',
@@ -165,6 +166,7 @@
 </script>
 <template>
   <BasicModal
+    :okButtonProps="{ id: 'e2e-flinkenv-submit-btn' }"
     :width="600"
     centered
     @register="registerModalInner"

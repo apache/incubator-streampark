@@ -120,7 +120,7 @@ export const useClusterSetting = () => {
           placeholder: t('setting.flinkCluster.placeholder.executionMode'),
           options: [
             {
-              label: 'remote',
+              label: 'standalone',
               value: ExecModeEnum.STANDALONE,
             },
             { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },

@@ -50,9 +50,9 @@ public class ClusterDetailForm {
     public <T> T addCluster(ExecutionMode executionMode) {
         buttonExecutionModeDropdown.click();
         switch (executionMode) {
-            case REMOTE:
+            case STANDALONE:
                 selectExecutionMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc))
+                    .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.STANDALONE.desc))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException(
                         String.format("Execution Mode not found: %s", executionMode.desc)))
@@ -75,7 +75,7 @@ public class ClusterDetailForm {
     @Getter
     public enum ExecutionMode {
 
-        REMOTE("remote"),
+        STANDALONE("standalone"),
         YARN_SESSION("yarn session"),
         KUBERNETES_SESSION(
             "kubernetes session");

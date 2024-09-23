@@ -164,7 +164,11 @@
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
         <Col :span="5" :offset="13" class="text-right">
-          <a-button type="primary" @click="() => go('/flink/add_cluster')">
+          <a-button
+            id="e2e-flinkcluster-create-btn"
+            type="primary"
+            @click="() => go('/flink/add_cluster')"
+          >
             <PlusOutlined />
             {{ t('common.add') }}
           </a-button>
@@ -200,6 +204,7 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-flinkcluster-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'cluster:update',
                 tooltip: t('setting.flinkCluster.edit'),
@@ -207,6 +212,7 @@
                 onClick: handleEditCluster.bind(null, record),
               },
               {
+                class: 'e2e-flinkcluster-shutdown-btn',
                 icon: 'ant-design:pause-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: handleIsStart(record),
@@ -215,6 +221,7 @@
                 onClick: handleShutdownCluster.bind(null, record),
               },
               {
+                class: 'e2e-flinkcluster-start-btn',
                 icon: 'ant-design:play-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: !handleIsStart(record),
@@ -231,10 +238,14 @@
                 target: '_blank',
               },
               {
+                class: 'e2e-flinkcluster-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-flinkcluster-delete-confirm',
+                  },
                   title: t('setting.flinkCluster.delete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
