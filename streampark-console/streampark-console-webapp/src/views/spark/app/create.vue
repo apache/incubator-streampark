@@ -69,7 +69,7 @@
       tags: values.tags,
       yarnQueue: values.yarnQueue,
       resourceFrom: ResourceFromEnum.UPLOAD,
-      config: null,
+      config: values.config,
       appProperties: values.appProperties,
       appArgs: values.args,
       hadoopUser: values.hadoopUser,
@@ -102,9 +102,9 @@
   async function handleAppSubmit(formValue: Recordable) {
     let config = formValue.configOverride;
     if (config != null && config !== undefined && config.trim() != '') {
-      formValue.config = encryptByBase64(config);
+      config = encryptByBase64(config);
     } else {
-      formValue.config = null;
+      config = null;
     }
     if (formValue.jobType == JobTypeEnum.SQL) {
       if (formValue.sparkSql == null || formValue.sparkSql.trim() === '') {
@@ -116,9 +116,15 @@
           throw new Error(access);
         }
       }
-      handleSQLMode(formValue);
+      handleSQLMode({
+        ...formValue,
+        config,
+      });
     } else {
-      handleCustomJobMode(formValue);
+      handleCustomJobMode({
+        ...formValue,
+        config,
+      });
     }
   }
   /* send create request */
