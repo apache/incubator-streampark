@@ -225,7 +225,9 @@
           pageSize: params.pageSize,
         });
       }
+
       const [registerTable, { reload, getLoading, setPagination }] = useTable({
+        rowKey: 'id',
         api: getRequestList,
         columns: [
           { dataIndex: 'name', title: t('flink.project.form.projectName') },

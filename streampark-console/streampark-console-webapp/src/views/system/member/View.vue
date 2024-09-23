@@ -128,6 +128,7 @@
     };
   });
   const [registerTable, { reload }] = useTable({
+    rowKey: 'id',
     api: fetchMemberList,
     columns: [
       { title: t('system.member.table.userName'), dataIndex: 'userName', sorter: true },
@@ -135,7 +136,6 @@
       { title: t('common.createTime'), dataIndex: 'createTime', sorter: true },
       { title: t('common.modifyTime'), dataIndex: 'modifyTime', sorter: true },
     ],
-    rowKey: 'id',
     pagination: true,
     useSearchForm: true,
     showTableSetting: false,

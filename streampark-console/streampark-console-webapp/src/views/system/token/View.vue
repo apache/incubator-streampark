@@ -86,6 +86,7 @@
       const [registerModal, { openModal }] = useModal();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
+        rowKey: 'id',
         api: fetTokenList,
         // beforeFetch: (params) => {
         //   if (params.user) {
@@ -103,7 +104,6 @@
           submitOnChange: true,
           showActionButtonGroup: false,
         },
-        rowKey: 'tokenId',
         pagination: true,
         striped: false,
         useSearchForm: true,

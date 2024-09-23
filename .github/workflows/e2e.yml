@@ -130,6 +130,28 @@ jobs:
             class: org.apache.streampark.e2e.cases.TokenManagementTest
           - name: UploadManagementTest
             class: org.apache.streampark.e2e.cases.UploadManagementTest
+          - name: ProjectsManagementTest
+            class: org.apache.streampark.e2e.cases.ProjectsManagementTest
+          - name: VariableManagementTest
+            class: org.apache.streampark.e2e.cases.VariableManagementTest
+          - name: Flink118OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnRemoteClusterDeployTest
+          - name: Flink117OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
+          - name: Flink116OnRemoteClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnRemoteClusterDeployTest
+          - name: Flink116OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink116OnYarnClusterDeployTest
+          - name: Flink117OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink117OnYarnClusterDeployTest
+          - name: Flink118OnYarnClusterDeployTest
+            class: org.apache.streampark.e2e.cases.Flink118OnYarnClusterDeployTest
+          - name: FlinkSQL116OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL116OnYarnTest
+          - name: FlinkSQL117OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL117OnYarnTest
+          - name: FlinkSQL118OnYarnTest
+            class: org.apache.streampark.e2e.cases.FlinkSQL118OnYarnTest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:

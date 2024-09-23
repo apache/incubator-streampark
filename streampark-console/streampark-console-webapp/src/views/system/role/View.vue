@@ -107,6 +107,7 @@
       const { createMessage } = useMessage();
       const useStore = useUserStoreWithOut();
       const [registerTable, { reload }] = useTable({
+        rowKey: 'roleId',
         api: getRoleListByPage,
         columns,
         formConfig: {
