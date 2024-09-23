@@ -74,10 +74,16 @@
     >
       <template #formFooter>
         <div class="flex items-center w-full justify-center">
-          <a-button @click="router.go(-1)">
+          <a-button id="e2e-project-cancel-btn" @click="router.go(-1)">
             {{ t('common.cancelText') }}
           </a-button>
-          <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">
+          <a-button
+            id="e2e-project-submit-btn"
+            class="ml-4"
+            :loading="getLoading"
+            type="primary"
+            @click="submit()"
+          >
             {{ t('common.submitText') }}
           </a-button>
         </div>

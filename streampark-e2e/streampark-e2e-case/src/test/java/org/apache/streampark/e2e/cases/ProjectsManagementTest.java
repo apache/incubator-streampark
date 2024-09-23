@@ -43,8 +43,6 @@ public class ProjectsManagementTest {
 
     private static final String editedProjectName = "e2e_test_project_edited";
 
-    private static final String cvs = "GitHub/GitLab";
-
     private static final String url = "https://github.com/apache/incubator-streampark-quickstart";
 
     private static final String branch = "dev";
@@ -56,7 +54,7 @@ public class ProjectsManagementTest {
 
     @BeforeAll
     public static void setup() {
-        ProjectsPage projectsPage = new LoginPage(browser)
+        new LoginPage(browser)
             .login()
             .goToNav(ResourcePage.class)
             .goToTab(ProjectsPage.class);
@@ -67,7 +65,7 @@ public class ProjectsManagementTest {
     void testCreateProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
-        projectsPage.createProject(projectName, cvs, url, branch, buildArgument, description);
+        projectsPage.createProject(projectName, url, branch, buildArgument, description);
 
         await()
             .untilAsserted(
@@ -82,7 +80,7 @@ public class ProjectsManagementTest {
     void testEditProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
-        projectsPage.editProject(projectName, editedProjectName, cvs, url, branch, buildArgument, description);
+        projectsPage.editProject(projectName, editedProjectName);
 
         await()
             .untilAsserted(

@@ -103,16 +103,21 @@
                 onClick: handleViewLog.bind(null, record),
               },
               {
+                class: 'e2e-project-build-btn',
                 icon: 'ant-design:thunderbolt-outlined',
                 auth: 'project:build',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-project-build-confirm',
+                  },
                   title: t('flink.project.operationTips.buildProjectMessage'),
                   placement: 'left',
                   confirm: handleBuild.bind(null, record),
                 },
               },
               {
+                class: 'e2e-project-edit-btn',
                 icon: 'clarity:note-edit-line',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:update',
@@ -120,12 +125,16 @@
                 onClick: handleEdit.bind(null, record),
               },
               {
+                class: 'e2e-project-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-project-delete-confirm',
+                  },
                   title: t('flink.project.operationTips.deleteProjectMessage'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
