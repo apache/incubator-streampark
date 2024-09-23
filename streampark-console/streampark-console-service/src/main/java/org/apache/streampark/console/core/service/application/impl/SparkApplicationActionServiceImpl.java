@@ -360,6 +360,7 @@ public class SparkApplicationActionServiceImpl
                     application.setAppId(response.sparkAppId());
                 }
                 applicationLog.setSparkAppId(response.sparkAppId());
+                applicationLog.setTrackUrl(response.trackingUrl());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
 
@@ -480,7 +481,7 @@ public class SparkApplicationActionServiceImpl
                     }
                 }
 
-                if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
+                if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
                             sparkUserJar = String.format(

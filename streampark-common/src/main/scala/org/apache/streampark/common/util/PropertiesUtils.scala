@@ -411,18 +411,15 @@ object PropertiesUtils extends Logger {
   }
 
   /** extract spark configuration from sparkApplication.appArgs */
-  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] =
-    new JavaArrayList[String](extractSparkArguments(arguments))
-
-  @Nonnull def extractSparkArguments(arguments: String): List[String] = {
-    if (StringUtils.isEmpty(arguments)) List.empty[String]
+  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] = {
+    val list = new JavaArrayList[String]()
+    if (StringUtils.isEmpty(arguments)) list
     else {
-      val list = List[String]()
       arguments.split(SPARK_ARGUMENT_REGEXP) match {
         case d if Utils.isNotEmpty(d) =>
           d.foreach(x => {
             if (x.nonEmpty) {
-              list :+ x
+              list.add(x)
             }
           })
         case _ =>

@@ -19,6 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 
 import org.springframework.http.ResponseEntity;
 
@@ -27,6 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 public interface ProxyService {
 
     ResponseEntity<?> proxyFlink(HttpServletRequest request, Application app) throws Exception;
+
+    ResponseEntity<?> proxyYarn(HttpServletRequest request, SparkApplicationLog log) throws Exception;
 
     ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception;
 

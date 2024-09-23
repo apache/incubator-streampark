@@ -19,11 +19,12 @@ package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
 import org.apache.streampark.common.enums.SparkExecutionMode
-import org.apache.streampark.common.util.HadoopUtils
+import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
 import org.apache.streampark.spark.client.bean._
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
 
@@ -74,17 +75,23 @@ object YarnClient extends SparkClientTrait {
     // 3) launch
     Try(launch(launcher)) match {
       case Success(handle: SparkAppHandle) =>
-        logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.appName} is submit successful, " +
-          s"appid: ${handle.getAppId}, " +
-          s"state: ${handle.getState}")
-        sparkHandles += handle.getAppId -> handle
-        SubmitResponse(handle.getAppId, submitRequest.appProperties)
+        if (handle.getError.isPresent) {
+          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.appName} submit failed.")
+          throw handle.getError.get()
+        } else {
+          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${submitRequest.appName} submit successfully, " +
+            s"appid: ${handle.getAppId}, " +
+            s"state: ${handle.getState}")
+          sparkHandles += handle.getAppId -> handle
+          val trackingUrl = YarnUtils.getYarnAppTrackingUrl(HadoopUtils.toApplicationId(handle.getAppId))
+          SubmitResponse(handle.getAppId, trackingUrl, submitRequest.appProperties)
+        }
       case Failure(e) => throw e
     }
   }
 
   private def launch(sparkLauncher: SparkLauncher): SparkAppHandle = {
-    logger.info("[StreamPark][Spark][YarnClient] The spark job starting")
+    logger.info("[StreamPark][Spark][YarnClient] The spark job start submitting")
     val submitFinished: CountDownLatch = new CountDownLatch(1)
     val sparkAppHandle = sparkLauncher.startApplication(new SparkAppHandle.Listener() {
       override def infoChanged(sparkAppHandle: SparkAppHandle): Unit = {}
@@ -92,13 +99,21 @@ object YarnClient extends SparkClientTrait {
         if (handle.getAppId != null) {
           logger.info(s"${handle.getAppId} stateChanged : ${handle.getState.toString}")
         } else {
-          logger.info("stateChanged :{}", handle.getState.toString)
-        }
-        if (SparkAppHandle.State.FAILED == handle.getState) {
-          logger.error("Task run failure stateChanged :{}", handle.getState.toString)
+          logger.info("stateChanged : {}", handle.getState.toString)
         }
         if (handle.getAppId != null && submitFinished.getCount != 0) {
+          // Task submission succeeded
           submitFinished.countDown()
+        }
+        if (handle.getState.isFinal) {
+          if (StringUtils.isNotBlank(handle.getAppId) && sparkHandles.containsKey(handle.getAppId)) {
+            sparkHandles.remove(handle.getAppId)
+          }
+          if (submitFinished.getCount != 0) {
+            // Task submission failed
+            submitFinished.countDown()
+          }
+          logger.info("Task is end, final state : {}", handle.getState.toString)
         }
       }
     })
@@ -107,7 +122,11 @@ object YarnClient extends SparkClientTrait {
   }
 
   private def prepareSparkLauncher(submitRequest: SubmitRequest) = {
-    new SparkLauncher()
+    val env = new JavaHashMap[String, String]()
+    if (StringUtils.isNotBlank(submitRequest.hadoopUser)) {
+      env.put("HADOOP_USER_NAME", submitRequest.hadoopUser)
+    }
+    new SparkLauncher(env)
       .setSparkHome(submitRequest.sparkVersion.sparkHome)
       .setAppResource(submitRequest.userJarPath)
       .setMainClass(submitRequest.appMain)

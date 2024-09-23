@@ -124,6 +124,12 @@
         </where>
     </select>
 
+    <select id="selectApp" resultType="org.apache.streampark.console.core.entity.SparkApplication" parameterType="long">
+        select *
+        from t_spark_app
+        where id = #{id}
+    </select>
+
     <select id="selectAppsByTeamId" resultType="org.apache.streampark.console.core.entity.SparkApplication" parameterType="java.lang.Long">
         select
             t.*,

@@ -21,4 +21,5 @@ import org.apache.streampark.common.util.Implicits.JavaMap
 
 case class SubmitResponse(
     var sparkAppId: String,
+    trackingUrl: String,
     sparkProperties: JavaMap[String, String])
