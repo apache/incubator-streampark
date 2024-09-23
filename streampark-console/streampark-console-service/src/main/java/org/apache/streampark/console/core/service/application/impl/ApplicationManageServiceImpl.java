@@ -558,7 +558,6 @@ public class ApplicationManageServiceImpl extends ServiceImpl<ApplicationMapper,
                 break;
             case REMOTE:
             case YARN_SESSION:
-                application.setFlinkClusterId(appParam.getFlinkClusterId());
             case KUBERNETES_NATIVE_SESSION:
                 application.setFlinkClusterId(appParam.getFlinkClusterId());
                 break;
