@@ -96,11 +96,11 @@
 </script>
 <template>
   <BasicDrawer title="Flink Conf" @register="registerDrawer" width="40%" placement="right">
-    <div style="padding-bottom: 15px">
+    <div class="py-15px pl-10px">
       {{ t('setting.flinkHome.title') }}: &nbsp;&nbsp; {{ flinkInfo.flinkHome }}
     </div>
     <div>
-      {{ t('setting.flinkHome.sync') }} :
+      <div class="pl-10px">{{ t('setting.flinkHome.sync') }} :</div>
       <div class="py-15px">
         <div ref="conf" style="height: 120px"></div>
         <a-button

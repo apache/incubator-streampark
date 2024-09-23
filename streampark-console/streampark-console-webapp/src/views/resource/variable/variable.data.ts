@@ -36,16 +36,12 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'variableCode',
-    label: t('flink.variable.table.variableCode'),
+    label: '',
     component: 'Input',
-    componentProps: { placeholder: t('flink.variable.table.variableCodePlaceholder') },
-    colProps: { span: 8 },
-  },
-  {
-    field: 'description',
-    label: t('common.description'),
-    component: 'Input',
-    componentProps: { placeholder: t('flink.variable.table.descriptionPlaceholder') },
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('flink.variable.searchByCode'),
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];

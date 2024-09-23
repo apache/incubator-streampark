@@ -15,74 +15,154 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper contentFullHeight contentBackground contentClass="px-20px">
+  <PageWrapper
+    contentFullHeight
+    fixed-height
+    content-background
+    contentClass="px-10px"
+    class="sp-project"
+  >
     <a-card class="header" :bordered="false">
-      <template #extra>
-        <a-radio-group v-model:value="queryParams.buildState">
-          <a-radio-button
-            v-for="item in buttonList"
-            @click="handleQuery(item.key)"
-            :value="item.key"
-            :key="item.key"
-            >{{ item.label }}</a-radio-button
-          >
-        </a-radio-group>
-        <a-input-search
-          v-model:value="searchValue"
-          @search="handleSearch"
-          :placeholder="t('flink.project.searchPlaceholder')"
-          class="search-input"
-        />
+      <template #title>
+        <div class="flex items-center justify-between">
+          <div>
+            <a-radio-group v-model:value="queryParams.buildState">
+              <a-radio-button
+                v-for="item in buttonList"
+                @click="handleQuery(item.key)"
+                :value="item.key"
+                :key="item.key"
+                >{{ item.label }}</a-radio-button
+              >
+            </a-radio-group>
+            <a-input
+              v-model:value="queryParams.name"
+              allow-clear
+              @search="() => reload()"
+              :placeholder="t('flink.project.searchPlaceholder')"
+              class="search-input"
+            />
+          </div>
+          <div class="operate bg-white" v-auth="'project:create'">
+            <a-button id="e2e-project-create-btn" type="primary" class="w-full" @click="onAdd">
+              <Icon icon="ant-design:plus-outlined" />
+              {{ t('common.add') }}
+            </a-button>
+          </div>
+        </div>
       </template>
     </a-card>
-    <div class="operate pt-20px bg-white" v-auth="'project:create'">
-      <a-button id="e2e-project-create-btn" type="dashed" style="width: 100%" @click="onAdd">
-        <Icon icon="ant-design:plus-outlined" />
-        {{ t('common.add') }}
-      </a-button>
-    </div>
-    <a-card :bordered="false">
-      <a-spin :spinning="loading">
-        <a-list>
-          <ListItem
-            :key="item.id"
-            v-for="item in projectDataSource"
-            :item="item"
-            @view-log="handleViewLog"
-            @success="handleListItemSuccess"
+    <BasicTable @register="registerTable">
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'branches'">
+          <div v-if="record.refs">
+            <a-tag
+              v-if="record.refs?.startsWith('refs/tags/') > 0"
+              color="green"
+              style="border-radius: 4px"
+            >
+              {{ record.refs?.replace('refs/tags/', '') }}
+            </a-tag>
+            <a-tag v-else color="blue" style="border-radius: 4px">
+              {{ record.refs?.replace('refs/heads/', '') }}
+            </a-tag>
+          </div>
+          <span v-else>-</span>
+        </template>
+        <template v-if="column.dataIndex === 'type'">
+          <a-badge
+            class="build-badge"
+            v-if="record.buildState == BuildStateEnum.NEED_REBUILD"
+            count="NEW"
+            title="this project has changed, need rebuild"
+          >
+            <svg-icon class="avatar" :name="projectMap[record.type]" :size="20" />
+          </a-badge>
+          <svg-icon v-else class="avatar" :name="projectMap[record.type]" :size="20" />
+          {{ projectMap[record.type].toUpperCase() }}
+        </template>
+        <template v-if="column.dataIndex === 'buildState'">
+          <a-badge
+            status="success"
+            title="installing"
+            class="mr-10px"
+            v-if="record.buildState == BuildStateEnum.BUILDING"
           />
-        </a-list>
-        <div class="text-center mt-10px">
-          <a-pagination
-            class="w-full"
-            showLessItems
-            hideOnSinglePage
-            :pageSize="pageInfo.pageSize"
-            :total="pageInfo.total"
-            @change="handlePageChange"
+          <a-tag
+            class="bold-tag"
+            :color="buildStateMap[record.buildState]?.color || '#f5222d'"
+            :class="buildStateMap[record.buildState]?.className"
+          >
+            {{ buildStateMap[record.buildState]?.label || t('flink.project.projectStatus.failed') }}
+          </a-tag>
+        </template>
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'ant-design:code-outlined',
+                auth: 'project:build',
+                tooltip: t('flink.project.operationTips.seeBuildLog'),
+                onClick: handleViewLog.bind(null, record),
+              },
+              {
+                icon: 'ant-design:thunderbolt-outlined',
+                auth: 'project:build',
+                ifShow: record.buildState !== BuildStateEnum.BUILDING,
+                popConfirm: {
+                  title: t('flink.project.operationTips.buildProjectMessage'),
+                  placement: 'left',
+                  confirm: handleBuild.bind(null, record),
+                },
+              },
+              {
+                icon: 'clarity:note-edit-line',
+                ifShow: record.buildState !== BuildStateEnum.BUILDING,
+                auth: 'project:update',
+                tooltip: t('common.edit'),
+                onClick: handleEdit.bind(null, record),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('common.delText'),
+                ifShow: record.buildState !== BuildStateEnum.BUILDING,
+                auth: 'project:delete',
+                popConfirm: {
+                  title: t('flink.project.operationTips.deleteProjectMessage'),
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
           />
-        </div>
-      </a-spin>
-    </a-card>
+        </template>
+      </template>
+    </BasicTable>
     <LogModal @register="registerLogModal" />
   </PageWrapper>
 </template>
 <script lang="ts">
-  import { defineComponent, onUnmounted, reactive, ref, unref, watch } from 'vue';
+  import { defineComponent, nextTick, onUnmounted, reactive, ref, watch } from 'vue';
 
   import { PageWrapper } from '/@/components/Page';
-  import { statusList } from './project.data';
-  import { RadioGroup, Radio, Input, Card, List, Spin, Pagination } from 'ant-design-vue';
-  import { getList } from '/@/api/resource/project';
+  import { buildStateMap, statusList } from './project.data';
+  import { RadioGroup, Radio, Card, Tag, Badge, Input } from 'ant-design-vue';
+  import { buildProject, deleteProject, getList } from '/@/api/resource/project';
   import { ProjectRecord } from '/@/api/resource/project/model/projectModel';
-  import ListItem from './components/ListItem.vue';
-  import Icon from '/@/components/Icon/src/Icon.vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { useTimeoutFn } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useModal } from '/@/components/Modal';
   import LogModal from './components/LogModal.vue';
   import { useUserStoreWithOut } from '/@/store/modules/user';
+  import { BasicTable, TableAction, useTable } from '/@/components/Table';
+  import { BuildStateEnum } from '/@/enums/flinkEnum';
+  import { buildUUID } from '/@/utils/uuid';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useRouter } from 'vue-router';
+  import { ProjectTypeEnum } from '/@/enums/projectEnum';
+  import Icon, { SvgIcon } from '/@/components/Icon';
 
   export default defineComponent({
     name: 'ProjectView',
@@ -90,19 +170,22 @@
       PageWrapper,
       ARadioGroup: RadioGroup,
       ARadioButton: Radio.Button,
-      AInputSearch: Input.Search,
-      APagination: Pagination,
       ACard: Card,
-      AList: List,
-      ListItem,
-      ASpin: Spin,
+      ATag: Tag,
+      ABadge: Badge,
+      AInput: Input,
       Icon,
+      SvgIcon,
       LogModal,
+      TableAction,
+      BasicTable,
     },
     setup() {
       const go = useGo();
       const userStore = useUserStoreWithOut();
       const { t } = useI18n();
+      const router = useRouter();
+      const { Swal, createMessage } = useMessage();
       const [registerLogModal, { openModal: openLogModal }] = useModal();
       const buttonList = reactive(statusList);
       const loading = ref(false);
@@ -119,46 +202,104 @@
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);
+      const projectMap = {
+        [ProjectTypeEnum.FLINK]: 'flink',
+        [ProjectTypeEnum.SPARK]: 'spark',
+      };
 
       function onAdd() {
         go(`/project/add`);
       }
 
-      function handleSearch(value: string) {
-        queryParams.name = value;
-        pageInfo.currentPage = 1;
-        queryParams.name = searchValue.value;
-        queryData();
-      }
-
-      function queryData(showLoading = true) {
-        if (showLoading) loading.value = true;
-        getList({
+      async function getRequestList(params: Recordable) {
+        return getList({
           ...queryParams,
-          pageNum: pageInfo.currentPage,
-          pageSize: pageInfo.pageSize,
-        }).then((res) => {
-          loading.value = false;
-          pageInfo.total = Number(res.total);
-          projectDataSource.value = res.records;
+          pageNum: params.pageNum,
+          pageSize: params.pageSize,
         });
+      }
+      const [registerTable, { reload, getLoading, setPagination }] = useTable({
+        api: getRequestList,
+        columns: [
+          { dataIndex: 'name', title: t('flink.project.form.projectName') },
+          { dataIndex: 'type', title: t('flink.project.form.projectType') },
+          { dataIndex: 'branches', title: t('flink.project.form.branches') },
+          { dataIndex: 'lastBuild', title: t('flink.project.form.lastBuild') },
+          { dataIndex: 'buildState', title: t('flink.project.form.buildState') },
+        ],
+        rowKey: 'id',
+        useSearchForm: false,
+        striped: false,
+        canResize: false,
+        bordered: false,
+        showIndexColumn: false,
+        actionColumn: {
+          width: 200,
+          title: t('component.table.operation'),
+          dataIndex: 'action',
+        },
+      });
+
+      async function handleBuild(record: ProjectRecord) {
+        try {
+          await buildProject({
+            id: record.id,
+            socketId: buildUUID(),
+          });
+          Swal.fire({
+            icon: 'success',
+            title: t('flink.project.operationTips.projectIsbuildingMessage'),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } catch (e) {
+          createMessage.error(t('flink.project.operationTips.projectIsbuildFailedMessage'));
+        }
+      }
+      const handleEdit = function (record: ProjectRecord) {
+        router.push({ path: '/flink/project/edit', query: { id: record.id } });
+      };
+      async function handleDelete(record: ProjectRecord) {
+        try {
+          const res = await deleteProject({ id: record.id });
+          if (res.data) {
+            Swal.fire({
+              icon: 'success',
+              title: t('flink.project.operationTips.deleteProjectSuccessMessage'),
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            reload();
+          } else {
+            Swal.fire(
+              'Failed',
+              t('flink.project.operationTips.deleteProjectFailedDetailMessage'),
+              'error',
+            );
+          }
+        } catch (e) {
+          createMessage.error(t('flink.project.operationTips.deleteProjectFailedMessage'));
+        }
       }
 
       const handleQuery = function (val: string | undefined) {
-        pageInfo.currentPage = 1;
+        setPagination({ current: 1 });
         queryParams.buildState = val!;
-        queryParams.name = searchValue.value;
-        queryData();
+        reload();
       };
 
-      const { start, stop } = useTimeoutFn(
-        () => {
-          if (!unref(loading)) queryData(false);
-          start();
-        },
-        2000,
-        { immediate: false },
-      );
+      function handlePageDataReload(polling = false) {
+        nextTick(() => {
+          reload({ polling });
+        });
+      }
+
+      const { start, stop } = useTimeoutFn(() => {
+        if (!getLoading()) {
+          handlePageDataReload(true);
+        }
+        start();
+      }, 2000);
       /* View log */
       function handleViewLog(value: Recordable) {
         openLogModal(true, { project: value });
@@ -167,26 +308,23 @@
       watch(
         () => userStore.getTeamId,
         (val) => {
-          if (val) queryData();
+          if (val) {
+            setPagination({ current: 1 });
+            reload();
+          }
         },
       );
-      queryData();
-      start();
 
       onUnmounted(() => {
         stop();
       });
-      function handlePageChange(val: number) {
-        pageInfo.currentPage = val;
-        queryParams.name = searchValue.value;
-        queryData();
-      }
-      function handleListItemSuccess() {
-        pageInfo.currentPage = 1;
-        queryData();
-      }
+
       return {
         t,
+        BuildStateEnum,
+        buildStateMap,
+        registerTable,
+        reload,
         searchValue,
         pageInfo,
         buildState,
@@ -196,12 +334,12 @@
         projectDataSource,
         loading,
         onAdd,
-        handleSearch,
         registerLogModal,
         handleViewLog,
-        queryData,
-        handlePageChange,
-        handleListItemSuccess,
+        handleBuild,
+        handleEdit,
+        handleDelete,
+        projectMap,
       };
     },
   });

@@ -27,6 +27,7 @@
     </parent>
 
     <artifactId>streampark-registry-api</artifactId>
+    <name>StreamPark : Console Registry API</name>
 
     <dependencies>
         <dependency>
@@ -34,4 +35,5 @@
             <artifactId>streampark-common_${scala.binary.version}</artifactId>
         </dependency>
     </dependencies>
+
 </project>

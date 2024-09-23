@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class RoleManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String newRoleName = "new_role";
 
@@ -51,43 +45,43 @@ public class RoleManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(RoleManagementPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
         roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .as("Role list should contain newly-created role")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newRoleName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
         roleManagementPage.createRole(newRoleName, newDescription, existMenuName);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.errorMessageList())
+                () -> assertThat(roleManagementPage.errorMessageList)
                     .as("Role Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "Sorry, the role name already exists")));
 
-        roleManagementPage.createRoleForm().buttonCancel().click();
+        roleManagementPage.createRoleForm.buttonCancel.click();
     }
     @Test
-    @Order(30)
+    @Order(3)
     void testEditRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
 
@@ -97,14 +91,14 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .as("Role list should contain edited role")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newEditDescription)));
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteRole() {
         final RoleManagementPage roleManagementPage = new RoleManagementPage(browser);
 
@@ -112,7 +106,7 @@ public class RoleManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(roleManagementPage.roleList())
+                () -> assertThat(roleManagementPage.roleList)
                     .extracting(WebElement::getText)
                     .noneMatch(it -> it.contains(newRoleName)));
     }

@@ -14,16 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
-
-  export default defineComponent({
-    name: 'FlinkModal',
-  });
-</script>
 <script lang="ts" setup name="FlinkModal">
   import { h, ref } from 'vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { BasicForm, useForm } from '/@/components/Form';
   import { SvgIcon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -35,12 +28,10 @@
   const { t } = useI18n();
   const { Swal } = useMessage();
   const [registerForm, { setFieldsValue, validate, resetFields }] = useForm({
-    labelWidth: 120,
     colon: true,
     showActionButtonGroup: false,
-    labelCol: { lg: 7, sm: 7 },
-    wrapperCol: { lg: 16, sm: 4 },
-    baseColProps: { span: 24 },
+    layout: 'vertical',
+    baseColProps: { span: 22, offset: 1 },
     schemas: [
       {
         field: 'flinkName',
@@ -77,6 +68,7 @@
         componentProps: {
           placeholder: t('setting.flinkHome.descriptionPlaceholder'),
           allowClear: true,
+          rows: 3,
         },
       },
     ],
@@ -91,47 +83,38 @@
 
   /* form submit */
   async function handleSubmit() {
-    changeOkLoading(true);
-    let formValue;
     try {
-      formValue = await validate();
-    } catch (error) {
-      console.warn('validate error:', error);
-      return;
-    } finally {
-      changeOkLoading(false);
-    }
-    // Detection environment
-    const { data: resp } = await fetchCheckEnv({
-      id: versionId.value,
-      flinkName: formValue.flinkName,
-      flinkHome: formValue.flinkHome,
-    });
-    const checkResp = parseInt(resp.data);
-    if (checkResp !== FlinkEnvCheckEnum.OK) {
-      switch (checkResp) {
-        case FlinkEnvCheckEnum.INVALID_PATH:
-          Swal.fire(
-            'Failed',
-            t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'),
-            'error',
-          );
-          break;
-        case FlinkEnvCheckEnum.NAME_REPEATED:
-          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsRepeated'), 'error');
-          break;
-        case FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND:
-          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistNotFound'), 'error');
-          break;
-        case FlinkEnvCheckEnum.FLINK_DIST_REPEATED:
-          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
-          break;
+      changeOkLoading(true);
+      const formValue = await validate();
+      // Detection environment
+      const { data: resp } = await fetchCheckEnv({
+        id: versionId.value,
+        flinkName: formValue.flinkName,
+        flinkHome: formValue.flinkHome,
+      });
+      const checkResp = parseInt(resp.data);
+      if (checkResp !== FlinkEnvCheckEnum.OK) {
+        switch (checkResp) {
+          case FlinkEnvCheckEnum.INVALID_PATH:
+            Swal.fire(
+              'Failed',
+              t('setting.flinkHome.operateMessage.flinkHomePathIsInvalid'),
+              'error',
+            );
+            break;
+          case FlinkEnvCheckEnum.NAME_REPEATED:
+            Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsRepeated'), 'error');
+            break;
+          case FlinkEnvCheckEnum.FLINK_DIST_NOT_FOUND:
+            Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistNotFound'), 'error');
+            break;
+          case FlinkEnvCheckEnum.FLINK_DIST_REPEATED:
+            Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkDistIsRepeated'), 'error');
+            break;
+        }
+        changeOkLoading(false);
+        return;
       }
-      changeOkLoading(false);
-      return;
-    }
-
-    try {
       let message: string;
       let success = false;
       // create
@@ -172,16 +155,25 @@
       } else {
         Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
       }
+    } catch (error) {
+      console.warn('validate error:', error);
+      return;
     } finally {
       changeOkLoading(false);
     }
   }
 </script>
 <template>
-  <BasicModal @register="registerModalInner" v-bind="$attrs" @ok="handleSubmit">
+  <BasicModal
+    :width="600"
+    centered
+    @register="registerModalInner"
+    v-bind="$attrs"
+    @ok="handleSubmit"
+  >
     <template #title>
       <SvgIcon name="flink" />
-      {{ t('common.add') }}
+      {{ versionId ? t('common.edit') : t('common.add') }}
     </template>
     <BasicForm @register="registerForm" />
   </BasicModal>

@@ -27,7 +27,7 @@
       {{ t('system.role.roleInfo') }}
     </template>
     <Description :column="1" :data="roleInfo" :schema="roleColumn" />
-    <p class="mt-20px">
+    <p class="ml-20px mt-20px">
       <Icon icon="ant-design:trophy-outlined" />&nbsp;&nbsp; {{ t('system.role.assignment') }}
       <Tree
         :check-strictly="false"

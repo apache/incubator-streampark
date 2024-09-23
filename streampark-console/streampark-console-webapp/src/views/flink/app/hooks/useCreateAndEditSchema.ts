@@ -204,8 +204,8 @@ export const useCreateAndEditSchema = (
         field: 'remoteClusterId',
         label: t('flink.app.flinkCluster'),
         component: 'Select',
-        render: (param) => renderFlinkCluster(getExecutionCluster(ExecModeEnum.REMOTE), param),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.REMOTE,
+        render: (param) => renderFlinkCluster(getExecutionCluster(ExecModeEnum.STANDALONE), param),
+        ifShow: ({ values }) => values.executionMode == ExecModeEnum.STANDALONE,
         rules: [
           { required: true, message: t('flink.app.addAppTips.flinkClusterIsRequiredMessage') },
         ],

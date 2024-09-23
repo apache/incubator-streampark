@@ -21,6 +21,7 @@ export default {
   start: '开启集群',
   edit: '编辑集群',
   delete: '确定要删除此集群 ?',
+  searchByName: '根据 Flink 集群名称搜索',
   form: {
     clusterName: '集群名称',
     address: '集群URL',

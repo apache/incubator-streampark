@@ -15,18 +15,20 @@
   limitations under the License.
 -->
 <template>
-  <PageWrapper>
-    <BasicTable @register="registerTable">
-      <template #toolbar>
-        <a-button
-          id="e2e-token-create-btn"
-          type="primary"
-          @click="handleCreate"
-          v-auth="'token:add'"
-        >
-          <Icon icon="ant-design:plus-outlined" />
-          {{ t('common.add') }}
-        </a-button>
+  <PageWrapper content-full-height fixed-height>
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="5" :offset="13" class="text-right">
+          <a-button
+            id="e2e-token-create-btn"
+            type="primary"
+            @click="handleCreate"
+            v-auth="'token:add'"
+          >
+            <Icon icon="ant-design:plus-outlined" />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
@@ -58,32 +60,32 @@
         </template>
       </template>
     </BasicTable>
-    <TokenDrawer @register="registerDrawer" @success="handleSuccess" />
+    <TokenModal @register="registerModal" @success="handleSuccess" />
   </PageWrapper>
 </template>
 <script lang="ts">
   import { defineComponent, unref } from 'vue';
 
   import { BasicTable, useTable, TableAction } from '/@/components/Table';
-  import TokenDrawer from './components/TokenDrawer.vue';
+  import TokenModal from './components/TokenModal.vue';
   import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
-  import { useDrawer } from '/@/components/Drawer';
+  import { useModal } from '/@/components/Modal';
   import { fetchTokenDelete, fetTokenList } from '/@/api/system/token';
   import { columns, searchFormSchema } from './token.data';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { PageWrapper } from '/@/components/Page';
+  import { Col } from 'ant-design-vue';
   export default defineComponent({
     name: 'UserToken',
-    components: { BasicTable, TokenDrawer, TableAction, Icon, PageWrapper },
+    components: { Col, BasicTable, TokenModal, TableAction, Icon, PageWrapper },
     setup() {
       const { t } = useI18n();
       const { createMessage } = useMessage();
-      const [registerDrawer, { openDrawer }] = useDrawer();
+      const [registerModal, { openModal }] = useModal();
       const { clipboardRef, copiedRef } = useCopyToClipboard();
       const [registerTable, { reload, updateTableDataRecord }] = useTable({
-        title: t('system.token.table.title'),
         api: fetTokenList,
         // beforeFetch: (params) => {
         //   if (params.user) {
@@ -94,12 +96,19 @@
         // },
         columns,
         formConfig: {
-          baseColProps: { style: { paddingRight: '30px' } },
           schemas: searchFormSchema,
+          rowProps: {
+            gutter: 14,
+          },
+          submitOnChange: true,
+          showActionButtonGroup: false,
         },
-        useSearchForm: false,
-        showTableSetting: true,
         rowKey: 'tokenId',
+        pagination: true,
+        striped: false,
+        useSearchForm: true,
+        showTableSetting: false,
+        bordered: false,
         showIndexColumn: false,
         canResize: false,
         actionColumn: {
@@ -110,7 +119,7 @@
       });
 
       function handleCreate() {
-        openDrawer(true, {
+        openModal(true, {
           isUpdate: false,
         });
       }
@@ -143,7 +152,7 @@
       return {
         t,
         registerTable,
-        registerDrawer,
+        registerModal,
         handleCreate,
         handleCopy,
         handleDelete,

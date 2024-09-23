@@ -28,29 +28,29 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class DockerSettingForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "SettingForm_address")
-    private WebElement inputAddress;
+    public WebElement inputAddress;
 
     @FindBy(id = "SettingForm_namespace")
-    private WebElement inputNamespace;
+    public WebElement inputNamespace;
 
     @FindBy(id = "SettingForm_username")
-    private WebElement inputUsername;
+    public WebElement inputUsername;
 
     @FindBy(xpath = "//input[@placeholder='Docker Password']")
-    private WebElement inputPassword;
+    public WebElement inputPassword;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Docker Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
-    private WebElement buttonOk;
+    public WebElement buttonOk;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-modal-title') and contains(., 'Docker Setting')]/../..//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-    private WebElement buttonCancel;
+    public WebElement buttonCancel;
 
     DockerSettingForm(EnvironmentDetailForm environmentDetailForm) {
         super(environmentDetailForm);
-        this.driver = environmentDetailForm.driver();
+        this.driver = environmentDetailForm.driver;
     }
 
     public DockerSettingForm address(String address) {

@@ -16,24 +16,19 @@
 -->
 <script lang="ts" setup>
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { onMounted, ref } from 'vue';
+  import { ref } from 'vue';
   import { useModal } from '/@/components/Modal';
   import { SvgIcon } from '/@/components/Icon';
-  import { List, Switch, Card, Popconfirm, Tooltip } from 'ant-design-vue';
-  import {
-    CheckOutlined,
-    CloseOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    PlusOutlined,
-  } from '@ant-design/icons-vue';
+  import { Col, Switch } from 'ant-design-vue';
+  import { CheckOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons-vue';
   import { SparkEnvModal } from './components';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { PageWrapper } from '/@/components/Page';
-  import { BasicTitle } from '/@/components/Basic';
   import { fetchSetDefault, fetchSparkEnvList, fetchSparkEnvRemove } from '/@/api/spark/home';
   import { SparkEnv } from '/@/api/spark/home.type';
-
+  import { BasicTable, TableAction, useTable } from '/@/components/Table';
+  // import { useDrawer } from '/@/components/Drawer';
+  // import SparkEnvDrawer from './components/Drawer.vue';
   defineOptions({
     name: 'SparkEnvSetting',
   });
@@ -41,12 +36,53 @@
   const { t } = useI18n();
   const versionId = ref<string | null>(null);
   const { Swal, createMessage } = useMessage();
-  const sparkEnvs = ref<SparkEnv[]>([]);
-  const [registerModal, { openModal: openFlinkModal }] = useModal();
+  const [registerModal, { openModal: openSparkModal }] = useModal();
+  // const [registerSparkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
+  const [registerTable, { reload, getDataSource }] = useTable({
+    api: fetchSparkEnvList,
+    columns: [
+      { dataIndex: 'sparkName', title: t('spark.home.form.sparkName') },
+      { dataIndex: 'sparkHome', title: t('spark.home.form.sparkHome') },
+      { dataIndex: 'version', title: t('spark.home.sparkVersion') },
+      { dataIndex: 'default', title: 'Default' },
+      { dataIndex: 'description', title: t('spark.home.form.description') },
+    ],
+    formConfig: {
+      schemas: [
+        {
+          field: 'sparkName',
+          label: '',
+          component: 'Input',
+          componentProps: {
+            placeholder: t('spark.home.searchByName'),
+            allowClear: true,
+          },
+          colProps: { span: 6 },
+        },
+      ],
+      rowProps: {
+        gutter: 14,
+      },
+      submitOnChange: true,
+      showActionButtonGroup: false,
+    },
+    rowKey: 'id',
+    pagination: true,
+    useSearchForm: true,
+    showTableSetting: false,
+    showIndexColumn: false,
+    canResize: false,
+    actionColumn: {
+      width: 200,
+      title: t('component.table.operation'),
+      dataIndex: 'action',
+    },
+  });
+
   /* Edit button */
   async function handleEditSpark(item: SparkEnv) {
     versionId.value = item.id;
-    openFlinkModal(true, {
+    openSparkModal(true, {
       versionId: item.id,
       sparkName: item.sparkName,
       sparkHome: item.sparkHome,
@@ -56,10 +92,19 @@
 
   /* delete spark home */
   async function handleDelete(item: SparkEnv) {
-    await fetchSparkEnvRemove(item.id);
-    await getSparkEnv();
-    createMessage.success(t('spark.home.tips.remove'));
+    try {
+      await fetchSparkEnvRemove(item.id);
+      reload();
+      createMessage.success(t('spark.home.tips.remove'));
+    } catch (error) {
+      console.error(error);
+    }
   }
+
+  /* View configuration */
+  // async function handleSparkConf(item: SparkEnv) {
+  //   openEnvDrawer(true, item);
+  // }
 
   /* set as default environment */
   async function handleSetDefault(item: SparkEnv) {
@@ -71,104 +116,68 @@
         showConfirmButton: false,
         timer: 2000,
       });
-      getSparkEnv();
+      reload();
     }
   }
-
-  /* Get spark environment data */
-  async function getSparkEnv() {
-    sparkEnvs.value = await fetchSparkEnvList();
-  }
-
-  onMounted(() => {
-    getSparkEnv();
-  });
 </script>
 <template>
-  <PageWrapper contentFullHeight>
-    <Card :bordered="false">
-      <BasicTitle>{{ t('spark.home.title') }}</BasicTitle>
-      <div>
-        <a-button
-          type="dashed"
-          style="width: 100%; margin-top: 20px"
-          @click="openFlinkModal(true, {})"
-        >
-          <PlusOutlined />
-          {{ t('common.add') }}
-        </a-button>
-      </div>
-      <List>
-        <List.Item v-for="(item, index) in sparkEnvs" :key="index">
-          <List.Item.Meta
-            style="width: 60%"
-            :title="item.sparkName"
-            :description="item.description"
+  <PageWrapper contentFullHeight fixed-height content-class="flex flex-col">
+    <BasicTable @register="registerTable" class="flex flex-col">
+      <template #form-formFooter>
+        <Col :span="5" :offset="13" class="text-right">
+          <a-button type="primary" @click="openSparkModal(true, {})">
+            <PlusOutlined />
+            {{ t('common.add') }}
+          </a-button>
+        </Col>
+      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'flinkName'">
+          <svg-icon class="avatar" name="flink" :size="20" />
+          {{ record.flinkName }}
+        </template>
+        <template v-if="column.dataIndex === 'default'">
+          <Switch
+            :disabled="record.isDefault"
+            @click="handleSetDefault(record)"
+            v-model:checked="record.isDefault"
           >
-            <template #avatar>
-              <SvgIcon class="avatar p-15px" name="spark" size="60" />
+            <template #checkedChildren>
+              <CheckOutlined />
             </template>
-          </List.Item.Meta>
+            <template #unCheckedChildren>
+              <CloseOutlined />
+            </template>
+          </Switch>
+        </template>
+        <template v-if="column.dataIndex === 'action'">
+          <TableAction
+            :actions="[
+              {
+                icon: 'clarity:note-edit-line',
+                auth: 'project:build',
+                tooltip: t('spark.home.edit'),
+                onClick: handleEditSpark.bind(null, record),
+              },
+              {
+                icon: 'ant-design:delete-outlined',
+                color: 'error',
+                tooltip: t('common.delText'),
+                disabled: record.isDefault && getDataSource()?.length > 1,
+                popConfirm: {
+                  title: t('common.delText'),
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
+              },
+            ]"
+          />
+        </template>
+      </template>
+    </BasicTable>
 
-          <div class="list-content flex" style="width: 40%">
-            <div class="list-content-item" style="width: 60%">
-              <span>{{ t('spark.home.title') }}</span>
-              <p style="margin-top: 10px">
-                {{ item.sparkHome }}
-              </p>
-            </div>
-            <div class="list-content-item">
-              <span>Default</span>
-              <p style="margin-top: 10px">
-                <Switch
-                  :disabled="item.isDefault"
-                  @click="handleSetDefault(item)"
-                  v-model:checked="item.isDefault"
-                >
-                  <template #checkedChildren>
-                    <CheckOutlined />
-                  </template>
-                  <template #unCheckedChildren>
-                    <CloseOutlined />
-                  </template>
-                </Switch>
-              </p>
-            </div>
-          </div>
-
-          <template #actions>
-            <Tooltip :title="t('common.edit')">
-              <a-button
-                @click="handleEditSpark(item)"
-                shape="circle"
-                size="large"
-                class="control-button"
-              >
-                <EditOutlined />
-              </a-button>
-            </Tooltip>
-            <Popconfirm
-              :title="t('common.delText')"
-              :cancel-text="t('common.no')"
-              :ok-text="t('common.yes')"
-              @confirm="handleDelete(item)"
-            >
-              <a-button
-                :disabled="item.isDefault && sparkEnvs.length > 1"
-                type="danger"
-                shape="circle"
-                size="large"
-                class="control-button"
-              >
-                <DeleteOutlined />
-              </a-button>
-            </Popconfirm>
-          </template>
-        </List.Item>
-      </List>
-    </Card>
-
-    <SparkEnvModal @register="registerModal" @reload="getSparkEnv" />
+    <SparkEnvModal @register="registerModal" @reload="reload" />
+    <!-- <SparkEnvDrawer @register="registerSparkDraw" /> -->
   </PageWrapper>
 </template>
 <style lang="less"></style>

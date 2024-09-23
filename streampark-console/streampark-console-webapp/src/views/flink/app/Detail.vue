@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script setup lang="ts" name="ApplicationDetail">
-  import { AppStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
+  import { ExecModeEnum } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
@@ -24,8 +24,8 @@
   import { Description, useDescription } from '/@/components/Description';
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
-  import { fetchBackUps, fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
-  import { onUnmounted, reactive, h, unref, ref, onMounted, computed } from 'vue';
+  import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
+  import { onUnmounted, reactive, h, ref, onMounted } from 'vue';
   import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
@@ -49,6 +49,8 @@
 
   const { t } = useI18n();
 
+  const appNotRunning = ref(true);
+
   const yarn = ref('');
   const externalLinks = ref<ExternalLink[]>([]);
   const app = reactive<Partial<AppListRecord>>({});
@@ -66,7 +68,6 @@
       ...(getDescSchema() as any),
       {
         field: 'resetApi',
-        span: 2,
         label: h('div', null, [
           t('flink.app.detail.resetApi'),
           h(Tooltip, { title: t('flink.app.detail.resetApiToolTip'), placement: 'top' }, () =>
@@ -107,8 +108,9 @@
       },
     ],
     data: app,
-    layout: 'vertical',
-    column: 3,
+    layout: 'horizontal',
+    column: 2,
+    size: 'small',
   });
 
   const [registerConfDrawer] = useDrawer();
@@ -116,7 +118,7 @@
 
   /* Flink Web UI */
   function handleFlinkView() {
-    handleView(app as any, unref(yarn));
+    handleView(app as any);
   }
 
   const { pause } = useIntervalFn(
@@ -146,6 +148,7 @@
       await handleDetailTabs();
     }
     Object.assign(app, res);
+    appNotRunning.value = !app.appControl.allowView;
   }
 
   async function handleDetailTabs() {
@@ -157,12 +160,10 @@
 
     const confList = await fetchListVer(commonParams);
     const pointHistory = await fetchSavePointHistory(commonParams);
-    const backupList = await fetchBackUps(commonParams);
     const optionList = await fetchOptionLog(commonParams);
 
     if (confList.records.length > 0) detailTabs.showConf = true;
     if (pointHistory.records.length > 0) detailTabs.showSaveOption = true;
-    if (backupList.records.length > 0) detailTabs.showBackup = true;
     if (optionList.records.length > 0) detailTabs.showOptionLog = true;
   }
 
@@ -183,44 +184,43 @@
   onUnmounted(() => {
     pause();
   });
-
-  const appNotRunning = computed(
-    () => app.state !== AppStateEnum.RUNNING || (yarn.value === null && app.flinkRestUrl === null),
-  );
 </script>
 <template>
-  <PageWrapper content-full-height content-background contentClass="p-24px">
-    <div class="mb-15px">
-      <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
-      <Space class="-mt-8px">
-        <div v-for="link in externalLinks" :key="link.id">
-          <LinkBadge
-            :label="link.badgeLabel"
-            :redirect="link.renderedLinkUrl"
-            :color="link.badgeColor"
-            :message="link.badgeName"
-            :disabled="appNotRunning"
-          />
-        </div>
-      </Space>
-      <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
-        <Icon icon="ant-design:arrow-left-outlined" />
-      </a-button>
-      <a-button
-        type="primary"
-        @click="handleFlinkView"
-        :disabled="appNotRunning"
-        class="float-right -mt-8px mr-20px"
-      >
-        <Icon icon="ant-design:cloud-outlined" />
-        {{ t('flink.app.detail.flinkWebUi') }}
-      </a-button>
+  <PageWrapper content-full-height content-background>
+    <div class="detail-pad">
+      <div class="mb-15px">
+        <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
+        <Space class="-mt-8px">
+          <div v-for="link in externalLinks" :key="link.id">
+            <LinkBadge
+              :label="link.badgeLabel"
+              :redirect="link.renderedLinkUrl"
+              :color="link.badgeColor"
+              :message="link.badgeName"
+              :disabled="appNotRunning"
+            />
+          </div>
+        </Space>
+        <a-button type="primary" shape="circle" @click="router.back()" class="float-right -mt-8px">
+          <Icon icon="ant-design:arrow-left-outlined" />
+        </a-button>
+        <a-button
+          type="primary"
+          @click="handleFlinkView"
+          :disabled="appNotRunning"
+          class="float-right -mt-8px mr-20px"
+        >
+          <Icon icon="ant-design:cloud-outlined" />
+          {{ t('flink.app.detail.flinkWebUi') }}
+        </a-button>
+      </div>
+      <Description @register="registerDescription" />
+      <Divider class="mt-20px -mb-17px" />
+      <DetailTab :app="app" :tabConf="detailTabs" />
+
+      <Mergely @register="registerConfDrawer" :readOnly="true" />
+      <RequestModal @register="registerOpenApi" />
     </div>
-    <Description @register="registerDescription" />
-    <Divider class="mt-20px -mb-17px" />
-    <DetailTab :app="app" :tabConf="detailTabs" />
-    <Mergely @register="registerConfDrawer" :readOnly="true" />
-    <RequestModal @register="registerOpenApi" />
   </PageWrapper>
 </template>
 <style lang="less">

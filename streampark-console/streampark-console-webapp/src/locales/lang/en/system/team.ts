@@ -23,12 +23,13 @@ export default {
   add: 'Add',
   success: 'successful',
   fail: 'failed',
+  searchByTeam: 'Search by team name',
   table: {
     title: 'Team List',
-    teamName: 'Team Name',
-    teamNamePlaceholder: 'Please enter team name',
+    teamName: 'Team name',
+    teamNamePlaceholder: 'please enter Team Name',
     description: 'Description',
-    descriptionMessage: 'Exceeds maximum length limit of 100 characters',
-    teamMessage: 'Team name must be at least 4 characters',
+    descriptionMessage: 'exceeds maximum length limit of 100 characters',
+    teamMessage: 'teamName must be at least 4 characters',
   },
 };

@@ -27,15 +27,14 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class EmailAlertForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_alertEmail")
-    private WebElement inputEmail;
+    public WebElement inputEmail;
 
     public EmailAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
         super(alertTypeDetailForm);
-
-        this.driver = alertTypeDetailForm.driver();
+        this.driver = alertTypeDetailForm.driver;
     }
 
     public EmailAlertForm email(String email) {

@@ -27,7 +27,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Getter
 public class EnvironmentDetailForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     public EnvironmentDetailForm(WebDriver driver) {
         PageFactory.initElements(driver, this);
@@ -48,7 +48,7 @@ public class EnvironmentDetailForm {
                 return (T) new IngressSettingForm(this);
             default:
                 throw new UnsupportedOperationException(
-                    String.format("Unsupported Environment setting type %s", envSettingTypeEnum.desc()));
+                    String.format("Unsupported Environment setting type %s", envSettingTypeEnum.desc));
         }
     }
 
@@ -59,7 +59,7 @@ public class EnvironmentDetailForm {
         Docker("Docker"),
         Email("Email"),
         Ingress("Ingress");
-        private final String desc;
+        public final String desc;
 
         EnvSettingTypeEnum(String desc) {
             this.desc = desc;

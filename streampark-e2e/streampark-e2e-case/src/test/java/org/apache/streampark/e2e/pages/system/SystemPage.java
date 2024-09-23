@@ -32,19 +32,19 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public final class SystemPage extends NavBarPage implements NavBarItem {
 
     @FindBy(className = "menu-item-system_user")
-    private WebElement menuUserManagement;
+    public WebElement menuUserManagement;
 
     @FindBy(className = "menu-item-system_token")
-    private WebElement menuTokenManagement;
+    public WebElement menuTokenManagement;
 
     @FindBy(className = "menu-item-system_role")
-    private WebElement menuRoleManagement;
+    public WebElement menuRoleManagement;
 
     @FindBy(className = "menu-item-system_team")
-    private WebElement menuTeamManagement;
+    public WebElement menuTeamManagement;
 
     @FindBy(className = "menu-item-system_member")
-    private WebElement menuMemberManagement;
+    public WebElement menuMemberManagement;
 
     public SystemPage(RemoteWebDriver driver) {
         super(driver);

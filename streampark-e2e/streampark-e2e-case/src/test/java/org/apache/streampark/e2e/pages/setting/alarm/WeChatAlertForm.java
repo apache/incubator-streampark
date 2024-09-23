@@ -27,15 +27,14 @@ import static org.apache.streampark.e2e.pages.common.CommonFactory.WebElementDel
 @Getter
 public class WeChatAlertForm extends CommonForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBy(id = "form_item_weToken")
-    private WebElement inputWeChatToken;
+    public WebElement inputWeChatToken;
 
     public WeChatAlertForm(AlertTypeDetailForm alertTypeDetailForm) {
         super(alertTypeDetailForm);
-
-        this.driver = alertTypeDetailForm.driver();
+        this.driver = alertTypeDetailForm.driver;
     }
 
     public WeChatAlertForm token(String token) {

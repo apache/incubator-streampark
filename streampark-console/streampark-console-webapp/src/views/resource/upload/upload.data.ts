@@ -64,16 +64,12 @@ export const columns: BasicColumn[] = [
 export const searchFormSchema: FormSchema[] = [
   {
     field: 'resourceName',
-    label: t('flink.resource.table.resourceName'),
+    label: '',
     component: 'Input',
-    componentProps: { placeholder: t('flink.resource.table.resourceNamePlaceholder') },
-    colProps: { span: 8 },
-  },
-  {
-    field: 'description',
-    label: t('common.description'),
-    component: 'Input',
-    componentProps: { placeholder: t('flink.resource.table.descriptionPlaceholder') },
-    colProps: { span: 8 },
+    componentProps: {
+      placeholder: t('flink.resource.table.searchByResourceName'),
+      allowClear: true,
+    },
+    colProps: { span: 6 },
   },
 ];

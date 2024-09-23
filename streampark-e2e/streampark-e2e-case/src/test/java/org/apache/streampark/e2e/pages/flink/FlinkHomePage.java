@@ -36,15 +36,15 @@ import java.util.List;
 public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
     @FindBy(id = "e2e-env-add-btn")
-    private WebElement buttonCreateFlinkHome;
+    public WebElement buttonCreateFlinkHome;
 
     @FindBy(xpath = "//div[contains(@class, 'ant-spin-container')]")
-    private List<WebElement> flinkHomeList;
+    public List<WebElement> flinkHomeList;
 
     @FindBy(xpath = "//button[contains(@class, 'ant-btn')]/span[contains(., 'Yes')]")
-    private WebElement deleteConfirmButton;
+    public WebElement deleteConfirmButton;
 
-    private final CreateFlinkHomeForm createFlinkHomeForm = new CreateFlinkHomeForm();
+    public final CreateFlinkHomeForm createFlinkHomeForm = new CreateFlinkHomeForm();
 
     public FlinkHomePage(RemoteWebDriver driver) {
         super(driver);
@@ -56,10 +56,10 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
         buttonCreateFlinkHome.click();
-        createFlinkHomeForm.inputFlinkName().sendKeys(flinkName);
-        createFlinkHomeForm.inputFlinkHome().sendKeys(flinkHome);
-        createFlinkHomeForm.inputDescription().sendKeys(description);
-        createFlinkHomeForm.buttonSubmit().click();
+        createFlinkHomeForm.inputFlinkName.sendKeys(flinkName);
+        createFlinkHomeForm.inputFlinkHome.sendKeys(flinkHome);
+        createFlinkHomeForm.inputDescription.sendKeys(description);
+        createFlinkHomeForm.buttonSubmit.click();
 
         waitForClickFinish("create successful");
         return this;
@@ -68,7 +68,7 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
     public FlinkHomePage editFlinkHome(String oldFlinkName, String newFlinkName) {
         waitForPageLoading();
 
-        flinkHomeList().stream()
+        flinkHomeList.stream()
             .filter(it -> it.getText().contains(oldFlinkName))
             .flatMap(
                 it -> it
@@ -81,19 +81,20 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
             .orElseThrow(() -> new RuntimeException("No edit button in flink home list"))
             .click();
 
-        createFlinkHomeForm.inputFlinkName().sendKeys(Keys.CONTROL + "a");
-        createFlinkHomeForm.inputFlinkName().sendKeys(Keys.BACK_SPACE);
-        createFlinkHomeForm.inputFlinkName().sendKeys(newFlinkName);
-        createFlinkHomeForm.buttonSubmit().click();
+        createFlinkHomeForm.inputFlinkName.sendKeys(Keys.CONTROL + "a");
+        createFlinkHomeForm.inputFlinkName.sendKeys(Keys.BACK_SPACE);
+        createFlinkHomeForm.inputFlinkName.sendKeys(newFlinkName);
+        createFlinkHomeForm.buttonSubmit.click();
 
         waitForClickFinish("update successful");
+
         return this;
     }
 
     public FlinkHomePage deleteFlinkHome(String flinkName) {
         waitForPageLoading();
 
-        flinkHomeList().stream()
+        flinkHomeList.stream()
             .filter(it -> it.getText().contains(flinkName))
             .flatMap(
                 it -> it
@@ -138,18 +139,18 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
         }
 
         @FindBy(id = "form_item_flinkName")
-        private WebElement inputFlinkName;
+        public WebElement inputFlinkName;
 
         @FindBy(id = "form_item_flinkHome")
-        private WebElement inputFlinkHome;
+        public WebElement inputFlinkHome;
 
         @FindBy(id = "form_item_description")
-        private WebElement inputDescription;
+        public WebElement inputDescription;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'OK')]")
-        private WebElement buttonSubmit;
+        public WebElement buttonSubmit;
 
         @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Cancel')]")
-        private WebElement buttonCancel;
+        public WebElement buttonCancel;
     }
 }

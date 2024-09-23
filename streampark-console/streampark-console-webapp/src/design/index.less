@@ -102,13 +102,31 @@ span {
 .ant-modal-content,
 .ant-tree-checkbox-inner,
 .ant-table,
+.ant-card,
 .ant-alert,
 .bold-tag,
-.bold-tag > .ant-tag,
+.bold-tag>.ant-tag,
 .ant-tabs-tab,
 .ant-btn-group,
 textarea.ant-input,
 .ant-select-selector,
+.streampark-page-wrapper,
+.streampark-page-wrapper-content,
 .ant-upload.ant-upload-drag {
-  border-radius: 0 !important;
+  border-radius: 1px !important;
+}
+
+.pop-tip,
+.tip-info {
+  display: inline-block;
+  margin-top: 5px;
+  color: darkgrey;
+}
+
+[data-theme='dark'] {
+
+  .pop-tip,
+  .tip-info {
+    color: #666;
+  }
 }

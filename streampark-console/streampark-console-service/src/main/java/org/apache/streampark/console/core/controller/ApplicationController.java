@@ -214,17 +214,17 @@ public class ApplicationController {
     }
 
     @PostMapping("opt_log")
-    @Permission(app = "#log.appId", team = "#log.teamId")
+    @Permission(app = "#applicationLog.appId", team = "#applicationLog.teamId")
     public RestResponse log(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 
-    @Permission(app = "#log.appId", team = "#log.teamId")
+    @Permission(app = "#applicationLog.appId", team = "#applicationLog.teamId")
     @PostMapping("delete/opt_log")
     @RequiresPermissions("app:delete")
-    public RestResponse deleteLog(Long id) {
-        Boolean deleted = applicationLogService.removeById(id);
+    public RestResponse deleteLog(ApplicationLog applicationLog) {
+        Boolean deleted = applicationLogService.delete(applicationLog);
         return RestResponse.success(deleted);
     }
 

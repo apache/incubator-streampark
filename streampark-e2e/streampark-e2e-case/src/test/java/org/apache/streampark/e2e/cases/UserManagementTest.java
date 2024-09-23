@@ -36,13 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class UserManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
+    public static RemoteWebDriver browser;
 
     private static final String password = "streampark";
-
-    private static final String teamName = "default";
 
     private static final String newUserName = "test_new";
 
@@ -51,13 +47,13 @@ public class UserManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(UserManagementPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         userManagementPage.createUser(
@@ -65,14 +61,14 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.userList())
+                () -> assertThat(userManagementPage.userList)
                     .as("User list should contain newly-created user")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newUserName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         userManagementPage.createUser(
@@ -80,17 +76,17 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.errorMessageList())
+                () -> assertThat(userManagementPage.errorMessageList)
                     .as("User Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         "Sorry the username already exists")));
 
-        userManagementPage.createUserForm().buttonCancel().click();
+        userManagementPage.createUserForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditUser() {
         final UserManagementPage userManagementPage = new UserManagementPage(browser);
         String editEmail = "edit_" + newUserEmail;
@@ -100,7 +96,7 @@ public class UserManagementTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(userManagementPage.userList())
+                () -> assertThat(userManagementPage.userList)
                     .as("User list should contain edited user")
                     .extracting(WebElement::getText)
                     .anyMatch(

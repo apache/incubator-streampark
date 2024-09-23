@@ -34,13 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ExternalLinkTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String newLabel = "new_label";
 
@@ -55,20 +49,20 @@ public class ExternalLinkTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SettingPage.class)
             .goToTab(ExternalLinkPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         externalLinkPage.createExternalLink(newLabel, newName, color, newLink);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.externalLinkList())
+                () -> assertThat(externalLinkPage.externalLinkList)
                     .as("External link list should contain newly-created link")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(newLabel))
@@ -77,25 +71,25 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCreateDuplicateExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         externalLinkPage.createExternalLink(newLabel, newName, color, newLink);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.errorMessageList())
+                () -> assertThat(externalLinkPage.errorMessageList)
                     .as("Name Duplicated Error message should be displayed")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(
                         String.format("The name: %s is already existing.", newName))));
 
-        externalLinkPage.errorMessageConfirmButton().click();
-        externalLinkPage.createExternalLinkForm().buttonCancel().click();
+        externalLinkPage.errorMessageConfirmButton.click();
+        externalLinkPage.createExternalLinkForm.buttonCancel.click();
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testEditExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
         String editName = "edit_name";
@@ -104,7 +98,7 @@ public class ExternalLinkTest {
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(externalLinkPage.externalLinkList())
+                () -> assertThat(externalLinkPage.externalLinkList)
                     .as("External link list should contain edited link")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editLabel))
@@ -113,7 +107,7 @@ public class ExternalLinkTest {
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteExternalLink() {
         final ExternalLinkPage externalLinkPage = new ExternalLinkPage(browser);
 
@@ -122,7 +116,7 @@ public class ExternalLinkTest {
         Awaitility.await()
             .untilAsserted(
                 () -> {
-                    assertThat(externalLinkPage.externalLinkList())
+                    assertThat(externalLinkPage.externalLinkList)
                         .noneMatch(it -> it.getText().contains(editLabel));
                 });
     }

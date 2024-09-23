@@ -36,13 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class TokenManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String existUserName = "admin";
 
@@ -51,47 +45,47 @@ public class TokenManagementTest {
     @BeforeAll
     public static void setup() {
         new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(SystemPage.class)
             .goToTab(TokenManagementPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
         tokenManagementPage.createToken(existUserName, newTokenDescription);
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(tokenManagementPage.tokenList())
+                () -> assertThat(tokenManagementPage.tokenList)
                     .as("Token list should contain newly-created token")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(existUserName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testCopyToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
         tokenManagementPage.copyToken(existUserName);
 
         // put clipboard value into createTokenForm.description
-        tokenManagementPage.buttonCreateToken().click();
-        tokenManagementPage.createTokenForm().inputDescription().sendKeys(Keys.CONTROL, "v");
-        String token = tokenManagementPage.createTokenForm().inputDescription().getAttribute("value");
-        tokenManagementPage.createTokenForm().buttonCancel().click();
+        tokenManagementPage.buttonCreateToken.click();
+        tokenManagementPage.createTokenForm.inputDescription.sendKeys(Keys.CONTROL, "v");
+        String token = tokenManagementPage.createTokenForm.inputDescription.getAttribute("value");
+        tokenManagementPage.createTokenForm.buttonCancel.click();
 
         Awaitility.await()
             .untilAsserted(
-                () -> assertThat(tokenManagementPage.tokenList())
+                () -> assertThat(tokenManagementPage.tokenList)
                     .as("Clipboard should contain existing token.")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(token)));
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testCreateDuplicateToken() {
         final TokenManagementPage tokenManagementPage = new TokenManagementPage(browser);
 
@@ -102,11 +96,11 @@ public class TokenManagementTest {
                 () -> assertThat(browser.findElement(By.tagName("body")).getText())
                     .contains(String.format("user %s already has a token", existUserName)));
 
-        tokenManagementPage.createTokenForm().buttonCancel().click();
+        tokenManagementPage.createTokenForm.buttonCancel.click();
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteToken() {
         final TokenManagementPage teamManagementPage = new TokenManagementPage(browser);
         teamManagementPage.deleteToken(existUserName);
@@ -115,7 +109,7 @@ public class TokenManagementTest {
             .untilAsserted(
                 () -> {
                     browser.navigate().refresh();
-                    assertThat(teamManagementPage.tokenList())
+                    assertThat(teamManagementPage.tokenList)
                         .noneMatch(it -> it.getText().contains(existUserName));
                 });
     }

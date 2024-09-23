@@ -33,16 +33,16 @@ import java.util.List;
 @Getter
 public class AlertTypeDetailForm {
 
-    private WebDriver driver;
+    public WebDriver driver;
 
     @FindBys({
             @FindBy(xpath = "//div[contains(@class, 'ant-select-selector')]"),
             @FindBy(xpath = ".//input[@id='form_item_alertType']")
     })
-    private WebElement btnAlertTypeDropdown;
+    public WebElement btnAlertTypeDropdown;
 
     @FindBy(xpath = "//*[@id='form_item_alertType']//following::div[@class='ant-select-item-option-content']")
-    private List<WebElement> selectAlertType;
+    public List<WebElement> selectAlertType;
 
     public AlertTypeDetailForm(WebDriver driver) {
         PageFactory.initElements(driver, this);
@@ -54,28 +54,28 @@ public class AlertTypeDetailForm {
         btnAlertTypeDropdown.click();
         switch (alertTypeEnum) {
             case EMAIL:
-                selectByAlertType(alertTypeEnum.desc());
+                selectByAlertType(alertTypeEnum.desc);
                 return (T) new EmailAlertForm(this);
             case DINGTALK:
-                selectByAlertType(alertTypeEnum.desc());
+                selectByAlertType(alertTypeEnum.desc);
                 return (T) new DingTalkAlertForm(this);
             case WECHAT:
-                selectByAlertType(alertTypeEnum.desc());
+                selectByAlertType(alertTypeEnum.desc);
                 return (T) new WeChatAlertForm(this);
             case SMS:
                 // ignore.
             case LARK:
-                selectByAlertType(alertTypeEnum.desc());
+                selectByAlertType(alertTypeEnum.desc);
                 return (T) new LarkAlertForm(this);
             default:
                 throw new UnsupportedOperationException(
-                    String.format("Unsupported alert type %s", alertTypeEnum.desc()));
+                    String.format("Unsupported alert type %s", alertTypeEnum.desc));
         }
     }
 
     private void selectByAlertType(String alertType) {
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(selectAlertType()));
+            .until(ExpectedConditions.visibilityOfAllElements(selectAlertType));
         selectAlertType.stream()
             .filter(e -> e.getText().equals(alertType))
             .findFirst()
@@ -93,7 +93,7 @@ public class AlertTypeDetailForm {
         WECHAT("WeChat"),
         LARK("Lark"),
         SMS("SMS");
-        private final String desc;
+        public final String desc;
 
         AlertTypeEnum(String desc) {
             this.desc = desc;

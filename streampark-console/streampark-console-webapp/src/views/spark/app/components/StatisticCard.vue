@@ -35,15 +35,15 @@
         <Statistic
           v-bind="statisticProps"
           :value-style="{
-            color: '#3f8600',
-            fontSize: '45px',
+            color: '#52c41a',
+            fontSize: '36px',
             fontWeight: 500,
-            textShadow: '1px 1px 0 rgba(0,0,0,0.2)',
+            textShadow: '1px 1px 0 rgba(0,0,0,0.1)',
           }"
         />
       </Card>
       <Divider class="def-margin-bottom" />
-      <template v-for="(item, index) in footerList" :key="index">
+      <template v-for="(item, index) in footerList" :key="item.field">
         <span> {{ item.title }} </span>
         <strong class="pl-10px">{{ item.value }}</strong>
         <Divider type="vertical" v-if="index !== footerList.length - 1" />

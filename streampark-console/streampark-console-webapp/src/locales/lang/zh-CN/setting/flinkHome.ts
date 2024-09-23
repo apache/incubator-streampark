@@ -26,6 +26,8 @@ export default {
   flinkHomePlaceholder: '请输入Flink安装路径',
   description: '描述',
   descriptionPlaceholder: 'Flink描述',
+  flinkVersion: 'Flink 版本',
+  searchByName: '根据 Flink 名称搜索',
   operateMessage: {
     flinkNameTips: 'Flink别名,举例: Flink-1.12',
     flinkNameIsRepeated: 'Flink名称已存在',

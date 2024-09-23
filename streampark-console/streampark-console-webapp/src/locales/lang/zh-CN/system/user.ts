@@ -21,6 +21,9 @@ export default {
     modify: '修改用户',
     reset: '重置密码',
     resetTip: '你确定要重置密码吗?',
+    delete: '删除用户',
+    deleteTip: '你确定要删除用户吗',
+    deleteSuccess: '用户删除成功',
     resetSuccess: '重置密码成功，用户 [ {0} ] 新密码为 streampark666',
   },
   form: {
@@ -46,6 +49,7 @@ export default {
     notice: '提示',
     transferResource: '请将需要被禁用的用户资源转移到新的用户上',
   },
+  searchByName: '根据用户名搜索',
   roleInfo: '角色信息',
   modifyTime: '尚未修改',
   male: '男',

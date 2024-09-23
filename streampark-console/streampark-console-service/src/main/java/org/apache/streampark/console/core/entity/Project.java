@@ -66,6 +66,9 @@ public class Project extends BaseEntity {
 
     private String url;
 
+    /** git branch or tag */
+    private String refs;
+
     /** git branch */
     private String branches;
 

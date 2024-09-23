@@ -19,9 +19,11 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Collection;
@@ -130,4 +132,6 @@ public interface FlinkClusterService extends IService<FlinkCluster> {
      * @param state flink cluster state
      */
     void updateClusterState(Long id, ClusterState state);
+
+    IPage<FlinkCluster> findPage(FlinkCluster flinkCluster, RestRequest restRequest);
 }

@@ -41,10 +41,10 @@
         <Statistic
           v-bind="statisticProps"
           :value-style="{
-            color: '#3f8600',
-            fontSize: '45px',
+            color: '#52c41a',
+            fontSize: '36px',
             fontWeight: 500,
-            textShadow: '1px 1px 0 rgba(0,0,0,0.2)',
+            textShadow: '1px 1px 0 rgba(0,0,0,0.1)',
           }"
         />
       </Card>

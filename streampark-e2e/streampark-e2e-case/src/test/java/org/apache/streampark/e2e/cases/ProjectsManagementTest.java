@@ -37,13 +37,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ProjectsManagementTest {
 
-    private static RemoteWebDriver browser;
-
-    private static final String userName = "admin";
-
-    private static final String password = "streampark";
-
-    private static final String teamName = "default";
+    public static RemoteWebDriver browser;
 
     private static final String projectName = "e2e_test_project";
 
@@ -63,13 +57,13 @@ public class ProjectsManagementTest {
     @BeforeAll
     public static void setup() {
         ProjectsPage projectsPage = new LoginPage(browser)
-            .login(userName, password, teamName)
+            .login()
             .goToNav(ResourcePage.class)
             .goToTab(ProjectsPage.class);
     }
 
     @Test
-    @Order(10)
+    @Order(1)
     void testCreateProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -77,14 +71,14 @@ public class ProjectsManagementTest {
 
         await()
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain newly-created project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(projectName)));
     }
 
     @Test
-    @Order(20)
+    @Order(2)
     void testEditProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -92,14 +86,14 @@ public class ProjectsManagementTest {
 
         await()
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain edited project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(editedProjectName)));
     }
 
     @Test
-    @Order(30)
+    @Order(3)
     void testBuildProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -107,14 +101,14 @@ public class ProjectsManagementTest {
 
         await().timeout(Duration.ofMinutes(Constants.DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES))
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList())
+                () -> assertThat(projectsPage.projectList)
                     .as("Projects list should contain build successful project")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains("SUCCESSFUL")));
     }
 
     @Test
-    @Order(40)
+    @Order(4)
     void testDeleteProject() {
         final ProjectsPage projectsPage = new ProjectsPage(browser);
 
@@ -126,7 +120,7 @@ public class ProjectsManagementTest {
                     browser.navigate().refresh();
                     Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
 
-                    assertThat(projectsPage.projectList())
+                    assertThat(projectsPage.projectList)
                         .noneMatch(it -> it.getText().contains(editedProjectName));
                 });
     }

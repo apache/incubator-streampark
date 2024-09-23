@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.controller;
 
+import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +42,11 @@ public class FlinkEnvController {
     @Autowired
     private FlinkEnvService flinkEnvService;
 
+    @PostMapping("page")
+    public RestResponse findPage(FlinkEnv flinkEnv, RestRequest restRequest) {
+        IPage<FlinkEnv> envs = flinkEnvService.findPage(flinkEnv, restRequest);
+        return RestResponse.success(envs);
+    }
     @PostMapping("list")
     public RestResponse list() {
         List<FlinkEnv> flinkEnvList = flinkEnvService.list();
