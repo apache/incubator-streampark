@@ -243,10 +243,10 @@ export default {
     terminated: '终止',
   },
   releaseState: {
+    releasing: '发布中',
     failed: '发布失败',
     success: '发布成功',
     waiting: '待发布',
-    releasing: '发布中',
     pending: '待回滚',
   },
   addAppTips: {
