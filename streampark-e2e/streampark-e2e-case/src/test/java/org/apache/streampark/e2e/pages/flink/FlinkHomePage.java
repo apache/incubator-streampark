@@ -21,8 +21,6 @@ import org.apache.streampark.e2e.pages.common.Constants;
 import org.apache.streampark.e2e.pages.common.NavBarPage;
 
 import lombok.Getter;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.FindBy;
@@ -38,19 +36,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Getter
 public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
-    @FindBy(id = "e2e-env-add-btn")
-    public WebElement buttonCreateFlinkHome;
-
     @FindBy(className = "ant-table-tbody")
     public List<WebElement> flinkHomeList;
+
+    @FindBy(id = "e2e-env-add-btn")
+    public WebElement buttonCreateFlinkHome;
 
     @FindBy(className = "e2e-flinkenv-delete-confirm")
     public WebElement deleteConfirmButton;
 
-    public final CreateFlinkHomeForm createFlinkHomeForm = new CreateFlinkHomeForm();
+    public CreateFlinkHomeForm createFlinkHomeForm;
 
     public FlinkHomePage(RemoteWebDriver driver) {
         super(driver);
+        createFlinkHomeForm = new CreateFlinkHomeForm();
     }
 
     public FlinkHomePage createFlinkHome(String flinkName, String flinkHome, String description) {
@@ -60,7 +59,6 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
 
         buttonCreateFlinkHome.click();
-
         createFlinkHomeForm.inputFlinkName.sendKeys(flinkName);
         createFlinkHomeForm.inputFlinkHome.sendKeys(flinkHome);
         createFlinkHomeForm.inputDescription.sendKeys(description);
@@ -72,49 +70,6 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
                     .as("FlinkEnv list should contain newly-created env")
                     .extracting(WebElement::getText)
                     .anyMatch(it -> it.contains(flinkName)));
-
-        return this;
-    }
-
-    public FlinkHomePage editFlinkHome(String oldFlinkName, String newFlinkName) {
-        waitForPageLoading();
-
-        flinkHomeList.stream()
-            .filter(it -> it.getText().contains(oldFlinkName))
-            .flatMap(
-                it -> it
-                    .findElements(By.className("e2e-flinkenv-edit-btn"))
-                    .stream())
-            .filter(WebElement::isDisplayed)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No edit button in flink home list"))
-            .click();
-
-        createFlinkHomeForm.inputFlinkName.sendKeys(Keys.CONTROL + "a");
-        createFlinkHomeForm.inputFlinkName.sendKeys(Keys.BACK_SPACE);
-        createFlinkHomeForm.inputFlinkName.sendKeys(newFlinkName);
-        createFlinkHomeForm.buttonSubmit.click();
-
-        return this;
-    }
-
-    public FlinkHomePage deleteFlinkHome(String flinkName) {
-        waitForPageLoading();
-
-        flinkHomeList.stream()
-            .filter(it -> it.getText().contains(flinkName))
-            .flatMap(
-                it -> it
-                    .findElements(
-                        By.className(
-                            "e2e-flinkenv-delete-btn"))
-                    .stream())
-            .filter(WebElement::isDisplayed)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No delete button in flink home list"))
-            .click();
-
-        deleteConfirmButton.click();
 
         return this;
     }

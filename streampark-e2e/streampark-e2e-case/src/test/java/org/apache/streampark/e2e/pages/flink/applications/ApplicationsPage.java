@@ -170,9 +170,6 @@ public class ApplicationsPage extends NavBarPage implements ApacheFlinkPage.Tab 
 
         @FindBy(id = "e2e-flinkapp-start-submit")
         public WebElement buttonSubmit;
-
-        @FindBy(id = "e2e-flinkapp-start-cancel")
-        public WebElement buttonCancel;
     }
 
     @Getter

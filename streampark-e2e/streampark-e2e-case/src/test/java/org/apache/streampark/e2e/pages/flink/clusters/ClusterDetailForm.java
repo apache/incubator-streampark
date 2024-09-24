@@ -42,7 +42,6 @@ public class ClusterDetailForm {
 
     public ClusterDetailForm(WebDriver driver) {
         PageFactory.initElements(driver, this);
-
         this.driver = driver;
     }
 

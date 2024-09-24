@@ -53,8 +53,8 @@ public class FlinkClustersPage extends NavBarPage implements ApacheFlinkPage.Tab
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkCluster));
-
         buttonCreateFlinkCluster.click();
+
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.urlContains("/flink/add_cluster"));
 
