@@ -109,7 +109,7 @@
     const resp = await fetchFlinkEnvRemove(item.id);
     if (resp.data.code == 200) {
       reload();
-      createMessage.success('The current flink home is removed.');
+      createMessage.success(t('setting.flinkHome.operateMessage.deleteSuccess'));
     }
   }
 
@@ -119,7 +119,7 @@
       await fetchDefaultSet(item.id);
       Swal.fire({
         icon: 'success',
-        title: item.flinkName.concat(' set default successful!'),
+        title: t('setting.flinkHome.operateMessage.setDefaultSuccess', { name: item.flinkName }),
         showConfirmButton: false,
         timer: 2000,
       });

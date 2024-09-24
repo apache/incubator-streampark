@@ -14,13 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  import { defineComponent } from 'vue';
-
-  export default defineComponent({
-    name: 'FlinkEnvDraw',
-  });
-</script>
 <script lang="ts" setup name="FlinkEnvDraw">
   import { ref, reactive } from 'vue';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
@@ -57,7 +50,7 @@
       automaticLayout: true,
       cursorStyle: 'line',
       cursorWidth: 3,
-      renderFinalNewline: true,
+      renderFinalNewline: 'on',
       renderLineHighlight: 'all',
       quickSuggestionsDelay: 100, // Code prompt delay
       minimap: { enabled: true },

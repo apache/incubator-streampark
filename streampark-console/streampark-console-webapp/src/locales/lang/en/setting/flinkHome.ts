@@ -36,5 +36,9 @@ export default {
     flinkHomeIsRequired: 'The flink home is required',
     createFlinkHomeSuccessful: ' Create successful!',
     updateFlinkHomeSuccessful: ' Update successful!',
+    invalidPath: 'FLINK_HOME invalid path.',
+    flinkHomeError: 'Can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
+    deleteSuccess: 'The current flink home is removed.',
+    setDefaultSuccess: `{name} is set as the default flink home.`,
   },
 };

@@ -14,13 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default defineComponent({
-    name: 'EditProject',
-  });
-</script>
 <script setup lang="ts" name="EditProject">
-  import { defineComponent, onMounted, ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { useProject } from './useProject';
   import { updateProject } from '/@/api/flink/project';
