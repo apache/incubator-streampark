@@ -33,6 +33,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, TableAction, useTable } from '/@/components/Table';
+  import State from './State';
   defineOptions({
     name: 'FlinkClusterSetting',
   });
@@ -55,13 +56,16 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerTable, { reload, getLoading }] = useTable({
+    rowKey: 'id',
     api: fetchFlinkClusterPage,
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
       { dataIndex: 'executionMode', title: t('setting.flinkCluster.form.executionMode') },
       { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
+      { dataIndex: 'clusterState', title: t('setting.flinkCluster.form.runState') },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],
+
     formConfig: {
       schemas: [
         {
@@ -81,7 +85,6 @@
       submitOnChange: true,
       showActionButtonGroup: false,
     },
-    rowKey: 'id',
     pagination: true,
     useSearchForm: true,
     showTableSetting: false,
@@ -199,6 +202,9 @@
             {{ record.address }}
           </a>
           <span v-else> - </span>
+        </template>
+        <template v-if="column.dataIndex === 'clusterState'">
+          <State :data="{ clusterState: record.clusterState }" />
         </template>
         <template v-if="column.dataIndex === 'action'">
           <TableAction

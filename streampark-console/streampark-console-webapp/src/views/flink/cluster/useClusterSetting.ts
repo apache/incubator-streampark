@@ -364,6 +364,7 @@ export const useClusterSetting = () => {
           dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,
         });
+        return params;
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
           clusterId: values.clusterId,
