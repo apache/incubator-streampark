@@ -26,7 +26,7 @@
       <EyeOutlined style="color: green" />
       Spark SQL preview
     </template>
-    <div ref="sparkReviewRef" class="h-[calc(100vh-150px)] flink-preview"></div>
+    <div ref="sparkReviewRef" class="h-[calc(100vh-150px)] spark-preview"></div>
   </BasicDrawer>
 </template>
 
@@ -49,7 +49,7 @@
   });
 </script>
 <style lang="less">
-  .flink-preview {
+  .spark-preview {
     border: 1px solid @border-color-base;
   }
 </style>

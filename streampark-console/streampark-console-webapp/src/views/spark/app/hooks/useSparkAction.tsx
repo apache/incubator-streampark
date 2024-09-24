@@ -55,8 +55,8 @@ export const useSparkAction = (optionApps: Recordable) => {
       createWarningModal({
         title: 'WARNING',
         content: `
-          <p class="pt-10px">${t('flink.app.release.releaseTitle')}</p>
-          <p>${t('flink.app.release.releaseDesc')}</p>
+          <p class="pt-10px">${t('spark.app.release.releaseTitle')}</p>
+          <p>${t('spark.app.release.releaseDesc')}</p>
         `,
         okType: 'danger',
         onOk: () => handleReleaseApp(app, true),
@@ -73,13 +73,13 @@ export const useSparkAction = (optionApps: Recordable) => {
     if (!res.data) {
       let message = res.message || '';
       if (!message) {
-        message = t('flink.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
+        message = t('spark.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
       }
       Swal.fire('Failed', message, 'error');
     } else {
       Swal.fire({
         icon: 'success',
-        title: t('flink.app.release.releasing'),
+        title: t('spark.app.release.releasing'),
         showConfirmButton: false,
         timer: 2000,
       });
@@ -315,13 +315,13 @@ export const useSparkAction = (optionApps: Recordable) => {
         } else {
           validateStatus.value = 'error';
           if (code === 1) {
-            help = t('flink.app.addAppTips.appNameNotUniqueMessage');
+            help = t('spark.app.addAppTips.appNameNotUniqueMessage');
           } else if (code === 2) {
-            help = t('flink.app.addAppTips.appNameExistsInYarnMessage');
+            help = t('spark.app.addAppTips.appNameExistsInYarnMessage');
           } else if (code === 3) {
-            help = t('flink.app.addAppTips.appNameExistsInK8sMessage');
+            help = t('spark.app.addAppTips.appNameExistsInK8sMessage');
           } else {
-            help = t('flink.app.addAppTips.appNameNotValid');
+            help = t('spark.app.addAppTips.appNameNotValid');
           }
           return Promise.reject('copy application error');
         }

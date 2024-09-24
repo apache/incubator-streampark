@@ -354,11 +354,11 @@
               <Popover :title="t('common.detailText')">
                 <template #content>
                   <div class="flex">
-                    <span class="pr-6px font-bold">{{ t('flink.app.appName') }}:</span>
+                    <span class="pr-6px font-bold">{{ t('spark.app.appName') }}:</span>
                     <div class="max-w-300px break-words">{{ record.appName }}</div>
                   </div>
                   <div class="pt-2px">
-                    <span class="pr-6px font-bold">{{ t('flink.app.jobType') }}:</span>
+                    <span class="pr-6px font-bold">{{ t('spark.app.jobType') }}:</span>
                     <Tag color="blue">
                       <span v-if="record['jobType'] == JobTypeEnum.JAR"> Spark JAR </span>
                       <span v-if="record['jobType'] == JobTypeEnum.SQL"> Spark SQL </span>
@@ -379,13 +379,13 @@
                 v-if="record.release === ReleaseStateEnum.NEED_CHECK"
                 class="build-badge"
                 count="NEW"
-                :title="t('flink.app.view.recheck')"
+                :title="t('spark.app.view.recheck')"
               />
               <Badge
                 v-else-if="record.release >= ReleaseStateEnum.RELEASING"
                 class="build-badge"
                 count="NEW"
-                :title="t('flink.app.view.changed')"
+                :title="t('spark.app.view.changed')"
               />
             </template>
           </template>

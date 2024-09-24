@@ -103,7 +103,8 @@
 }
 
 .pod-template-tool,
-.flinksql-tool {
+.flinksql-tool,
+.sparkSql-tool {
   z-index: 99;
   float: right;
   margin-right: 5px;
@@ -111,7 +112,8 @@
   margin-top: 5px;
 }
 
-.flinksql-tool-item {
+.flinksql-tool-item,
+.sparkSql-tool-item {
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -200,6 +202,7 @@
       padding: 0 6px;
       width: unset;
       float: left;
+
       .ant-alert-close-icon {
         position: relative;
         left: 5px;
@@ -212,7 +215,7 @@
     cursor: pointer;
   }
 
-  .form-required > .ant-form-item-label > label::before {
+  .form-required>.ant-form-item-label>label::before {
     display: inline-block;
     margin-right: 4px;
     color: #f5222d;
@@ -268,6 +271,7 @@
     .icon-close {
       color: #ffffff73;
     }
+
     .dependency-box {
       background-color: #111b26;
       border: 1px solid #153450;

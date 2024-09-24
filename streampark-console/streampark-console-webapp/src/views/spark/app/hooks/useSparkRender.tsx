@@ -95,38 +95,9 @@ export const renderYarnQueue = ({ model, field }: RenderCallbackParams) => {
       <p class="conf-desc mt-10px">
         <span class="note-info">
           <Tag color="#2db7f5" class="tag-note">
-            {t('flink.app.noteInfo.note')}
+            {t('spark.app.noteInfo.note')}
           </Tag>
           {t('setting.yarnQueue.selectionHint')}
-        </span>
-      </p>
-    </div>
-  );
-};
-
-/* render memory option */
-export const renderDynamicProperties = ({ model, field }: RenderCallbackParams) => {
-  return (
-    <div>
-      <Input.TextArea
-        rows={8}
-        name="dynamicProperties"
-        placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-        value={model[field]}
-        onInput={(e: ChangeEvent) => (model[field] = e?.target?.value)}
-      />
-      <p class="conf-desc mt-10px">
-        <span class="note-info">
-          <Tag color="#2db7f5" class="tag-note">
-            {t('flink.app.noteInfo.note')}
-          </Tag>
-          <a
-            href="https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html"
-            target="_blank"
-            class="pl-5px"
-          >
-            Flink {t('flink.app.noteInfo.officialDoc')}
-          </a>
         </span>
       </p>
     </div>
@@ -275,7 +246,7 @@ export const renderStreamParkResource = ({ model, resources }) => {
         optionFilterProp="label"
         onChange={(value) => (model.jar = value)}
         value={model.jar}
-        placeholder={t('flink.app.resourcePlaceHolder')}
+        placeholder={t('spark.app.resourcePlaceHolder')}
       >
         {renderOptions()}
       </Select>
@@ -316,7 +287,7 @@ export const renderStreamParkJarApp = ({ model, resources }) => {
         optionFilterProp="label"
         onChange={handleAppChange}
         value={model.uploadJobJar}
-        placeholder={t('flink.app.selectAppPlaceHolder')}
+        placeholder={t('spark.app.selectAppPlaceHolder')}
       >
         {renderOptions()}
       </Select>
