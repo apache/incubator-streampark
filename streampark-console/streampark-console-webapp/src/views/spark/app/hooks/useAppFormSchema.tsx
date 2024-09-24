@@ -153,7 +153,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
           fieldNames: { label: 'sparkName', value: 'id', options: 'options' },
         },
         rules: [
-          { required: true, message: t('spark.app.addAppTips.flinkVersionIsRequiredMessage') },
+          { required: true, message: t('spark.app.addAppTips.sparkVersionIsRequiredMessage') },
         ],
       },
       {
@@ -221,7 +221,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
               <p class="conf-desc mt-10px">
                 <span class="note-info">
                   <Tag color="#2db7f5" class="tag-note">
-                    {t('flink.app.noteInfo.note')}
+                    {t('spark.app.noteInfo.note')}
                   </Tag>
                   {t('setting.yarnQueue.selectionHint')}
                 </span>

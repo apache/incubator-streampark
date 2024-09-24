@@ -100,6 +100,7 @@
       appType: AppTypeEnum.APACHE_SPARK,
       versionId: values.versionId,
       sparkSql: values.sparkSql,
+      sqlId: sparkApp.value.sqlId,
       jar: null,
       mainClass: null,
       appName: values.appName,
@@ -115,11 +116,11 @@
   }
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
-    let config = formValue.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
-      config = encryptByBase64(config);
+    const { configOverride } = formValue;
+    if (configOverride != null && configOverride !== undefined && configOverride.trim() != '') {
+      formValue.config = encryptByBase64(configOverride);
     } else {
-      config = null;
+      formValue.config = null;
     }
 
     if (formValue.jobType == JobTypeEnum.SQL) {
@@ -132,15 +133,9 @@
           throw new Error(access);
         }
       }
-      handleSQLMode({
-        ...formValue,
-        config,
-      });
+      handleSQLMode(formValue);
     } else {
-      handleCustomJobMode({
-        ...formValue,
-        config,
-      });
+      handleCustomJobMode(formValue);
     }
   }
   /* send create request */

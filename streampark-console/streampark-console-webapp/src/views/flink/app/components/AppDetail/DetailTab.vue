@@ -46,7 +46,6 @@
     fetchOptionLog,
     fetchRemoveBackup,
     fetchDeleteOperationLog,
-    fetchYarn,
   } from '/@/api/flink/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';

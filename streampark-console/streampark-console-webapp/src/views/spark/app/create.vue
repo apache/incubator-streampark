@@ -100,11 +100,11 @@
   }
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
-    let config = formValue.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
-      config = encryptByBase64(config);
+    let { configOverride } = formValue;
+    if (configOverride != null && configOverride !== undefined && configOverride.trim() != '') {
+      formValue.config = encryptByBase64(configOverride);
     } else {
-      config = null;
+      formValue.config = null;
     }
     if (formValue.jobType == JobTypeEnum.SQL) {
       if (formValue.sparkSql == null || formValue.sparkSql.trim() === '') {
@@ -116,15 +116,9 @@
           throw new Error(access);
         }
       }
-      handleSQLMode({
-        ...formValue,
-        config,
-      });
+      handleSQLMode(formValue);
     } else {
-      handleCustomJobMode({
-        ...formValue,
-        config,
-      });
+      handleCustomJobMode(formValue);
     }
   }
   /* send create request */

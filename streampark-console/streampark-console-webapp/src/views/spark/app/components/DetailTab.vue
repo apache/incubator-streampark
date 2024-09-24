@@ -38,7 +38,6 @@
     fetchSparkDeleteOptLog,
     fetchSparkOptionLog,
     fetchSparkRemoveBackup,
-    fetchSparkYarn,
   } from '/@/api/spark/app';
   import { decodeByBase64 } from '/@/utils/cipher';
   import { useModal } from '/@/components/Modal';
@@ -52,6 +51,7 @@
   import SparkSqlCompareModal from './SparkSqlCompareModal.vue';
   import { fetchSparkSql, fetchSparkSqlList, fetchSparkSqlRemove } from '/@/api/spark/sql';
   import { SparkApplication } from '/@/api/spark/app.type';
+  import { baseUrl } from '/@/api';
   const DescriptionItem = Descriptions.Item;
   const TabPane = Tabs.TabPane;
 
@@ -251,9 +251,12 @@
     });
   }
 
-  async function handleYarnUrl(yarnAppId: string) {
-    const res = await fetchSparkYarn();
-    window.open(res + '/proxy/' + yarnAppId + '/');
+  async function handleYarnUrl(id: string) {
+    window.open(baseUrl() + '/proxy/yarn/' + id + '/');
+  }
+
+  async function handleViewHistory(id: string) {
+    window.open(baseUrl() + '/proxy/history/' + id + '/');
   }
 
   function getBackupAction(record: Recordable): ActionItem[] {
@@ -344,9 +347,9 @@
                 {{ record.yarnAppId }}
               </a>
             </template>
-            <template v-if="column.dataIndex === 'jobManagerUrl'">
-              <a type="link" :href="record.jobManagerUrl" target="_blank">
-                {{ record.jobManagerUrl }}
+            <template v-if="column.dataIndex === 'trackUrl'">
+              <a type="link" @click="handleViewHistory(record.id)" target="_blank">
+                {{ record.trackUrl }}
               </a>
             </template>
             <template v-if="column.dataIndex === 'optionTime'">

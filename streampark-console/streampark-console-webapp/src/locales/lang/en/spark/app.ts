@@ -77,13 +77,13 @@ export default {
   jmMemoryOptions: 'JM Memory',
   tmMemoryOptions: 'TM Memory',
   podTemplate: 'Kubernetes Pod Template',
-  flinkCluster: 'Flink Cluster',
+  sparkCluster: 'Spark Cluster',
   yarnQueue: 'Yarn Queue',
   mavenPom: 'Maven POM',
   uploadJar: 'Upload Dependency Jar File',
   kubernetesNamespace: 'Kubernetes Namespace',
   kubernetesClusterId: 'Kubernetes Cluster ID',
-  flinkBaseDockerImage: 'Flink Base Docker Image',
+  sparkBaseDockerImage: 'Spark Base Docker Image',
   restServiceExposedType: 'Rest-Service Exposed Type',
   resourceFrom: 'Resource Source',
   uploadJobJar: 'Upload Jar File',
@@ -103,8 +103,6 @@ export default {
   startTime: 'Start Time',
   endTime: 'End Time',
   hadoopUser: 'Hadoop User',
-  restoreModeTip:
-    'Flink 1.15 and later supports restore mode; generally, this parameter does not need to be set',
   success: 'Submission Successful',
   appidCheck: 'appId cannot be empty!',
   release: {
@@ -122,7 +120,7 @@ export default {
   },
   detail: {
     detailTitle: 'Job Details',
-    flinkWebUi: 'Flink Web UI',
+    webUI: 'Spark Web UI',
     compareConfig: 'Compare Configuration',
     compareSparkSql: 'Compare Spark SQL',
     candidate: 'Candidate',
@@ -211,7 +209,7 @@ export default {
     start: 'Start Job',
     cancel: 'Stop Job',
     detail: 'Job Details',
-    startLog: 'View Flink Start Log',
+    startLog: 'View Spark Start Log',
     abort: 'Terminate Job',
     copy: 'Copy Job',
     remapping: 'Remap Job',
@@ -269,7 +267,7 @@ export default {
       'Characters must be (Chinese or English or "-" or "_") and cannot have two consecutive spaces',
     appNameNotValid:
       'Job name is invalid. Characters must be (Chinese or English or "-" or "_") and cannot have two consecutive spaces. Please check',
-    flinkClusterIsRequiredMessage: 'Flink cluster is required',
+    sparkClusterIsRequiredMessage: 'Spark cluster is required',
     sparkSqlIsRequiredMessage: 'Spark SQL is required',
     tagsPlaceholder: 'Please enter tags, if more than one, separate with commas (，)',
     parallelismPlaceholder: 'Parallelism for running the program',
@@ -285,9 +283,9 @@ export default {
     kubernetesClusterIdRequire:
       'Lowercase letters, numbers, "-", and must start and end with alphanumeric characters, and not exceed 45 characters',
     kubernetesClusterIdIsRequiredMessage: 'Kubernetes Cluster ID is required',
-    flinkImagePlaceholder:
-      'Please enter the tag of the Flink base Docker image, e.g., flink:1.13.0-scala_2.11-java8',
-    flinkImageIsRequiredMessage: 'Flink base Docker image is required',
+    sparkImagePlaceholder:
+      'Please enter the tag of the spark base Docker image, e.g., spark:1.13.0-java8',
+    sparkImageIsRequiredMessage: 'spark base Docker image is required',
     k8sRestExposedTypePlaceholder: 'Kubernetes Rest-Service Exposed Type',
     hadoopXmlConfigFileTips:
       'Automatically copy configuration file from system environment parameters',

@@ -165,7 +165,7 @@
   >
     <template #title>
       <SvgIcon name="spark" />
-      {{ versionId ? t('common.edit') : t('common.') }}
+      {{ versionId ? t('common.edit') : t('common.add') }}
     </template>
     <BasicForm @register="registerForm" />
   </BasicModal>

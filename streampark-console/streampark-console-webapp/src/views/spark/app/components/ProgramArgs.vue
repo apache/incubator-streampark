@@ -29,19 +29,19 @@
       </Tooltip>
     </div>
     <div ref="programArgRef" :class="fullEditorClass" class="w-full program-box mt-5px"> </div>
-    <ButtonGroup class="flinksql-tool" v-if="!fullScreenStatus">
+    <ButtonGroup class="sparkSql-tool" v-if="!fullScreenStatus">
       <a-button
-        class="flinksql-tool-item"
+        class="sparkSql-tool-item"
         v-if="canReview"
         type="primary"
         @click="emit('preview', value)"
         size="small"
       >
         <Icon icon="ant-design:eye-outlined" />
-        {{ t('flink.app.flinkSql.preview') }}
+        {{ t('spark.app.sparkSql.preview') }}
       </a-button>
       <a-button
-        class="flinksql-tool-item"
+        class="sparkSql-tool-item"
         size="small"
         :type="canReview ? 'default' : 'primary'"
         @click="toggle"
@@ -50,18 +50,18 @@
         {{ t('layout.header.tooltipEntryFull') }}
       </a-button>
     </ButtonGroup>
-    <ButtonGroup v-else class="flinksql-tool">
+    <ButtonGroup v-else class="sparkSql-tool">
       <a-button
         type="primary"
-        class="flinksql-tool-item"
+        class="sparkSql-tool-item"
         v-if="canReview"
         @click="emit('preview', value)"
       >
         <Icon icon="ant-design:eye-outlined" />
-        {{ t('flink.app.flinkSql.preview') }}
+        {{ t('spark.app.sparkSql.preview') }}
       </a-button>
       <a-button
-        class="flinksql-tool-item"
+        class="sparkSql-tool-item"
         size="small"
         :type="canReview ? 'default' : 'primary'"
         @click="toggle"

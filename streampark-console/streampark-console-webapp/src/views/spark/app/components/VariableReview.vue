@@ -24,9 +24,9 @@
   >
     <template #title>
       <EyeOutlined style="color: green" />
-      Flink SQL preview
+      Spark SQL preview
     </template>
-    <div ref="flinkReviewRef" class="h-[calc(100vh-150px)] flink-preview"></div>
+    <div ref="sparkReviewRef" class="h-[calc(100vh-150px)] spark-preview"></div>
   </BasicDrawer>
 </template>
 
@@ -36,8 +36,8 @@
   import { getMonacoOptions } from '../data';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
   import { useMonaco } from '/@/hooks/web/useMonaco';
-  const flinkReviewRef = ref();
-  const { setContent } = useMonaco(flinkReviewRef, {
+  const sparkReviewRef = ref();
+  const { setContent } = useMonaco(sparkReviewRef, {
     language: 'sql',
     code: '',
     options: getMonacoOptions(true) as any,
@@ -58,8 +58,8 @@
     }
   });
 </script>
-<style lang="less">
-  .flink-preview {
+<style lang="less" scoped>
+  .spark-preview {
     border: 1px solid @border-color-base;
   }
 </style>

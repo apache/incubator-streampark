@@ -132,9 +132,9 @@
         </Col>
       </template>
       <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'flinkName'">
-          <svg-icon class="avatar" name="flink" :size="20" />
-          {{ record.flinkName }}
+        <template v-if="column.dataIndex === 'sparkName'">
+          <svg-icon class="avatar" name="spark" :size="20" />
+          {{ record.sparkName }}
         </template>
         <template v-if="column.dataIndex === 'default'">
           <Switch
@@ -165,7 +165,7 @@
                 tooltip: t('common.delText'),
                 disabled: record.isDefault && getDataSource()?.length > 1,
                 popConfirm: {
-                  title: t('common.delText'),
+                  title: t('spark.home.delete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
                 },

@@ -88,7 +88,7 @@
   async function handleSubmit() {
     try {
       const { triggerSavepoint, customSavepoint, drain } = (await validate()) as Recordable;
-      const stopReq = {
+      const stopReq: CancelParam = {
         id: app.id,
         restoreOrTriggerSavepoint: triggerSavepoint,
         savepointPath: customSavepoint,

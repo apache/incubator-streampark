@@ -211,7 +211,7 @@
         class="float-right -mt-8px mr-20px"
       >
         <Icon icon="ant-design:cloud-outlined" />
-        {{ t('spark.app.detail.flinkWebUi') }}
+        {{ t('spark.app.detail.webUI') }}
       </a-button>
     </div>
     <Description @register="registerDescription" />

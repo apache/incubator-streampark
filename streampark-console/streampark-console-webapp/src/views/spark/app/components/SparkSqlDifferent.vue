@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script setup lang="ts" name="FlinkSqlDifferent">
+<script setup lang="ts">
   import { nextTick, reactive, ref } from 'vue';
   import { getMonacoOptions } from '/@/views/flink/app/data/index';
   import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';

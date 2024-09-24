@@ -133,15 +133,7 @@
     const formatSql = format(props.value);
     setContent(formatSql);
   }
-  /* full screen */
-  // function handleBigScreen() {
-  //   toggle();
-  //   unref(flinkSql).style.width = '0';
-  //   setTimeout(() => {
-  //     unref(flinkSql).style.width = '100%';
-  //     unref(flinkSql).style.height = isFullscreen.value ? 'calc(100vh - 50px)' : '550px';
-  //   }, 500);
-  // }
+
   const { onChange, setContent, getInstance, getMonacoInstance, setMonacoSuggest } = useMonaco(
     sparkSql,
     {
@@ -163,7 +155,7 @@
   const canPreview = computed(() => {
     return /\${.+}/.test(props.value);
   });
-  const flinkEditorClass = computed(() => {
+  const sparkEditorClass = computed(() => {
     return {
       ...fullEditorClass.value,
       ['syntax-' + (verifyRes.errorMsg ? 'false' : 'true')]: true,
@@ -195,7 +187,7 @@
     <div
       ref="sparkSql"
       class="overflow-hidden w-full mt-5px sql-bordered"
-      :class="flinkEditorClass"
+      :class="sparkEditorClass"
     ></div>
     <ButtonGroup class="sql-tool" v-if="!fullScreenStatus">
       <a-button size="small" class="sql-tool-item" type="primary" @click="handleVerifySql">

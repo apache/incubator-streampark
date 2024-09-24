@@ -151,7 +151,7 @@ export interface CancelParam {
   id: string;
   restoreOrTriggerSavepoint: boolean;
   drain: boolean;
-  nativeFormat: boolean;
+  nativeFormat?: boolean;
   savepointPath: string;
 }
 // create Params

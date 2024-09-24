@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 /*  state map*/
 export const stateMap = {
-  [AppStateEnum.ADDED]: { color: '#2f54eb', title: t('spark.app.runState.added') },
+  [AppStateEnum.ADDED]: { color: '#477de9', title: t('spark.app.runState.added') },
   [AppStateEnum.NEW_SAVING]: {
     color: '#738df8',
     title: t('spark.app.runState.saving'),
@@ -53,11 +53,11 @@ export const stateMap = {
     class: 'status-processing-success',
   },
   [AppStateEnum.RUNNING]: {
-    color: '#fa541c',
+    color: '#1890ff',
     title: t('spark.app.runState.running'),
     class: 'status-processing-failing',
   },
-  [AppStateEnum.FINISHED]: { color: '#1890ff', title: t('spark.app.runState.finished') },
+  [AppStateEnum.FINISHED]: { color: '#52c41a', title: t('spark.app.runState.finished') },
   [AppStateEnum.FAILED]: { color: '#f5222d', title: t('spark.app.runState.failed') },
   [AppStateEnum.LOST]: { color: '#333333', title: t('spark.app.runState.lost') },
   [AppStateEnum.MAPPING]: {
@@ -73,7 +73,7 @@ export const stateMap = {
   },
 
   [AppStateEnum.STOPPING]: {
-    color: '#738df8',
+    color: '#f5222d',
     title: t('spark.app.runState.stopping'),
     class: 'status-processing-initializing',
   },

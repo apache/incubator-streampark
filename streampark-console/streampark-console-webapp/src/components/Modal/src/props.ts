@@ -1,4 +1,4 @@
-import type { PropType, CSSProperties } from 'vue';
+import type { PropType, CSSProperties, HTMLAttributes } from 'vue';
 import type { ModalWrapperProps } from './typing';
 import { ButtonProps } from 'ant-design-vue/es/button/buttonTypes';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -67,9 +67,9 @@ export const basicProps = Object.assign({}, modalProps, {
 
   okType: { type: String, default: 'primary' },
 
-  okButtonProps: Object as PropType<ButtonProps>,
+  okButtonProps: Object as PropType<ButtonProps & HTMLAttributes>,
 
-  cancelButtonProps: Object as PropType<ButtonProps>,
+  cancelButtonProps: Object as PropType<ButtonProps & HTMLAttributes>,
 
   title: { type: String },
 
