@@ -24,6 +24,7 @@ import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * DistributedTaskService is the interface for managing tasks.
@@ -31,10 +32,11 @@ import java.util.List;
 public interface DistributedTaskService extends IService<DistributedTask> {
 
     /**
-     * Add the current console server itself to the consistent hash ring.
-     * @param serverName String
+     * Initialize the consistent hash ring.
+     * @param allServers All servers
+     * @param serverId The name of the current server
      */
-    void init(String serverName);
+    void init(Set<String> allServers, String serverId);
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
@@ -51,15 +53,15 @@ public interface DistributedTaskService extends IService<DistributedTask> {
 
     /**
      * This interface handles task redistribution when server nodes are added.
-     * @param server String
+     * @param serverId String
      */
-    void addServerRedistribute(String server);
+    void addServer(String serverId);
 
     /**
      * This interface handles task redistribution when server nodes are removed.
-     * @param server String
+     * @param serverId String
      */
-    void removeServerRedistribute(String server);
+    void removeServer(String serverId);
 
     /**
      * Determine whether the task is processed locally.

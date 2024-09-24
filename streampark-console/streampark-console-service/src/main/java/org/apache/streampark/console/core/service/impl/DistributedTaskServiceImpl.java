@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -51,16 +52,6 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     implements
         DistributedTaskService {
 
-    /**
-     * Server name
-     */
-    private String serverId;
-
-    /**
-     * Consistent hash algorithm for task distribution
-     */
-    private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
-
     @Qualifier("streamparkDistributedTaskExecutor")
     @Autowired
     private Executor taskExecutor;
@@ -69,16 +60,30 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     private ApplicationActionService applicationActionService;
 
     /**
+     * Server Id
+     */
+    private String serverId;
+
+    /**
+     * Consistent hash algorithm for task distribution
+     */
+    private final ConsistentHash<String> consistentHash = new ConsistentHash<>(Collections.emptyList());
+
+    /**
      * Task execution status
      */
     private final ConcurrentHashMap<Long, Boolean> runningTasks = new ConcurrentHashMap<>();
 
     /**
-     * Add the current console server itself to the consistent hash ring.
+     * Initialize the consistent hash ring.
+     * @param allServers All servers
+     * @param serverId The name of the current server
      */
-    public void init(String serverName) {
-        this.serverId = serverName;
-        consistentHash.add(serverName);
+    public void init(Set<String> allServers, String serverId) {
+        this.serverId = serverId;
+        for (String server : allServers) {
+            consistentHash.add(server);
+        }
     }
 
     @Scheduled(fixedDelay = 50)
@@ -151,21 +156,21 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     /**
      * This interface handles task redistribution when server nodes are added.
      *
-     * @param server String
+     * @param serverId String
      */
     @Override
-    public void addServerRedistribute(String server) {
-
+    public void addServer(String serverId) {
+        consistentHash.add(serverId);
     }
 
     /**
      * This interface handles task redistribution when server nodes are removed.
      *
-     * @param server String
+     * @param serverId String
      */
     @Override
-    public void removeServerRedistribute(String server) {
-
+    public void removeServer(String serverId) {
+        consistentHash.remove(serverId);
     }
 
     /**
