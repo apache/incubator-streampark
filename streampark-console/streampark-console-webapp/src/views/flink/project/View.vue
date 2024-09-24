@@ -56,7 +56,7 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'branches'">
           <a-tag
-            v-if="record.refs.startsWith('refs/tags/') > 0"
+            v-if="record.refs.startsWith('refs/tags/')"
             color="green"
             style="border-radius: 4px"
           >

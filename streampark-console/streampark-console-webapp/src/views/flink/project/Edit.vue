@@ -40,7 +40,7 @@
   function handleCheckRebuild(values: Recordable) {
     if (
       projectResource.url !== values.url ||
-      projectResource.branches !== values.branches ||
+      projectResource.refs !== values.refs ||
       projectResource.pom !== values.pom
     ) {
       buildState.value = BuildStateEnum.NEED_REBUILD;

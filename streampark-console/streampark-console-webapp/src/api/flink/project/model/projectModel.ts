@@ -28,7 +28,6 @@ export interface ProjectRecord {
   password?: any;
   repository: number;
   pom?: any;
-  branches?: any;
   buildArgs?: any;
   description: string;
   buildState: number | string;
