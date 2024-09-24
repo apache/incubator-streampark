@@ -30,6 +30,7 @@ export default {
     addType: '添加类型',
     addExisting: '已有集群',
     addNew: '全新集群',
+    clusterState: '集群状态',
     yarnQueue: 'Yarn 队列',
     yarnSessionClusterId: 'Yarn Session 模式集群ID',
     k8sNamespace: 'K8S 命名空间',

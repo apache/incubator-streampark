@@ -30,6 +30,7 @@ export default {
     versionId: 'Flink Version',
     addExisting: 'existing cluster',
     addNew: 'new cluster',
+    clusterState: 'Cluster State',
     yarnQueue: 'Yarn Queue',
     yarnSessionClusterId: 'Yarn Session Cluster',
     k8sNamespace: 'Kubernetes Namespace',
