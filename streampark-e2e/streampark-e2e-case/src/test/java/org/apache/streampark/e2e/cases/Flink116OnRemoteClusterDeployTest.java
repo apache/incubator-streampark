@@ -86,7 +86,7 @@ public class Flink116OnRemoteClusterDeployTest {
     }
 
     @Test
-    @Order(5)
+    @Order(2)
     public void testDeleteFlinkCluster() {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 

@@ -139,7 +139,13 @@
           <a-button @click="go('/flink/cluster')">
             {{ t('common.cancelText') }}
           </a-button>
-          <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">
+          <a-button
+            id="e2e-flinkcluster-submit-btn"
+            class="ml-4"
+            :loading="getLoading"
+            type="primary"
+            @click="submit()"
+          >
             {{ t('common.submitText') }}
           </a-button>
         </div>

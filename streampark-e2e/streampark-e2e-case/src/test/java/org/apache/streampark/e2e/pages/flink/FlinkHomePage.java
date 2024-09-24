@@ -58,7 +58,9 @@ public class FlinkHomePage extends NavBarPage implements ApacheFlinkPage.Tab {
 
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
             .until(ExpectedConditions.elementToBeClickable(buttonCreateFlinkHome));
+
         buttonCreateFlinkHome.click();
+
         createFlinkHomeForm.inputFlinkName.sendKeys(flinkName);
         createFlinkHomeForm.inputFlinkHome.sendKeys(flinkHome);
         createFlinkHomeForm.inputDescription.sendKeys(description);

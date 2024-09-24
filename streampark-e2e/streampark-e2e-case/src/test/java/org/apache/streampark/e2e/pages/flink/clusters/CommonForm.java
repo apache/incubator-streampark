@@ -36,7 +36,7 @@ public abstract class CommonForm {
 
     public WebDriver driver;
 
-    @FindBy(id = "form_item_clusterName")
+    @FindBy(id = "flink_cluster_clusterName")
     public WebElement inputFlinkClusterName;
 
     @FindBy(xpath = "//div[contains(@codefield, 'versionId')]//div[contains(@class, 'ant-select-selector')]")
@@ -48,7 +48,7 @@ public abstract class CommonForm {
     })
     public List<WebElement> selectFlinkVersion;
 
-    @FindBy(xpath = "//button[contains(@class, 'ant-btn')]//span[contains(text(), 'Submit')]")
+    @FindBy(id = "e2e-flinkcluster-submit-btn")
     public WebElement buttonSubmit;
 
     private final ClusterDetailForm parent;
