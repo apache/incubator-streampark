@@ -51,7 +51,7 @@
         <span>{{ t('flink.project.form.branches') }}</span>
         <p v-if="item.refs != null">
           <a-tag
-            v-if="item.refs.startsWith('refs/tags/') > 0"
+            v-if="item.refs.startsWith('refs/tags/')"
             color="#108ee9"
             style="border-radius: 4px"
           >

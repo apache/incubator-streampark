@@ -14,14 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<script lang="ts">
-  export default defineComponent({
-    name: 'AddProject',
-  });
-</script>
-
 <script setup lang="ts" name="AddProject">
-  import { defineComponent } from 'vue';
   import { useRouter } from 'vue-router';
   import { useProject } from './useProject';
   import { createProject } from '/@/api/flink/project';

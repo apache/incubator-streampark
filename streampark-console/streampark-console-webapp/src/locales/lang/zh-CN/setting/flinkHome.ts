@@ -36,5 +36,9 @@ export default {
     flinkHomeIsRequired: 'Flink安装路径必填',
     createFlinkHomeSuccessful: ' 创建成功!',
     updateFlinkHomeSuccessful: ' 更新成功!',
+    invalidPath: 'FLINK_HOME 路径无效.',
+    flinkHomeError: '未找到 flink-dist 或找到多个 flink-dist, FLINK_HOME 错误.',
+    deleteSuccess: '当前 Flink home 已删除.',
+    setDefaultSuccess: `{name} 已被设置为默认 Flink home.`,
   },
 };

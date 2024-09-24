@@ -82,80 +82,70 @@
 
   /* form submit */
   async function handleSubmit() {
-    let formValue;
     try {
-      formValue = await validate();
+      changeOkLoading(true);
+      const formValue = await validate();
+      // Detection environment
+      const { data: resp } = await fetchCheckEnv({
+        id: versionId.value,
+        flinkName: formValue.flinkName,
+        flinkHome: formValue.flinkHome,
+      });
+      const checkResp = parseInt(resp.data);
+      if (checkResp != 0) {
+        // Environment detection is successful
+        if (checkResp == -1) {
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.invalidPath'), 'error');
+        } else if (checkResp == 1) {
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
+        } else if (checkResp == 2) {
+          Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkHomeError'), 'error');
+        }
+      } else {
+        let message: string;
+        let success = false;
+        // create
+        if (versionId.value == null) {
+          const { data } = await fetchFlinkCreate(formValue);
+          if (data.data) {
+            success = true;
+            message = formValue.flinkName.concat(
+              t('setting.flinkHome.operateMessage.createFlinkHomeSuccessful'),
+            );
+          } else {
+            message = data.message;
+          }
+        } else {
+          // update
+          const { data } = await fetchFlinkUpdate({
+            id: versionId.value,
+            ...formValue,
+          });
+          if (data.data) {
+            message = formValue.flinkName.concat(
+              t('setting.flinkHome.operateMessage.updateFlinkHomeSuccessful'),
+            );
+            success = true;
+          } else {
+            message = data.message;
+          }
+        }
+        if (success) {
+          Swal.fire({
+            icon: 'success',
+            title: message,
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          closeModal();
+          emit('reload');
+        } else {
+          Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
+        }
+      }
     } catch (error) {
       console.warn('validate error:', error);
       return;
-    } finally {
-      changeOkLoading(false);
-    }
-    // Detection environment
-    const { data: resp } = await fetchCheckEnv({
-      id: versionId.value,
-      flinkName: formValue.flinkName,
-      flinkHome: formValue.flinkHome,
-    });
-    const checkResp = parseInt(resp.data);
-    if (checkResp != 0) {
-      // Environment detection is successful
-      if (checkResp == -1) {
-        Swal.fire('Failed', 'FLINK_HOME invalid path.', 'error');
-      } else if (checkResp == 1) {
-        Swal.fire('Failed', t('setting.flinkHome.operateMessage.flinkNameIsUnique'), 'error');
-      } else if (checkResp == 2) {
-        Swal.fire(
-          'Failed',
-          'can no found flink-dist or found multiple flink-dist, FLINK_HOME error.',
-          'error',
-        );
-      }
-      changeOkLoading(false);
-      return;
-    }
-
-    try {
-      let message: string;
-      let success = false;
-      // create
-      if (versionId.value == null) {
-        const { data } = await fetchFlinkCreate(formValue);
-        if (data.data) {
-          success = true;
-          message = formValue.flinkName.concat(
-            t('setting.flinkHome.operateMessage.createFlinkHomeSuccessful'),
-          );
-        } else {
-          message = data.message;
-        }
-      } else {
-        // update
-        const { data } = await fetchFlinkUpdate({
-          id: versionId.value,
-          ...formValue,
-        });
-        if (data.data) {
-          message = formValue.flinkName.concat(
-            t('setting.flinkHome.operateMessage.updateFlinkHomeSuccessful'),
-          );
-          success = true;
-        } else {
-          message = data.message;
-        }
-      }
-      if (success) {
-        Swal.fire({
-          icon: 'success',
-          title: message,
-          showConfirmButton: false,
-          timer: 2000,
-        });
-        closeModal();
-        emit('reload');
-      } else {
-        Swal.fire('Failed', message.replaceAll(/\[StreamPark]/g, ''), 'error');
-      }
     } finally {
       changeOkLoading(false);
     }
@@ -165,7 +155,7 @@
   <BasicModal :width="600" @register="registerModalInner" v-bind="$attrs" @ok="handleSubmit">
     <template #title>
       <SvgIcon name="flink" />
-      {{ t('common.add') }}
+      {{ versionId ? t('common.add') : t('common.edit') }}
     </template>
     <div class="mt-3">
       <BasicForm @register="registerForm" />

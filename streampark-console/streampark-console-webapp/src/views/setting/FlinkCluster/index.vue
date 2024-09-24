@@ -53,7 +53,7 @@
 
   const go = useGo();
   const { t } = useI18n();
-  const { Swal, createMessage, createConfirm } = useMessage();
+  const { Swal, createMessage } = useMessage();
   const [registerTable, { reload, getLoading }] = useTable({
     api: pageFlinkCluster,
     columns: [
@@ -123,17 +123,16 @@
   }
   /* delete */
   async function handleDelete(item: FlinkCluster) {
-    createConfirm({
-      iconType: 'warning',
-      title: t('common.delText'),
-      centered: true,
-      content: t('setting.flinkCluster.delete'),
-      onOk: async () => {
-        await fetchClusterRemove(item.id);
-        reload();
-        createMessage.success('The current cluster is remove');
-      },
-    });
+    const hide = createMessage.loading('Deleting', 0);
+    try {
+      await fetchClusterRemove(item.id);
+      reload();
+      createMessage.success('The current cluster is remove');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      hide();
+    }
   }
   /* shutdown */
   async function handleShutdownCluster(item: FlinkCluster) {
@@ -240,7 +239,11 @@
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
-                onClick: handleDelete.bind(null, record),
+                popConfirm: {
+                  title: t('setting.flinkCluster.delete'),
+                  placement: 'left',
+                  confirm: handleDelete.bind(null, record),
+                },
               },
             ]"
           />
