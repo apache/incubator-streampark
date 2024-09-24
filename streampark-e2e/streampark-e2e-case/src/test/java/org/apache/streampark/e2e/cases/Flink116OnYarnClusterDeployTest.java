@@ -42,7 +42,7 @@ public class Flink116OnYarnClusterDeployTest {
 
     private static final String flinkName = "flink-1.16.3";
 
-    private static final String flinkHome = "/opt/flink/";
+    private static final String flinkHome = "/flink-1.16.3";
 
     private static final String flinkDescription = "description test";
 
