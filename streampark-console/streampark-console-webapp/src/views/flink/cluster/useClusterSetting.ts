@@ -120,7 +120,7 @@ export const useClusterSetting = () => {
           placeholder: t('setting.flinkCluster.placeholder.executionMode'),
           options: [
             {
-              label: 'remote',
+              label: 'standalone',
               value: ExecModeEnum.STANDALONE,
             },
             { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },
@@ -364,6 +364,7 @@ export const useClusterSetting = () => {
           dynamicProperties: values.dynamicProperties,
           resolveOrder: values.resolveOrder,
         });
+        return params;
       case ExecModeEnum.KUBERNETES_SESSION:
         Object.assign(params, {
           clusterId: values.clusterId,

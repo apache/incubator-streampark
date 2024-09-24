@@ -30,6 +30,7 @@
   const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
 
   const [registerForm, { submit }] = useForm({
+    name: 'flink_cluster',
     labelWidth: 120,
     colon: true,
     labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
@@ -37,6 +38,7 @@
     baseColProps: { span: 24 },
     showActionButtonGroup: false,
   });
+
   async function handleSubmitCluster(values: Recordable) {
     try {
       changeLoading(true);
@@ -87,7 +89,13 @@
           <a-button @click="go('/flink/cluster')">
             {{ t('common.cancelText') }}
           </a-button>
-          <a-button class="ml-4" :loading="getLoading" type="primary" @click="submit()">
+          <a-button
+            id="e2e-flinkcluster-submit-btn"
+            class="ml-4"
+            :loading="getLoading"
+            type="primary"
+            @click="submit()"
+          >
             {{ t('common.submitText') }}
           </a-button>
         </div>

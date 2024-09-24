@@ -116,6 +116,7 @@ public class ExternalLinkPage extends NavBarPage implements SettingPage.Tab {
             .until(ExpectedConditions.elementToBeClickable(deleteConfirmButton));
 
         deleteConfirmButton.click();
+
         return this;
     }
 

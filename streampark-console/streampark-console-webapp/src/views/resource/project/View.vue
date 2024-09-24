@@ -55,19 +55,16 @@
     <BasicTable @register="registerTable">
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'branches'">
-          <div v-if="record.refs">
-            <a-tag
-              v-if="record.refs?.startsWith('refs/tags/') > 0"
-              color="green"
-              style="border-radius: 4px"
-            >
-              {{ record.refs?.replace('refs/tags/', '') }}
-            </a-tag>
-            <a-tag v-else color="blue" style="border-radius: 4px">
-              {{ record.refs?.replace('refs/heads/', '') }}
-            </a-tag>
-          </div>
-          <span v-else>-</span>
+          <a-tag
+            v-if="record.refs.startsWith('refs/tags/') > 0"
+            color="green"
+            style="border-radius: 4px"
+          >
+            {{ record.refs.replace('refs/tags/', '') }}
+          </a-tag>
+          <a-tag v-else color="blue" style="border-radius: 4px">
+            {{ record.refs.replace('refs/heads/', '') }}
+          </a-tag>
         </template>
         <template v-if="column.dataIndex === 'type'">
           <a-badge
@@ -106,16 +103,21 @@
                 onClick: handleViewLog.bind(null, record),
               },
               {
+                class: 'e2e-project-build-btn',
                 icon: 'ant-design:thunderbolt-outlined',
                 auth: 'project:build',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-project-build-confirm',
+                  },
                   title: t('flink.project.operationTips.buildProjectMessage'),
                   placement: 'left',
                   confirm: handleBuild.bind(null, record),
                 },
               },
               {
+                class: 'e2e-project-edit-btn',
                 icon: 'clarity:note-edit-line',
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:update',
@@ -123,12 +125,16 @@
                 onClick: handleEdit.bind(null, record),
               },
               {
+                class: 'e2e-project-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 ifShow: record.buildState !== BuildStateEnum.BUILDING,
                 auth: 'project:delete',
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-project-delete-confirm',
+                  },
                   title: t('flink.project.operationTips.deleteProjectMessage'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),
@@ -146,10 +152,12 @@
   import { defineComponent, nextTick, onUnmounted, reactive, ref, watch } from 'vue';
 
   import { PageWrapper } from '/@/components/Page';
-  import { buildStateMap, statusList } from './project.data';
-  import { RadioGroup, Radio, Card, Tag, Badge, Input } from 'ant-design-vue';
+  import { statusList } from './project.data';
+  import { RadioGroup, Radio, Card, Tag, Badge } from 'ant-design-vue';
+  import { buildStateMap } from './project.data';
   import { buildProject, deleteProject, getList } from '/@/api/resource/project';
   import { ProjectRecord } from '/@/api/resource/project/model/projectModel';
+  import Icon, { SvgIcon } from '/@/components/Icon';
   import { useGo } from '/@/hooks/web/usePage';
   import { useTimeoutFn } from '@vueuse/core';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -162,7 +170,6 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRouter } from 'vue-router';
   import { ProjectTypeEnum } from '/@/enums/projectEnum';
-  import Icon, { SvgIcon } from '/@/components/Icon';
 
   export default defineComponent({
     name: 'ProjectView',
@@ -173,7 +180,6 @@
       ACard: Card,
       ATag: Tag,
       ABadge: Badge,
-      AInput: Input,
       Icon,
       SvgIcon,
       LogModal,
@@ -199,6 +205,7 @@
 
       const queryParams = reactive<{ buildState: string; name?: string }>({
         buildState: '',
+        name: '',
       });
 
       let projectDataSource = ref<Array<ProjectRecord>>([]);
@@ -218,7 +225,9 @@
           pageSize: params.pageSize,
         });
       }
+
       const [registerTable, { reload, getLoading, setPagination }] = useTable({
+        rowKey: 'id',
         api: getRequestList,
         columns: [
           { dataIndex: 'name', title: t('flink.project.form.projectName') },
@@ -227,7 +236,6 @@
           { dataIndex: 'lastBuild', title: t('flink.project.form.lastBuild') },
           { dataIndex: 'buildState', title: t('flink.project.form.buildState') },
         ],
-        rowKey: 'id',
         useSearchForm: false,
         striped: false,
         canResize: false,
@@ -239,7 +247,11 @@
           dataIndex: 'action',
         },
       });
-
+      function handlePageDataReload(polling = false) {
+        nextTick(() => {
+          reload({ polling });
+        });
+      }
       async function handleBuild(record: ProjectRecord) {
         try {
           await buildProject({
@@ -257,7 +269,7 @@
         }
       }
       const handleEdit = function (record: ProjectRecord) {
-        router.push({ path: '/flink/project/edit', query: { id: record.id } });
+        router.push({ path: '/project/edit', query: { id: record.id } });
       };
       async function handleDelete(record: ProjectRecord) {
         try {
@@ -288,18 +300,13 @@
         reload();
       };
 
-      function handlePageDataReload(polling = false) {
-        nextTick(() => {
-          reload({ polling });
-        });
-      }
-
       const { start, stop } = useTimeoutFn(() => {
         if (!getLoading()) {
           handlePageDataReload(true);
         }
         start();
       }, 2000);
+
       /* View log */
       function handleViewLog(value: Recordable) {
         openLogModal(true, { project: value });
@@ -344,13 +351,20 @@
     },
   });
 </script>
-<style lang="less" scoped>
-  .search-input {
-    width: 272px;
-    margin-left: 16px;
+<style lang="less">
+  .sp-project {
+    .search-input {
+      width: 272px;
+      margin-left: 16px;
+    }
+    .add-btn {
+      margin-left: 30px;
+    }
+    .ant-card-head {
+      padding: 0 2px !important;
+    }
   }
-
-  .add-btn {
-    margin-left: 30px;
+  .status-processing-running {
+    animation: running-color 800ms ease-out infinite alternate;
   }
 </style>

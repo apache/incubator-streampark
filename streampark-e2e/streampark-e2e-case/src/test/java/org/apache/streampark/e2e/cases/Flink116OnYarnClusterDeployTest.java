@@ -53,7 +53,7 @@ public class Flink116OnYarnClusterDeployTest {
     private static final ClusterDetailForm.ExecutionMode executionMode = ClusterDetailForm.ExecutionMode.YARN_SESSION;
 
     @BeforeAll
-    public static void setup() {
+    public static void setUp() {
         FlinkHomePage flinkHomePage = new LoginPage(browser)
             .login()
             .goToNav(ApacheFlinkPage.class)
@@ -68,11 +68,10 @@ public class Flink116OnYarnClusterDeployTest {
     @Test
     @Order(1)
     public void testCreateFlinkCluster() {
-        final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
+        FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
         flinkClustersPage.createFlinkCluster()
             .<YarnSessionForm>addCluster(executionMode)
-            .resolveOrder(YarnSessionForm.ResolveOrder.CHILD_FIRST)
             .clusterName(flinkClusterName)
             .flinkVersion(flinkName)
             .submit();

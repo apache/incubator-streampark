@@ -22,11 +22,7 @@ import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
-import org.apache.streampark.console.base.exception.ApiDetailException;
-import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
-import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.WebUtils;
-import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,25 +33,25 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.lib.Constants;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @TableName("t_flink_project")
-public class Project extends BaseEntity {
+public class Project implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -69,9 +65,6 @@ public class Project extends BaseEntity {
     /** git branch or tag */
     private String refs;
 
-    /** git branch */
-    private String branches;
-
     private Date lastBuild;
 
     @TableField(updateStrategy = FieldStrategy.IGNORED)
@@ -82,10 +75,6 @@ public class Project extends BaseEntity {
 
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String prvkeyPath;
-
-    /** No salt value is returned */
-    @JsonIgnore
-    private String salt;
 
     /** 1:git 2:svn */
     private Integer repository;
@@ -103,6 +92,10 @@ public class Project extends BaseEntity {
 
     /** 1) flink 2) spark */
     private Integer type;
+
+    private Date createTime;
+
+    private Date modifyTime;
 
     private transient String module;
 
@@ -124,7 +117,8 @@ public class Project extends BaseEntity {
         }
 
         String sourceDir = getSourceDirName();
-        File srcFile = new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
+        File srcFile =
+            new File(String.format("%s/%s/%s", sourcePath.getAbsolutePath(), name, sourceDir));
         String newPath = String.format("%s/%s", sourcePath.getAbsolutePath(), id);
         if (srcFile.exists()) {
             File newFile = new File(newPath);
@@ -138,7 +132,16 @@ public class Project extends BaseEntity {
     }
 
     private String getSourceDirName() {
-        String branches = this.getBranches() == null ? "main" : this.getBranches();
+        String branches = "main";
+        if (StringUtils.isNotBlank(this.refs)) {
+            if (this.refs.startsWith(Constants.R_HEADS)) {
+                branches = this.refs.replace(Constants.R_HEADS, "");
+            } else if (this.refs.startsWith(Constants.R_TAGS)) {
+                branches = this.refs.replace(Constants.R_TAGS, "");
+            } else {
+                branches = this.refs;
+            }
+        }
         String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
         return rootName.concat("-").concat(branches);
     }
@@ -160,30 +163,6 @@ public class Project extends BaseEntity {
     }
 
     @JsonIgnore
-    public List<String> getAllBranches() {
-        try {
-            return GitUtils.getBranchList(this);
-        } catch (Exception e) {
-            throw new ApiDetailException(e);
-        }
-    }
-
-    public GitAuthorizedErrorEnum gitCheck() {
-        try {
-            GitUtils.getBranchList(this);
-            return GitAuthorizedErrorEnum.SUCCESS;
-        } catch (Exception e) {
-            String err = e.getMessage();
-            if (err.contains("not authorized")) {
-                return GitAuthorizedErrorEnum.ERROR;
-            } else if (err.contains("Authentication is required")) {
-                return GitAuthorizedErrorEnum.REQUIRED;
-            }
-            return GitAuthorizedErrorEnum.UNKNOW;
-        }
-    }
-
-    @JsonIgnore
     public boolean isCloned() {
         File repository = getGitRepository();
         return repository.exists();
@@ -202,39 +181,47 @@ public class Project extends BaseEntity {
 
     @JsonIgnore
     public String getMavenArgs() {
-        // 1) check build args
-        String buildArg = getMvnBuildArgs();
-        StringBuilder argBuilder = new StringBuilder();
-        if (StringUtils.isNotBlank(buildArg)) {
-            argBuilder.append(buildArg);
+        StringBuilder mvnArgBuffer = new StringBuilder(" clean package -DskipTests ");
+        if (StringUtils.isNotBlank(this.buildArgs)) {
+            mvnArgBuffer.append(this.buildArgs.trim());
         }
 
-        // 2) mvn setting file
-        String mvnSetting = getMvnSetting();
-        if (StringUtils.isNotBlank(mvnSetting)) {
-            argBuilder.append(" --settings ").append(mvnSetting);
+        // --settings
+        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        if (StringUtils.isNotBlank(setting)) {
+            File file = new File(setting);
+            if (file.exists() && file.isFile()) {
+                mvnArgBuffer.append(" --settings ").append(setting.trim());
+            } else {
+                throw new IllegalArgumentException(
+                    String.format(
+                        "Invalid maven-setting file path \"%s\", the path not exist or is not file",
+                        setting));
+            }
         }
 
-        // 3) check args
-        String cmd = argBuilder.toString();
-        String illegalArg = getIllegalArgs(cmd);
-        if (illegalArg != null) {
+        // check maven args
+        String mvnArgs = mvnArgBuffer.toString();
+        if (mvnArgs.contains("\n")) {
             throw new IllegalArgumentException(
                 String.format(
-                    "Invalid maven argument, illegal args: %s, in your maven args: %s",
-                    illegalArg, cmd));
+                    "Illegal argument: newline character in maven build parameters: \"%s\"", mvnArgs));
         }
 
-        String mvn = getMvn();
-        return mvn.concat(" clean package -DskipTests ").concat(cmd);
-    }
+        String args = getIllegalArgs(mvnArgs);
+        if (args != null) {
+            throw new IllegalArgumentException(
+                String.format("Illegal argument: \"%s\" in maven build parameters: %s", args, mvnArgs));
+        }
 
-    private String getMvn() {
+        // find mvn
         boolean windows = Utils.isWindows();
         String mvn = windows ? "mvn.cmd" : "mvn";
 
         String mavenHome = System.getenv("M2_HOME");
-        mavenHome = mavenHome == null ? System.getenv("MAVEN_HOME") : mavenHome;
+        if (mavenHome == null) {
+            mavenHome = System.getenv("MAVEN_HOME");
+        }
 
         boolean useWrapper = true;
         if (mavenHome != null) {
@@ -250,36 +237,13 @@ public class Project extends BaseEntity {
         }
 
         if (useWrapper) {
-            mvn = WebUtils.getAppHome().concat(windows ? "/bin/mvnw.cmd" : "/bin/mvnw");
+            if (windows) {
+                mvn = WebUtils.getAppHome().concat("/bin/mvnw.cmd");
+            } else {
+                mvn = WebUtils.getAppHome().concat("/bin/mvnw");
+            }
         }
-        return mvn;
-    }
-
-    private String getMvnBuildArgs() {
-        if (StringUtils.isNotBlank(this.buildArgs)) {
-            String args = getIllegalArgs(this.buildArgs);
-            AssertUtils.required(
-                args == null,
-                String.format(
-                    "Illegal argument: \"%s\" in maven build parameters: %s", args,
-                    this.buildArgs));
-            return this.buildArgs.trim();
-        }
-        return null;
-    }
-
-    private String getMvnSetting() {
-        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
-        if (StringUtils.isBlank(setting)) {
-            return null;
-        }
-        File file = new File(setting);
-        AssertUtils.required(
-            !file.exists() || !file.isFile(),
-            String.format(
-                "Invalid maven-setting file path \"%s\", the path not exist or is not file",
-                setting));
-        return setting;
+        return mvn.concat(mvnArgs);
     }
 
     private String getIllegalArgs(String param) {
@@ -314,27 +278,19 @@ public class Project extends BaseEntity {
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-            "%sproject : %s%nbranches: %s%ncommand : %s%n%n",
-            getLogHeader("maven install"), getName(), getBranches(), getMavenArgs());
+            "%sproject : %s\nrefs: %s\ncommand : %s\n\n",
+            getLogHeader("maven install"), getName(), getRefs(), getMavenArgs());
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-            "%sproject  : %s%nbranches : %s%nworkspace: %s%n%n",
-            getLogHeader("git clone"), getName(), getBranches(), getAppSource());
+            "%sproject  : %s\nrefs : %s\nworkspace: %s\n\n",
+            getLogHeader("git clone"), getName(), getRefs(), getAppSource());
     }
 
     @JsonIgnore
     private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
-    }
-
-    public boolean isHttpRepositoryUrl() {
-        return url != null && (url.trim().startsWith("https://") || url.trim().startsWith("http://"));
-    }
-
-    public boolean isSshRepositoryUrl() {
-        return url != null && url.trim().startsWith("git@");
     }
 }

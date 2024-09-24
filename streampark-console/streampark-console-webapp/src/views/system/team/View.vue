@@ -80,6 +80,7 @@
       const { createMessage } = useMessage();
       const { t } = useI18n();
       const [registerTable, { reload }] = useTable({
+        rowKey: 'id',
         api: fetTeamList,
         columns,
         formConfig: {
@@ -90,7 +91,6 @@
           submitOnChange: true,
           showActionButtonGroup: false,
         },
-        rowKey: 'id',
         pagination: true,
         useSearchForm: true,
         showTableSetting: false,

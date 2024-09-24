@@ -159,6 +159,7 @@
           <TableAction
             :actions="[
               {
+                class: 'e2e-flinkenv-edit-btn',
                 icon: 'clarity:note-edit-line',
                 tooltip: t('setting.flinkHome.edit'),
                 onClick: handleEditFlink.bind(null, record),
@@ -169,11 +170,15 @@
                 onClick: handleFlinkConf.bind(null, record),
               },
               {
+                class: 'e2e-flinkenv-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 disabled: record.isDefault && getDataSource()?.length > 1,
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-flinkenv-delete-confirm',
+                  },
                   title: t('setting.flinkHome.delete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),

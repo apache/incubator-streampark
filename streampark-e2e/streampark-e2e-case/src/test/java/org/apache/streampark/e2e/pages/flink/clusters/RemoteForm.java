@@ -29,7 +29,7 @@ public class RemoteForm extends CommonForm {
 
     public WebDriver driver;
 
-    @FindBy(id = "form_item_address")
+    @FindBy(id = "flink_cluster_address")
     public WebElement inputJobManagerURL;
 
     public RemoteForm(ClusterDetailForm clusterDetailForm) {

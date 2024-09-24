@@ -33,6 +33,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { PageWrapper } from '/@/components/Page';
   import { BasicTable, TableAction, useTable } from '/@/components/Table';
+  import State from './State';
   defineOptions({
     name: 'FlinkClusterSetting',
   });
@@ -55,13 +56,16 @@
   const { t } = useI18n();
   const { Swal, createMessage } = useMessage();
   const [registerTable, { reload, getLoading }] = useTable({
+    rowKey: 'id',
     api: fetchFlinkClusterPage,
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
       { dataIndex: 'executionMode', title: t('setting.flinkCluster.form.executionMode') },
       { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
+      { dataIndex: 'clusterState', title: t('setting.flinkCluster.form.runState') },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
     ],
+
     formConfig: {
       schemas: [
         {
@@ -81,7 +85,6 @@
       submitOnChange: true,
       showActionButtonGroup: false,
     },
-    rowKey: 'id',
     pagination: true,
     useSearchForm: true,
     showTableSetting: false,
@@ -164,7 +167,11 @@
     <BasicTable @register="registerTable" class="flex flex-col">
       <template #form-formFooter>
         <Col :span="5" :offset="13" class="text-right">
-          <a-button type="primary" @click="() => go('/flink/add_cluster')">
+          <a-button
+            id="e2e-flinkcluster-create-btn"
+            type="primary"
+            @click="() => go('/flink/add_cluster')"
+          >
             <PlusOutlined />
             {{ t('common.add') }}
           </a-button>
@@ -196,10 +203,14 @@
           </a>
           <span v-else> - </span>
         </template>
+        <template v-if="column.dataIndex === 'clusterState'">
+          <State :data="{ clusterState: record.clusterState }" />
+        </template>
         <template v-if="column.dataIndex === 'action'">
           <TableAction
             :actions="[
               {
+                class: 'e2e-flinkcluster-edit-btn',
                 icon: 'clarity:note-edit-line',
                 auth: 'cluster:update',
                 tooltip: t('setting.flinkCluster.edit'),
@@ -207,6 +218,7 @@
                 onClick: handleEditCluster.bind(null, record),
               },
               {
+                class: 'e2e-flinkcluster-shutdown-btn',
                 icon: 'ant-design:pause-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: handleIsStart(record),
@@ -215,6 +227,7 @@
                 onClick: handleShutdownCluster.bind(null, record),
               },
               {
+                class: 'e2e-flinkcluster-start-btn',
                 icon: 'ant-design:play-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: !handleIsStart(record),
@@ -231,10 +244,14 @@
                 target: '_blank',
               },
               {
+                class: 'e2e-flinkcluster-delete-btn',
                 icon: 'ant-design:delete-outlined',
                 color: 'error',
                 tooltip: t('common.delText'),
                 popConfirm: {
+                  okButtonProps: {
+                    class: 'e2e-flinkcluster-delete-confirm',
+                  },
                   title: t('setting.flinkCluster.delete'),
                   placement: 'left',
                   confirm: handleDelete.bind(null, record),

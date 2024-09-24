@@ -30,10 +30,9 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.base.util.EncryptUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.base.util.GitUtils;
-import org.apache.streampark.console.base.util.ShaHashUtils;
+import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
@@ -45,7 +44,6 @@ import org.apache.streampark.console.core.service.application.ApplicationManageS
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.MemorySize;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -67,6 +65,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,77 +99,71 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public RestResponse create(Project project) {
-        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<Project>().eq(Project::getName,
-            project.getName());
-        long count = count(queryWrapper);
         RestResponse response = RestResponse.success();
-
-        ApiAlertException.throwIfTrue(count > 0, "project name already exists, add project failed");
-        if (StringUtils.isNotBlank(project.getPassword())) {
-            String salt = ShaHashUtils.getRandomSalt();
-            try {
-                String encrypt = EncryptUtils.encrypt(project.getPassword(), salt);
-                project.setSalt(salt);
-                project.setPassword(encrypt);
-            } catch (Exception e) {
-                log.error("Project password decrypt failed", e);
-                throw new ApiAlertException("Project github/gitlab password decrypt failed");
-            }
-        }
+        project.setId(null);
+        ApiAlertException.throwIfTrue(
+            checkExists(project), "project name already exists, add project failed");
+        Date date = new Date();
+        project.setCreateTime(date);
+        project.setModifyTime(date);
         boolean status = save(project);
-
         if (status) {
             return response.message("Add project successfully").data(true);
+        } else {
+            return response.message("Add project failed").data(false);
         }
-        return response.message("Add project failed").data(false);
     }
 
     @Override
+    public boolean checkExists(Project project) {
+        if (project.getId() != null) {
+            Project proj = getById(project.getId());
+            if (proj != null && ObjectUtils.safeEquals(project.getName(), proj.getName())) {
+                return false;
+            }
+        }
+        LambdaQueryWrapper<Project> queryWrapper =
+            new LambdaQueryWrapper<Project>()
+                .eq(Project::getName, project.getName())
+                .eq(Project::getTeamId, project.getTeamId());
+        return this.baseMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean update(Project projectParam) {
         Project project = getById(projectParam.getId());
         AssertUtils.notNull(project);
         ApiAlertException.throwIfFalse(
             project.getTeamId().equals(projectParam.getTeamId()),
-            "TeamId can't be changed, update project failed.");
+            "Team can't be changed, update project failed.");
         ApiAlertException.throwIfFalse(
             !project.getBuildState().equals(BuildStateEnum.BUILDING.get()),
             "The project is being built, update project failed.");
-        updateInternal(projectParam, project);
-        if (project.isHttpRepositoryUrl()) {
-            if (StringUtils.isBlank(projectParam.getUserName())) {
-                project.setUserName(null);
-                project.setPassword(null);
-                project.setSalt(null);
-            } else {
-                project.setUserName(projectParam.getUserName());
-                if (!Objects.equals(projectParam.getPassword(), project.getPassword())) {
-                    try {
-                        String salt = ShaHashUtils.getRandomSalt();
-                        String encrypt = EncryptUtils.encrypt(projectParam.getPassword(), salt);
-                        project.setPassword(encrypt);
-                        project.setSalt(salt);
-                    } catch (Exception e) {
-                        log.error("The project github/gitlab password encrypt failed");
-                        throw new ApiAlertException(e);
-                    }
-                }
-            }
-        }
-        if (project.isSshRepositoryUrl()) {
+        project.setName(projectParam.getName());
+        project.setUrl(projectParam.getUrl());
+        project.setRefs(projectParam.getRefs());
+        project.setPrvkeyPath(projectParam.getPrvkeyPath());
+        project.setUserName(projectParam.getUserName());
+        project.setPassword(projectParam.getPassword());
+        project.setPom(projectParam.getPom());
+        project.setDescription(projectParam.getDescription());
+        project.setBuildArgs(projectParam.getBuildArgs());
+        project.setModifyTime(new Date());
+        if (GitUtils.isSshRepositoryUrl(project.getUrl())) {
             project.setUserName(null);
         } else {
             project.setPrvkeyPath(null);
         }
         if (projectParam.getBuildState() != null) {
             project.setBuildState(projectParam.getBuildState());
-            if (BuildStateEnum.NEED_REBUILD == BuildStateEnum.of(projectParam.getBuildState())) {
+            if (BuildStateEnum.of(projectParam.getBuildState()).equals(BuildStateEnum.NEED_REBUILD)) {
                 List<Application> applications = listApps(project);
                 // Update deployment status
                 applications.forEach(
                     (app) -> {
                         log.info(
-                            "update deploy by project: {}, appName:{}", project.getName(),
-                            app.getJobName());
+                            "update deploy by project: {}, appName:{}", project.getName(), app.getJobName());
                         app.setRelease(ReleaseStateEnum.NEED_CHECK.get());
                         applicationManageService.updateRelease(app);
                     });
@@ -178,18 +171,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         }
         baseMapper.updateById(project);
         return true;
-    }
-
-    private static void updateInternal(Project projectParam, Project project) {
-        project.setName(projectParam.getName());
-        project.setUrl(projectParam.getUrl());
-        project.setBranches(projectParam.getBranches());
-        project.setPrvkeyPath(projectParam.getPrvkeyPath());
-        project.setUserName(projectParam.getUserName());
-        project.setPassword(projectParam.getPassword());
-        project.setPom(projectParam.getPom());
-        project.setDescription(projectParam.getDescription());
-        project.setBuildArgs(projectParam.getBuildArgs());
     }
 
     @Override
@@ -420,7 +401,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public List<String> getAllBranches(Project project) {
         try {
-            return GitUtils.getBranchList(remakeProject(project));
+            GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+            request.setUrl(project.getUrl());
+            request.setUsername(project.getUserName());
+            request.setPassword(project.getPassword());
+            request.setPrivateKey(project.getPrvkeyPath());
+            return GitUtils.getBranches(request);
         } catch (Exception e) {
             throw new ApiDetailException(e);
         }
@@ -429,7 +415,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public GitAuthorizedErrorEnum gitCheck(Project project) {
         try {
-            GitUtils.getBranchList(remakeProject(project));
+            GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+            request.setUrl(project.getUrl());
+            request.setUsername(project.getUserName());
+            request.setPassword(project.getPassword());
+            request.setPrivateKey(project.getPrvkeyPath());
+            GitUtils.getBranches(request);
             return GitAuthorizedErrorEnum.SUCCESS;
         } catch (Exception e) {
             String err = e.getMessage();
@@ -439,6 +430,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 return GitAuthorizedErrorEnum.REQUIRED;
             }
             return GitAuthorizedErrorEnum.UNKNOW;
+        }
+    }
+
+    @Override
+    public List<String> getAllTags(Project project) {
+        try {
+            GitUtils.GitGetRequest request = new GitUtils.GitGetRequest();
+            request.setUrl(project.getUrl());
+            request.setUsername(project.getUserName());
+            request.setPassword(project.getPassword());
+            request.setPrivateKey(project.getPrvkeyPath());
+            return GitUtils.getTags(request);
+        } catch (Exception e) {
+            throw new ApiDetailException(e);
         }
     }
 

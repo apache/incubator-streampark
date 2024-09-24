@@ -72,6 +72,7 @@
       const [registerModal, { openModal }] = useModal();
       const { createMessage, Swal } = useMessage();
       const [registerTable, { reload }] = useTable({
+        rowKey: 'userId',
         api: getUserList,
         columns,
         formConfig: {
@@ -83,7 +84,6 @@
           submitOnChange: true,
           showActionButtonGroup: false,
         },
-        rowKey: 'userId',
         pagination: true,
         striped: false,
         useSearchForm: true,

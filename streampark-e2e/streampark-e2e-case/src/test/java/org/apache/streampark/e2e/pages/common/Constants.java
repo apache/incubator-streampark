@@ -26,10 +26,6 @@ public class Constants {
 
     public static final Integer DEFAULT_SLEEP_MILLISECONDS = 2000;
 
-    public static final Integer DEFAULT_FLINK_SQL_EDITOR_SLEEP_MILLISECONDS = 1000;
-
-    public static final Integer DEFAULT_PROJECT_BUILD_TIMEOUT_MINUTES = 5;
-
     public static final Duration DEFAULT_WEBDRIVER_WAIT_DURATION = Duration.ofSeconds(10);
 
     public static final String LINE_SEPARATOR = "\n";

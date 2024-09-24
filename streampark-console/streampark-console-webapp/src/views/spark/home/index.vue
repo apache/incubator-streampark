@@ -39,6 +39,7 @@
   const [registerModal, { openModal: openSparkModal }] = useModal();
   // const [registerSparkDraw, { openDrawer: openEnvDrawer }] = useDrawer();
   const [registerTable, { reload, getDataSource }] = useTable({
+    rowKey: 'id',
     api: fetchSparkEnvList,
     columns: [
       { dataIndex: 'sparkName', title: t('spark.home.form.sparkName') },
@@ -66,7 +67,6 @@
       submitOnChange: true,
       showActionButtonGroup: false,
     },
-    rowKey: 'id',
     pagination: true,
     useSearchForm: true,
     showTableSetting: false,

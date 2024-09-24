@@ -17,21 +17,19 @@
 
 package org.apache.streampark.console.base.util;
 
-import org.apache.streampark.common.util.FileUtils;
-import org.apache.streampark.common.util.SystemPropertyUtils;
-import org.apache.streampark.console.core.entity.Project;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
@@ -40,102 +38,219 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.util.FS;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/** used to build project and project build task */
+/** */
 public class GitUtils {
 
     private GitUtils() {
     }
 
-    public static Git clone(Project project) throws GitAPIException {
-        CloneCommand cloneCommand = Git.cloneRepository().setURI(project.getUrl()).setDirectory(project.getAppSource());
-
-        if (StringUtils.isNotBlank(project.getBranches())) {
-            cloneCommand.setBranch(Constants.R_HEADS + project.getBranches());
-            cloneCommand.setBranchesToClone(
-                Collections.singletonList(Constants.R_HEADS + project.getBranches()));
-        }
-        setCredentials(cloneCommand, project);
-        return cloneCommand.call();
-    }
-
-    public static List<String> getBranchList(Project project) throws GitAPIException {
-        LsRemoteCommand command = Git.lsRemoteRepository().setRemote(project.getUrl()).setHeads(true);
-        setCredentials(command, project);
-        Collection<Ref> refList = command.call();
-        List<String> branchList = new ArrayList<>(4);
-        if (CollectionUtils.isEmpty(refList)) {
-            return branchList;
-        }
-        for (Ref ref : refList) {
-            String refName = ref.getName();
-            if (refName.startsWith(Constants.R_HEADS)) {
-                String branchName = refName.replace(Constants.R_HEADS, "");
-                branchList.add(branchName);
+    public static Git clone(GitCloneRequest request) throws GitAPIException {
+        try {
+            CloneCommand cloneCommand =
+                Git.cloneRepository().setURI(request.getUrl()).setDirectory(request.getStoreDir());
+            setCredentials(cloneCommand, request);
+            if (StringUtils.isNotBlank(request.getBranch())) {
+                cloneCommand.setBranch(Constants.R_HEADS + request.getBranch());
+                cloneCommand.setBranchesToClone(
+                    Collections.singletonList(Constants.R_HEADS + request.getBranch()));
             }
+            Git git = cloneCommand.call();
+            if (StringUtils.isNotBlank(request.getBranch())) {
+                git.checkout().setName(request.getBranch()).call();
+            } else if (StringUtils.isNotBlank(request.getTag())) {
+                git.checkout().setName(request.getTag()).call();
+            } else {
+                throw new IllegalArgumentException("git clone failed, No tag or branch specified");
+            }
+            return git;
+        } catch (Exception e) {
+            if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
+                String url = httpUrlToSSH(request.getUrl());
+                request.setUrl(url);
+                return clone(request);
+            }
+            throw e;
         }
-        return branchList;
     }
 
-    private static void setCredentials(TransportCommand<?, ?> transportCommand, Project project) {
-        if (project.isHttpRepositoryUrl()) {
-            if (!StringUtils.isAllEmpty(project.getUserName(), project.getPassword())) {
-                try {
-                    String decrypt = StringUtils.isNotBlank(project.getSalt())
-                        ? EncryptUtils.decrypt(project.getPassword(), project.getSalt())
-                        : project.getPassword();
-                    UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(
-                        project.getUserName(), decrypt);
-                    transportCommand.setCredentialsProvider(credentialsProvider);
-                } catch (Exception e) {
-                    throw new IllegalStateException(
-                        "[StreamPark] git setCredentials: project password decrypt failed", e);
+    public static List<String> getBranches(GitGetRequest request) throws GitAPIException {
+        try {
+            LsRemoteCommand command = Git.lsRemoteRepository().setRemote(request.getUrl()).setHeads(true);
+            setCredentials(command, request);
+            Collection<Ref> refList = command.call();
+            List<String> branchList = new ArrayList<>(4);
+            for (Ref ref : refList) {
+                String refName = ref.getName();
+                if (refName.startsWith(Constants.R_HEADS)) {
+                    String branchName = refName.replace(Constants.R_HEADS, "");
+                    branchList.add(branchName);
                 }
             }
-        } else if (project.isSshRepositoryUrl()) {
-            transportCommand.setTransportConfigCallback(
-                transport -> {
-                    SshTransport sshTransport = (SshTransport) transport;
-                    sshTransport.setSshSessionFactory(
-                        new JschConfigSessionFactory() {
+            return branchList;
+        } catch (Exception e) {
+            if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
+                String url = httpUrlToSSH(request.getUrl());
+                request.setUrl(url);
+                return getBranches(request);
+            }
+            throw e;
+        }
+    }
 
-                            @Override
-                            protected void configure(OpenSshConfig.Host hc, Session session) {
-                                session.setConfig("StrictHostKeyChecking", "no");
-                            }
+    public static List<String> getTags(GitGetRequest request) throws GitAPIException {
+        try {
+            LsRemoteCommand command = Git.lsRemoteRepository().setRemote(request.getUrl()).setTags(true);
+            setCredentials(command, request);
+            Collection<Ref> refList = command.call();
+            List<String> tagList = new ArrayList<>(4);
+            for (Ref ref : refList) {
+                String refName = ref.getName();
+                if (refName.startsWith(Constants.R_TAGS)) {
+                    String branchName = refName.replace(Constants.R_TAGS, "");
+                    tagList.add(branchName);
+                }
+            }
+            return tagList;
+        } catch (Exception e) {
+            if (e instanceof InvalidRemoteException && request.getConnType() == GitConnType.HTTP) {
+                String url = httpUrlToSSH(request.getUrl());
+                request.setUrl(url);
+                return getTags(request);
+            }
+            throw e;
+        }
+    }
 
-                            @Override
-                            protected JSch createDefaultJSch(FS fs) throws JSchException {
-                                JSch jSch = super.createDefaultJSch(fs);
-                                String prvkeyPath = project.getPrvkeyPath();
-                                if (StringUtils.isBlank(prvkeyPath)) {
-                                    String userHome = SystemPropertyUtils.getUserHome();
-                                    if (userHome != null) {
-                                        String rsaPath = userHome.concat("/.ssh/id_rsa");
-                                        if (FileUtils.exists(rsaPath)) {
-                                            prvkeyPath = rsaPath;
+    public static String httpUrlToSSH(String url) {
+        return url.replaceAll("(https://|http://)(.*?)/(.*?)/(.*?)(\\.git|)\\s*$", "git@$2:$3/$4.git");
+    }
+
+    public static boolean isSshRepositoryUrl(String url) {
+        return url.trim().startsWith("git@");
+    }
+
+    public static boolean isHttpRepositoryUrl(String url) {
+        return !isSshRepositoryUrl(url);
+    }
+
+    private static void setCredentials(
+                                       TransportCommand<?, ?> transportCommand, GitAuthRequest request) {
+        switch (request.connType) {
+            case HTTP:
+                if (!StringUtils.isAllEmpty(request.getUsername(), request.getPassword())) {
+                    UsernamePasswordCredentialsProvider credentialsProvider =
+                        new UsernamePasswordCredentialsProvider(request.getUsername(), request.getPassword());
+                    transportCommand.setCredentialsProvider(credentialsProvider);
+                }
+                break;
+            case SSH:
+                transportCommand.setTransportConfigCallback(
+                    transport -> {
+                        SshTransport sshTransport = (SshTransport) transport;
+                        sshTransport.setSshSessionFactory(
+                            new JschConfigSessionFactory() {
+
+                                @Override
+                                protected void configure(OpenSshConfig.Host hc, Session session) {
+                                    session.setConfig("StrictHostKeyChecking", "no");
+                                }
+
+                                @Override
+                                protected JSch createDefaultJSch(FS fs) throws JSchException {
+                                    JSch jSch = super.createDefaultJSch(fs);
+                                    String prvkeyPath = request.getPrivateKey();
+                                    if (StringUtils.isBlank(prvkeyPath)) {
+                                        String userHome = System.getProperty("user.home");
+                                        if (userHome != null) {
+                                            String rsaPath = userHome.concat("/.ssh/id_rsa");
+                                            File resFile = new File(rsaPath);
+                                            if (resFile.exists()) {
+                                                prvkeyPath = rsaPath;
+                                            }
                                         }
                                     }
-                                }
-                                if (prvkeyPath == null) {
+                                    if (prvkeyPath == null) {
+                                        return jSch;
+                                    }
+                                    if (StringUtils.isEmpty(request.getPassword())) {
+                                        jSch.addIdentity(prvkeyPath);
+                                    } else {
+                                        jSch.addIdentity(prvkeyPath, request.getPassword());
+                                    }
                                     return jSch;
                                 }
-                                if (StringUtils.isBlank(project.getPassword())) {
-                                    jSch.addIdentity(prvkeyPath);
-                                } else {
-                                    jSch.addIdentity(prvkeyPath, project.getPassword());
-                                }
-                                return jSch;
-                            }
-                        });
-                });
-        } else {
-            throw new IllegalStateException(
-                "[StreamPark] repository URL is invalid, must be ssh or http(s)");
+                            });
+                    });
+                break;
+            default:
+                throw new IllegalStateException(
+                    "[StreamPark] repository URL is invalid, must be ssh or http(s)");
+        }
+    }
+
+    @Getter
+    public enum GitConnType {
+        HTTP,
+        SSH
+    }
+
+    @Getter
+    @Setter
+    public static class GitAuthRequest {
+
+        private GitConnType connType;
+        private String username;
+        private String password;
+        private String privateKey;
+    }
+
+    @Getter
+    @Setter
+    public static class GitGetRequest extends GitAuthRequest {
+
+        private String url;
+
+        public void setUrl(String url) {
+            if (StringUtils.isBlank(url)) {
+                throw new IllegalArgumentException("git url cannot be empty");
+            }
+            this.url = url;
+            if (GitUtils.isSshRepositoryUrl(url)) {
+                setConnType(GitConnType.SSH);
+            } else {
+                setConnType(GitConnType.HTTP);
+            }
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class GitCloneRequest extends GitGetRequest {
+
+        private File storeDir;
+        private String branch;
+        private String tag;
+
+        public void setRefs(String refs) {
+            if (StringUtils.isNotBlank(refs)) {
+                if (!refs.startsWith(Constants.R_REFS)) {
+                    this.branch = refs;
+                    return;
+                }
+                if (refs.startsWith(Constants.R_HEADS)) {
+                    this.branch = refs.replace(Constants.R_HEADS, "");
+                    return;
+                }
+                if (refs.startsWith(Constants.R_TAGS)) {
+                    this.tag = refs.replace(Constants.R_TAGS, "");
+                }
+            }
         }
     }
 }
