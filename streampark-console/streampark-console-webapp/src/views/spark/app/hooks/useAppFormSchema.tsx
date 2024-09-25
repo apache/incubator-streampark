@@ -202,7 +202,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         component: 'InputTextArea',
         defaultValue: '',
         slot: 'args',
-        ifShow: ({ values }) => [JobTypeEnum.JAR, JobTypeEnum.PYSPARK].includes(values?.jobType),
+        ifShow: ({ model }) => [JobTypeEnum.JAR, JobTypeEnum.PYSPARK].includes(model?.jobType),
       },
       {
         field: 'appProperties',

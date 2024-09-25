@@ -78,7 +78,7 @@
   async function handleAppSubmit(formValue: Recordable) {
     try {
       submitLoading.value = true;
-      await props.submit(formValue);
+      await props.submit?.(formValue);
     } catch (error) {
       submitLoading.value = false;
     }
@@ -102,7 +102,7 @@
     </template>
     <template #args="{ model }">
       <ProgramArgs
-        v-model:value="model[args]"
+        v-model:value="model.args"
         :suggestions="suggestions"
         @preview="(value) => openReviewDrawer(true, { value, suggestions })"
       />
