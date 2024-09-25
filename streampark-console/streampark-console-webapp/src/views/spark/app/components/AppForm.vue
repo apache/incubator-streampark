@@ -78,7 +78,7 @@
   async function handleAppSubmit(formValue: Recordable) {
     try {
       submitLoading.value = true;
-      await props.submit?.(formValue);
+      await props.submit(formValue);
     } catch (error) {
       submitLoading.value = false;
     }

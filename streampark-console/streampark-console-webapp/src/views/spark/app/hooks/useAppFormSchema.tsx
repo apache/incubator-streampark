@@ -73,7 +73,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         {
           field: 'jobType',
           label: t('spark.app.jobType'),
-          component: 'Input',
+          component: 'InputNumber',
           render: ({ model }) => {
             const jobOptions = getJobTypeOptions();
             return (
