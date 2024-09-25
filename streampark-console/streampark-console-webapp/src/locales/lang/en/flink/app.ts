@@ -16,7 +16,7 @@
  */
 export default {
   id: 'ID',
-  appName: 'Application Name',
+  appName: 'Job Name',
   searchName: 'Name',
   tags: 'Tags',
   owner: 'Owner',
@@ -26,14 +26,14 @@ export default {
   runStatus: 'Run Status',
   releaseBuild: 'Release Status',
   jobType: 'Job Type',
-  developmentMode: 'Development Mode',
-  executionMode: 'Execution Mode',
+  appType: 'Application Type',
+  executionMode: 'Deploy Mode',
   historyVersion: 'History Version',
   resource: 'Resource',
   resourcePlaceHolder: 'Please choose resource',
   selectAppPlaceHolder: 'choose app jar',
   dependency: 'Dependency',
-  appConf: 'Application Conf',
+  appConf: 'Configurations',
   resolveOrder: 'resolveOrder',
   parallelism: 'Parallelism',
   restartSize: 'Fault Restart Size',
@@ -255,10 +255,10 @@ export default {
     terminated: 'TERMINATED',
   },
   addAppTips: {
-    developmentModePlaceholder: 'Please select job type',
-    developmentModeIsRequiredMessage: 'Job Type is required',
-    executionModePlaceholder: 'Please select execution mode',
-    executionModeIsRequiredMessage: 'Execution Mode is required',
+    jobTypePlaceholder: 'Please select job type',
+    jobTypeIsRequiredMessage: 'Job Type is required',
+    executionModePlaceholder: 'Please select deploy mode',
+    executionModeIsRequiredMessage: 'Deploy Mode is required',
     hadoopEnvInitMessage:
       'Hadoop environment initialization failed, please check the environment settings',
     resourceFromMessage: 'resource from is required',
@@ -273,16 +273,16 @@ export default {
     useSysHadoopConf: 'Use System Hadoop Conf',
     flinkVersionIsRequiredMessage: 'Flink Version is required',
     appNamePlaceholder: 'Please enter application name',
-    appNameIsRequiredMessage: 'The application name is required',
-    appNameNotUniqueMessage: 'The application name already exists, must be unique. ',
+    appNameIsRequiredMessage: 'The job name is required',
+    appNameNotUniqueMessage: 'The job name already exists, must be unique. ',
     appNameExistsInYarnMessage:
-      'The application name already exists in YARN, cannot be repeated. Please check',
+      'The job name already exists in YARN, cannot be repeated. Please check',
     appNameExistsInK8sMessage:
-      'The application name already exists in Kubernetes,cannot be repeated. Please check',
+      'The job name already exists in Kubernetes,cannot be repeated. Please check',
     appNameValid: 'The job name is invalid',
     appNameRole: 'The job name must follow these rules: ',
     appNameNotValid:
-      'The application name is invalid, must be (Chinese or English or "-" or "_"), two consecutive spaces cannot appear.Please check',
+      'The job name is invalid, must be (Chinese or English or "-" or "_"), two consecutive spaces cannot appear.Please check',
     K8sSessionClusterIdRole: 'The Kubernetes clusterId must follow the following rules:',
     appNameK8sClusterIdRole:
       'The current deployment mode is kubernetes application mode, and the job name will be used as the clusterId in kubernetes. Therefore, the job name must follow the following rules:',

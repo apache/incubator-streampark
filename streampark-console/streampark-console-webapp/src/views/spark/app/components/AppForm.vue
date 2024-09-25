@@ -101,13 +101,11 @@
       />
     </template>
     <template #args="{ model }">
-      <template v-if="model.args !== undefined">
-        <ProgramArgs
-          v-model:value="model.args"
-          :suggestions="suggestions"
-          @preview="(value) => openReviewDrawer(true, { value, suggestions })"
-        />
-      </template>
+      <ProgramArgs
+        v-model:value="model[args]"
+        :suggestions="suggestions"
+        @preview="(value) => openReviewDrawer(true, { value, suggestions })"
+      />
     </template>
     <template #formFooter>
       <div class="flex items-center w-full justify-center">

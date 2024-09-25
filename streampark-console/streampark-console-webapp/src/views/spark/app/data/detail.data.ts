@@ -37,7 +37,7 @@ export const getDescSchema = (): DescItem[] => {
     { field: 'appName', label: t('spark.app.appName') },
     {
       field: 'jobType',
-      label: t('spark.app.developmentMode'),
+      label: t('spark.app.jobType'),
       render: (curVal) => sparkJobTypeMap[+curVal]?.label || '-',
     },
     {

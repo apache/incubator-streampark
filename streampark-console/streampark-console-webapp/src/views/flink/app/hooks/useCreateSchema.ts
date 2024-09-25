@@ -101,11 +101,11 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     return [
       {
         field: 'jobType',
-        label: t('flink.app.developmentMode'),
+        label: t('flink.app.jobType'),
         component: 'Select',
         componentProps: ({ formModel }) => {
           return {
-            placeholder: t('flink.app.addAppTips.developmentModePlaceholder'),
+            placeholder: t('flink.app.addAppTips.jobTypePlaceholder'),
             options: getJobTypeOptions(),
             onChange: (value) => {
               if (value != JobTypeEnum.SQL) {
@@ -115,9 +115,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
           };
         },
         defaultValue: String(JobTypeEnum.SQL),
-        rules: [
-          { required: true, message: t('flink.app.addAppTips.developmentModeIsRequiredMessage') },
-        ],
+        rules: [{ required: true, message: t('flink.app.addAppTips.jobTypeIsRequiredMessage') }],
       },
       ...getExecutionModeSchema.value,
       ...getFlinkClusterSchemas.value,
