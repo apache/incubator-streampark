@@ -335,12 +335,8 @@
         </template>
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'appName'">
-            <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR">
-              Spark JAR
-            </span>
-            <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL">
-              Spark SQL
-            </span>
+            <span class="app_type app_jar" v-if="record['jobType'] == JobTypeEnum.JAR"> JAR </span>
+            <span class="app_type app_sql" v-if="record['jobType'] == JobTypeEnum.SQL"> SQL </span>
             <span class="app_type app_py" v-if="record['jobType'] == JobTypeEnum.PYSPARK">
               PySpark
             </span>

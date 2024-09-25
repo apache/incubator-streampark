@@ -298,21 +298,21 @@ export const renderStreamParkJarApp = ({ model, resources }) => {
 export const sparkJobTypeMap = {
   [JobTypeEnum.JAR]: {
     label: h('div', {}, [
-      h(SvgIcon, { name: 'code', color: '#108ee9' }, ''),
+      h(SvgIcon, { name: 'spark', color: '#108ee9' }, ''),
       h('span', { class: 'pl-10px' }, 'Spark Jar'),
     ]),
     value: JobTypeEnum.JAR,
   },
   [JobTypeEnum.SQL]: {
     label: h('div', {}, [
-      h(SvgIcon, { name: 'fql', color: '#108ee9' }, ''),
+      h(SvgIcon, { name: 'sparksql', color: '#108ee9' }, ''),
       h('span', { class: 'pl-10px' }, 'Spark SQL'),
     ]),
     value: JobTypeEnum.SQL,
   },
   [JobTypeEnum.PYSPARK]: {
     label: h('div', {}, [
-      h(SvgIcon, { name: 'py', color: '#108ee9' }, ''),
+      h(SvgIcon, { name: 'pyspark', color: '#108ee9' }, ''),
       h('span', { class: 'pl-10px' }, 'PySpark'),
     ]),
     value: JobTypeEnum.PYSPARK,

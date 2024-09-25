@@ -75,11 +75,11 @@
       hadoopUser: values.hadoopUser,
       description: values.description,
     };
-    handleCreateAction(params);
+    await handleCreateAction(params);
   }
   /* spark sql mode */
   async function handleSQLMode(values: Recordable) {
-    handleCreateAction({
+    await handleCreateAction({
       jobType: JobTypeEnum.SQL,
       executionMode: values.executionMode,
       appType: AppTypeEnum.APACHE_SPARK,
@@ -101,7 +101,7 @@
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
     let { configOverride } = formValue;
-    if (configOverride != null && configOverride !== undefined && configOverride.trim() != '') {
+    if (configOverride != null && configOverride.trim() != '') {
       formValue.config = encryptByBase64(configOverride);
     } else {
       formValue.config = null;
@@ -116,9 +116,9 @@
           throw new Error(access);
         }
       }
-      handleSQLMode(formValue);
+      await handleSQLMode(formValue);
     } else {
-      handleCustomJobMode(formValue);
+      await handleCustomJobMode(formValue);
     }
   }
   /* send create request */
@@ -126,7 +126,7 @@
     const param: SparkApplication = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null && v !== undefined) {
+      if (v != null) {
         param[k] = v;
       }
     }

@@ -17,8 +17,8 @@
 export default {
   id: 'ID',
   appName: 'Job Name',
-  searchName: 'Name',
-  tags: 'Tags',
+  searchName: 'search by JobName',
+  tags: 'Job Tags',
   owner: 'Owner',
   flinkVersion: 'Flink Version',
   duration: 'Duration',
