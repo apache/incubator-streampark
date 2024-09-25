@@ -51,7 +51,7 @@ export default {
   },
   depend: {
     title: 'Variable Depend Apps',
-    jobName: 'Application Name',
+    jobName: 'Job Name',
     nickName: 'Owner',
     headerTitle: 'Variable " {0} " used list',
   },

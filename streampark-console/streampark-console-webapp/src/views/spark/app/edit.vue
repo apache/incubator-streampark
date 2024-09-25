@@ -64,7 +64,7 @@
       configOverride,
     });
     sparkApp.value = res;
-    nextTick(() => {
+    await nextTick(() => {
       if (res.sparkSql) appFormRef.value?.sparkSql?.setContent(decodeByBase64(res.sparkSql));
     });
     return res;
@@ -90,11 +90,11 @@
       hadoopUser: values.hadoopUser,
       description: values.description,
     };
-    handleUpdateAction(params);
+    await handleUpdateAction(params);
   }
   /* spark sql mode */
   async function handleSQLMode(values: Recordable) {
-    handleUpdateAction({
+    await handleUpdateAction({
       jobType: JobTypeEnum.SQL,
       executionMode: values.executionMode,
       appType: AppTypeEnum.APACHE_SPARK,
@@ -117,7 +117,7 @@
   /* Submit to create */
   async function handleAppSubmit(formValue: Recordable) {
     const { configOverride } = formValue;
-    if (configOverride != null && configOverride !== undefined && configOverride.trim() != '') {
+    if (configOverride != null && configOverride.trim() != '') {
       formValue.config = encryptByBase64(configOverride);
     } else {
       formValue.config = null;
@@ -133,9 +133,9 @@
           throw new Error(access);
         }
       }
-      handleSQLMode(formValue);
+      await handleSQLMode(formValue);
     } else {
-      handleCustomJobMode(formValue);
+      await handleCustomJobMode(formValue);
     }
   }
   /* send create request */
@@ -143,7 +143,7 @@
     const fetchParams: SparkApplication = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null && v !== undefined) {
+      if (v != null) {
         fetchParams[k] = v;
       }
     }
@@ -182,3 +182,7 @@
     />
   </PageWrapper>
 </template>
+
+<style lang="less">
+  @import url('./styles/spark.less');
+</style>

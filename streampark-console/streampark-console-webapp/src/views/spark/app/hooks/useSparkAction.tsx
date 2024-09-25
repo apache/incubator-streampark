@@ -257,7 +257,7 @@ export const useSparkAction = (optionApps: Recordable) => {
         return (
           <Form class="!pt-50px">
             <Form.Item
-              label="Application Name"
+              label="Job Name"
               labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
               wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
               validateStatus={unref(validateStatus)}
@@ -266,7 +266,7 @@ export const useSparkAction = (optionApps: Recordable) => {
             >
               <Input
                 type="text"
-                placeholder="New Application Name"
+                placeholder="New Job Name"
                 onInput={(e) => {
                   copyAppName = e.target.value;
                 }}
@@ -281,7 +281,7 @@ export const useSparkAction = (optionApps: Recordable) => {
         //1) check empty
         if (copyAppName == null) {
           validateStatus.value = 'error';
-          help = 'Sorry, Application Name cannot be empty';
+          help = 'Sorry, Job Name cannot be empty';
           return Promise.reject('copy application error');
         }
         //2) check name
@@ -352,7 +352,7 @@ export const useSparkAction = (optionApps: Recordable) => {
             wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
             v-model:model={formValue}
           >
-            <Form.Item label="Application Name">
+            <Form.Item label="Job Name">
               <Alert message={app.appName} type="info" />
             </Form.Item>
             {[ExecModeEnum.YARN_CLIENT, ExecModeEnum.YARN_CLUSTER].includes(app.executionMode) && (

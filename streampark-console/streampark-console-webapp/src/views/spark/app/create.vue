@@ -155,3 +155,6 @@
     />
   </PageWrapper>
 </template>
+<style lang="less">
+  @import url('./styles/spark.less');
+</style>
