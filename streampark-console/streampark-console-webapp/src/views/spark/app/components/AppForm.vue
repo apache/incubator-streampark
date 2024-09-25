@@ -102,7 +102,7 @@
     </template>
     <template #args="{ model }">
       <ProgramArgs
-        v-model:value="model[args]"
+        v-model:value="model.args"
         :suggestions="suggestions"
         @preview="(value) => openReviewDrawer(true, { value, suggestions })"
       />
