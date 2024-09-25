@@ -115,13 +115,12 @@
         <hikariCP.version>3.4.5</hikariCP.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <typesafe-conf.version>1.4.2</typesafe-conf.version>
-        <json4s-jackson.version>4.0.6</json4s-jackson.version>
+        <json4s-jackson.version>3.7.0-M11</json4s-jackson.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-net.version>3.9.0</commons-net.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <enumeratum.version>1.6.1</enumeratum.version>
         <assertj.version>3.23.1</assertj.version>
-        <pprint.version>0.8.1</pprint.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
