@@ -214,7 +214,6 @@
       >
         <a-button type="primary" @click="openErrorDrawer(true)">
           <Icon icon="ant-design:warning-outlined" />
-          Error Log
           {{ t('spark.app.view.errorLog') }}
         </a-button>
       </div>

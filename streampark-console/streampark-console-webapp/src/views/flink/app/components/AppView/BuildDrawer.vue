@@ -220,7 +220,6 @@
       >
         <a-button type="primary" @click="openErrorDrawer(true)">
           <Icon icon="ant-design:warning-outlined" />
-          Error Log
           {{ t('flink.app.view.errorLog') }}
         </a-button>
       </div>

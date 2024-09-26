@@ -77,14 +77,14 @@
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-ast_2.12</artifactId>
-            <version>3.7.0-M5</version>
+            <version>${json4s-jackson.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-core_2.12</artifactId>
-            <version>3.7.0-M5</version>
+            <version>${json4s-jackson.version}</version>
             <scope>provided</scope>
         </dependency>
 
