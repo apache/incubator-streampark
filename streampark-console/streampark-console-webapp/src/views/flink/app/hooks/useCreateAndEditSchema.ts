@@ -484,7 +484,7 @@ export const useCreateAndEditSchema = (
     return [
       {
         field: 'jobType',
-        label: t('flink.app.developmentMode'),
+        label: t('flink.app.jobType'),
         component: 'Input',
         render: ({ model }) => {
           if (model.jobType == JobTypeEnum.JAR) {

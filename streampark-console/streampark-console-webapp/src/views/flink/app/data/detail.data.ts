@@ -51,7 +51,7 @@ export const getDescSchema = (): DescItem[] => {
     },
     {
       field: 'jobType',
-      label: t('flink.app.developmentMode'),
+      label: t('flink.app.jobType'),
       render: (curVal) =>
         h(
           'div',

@@ -88,6 +88,7 @@
     @register="registerBuild"
     :title="t('flink.app.view.buildTitle')"
     width="500"
+    class="build-drawer-detail"
     :closable="true"
     @close="stop()"
   >
@@ -220,12 +221,12 @@
       >
         <a-button type="primary" @click="openErrorDrawer(true)">
           <Icon icon="ant-design:warning-outlined" />
-          Error Log
           {{ t('flink.app.view.errorLog') }}
         </a-button>
       </div>
       <BasicDrawer
         @register="registerErrorLog"
+        class="build-drawer-detail"
         :title="t('flink.app.view.errorLog')"
         width="800"
         :closable="true"

@@ -26,7 +26,7 @@ export default {
     clusterName: 'Cluster Name',
     address: 'Cluster URL',
     internal: 'internal cluster',
-    executionMode: 'Execution Mode',
+    executionMode: 'Deploy Mode',
     versionId: 'Flink Version',
     addExisting: 'existing cluster',
     addNew: 'new cluster',
@@ -67,7 +67,7 @@ export default {
   },
   required: {
     address: 'cluster address is required',
-    executionMode: 'Execution Mode is required',
+    executionMode: 'Deploy Mode is required',
     clusterId: 'Yarn Session Cluster is required',
     versionId: 'Flink Version is required',
     flinkImage: 'Flink Base Docker Image is required',
