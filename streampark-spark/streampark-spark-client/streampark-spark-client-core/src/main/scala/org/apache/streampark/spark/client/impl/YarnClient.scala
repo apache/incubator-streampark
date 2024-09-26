@@ -40,7 +40,7 @@ object YarnClient extends SparkClientTrait {
   override def doStop(stopRequest: StopRequest): StopResponse = {
     val sparkAppHandle = sparkHandles.remove(stopRequest.appId)
     if (sparkAppHandle != null) {
-      Try(sparkAppHandle.kill()) match {
+      Try(sparkAppHandle.stop()) match {
         case Success(_) =>
           logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.appId} is stopped successfully.")
           StopResponse(null)
