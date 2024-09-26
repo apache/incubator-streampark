@@ -17,7 +17,7 @@
 <template>
   <div class="enter-x mb-50px text-light-50">
     <div class="text-center enter-x">
-      <img class="logo w-160px mx-auto my-20px" src="/@/assets/images/logo.png" />
+      <img class="logo mx-auto my-20px" src="/@/assets/images/logo-text.png" />
     </div>
   </div>
   <Form
@@ -41,7 +41,7 @@
         </template>
       </Input>
     </FormItem>
-    <FormItem name="password" class="enter-x">
+    <FormItem name="password" class="enter-x !mt-30px">
       <InputPassword
         visibilityToggle
         size="large"
@@ -53,7 +53,6 @@
         </template>
       </InputPassword>
     </FormItem>
-
     <FormItem class="enter-x">
       <Button
         type="primary"
@@ -87,6 +86,7 @@
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
+
   import { useUserStore } from '/@/store/modules/user';
   import {
     LoginStateEnum,
