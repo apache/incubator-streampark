@@ -16,4 +16,4 @@
 #
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.apache.streampark.plugin.registry.core.JdbcRegistryAutoConfiguration
+  org.apache.streampark.registry.core.JdbcRegistryAutoConfiguration
