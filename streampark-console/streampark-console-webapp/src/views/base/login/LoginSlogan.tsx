@@ -19,7 +19,6 @@ import { defineComponent } from 'vue';
 import './LoginSlogan.less';
 import Icon from '/@/components/Icon';
 import { version } from '../../../../package.json';
-
 export default defineComponent({
   name: 'LoginSlogan',
   setup() {
@@ -53,7 +52,6 @@ export default defineComponent({
                     StreamPark
                   </span>
                 </div>
-                <span class="badge bg-secondary-home text-xl tag">Incubating</span>
               </div>
             </div>
             <p class=" text-light-200 leading-40px" style={{ fontSize: '18px' }}>
