@@ -24,7 +24,7 @@
         :showText="false"
       />
     </div>
-    <div class="w-full relative h-[calc(100%-120px)] min-h-700px flex items-center section">
+    <div class="w-full relative h-[calc(100%-70px)] min-h-700px flex items-center section">
       <div class="scribble-box w-[80%] h-full absolute overflow-hidden">
         <figure class="scribble scale-2 !opacity-10 top-50 left-0">
           <SvgIcon name="block" class="text-secondary" :size="200" />
@@ -59,14 +59,38 @@
       </div>
     </div>
     <footer class="w-1150px m-auto text-center bg-transparent opacity-60">
-      <a href="https://incubator.apache.org/" target="_blank" class="w-200px m-auto inline-block">
-        <img
-          src="/@/assets/svg/apache-incubator.svg"
-          alt="Apache Incubator logo"
-          class="w-200px my-10px mx-auto"
-        />
-      </a>
-      <p class="text-light-100 pt-10px" style="border-top: 1px solid #dad7d7">
+      <div class="flex items-center justify-center">
+        <a
+          :href="TWITTER_URL"
+          target="_blank"
+          class="text-light-100 mx-3 cursor-pointer hover:text-light-400 dark:text-light-100"
+        >
+          <Icon icon="hugeicons:new-twitter" />
+        </a>
+        <div class="mx-3 text-light-100 cursor-pointer">
+          <Popover placement="top" trigger="hover" arrow-point-at-center>
+            <template #content>
+              <img src="/@/assets/images/join_wechat.png" alt="qrcode" class="h-150px w-150px" />
+            </template>
+            <Icon icon="cib:wechat" />
+          </Popover>
+        </div>
+        <a
+          :href="EMAIL_URL"
+          target="_blank"
+          class="text-light-100 mx-3 cursor-pointer hover:text-light-100 dark:text-light-100"
+        >
+          <Icon icon="ic:round-email" />
+        </a>
+        <a
+          :href="GITHUB_URL"
+          target="_blank"
+          class="text-light-100 mx-3 cursor-pointer hover:text-light-100 dark:text-light-100"
+        >
+          <Icon icon="ant-design:github-filled" />
+        </a>
+      </div>
+      <p class="text-light-100 pt-10px">
         Copyright © 2022-{{ `${new Date().getFullYear()}` }} The Apache Software Foundation. Apache
         StreamPark, StreamPark, and its feather logo are trademarks of The Apache Software
         Foundation.
@@ -78,10 +102,11 @@
   import LoginForm from './LoginForm.vue';
   import LoginSlogan from './LoginSlogan';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Row, Col } from 'ant-design-vue';
-  import { SvgIcon } from '/@/components/Icon';
+  import { Row, Popover, Col } from 'ant-design-vue';
+  import Icon, { SvgIcon } from '/@/components/Icon';
   import { useLocale } from '/@/locales/useLocale';
   import { AppLocalePicker } from '/@/components/Application';
+  import { GITHUB_URL, EMAIL_URL, TWITTER_URL } from '/@/settings/siteSetting';
   defineProps({
     sessionTimeout: {
       type: Boolean,

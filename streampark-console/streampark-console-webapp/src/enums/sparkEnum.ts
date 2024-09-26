@@ -11,6 +11,12 @@ export enum JobTypeEnum {
   SQL = 2,
   PYSPARK = 3,
 }
+
+export enum OperationEnum {
+  RELEASE,
+  START,
+  STOP,
+}
 export enum OptionStateEnum {
   /** Application which is currently action: none. */
   NONE = 0,

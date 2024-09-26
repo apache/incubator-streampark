@@ -237,7 +237,7 @@
     }
 
     let config = values.configOverride;
-    if (config != null && config !== undefined && config.trim() != '') {
+    if (config != null && config.trim() != '') {
       config = encryptByBase64(config);
     } else {
       config = null;
@@ -257,7 +257,7 @@
           : JSON.stringify(dependency),
     };
     handleSubmitParams(params, values, k8sTemplate);
-    handleCreateApp(params);
+    await handleCreateApp(params);
   }
   /* Submit to create */
   async function handleAppCreate(formValue: Recordable) {
@@ -273,9 +273,9 @@
             throw new Error(access);
           }
         }
-        handleSubmitSQL(formValue);
+        await handleSubmitSQL(formValue);
       } else {
-        handleSubmitCustomJob(formValue);
+        await handleSubmitCustomJob(formValue);
       }
     } catch (error) {
       submitLoading.value = false;
@@ -286,7 +286,7 @@
     const param = {};
     for (const k in params) {
       const v = params[k];
-      if (v != null && v !== undefined) {
+      if (v != null) {
         param[k] = v;
       }
     }

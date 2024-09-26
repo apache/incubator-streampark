@@ -45,8 +45,8 @@
   import ExecOptionModal from '/@/views/flink/app/components/AppDetail/ExecOptionModal.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useClipboard } from '@vueuse/core';
-  import { OperationEnum, CandidateTypeEnum, ConfigTypeEnum } from '/@/enums/flinkEnum';
-  import { JobTypeEnum } from '/@/enums/sparkEnum';
+  import { CandidateTypeEnum, ConfigTypeEnum } from '/@/enums/flinkEnum';
+  import { OperationEnum, JobTypeEnum } from '/@/enums/sparkEnum';
   import SparkSqlReview from './SparkSqlReview.vue';
   import SparkSqlCompareModal from './SparkSqlCompareModal.vue';
   import { fetchSparkSql, fetchSparkSqlList, fetchSparkSqlRemove } from '/@/api/spark/sql';
@@ -340,7 +340,7 @@
             <template v-if="column.dataIndex === 'optionName'">
               <Tag color="blue" v-if="record.optionName === OperationEnum.RELEASE"> Release </Tag>
               <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
-              <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
+              <Tag color="orange" v-if="record.optionName === OperationEnum.STOP"> STOP </Tag>
             </template>
             <template v-if="column.dataIndex === 'yarnAppId'">
               <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">

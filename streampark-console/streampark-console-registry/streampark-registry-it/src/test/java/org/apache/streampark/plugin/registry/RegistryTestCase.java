@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.plugin.registry;
+package org.apache.streampark.registry;
 
 import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.streampark.registry.api.ConnectionState;

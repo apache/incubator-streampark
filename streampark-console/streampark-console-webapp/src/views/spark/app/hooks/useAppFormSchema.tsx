@@ -17,7 +17,7 @@
 import { computed, onMounted, ref, unref, type Ref } from 'vue';
 import type { FormSchema } from '/@/components/Form';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { AppExistsStateEnum, JobTypeEnum } from '/@/enums/sparkEnum';
+import { AppExistsStateEnum, JobTypeEnum, ExecModeEnum } from '/@/enums/sparkEnum';
 import { ResourceFromEnum } from '/@/enums/flinkEnum';
 import type { SparkEnv } from '/@/api/spark/home.type';
 import type { RuleObject } from 'ant-design-vue/lib/form';
@@ -72,8 +72,8 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
       return [
         {
           field: 'jobType',
-          label: t('spark.app.developmentMode'),
-          component: 'Input',
+          label: t('spark.app.jobType'),
+          component: 'InputNumber',
           render: ({ model }) => {
             const jobOptions = getJobTypeOptions();
             return (
@@ -91,11 +91,11 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
       return [
         {
           field: 'jobType',
-          label: t('spark.app.developmentMode'),
+          label: t('spark.app.jobType'),
           component: 'Select',
           componentProps: ({ formModel }) => {
             return {
-              placeholder: t('spark.app.addAppTips.developmentModePlaceholder'),
+              placeholder: t('spark.app.addAppTips.jobTypePlaceholder'),
               options: getJobTypeOptions(),
               onChange: (value) => {
                 if (value != JobTypeEnum.SQL) {
@@ -108,7 +108,7 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
           rules: [
             {
               required: true,
-              message: t('spark.app.addAppTips.developmentModeIsRequiredMessage'),
+              message: t('spark.app.addAppTips.jobTypeIsRequiredMessage'),
               type: 'number',
             },
           ],
@@ -197,6 +197,32 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         },
       },
       {
+        field: 'args',
+        label: t('spark.app.programArgs'),
+        component: 'InputTextArea',
+        defaultValue: '',
+        slot: 'args',
+        ifShow: ({ model }) => [JobTypeEnum.JAR, JobTypeEnum.PYSPARK].includes(model?.jobType),
+      },
+      {
+        field: 'appProperties',
+        label: 'Spark Properties',
+        component: 'InputTextArea',
+        componentProps: {
+          rows: 4,
+          placeholder: '--conf, -c PROP=VALUE Arbitrary Spark configuration property.',
+        },
+      },
+      { field: 'configOverride', label: '', component: 'Input', show: false },
+      {
+        field: 'isSetConfig',
+        label: t('spark.app.appConf'),
+        component: 'Switch',
+        render({ model, field }) {
+          return renderIsSetConfig(model, field, registerConfDrawer, openConfDrawer);
+        },
+      },
+      {
         field: 'tags',
         label: t('spark.app.tags'),
         component: 'Input',
@@ -205,9 +231,20 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         },
       },
       {
+        field: 'hadoopUser',
+        label: t('spark.app.hadoopUser'),
+        component: 'Input',
+        ifShow: ({ values }) =>
+          values?.executionMode == ExecModeEnum.YARN_CLIENT ||
+          values?.executionMode == ExecModeEnum.YARN_CLUSTER,
+      },
+      {
         field: 'yarnQueue',
         label: t('spark.app.yarnQueue'),
         component: 'Input',
+        ifShow: ({ values }) =>
+          values?.executionMode == ExecModeEnum.YARN_CLIENT ||
+          values?.executionMode == ExecModeEnum.YARN_CLUSTER,
         render: ({ model, field }) => {
           return (
             <div>
@@ -229,38 +266,6 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
             </div>
           );
         },
-      },
-      { field: 'configOverride', label: '', component: 'Input', show: false },
-      {
-        field: 'isSetConfig',
-        label: t('spark.app.appConf'),
-        component: 'Switch',
-        render({ model, field }) {
-          return renderIsSetConfig(model, field, registerConfDrawer, openConfDrawer);
-        },
-      },
-      {
-        field: 'appProperties',
-        label: 'Application Properties',
-        component: 'InputTextArea',
-        componentProps: {
-          rows: 4,
-          placeholder:
-            '$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)',
-        },
-      },
-      {
-        field: 'args',
-        label: t('spark.app.programArgs'),
-        component: 'InputTextArea',
-        defaultValue: '',
-        slot: 'args',
-        ifShow: ({ values }) => [JobTypeEnum.JAR, JobTypeEnum.PYSPARK].includes(values?.jobType),
-      },
-      {
-        field: 'hadoopUser',
-        label: t('spark.app.hadoopUser'),
-        component: 'Input',
       },
       {
         field: 'description',
