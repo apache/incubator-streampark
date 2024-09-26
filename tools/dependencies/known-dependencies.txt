@@ -169,11 +169,10 @@ jna-5.10.0.jar
 jna-platform-5.10.0.jar
 jsch-0.2.11.jar
 json-smart-2.4.10.jar
-json4s-ast_2.12-4.0.6.jar
-json4s-core_2.12-4.0.6.jar
-json4s-jackson-core_2.12-4.0.6.jar
-json4s-jackson_2.12-4.0.6.jar
-json4s-scalap_2.12-4.0.6.jar
+json4s-ast_2.12-3.7.0-M11.jar
+json4s-core_2.12-3.7.0-M11.jar
+json4s-jackson_2.12-3.7.0-M11.jar
+json4s-scalap_2.12-3.7.0-M11.jar
 jsp-api-2.1.jar
 jsqlparser-4.4.jar
 jsr305-3.0.2.jar
