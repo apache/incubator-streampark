@@ -17,7 +17,7 @@
 <script setup lang="ts">
   import { useGo } from '/@/hooks/web/usePage';
   import AppForm from './components/AppForm.vue';
-  import { nextTick, onMounted, ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
 
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -64,9 +64,6 @@
       configOverride,
     });
     sparkApp.value = res;
-    await nextTick(() => {
-      if (res.sparkSql) appFormRef.value?.sparkSql?.setContent(decodeByBase64(res.sparkSql));
-    });
     return res;
   }
 
@@ -130,7 +127,7 @@
         const access = await appFormRef?.value?.sparkSql?.handleVerifySql();
         if (!access) {
           createMessage.warning(t('spark.app.addAppTips.sqlCheck'));
-          throw new Error(access);
+          throw new Error(t('spark.app.addAppTips.sqlCheck'));
         }
       }
       await handleSQLMode(formValue);
