@@ -99,8 +99,8 @@ abstract class FlinkStreamTableTrait(
   def $setParallelism(parallelism: Int): Unit =
     this.streamEnv.setParallelism(parallelism)
 
-  def $setRuntimeMode(executionMode: RuntimeExecutionMode): StreamExecutionEnvironment =
-    this.streamEnv.setRuntimeMode(executionMode)
+  def $setRuntimeMode(deployMode: RuntimeExecutionMode): StreamExecutionEnvironment =
+    this.streamEnv.setRuntimeMode(deployMode)
 
   def $setMaxParallelism(maxParallelism: Int): Unit =
     this.streamEnv.setMaxParallelism(maxParallelism)

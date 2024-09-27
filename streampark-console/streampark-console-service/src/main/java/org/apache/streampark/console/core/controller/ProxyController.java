@@ -18,12 +18,12 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.ProxyService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
@@ -53,7 +53,7 @@ public class ProxyController {
     private ProxyService proxyService;
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private ApplicationLogService logService;
@@ -79,7 +79,7 @@ public class ProxyController {
 
     private ResponseEntity<?> proxy(String type, HttpServletRequest request, Long id) throws Exception {
         ApplicationLog log;
-        Application app;
+        FlinkApplication app;
 
         switch (type) {
             case "flink":
@@ -101,7 +101,7 @@ public class ProxyController {
         }
     }
 
-    private void checkProxyApp(Application app) {
+    private void checkProxyApp(FlinkApplication app) {
         ApiAlertException.throwIfNull(app, "Invalid operation, application is invalid.");
 
         User user = ServiceHelper.getLoginUser();
@@ -116,7 +116,7 @@ public class ProxyController {
 
     private void checkProxyAppLog(ApplicationLog log) {
         ApiAlertException.throwIfNull(log, "Invalid operation, The application log not found.");
-        Application app = applicationManageService.getById(log.getAppId());
+        FlinkApplication app = applicationManageService.getById(log.getAppId());
         checkProxyApp(app);
     }
 }

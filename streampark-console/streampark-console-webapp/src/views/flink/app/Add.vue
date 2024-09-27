@@ -48,7 +48,7 @@
   import {
     AppTypeEnum,
     ClusterStateEnum,
-    ExecModeEnum,
+    DeployMode,
     JobTypeEnum,
     ResourceFromEnum,
   } from '/@/enums/flinkEnum';
@@ -137,7 +137,7 @@
 
   function handleCluster(values: Recordable) {
     let flinkClusterId =
-      values.executionMode == ExecModeEnum.YARN_SESSION
+      values.deployMode == DeployMode.YARN_SESSION
         ? values.yarnSessionClusterId
         : values.flinkClusterId;
     const cluster =
@@ -148,7 +148,7 @@
       })[0] || null;
     if (cluster) {
       Object.assign(values, { flinkClusterId: cluster.id });
-      if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+      if (values.deployMode == DeployMode.KUBERNETES_SESSION) {
         Object.assign(values, { clusterId: cluster.clusterId });
       }
     }

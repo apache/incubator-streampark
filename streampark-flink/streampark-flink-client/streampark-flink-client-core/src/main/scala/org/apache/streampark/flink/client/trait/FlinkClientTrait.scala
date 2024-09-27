@@ -66,7 +66,7 @@ trait FlinkClientTrait extends Logger {
          |    flinkVersion     : ${submitRequest.flinkVersion.version}
          |    appName          : ${submitRequest.effectiveAppName}
          |    devMode          : ${submitRequest.developmentMode.name()}
-         |    execMode         : ${submitRequest.executionMode.name()}
+         |    deployMode       : ${submitRequest.deployMode.name()}
          |    k8sNamespace     : ${submitRequest.kubernetesNamespace}
          |    flinkExposedType : ${submitRequest.flinkRestExposedType}
          |    clusterId        : ${submitRequest.clusterId}
@@ -89,7 +89,7 @@ trait FlinkClientTrait extends Logger {
       case Failure(e) =>
         logError(
           s"flink job ${submitRequest.appName} start failed, " +
-            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"deployMode: ${submitRequest.deployMode.getName}, " +
             s"detail: ${ExceptionUtils.stringifyException(e)}")
         throw e
     }
@@ -100,7 +100,7 @@ trait FlinkClientTrait extends Logger {
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
 
     submitRequest.developmentMode match {
-      case FlinkDevelopmentMode.PYFLINK =>
+      case FlinkJobType.PYFLINK =>
         val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
         AssertUtils.required(FsOperator.lfs.exists(pythonVenv), s"$pythonVenv File does not exist")
 
@@ -135,7 +135,7 @@ trait FlinkClientTrait extends Logger {
     // 1) set common parameter
     flinkConfig
       .safeSet(PipelineOptions.NAME, submitRequest.effectiveAppName)
-      .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
+      .safeSet(DeploymentOptions.TARGET, submitRequest.deployMode.getName)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       .safeSet(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
       .safeSet(ApplicationConfiguration.APPLICATION_ARGS, extractProgramArgs(submitRequest))
@@ -288,7 +288,7 @@ trait FlinkClientTrait extends Logger {
             .orElse(Lists.newArrayList()): _*)
 
       submitRequest.developmentMode match {
-        case FlinkDevelopmentMode.PYFLINK =>
+        case FlinkJobType.PYFLINK =>
           if (submitRequest.libs.nonEmpty) {
             // BUG: https://github.com/apache/incubator-streampark/issues/3761
             // builder.setUserClassPaths(Lists.newArrayList(submitRequest.libs: _*))
@@ -393,8 +393,8 @@ trait FlinkClientTrait extends Logger {
       }
 
       Seq("-e", "--executor", "-t", "--target").foreach(optionMap.remove)
-      if (submitRequest.executionMode != null) {
-        optionMap += "-t" -> submitRequest.executionMode.getName
+      if (submitRequest.deployMode != null) {
+        optionMap += "-t" -> submitRequest.deployMode.getName
       }
 
       val array = new ArrayBuffer[String]()
@@ -478,7 +478,7 @@ trait FlinkClientTrait extends Logger {
       programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
 
       submitRequest.developmentMode match {
-        case FlinkDevelopmentMode.FLINK_SQL =>
+        case FlinkJobType.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
             programArgs += PARAM_KEY_APP_CONF += submitRequest.appConf
@@ -501,9 +501,9 @@ trait FlinkClientTrait extends Logger {
       case _ =>
     }
 
-    if (submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK) {
-      // TODO why executionMode is not yarn-application ???
-      if (submitRequest.executionMode != FlinkExecutionMode.YARN_APPLICATION) {
+    if (submitRequest.developmentMode == FlinkJobType.PYFLINK) {
+      // TODO why deployMode is not yarn-application ???
+      if (submitRequest.deployMode != FlinkDeployMode.YARN_APPLICATION) {
         // python file
         programArgs.add("-py")
         programArgs.add(submitRequest.userJarFile.getAbsolutePath)
@@ -579,14 +579,14 @@ trait FlinkClientTrait extends Logger {
             .key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
             .stringType()
             .defaultValue {
-              if (request.executionMode == FlinkExecutionMode.YARN_APPLICATION) {
+              if (request.deployMode == FlinkDeployMode.YARN_APPLICATION) {
                 Workspace.remote.APP_SAVEPOINTS
               } else null
             })
 
         AssertUtils.required(
           StringUtils.isNotBlank(configDir),
-          s"[StreamPark] executionMode: ${request.executionMode.getName}, savePoint path is null or invalid.")
+          s"[StreamPark] deployMode: ${request.deployMode.getName}, savePoint path is null or invalid.")
         configDir
       }
     }

@@ -19,7 +19,7 @@ package org.apache.streampark.flink.client.impl
 
 import org.apache.streampark.common.conf.Workspace
 import org.apache.streampark.common.constants.Constants
-import org.apache.streampark.common.enums.FlinkDevelopmentMode
+import org.apache.streampark.common.enums.FlinkJobType
 import org.apache.streampark.common.fs.FsOperator
 import org.apache.streampark.common.util.{AssertUtils, FileUtils, HdfsUtils}
 import org.apache.streampark.common.util.Implicits._
@@ -52,7 +52,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.flinkPlugins,
         submitRequest.hdfsWorkspace.appJars)
       submitRequest.developmentMode match {
-        case FlinkDevelopmentMode.FLINK_SQL =>
+        case FlinkJobType.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
           val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
           if (HdfsUtils.exists(jobLib)) {
@@ -80,7 +80,7 @@ object YarnApplicationClient extends YarnClientTrait {
       // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
-    if (submitRequest.developmentMode == FlinkDevelopmentMode.PYFLINK) {
+    if (submitRequest.developmentMode == FlinkJobType.PYFLINK) {
       val pyVenv: String = workspace.APP_PYTHON_VENV
       AssertUtils.required(FsOperator.hdfs.exists(pyVenv), s"$pyVenv File does not exist")
 

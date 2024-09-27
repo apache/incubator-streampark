@@ -40,10 +40,10 @@ import scala.util.Try
 
 case class SubmitRequest(
     flinkVersion: FlinkVersion,
-    executionMode: FlinkExecutionMode,
+    deployMode: FlinkDeployMode,
     properties: JavaMap[String, Any],
     flinkYaml: String,
-    developmentMode: FlinkDevelopmentMode,
+    developmentMode: FlinkJobType,
     id: Long,
     jobId: String,
     appName: String,
@@ -65,9 +65,9 @@ case class SubmitRequest(
   lazy val appOption: Map[String, String] = getParameterMap(KEY_FLINK_OPTION_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case FlinkDevelopmentMode.FLINK_SQL =>
+    case FlinkJobType.FLINK_SQL =>
       Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS
-    case FlinkDevelopmentMode.PYFLINK => Constants.PYTHON_FLINK_DRIVER_CLASS_NAME
+    case FlinkJobType.PYFLINK => Constants.PYTHON_FLINK_DRIVER_CLASS_NAME
     case _ => appProperties(KEY_FLINK_APPLICATION_MAIN_CLASS)
   }
 
@@ -101,8 +101,8 @@ case class SubmitRequest(
   }
 
   lazy val userJarFile: File = {
-    executionMode match {
-      case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => null
+    deployMode match {
+      case FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION => null
       case _ =>
         checkBuildResult()
         new File(buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath)
@@ -194,8 +194,8 @@ case class SubmitRequest(
 
   @throws[Exception]
   def checkBuildResult(): Unit = {
-    executionMode match {
-      case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION =>
+    deployMode match {
+      case FlinkDeployMode.KUBERNETES_NATIVE_SESSION =>
         AssertUtils.required(
           buildResult != null,
           s"[flink-submit] current job: ${this.effectiveAppName} was not yet built, buildResult is empty" +

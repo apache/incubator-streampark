@@ -67,7 +67,7 @@ public class FlinkSQL116OnYarnTest {
             .goToTab(FlinkClustersPage.class);
 
         flinkClustersPage.createFlinkCluster()
-            .<YarnSessionForm>addCluster(ClusterDetailForm.ExecutionMode.YARN_SESSION)
+            .<YarnSessionForm>addCluster(ClusterDetailForm.DeployMode.YARN_SESSION)
             .resolveOrder(YarnSessionForm.ResolveOrder.PARENT_FIRST)
             .clusterName(flinkClusterName)
             .flinkVersion(flinkName)
@@ -88,7 +88,7 @@ public class FlinkSQL116OnYarnTest {
             .createApplication()
             .addApplication(
                 ApplicationForm.DevelopmentMode.FLINK_SQL,
-                ApplicationForm.ExecutionMode.YARN_APPLICATION,
+                ApplicationForm.DeployMode.YARN_APPLICATION,
                 applicationName)
             .flinkVersion(flinkName)
             .flinkSql(TEST_FLINK_SQL)
@@ -190,7 +190,7 @@ public class FlinkSQL116OnYarnTest {
             .createApplication()
             .addApplication(
                 ApplicationForm.DevelopmentMode.FLINK_SQL,
-                ApplicationForm.ExecutionMode.YARN_PER_JOB,
+                ApplicationForm.DeployMode.YARN_PER_JOB,
                 applicationName)
             .flinkVersion(flinkName)
             .flinkSql(TEST_FLINK_SQL)
@@ -266,7 +266,7 @@ public class FlinkSQL116OnYarnTest {
         applicationsPage.createApplication()
             .addApplication(
                 ApplicationForm.DevelopmentMode.FLINK_SQL,
-                ApplicationForm.ExecutionMode.YARN_SESSION,
+                ApplicationForm.DeployMode.YARN_SESSION,
                 applicationName)
             .flinkVersion(flinkName)
             .flinkSql(TEST_FLINK_SQL)

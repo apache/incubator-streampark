@@ -20,8 +20,8 @@ package org.apache.streampark.flink.kubernetes.watcher
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes._
-import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sExecuteMode}
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
+import org.apache.streampark.flink.kubernetes.enums.{FlinkJobState, FlinkK8sDeployMode}
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode.{APPLICATION, SESSION}
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import org.apache.streampark.flink.kubernetes.helper.KubernetesDeploymentHelper
 import org.apache.streampark.flink.kubernetes.model._
@@ -101,7 +101,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
       // 1) k8s application mode
       val appFuture: Set[Future[Option[JobStatusCV]]] =
-        trackIds.filter(_.executeMode == FlinkK8sExecuteMode.APPLICATION).map {
+        trackIds.filter(_.executeMode == FlinkK8sDeployMode.APPLICATION).map {
           id =>
             val future = Future(touchApplicationJob(id))
             future.onComplete(_.getOrElse(None) match {
@@ -114,7 +114,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConfig = JobStatusWatcherConfi
 
       // 2) k8s session mode
       val sessionIds =
-        trackIds.filter(_.executeMode == FlinkK8sExecuteMode.SESSION)
+        trackIds.filter(_.executeMode == FlinkK8sDeployMode.SESSION)
       val sessionCluster =
         sessionIds.groupBy(_.toClusterKey.toString).flatMap(_._2).toSet
       val sessionFuture = sessionCluster.map {

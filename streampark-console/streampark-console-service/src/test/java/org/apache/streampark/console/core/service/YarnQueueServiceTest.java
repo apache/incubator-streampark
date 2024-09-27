@@ -17,13 +17,13 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.YarnQueue;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.service.impl.YarnQueueServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -54,7 +54,7 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
     private FlinkClusterService flinkClusterService;
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private YarnQueueService yarnQueueService;
@@ -264,27 +264,27 @@ class YarnQueueServiceTest extends SpringUnitTestBase {
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that don't belong to the same team, not in yarn mode.
-        applicationManageService.save(mockYarnModeJobApp(2L, "app1", null, FlinkExecutionMode.REMOTE));
+        applicationManageService.save(mockYarnModeJobApp(2L, "app1", null, FlinkDeployMode.REMOTE));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that don't belong to the same team, in yarn mode
         applicationManageService.save(
-            mockYarnModeJobApp(2L, "app2", null, FlinkExecutionMode.YARN_APPLICATION));
+            mockYarnModeJobApp(2L, "app2", null, FlinkDeployMode.YARN_APPLICATION));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that belong to the same team, but not in yarn mode.
         applicationManageService.save(
-            mockYarnModeJobApp(targetTeamId, "app3", null, FlinkExecutionMode.REMOTE));
+            mockYarnModeJobApp(targetTeamId, "app3", null, FlinkDeployMode.REMOTE));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications that belong to the same team, but without yarn queue value.
         applicationManageService.save(
-            mockYarnModeJobApp(targetTeamId, "app4", null, FlinkExecutionMode.YARN_PER_JOB));
+            mockYarnModeJobApp(targetTeamId, "app4", null, FlinkDeployMode.YARN_PER_JOB));
         yarnQueueServiceImpl.checkNotReferencedByApplications(targetTeamId, queueLabel, operation);
 
         // Test for existed applications, some apps belong to the same team, but others don't belong to.
         applicationManageService.save(
-            mockYarnModeJobApp(targetTeamId, "app5", queueLabel, FlinkExecutionMode.YARN_PER_JOB));
+            mockYarnModeJobApp(targetTeamId, "app5", queueLabel, FlinkDeployMode.YARN_PER_JOB));
         assertThatThrownBy(
             () -> yarnQueueServiceImpl.checkNotReferencedByApplications(
                 targetTeamId, queueLabel, operation))

@@ -21,8 +21,8 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.SparkDevelopmentMode;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
+import org.apache.streampark.common.enums.SparkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -210,7 +210,7 @@ public class SparkApplicationActionServiceImpl
             new StopRequest(
                 application.getId(),
                 sparkEnv.getSparkVersion(),
-                SparkExecutionMode.of(application.getExecutionMode()),
+                SparkDeployMode.of(application.getDeployMode()),
                 stopProper,
                 application.getAppId());
 
@@ -255,7 +255,7 @@ public class SparkApplicationActionServiceImpl
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
         ApiAlertException.throwIfNull(sparkEnv, "[StreamPark] can no found spark version");
 
-        if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
+        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
             checkYarnBeforeStart(application);
         }
 
@@ -298,7 +298,7 @@ public class SparkApplicationActionServiceImpl
         String appConf = userJarAndAppConf.f1;
 
         BuildResult buildResult = buildPipeline.getBuildResult();
-        if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
+        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
                 extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
@@ -314,9 +314,9 @@ public class SparkApplicationActionServiceImpl
 
         SubmitRequest submitRequest = new SubmitRequest(
             sparkEnv.getSparkVersion(),
-            SparkExecutionMode.of(application.getExecutionMode()),
+            SparkDeployMode.of(application.getDeployMode()),
             sparkEnv.getSparkConf(),
-            SparkDevelopmentMode.valueOf(application.getJobType()),
+            SparkJobType.valueOf(application.getJobType()),
             application.getId(),
             application.getAppName(),
             application.getMainClass(),
@@ -410,11 +410,11 @@ public class SparkApplicationActionServiceImpl
 
     private Tuple2<String, String> getUserJarAndAppConf(
                                                         SparkEnv sparkEnv, SparkApplication application) {
-        SparkExecutionMode executionModeEnum = application.getSparkExecutionMode();
+        SparkDeployMode deployModeEnum = application.getSparkDeployMode();
         SparkApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
         ApiAlertException.throwIfNull(
-            executionModeEnum, "ExecutionMode can't be null, start application failed.");
+            deployModeEnum, "DeployMode can't be null, start application failed.");
 
         String sparkUserJar = null;
         String appConf = null;
@@ -430,7 +430,7 @@ public class SparkApplicationActionServiceImpl
                     ? null
                     : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
-                if (SparkExecutionMode.YARN_CLUSTER == executionModeEnum) {
+                if (SparkDeployMode.YARN_CLUSTER == deployModeEnum) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     sparkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
@@ -483,7 +483,7 @@ public class SparkApplicationActionServiceImpl
                     }
                 }
 
-                if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
+                if (SparkDeployMode.isYarnMode(deployModeEnum)) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_SPARK:
                             sparkUserJar = String.format(
@@ -522,7 +522,7 @@ public class SparkApplicationActionServiceImpl
         updateById(application);
         SparkAppHttpWatcher.unWatching(application.getId());
         // kill application
-        if (SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())) {
+        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
             try {
                 List<ApplicationReport> applications = applicationInfoService
                     .getYarnAppReport(application.getAppName());

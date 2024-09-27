@@ -19,13 +19,13 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.UserService;
 
@@ -44,9 +44,9 @@ class UserServiceTest extends SpringUnitTestBase {
     @Autowired
     private UserService userService;
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
     @Autowired
     private ResourceService resourceService;
 
@@ -106,7 +106,7 @@ class UserServiceTest extends SpringUnitTestBase {
         resource.setCreatorId(user.getUserId());
         resourceService.save(resource);
 
-        Application app = new Application();
+        FlinkApplication app = new FlinkApplication();
         app.setUserId(user.getUserId());
         app.setTeamId(1L);
         applicationManageService.save(app);

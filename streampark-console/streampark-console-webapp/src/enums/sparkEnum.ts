@@ -28,8 +28,8 @@ export enum OptionStateEnum {
   STOPPING = 3,
 }
 
-/* ExecutionMode  */
-export enum ExecModeEnum {
+/* DeployMode  */
+export enum DeployMode {
   /** remote (standalone) */
   REMOTE = 1,
   /** yarn per-job (deprecated, please use yarn-application mode) */

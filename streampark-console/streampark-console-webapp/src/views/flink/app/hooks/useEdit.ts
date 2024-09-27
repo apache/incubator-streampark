@@ -46,7 +46,7 @@ export const useEdit = () => {
       jobType: res.jobType,
       appType: res.appType,
       versionId: res.versionId,
-      executionMode: res.executionMode,
+      deployMode: res.deployMode,
       resourceFrom: res.resourceFrom,
     });
     return returnData;

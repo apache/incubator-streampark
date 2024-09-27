@@ -46,14 +46,14 @@ public final class ApplicationForm {
     })
     public List<WebElement> selectDevelopmentMode;
 
-    @FindBy(xpath = "//div[contains(@codefield, 'executionMode')]//div[contains(@class, 'ant-select-selector')]")
-    public WebElement buttonExecutionModeDropdown;
+    @FindBy(xpath = "//div[contains(@codefield, 'deployMode')]//div[contains(@class, 'ant-select-selector')]")
+    public WebElement buttonDeployModeDropdown;
 
     @FindBys({
-            @FindBy(css = "[codefield=executionMode]"),
+            @FindBy(css = "[codefield=deployMode]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    public List<WebElement> selectExecutionMode;
+    public List<WebElement> selectDeployMode;
 
     @FindBy(id = "form_item_jobName")
     public WebElement inputApplicationName;
@@ -87,7 +87,7 @@ public final class ApplicationForm {
 
     @SneakyThrows
     public ApplicationForm addApplication(DevelopmentMode developmentMode,
-                                          ExecutionMode executionMode,
+                                          DeployMode deployMode,
                                           String applicationName) {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
@@ -115,76 +115,76 @@ public final class ApplicationForm {
                             String.format("Development mode not found: %s",
                                 developmentMode.desc)))
                     .click();
-                buttonExecutionModeDropdown.click();
-                switch (executionMode) {
+                buttonDeployModeDropdown.click();
+                switch (deployMode) {
                     case REMOTE:
-                        selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.REMOTE.desc))
+                        selectDeployMode.stream()
+                            .filter(e -> e.getText().equalsIgnoreCase(DeployMode.REMOTE.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
                         break;
                     case YARN_APPLICATION:
-                        selectExecutionMode.stream()
+                        selectDeployMode.stream()
                             .filter(e -> e.getText()
-                                .equalsIgnoreCase(ExecutionMode.YARN_APPLICATION.desc))
+                                .equalsIgnoreCase(DeployMode.YARN_APPLICATION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
 
                         break;
                     case YARN_SESSION:
-                        selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_SESSION.desc))
+                        selectDeployMode.stream()
+                            .filter(e -> e.getText().equalsIgnoreCase(DeployMode.YARN_SESSION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
                         break;
                     case KUBERNETES_SESSION:
-                        selectExecutionMode.stream()
+                        selectDeployMode.stream()
                             .filter(e -> e.getText()
-                                .equalsIgnoreCase(ExecutionMode.KUBERNETES_SESSION.desc))
+                                .equalsIgnoreCase(DeployMode.KUBERNETES_SESSION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
                         break;
                     case KUBERNETES_APPLICATION:
-                        selectExecutionMode.stream()
+                        selectDeployMode.stream()
                             .filter(
                                 e -> e.getText().equalsIgnoreCase(
-                                    ExecutionMode.KUBERNETES_APPLICATION.desc))
+                                    DeployMode.KUBERNETES_APPLICATION.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
                         break;
                     case YARN_PER_JOB:
-                        selectExecutionMode.stream()
-                            .filter(e -> e.getText().equalsIgnoreCase(ExecutionMode.YARN_PER_JOB.desc))
+                        selectDeployMode.stream()
+                            .filter(e -> e.getText().equalsIgnoreCase(DeployMode.YARN_PER_JOB.desc))
                             .findFirst()
                             .orElseThrow(
                                 () -> new IllegalArgumentException(
                                     String.format("Execution mode not found: %s",
-                                        executionMode.desc)))
+                                        deployMode.desc)))
                             .click();
                         break;
                     default:
                         throw new IllegalArgumentException(
-                            String.format("Unknown execution mode: %s", executionMode.desc));
+                            String.format("Unknown execution mode: %s", deployMode.desc));
                 }
                 break;
             case PYTHON_FLINK:
@@ -262,7 +262,7 @@ public final class ApplicationForm {
     }
 
     @Getter
-    public enum ExecutionMode {
+    public enum DeployMode {
 
         REMOTE("remote"),
         YARN_APPLICATION("yarn application"),
@@ -273,7 +273,7 @@ public final class ApplicationForm {
 
         private final String desc;
 
-        ExecutionMode(String desc) {
+        DeployMode(String desc) {
             this.desc = desc;
         }
     }

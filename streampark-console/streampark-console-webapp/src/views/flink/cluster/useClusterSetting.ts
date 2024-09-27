@@ -1,4 +1,4 @@
-import { ExecModeEnum } from '/@/enums/flinkEnum';
+import { DeployMode } from '/@/enums/flinkEnum';
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -68,11 +68,11 @@ export const useClusterSetting = () => {
   const getLoading = computed(() => submitLoading.value);
 
   /* check */
-  async function handleCheckExecMode(_rule: RuleObject, value: StoreValue) {
+  async function handleCheckDeployMode(_rule: RuleObject, value: StoreValue) {
     if (value === null || value === undefined || value === '') {
-      return Promise.reject(t('setting.flinkCluster.required.executionMode'));
+      return Promise.reject(t('setting.flinkCluster.required.deployMode'));
     } else {
-      if (value === ExecModeEnum.YARN_SESSION) {
+      if (value === DeployMode.YARN_SESSION) {
         try {
           const res = await fetchCheckHadoop();
           if (res) {
@@ -96,8 +96,8 @@ export const useClusterSetting = () => {
   // session mode
   function isShowInSessionMode(value: Recordable): boolean {
     return (
-      value.executionMode == ExecModeEnum.YARN_SESSION ||
-      value.executionMode == ExecModeEnum.KUBERNETES_SESSION
+      value.deployMode == DeployMode.YARN_SESSION ||
+      value.deployMode == DeployMode.KUBERNETES_SESSION
     );
   }
 
@@ -113,22 +113,22 @@ export const useClusterSetting = () => {
         required: true,
       },
       {
-        field: 'executionMode',
-        label: t('setting.flinkCluster.form.executionMode'),
+        field: 'deployMode',
+        label: t('setting.flinkCluster.form.deployMode'),
         component: 'Select',
         componentProps: {
-          placeholder: t('setting.flinkCluster.placeholder.executionMode'),
+          placeholder: t('setting.flinkCluster.placeholder.deployMode'),
           options: [
             {
               label: 'standalone',
-              value: ExecModeEnum.STANDALONE,
+              value: DeployMode.STANDALONE,
             },
-            { label: 'yarn session', value: ExecModeEnum.YARN_SESSION },
-            { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION },
+            { label: 'yarn session', value: DeployMode.YARN_SESSION },
+            { label: 'kubernetes session', value: DeployMode.KUBERNETES_SESSION },
           ],
         },
         dynamicRules: () => {
-          return [{ required: true, validator: handleCheckExecMode }];
+          return [{ required: true, validator: handleCheckDeployMode }];
         },
       },
       {
@@ -149,14 +149,14 @@ export const useClusterSetting = () => {
         componentProps: {
           placeholder: t('setting.flinkCluster.placeholder.addressRemoteMode'),
         },
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.STANDALONE,
+        ifShow: ({ values }) => values.deployMode == DeployMode.STANDALONE,
         rules: [{ required: true, message: t('setting.flinkCluster.required.address') }],
       },
       {
         field: 'yarnQueue',
         label: t('setting.flinkCluster.form.yarnQueue'),
         component: 'Input',
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.YARN_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.YARN_SESSION,
         render: (renderCallbackParams) => renderYarnQueue(renderCallbackParams),
       },
       {
@@ -169,13 +169,13 @@ export const useClusterSetting = () => {
           fieldNames: { label: 'alertName', value: 'id', options: 'options' },
         },
         ifShow: ({ values }) =>
-          values.executionMode == ExecModeEnum.YARN_SESSION ||
-          values.executionMode == ExecModeEnum.STANDALONE,
+          values.deployMode == DeployMode.YARN_SESSION ||
+          values.deployMode == DeployMode.STANDALONE,
       },
       {
         field: 'clusterId',
         label: t('setting.flinkCluster.form.k8sClusterId'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Input',
         defaultValue: unref(flinkEnvs).filter((v) => v.isDefault)[0],
         render: ({ model, field }) =>
@@ -187,7 +187,7 @@ export const useClusterSetting = () => {
       {
         field: 'k8sNamespace',
         label: t('setting.flinkCluster.form.k8sNamespace'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -198,7 +198,7 @@ export const useClusterSetting = () => {
       {
         field: 'serviceAccount',
         label: t('setting.flinkCluster.form.serviceAccount'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -209,7 +209,7 @@ export const useClusterSetting = () => {
       {
         field: 'k8sConf',
         label: t('setting.flinkCluster.form.k8sConf'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -220,7 +220,7 @@ export const useClusterSetting = () => {
       {
         field: 'flinkImage',
         label: t('setting.flinkCluster.form.flinkImage'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Input',
         render: ({ model, field }) =>
           renderInputDropdown(model, field, {
@@ -232,7 +232,7 @@ export const useClusterSetting = () => {
       {
         field: 'k8sRestExposedType',
         label: t('setting.flinkCluster.form.k8sRestExposedType'),
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_SESSION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_SESSION,
         component: 'Select',
         componentProps: {
           placeholder: t('setting.flinkCluster.placeholder.k8sRestExposedType'),
@@ -345,19 +345,19 @@ export const useClusterSetting = () => {
     const options = handleFormValue(values);
     const params = {
       clusterName: values.clusterName,
-      executionMode: values.executionMode,
+      deployMode: values.deployMode,
       versionId: values.versionId,
       description: values.description,
       alertId: values.alertId,
     };
 
-    switch (values.executionMode) {
-      case ExecModeEnum.STANDALONE:
+    switch (values.deployMode) {
+      case DeployMode.STANDALONE:
         Object.assign(params, {
           address: values.address,
         });
         return params;
-      case ExecModeEnum.YARN_SESSION:
+      case DeployMode.YARN_SESSION:
         Object.assign(params, {
           options: JSON.stringify(options),
           yarnQueue: values.yarnQueue || 'default',
@@ -365,7 +365,7 @@ export const useClusterSetting = () => {
           resolveOrder: values.resolveOrder,
         });
         return params;
-      case ExecModeEnum.KUBERNETES_SESSION:
+      case DeployMode.KUBERNETES_SESSION:
         Object.assign(params, {
           clusterId: values.clusterId,
           options: JSON.stringify(options),
@@ -380,7 +380,7 @@ export const useClusterSetting = () => {
         });
         return params;
       default:
-        createMessage.error('error executionMode.');
+        createMessage.error('error deployMode.');
         return {};
     }
   }
@@ -395,7 +395,7 @@ export const useClusterSetting = () => {
       historyRecord.k8sNamespace = res;
     });
     fetchSessionClusterIds({
-      executionMode: ExecModeEnum.KUBERNETES_SESSION,
+      deployMode: DeployMode.KUBERNETES_SESSION,
     }).then((res) => {
       historyRecord.k8sSessionClusterId = res;
     });

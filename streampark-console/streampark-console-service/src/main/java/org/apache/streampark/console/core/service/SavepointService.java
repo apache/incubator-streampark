@@ -19,15 +19,15 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.Savepoint;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkSavepoint;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.annotation.Nullable;
 
-public interface SavepointService extends IService<Savepoint> {
+public interface SavepointService extends IService<FlinkSavepoint> {
 
     /**
      * Expires all savepoints for the specified application.
@@ -42,7 +42,7 @@ public interface SavepointService extends IService<Savepoint> {
      * @param id the unique identifier of the SavePoint
      * @return the latest SavePoint object, or null if not found
      */
-    Savepoint getLatest(Long id);
+    FlinkSavepoint getLatest(Long id);
 
     /**
      * Triggers a savepoint for the specified application.
@@ -62,7 +62,7 @@ public interface SavepointService extends IService<Savepoint> {
      * @return true if the application is successfully deleted, false otherwise
      * @throws InternalException if there is an internal error during the deletion process
      */
-    Boolean remove(Long id, Application appParam) throws InternalException;
+    Boolean remove(Long id, FlinkApplication appParam) throws InternalException;
 
     /**
      * Retrieves a page of savepoint objects based on the specified parameters.
@@ -71,14 +71,14 @@ public interface SavepointService extends IService<Savepoint> {
      * @param request The RestRequest object containing additional request parameters.
      * @return An instance of IPage<SavePoint> representing the page of SavePoint objects.
      */
-    IPage<Savepoint> getPage(Savepoint savepoint, RestRequest request);
+    IPage<FlinkSavepoint> getPage(FlinkSavepoint savepoint, RestRequest request);
 
     /**
      * Removes all savepoints for the specified application.
      *
      * @param appParam the application to be removed
      */
-    void remove(Application appParam);
+    void remove(FlinkApplication appParam);
 
     /**
      * Returns the savepoint path for the given application.
@@ -87,5 +87,5 @@ public interface SavepointService extends IService<Savepoint> {
      * @return the save point path for the given application
      * @throws Exception if an error occurs while getting the save point path
      */
-    String getSavePointPath(Application appParam) throws Exception;
+    String getSavePointPath(FlinkApplication appParam) throws Exception;
 }

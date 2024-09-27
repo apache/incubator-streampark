@@ -19,7 +19,7 @@ export interface FlinkCluster {
   address: string;
   clusterId: string;
   clusterName: string;
-  executionMode: number;
+  deployMode: number;
   versionId: string;
   k8sNamespace: string;
   serviceAccount?: any;

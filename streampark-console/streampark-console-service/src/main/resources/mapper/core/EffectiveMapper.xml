@@ -17,11 +17,5 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.EffectiveMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.Effective">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="app_id" jdbcType="BIGINT" property="appId"/>
-        <result column="target_type" jdbcType="BIGINT" property="targetType"/>
-        <result column="target_id" jdbcType="BIGINT" property="targetId"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
+
 </mapper>

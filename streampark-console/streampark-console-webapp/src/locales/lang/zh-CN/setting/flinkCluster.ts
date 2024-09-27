@@ -26,7 +26,7 @@ export default {
     clusterName: '集群名称',
     address: '集群URL',
     runState: '运行状态',
-    executionMode: '部署模式',
+    deployMode: '部署模式',
     versionId: 'Flink版本',
     addType: '添加类型',
     addExisting: '已有集群',
@@ -49,7 +49,7 @@ export default {
   placeholder: {
     addType: '请选择集群添加类型',
     clusterName: '请输入集群名称',
-    executionMode: '请选择部署模式',
+    deployMode: '请选择部署模式',
     versionId: '请选择Flink版本',
     addressRemoteMode: '请输入Flink 集群JobManager URL访问地址',
     addressNoRemoteMode: '请输入集群地址，例如：http://host:port',
@@ -66,7 +66,7 @@ export default {
   },
   required: {
     address: '必须填写集群地址',
-    executionMode: '部署模式必填',
+    deployMode: '部署模式必填',
     clusterId: 'Yarn Session Cluster 为必填项',
     versionId: 'Flink 版本必选',
     flinkImage: 'link基础docker镜像是必填的',

@@ -26,7 +26,7 @@ import org.apache.streampark.console.core.enums.FlinkEnvCheckEnum;
 import org.apache.streampark.console.core.mapper.FlinkEnvMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -51,7 +51,7 @@ public class FlinkEnvServiceImpl extends ServiceImpl<FlinkEnvMapper, FlinkEnv>
     @Autowired
     private FlinkClusterService flinkClusterService;
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     /**
      * two places will be checked: <br>

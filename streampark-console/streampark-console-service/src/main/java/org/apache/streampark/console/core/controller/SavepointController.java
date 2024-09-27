@@ -21,10 +21,10 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.Savepoint;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.service.SavepointService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -45,24 +45,24 @@ import javax.annotation.Nullable;
 public class SavepointController {
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private SavepointService savepointService;
 
     @PostMapping("history")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public RestResponse history(Savepoint sp, RestRequest request) {
-        IPage<Savepoint> page = savepointService.getPage(sp, request);
+    public RestResponse history(FlinkSavepoint sp, RestRequest request) {
+        IPage<FlinkSavepoint> page = savepointService.getPage(sp, request);
         return RestResponse.success(page);
     }
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
     @Permission(app = "#sp.appId", team = "#sp.teamId")
-    public RestResponse delete(Savepoint sp) throws InternalException {
-        Savepoint savepoint = savepointService.getById(sp.getId());
-        Application application = applicationManageService.getById(savepoint.getAppId());
+    public RestResponse delete(FlinkSavepoint sp) throws InternalException {
+        FlinkSavepoint savepoint = savepointService.getById(sp.getId());
+        FlinkApplication application = applicationManageService.getById(savepoint.getAppId());
         Boolean deleted = savepointService.remove(sp.getId(), application);
         return RestResponse.success(deleted);
     }

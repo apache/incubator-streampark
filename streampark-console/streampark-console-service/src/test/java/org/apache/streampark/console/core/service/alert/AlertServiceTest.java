@@ -26,7 +26,7 @@ import org.apache.streampark.console.core.bean.AlertLarkParams;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.bean.AlertWeComParams;
 import org.apache.streampark.console.core.bean.EmailConfig;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.service.alert.impl.DingTalkAlertNotifyServiceImpl;
 import org.apache.streampark.console.core.service.alert.impl.LarkAlertNotifyServiceImpl;
@@ -157,7 +157,7 @@ class AlertServiceTest {
 
     @Test
     void testAlert() {
-        Application application = new Application();
+        FlinkApplication application = new FlinkApplication();
         application.setStartTime(new Date());
         application.setJobName("Test My Job");
         application.setClusterId("1234567890");
@@ -194,7 +194,7 @@ class AlertServiceTest {
         }
     }
 
-    private AlertTemplate getAlertBaseInfo(Application application) {
+    private AlertTemplate getAlertBaseInfo(FlinkApplication application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();

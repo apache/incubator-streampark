@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -32,9 +32,9 @@ import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.DockerConfig;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Message;
@@ -46,17 +46,17 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.AppBuildPipeService;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
-import org.apache.streampark.console.core.service.ApplicationConfigService;
 import org.apache.streampark.console.core.service.ApplicationLogService;
+import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.packer.docker.DockerConf;
@@ -129,7 +129,7 @@ public class AppBuildPipeServiceImpl
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private ApplicationBackUpService backUpService;
+    private FlinkApplicationBackUpService backUpService;
 
     @Autowired
     private SettingService settingService;
@@ -138,10 +138,10 @@ public class AppBuildPipeServiceImpl
     private MessageService messageService;
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     @Autowired
     private ApplicationLogService applicationLogService;
@@ -150,7 +150,7 @@ public class AppBuildPipeServiceImpl
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
     @Autowired
-    private ApplicationConfigService applicationConfigService;
+    private FlinkApplicationConfigService applicationConfigService;
 
     @Autowired
     private ResourceService resourceService;
@@ -180,7 +180,7 @@ public class AppBuildPipeServiceImpl
         // check the build environment
         checkBuildEnv(appId, forceBuild);
 
-        Application app = applicationManageService.getById(appId);
+        FlinkApplication app = applicationManageService.getById(appId);
         ApplicationLog applicationLog = getApplicationLog(app);
 
         // check if you need to go through the build process (if the jar and pom have changed,
@@ -325,7 +325,7 @@ public class AppBuildPipeServiceImpl
                                 applicationManageService.toEffective(app);
                             } else {
                                 if (app.isStreamParkJob()) {
-                                    ApplicationConfig config =
+                                    FlinkApplicationConfig config =
                                         applicationConfigService.getLatest(app.getId());
                                     if (config != null) {
                                         config.setToApplication(app);
@@ -383,7 +383,7 @@ public class AppBuildPipeServiceImpl
         return saved;
     }
 
-    private void registerDockerProgressWatcher(BuildPipeline pipeline, Application app) {
+    private void registerDockerProgressWatcher(BuildPipeline pipeline, FlinkApplication app) {
         pipeline
             .as(FlinkK8sApplicationBuildPipeline.class)
             .registerDockerProgressWatcher(
@@ -407,7 +407,7 @@ public class AppBuildPipeServiceImpl
     }
 
     @Nonnull
-    private ApplicationLog getApplicationLog(Application app) {
+    private ApplicationLog getApplicationLog(FlinkApplication app) {
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
@@ -423,7 +423,7 @@ public class AppBuildPipeServiceImpl
      * @param forceBuild forced start pipeline or not
      */
     private void checkBuildEnv(Long appId, boolean forceBuild) {
-        Application app = applicationManageService.getById(appId);
+        FlinkApplication app = applicationManageService.getById(appId);
 
         // 1) check flink version
         String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";
@@ -444,7 +444,7 @@ public class AppBuildPipeServiceImpl
     }
 
     /** create building pipeline instance */
-    private BuildPipeline createPipelineInstance(@Nonnull Application app) {
+    private BuildPipeline createPipelineInstance(@Nonnull FlinkApplication app) {
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(app.getVersionId());
         String flinkUserJar = retrieveFlinkUserJar(flinkEnv, app);
 
@@ -455,13 +455,13 @@ public class AppBuildPipeServiceImpl
             }
         }
 
-        FlinkExecutionMode executionModeEnum = app.getFlinkExecutionMode();
+        FlinkDeployMode deployModeEnum = app.getFlinkDeployMode();
         String mainClass = Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
-        switch (executionModeEnum) {
+        switch (deployModeEnum) {
             case YARN_APPLICATION:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                if (FlinkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
+                if (FlinkJobType.CUSTOM_CODE == app.getDevelopmentMode()
                     && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
@@ -490,13 +490,13 @@ public class AppBuildPipeServiceImpl
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
+                    "Unsupported Building Application for DeployMode: " + app.getFlinkDeployMode());
         }
     }
 
     @Nonnull
     private FlinkYarnApplicationBuildRequest buildFlinkYarnApplicationBuildRequest(
-                                                                                   @Nonnull Application app,
+                                                                                   @Nonnull FlinkApplication app,
                                                                                    String mainClass,
                                                                                    String localWorkspace,
                                                                                    String yarnProvidedPath) {
@@ -511,7 +511,7 @@ public class AppBuildPipeServiceImpl
 
     @Nonnull
     private FlinkK8sApplicationBuildRequest buildFlinkK8sApplicationBuildRequest(
-                                                                                 @Nonnull Application app,
+                                                                                 @Nonnull FlinkApplication app,
                                                                                  String mainClass,
                                                                                  String flinkUserJar,
                                                                                  FlinkEnv flinkEnv,
@@ -521,7 +521,7 @@ public class AppBuildPipeServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
@@ -541,14 +541,15 @@ public class AppBuildPipeServiceImpl
 
     @Nonnull
     private FlinkK8sSessionBuildRequest buildFlinkK8sSessionBuildRequest(
-                                                                         @Nonnull Application app, String mainClass,
+                                                                         @Nonnull FlinkApplication app,
+                                                                         String mainClass,
                                                                          String flinkUserJar, FlinkEnv flinkEnv) {
         FlinkK8sSessionBuildRequest k8sSessionBuildRequest = new FlinkK8sSessionBuildRequest(
             app.getJobName(),
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
@@ -559,7 +560,8 @@ public class AppBuildPipeServiceImpl
 
     @Nonnull
     private FlinkRemotePerJobBuildRequest buildFlinkRemotePerJobBuildRequest(
-                                                                             @Nonnull Application app, String mainClass,
+                                                                             @Nonnull FlinkApplication app,
+                                                                             String mainClass,
                                                                              String flinkUserJar, FlinkEnv flinkEnv) {
         return new FlinkRemotePerJobBuildRequest(
             app.getJobName(),
@@ -567,14 +569,14 @@ public class AppBuildPipeServiceImpl
             mainClass,
             flinkUserJar,
             app.isCustomCodeJob(),
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app));
     }
 
-    /** copy from {@link ApplicationActionService#start(Application, boolean)} */
-    private String retrieveFlinkUserJar(FlinkEnv flinkEnv, Application app) {
+    /** copy from {@link FlinkApplicationActionService#start(FlinkApplication, boolean)} */
+    private String retrieveFlinkUserJar(FlinkEnv flinkEnv, FlinkApplication app) {
         switch (app.getDevelopmentMode()) {
             case CUSTOM_CODE:
                 switch (app.getApplicationType()) {
@@ -592,7 +594,7 @@ public class AppBuildPipeServiceImpl
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
-                if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
+                if (app.getFlinkDeployMode() == FlinkDeployMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
@@ -685,7 +687,7 @@ public class AppBuildPipeServiceImpl
      * @param application
      * @return DependencyInfo
      */
-    private DependencyInfo getMergedDependencyInfo(Application application) {
+    private DependencyInfo getMergedDependencyInfo(FlinkApplication application) {
         DependencyInfo dependencyInfo = application.getDependencyInfo();
         if (StringUtils.isBlank(application.getTeamResource())) {
             return dependencyInfo;
@@ -730,7 +732,7 @@ public class AppBuildPipeServiceImpl
     }
 
     private static void mergeDependency(
-                                        Application application,
+                                        FlinkApplication application,
                                         List<Artifact> mvnArtifacts,
                                         List<String> jarLibs,
                                         Resource resource) {

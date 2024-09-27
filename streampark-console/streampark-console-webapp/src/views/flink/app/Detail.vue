@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script setup lang="ts" name="ApplicationDetail">
-  import { ExecModeEnum } from '/@/enums/flinkEnum';
+  import { DeployMode } from '/@/enums/flinkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
@@ -137,11 +137,9 @@
     // Get data for the first time
     if (Object.keys(app).length == 0) {
       if (
-        [
-          ExecModeEnum.YARN_PER_JOB,
-          ExecModeEnum.YARN_SESSION,
-          ExecModeEnum.YARN_APPLICATION,
-        ].includes(res.executionMode)
+        [DeployMode.YARN_PER_JOB, DeployMode.YARN_SESSION, DeployMode.YARN_APPLICATION].includes(
+          res.deployMode,
+        )
       ) {
         await handleYarn();
       }

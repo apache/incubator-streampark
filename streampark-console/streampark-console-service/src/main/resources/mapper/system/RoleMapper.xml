@@ -17,14 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.system.mapper.RoleMapper">
-    <resultMap id="roleMap" type="org.apache.streampark.console.system.entity.Role">
-        <result column="role_id" jdbcType="BIGINT" property="roleId"/>
-        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-    </resultMap>
-
     <select id="selectPage" resultType="org.apache.streampark.console.system.entity.Role" parameterType="org.apache.streampark.console.system.entity.Role">
         select * from t_role
         <where>

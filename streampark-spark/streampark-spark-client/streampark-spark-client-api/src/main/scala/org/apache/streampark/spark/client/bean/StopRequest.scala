@@ -18,7 +18,7 @@
 package org.apache.streampark.spark.client.bean
 
 import org.apache.streampark.common.conf.SparkVersion
-import org.apache.streampark.common.enums.SparkExecutionMode
+import org.apache.streampark.common.enums.SparkDeployMode
 import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
@@ -26,6 +26,6 @@ import javax.annotation.Nullable
 case class StopRequest(
     id: Long,
     sparkVersion: SparkVersion,
-    executionMode: SparkExecutionMode,
+    deployMode: SparkDeployMode,
     @Nullable properties: JavaMap[String, String],
     appId: String)

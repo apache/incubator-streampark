@@ -50,7 +50,7 @@ public class Flink117OnYarnClusterDeployTest {
 
     private static final String flinkClusterNameEdited = "flink_1.17.2_cluster_e2e_edited";
 
-    private static final ClusterDetailForm.ExecutionMode executionMode = ClusterDetailForm.ExecutionMode.YARN_SESSION;
+    private static final ClusterDetailForm.DeployMode deployMode = ClusterDetailForm.DeployMode.YARN_SESSION;
 
     @BeforeAll
     public static void setup() {
@@ -71,7 +71,7 @@ public class Flink117OnYarnClusterDeployTest {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
         flinkClustersPage.createFlinkCluster()
-            .<YarnSessionForm>addCluster(executionMode)
+            .<YarnSessionForm>addCluster(deployMode)
             .resolveOrder(YarnSessionForm.ResolveOrder.CHILD_FIRST)
             .clusterName(flinkClusterName)
             .flinkVersion(flinkName)
@@ -91,7 +91,7 @@ public class Flink117OnYarnClusterDeployTest {
         final FlinkClustersPage flinkClustersPage = new FlinkClustersPage(browser);
 
         flinkClustersPage.editFlinkCluster(flinkClusterName)
-            .<YarnSessionForm>addCluster(executionMode)
+            .<YarnSessionForm>addCluster(deployMode)
             .clusterName(flinkClusterNameEdited)
             .submit();
 

@@ -17,20 +17,20 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 import org.apache.streampark.console.core.mapper.YarnQueueMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +70,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public static final String QUEUE_AVAILABLE_HINT = "The queue label is available.";
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
     @Autowired
     private FlinkClusterService flinkClusterService;
 
@@ -175,19 +175,19 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
      * Only check the validation of queue-labelExpression when using yarn application or yarn-session
      * mode or yarn-perjob mode.
      *
-     * @param executionModeEnum execution mode.
+     * @param deployModeEnum execution mode.
      * @param queueLabel queueLabel expression.
      */
     @Override
-    public void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel) {
-        if (FlinkExecutionMode.isYarnMode(executionModeEnum)) {
+    public void checkQueueLabel(FlinkDeployMode deployModeEnum, String queueLabel) {
+        if (FlinkDeployMode.isYarnMode(deployModeEnum)) {
             ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
         }
     }
 
     @Override
-    public void checkQueueLabel(SparkExecutionMode executionModeEnum, String queueLabel) {
-        if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
+    public void checkQueueLabel(SparkDeployMode deployModeEnum, String queueLabel) {
+        if (SparkDeployMode.isYarnMode(deployModeEnum)) {
             ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
         }
     }
@@ -227,7 +227,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public void checkNotReferencedByFlinkClusters(
                                                   @Nonnull String queueLabel, @Nonnull String operation) {
         List<FlinkCluster> clustersReferenceYarnQueueLabel = flinkClusterService
-            .listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
+            .listByDeployModes(Sets.newHashSet(FlinkDeployMode.YARN_SESSION))
             .stream()
             .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
             .collect(Collectors.toList());
@@ -240,12 +240,12 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public void checkNotReferencedByApplications(
                                                  @Nonnull Long teamId, @Nonnull String queueLabel,
                                                  @Nonnull String operation) {
-        List<Application> appsReferenceQueueLabel = applicationManageService
-            .listByTeamIdAndExecutionModes(
+        List<FlinkApplication> appsReferenceQueueLabel = applicationManageService
+            .listByTeamIdAndDeployModes(
                 teamId,
                 Sets.newHashSet(
-                    FlinkExecutionMode.YARN_APPLICATION,
-                    FlinkExecutionMode.YARN_PER_JOB))
+                    FlinkDeployMode.YARN_APPLICATION,
+                    FlinkDeployMode.YARN_PER_JOB))
             .stream()
             .filter(
                 application -> {

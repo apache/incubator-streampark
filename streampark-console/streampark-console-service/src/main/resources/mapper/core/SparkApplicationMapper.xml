@@ -17,62 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.SparkApplicationMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.SparkApplication">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="team_id" jdbcType="BIGINT" property="teamId"/>
-        <result column="job_type" jdbcType="INTEGER" property="jobType"/>
-        <result column="app_type" jdbcType="INTEGER" property="appType"/>
-        <result column="version_id" jdbcType="BIGINT" property="versionId"/>
-        <result column="app_name" jdbcType="VARCHAR" property="appName"/>
-        <result column="execution_mode" jdbcType="INTEGER" property="executionMode"/>
-        <result column="resource_from" jdbcType="INTEGER" property="resourceFrom"/>
-        <result column="project_id" jdbcType="BIGINT" property="projectId"/>
-        <result column="module" jdbcType="VARCHAR" property="module"/>
-        <result column="main_class" jdbcType="VARCHAR" property="mainClass"/>
-        <result column="jar" jdbcType="VARCHAR" property="jar"/>
-        <result column="jar_check_sum" jdbcType="VARCHAR" property="jarCheckSum"/>
-        <result column="app_properties" jdbcType="LONGVARCHAR" property="appProperties"/>
-        <result column="app_args" jdbcType="LONGVARCHAR" property="appArgs"/>
-        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
-        <result column="yarn_queue" jdbcType="VARCHAR" property="yarnQueue"/>
-        <result column="k8s_master_url" jdbcType="VARCHAR" property="k8sMasterUrl"/>
-        <result column="k8s_container_image" jdbcType="VARCHAR" property="k8sContainerImage"/>
-        <result column="k8s_image_pull_policy" jdbcType="TINYINT" property="k8sImagePullPolicy"/>
-        <result column="k8s_service_account" jdbcType="VARCHAR" property="k8sServiceAccount"/>
-        <result column="k8s_namespace" jdbcType="VARCHAR" property="k8sNamespace"/>
-        <result column="hadoop_user" jdbcType="VARCHAR" property="hadoopUser"/>
-        <result column="restart_size" jdbcType="INTEGER" property="restartSize"/>
-        <result column="restart_count" jdbcType="INTEGER" property="restartCount"/>
-        <result column="state" jdbcType="INTEGER" property="state"/>
-        <result column="options" jdbcType="LONGVARCHAR" property="options"/>
-        <result column="option_state" jdbcType="INTEGER" property="optionState"/>
-        <result column="option_time" jdbcType="DATE" property="optionTime"/>
-        <result column="user_id" jdbcType="BIGINT" property="userId"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="tracking" jdbcType="INTEGER" property="tracking"/>
-        <result column="release" jdbcType="INTEGER" property="release"/>
-        <result column="build" jdbcType="BOOLEAN" property="build"/>
-        <result column="alert_id" jdbcType="BIGINT" property="alertId"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-        <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
-        <result column="start_time" jdbcType="DATE" property="startTime"/>
-        <result column="end_time" jdbcType="DATE" property="endTime"/>
-        <result column="duration" jdbcType="BIGINT" property="duration"/>
-        <result column="tags" jdbcType="VARCHAR" property="tags"/>
-        <result column="driver_cores" jdbcType="VARCHAR" property="driverCores"/>
-        <result column="driver_memory" jdbcType="VARCHAR" property="driverMemory"/>
-        <result column="executor_cores" jdbcType="VARCHAR" property="executorCores"/>
-        <result column="executor_memory" jdbcType="VARCHAR" property="executorMemory"/>
-        <result column="executor_max_nums" jdbcType="VARCHAR" property="executorMaxNums"/>
-        <result column="num_tasks" jdbcType="BIGINT" property="numTasks"/>
-        <result column="num_completed_tasks" jdbcType="BIGINT" property="numCompletedTasks"/>
-        <result column="num_stages" jdbcType="BIGINT" property="numStages"/>
-        <result column="num_completed_stages" jdbcType="BIGINT" property="numCompletedStages"/>
-        <result column="used_memory" jdbcType="BIGINT" property="usedMemory"/>
-        <result column="used_v_cores" jdbcType="BIGINT" property="usedVCores"/>
-
-    </resultMap>
-
     <update id="resetOptionState">
         update t_spark_app
         set option_state = 0
@@ -103,8 +47,8 @@
             <if test="app.jobType != null and app.jobType != ''">
                 and t.job_type = #{app.jobType}
             </if>
-            <if test="app.executionMode != null and app.executionMode != ''">
-                and t.execution_mode = #{app.executionMode}
+            <if test="app.deployMode != null and app.deployMode != ''">
+                and t.deploy_mode = #{app.deployMode}
             </if>
             <if test="app.appName != null and app.appName != ''">
                 and t.app_name like concat('%', '${app.appName}', '%')

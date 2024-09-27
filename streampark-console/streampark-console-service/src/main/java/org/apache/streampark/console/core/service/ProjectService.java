@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 
@@ -139,7 +139,7 @@ public interface ProjectService extends IService<Project> {
      * @param project Project
      * @return List of Applications
      */
-    List<Application> listApps(Project project);
+    List<FlinkApplication> listApps(Project project);
 
     /**
      * Check whether the corresponding project exists

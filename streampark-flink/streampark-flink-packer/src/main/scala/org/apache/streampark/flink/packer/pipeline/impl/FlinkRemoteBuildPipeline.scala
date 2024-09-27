@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline.impl
 
-import org.apache.streampark.common.enums.FlinkDevelopmentMode
+import org.apache.streampark.common.enums.FlinkJobType
 import org.apache.streampark.common.fs.{FsOperator, LfsOperator}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.packer.maven.MavenTool
@@ -48,7 +48,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       val shadedJar =
         execStep(2) {
           request.developmentMode match {
-            case FlinkDevelopmentMode.FLINK_SQL =>
+            case FlinkJobType.FLINK_SQL =>
               val output = MavenTool.buildFatJar(
                 request.mainClass,
                 request.providedLibs,
@@ -62,7 +62,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       val mavenJars =
         execStep(3) {
           request.developmentMode match {
-            case FlinkDevelopmentMode.PYFLINK =>
+            case FlinkJobType.PYFLINK =>
               val mavenArts =
                 MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
               mavenArts.map(_.getAbsolutePath) ++ request.dependencyInfo.extJarLibs
@@ -72,7 +72,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
 
       execStep(4) {
         request.developmentMode match {
-          case FlinkDevelopmentMode.PYFLINK =>
+          case FlinkJobType.PYFLINK =>
             mavenJars.foreach(jar => {
               val lfs: FsOperator = FsOperator.lfs
               val lib = request.workspace.concat("/lib")

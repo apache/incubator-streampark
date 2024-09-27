@@ -34,14 +34,14 @@ import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.bean.FlinkConnector;
 import org.apache.streampark.console.core.bean.MavenPom;
 import org.apache.streampark.console.core.bean.UploadResponse;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
 import org.apache.streampark.console.core.mapper.ResourceMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.maven.Artifact;
 import org.apache.streampark.flink.packer.maven.MavenTool;
@@ -102,7 +102,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     public static final String EXCEPTION = "exception";
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private FlinkSqlService flinkSqlService;
@@ -486,11 +486,11 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
         return CollectionUtils.isNotEmpty(getResourceApplicationsById(resource));
     }
 
-    private List<Application> getResourceApplicationsById(Resource resource) {
-        List<Application> dependApplications = new ArrayList<>();
-        List<Application> applications = applicationManageService.listByTeamId(resource.getTeamId());
-        Map<Long, Application> applicationMap = applications.stream()
-            .collect(Collectors.toMap(Application::getId, application -> application));
+    private List<FlinkApplication> getResourceApplicationsById(Resource resource) {
+        List<FlinkApplication> dependApplications = new ArrayList<>();
+        List<FlinkApplication> applications = applicationManageService.listByTeamId(resource.getTeamId());
+        Map<Long, FlinkApplication> applicationMap = applications.stream()
+            .collect(Collectors.toMap(FlinkApplication::getId, application -> application));
 
         // Get the application that depends on this resource
         List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(resource.getTeamId());
@@ -498,7 +498,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
             String sqlTeamResource = flinkSql.getTeamResource();
             if (sqlTeamResource != null
                 && sqlTeamResource.contains(String.valueOf(resource.getTeamId()))) {
-                Application app = applicationMap.get(flinkSql.getAppId());
+                FlinkApplication app = applicationMap.get(flinkSql.getAppId());
                 if (!dependApplications.contains(app)) {
                     dependApplications.add(applicationMap.get(flinkSql.getAppId()));
                 }
