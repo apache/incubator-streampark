@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
-import org.apache.streampark.console.core.service.SparkApplicationConfigService;
+import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 

@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service;
+package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -30,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /** Applications can be built asynchronously, can manage pipeline and get info */
-public interface AppBuildPipeService extends IService<AppBuildPipeline> {
+public interface SparkAppBuildPipeService extends IService<AppBuildPipeline> {
 
     /**
      * Build application. This is an async call method.
@@ -48,14 +47,6 @@ public interface AppBuildPipeService extends IService<AppBuildPipeline> {
      * @return ApplicationBuildPipeline instance
      */
     Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId);
-
-    /**
-     * Get Docker resolved snapshot of specified application.
-     *
-     * @param appId application id
-     * @return DockerResolvedSnapshot instance
-     */
-    DockerResolvedSnapshot getDockerProgressDetailSnapshot(@Nonnull Long appId);
 
     /**
      * Whether the application can currently start a new building progress

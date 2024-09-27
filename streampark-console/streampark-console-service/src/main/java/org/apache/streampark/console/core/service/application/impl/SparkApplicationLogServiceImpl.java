@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service.impl;
+package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.entity.ApplicationLog;
-import org.apache.streampark.console.core.mapper.ApplicationLogMapper;
-import org.apache.streampark.console.core.service.ApplicationLogService;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
+import org.apache.streampark.console.core.mapper.SparkApplicationLogMapper;
+import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -35,28 +35,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog>
+public class SparkApplicationLogServiceImpl extends ServiceImpl<SparkApplicationLogMapper, SparkApplicationLog>
     implements
-        ApplicationLogService {
+        SparkApplicationLogService {
 
     @Override
-    public IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request) {
+    public IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, RestRequest request) {
         request.setSortField("option_time");
-        Page<ApplicationLog> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
-            .eq(ApplicationLog::getAppId, applicationLog.getAppId());
+        Page<SparkApplicationLog> page = MybatisPager.getPage(request);
+        LambdaQueryWrapper<SparkApplicationLog> queryWrapper = new LambdaQueryWrapper<SparkApplicationLog>()
+            .eq(SparkApplicationLog::getAppId, sparkApplicationLog.getAppId());
         return this.page(page, queryWrapper);
     }
 
     @Override
     public void removeByAppId(Long appId) {
-        LambdaQueryWrapper<ApplicationLog> queryWrapper = new LambdaQueryWrapper<ApplicationLog>()
-            .eq(ApplicationLog::getAppId, appId);
+        LambdaQueryWrapper<SparkApplicationLog> queryWrapper = new LambdaQueryWrapper<SparkApplicationLog>()
+            .eq(SparkApplicationLog::getAppId, appId);
         this.remove(queryWrapper);
-    }
-
-    @Override
-    public Boolean delete(ApplicationLog applicationLog) {
-        return removeById(applicationLog.getId());
     }
 }

@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CatalogServiceTest extends SpringUnitTestBase {
 
     @Autowired
-    private CatalogService catalogService;
+    private FlinkCatalogService catalogService;
 
     @AfterEach
     void cleanTestRecordsInDatabase() {

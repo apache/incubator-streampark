@@ -24,8 +24,8 @@ import org.apache.streampark.console.core.entity.FlinkCatalog;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/** This interface is use to managed catalog */
-public interface CatalogService extends IService<FlinkCatalog> {
+/** This interface is used to managed catalog */
+public interface FlinkCatalogService extends IService<FlinkCatalog> {
 
     /**
      * Create Catalog

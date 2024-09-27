@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service.impl;
+package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.domain.RestRequest;
@@ -29,10 +29,10 @@ import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationBackUpMapper;
-import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
-import org.apache.streampark.console.core.service.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -143,7 +143,7 @@ public class SparkApplicationBackUpServiceImpl
         if (!backUpPages.getRecords().isEmpty()) {
             SparkApplicationBackUp backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
-            appParam.getFsOperator().move(path, appParam.getWorkspace().SPARK_APP_WORKSPACE());
+            appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
         }
     }

@@ -15,31 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.service.application;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
-import lombok.Getter;
+import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 
-import java.util.Arrays;
+import com.baomidou.mybatisplus.extension.service.IService;
 
-/** Compute engine type. */
-@Getter
-public enum EngineTypeEnum {
+public interface ApplicationService extends IService<Application> {
 
-    /** Apache Flink: activated by default */
-    FLINK(1),
-
-    /** Apache Spark */
-    SPARK(2);
-
-    @EnumValue
-    private final int code;
-
-    EngineTypeEnum(int code) {
-        this.code = code;
-    }
-
-    public static EngineTypeEnum of(Integer code) {
-        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-    }
+    Application create(EngineTypeEnum engineTypeEnum);
 }

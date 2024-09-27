@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.FlinkCatalogParams;
-import org.apache.streampark.console.core.service.CatalogService;
+import org.apache.streampark.console.core.service.FlinkCatalogService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -40,10 +40,10 @@ import java.io.IOException;
 @Validated
 @RestController
 @RequestMapping("flink/catalog")
-public class CatalogController {
+public class FlinkCatalogController {
 
     @Autowired
-    CatalogService catalogService;
+    FlinkCatalogService catalogService;
 
     @Permission(team = "#catalog.teamId")
     @PostMapping("create")

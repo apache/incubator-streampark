@@ -131,7 +131,7 @@ public class ProxyServiceImpl implements ProxyService {
     @Override
     public ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
-        String yarnId = log.getYarnAppId();
+        String yarnId = log.getClusterId();
         if (StringUtils.isBlank(yarnId)) {
             return builder.body("The yarn application id is null.");
         }
@@ -158,7 +158,7 @@ public class ProxyServiceImpl implements ProxyService {
     public ResponseEntity<?> proxyHistory(HttpServletRequest request, ApplicationLog log) throws Exception {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
-        String url = log.getJobManagerUrl();
+        String url = log.getTrackingUrl();
         if (StringUtils.isBlank(url)) {
             return builder.body("The jobManager url is null.");
         }

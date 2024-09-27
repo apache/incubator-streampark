@@ -20,12 +20,26 @@ use streampark;
 set names utf8mb4;
 set foreign_key_checks = 0;
 
-alter table t_app_backup rename to t_flink_app_backup;
+
+-- ----------------------------
+-- Table structure for t_app
+-- ----------------------------
+create table if not exists `t_app` (
+`id` bigint not null,
+`job_type` tinyint default null,
+`create_time` datetime default null comment 'create time',
+`modify_time` datetime default null comment 'modify time',
+primary key(`id`)
+);
+
 
 alter table `t_flink_app`
-    add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
+    modify column `id` not null;
+add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
     -- modify_time change with duration #3188
     modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+
+alter table t_app_backup rename to t_flink_app_backup;
 
 alter table `t_flink_log`
     add column `user_id` bigint default null comment 'operator user id';

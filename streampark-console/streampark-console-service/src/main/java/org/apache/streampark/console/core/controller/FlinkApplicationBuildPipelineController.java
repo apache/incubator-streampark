@@ -21,7 +21,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.AppBuildPipeService;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 
@@ -42,7 +42,7 @@ import java.util.Optional;
 @Validated
 @RestController
 @RequestMapping("flink/pipe")
-public class ApplicationBuildPipelineController {
+public class FlinkApplicationBuildPipelineController {
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;

@@ -15,25 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service;
+package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.SparkApplicationLog;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-/** This interface is used to record application operation logs */
-public interface ApplicationLogService extends IService<ApplicationLog> {
+/** This interface is used to record spark application operation logs */
+public interface SparkApplicationLogService extends IService<SparkApplicationLog> {
 
     /**
-     * Retrieves a page of {@link ApplicationLog} objects based on the provided parameters.
+     * Retrieves a page of {@link SparkApplicationLog} objects based on the provided parameters.
      *
-     * @param applicationLog The {@link ApplicationLog} object containing the search criteria.
+     * @param sparkApplicationLog The {@link SparkApplicationLog} object containing the search criteria.
      * @param request The {@link RestRequest} object used for pagination and sorting.
-     * @return An {@link IPage} containing the retrieved {@link ApplicationLog} objects.
+     * @return An {@link IPage} containing the retrieved {@link SparkApplicationLog} objects.
      */
-    IPage<ApplicationLog> getPage(ApplicationLog applicationLog, RestRequest request);
+    IPage<SparkApplicationLog> getPage(SparkApplicationLog sparkApplicationLog, RestRequest request);
 
     /**
      * remove application log by application id
@@ -41,6 +41,4 @@ public interface ApplicationLogService extends IService<ApplicationLog> {
      * @param appId The id of the application to be removed
      */
     void removeByAppId(Long appId);
-
-    Boolean delete(ApplicationLog applicationLog);
 }

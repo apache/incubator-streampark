@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service;
+package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationConfig;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /** This interface defines the methods to manage the application configuration. */
-public interface SparkApplicationConfigService extends IService<SparkApplicationConfig> {
+public interface FlinkApplicationConfigService extends IService<FlinkApplicationConfig> {
 
     /**
      * Creates a new instance of an Application.
@@ -35,7 +35,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @param appParam The Application object to create.
      * @param latest If set to true, sets the created Application as the latest version.
      */
-    void create(SparkApplication appParam, Boolean latest);
+    void create(FlinkApplication appParam, Boolean latest);
 
     /**
      * Updates the given application.
@@ -43,7 +43,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @param appParam the application to be updated
      * @param latest a boolean indicating whether to update to the latest version
      */
-    void update(SparkApplication appParam, Boolean latest);
+    void update(FlinkApplication appParam, Boolean latest);
 
     /**
      * Sets the latest or effective flag for a given configuration and application. The latest flag
@@ -71,7 +71,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @param appId The ID of the application
      * @return The latest version of the application configuration
      */
-    SparkApplicationConfig getLatest(Long appId);
+    FlinkApplicationConfig getLatest(Long appId);
 
     /**
      * Retrieves the effective ApplicationConfig for the given appId.
@@ -79,7 +79,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @param appId The identifier of the application.
      * @return The effective ApplicationConfig.
      */
-    SparkApplicationConfig getEffective(Long appId);
+    FlinkApplicationConfig getEffective(Long appId);
 
     /**
      * Retrieves the ApplicationConfig for the specified ID.
@@ -88,7 +88,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @return the ApplicationConfig object corresponding to the specified ID, or null if no
      *     ApplicationConfig is found
      */
-    SparkApplicationConfig get(Long id);
+    FlinkApplicationConfig get(Long id);
 
     /**
      * Retrieves a page of ApplicationConfig objects based on the specified ApplicationConfig and
@@ -100,7 +100,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @return an IPage containing the ApplicationConfig objects that match the filter criteria
      *     specified in the config object, limited by the settings in the request object
      */
-    IPage<SparkApplicationConfig> getPage(SparkApplicationConfig config, RestRequest request);
+    IPage<FlinkApplicationConfig> getPage(FlinkApplicationConfig config, RestRequest request);
 
     /**
      * Retrieves the history of application configurations for a given application.
@@ -108,7 +108,7 @@ public interface SparkApplicationConfigService extends IService<SparkApplication
      * @param appId The application's id for which to retrieve the history.
      * @return The list of application configurations representing the history.
      */
-    List<SparkApplicationConfig> list(Long appId);
+    List<FlinkApplicationConfig> list(Long appId);
 
     /**
      * Reads a template from a file or a database.

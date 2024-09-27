@@ -192,7 +192,7 @@ create sequence "public"."streampark_t_flink_app_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_flink_app" (
-  "id" int8 not null default nextval('streampark_t_flink_app_id_seq'::regclass),
+  "id" int8 not null,
   "team_id" int8,
   "job_type" int2,
   "deploy_mode" int2,

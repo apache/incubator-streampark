@@ -15,31 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.enums;
+package org.apache.streampark.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.EnumValue;
-import lombok.Getter;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
+import java.io.Serializable;
+import java.util.Date;
 
-/** Compute engine type. */
-@Getter
-public enum EngineTypeEnum {
+@Data
+@TableName("t_app")
+@Slf4j
+public class Application implements Serializable {
 
-    /** Apache Flink: activated by default */
-    FLINK(1),
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    /**
+     * 1: flink job
+     * 2: spark job
+     */
+    private Integer jobType;
 
-    /** Apache Spark */
-    SPARK(2);
+    private Date createTime;
 
-    @EnumValue
-    private final int code;
+    private Date modifyTime;
 
-    EngineTypeEnum(int code) {
-        this.code = code;
-    }
-
-    public static EngineTypeEnum of(Integer code) {
-        return Arrays.stream(values()).filter((x) -> x.code == code).findFirst().orElse(null);
-    }
 }

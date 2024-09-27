@@ -28,10 +28,10 @@ import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.SparkSqlMapper;
-import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
 import org.apache.streampark.spark.client.proxy.SparkShimsProxy;
 import org.apache.streampark.spark.core.util.SparkSqlValidationResult;
 

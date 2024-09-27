@@ -22,27 +22,22 @@ set names utf8mb4;
 set foreign_key_checks = 0;
 
 -- ----------------------------
--- table structure for t_flink_app_backup
+-- Table structure for t_app
 -- ----------------------------
-drop table if exists `t_flink_app_backup`;
-create table `t_flink_app_backup` (
-  `id` bigint not null auto_increment,
-  `app_id` bigint default null,
-  `sql_id` bigint default null,
-  `config_id` bigint default null,
-  `version` int default null,
-  `path` varchar(128) collate utf8mb4_general_ci default null,
-  `description` varchar(255) collate utf8mb4_general_ci default null,
-  `create_time` datetime default null comment 'create time',
-  primary key (`id`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+create table if not exists `t_app` (
+`id` bigint not null,
+`job_type` tinyint default null,
+`create_time` datetime default null comment 'create time',
+`modify_time` datetime default null comment 'modify time',
+primary key(`id`)
+);
 
 -- ----------------------------
 -- Table structure for t_flink_app
 -- ----------------------------
 drop table if exists `t_flink_app`;
 create table `t_flink_app` (
-  `id` bigint not null auto_increment,
+  `id` bigint not null,
   `team_id` bigint not null,
   `job_type` tinyint default null,
   `deploy_mode` tinyint default null,
@@ -107,6 +102,23 @@ create table `t_flink_app` (
   key `inx_job_type` (`job_type`) using btree,
   key `inx_track` (`tracking`) using btree,
   index `inx_team` (`team_id`) using btree
+) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+
+-- ----------------------------
+-- table structure for t_flink_app_backup
+-- ----------------------------
+drop table if exists `t_flink_app_backup`;
+create table `t_flink_app_backup` (
+`id` bigint not null,
+`app_id` bigint default null,
+`sql_id` bigint default null,
+`config_id` bigint default null,
+`version` int default null,
+`path` varchar(128) collate utf8mb4_general_ci default null,
+`description` varchar(255) collate utf8mb4_general_ci default null,
+`create_time` datetime default null comment 'create time',
+primary key (`id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 

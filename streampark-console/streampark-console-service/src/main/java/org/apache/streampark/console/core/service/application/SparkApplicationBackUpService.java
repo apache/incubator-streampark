@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.service;
+package org.apache.streampark.console.core.service.application;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.InternalException;
-import org.apache.streampark.console.core.entity.FlinkApplication;
-import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
-import org.apache.streampark.console.core.entity.FlinkSql;
+import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
+import org.apache.streampark.console.core.entity.SparkSql;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /** Interface representing a service for application backup operations. */
-public interface FlinkApplicationBackUpService extends IService<FlinkApplicationBackUp> {
+public interface SparkApplicationBackUpService extends IService<SparkApplicationBackUp> {
 
     /**
      * Deletes an object specified by the given ID.
@@ -39,48 +39,48 @@ public interface FlinkApplicationBackUpService extends IService<FlinkApplication
     Boolean removeById(Long id) throws InternalException;
 
     /**
-     * Performs a backup for the given application and Flink SQL parameters.
+     * Performs a backup for the given application and Spark SQL parameters.
      *
      * @param appParam The application to back up.
-     * @param flinkSqlParam The Flink SQL to back up.
+     * @param sparkSqlParam The Spark SQL to back up.
      */
-    void backup(FlinkApplication appParam, FlinkSql flinkSqlParam);
+    void backup(SparkApplication appParam, SparkSql sparkSqlParam);
 
     /**
-     * Retrieves a page of {@link FlinkApplicationBackUp} objects based on the provided parameters.
+     * Retrieves a page of {@link SparkApplicationBackUp} objects based on the provided parameters.
      *
-     * @param bakParam The {@link FlinkApplicationBackUp} object containing the search criteria.
+     * @param bakParam The {@link SparkApplicationBackUp} object containing the search criteria.
      * @param request The {@link RestRequest} object used for pagination and sorting.
-     * @return An {@link IPage} containing the retrieved {@link FlinkApplicationBackUp} objects.
+     * @return An {@link IPage} containing the retrieved {@link SparkApplicationBackUp} objects.
      */
-    IPage<FlinkApplicationBackUp> getPage(FlinkApplicationBackUp bakParam, RestRequest request);
+    IPage<SparkApplicationBackUp> getPage(SparkApplicationBackUp bakParam, RestRequest request);
 
     /**
      * Rolls back the changes made by the specified application backup.
      *
-     * @param bakParam The ApplicationBackUp object representing the backup to roll back.
+     * @param bakParam The SparkApplicationBackUp object representing the backup to roll back.
      */
-    void rollback(FlinkApplicationBackUp bakParam);
+    void rollback(SparkApplicationBackUp bakParam);
 
     /**
      * Revoke the given application.
      *
      * @param appParam The application to be revoked.
      */
-    void revoke(FlinkApplication appParam);
+    void revoke(SparkApplication appParam);
 
     /**
      * Removes the specified application.
      *
      * @param appParam the application to be removed
      */
-    void remove(FlinkApplication appParam);
+    void remove(SparkApplication appParam);
 
     /**
-     * Rolls back a Flink SQL application to its previous state.
+     * Rolls back a Spark SQL application to its previous state.
      *
      * @param appParam The application to rollback.
-     * @param flinkSqlParam The Flink SQL instance associated with the application.
+     * @param sparkSqlParam The Spark SQL instance associated with the application.
      */
-    void rollbackFlinkSql(FlinkApplication appParam, FlinkSql flinkSqlParam);
+    void rollbackSparkSql(SparkApplication appParam, SparkSql sparkSqlParam);
 }

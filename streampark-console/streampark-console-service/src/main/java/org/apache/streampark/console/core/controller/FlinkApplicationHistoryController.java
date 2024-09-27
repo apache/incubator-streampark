@@ -37,7 +37,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("flink/history")
-public class ApplicationHistoryController {
+public class FlinkApplicationHistoryController {
 
     @Autowired
     private FlinkApplicationInfoService applicationInfoService;
