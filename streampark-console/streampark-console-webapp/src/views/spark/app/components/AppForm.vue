@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <script lang="ts" setup>
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, nextTick, onMounted, ref } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './ProgramArgs.vue';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
@@ -26,6 +26,7 @@
   import VariableReview from './VariableReview.vue';
   import { useSparkSchema } from '../hooks/useAppFormSchema';
   import { SparkEnv } from '/@/api/spark/home.type';
+  import { decodeByBase64 } from '/@/utils/cipher';
 
   const SparkSqlEditor = createAsyncComponent(() => import('./SparkSql.vue'), {
     loading: true,
@@ -47,6 +48,9 @@
   });
   const go = useGo();
   const sparkSql = ref();
+  const programArgsRef = ref<{
+    setContent: (data: string) => void;
+  }>();
   const submitLoading = ref(false);
 
   const { t } = useI18n();
@@ -72,6 +76,10 @@
     if (props.initFormFn) {
       const fieldsValue = await props.initFormFn();
       await setFieldsValue(fieldsValue);
+      nextTick(() => {
+        if (fieldsValue.sparkSql) sparkSql.value?.setContent(decodeByBase64(fieldsValue.sparkSql));
+        if (fieldsValue.appArgs) programArgsRef.value?.setContent(fieldsValue.appArgs);
+      });
     }
   }
   /* Submit to create */
@@ -102,6 +110,7 @@
     </template>
     <template #args="{ model }">
       <ProgramArgs
+        ref="programArgsRef"
         v-model:value="model.args"
         :suggestions="suggestions"
         @preview="(value) => openReviewDrawer(true, { value, suggestions })"
