@@ -41,7 +41,7 @@ import static org.apache.streampark.console.core.service.impl.YarnQueueServiceIm
 import static org.apache.streampark.console.core.util.YarnQueueLabelExpression.ERR_FORMAT_HINTS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.parallel.DeployMode.SAME_THREAD;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 /**
  * Test for {@link YarnQueueService}. We use {@link Execution} to specify the same thread mode to
