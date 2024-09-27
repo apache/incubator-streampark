@@ -255,6 +255,10 @@ public class AppBuildPipeServiceImpl
                                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
                                     localJar = new File(resource.getFilePath());
                                     uploadJar = appUploads.concat("/").concat(localJar.getName());
+                                } else {
+                                    localJar =
+                                        new File(WebUtils.getAppTempDir(), app.getJar());
+                                    uploadJar = appUploads.concat("/").concat(localJar.getName());
                                 }
                             }
                             // upload jar copy to appHome
