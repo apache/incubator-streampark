@@ -33,14 +33,14 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildStateEnum;
 import org.apache.streampark.console.core.enums.GitAuthorizedErrorEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ProjectService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
@@ -85,7 +85,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         ProjectService {
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
@@ -158,7 +158,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (projectParam.getBuildState() != null) {
             project.setBuildState(projectParam.getBuildState());
             if (BuildStateEnum.of(projectParam.getBuildState()).equals(BuildStateEnum.NEED_REBUILD)) {
-                List<Application> applications = listApps(project);
+                List<FlinkApplication> applications = listApps(project);
                 // Update deployment status
                 applications.forEach(
                     (app) -> {
@@ -177,8 +177,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public boolean removeById(Long id) {
         Project project = getById(id);
         AssertUtils.notNull(project);
-        LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<Application>()
-            .eq(Application::getProjectId, id);
+        LambdaQueryWrapper<FlinkApplication> queryWrapper = new LambdaQueryWrapper<FlinkApplication>()
+            .eq(FlinkApplication::getProjectId, id);
         long count = applicationManageService.count(queryWrapper);
         if (count > 0) {
             return false;
@@ -230,7 +230,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 flinkAppHttpWatcher.init();
             },
             fileLogger -> {
-                List<Application> applications =
+                List<FlinkApplication> applications =
                     this.applicationManageService.listByProjectId(project.getId());
                 applications.forEach(
                     (app) -> {
@@ -287,7 +287,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public List<Application> listApps(Project project) {
+    public List<FlinkApplication> listApps(Project project) {
         return this.applicationManageService.listByProjectId(project.getId());
     }
 

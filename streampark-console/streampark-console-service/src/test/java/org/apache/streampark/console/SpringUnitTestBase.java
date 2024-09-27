@@ -20,7 +20,7 @@ package org.apache.streampark.console;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
@@ -110,10 +110,10 @@ public abstract class SpringUnitTestBase {
         return cluster;
     }
 
-    protected Application mockYarnModeJobApp(
-                                             Long teamId, String name, String yarnQueue,
-                                             FlinkExecutionMode executionModeEnum) {
-        Application application = new Application();
+    protected FlinkApplication mockYarnModeJobApp(
+                                                  Long teamId, String name, String yarnQueue,
+                                                  FlinkExecutionMode executionModeEnum) {
+        FlinkApplication application = new FlinkApplication();
         application.setYarnQueue(yarnQueue);
         application.setTeamId(teamId);
         application.setJobName(name);

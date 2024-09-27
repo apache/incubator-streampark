@@ -19,12 +19,12 @@ package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcherFactory;
 import org.apache.streampark.flink.kubernetes.FlinkTrackConfig;
@@ -69,7 +69,7 @@ public class FlinkK8sWatcherWrapper {
 
     @Lazy
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Lazy
     @Autowired
@@ -108,12 +108,12 @@ public class FlinkK8sWatcherWrapper {
     /** get flink-k8s job tracking application from db. */
     private List<TrackId> getK8sWatchingApps() {
         // query k8s execution mode application from db
-        final LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
+        final LambdaQueryWrapper<FlinkApplication> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
-            .eq(Application::getTracking, 1)
-            .in(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
+            .eq(FlinkApplication::getTracking, 1)
+            .in(FlinkApplication::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
 
-        List<Application> k8sApplication = applicationManageService.list(queryWrapper);
+        List<FlinkApplication> k8sApplication = applicationManageService.list(queryWrapper);
         if (CollectionUtils.isEmpty(k8sApplication)) {
             return Lists.newArrayList();
         }
@@ -124,7 +124,7 @@ public class FlinkK8sWatcherWrapper {
             .collect(Collectors.toList());
     }
 
-    public TrackId toTrackId(Application app) {
+    public TrackId toTrackId(FlinkApplication app) {
         FlinkEnv flinkEnv = flinkEnvService.getById(app.getVersionId());
         Properties properties = flinkEnv.getFlinkConfig();
 

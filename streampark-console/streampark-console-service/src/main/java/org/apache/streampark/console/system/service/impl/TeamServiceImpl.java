@@ -24,7 +24,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.VariableService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
@@ -55,7 +55,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     private UserService userService;
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     @Autowired
     private ProjectService projectService;

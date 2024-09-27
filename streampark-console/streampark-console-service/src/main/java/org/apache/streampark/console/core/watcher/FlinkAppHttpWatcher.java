@@ -24,7 +24,7 @@ import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AlertTemplate;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkStateChangeEvent;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
@@ -39,9 +39,9 @@ import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -79,13 +79,13 @@ import java.util.stream.Collectors;
 public class FlinkAppHttpWatcher {
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
-    private ApplicationActionService applicationActionService;
+    private FlinkApplicationActionService applicationActionService;
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     @Autowired
     private AlertService alertService;
@@ -133,7 +133,7 @@ public class FlinkAppHttpWatcher {
         Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
     /** tracking task list */
-    private static final Map<Long, Application> WATCHING_APPS = new ConcurrentHashMap<>(0);
+    private static final Map<Long, FlinkApplication> WATCHING_APPS = new ConcurrentHashMap<>(0);
 
     /**
      *
@@ -180,10 +180,10 @@ public class FlinkAppHttpWatcher {
     @PostConstruct
     public void init() {
         WATCHING_APPS.clear();
-        List<Application> applications = distributedTaskService.getMonitoredTaskList(applicationManageService.list(
-            new LambdaQueryWrapper<Application>()
-                .eq(Application::getTracking, 1)
-                .notIn(Application::getExecutionMode, FlinkExecutionMode.getKubernetesMode())));
+        List<FlinkApplication> applications = distributedTaskService.getMonitoredTaskList(applicationManageService.list(
+            new LambdaQueryWrapper<FlinkApplication>()
+                .eq(FlinkApplication::getTracking, 1)
+                .notIn(FlinkApplication::getExecutionMode, FlinkExecutionMode.getKubernetesMode())));
         applications.forEach(
             (app) -> {
                 WATCHING_APPS.put(app.getId(), app);
@@ -218,7 +218,7 @@ public class FlinkAppHttpWatcher {
         }
     }
 
-    private void watch(Long id, Application application) {
+    private void watch(Long id, FlinkApplication application) {
         watchExecutor.execute(
             () -> {
                 try {
@@ -237,11 +237,11 @@ public class FlinkAppHttpWatcher {
             });
     }
 
-    private void cleanupLost(Application application) {
+    private void cleanupLost(FlinkApplication application) {
         LOST_CACHE.invalidate(application.getId());
     }
 
-    private void doStateFailed(Application application) {
+    private void doStateFailed(FlinkApplication application) {
         /*
          * Query from flink's restAPI and yarn's restAPI both failed. In this case, it is necessary to decide whether to
          * return to the final state depending on the state being operated
@@ -294,7 +294,7 @@ public class FlinkAppHttpWatcher {
      *
      * @param application application
      */
-    private void getStateFromFlink(Application application) throws Exception {
+    private void getStateFromFlink(FlinkApplication application) throws Exception {
         StopFromEnum stopFrom = getStopFrom(application);
         JobsOverview jobsOverview = httpJobsOverview(application);
         Optional<JobsOverview.Job> optional;
@@ -346,7 +346,7 @@ public class FlinkAppHttpWatcher {
         }
     }
 
-    private StopFromEnum getStopFrom(Application application) {
+    private StopFromEnum getStopFrom(FlinkApplication application) {
         return STOP_FROM_MAP.getOrDefault(application.getId(), null) == null
             ? StopFromEnum.NONE
             : STOP_FROM_MAP.get(application.getId());
@@ -358,7 +358,7 @@ public class FlinkAppHttpWatcher {
      * @param application application
      * @param jobOverview jobOverview
      */
-    private void handleJobOverview(Application application, JobsOverview.Job jobOverview) throws IOException {
+    private void handleJobOverview(FlinkApplication application, JobsOverview.Job jobOverview) throws IOException {
         // compute duration
         long startTime = jobOverview.getStartTime();
         long endTime = jobOverview.getEndTime();
@@ -389,7 +389,7 @@ public class FlinkAppHttpWatcher {
     }
 
     /** get latest checkpoint */
-    private void handleCheckPoints(Application application) throws Exception {
+    private void handleCheckPoints(FlinkApplication application) throws Exception {
         CheckPoints checkPoints = httpCheckpoints(application);
         if (checkPoints != null) {
             checkpointProcessor.process(application, checkPoints);
@@ -404,7 +404,7 @@ public class FlinkAppHttpWatcher {
      * @param currentState currentState
      */
     private void handleRunningState(
-                                    Application application, OptionStateEnum optionState,
+                                    FlinkApplication application, OptionStateEnum optionState,
                                     FlinkAppStateEnum currentState) {
         /*
          * if the last recorded state is STARTING and the latest state obtained this time is RUNNING, which means it is
@@ -415,15 +415,15 @@ public class FlinkAppHttpWatcher {
          */
         Long appId = application.getId();
         if (OptionStateEnum.STARTING.equals(optionState)) {
-            Application latestApp = WATCHING_APPS.get(appId);
+            FlinkApplication latestApp = WATCHING_APPS.get(appId);
             ReleaseStateEnum releaseState = latestApp.getReleaseState();
             switch (releaseState) {
                 case NEED_RESTART:
                 case NEED_ROLLBACK:
-                    LambdaUpdateWrapper<Application> updateWrapper =
-                        new LambdaUpdateWrapper<Application>()
-                            .eq(Application::getId, appId)
-                            .set(Application::getRelease, ReleaseStateEnum.DONE.get());
+                    LambdaUpdateWrapper<FlinkApplication> updateWrapper =
+                        new LambdaUpdateWrapper<FlinkApplication>()
+                            .eq(FlinkApplication::getId, appId)
+                            .set(FlinkApplication::getRelease, ReleaseStateEnum.DONE.get());
                     applicationManageService.update(updateWrapper);
                     break;
                 default:
@@ -443,7 +443,7 @@ public class FlinkAppHttpWatcher {
         cleanOptioning(optionState, appId);
     }
 
-    private void doPersistMetrics(Application application, boolean stopWatch) {
+    private void doPersistMetrics(FlinkApplication application, boolean stopWatch) {
         Long appId = application.getId();
         if (FlinkAppStateEnum.isEndState(application.getState())) {
             application.setOverview(null);
@@ -477,7 +477,7 @@ public class FlinkAppHttpWatcher {
      * @param stopFrom stopFrom
      */
     private void handleNotRunState(
-                                   Application application,
+                                   FlinkApplication application,
                                    OptionStateEnum optionState,
                                    FlinkAppStateEnum currentState,
                                    StopFromEnum stopFrom) throws Exception {
@@ -535,7 +535,7 @@ public class FlinkAppHttpWatcher {
      *
      * @param application application
      */
-    private void getStateFromYarn(Application application) throws Exception {
+    private void getStateFromYarn(FlinkApplication application) throws Exception {
         log.debug("[StreamPark][FlinkAppHttpWatcher] getFromYarnRestApi starting...");
         StopFromEnum stopFrom = getStopFrom(application);
         OptionStateEnum optionState = OPTIONING.get(application.getId());
@@ -623,7 +623,7 @@ public class FlinkAppHttpWatcher {
         }
     }
 
-    private void doAlert(Application application, FlinkAppStateEnum flinkAppState) {
+    private void doAlert(FlinkApplication application, FlinkAppStateEnum flinkAppState) {
         AlertTemplate alertTemplate =
             AlertTemplateUtils.createAlertTemplate(application, flinkAppState);
         alertService.alert(application.getAlertId(), alertTemplate);
@@ -636,7 +636,7 @@ public class FlinkAppHttpWatcher {
         }
     }
 
-    public void cleanSavepoint(Application application) {
+    public void cleanSavepoint(FlinkApplication application) {
         application.setOptionState(OptionStateEnum.NONE.getValue());
         FlinkStateChangeEvent event = PREVIOUS_STATUS.getIfPresent(application.getId());
         if (event != null && event.getOptionState() == OptionStateEnum.SAVEPOINTING) {
@@ -657,7 +657,7 @@ public class FlinkAppHttpWatcher {
         }
     }
 
-    public static void doWatching(Application application) {
+    public static void doWatching(FlinkApplication application) {
         if (application.isKubernetesModeJob()) {
             return;
         }
@@ -706,24 +706,24 @@ public class FlinkAppHttpWatcher {
         return CANCELLED_JOB_MAP.get(appId) == null ? Long.valueOf(-1) : CANCELLED_JOB_MAP.get(appId);
     }
 
-    public static Collection<Application> getWatchingApps() {
+    public static Collection<FlinkApplication> getWatchingApps() {
         return WATCHING_APPS.values();
     }
 
     private static boolean isKubernetesApp(Long appId) {
-        Application app = WATCHING_APPS.get(appId);
+        FlinkApplication app = WATCHING_APPS.get(appId);
         if (app == null) {
             return false;
         }
         return app.isKubernetesModeJob();
     }
 
-    private YarnAppInfo httpYarnAppInfo(Application application) throws Exception {
+    private YarnAppInfo httpYarnAppInfo(FlinkApplication application) throws Exception {
         String reqURL = "ws/v1/cluster/apps/".concat(application.getClusterId());
         return yarnRestRequest(reqURL, YarnAppInfo.class);
     }
 
-    private Overview httpOverview(Application application) throws IOException {
+    private Overview httpOverview(FlinkApplication application) throws IOException {
         String appId = application.getClusterId();
         if (appId != null) {
             if (application.getFlinkExecutionMode().equals(FlinkExecutionMode.YARN_APPLICATION)
@@ -742,7 +742,7 @@ public class FlinkAppHttpWatcher {
         return null;
     }
 
-    private JobsOverview httpJobsOverview(Application application) throws Exception {
+    private JobsOverview httpJobsOverview(FlinkApplication application) throws Exception {
         final String flinkUrl = "jobs/overview";
         FlinkExecutionMode execMode = application.getFlinkExecutionMode();
         if (FlinkExecutionMode.isYarnMode(execMode)) {
@@ -776,7 +776,7 @@ public class FlinkAppHttpWatcher {
         return null;
     }
 
-    private CheckPoints httpCheckpoints(Application application) throws Exception {
+    private CheckPoints httpCheckpoints(FlinkApplication application) throws Exception {
         final String flinkUrl = "jobs/%s/checkpoints";
         FlinkExecutionMode execMode = application.getFlinkExecutionMode();
         if (FlinkExecutionMode.isYarnMode(execMode)) {
@@ -846,7 +846,7 @@ public class FlinkAppHttpWatcher {
         R call(T e) throws Exception;
     }
 
-    public static FlinkStateChangeEvent createStateChangeEvent(Application application) {
+    public static FlinkStateChangeEvent createStateChangeEvent(FlinkApplication application) {
         FlinkStateChangeEvent event = new FlinkStateChangeEvent();
         event.setId(application.getId());
         event.setOptionState(OptionStateEnum.getState(application.getOptionState()));

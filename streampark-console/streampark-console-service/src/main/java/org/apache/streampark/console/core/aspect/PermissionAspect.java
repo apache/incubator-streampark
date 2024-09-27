@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.aspect;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.annotation.Permission;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
@@ -53,7 +53,7 @@ public class PermissionAspect {
     private MemberService memberService;
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Pointcut("@annotation(org.apache.streampark.console.core.annotation.Permission)")
     public void permissionPointcut() {
@@ -88,7 +88,7 @@ public class PermissionAspect {
             // 3) check app
             Long appId = getId(joinPoint, methodSignature, permission.app());
             if (appId != null) {
-                Application app = applicationManageService.getById(appId);
+                FlinkApplication app = applicationManageService.getById(appId);
                 ApiAlertException.throwIfTrue(app == null, "Invalid operation, application is null");
                 if (!currentUser.getUserId().equals(app.getUserId())) {
                     Member member = memberService.getByTeamIdUserName(app.getTeamId(), currentUser.getUsername());

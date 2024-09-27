@@ -22,10 +22,10 @@ set names utf8mb4;
 set foreign_key_checks = 0;
 
 -- ----------------------------
--- table structure for t_app_backup
+-- table structure for t_flink_app_backup
 -- ----------------------------
-drop table if exists `t_app_backup`;
-create table `t_app_backup` (
+drop table if exists `t_flink_app_backup`;
+create table `t_flink_app_backup` (
   `id` bigint not null auto_increment,
   `app_id` bigint default null,
   `sql_id` bigint default null,

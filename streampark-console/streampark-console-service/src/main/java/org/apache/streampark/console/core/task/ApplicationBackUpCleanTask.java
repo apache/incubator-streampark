@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.task;
 
-import org.apache.streampark.console.core.entity.ApplicationBackUp;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
+import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ApplicationBackUpCleanTask {
 
-    private final ApplicationBackUpService backUpService;
+    private final FlinkApplicationBackUpService backUpService;
 
     @Value("${streampark.backup-clean.max-backup-num:5}")
     public Integer maxBackupNum;
@@ -40,15 +40,15 @@ public class ApplicationBackUpCleanTask {
     public void backUpClean() {
         log.info("Start to clean application backup");
         // select all application backup which count > maxBackupNum group by app_id
-        backUpService.lambdaQuery().groupBy(ApplicationBackUp::getAppId)
+        backUpService.lambdaQuery().groupBy(FlinkApplicationBackUp::getAppId)
             .having("count(*) > " + maxBackupNum).list().stream()
-            .map(ApplicationBackUp::getAppId)
+            .map(FlinkApplicationBackUp::getAppId)
             .forEach(
                 appId -> {
                     // order by create_time desc and skip first maxBackupNum records and delete
                     // others
-                    backUpService.lambdaQuery().eq(ApplicationBackUp::getAppId, appId)
-                        .orderByDesc(ApplicationBackUp::getCreateTime).list()
+                    backUpService.lambdaQuery().eq(FlinkApplicationBackUp::getAppId, appId)
+                        .orderByDesc(FlinkApplicationBackUp::getCreateTime).list()
                         .stream()
                         .skip(maxBackupNum)
                         .forEach(

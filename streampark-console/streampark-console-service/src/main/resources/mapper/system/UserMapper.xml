@@ -17,22 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.system.mapper.UserMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.system.entity.User">
-        <id column="user_id" jdbcType="BIGINT" property="userId"/>
-        <result column="username" jdbcType="VARCHAR" property="username"/>
-        <result column="nick_name" jdbcType="VARCHAR" property="nickName"/>
-        <result column="password" jdbcType="VARCHAR" property="password"/>
-        <result column="email" jdbcType="VARCHAR" property="email"/>
-        <result column="status" jdbcType="CHAR" property="status"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime"/>
-        <result column="sex" jdbcType="CHAR" property="sex"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="last_team_id" jdbcType="BIGINT" property="lastTeamId"/>
-        <result column="login_type" jdbcType="INTEGER" property="loginType"/>
-    </resultMap>
-
     <sql id="userColumn">
         u.user_id,
         u.username,

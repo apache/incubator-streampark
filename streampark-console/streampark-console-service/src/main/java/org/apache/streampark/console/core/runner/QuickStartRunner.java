@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.runner;
 import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.common.util.PropertiesUtils;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSql;
@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class QuickStartRunner implements ApplicationRunner {
     private FlinkSqlService flinkSqlService;
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
@@ -85,9 +85,9 @@ public class QuickStartRunner implements ApplicationRunner {
             flinkClusterService.create(flinkCluster, defaultId);
 
             // 3) set flink version and cluster
-            Application app = new Application();
+            FlinkApplication app = new FlinkApplication();
             app.setId(defaultId);
-            Application application = applicationManageService.getApp(app.getId());
+            FlinkApplication application = applicationManageService.getApp(app.getId());
             application.setFlinkClusterId(flinkCluster.getId());
             application.setVersionId(flinkEnv.getId());
             application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());

@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -93,7 +93,7 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     @Override
-    public ResponseEntity<?> proxyFlink(HttpServletRequest request, Application app) throws Exception {
+    public ResponseEntity<?> proxyFlink(HttpServletRequest request, FlinkApplication app) throws Exception {
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
         String url = null;

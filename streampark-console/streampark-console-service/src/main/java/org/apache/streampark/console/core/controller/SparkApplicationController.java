@@ -23,11 +23,11 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppChangeEvent;
-import org.apache.streampark.console.core.entity.ApplicationBackUp;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
-import org.apache.streampark.console.core.service.ApplicationBackUpService;
+import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
@@ -66,7 +66,7 @@ public class SparkApplicationController {
     private SparkApplicationInfoService applicationInfoService;
 
     @Autowired
-    private ApplicationBackUpService backUpService;
+    private FlinkApplicationBackUpService backUpService;
 
     @Autowired
     private SparkApplicationLogService applicationLogService;
@@ -196,8 +196,8 @@ public class SparkApplicationController {
     }
 
     @PostMapping("backups")
-    public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
-        IPage<ApplicationBackUp> backups = backUpService.getPage(backUp, request);
+    public RestResponse backups(FlinkApplicationBackUp backUp, RestRequest request) {
+        IPage<FlinkApplicationBackUp> backups = backUpService.getPage(backUp, request);
         return RestResponse.success(backups);
     }
 
@@ -222,7 +222,7 @@ public class SparkApplicationController {
     }
 
     @PostMapping("delete/bak")
-    public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
+    public RestResponse deleteBak(FlinkApplicationBackUp backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
         return RestResponse.success(deleted);
     }

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Variable;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -102,7 +102,7 @@ public interface VariableService extends IService<Variable> {
      * @param request The REST request containing additional parameters for retrieving the page.
      * @return An instance of IPage<Application> containing the dependent applications.
      */
-    IPage<Application> getDependAppsPage(Variable variable, RestRequest request);
+    IPage<FlinkApplication> getDependAppsPage(Variable variable, RestRequest request);
 
     /**
      * Updates the given variable.

@@ -19,12 +19,12 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ExternalLink;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.PlaceholderTypeEnum;
 import org.apache.streampark.console.core.mapper.ExternalLinkMapper;
 import org.apache.streampark.console.core.service.ExternalLinkService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -47,7 +47,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
     implements
         ExternalLinkService {
 
-    private final ApplicationManageService applicationManageService;
+    private final FlinkApplicationManageService applicationManageService;
 
     @Override
     public void create(ExternalLink externalLink) {
@@ -73,7 +73,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
 
     @Override
     public List<ExternalLink> render(Long appId) {
-        Application app = applicationManageService.getById(appId);
+        FlinkApplication app = applicationManageService.getById(appId);
         AssertUtils.notNull(app, "Application doesn't exist");
         List<ExternalLink> externalLink = this.list();
         if (externalLink != null && externalLink.size() > 0) {
@@ -83,7 +83,7 @@ public class ExternalLinkServiceImpl extends ServiceImpl<ExternalLinkMapper, Ext
         return externalLink;
     }
 
-    private void renderLinkUrl(ExternalLink link, Application app) {
+    private void renderLinkUrl(ExternalLink link, FlinkApplication app) {
         Map<String, String> placeholderValueMap = new HashMap<>();
         placeholderValueMap.put(PlaceholderTypeEnum.ID.get(), String.valueOf(app.getId()));
         placeholderValueMap.put(PlaceholderTypeEnum.JOB_ID.get(), app.getJobId());

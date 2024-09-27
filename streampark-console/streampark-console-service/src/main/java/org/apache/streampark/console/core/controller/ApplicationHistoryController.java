@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -40,7 +40,7 @@ import java.util.List;
 public class ApplicationHistoryController {
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     @PostMapping("k8s_namespaces")
     @RequiresPermissions("app:create")

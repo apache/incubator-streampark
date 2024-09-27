@@ -19,12 +19,12 @@ package org.apache.streampark.console.core.watcher;
 
 import org.apache.streampark.common.enums.FlinkExecutionMode;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
@@ -65,7 +65,7 @@ public class FlinkK8sChangeEventListener {
 
     @Lazy
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Lazy
     @Autowired
@@ -90,7 +90,7 @@ public class FlinkK8sChangeEventListener {
         JobStatusCV jobStatus = event.jobStatus();
         TrackId trackId = event.trackId();
         // get pre application record
-        Application app = applicationManageService.getById(trackId.appId());
+        FlinkApplication app = applicationManageService.getById(trackId.appId());
         if (app == null) {
             return;
         }
@@ -124,7 +124,7 @@ public class FlinkK8sChangeEventListener {
             return;
         }
 
-        Application app = applicationManageService.getById(trackId.appId());
+        FlinkApplication app = applicationManageService.getById(trackId.appId());
         if (app == null) {
             return;
         }
@@ -160,7 +160,7 @@ public class FlinkK8sChangeEventListener {
             applicationManageService.getById(event.trackId().appId()), checkPoint);
     }
 
-    private void setByJobStatusCV(Application app, JobStatusCV jobStatus) {
+    private void setByJobStatusCV(FlinkApplication app, JobStatusCV jobStatus) {
         // infer the final flink job state
         Enumeration.Value state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
             jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));

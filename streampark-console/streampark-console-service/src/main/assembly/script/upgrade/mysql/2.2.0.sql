@@ -20,6 +20,29 @@ use streampark;
 set names utf8mb4;
 set foreign_key_checks = 0;
 
+alter table t_app_backup rename to t_flink_app_backup;
+
+alter table `t_flink_app`
+    add column `k8s_name` varchar(63) collate utf8mb4_general_ci default null,
+    -- modify_time change with duration #3188
+    modify column `modify_time` datetime not null default current_timestamp comment 'modify time';
+
+alter table `t_flink_log`
+    add column `user_id` bigint default null comment 'operator user id';
+
+alter table `t_flink_project`
+    add column `salt` varchar(26) collate utf8mb4_general_ci default null comment 'password salt',
+    modify column `password` varchar(512) collate utf8mb4_general_ci default null comment 'password';
+
+alter table `t_flink_sql`
+    add column `team_resource` varchar(64) default null;
+
+alter table `t_flink_cluster`
+    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
+    add column `start_time` datetime default null comment 'start time',
+    add column `end_time` datetime default null comment 'end time',
+    add column `alert_id` bigint default null comment 'alert id';
+
 -- ----------------------------
 -- Table of t_resource
 -- ----------------------------
@@ -39,18 +62,6 @@ create table `t_resource` (
 primary key (`id`) using btree,
 unique key `un_team_vcode_inx` (`team_id`,`resource_name`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
-alter table `t_flink_sql`
-    add column `team_resource` varchar(64) default null;
-
-alter table `t_flink_app`
-    add column `hadoop_user` varchar(64) default null;
-
-alter table `t_flink_cluster`
-    add column `job_manager_url` varchar(150) default null comment 'url address of jobmanager' after `address`,
-    add column `start_time` datetime default null comment 'start time',
-    add column `end_time` datetime default null comment 'end time',
-    add column `alert_id` bigint default null comment 'alert id';
 
 -- menu level 2
 insert into `t_menu` values (120400, 120000, 'menu.resource', '/flink/resource', 'flink/resource/View', null, 'apartment', '0', 1, 3, now(), now());
@@ -75,44 +86,10 @@ alter table `t_user` modify column `password` varchar(64) collate utf8mb4_genera
 alter table `t_user` modify column `login_type` tinyint default 0 comment 'login type 0:password 1:ldap 2:sso';
 
 -- ----------------------------
--- Table of t_flink_gateway
--- ----------------------------
-drop table if exists `t_flink_gateway`;
-create table `t_flink_gateway` (
-`id` bigint not null auto_increment,
-`gateway_name` varchar(128) collate utf8mb4_general_ci not null comment 'The name of the gateway',
-`description` text collate utf8mb4_general_ci default null comment 'More detailed description of resource',
-`gateway_type` int not null comment 'The type of the gateway',
-`address` varchar(150) default null comment 'url address of gateway endpoint',
-`create_time` datetime default null comment 'create time',
-`modify_time` datetime default null comment 'modify time',
-primary key (`id`) using btree
-) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
-
--- menu level 2
-insert into `t_menu` values (120500, 130000, 'setting.flinkGateway', '/setting/FlinkGateway', 'setting/FlinkGateway/index', null, 'apartment', '0', 1, 3, now(), now());
--- menu level 3
-insert into `t_menu` values (120501, 120500, 'add', NULL, NULL, 'gateway:add', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (120502, 120500, 'update', NULL, NULL, 'gateway:update', NULL, '1', 1, NULL, now(), now());
-insert into `t_menu` values (120503, 120500, 'delete', NULL, NULL, 'gateway:delete', NULL, '1', 1, NULL, now(), now());
-
--- role menu script
-insert into `t_role_menu` (role_id, menu_id) values (100001, 120500);
-insert into `t_role_menu` (role_id, menu_id) values (100001, 120501);
-insert into `t_role_menu` (role_id, menu_id) values (100001, 120502);
-insert into `t_role_menu` (role_id, menu_id) values (100001, 120503);
-
-insert into `t_role_menu` (role_id, menu_id) values (100002, 120500);
-insert into `t_role_menu` (role_id, menu_id) values (100002, 120501);
-insert into `t_role_menu` (role_id, menu_id) values (100002, 120502);
-insert into `t_role_menu` (role_id, menu_id) values (100002, 120503);
-
--- ----------------------------
 -- Table structure for jdbc registry
 -- ----------------------------
 DROP TABLE IF EXISTS `t_jdbc_registry_data`;
-CREATE TABLE `t_jdbc_registry_data`
-(
+CREATE TABLE `t_jdbc_registry_data` (
     `id`               bigint(11)   NOT NULL AUTO_INCREMENT COMMENT 'primary key',
     `data_key`         varchar(256) NOT NULL COMMENT 'key, like zookeeper node path',
     `data_value`       text         NOT NULL COMMENT 'data, like zookeeper node value',
@@ -127,8 +104,7 @@ CREATE TABLE `t_jdbc_registry_data`
 
 
 DROP TABLE IF EXISTS `t_jdbc_registry_lock`;
-CREATE TABLE `t_jdbc_registry_lock`
-(
+CREATE TABLE `t_jdbc_registry_lock` (
     `id`          bigint(11)   NOT NULL AUTO_INCREMENT COMMENT 'primary key',
     `lock_key`    varchar(256) NOT NULL COMMENT 'lock path',
     `lock_owner`  varchar(256) NOT NULL COMMENT 'the lock owner, ip_processId',
@@ -140,8 +116,7 @@ CREATE TABLE `t_jdbc_registry_lock`
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `t_jdbc_registry_client_heartbeat`;
-CREATE TABLE `t_jdbc_registry_client_heartbeat`
-(
+CREATE TABLE `t_jdbc_registry_client_heartbeat` (
     `id`                  bigint(11)   NOT NULL COMMENT 'primary key',
     `client_name`         varchar(256) NOT NULL COMMENT 'client name, ip_processId',
     `last_heartbeat_time` bigint(11)   NOT NULL COMMENT 'last heartbeat timestamp',
@@ -152,8 +127,7 @@ CREATE TABLE `t_jdbc_registry_client_heartbeat`
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `t_jdbc_registry_data_change_event`;
-CREATE TABLE `t_jdbc_registry_data_change_event`
-(
+CREATE TABLE `t_jdbc_registry_data_change_event` (
     `id`                 bigint(11)  NOT NULL AUTO_INCREMENT COMMENT 'primary key',
     `event_type`         varchar(64) NOT NULL COMMENT 'ADD, UPDATE, DELETE',
     `jdbc_registry_data` text        NOT NULL COMMENT 'jdbc registry data',
