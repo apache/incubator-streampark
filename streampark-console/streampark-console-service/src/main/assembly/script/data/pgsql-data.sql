@@ -26,7 +26,7 @@ insert into "public"."t_team" values (100000, 'default', null, now(), now());
 -- Records of t_flink_app
 -- ----------------------------
 INSERT INTO "public"."t_flink_app" (
-    "id", "team_id", "job_type", "execution_mode", "job_name", "user_id", "app_type", "state", "restart_size",
+    "id", "team_id", "job_type", "deploy_mode", "job_name", "user_id", "app_type", "state", "restart_size",
     "description", "resolve_order", "option_state", "tracking", "create_time", "modify_time", "release", "build",
     "k8s_hadoop_integration", "tags"
 ) VALUES (100000, 100000, 2, 4, 'Flink SQL Demo', 100000, 1, 0, 0, 'Flink SQL Demo', 0, 0, 0, now(), now(), 1, true, false, 'streampark,test');
@@ -50,7 +50,7 @@ insert into "public"."t_flink_sql" values (100000, 100000, 'eNqlUUtPhDAQvu+vmFs1
 -- Records of t_spark_app
 -- ----------------------------
 insert into "public"."t_spark_app" (
-     "id", "team_id", "job_type", "app_type", "app_name", "execution_mode", "resource_from", "main_class",
+     "id", "team_id", "job_type", "app_type", "app_name", "deploy_mode", "resource_from", "main_class",
      "yarn_queue", "k8s_image_pull_policy", "k8s_namespace", "state", "option_state", "user_id",
      "description", "tracking", "release", "build", "create_time", "modify_time", "tags")
 values (100000, 100000, 2, 4, 'Spark SQL Demo', 2, 2, 'org.apache.streampark.spark.cli.SqlClient', 'default', 0, 'default', 0, 0, 100000, 'Spark SQL Demo', 0, 1, 1, now(), now(), 'streampark,test');

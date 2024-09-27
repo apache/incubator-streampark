@@ -86,7 +86,7 @@
                 </foreach>
             </if>
             <if test="app.deployMode != null and app.deployMode != ''">
-                and t.execution_mode = #{app.deployMode}
+                and t.deploy_mode = #{app.deployMode}
             </if>
             <if test="app.jobName != null and app.jobName != ''">
                 <if test="_databaseId == 'mysql'">
@@ -239,7 +239,7 @@
             select cluster_id, max(create_time) as ct
             from t_flink_app
             where cluster_id is not null
-            and execution_mode = #{deployMode}
+            and deploy_mode = #{deployMode}
             group by cluster_id
             order by ct desc
         ) as ci
@@ -252,7 +252,7 @@
             select flink_image, max(create_time) as ct
             from t_flink_app
             where flink_image is not null
-            and execution_mode = 6
+            and deploy_mode = 6
             group by flink_image
             order by ct desc
         ) as fi
@@ -266,7 +266,7 @@
             from t_flink_app
             where k8s_pod_template is not null
             and k8s_pod_template !=''
-            and execution_mode = 6
+            and deploy_mode = 6
             group by k8s_pod_template
             order by ct desc
         ) as pt
@@ -280,7 +280,7 @@
             from t_flink_app
             where k8s_jm_pod_template is not null
             and k8s_jm_pod_template != ''
-            and execution_mode = 6
+            and deploy_mode = 6
             group by k8s_jm_pod_template
             order by ct desc
         ) as pt
@@ -294,7 +294,7 @@
             from t_flink_app
             where k8s_tm_pod_template is not null
             and k8s_tm_pod_template != ''
-            and execution_mode = 6
+            and deploy_mode = 6
             group by k8s_tm_pod_template
             order by ct desc
         ) as pt

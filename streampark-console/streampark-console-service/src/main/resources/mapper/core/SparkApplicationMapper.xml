@@ -48,7 +48,7 @@
                 and t.job_type = #{app.jobType}
             </if>
             <if test="app.deployMode != null and app.deployMode != ''">
-                and t.execution_mode = #{app.deployMode}
+                and t.deploy_mode = #{app.deployMode}
             </if>
             <if test="app.appName != null and app.appName != ''">
                 and t.app_name like concat('%', '${app.appName}', '%')

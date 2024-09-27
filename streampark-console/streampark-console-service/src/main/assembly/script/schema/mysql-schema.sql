@@ -45,7 +45,7 @@ create table `t_flink_app` (
   `id` bigint not null auto_increment,
   `team_id` bigint not null,
   `job_type` tinyint default null,
-  `execution_mode` tinyint default null,
+  `deploy_mode` tinyint default null,
   `resource_from` tinyint default null,
   `project_id` bigint default null,
   `job_name` varchar(255) collate utf8mb4_general_ci default null,
@@ -440,7 +440,7 @@ create table `t_flink_cluster` (
   `cluster_name` varchar(128) not null comment 'cluster name',
   `options` text comment 'json form of parameter collection ',
   `yarn_queue` varchar(128) default null comment 'the yarn queue where the task is located',
-  `execution_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',
+  `deploy_mode` tinyint not null default 1 comment 'k8s execution session mode(1:remote,3:yarn-session,5:kubernetes-session)',
   `version_id` bigint not null comment 'flink version id',
   `k8s_namespace` varchar(63) default 'default' comment 'k8s namespace',
   `service_account` varchar(64) default null comment 'k8s service account',
@@ -459,7 +459,7 @@ create table `t_flink_cluster` (
   `end_time` datetime default null comment 'end time',
   `alert_id` bigint default null comment 'alert id',
   primary key (`id`,`cluster_name`),
-  unique key `id` (`cluster_id`,`address`,`execution_mode`)
+  unique key `id` (`cluster_id`,`address`,`deploy_mode`)
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 
@@ -584,7 +584,7 @@ create table `t_spark_app` (
   `app_type` tinyint default null comment '(1)Apache Spark(2)StreamPark Spark',
   `version_id` bigint default null comment 'spark version',
   `app_name` varchar(255) collate utf8mb4_general_ci default null comment 'spark.app.name',
-  `execution_mode` tinyint default null comment 'spark.submit.deployMode(1)cluster(2)client',
+  `deploy_mode` tinyint default null comment 'spark.submit.deployMode(1)cluster(2)client',
   `resource_from` tinyint default null,
   `project_id` bigint default null,
   `module` varchar(255) collate utf8mb4_general_ci default null,
