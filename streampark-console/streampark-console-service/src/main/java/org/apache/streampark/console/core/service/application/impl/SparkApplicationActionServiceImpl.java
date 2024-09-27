@@ -58,8 +58,8 @@ import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.spark.client.SparkClient;
-import org.apache.streampark.spark.client.bean.StopRequest;
-import org.apache.streampark.spark.client.bean.StopResponse;
+import org.apache.streampark.spark.client.bean.CancelRequest;
+import org.apache.streampark.spark.client.bean.CancelResponse;
 import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
 
@@ -130,9 +130,9 @@ public class SparkApplicationActionServiceImpl
     @Autowired
     private ResourceService resourceService;
 
-    private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<SubmitResponse>> startJobFutureMap = new ConcurrentHashMap<>();
 
-    private final Map<Long, CompletableFuture<StopResponse>> stopFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<CancelResponse>> cancelJobFutureMap = new ConcurrentHashMap<>();
 
     @Override
     public void revoke(Long appId) throws ApplicationException {
@@ -168,8 +168,8 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void forcedStop(Long id) {
-        CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
-        CompletableFuture<StopResponse> stopFuture = stopFutureMap.remove(id);
+        CompletableFuture<SubmitResponse> startFuture = startJobFutureMap.remove(id);
+        CompletableFuture<CancelResponse> stopFuture = cancelJobFutureMap.remove(id);
         SparkApplication application = this.baseMapper.selectApp(id);
         if (startFuture != null) {
             startFuture.cancel(true);
@@ -206,21 +206,21 @@ public class SparkApplicationActionServiceImpl
 
         Map<String, String> stopProper = new HashMap<>();
 
-        StopRequest stopRequest =
-            new StopRequest(
+        CancelRequest stopRequest =
+            new CancelRequest(
                 application.getId(),
                 sparkEnv.getSparkVersion(),
                 SparkDeployMode.of(application.getDeployMode()),
                 stopProper,
                 application.getAppId());
 
-        CompletableFuture<StopResponse> stopFuture =
-            CompletableFuture.supplyAsync(() -> SparkClient.stop(stopRequest), executorService);
+        CompletableFuture<CancelResponse> stopFuture =
+            CompletableFuture.supplyAsync(() -> SparkClient.cancel(stopRequest), executorService);
 
-        stopFutureMap.put(application.getId(), stopFuture);
+        cancelJobFutureMap.put(application.getId(), stopFuture);
         stopFuture.whenComplete(
             (cancelResponse, throwable) -> {
-                stopFutureMap.remove(application.getId());
+                cancelJobFutureMap.remove(application.getId());
                 if (throwable != null) {
                     String exception = ExceptionUtils.stringifyException(throwable);
                     applicationLog.setException(exception);
@@ -331,11 +331,11 @@ public class SparkApplicationActionServiceImpl
         CompletableFuture<SubmitResponse> future = CompletableFuture
             .supplyAsync(() -> SparkClient.submit(submitRequest), executorService);
 
-        startFutureMap.put(application.getId(), future);
+        startJobFutureMap.put(application.getId(), future);
         future.whenComplete(
             (response, throwable) -> {
                 // 1) remove Future
-                startFutureMap.remove(application.getId());
+                startJobFutureMap.remove(application.getId());
 
                 // 2) exception
                 if (throwable != null) {

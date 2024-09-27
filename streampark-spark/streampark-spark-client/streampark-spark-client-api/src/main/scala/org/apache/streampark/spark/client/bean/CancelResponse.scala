@@ -17,15 +17,4 @@
 
 package org.apache.streampark.spark.client.bean
 
-import org.apache.streampark.common.conf.SparkVersion
-import org.apache.streampark.common.enums.SparkDeployMode
-import org.apache.streampark.common.util.Implicits.JavaMap
-
-import javax.annotation.Nullable
-
-case class StopRequest(
-    id: Long,
-    sparkVersion: SparkVersion,
-    deployMode: SparkDeployMode,
-    @Nullable properties: JavaMap[String, String],
-    appId: String)
+case class CancelResponse(savePoint: String)

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.spark.client.impl
 
-import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
+import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.SparkDeployMode
 import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
@@ -37,22 +37,22 @@ object YarnClient extends SparkClientTrait {
 
   private lazy val sparkHandles = new ConcurrentHashMap[String, SparkAppHandle]()
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
-    val sparkAppHandle = sparkHandles.remove(stopRequest.appId)
+  override def doCancel(cancelRequest: CancelRequest): CancelResponse = {
+    val sparkAppHandle = sparkHandles.remove(cancelRequest.appId)
     if (sparkAppHandle != null) {
       Try(sparkAppHandle.kill()) match {
         case Success(_) =>
-          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.appId} is stopped successfully.")
-          StopResponse(null)
+          logger.info(s"[StreamPark][Spark][YarnClient] spark job: ${cancelRequest.appId} is stopped successfully.")
+          CancelResponse(null)
         case Failure(e) =>
           logger.error("[StreamPark][Spark][YarnClient] sparkAppHandle kill failed. Try kill by yarn", e)
-          yarnKill(stopRequest.appId)
-          StopResponse(null)
+          yarnKill(cancelRequest.appId)
+          CancelResponse(null)
       }
     } else {
-      logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${stopRequest.appId} is not existed. Try kill by yarn")
-      yarnKill(stopRequest.appId)
-      StopResponse(null)
+      logger.warn(s"[StreamPark][Spark][YarnClient] spark job: ${cancelRequest.appId} is not existed. Try kill by yarn")
+      yarnKill(cancelRequest.appId)
+      CancelResponse(null)
     }
   }
 
