@@ -22,9 +22,9 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.core.entity.Effective;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
+import org.apache.streampark.console.core.entity.FlinkEffective;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * FlinkSavepointServiceImpl} of {@link
  * SavepointService}.
  */
-class SavepointServiceTest extends SpringUnitTestBase {
+class FlinkSavepointServiceTest extends SpringUnitTestBase {
 
     @Autowired
     private SavepointService savepointService;
@@ -57,7 +57,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
     private FlinkApplicationConfigService configService;
 
     @Autowired
-    private EffectiveService effectiveService;
+    private FlinkEffectiveService effectiveService;
 
     @Autowired
     private FlinkEnvService flinkEnvService;
@@ -138,7 +138,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
                     + String.format("%s=%s", CHECKPOINTING_INTERVAL.key(),
                         "3min")));
         configService.updateById(appCfg);
-        Effective effective = new Effective();
+        FlinkEffective effective = new FlinkEffective();
         effective.setTargetId(appCfg.getId());
         effective.setAppId(appId);
         effective.setTargetType(EffectiveTypeEnum.CONFIG.getType());

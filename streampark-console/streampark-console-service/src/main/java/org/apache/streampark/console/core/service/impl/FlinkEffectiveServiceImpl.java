@@ -17,10 +17,10 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.console.core.entity.Effective;
+import org.apache.streampark.console.core.entity.FlinkEffective;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
-import org.apache.streampark.console.core.mapper.EffectiveMapper;
-import org.apache.streampark.console.core.service.EffectiveService;
+import org.apache.streampark.console.core.mapper.FlinkEffectiveMapper;
+import org.apache.streampark.console.core.service.FlinkEffectiveService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -35,34 +35,34 @@ import java.util.Date;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective>
+public class FlinkEffectiveServiceImpl extends ServiceImpl<FlinkEffectiveMapper, FlinkEffective>
     implements
-        EffectiveService {
+        FlinkEffectiveService {
 
     @Override
     public void remove(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-            .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+        LambdaQueryWrapper<FlinkEffective> queryWrapper = new LambdaQueryWrapper<FlinkEffective>()
+            .eq(FlinkEffective::getAppId, appId)
+            .eq(FlinkEffective::getTargetType, effectiveTypeEnum.getType());
         baseMapper.delete(queryWrapper);
     }
 
     @Override
-    public Effective get(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-            .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, effectiveTypeEnum.getType());
+    public FlinkEffective get(Long appId, EffectiveTypeEnum effectiveTypeEnum) {
+        LambdaQueryWrapper<FlinkEffective> queryWrapper = new LambdaQueryWrapper<FlinkEffective>()
+            .eq(FlinkEffective::getAppId, appId)
+            .eq(FlinkEffective::getTargetType, effectiveTypeEnum.getType());
         return this.getOne(queryWrapper);
     }
 
     @Override
     public void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>()
-            .eq(Effective::getAppId, appId)
-            .eq(Effective::getTargetType, type.getType());
+        LambdaQueryWrapper<FlinkEffective> queryWrapper = new LambdaQueryWrapper<FlinkEffective>()
+            .eq(FlinkEffective::getAppId, appId)
+            .eq(FlinkEffective::getTargetType, type.getType());
         long count = count(queryWrapper);
         if (count == 0) {
-            Effective effective = new Effective();
+            FlinkEffective effective = new FlinkEffective();
             effective.setAppId(appId);
             effective.setTargetType(type.getType());
             effective.setTargetId(id);
@@ -70,16 +70,17 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             save(effective);
         } else {
             update(
-                new LambdaUpdateWrapper<Effective>()
-                    .eq(Effective::getAppId, appId)
-                    .eq(Effective::getTargetType, type.getType())
-                    .set(Effective::getTargetId, id));
+                new LambdaUpdateWrapper<FlinkEffective>()
+                    .eq(FlinkEffective::getAppId, appId)
+                    .eq(FlinkEffective::getTargetType, type.getType())
+                    .set(FlinkEffective::getTargetId, id));
         }
     }
 
     @Override
     public void removeByAppId(Long appId) {
-        LambdaQueryWrapper<Effective> queryWrapper = new LambdaQueryWrapper<Effective>().eq(Effective::getAppId, appId);
+        LambdaQueryWrapper<FlinkEffective> queryWrapper =
+            new LambdaQueryWrapper<FlinkEffective>().eq(FlinkEffective::getAppId, appId);
         this.remove(queryWrapper);
     }
 }

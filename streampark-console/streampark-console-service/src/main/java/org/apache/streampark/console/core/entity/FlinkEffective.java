@@ -15,11 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.console.core.mapper;
+package org.apache.streampark.console.core.entity;
 
-import org.apache.streampark.console.core.entity.Effective;
+import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-public interface EffectiveMapper extends BaseMapper<Effective> {
+import java.util.Date;
+
+@Data
+@TableName("t_flink_effective")
+@Slf4j
+public class FlinkEffective {
+
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    private Long appId;
+    /**
+     * 1) config <br>
+     * 2) flink Sql<br>
+     */
+    private Integer targetType;
+
+    private Long targetId;
+    private Date createTime;
+
+    private transient EffectiveTypeEnum effectiveType;
 }

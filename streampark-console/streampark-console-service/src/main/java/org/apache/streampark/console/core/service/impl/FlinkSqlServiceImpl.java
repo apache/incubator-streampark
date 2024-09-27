@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.FlinkSqlMapper;
-import org.apache.streampark.console.core.service.EffectiveService;
+import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
@@ -58,7 +58,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
         FlinkSqlService {
 
     @Autowired
-    private EffectiveService effectiveService;
+    private FlinkEffectiveService effectiveService;
 
     @Autowired
     private FlinkApplicationBackUpService backUpService;

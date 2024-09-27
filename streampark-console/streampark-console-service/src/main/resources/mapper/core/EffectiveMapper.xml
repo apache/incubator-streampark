@@ -16,6 +16,6 @@
   ~ limitations under the License.
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.apache.streampark.console.core.mapper.EffectiveMapper">
+<mapper namespace="org.apache.streampark.console.core.mapper.FlinkEffectiveMapper">
 
 </mapper>

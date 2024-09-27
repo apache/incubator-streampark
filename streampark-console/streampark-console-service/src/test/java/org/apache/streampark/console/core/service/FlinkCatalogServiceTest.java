@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** CatalogService Tests */
-public class CatalogServiceTest extends SpringUnitTestBase {
+public class FlinkCatalogServiceTest extends SpringUnitTestBase {
 
     @Autowired
     private FlinkCatalogService catalogService;

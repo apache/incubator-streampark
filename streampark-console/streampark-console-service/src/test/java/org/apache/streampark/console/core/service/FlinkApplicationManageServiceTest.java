@@ -37,7 +37,7 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** org.apache.streampark.console.core.service.ApplicationServiceUnitTest. */
-class ApplicationManageServiceTest extends SpringUnitTestBase {
+class FlinkApplicationManageServiceTest extends SpringUnitTestBase {
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;

@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.mapper.FlinkApplicationConfigMapper;
-import org.apache.streampark.console.core.service.EffectiveService;
+import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -64,7 +64,7 @@ public class FlinkApplicationConfigServiceImpl
     private ResourceLoader resourceLoader;
 
     @Autowired
-    private EffectiveService effectiveService;
+    private FlinkEffectiveService effectiveService;
 
     @Override
     public synchronized void create(FlinkApplication appParam, Boolean latest) {

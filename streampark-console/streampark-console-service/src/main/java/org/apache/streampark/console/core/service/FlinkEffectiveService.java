@@ -17,16 +17,16 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.core.entity.Effective;
+import org.apache.streampark.console.core.entity.FlinkEffective;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-public interface EffectiveService extends IService<Effective> {
+public interface FlinkEffectiveService extends IService<FlinkEffective> {
 
     void remove(Long appId, EffectiveTypeEnum config);
 
-    Effective get(Long appId, EffectiveTypeEnum config);
+    FlinkEffective get(Long appId, EffectiveTypeEnum config);
 
     void saveOrUpdate(Long appId, EffectiveTypeEnum type, Long id);
 
