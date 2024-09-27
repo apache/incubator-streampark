@@ -29,6 +29,7 @@ import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.ObjectUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -36,22 +37,24 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
-import org.apache.streampark.console.core.service.EffectiveService;
-import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
-import org.apache.streampark.console.core.service.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
+import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.service.application.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
@@ -105,6 +108,9 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     private ProjectService projectService;
 
     @Autowired
+    private ApplicationService applicationService;
+
+    @Autowired
     private FlinkApplicationBackUpService backUpService;
 
     @Autowired
@@ -120,7 +126,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     private SavepointService savepointService;
 
     @Autowired
-    private EffectiveService effectiveService;
+    private FlinkEffectiveService effectiveService;
 
     @Autowired
     private SettingService settingService;
@@ -348,7 +354,12 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
         }
 
-        if (save(appParam)) {
+        // 1) save application
+        Application application = applicationService.create(EngineTypeEnum.FLINK);
+        appParam.setId(application.getId());
+
+        boolean saveSuccess = save(appParam);
+        if (saveSuccess) {
             if (appParam.isFlinkSqlJobOrPyFlinkJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
                 flinkSqlService.create(flinkSql);
@@ -428,6 +439,9 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         newApp.setTags(persist.getTags());
         newApp.setTeamId(persist.getTeamId());
         newApp.setDependency(persist.getDependency());
+
+        Application application = applicationService.create(EngineTypeEnum.FLINK);
+        newApp.setId(application.getId());
 
         boolean saved = save(newApp);
         if (saved) {

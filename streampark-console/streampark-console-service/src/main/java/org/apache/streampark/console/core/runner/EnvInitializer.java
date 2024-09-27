@@ -147,7 +147,6 @@ public class EnvInitializer implements ApplicationRunner {
         Arrays.asList(
             workspace.APP_UPLOADS(),
             workspace.APP_WORKSPACE(),
-            workspace.SPARK_APP_WORKSPACE(),
             workspace.APP_BACKUPS(),
             workspace.APP_SAVEPOINTS(),
             workspace.APP_PYTHON(),

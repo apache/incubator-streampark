@@ -28,26 +28,28 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
+import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
 import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.service.ResourceService;
-import org.apache.streampark.console.core.service.SettingService;
-import org.apache.streampark.console.core.service.SparkApplicationBackUpService;
-import org.apache.streampark.console.core.service.SparkApplicationConfigService;
-import org.apache.streampark.console.core.service.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
+import org.apache.streampark.console.core.service.application.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.ApplicationService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
+import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
@@ -96,6 +98,9 @@ public class SparkApplicationManageServiceImpl
     private ProjectService projectService;
 
     @Autowired
+    private ApplicationService applicationService;
+
+    @Autowired
     private SparkApplicationBackUpService backUpService;
 
     @Autowired
@@ -109,9 +114,6 @@ public class SparkApplicationManageServiceImpl
 
     @Autowired
     private SparkEffectiveService effectiveService;
-
-    @Autowired
-    private SettingService settingService;
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
@@ -194,9 +196,9 @@ public class SparkApplicationManageServiceImpl
         try {
             application
                 .getFsOperator()
-                .delete(application.getWorkspace().SPARK_APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).SPARK_APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
             if (HdfsOperator.exists(path)) {
                 HdfsOperator.delete(path);
             }
@@ -286,7 +288,13 @@ public class SparkApplicationManageServiceImpl
             appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
         }
 
-        if (save(appParam)) {
+        // 1) save application
+        Application application = applicationService.create(EngineTypeEnum.SPARK);
+        appParam.setId(application.getId());
+
+        boolean saveSuccess = save(appParam);
+
+        if (saveSuccess) {
             if (appParam.isSparkSqlJob()) {
                 SparkSql sparkSql = new SparkSql(appParam);
                 sparkSqlService.create(sparkSql);
@@ -351,6 +359,9 @@ public class SparkApplicationManageServiceImpl
         newApp.setCreateTime(new Date());
         newApp.setModifyTime(newApp.getCreateTime());
         newApp.setTags(oldApp.getTags());
+
+        Application application = applicationService.create(EngineTypeEnum.SPARK);
+        newApp.setId(application.getId());
 
         boolean saved = save(newApp);
         if (saved) {

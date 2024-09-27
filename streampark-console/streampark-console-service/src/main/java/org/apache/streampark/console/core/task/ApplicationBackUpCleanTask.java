@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
-import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

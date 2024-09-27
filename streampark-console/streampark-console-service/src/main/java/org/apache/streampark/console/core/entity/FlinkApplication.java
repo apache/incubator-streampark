@@ -66,7 +66,7 @@ import java.util.Optional;
 @Slf4j
 public class FlinkApplication implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.INPUT)
     private Long id;
 
     private Long teamId;

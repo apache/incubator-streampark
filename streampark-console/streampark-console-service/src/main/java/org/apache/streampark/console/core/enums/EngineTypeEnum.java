@@ -27,10 +27,10 @@ import java.util.Arrays;
 public enum EngineTypeEnum {
 
     /** Apache Flink: activated by default */
-    FLINK(0),
+    FLINK(1),
 
     /** Apache Spark */
-    SPARK(1);
+    SPARK(2);
 
     @EnumValue
     private final int code;

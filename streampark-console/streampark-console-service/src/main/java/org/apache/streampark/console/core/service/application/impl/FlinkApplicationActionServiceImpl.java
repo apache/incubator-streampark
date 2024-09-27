@@ -54,11 +54,7 @@ import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
-import org.apache.streampark.console.core.service.AppBuildPipeService;
-import org.apache.streampark.console.core.service.ApplicationLogService;
 import org.apache.streampark.console.core.service.DistributedTaskService;
-import org.apache.streampark.console.core.service.FlinkApplicationBackUpService;
-import org.apache.streampark.console.core.service.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -66,7 +62,11 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.application.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -272,9 +272,9 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         ApplicationLog applicationLog = new ApplicationLog();
         applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
-        applicationLog.setJobManagerUrl(application.getJobManagerUrl());
+        applicationLog.setTrackingUrl(application.getJobManagerUrl());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setYarnAppId(application.getClusterId());
+        applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
 
         if (appParam.getRestoreOrTriggerSavepoint()) {
@@ -528,44 +528,44 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                                    FlinkApplication appParam,
                                    SubmitResponse response,
                                    ApplicationLog applicationLog,
-                                   FlinkApplication application) {
+                                   FlinkApplication flinkApplication) {
         applicationLog.setSuccess(true);
         if (response.flinkConfig() != null) {
             String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
             if (jmMemory != null) {
-                application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
+                flinkApplication.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
             }
             String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
             if (tmMemory != null) {
-                application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
+                flinkApplication.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
             }
         }
         if (StringUtils.isNoneEmpty(response.jobId())) {
-            application.setJobId(response.jobId());
+            flinkApplication.setJobId(response.jobId());
         }
 
-        if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
-            application.setClusterId(response.clusterId());
-            applicationLog.setYarnAppId(response.clusterId());
+        if (FlinkDeployMode.isYarnMode(flinkApplication.getDeployMode())) {
+            flinkApplication.setClusterId(response.clusterId());
+            applicationLog.setClusterId(response.clusterId());
         }
 
         if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
-            application.setJobManagerUrl(response.jobManagerUrl());
-            applicationLog.setJobManagerUrl(response.jobManagerUrl());
+            flinkApplication.setJobManagerUrl(response.jobManagerUrl());
+            applicationLog.setTrackingUrl(response.jobManagerUrl());
         }
-        applicationLog.setYarnAppId(response.clusterId());
-        application.setStartTime(new Date());
-        application.setEndTime(null);
+        applicationLog.setClusterId(response.clusterId());
+        flinkApplication.setStartTime(new Date());
+        flinkApplication.setEndTime(null);
 
         // if start completed, will be added task to tracking queue
-        if (application.isKubernetesModeJob()) {
-            processForK8sApp(application, applicationLog);
+        if (flinkApplication.isKubernetesModeJob()) {
+            processForK8sApp(flinkApplication, applicationLog);
         } else {
             FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
-            FlinkAppHttpWatcher.doWatching(application);
+            FlinkAppHttpWatcher.doWatching(flinkApplication);
         }
         // update app
-        updateById(application);
+        updateById(flinkApplication);
         // save log
         applicationLogService.save(applicationLog);
     }

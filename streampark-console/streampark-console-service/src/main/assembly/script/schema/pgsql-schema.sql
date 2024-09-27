@@ -39,7 +39,7 @@ drop table if exists "public"."t_app_build_pipe";
 drop table if exists "public"."t_flink_app_backup";
 drop table if exists "public"."t_alert_config";
 drop table if exists "public"."t_access_token";
-drop table if exists "public"."t_flink_log";
+drop table if exists "public"."t_app_log";
 drop table if exists "public"."t_team";
 drop table if exists "public"."t_variable";
 drop table if exists "public"."t_external_link";
@@ -66,7 +66,7 @@ drop sequence if exists "public"."streampark_t_distributed_task_id_seq";
 drop sequence if exists "public"."streampark_t_flink_app_backup_id_seq";
 drop sequence if exists "public"."streampark_t_alert_config_id_seq";
 drop sequence if exists "public"."streampark_t_access_token_id_seq";
-drop sequence if exists "public"."streampark_t_flink_log_id_seq";
+drop sequence if exists "public"."streampark_t_app_log_id_seq";
 drop sequence if exists "public"."streampark_t_team_id_seq";
 drop sequence if exists "public"."streampark_t_variable_id_seq";
 drop sequence if exists "public"."streampark_t_external_link_id_seq";
@@ -192,7 +192,7 @@ create sequence "public"."streampark_t_flink_app_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
 create table "public"."t_flink_app" (
-  "id" int8 not null default nextval('streampark_t_flink_app_id_seq'::regclass),
+  "id" int8 not null,
   "team_id" int8,
   "job_type" int2,
   "deploy_mode" int2,
@@ -403,16 +403,16 @@ create index "un_env_name" on "public"."t_flink_env" using btree (
 
 
 -- ----------------------------
--- table structure for t_flink_log
+-- table structure for t_app_log
 -- ----------------------------
-create sequence "public"."streampark_t_flink_log_id_seq"
+create sequence "public"."streampark_t_app_log_id_seq"
     increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
 
-create table "public"."t_flink_log" (
-  "id" int8 not null default nextval('streampark_t_flink_log_id_seq'::regclass),
+create table "public"."t_app_log" (
+  "id" int8 not null default nextval('streampark_t_app_log_id_seq'::regclass),
   "app_id" int8,
-  "yarn_app_id" varchar(64) collate "pg_catalog"."default",
-  "job_manager_url" varchar(255) collate "pg_catalog"."default",
+  "cluster_id" varchar(64) collate "pg_catalog"."default",
+  "tracking_url" varchar(255) collate "pg_catalog"."default",
   "success" boolean,
   "exception" text collate "pg_catalog"."default",
   "option_time" timestamp(6),
@@ -420,7 +420,7 @@ create table "public"."t_flink_log" (
   "user_id" int8
 )
 ;
-alter table "public"."t_flink_log" add constraint "t_flink_log_pkey" primary key ("id");
+alter table "public"."t_app_log" add constraint "t_app_log_pkey" primary key ("id");
 
 
 -- ----------------------------

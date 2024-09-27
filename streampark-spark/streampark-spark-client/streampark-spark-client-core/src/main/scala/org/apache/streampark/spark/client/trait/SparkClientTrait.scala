@@ -60,24 +60,24 @@ trait SparkClientTrait extends Logger {
   def setConfig(submitRequest: SubmitRequest): Unit
 
   @throws[Exception]
-  def stop(stopRequest: StopRequest): StopResponse = {
+  def cancel(stopRequest: CancelRequest): CancelResponse = {
     logInfo(
       s"""
-         |----------------------------------------- spark job stop ----------------------------------
+         |----------------------------------------- spark job cancel ----------------------------------
          |     userSparkHome     : ${stopRequest.sparkVersion.sparkHome}
          |     sparkVersion      : ${stopRequest.sparkVersion.version}
          |     appId             : ${stopRequest.appId}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
-    doStop(stopRequest)
+    doCancel(stopRequest)
   }
 
   @throws[Exception]
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
   @throws[Exception]
-  def doStop(stopRequest: StopRequest): StopResponse
+  def doCancel(cancelRequest: CancelRequest): CancelResponse
 
   private def prepareConfig(submitRequest: SubmitRequest): Unit = {
     // 1) filter illegal configuration key
