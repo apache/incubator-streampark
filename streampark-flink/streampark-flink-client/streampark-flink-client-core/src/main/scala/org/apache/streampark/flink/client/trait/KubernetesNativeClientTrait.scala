@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.`trait`
 
-import org.apache.streampark.common.enums.{FlinkExecutionMode, FlinkK8sRestExposedType}
+import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkK8sRestExposedType}
 import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.kubernetes.PodTemplateTool
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse
@@ -45,7 +45,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
         KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE,
         covertToServiceExposedType(submitRequest.flinkRestExposedType))
 
-    if (submitRequest.buildResult != null && submitRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+    if (submitRequest.buildResult != null && submitRequest.deployMode == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
       val buildResult =
         submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
       buildResult.podTemplatePaths.foreach(p => {
@@ -87,7 +87,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
       flinkConfig,
       (jobId, client) => {
         val resp = super.cancelJob(cancelRequest, jobId, client)
-        if (cancelRequest.executionMode == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+        if (cancelRequest.deployMode == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
           client.shutDownCluster()
         }
         CancelResponse(resp)
@@ -167,7 +167,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
   }
 
   protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =
-    s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(
+    s"deployMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(
         KubernetesConfigOptions.CLUSTER_ID)}, " +
       s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
 

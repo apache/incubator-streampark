@@ -19,7 +19,7 @@
   import { useTimeoutFn } from '@vueuse/core';
   import { SvgIcon } from '/@/components/Icon';
   import { Col, Tag } from 'ant-design-vue';
-  import { ClusterStateEnum, ExecModeEnum } from '/@/enums/flinkEnum';
+  import { ClusterStateEnum, DeployMode } from '/@/enums/flinkEnum';
   import { PlusOutlined } from '@ant-design/icons-vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import {
@@ -37,16 +37,16 @@
   defineOptions({
     name: 'FlinkClusterSetting',
   });
-  const executionModeMap = {
-    [ExecModeEnum.STANDALONE]: {
+  const deployModeMap = {
+    [DeployMode.STANDALONE]: {
       color: '#2db7f5',
       text: 'standalone',
     },
-    [ExecModeEnum.YARN_SESSION]: {
+    [DeployMode.YARN_SESSION]: {
       color: '#87d068',
       text: 'yarn session',
     },
-    [ExecModeEnum.KUBERNETES_SESSION]: {
+    [DeployMode.KUBERNETES_SESSION]: {
       color: '#108ee9',
       text: 'k8s session',
     },
@@ -60,7 +60,7 @@
     api: fetchFlinkClusterPage,
     columns: [
       { dataIndex: 'clusterName', title: t('setting.flinkCluster.form.clusterName') },
-      { dataIndex: 'executionMode', title: t('setting.flinkCluster.form.executionMode') },
+      { dataIndex: 'deployMode', title: t('setting.flinkCluster.form.deployMode') },
       { dataIndex: 'address', title: t('setting.flinkCluster.form.address') },
       { dataIndex: 'clusterState', title: t('setting.flinkCluster.form.runState') },
       { dataIndex: 'description', title: t('setting.flinkHome.description') },
@@ -182,12 +182,12 @@
           <svg-icon class="avatar" name="flink" :size="20" />
           {{ record.clusterName }}
         </template>
-        <template v-if="column.dataIndex === 'executionMode'">
+        <template v-if="column.dataIndex === 'deployMode'">
           <Tag
-            v-if="executionModeMap[record.executionMode]"
-            :color="executionModeMap[record.executionMode]?.color"
+            v-if="deployModeMap[record.deployMode]"
+            :color="deployModeMap[record.deployMode]?.color"
           >
-            {{ executionModeMap[record.executionMode]?.text }}
+            {{ deployModeMap[record.deployMode]?.text }}
           </Tag>
         </template>
         <template v-if="column.dataIndex === 'address'">
@@ -195,8 +195,8 @@
             :href="`/proxy/cluster/${record.id}/`"
             target="_blank"
             v-if="
-              record.executionMode === ExecModeEnum.STANDALONE ||
-              record.executionMode === ExecModeEnum.YARN_SESSION
+              record.deployMode === DeployMode.STANDALONE ||
+              record.deployMode === DeployMode.YARN_SESSION
             "
           >
             {{ record.address }}
@@ -222,7 +222,7 @@
                 icon: 'ant-design:pause-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: handleIsStart(record),
-                disabled: record.executionMode === ExecModeEnum.STANDALONE,
+                disabled: record.deployMode === DeployMode.STANDALONE,
                 tooltip: t('setting.flinkCluster.stop'),
                 onClick: handleShutdownCluster.bind(null, record),
               },
@@ -231,7 +231,7 @@
                 icon: 'ant-design:play-circle-outlined',
                 auth: 'cluster:create',
                 ifShow: !handleIsStart(record),
-                disabled: record.executionMode === ExecModeEnum.STANDALONE,
+                disabled: record.deployMode === DeployMode.STANDALONE,
                 tooltip: t('setting.flinkCluster.start'),
                 onClick: handleDeployCluster.bind(null, record),
               },

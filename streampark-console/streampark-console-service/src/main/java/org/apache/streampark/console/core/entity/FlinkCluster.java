@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.entity;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.ResolveOrder;
 import org.apache.streampark.common.util.HttpClientUtils;
@@ -69,7 +69,7 @@ public class FlinkCluster implements Serializable {
 
     private String clusterName;
 
-    private Integer executionMode;
+    private Integer deployMode;
 
     /** flink version */
     private Long versionId;
@@ -123,8 +123,8 @@ public class FlinkCluster implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkExecutionMode getFlinkExecutionModeEnum() {
-        return FlinkExecutionMode.of(this.executionMode);
+    public FlinkDeployMode getFlinkDeployModeEnum() {
+        return FlinkDeployMode.of(this.deployMode);
     }
 
     @JsonIgnore
@@ -139,7 +139,7 @@ public class FlinkCluster implements Serializable {
             return new HashMap<>();
         }
         Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
-        if (FlinkExecutionMode.YARN_SESSION == getFlinkExecutionModeEnum()) {
+        if (FlinkDeployMode.YARN_SESSION == getFlinkDeployModeEnum()) {
             optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
             optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
         }

@@ -18,15 +18,5 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.apache.streampark.console.core.mapper.ApplicationLogMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.ApplicationLog">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="job_id" jdbcType="BIGINT" property="jobId"/>
-        <result column="yarn_app_id" jdbcType="VARCHAR" property="yarnAppId"/>
-        <result column="job_manager_url" jdbcType="VARCHAR" property="jobManagerUrl"/>
-        <result column="success" jdbcType="INTEGER" property="success"/>
-        <result column="exception" jdbcType="LONGVARCHAR" property="exception"/>
-        <result column="option_time" jdbcType="DATE" property="optionTime"/>
-        <result column="option_name" jdbcType="INTEGER" property="optionName"/>
-    </resultMap>
 
 </mapper>

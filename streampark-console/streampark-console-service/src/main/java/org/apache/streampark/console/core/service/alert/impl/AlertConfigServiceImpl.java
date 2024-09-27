@@ -22,10 +22,10 @@ import org.apache.streampark.console.base.exception.AlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.AlertConfigParams;
 import org.apache.streampark.console.core.entity.AlertConfig;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.mapper.AlertConfigMapper;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -49,7 +49,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
         AlertConfigService {
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     @Override
     public IPage<AlertConfigParams> page(Long userId, RestRequest request) {
@@ -78,7 +78,7 @@ public class AlertConfigServiceImpl extends ServiceImpl<AlertConfigMapper, Alert
     @Override
     public boolean removeById(Long id) throws AlertException {
         long count = applicationInfoService.count(
-            new LambdaQueryWrapper<Application>().eq(id != null, Application::getAlertId, id));
+            new LambdaQueryWrapper<FlinkApplication>().eq(id != null, FlinkApplication::getAlertId, id));
         if (count > 0) {
             throw new AlertException(
                 String.format(

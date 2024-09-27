@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.bean.FlinkTaskItem;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.DistributedTask;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.service.impl.DistributedTaskServiceImpl;
 
@@ -58,13 +58,13 @@ class DistributedTaskServiceTest {
 
     @Test
     void testGetTaskAndApp() {
-        Application application = new Application();
+        FlinkApplication application = new FlinkApplication();
         application.setId(0L);
         try {
             DistributedTask DistributedTask =
                 distributionTaskService.getDistributedTaskByApp(application, false, DistributedTaskEnum.START);
             FlinkTaskItem flinkTaskItem = distributionTaskService.getFlinkTaskItem(DistributedTask);
-            Application newApplication = distributionTaskService.getAppByFlinkTaskItem(flinkTaskItem);
+            FlinkApplication newApplication = distributionTaskService.getAppByFlinkTaskItem(flinkTaskItem);
             assert (application.equals(newApplication));
         } catch (JacksonException e) {
             log.error("testGetTaskAndApp failed:", e);

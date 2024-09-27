@@ -17,13 +17,13 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.YarnQueue;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.service.application.impl.ApplicationManageServiceImpl;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.application.impl.FlinkApplicationManageServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.AfterEach;
@@ -40,9 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationManageServiceTest extends SpringUnitTestBase {
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
     @Autowired
-    private ApplicationActionService applicationActionService;
+    private FlinkApplicationActionService applicationActionService;
     @Autowired
     private YarnQueueService yarnQueueService;
 
@@ -55,7 +55,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
     @Test
     void testRevoke() {
         Date now = new Date();
-        Application app = new Application();
+        FlinkApplication app = new FlinkApplication();
         app.setId(100001L);
         app.setJobType(1);
         app.setUserId(100000L);
@@ -70,7 +70,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         app.setArgs("--hostname hadoop001 --port 8111");
         app.setOptions("{\"taskmanager.numberOfTaskSlots\":1,\"parallelism.default\":1}");
         app.setResolveOrder(0);
-        app.setExecutionMode(4);
+        app.setDeployMode(4);
         app.setAppType(2);
         app.setTracking(0);
         app.setJar("SocketWindowWordCount.jar");
@@ -92,7 +92,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
     @Test
     @Disabled("We couldn't do integration test with external services or components.")
     void testStart() throws Exception {
-        Application application = new Application();
+        FlinkApplication application = new FlinkApplication();
         application.setId(1304056220683497473L);
         application.setRestart(false);
         application.setRestoreOrTriggerSavepoint(false);
@@ -103,7 +103,8 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
 
     @Test
     void testCheckQueueValidationIfNeeded() {
-        ApplicationManageServiceImpl applicationServiceImpl = (ApplicationManageServiceImpl) applicationManageService;
+        FlinkApplicationManageServiceImpl applicationServiceImpl =
+            (FlinkApplicationManageServiceImpl) applicationManageService;
 
         // ------- Test it for the create operation. -------
         final String queueLabel = "queue1@label1";
@@ -112,8 +113,8 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         // Test application with available queue
         YarnQueue yarnQueue = mockYarnQueue(targetTeamId, queueLabel);
         yarnQueueService.save(yarnQueue);
-        Application application = mockYarnModeJobApp(targetTeamId, "app1", queueLabel,
-            FlinkExecutionMode.YARN_APPLICATION);
+        FlinkApplication application = mockYarnModeJobApp(targetTeamId, "app1", queueLabel,
+            FlinkDeployMode.YARN_APPLICATION);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(application)).isTrue();
 
         // Test application without available queue
@@ -128,8 +129,8 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         final Long teamId2 = 2L;
 
         // Test update for both versions in yarn-app or per-job with same yarn queue
-        Application app1 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_APPLICATION);
-        Application app2 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkExecutionMode.YARN_PER_JOB);
+        FlinkApplication app1 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkDeployMode.YARN_APPLICATION);
+        FlinkApplication app2 = mockYarnModeJobApp(teamId2, appName, queueLabel1, FlinkDeployMode.YARN_PER_JOB);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
         // Test available queue
@@ -141,7 +142,7 @@ class ApplicationManageServiceTest extends SpringUnitTestBase {
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isTrue();
 
         // Test non-existed queue
-        app1.setExecutionMode(FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
+        app1.setDeployMode(FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getMode());
         app2.setYarnQueue(nonExistedQueue);
         assertThat(applicationServiceImpl.validateQueueIfNeeded(app1, app2)).isFalse();
     }

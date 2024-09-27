@@ -18,14 +18,14 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.FlinkVersion
-import org.apache.streampark.common.enums.FlinkExecutionMode
+import org.apache.streampark.common.enums.FlinkDeployMode
 import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
 
 case class ShutDownRequest(
     flinkVersion: FlinkVersion,
-    executionMode: FlinkExecutionMode,
+    deployMode: FlinkDeployMode,
     @Nullable properties: JavaMap[String, Any],
     clusterId: String,
     id: Long,

@@ -22,7 +22,7 @@ import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.Permission;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.SqlCompleteService;
@@ -119,7 +119,7 @@ public class FlinkSqlController {
 
     @PostMapping("history")
     @Permission(app = "#app.id", team = "#app.teamId")
-    public RestResponse history(Application app) {
+    public RestResponse history(FlinkApplication app) {
         List<FlinkSql> sqlList = flinkSqlService.listFlinkSqlHistory(app.getId());
         return RestResponse.success(sqlList);
     }

@@ -21,14 +21,14 @@ import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.VariableMapper;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -66,7 +66,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     private static final String PLACEHOLDER_END = "}";
 
     @Autowired
-    private ApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
     private FlinkSqlService flinkSqlService;
@@ -99,10 +99,10 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
     }
 
     @Override
-    public IPage<Application> getDependAppsPage(Variable variable, RestRequest request) {
-        List<Application> applications = getDependApplicationsByCode(variable);
+    public IPage<FlinkApplication> getDependAppsPage(Variable variable, RestRequest request) {
+        List<FlinkApplication> applications = getDependApplicationsByCode(variable);
 
-        IPage<Application> page = new Page<>();
+        IPage<FlinkApplication> page = new Page<>();
         if (CollectionUtils.isEmpty(applications)) {
             return page;
         }
@@ -129,16 +129,16 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         // endregion
 
         // set Application's field release to NEED_RESTART
-        List<Application> applications = getDependApplicationsByCode(variable);
+        List<FlinkApplication> applications = getDependApplicationsByCode(variable);
         if (CollectionUtils.isNotEmpty(applications)) {
             applicationManageService.update(
-                new UpdateWrapper<Application>()
+                new UpdateWrapper<FlinkApplication>()
                     .lambda()
                     .in(
-                        Application::getId,
-                        applications.stream().map(Application::getId)
+                        FlinkApplication::getId,
+                        applications.stream().map(FlinkApplication::getId)
                             .collect(Collectors.toList()))
-                    .set(Application::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
+                    .set(FlinkApplication::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
         }
     }
 
@@ -208,14 +208,14 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         return CollectionUtils.isNotEmpty(getDependApplicationsByCode(variable));
     }
 
-    private List<Application> getDependApplicationsByCode(Variable variable) {
-        List<Application> dependApplications = new ArrayList<>();
-        List<Application> applications = applicationManageService.listByTeamId(variable.getTeamId());
-        Map<Long, Application> applicationMap = applications.stream()
-            .collect(Collectors.toMap(Application::getId, application -> application));
+    private List<FlinkApplication> getDependApplicationsByCode(Variable variable) {
+        List<FlinkApplication> dependApplications = new ArrayList<>();
+        List<FlinkApplication> applications = applicationManageService.listByTeamId(variable.getTeamId());
+        Map<Long, FlinkApplication> applicationMap = applications.stream()
+            .collect(Collectors.toMap(FlinkApplication::getId, application -> application));
 
         // Get applications that depend on this variable in application args
-        for (Application app : applications) {
+        for (FlinkApplication app : applications) {
             if (isDepend(variable.getVariableCode(), app.getArgs())) {
                 dependApplications.add(app);
             }
@@ -225,7 +225,7 @@ public class VariableServiceImpl extends ServiceImpl<VariableMapper, Variable>
         List<FlinkSql> flinkSqls = flinkSqlService.listByTeamId(variable.getTeamId());
         for (FlinkSql flinkSql : flinkSqls) {
             if (isDepend(variable.getVariableCode(), DeflaterUtils.unzipString(flinkSql.getSql()))) {
-                Application app = applicationMap.get(flinkSql.getAppId());
+                FlinkApplication app = applicationMap.get(flinkSql.getAppId());
                 if (!dependApplications.contains(app)) {
                     dependApplications.add(applicationMap.get(flinkSql.getAppId()));
                 }

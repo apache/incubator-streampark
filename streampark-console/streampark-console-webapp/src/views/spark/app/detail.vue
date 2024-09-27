@@ -16,7 +16,7 @@
 -->
 <script setup lang="ts">
   import { onUnmounted, reactive, unref, ref, onMounted, computed } from 'vue';
-  import { AppStateEnum, ExecModeEnum } from '/@/enums/sparkEnum';
+  import { AppStateEnum, DeployMode } from '/@/enums/sparkEnum';
   import { useI18n } from '/@/hooks/web/useI18n';
   // import { fetchAppExternalLink } from '/@/api/setting/externalLink';
   import { ExternalLink } from '/@/api/setting/types/externalLink.type';
@@ -140,8 +140,8 @@
     // Get data for the first time
     if (Object.keys(app).length == 0) {
       if (
-        !isNullOrUnDef(res.executionMode) &&
-        [ExecModeEnum.YARN_CLIENT, ExecModeEnum.YARN_CLUSTER].includes(res.executionMode)
+        !isNullOrUnDef(res.deployMode) &&
+        [DeployMode.YARN_CLIENT, DeployMode.YARN_CLUSTER].includes(res.deployMode)
       ) {
         await handleYarn();
       }

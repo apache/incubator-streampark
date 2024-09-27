@@ -22,8 +22,8 @@ import org.apache.streampark.console.core.annotation.OpenAPI;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.OpenAPISchema;
 import org.apache.streampark.console.core.component.OpenAPIComponent;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -45,7 +45,7 @@ public class OpenAPIController {
     private OpenAPIComponent openAPIComponent;
 
     @Autowired
-    private ApplicationActionService applicationActionService;
+    private FlinkApplicationActionService applicationActionService;
 
     @OpenAPI(name = "flinkStart", header = {
             @OpenAPI.Param(name = "Authorization", description = "Access authorization token", required = true, type = String.class)
@@ -60,7 +60,7 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/start")
     @RequiresPermissions("app:start")
-    public RestResponse flinkStart(Application app) throws Exception {
+    public RestResponse flinkStart(FlinkApplication app) throws Exception {
         applicationActionService.start(app, false);
         return RestResponse.success(true);
     }
@@ -77,7 +77,7 @@ public class OpenAPIController {
     @Permission(app = "#app.appId", team = "#app.teamId")
     @PostMapping("app/cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse flinkCancel(Application app) throws Exception {
+    public RestResponse flinkCancel(FlinkApplication app) throws Exception {
         applicationActionService.cancel(app);
         return RestResponse.success();
     }

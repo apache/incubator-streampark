@@ -21,7 +21,7 @@ import org.apache.streampark.common.enums.ClusterState;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.console.core.bean.AlertProbeMsg;
 import org.apache.streampark.console.core.bean.AlertTemplate;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.AlertTypeEnum;
@@ -40,11 +40,11 @@ public class AlertTemplateUtils {
 
     private static final String PROBE = "PROBE";
 
-    public static AlertTemplate createAlertTemplate(Application application, FlinkAppStateEnum appState) {
+    public static AlertTemplate createAlertTemplate(FlinkApplication application, FlinkAppStateEnum appState) {
         return AlertTemplate.builder()
             .duration(application.getStartTime(), application.getEndTime())
             .jobName(application.getJobName())
-            .link(application.getFlinkExecutionMode(), application.getClusterId())
+            .link(application.getFlinkDeployMode(), application.getClusterId())
             .startTime(application.getStartTime())
             .endTime(application.getEndTime())
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())
@@ -62,11 +62,11 @@ public class AlertTemplateUtils {
             .build();
     }
 
-    public static AlertTemplate createAlertTemplate(Application application, CheckPointStatusEnum statusEnum) {
+    public static AlertTemplate createAlertTemplate(FlinkApplication application, CheckPointStatusEnum statusEnum) {
         return AlertTemplate.builder()
             .duration(application.getStartTime(), application.getEndTime())
             .jobName(application.getJobName())
-            .link(application.getFlinkExecutionMode(), application.getClusterId())
+            .link(application.getFlinkDeployMode(), application.getClusterId())
             .startTime(application.getStartTime())
             .type(AlertTypeEnum.DING_TALK.getCode())
             .cpFailureRateInterval(
@@ -86,7 +86,7 @@ public class AlertTemplateUtils {
         return AlertTemplate.builder()
             .duration(cluster.getStartTime(), cluster.getEndTime())
             .jobName(cluster.getClusterName())
-            .link(cluster.getFlinkExecutionModeEnum(), cluster.getClusterId())
+            .link(cluster.getFlinkDeployModeEnum(), cluster.getClusterId())
             .startTime(cluster.getStartTime())
             .endTime(cluster.getEndTime())
             .type(3)
@@ -120,7 +120,7 @@ public class AlertTemplateUtils {
         return AlertTemplate.builder()
             .duration(application.getStartTime(), application.getEndTime())
             .jobName(application.getAppName())
-            .link(application.getSparkExecutionMode(), application.getAppId())
+            .link(application.getSparkDeployMode(), application.getAppId())
             .startTime(application.getStartTime())
             .endTime(application.getEndTime())
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())

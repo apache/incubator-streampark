@@ -20,9 +20,9 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.common.util.HadoopConfigUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationConfig;
-import org.apache.streampark.console.core.service.ApplicationConfigService;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
+import org.apache.streampark.console.core.service.FlinkApplicationConfigService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -45,11 +45,11 @@ import java.util.Map;
 public class ConfigController {
 
     @Autowired
-    private ApplicationConfigService applicationConfigService;
+    private FlinkApplicationConfigService applicationConfigService;
 
     @PostMapping("get")
     public RestResponse get(Long id) {
-        ApplicationConfig config = applicationConfigService.get(id);
+        FlinkApplicationConfig config = applicationConfigService.get(id);
         return RestResponse.success(config);
     }
 
@@ -60,14 +60,14 @@ public class ConfigController {
     }
 
     @PostMapping("list")
-    public RestResponse list(ApplicationConfig config, RestRequest request) {
-        IPage<ApplicationConfig> page = applicationConfigService.getPage(config, request);
+    public RestResponse list(FlinkApplicationConfig config, RestRequest request) {
+        IPage<FlinkApplicationConfig> page = applicationConfigService.getPage(config, request);
         return RestResponse.success(page);
     }
 
     @PostMapping("history")
-    public RestResponse history(Application application) {
-        List<ApplicationConfig> history = applicationConfigService.list(application.getId());
+    public RestResponse history(FlinkApplication application) {
+        List<FlinkApplicationConfig> history = applicationConfigService.list(application.getId());
         return RestResponse.success(history);
     }
 

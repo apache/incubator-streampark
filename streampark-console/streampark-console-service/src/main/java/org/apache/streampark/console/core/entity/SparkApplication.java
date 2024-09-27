@@ -21,8 +21,8 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.SparkDevelopmentMode;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
+import org.apache.streampark.common.enums.SparkJobType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
@@ -76,7 +76,7 @@ public class SparkApplication extends BaseEntity {
     /** spark.app.name */
     private String appName;
 
-    private Integer executionMode;
+    private Integer deployMode;
 
     /** 1: cicd (build from csv) 2: upload (upload local jar job) */
     private Integer resourceFrom;
@@ -233,8 +233,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     public void resolveYarnQueue() {
-        if (!(SparkExecutionMode.YARN_CLIENT == this.getSparkExecutionMode()
-            || SparkExecutionMode.YARN_CLUSTER == this.getSparkExecutionMode())) {
+        if (!(SparkDeployMode.YARN_CLIENT == this.getSparkDeployMode()
+            || SparkDeployMode.YARN_CLUSTER == this.getSparkDeployMode())) {
             return;
         }
         if (StringUtils.isBlank(this.yarnQueue)) {
@@ -312,8 +312,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public SparkDevelopmentMode getDevelopmentMode() {
-        return SparkDevelopmentMode.valueOf(jobType);
+    public SparkJobType getDevelopmentMode() {
+        return SparkJobType.valueOf(jobType);
     }
 
     @JsonIgnore
@@ -322,8 +322,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public SparkExecutionMode getSparkExecutionMode() {
-        return SparkExecutionMode.of(executionMode);
+    public SparkDeployMode getSparkDeployMode() {
+        return SparkDeployMode.of(deployMode);
     }
 
     /** Local compilation and packaging working directory */
@@ -348,10 +348,10 @@ public class SparkApplication extends BaseEntity {
         return path;
     }
 
-    /** Automatically identify remoteAppHome or localAppHome based on app SparkExecutionMode */
+    /** Automatically identify remoteAppHome or localAppHome based on app SparkDeployMode */
     @JsonIgnore
     public String getAppHome() {
-        switch (this.getSparkExecutionMode()) {
+        switch (this.getSparkDeployMode()) {
             case REMOTE:
             case LOCAL:
                 return getLocalAppHome();
@@ -360,7 +360,7 @@ public class SparkApplication extends BaseEntity {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(getSparkExecutionMode().getName()));
+                    "unsupported deployMode ".concat(getSparkDeployMode().getName()));
         }
     }
 
@@ -388,24 +388,24 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public boolean isSparkOnYarnJob() {
-        return SparkExecutionMode.YARN_CLUSTER.getMode() == (this.getExecutionMode())
-            || SparkExecutionMode.YARN_CLIENT.getMode() == (this.getExecutionMode());
+        return SparkDeployMode.YARN_CLUSTER.getMode() == (this.getDeployMode())
+            || SparkDeployMode.YARN_CLIENT.getMode() == (this.getDeployMode());
     }
 
     @JsonIgnore
     public boolean isSparkSqlJob() {
-        return SparkDevelopmentMode.SPARK_SQL.getMode().equals(this.getJobType());
+        return SparkJobType.SPARK_SQL.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isSparkJarJob() {
-        return SparkDevelopmentMode.SPARK_JAR.getMode().equals(this.getJobType());
+        return SparkJobType.SPARK_JAR.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isSparkJarOrPySparkJob() {
-        return SparkDevelopmentMode.SPARK_JAR.getMode().equals(this.getJobType())
-            || SparkDevelopmentMode.PYSPARK.getMode().equals(this.getJobType());
+        return SparkJobType.SPARK_JAR.getMode().equals(this.getJobType())
+            || SparkJobType.PYSPARK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
@@ -455,19 +455,19 @@ public class SparkApplication extends BaseEntity {
 
     @JsonIgnore
     public StorageType getStorageType() {
-        return getStorageType(getExecutionMode());
+        return getStorageType(getDeployMode());
     }
 
-    public static StorageType getStorageType(Integer execMode) {
-        SparkExecutionMode executionModeEnum = SparkExecutionMode.of(execMode);
-        switch (Objects.requireNonNull(executionModeEnum)) {
+    public static StorageType getStorageType(Integer deployMode) {
+        SparkDeployMode deployModeEnum = SparkDeployMode.of(deployMode);
+        switch (Objects.requireNonNull(deployModeEnum)) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 return StorageType.HDFS;
             case REMOTE:
                 return StorageType.LFS;
             default:
-                throw new UnsupportedOperationException("Unsupported ".concat(executionModeEnum.getName()));
+                throw new UnsupportedOperationException("Unsupported ".concat(deployModeEnum.getName()));
         }
     }
 
@@ -515,6 +515,6 @@ public class SparkApplication extends BaseEntity {
         public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;
         public static final SFunction<SparkApplication, Integer> STATE = SparkApplication::getState;
         public static final SFunction<SparkApplication, String> OPTIONS = SparkApplication::getOptions;
-        public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getExecutionMode;
+        public static final SFunction<SparkApplication, Integer> EXECUTION_MODE = SparkApplication::getDeployMode;
     }
 }

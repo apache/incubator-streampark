@@ -18,7 +18,7 @@
 package org.apache.streampark.spark.client.impl
 
 import org.apache.streampark.common.conf.ConfigKeys.{KEY_SPARK_YARN_AM_NODE_LABEL, KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, KEY_SPARK_YARN_QUEUE, KEY_SPARK_YARN_QUEUE_LABEL, KEY_SPARK_YARN_QUEUE_NAME}
-import org.apache.streampark.common.enums.SparkExecutionMode
+import org.apache.streampark.common.enums.SparkDeployMode
 import org.apache.streampark.common.util.{HadoopUtils, YarnUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.spark.client.`trait`.SparkClientTrait
@@ -131,14 +131,13 @@ object YarnClient extends SparkClientTrait {
       .setAppResource(submitRequest.userJarPath)
       .setMainClass(submitRequest.appMain)
       .setAppName(submitRequest.appName)
-      .setConf(
-        "spark.yarn.jars",
-        submitRequest.hdfsWorkspace.sparkLib + "/*.jar")
+      .setConf("spark.yarn.dist.jars", submitRequest.hdfsWorkspace.sparkLib)
+      .setConf("spark.yarn.applicationType", "StreamPark Spark")
       .setVerbose(true)
       .setMaster("yarn")
-      .setDeployMode(submitRequest.executionMode match {
-        case SparkExecutionMode.YARN_CLIENT => "client"
-        case SparkExecutionMode.YARN_CLUSTER => "cluster"
+      .setDeployMode(submitRequest.deployMode match {
+        case SparkDeployMode.YARN_CLIENT => "client"
+        case SparkDeployMode.YARN_CLUSTER => "cluster"
         case _ =>
           throw new IllegalArgumentException("[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".")
       })
@@ -147,7 +146,7 @@ object YarnClient extends SparkClientTrait {
   private def setSparkConfig(submitRequest: SubmitRequest, sparkLauncher: SparkLauncher): Unit = {
     logger.info("[StreamPark][Spark][YarnClient] set spark configuration.")
     // 1) put yarn queue
-    if (SparkExecutionMode.isYarnMode(submitRequest.executionMode)) {
+    if (SparkDeployMode.isYarnMode(submitRequest.deployMode)) {
       setYarnQueue(submitRequest)
     }
 
@@ -166,7 +165,7 @@ object YarnClient extends SparkClientTrait {
     }
   }
 
-  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
+  private def setYarnQueue(submitRequest: SubmitRequest): Unit = {
     if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_NAME)) {
       submitRequest.appProperties.put(KEY_SPARK_YARN_QUEUE, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_NAME).asInstanceOf[String])
     }

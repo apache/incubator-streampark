@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.Variable;
 import org.apache.streampark.console.core.service.VariableService;
 
@@ -86,7 +86,7 @@ public class VariableController {
     @PostMapping("depend_apps")
     @RequiresPermissions("variable:depend_apps")
     public RestResponse dependApps(RestRequest restRequest, Variable variable) {
-        IPage<Application> dependApps = variableService.getDependAppsPage(variable, restRequest);
+        IPage<FlinkApplication> dependApps = variableService.getDependAppsPage(variable, restRequest);
         return RestResponse.success(dependApps);
     }
 

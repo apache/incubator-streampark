@@ -17,16 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.FlinkSqlMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkSql">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="app_id" jdbcType="BIGINT" property="appId"/>
-        <result column="sql" jdbcType="LONGVARCHAR" property="sql"/>
-        <result column="candidate" jdbcType="INTEGER" property="candidate"/>
-        <result column="team_resource" jdbcType="VARCHAR" property="teamResource"/>
-        <result column="dependency" jdbcType="VARCHAR" property="dependency"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
-
     <select id="getEffective" resultType="org.apache.streampark.console.core.entity.FlinkSql" parameterType="java.lang.Long">
         select s.*
         from t_flink_sql s

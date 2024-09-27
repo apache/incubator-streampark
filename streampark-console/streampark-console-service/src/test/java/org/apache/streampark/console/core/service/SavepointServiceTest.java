@@ -18,18 +18,18 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.ApplicationConfig;
 import org.apache.streampark.console.core.entity.Effective;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
-import org.apache.streampark.console.core.service.application.ApplicationManageService;
-import org.apache.streampark.console.core.service.impl.SavepointServiceImpl;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.impl.FlinkSavepointServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Test class for the implementation {@link
- * SavepointServiceImpl} of {@link
+ * FlinkSavepointServiceImpl} of {@link
  * SavepointService}.
  */
 class SavepointServiceTest extends SpringUnitTestBase {
@@ -53,7 +53,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
     private SavepointService savepointService;
 
     @Autowired
-    private ApplicationConfigService configService;
+    private FlinkApplicationConfigService configService;
 
     @Autowired
     private EffectiveService effectiveService;
@@ -63,7 +63,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
     @Autowired
     private FlinkClusterService flinkClusterService;
     @Autowired
-    ApplicationManageService applicationManageService;
+    FlinkApplicationManageService applicationManageService;
 
     @AfterEach
     void cleanTestRecordsInDatabase() {
@@ -83,7 +83,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
     void testGetSavepointFromDynamicProps() {
         String propsWithEmptyTargetValue = "-Dstate.savepoints.dir=";
         String props = "-Dstate.savepoints.dir=hdfs:///test";
-        SavepointServiceImpl savepointServiceImpl = (SavepointServiceImpl) savepointService;
+        FlinkSavepointServiceImpl savepointServiceImpl = (FlinkSavepointServiceImpl) savepointService;
 
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(null)).isNull();
         assertThat(savepointServiceImpl.getSavepointFromDynamicProps(props)).isEqualTo("hdfs:///test");
@@ -93,8 +93,8 @@ class SavepointServiceTest extends SpringUnitTestBase {
 
     @Test
     void testGetSavepointFromAppCfgIfStreamParkOrSQLJob() {
-        SavepointServiceImpl savepointServiceImpl = (SavepointServiceImpl) savepointService;
-        Application app = new Application();
+        FlinkSavepointServiceImpl savepointServiceImpl = (FlinkSavepointServiceImpl) savepointService;
+        FlinkApplication app = new FlinkApplication();
         Long appId = 1L;
         Long appCfgId = 1L;
         app.setId(appId);
@@ -103,18 +103,18 @@ class SavepointServiceTest extends SpringUnitTestBase {
         app.setAppType(ApplicationType.APACHE_FLINK.getType());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-        app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
+        app.setJobType(FlinkJobType.CUSTOM_CODE.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
         // Test for (StreamPark job Or FlinkSQL job) without application config.
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-        app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
+        app.setJobType(FlinkJobType.CUSTOM_CODE.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
         // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
-        ApplicationConfig appCfg = new ApplicationConfig();
+        FlinkApplicationConfig appCfg = new FlinkApplicationConfig();
         appCfg.setId(appCfgId);
         appCfg.setAppId(appId);
         appCfg.setContent("state.savepoints.dir=hdfs:///test");
@@ -147,15 +147,15 @@ class SavepointServiceTest extends SpringUnitTestBase {
 
     @Test
     void testGetSavepointFromDeployLayer() throws JsonProcessingException {
-        SavepointServiceImpl savepointServiceImpl = (SavepointServiceImpl) savepointService;
+        FlinkSavepointServiceImpl savepointServiceImpl = (FlinkSavepointServiceImpl) savepointService;
         Long appId = 1L;
         Long idOfFlinkEnv = 1L;
         Long teamId = 1L;
-        Application application = new Application();
+        FlinkApplication application = new FlinkApplication();
         application.setId(appId);
         application.setTeamId(teamId);
         application.setVersionId(idOfFlinkEnv);
-        application.setExecutionMode(FlinkExecutionMode.YARN_APPLICATION.getMode());
+        application.setDeployMode(FlinkDeployMode.YARN_APPLICATION.getMode());
         applicationManageService.save(application);
 
         FlinkEnv flinkEnv = new FlinkEnv();
@@ -175,7 +175,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
         Long clusterId = 1L;
 
         // Test for it without cluster.
-        application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+        application.setDeployMode(FlinkDeployMode.REMOTE.getMode());
         application.setFlinkClusterId(clusterId);
         assertThatThrownBy(() -> savepointServiceImpl.getSavepointFromDeployLayer(application))
             .isInstanceOf(NullPointerException.class);

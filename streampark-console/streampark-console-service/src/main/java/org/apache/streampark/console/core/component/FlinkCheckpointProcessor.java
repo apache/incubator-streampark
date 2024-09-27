@@ -18,14 +18,14 @@
 package org.apache.streampark.console.core.component;
 
 import org.apache.streampark.common.util.AssertUtils;
-import org.apache.streampark.console.core.entity.Application;
-import org.apache.streampark.console.core.entity.Savepoint;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.enums.CheckPointStatusEnum;
 import org.apache.streampark.console.core.enums.FailoverStrategyEnum;
 import org.apache.streampark.console.core.metrics.flink.CheckPoints;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 
@@ -67,7 +67,7 @@ public class FlinkCheckpointProcessor {
     private final Map<Long, Counter> checkPointFailedCache = new ConcurrentHashMap<>(0);
 
     @Autowired
-    private ApplicationActionService applicationActionService;
+    private FlinkApplicationActionService applicationActionService;
 
     @Autowired
     private AlertService alertService;
@@ -78,11 +78,11 @@ public class FlinkCheckpointProcessor {
     @Autowired
     private FlinkAppHttpWatcher flinkAppHttpWatcher;
 
-    public void process(Application application, @Nonnull CheckPoints checkPoints) {
+    public void process(FlinkApplication application, @Nonnull CheckPoints checkPoints) {
         checkPoints.getLatestCheckpoint().forEach(checkPoint -> process(application, checkPoint));
     }
 
-    private void process(Application application, @Nonnull CheckPoints.CheckPoint checkPoint) {
+    private void process(FlinkApplication application, @Nonnull CheckPoints.CheckPoint checkPoint) {
         String jobID = application.getJobId();
         Long appId = application.getId();
         CheckPointStatusEnum status = checkPoint.getCheckPointStatus();
@@ -107,7 +107,7 @@ public class FlinkCheckpointProcessor {
     }
 
     private void processFailedCheckpoint(
-                                         Application application, @Nonnull CheckPoints.CheckPoint checkPoint,
+                                         FlinkApplication application, @Nonnull CheckPoints.CheckPoint checkPoint,
                                          Long appId) {
         Counter counter = checkPointFailedCache.get(appId);
         if (counter == null) {
@@ -130,7 +130,7 @@ public class FlinkCheckpointProcessor {
     }
 
     private void processFailoverStrategy(
-                                         Application application, FailoverStrategyEnum failoverStrategyEnum) {
+                                         FlinkApplication application, FailoverStrategyEnum failoverStrategyEnum) {
         switch (failoverStrategyEnum) {
             case ALERT:
                 alertService.alert(
@@ -172,8 +172,8 @@ public class FlinkCheckpointProcessor {
         return checkPointCache.get(
             cacheId,
             key -> {
-                Savepoint savepoint = savepointService.getLatest(appId);
-                return Optional.ofNullable(savepoint).map(Savepoint::getChkId).orElse(null);
+                FlinkSavepoint savepoint = savepointService.getLatest(appId);
+                return Optional.ofNullable(savepoint).map(FlinkSavepoint::getChkId).orElse(null);
             });
     }
 
@@ -184,7 +184,7 @@ public class FlinkCheckpointProcessor {
     }
 
     private void saveSavepoint(CheckPoints.CheckPoint checkPoint, Long appId) {
-        Savepoint savepoint = new Savepoint();
+        FlinkSavepoint savepoint = new FlinkSavepoint();
         savepoint.setAppId(appId);
         savepoint.setChkId(checkPoint.getId());
         savepoint.setLatest(true);

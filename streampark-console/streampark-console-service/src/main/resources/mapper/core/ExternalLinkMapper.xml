@@ -18,13 +18,5 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.apache.streampark.console.core.mapper.ExternalLinkMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.ExternalLink">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="badge_label" jdbcType="VARCHAR" property="badgeLabel"/>
-        <result column="badge_name" jdbcType="VARCHAR" property="badgeName"/>
-        <result column="badge_color" jdbcType="VARCHAR" property="badgeColor"/>
-        <result column="link_url" jdbcType="VARCHAR" property="linkUrl"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-        <result column="modify_time" jdbcType="DATE" property="modifyTime"/>
-    </resultMap>
+
 </mapper>

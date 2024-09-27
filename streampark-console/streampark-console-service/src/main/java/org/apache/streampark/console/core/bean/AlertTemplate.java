@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.bean;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.DateUtils;
 import org.apache.streampark.common.util.YarnUtils;
 
@@ -88,8 +88,8 @@ public class AlertTemplate implements Serializable {
             return this;
         }
 
-        public AlertTemplateBuilder link(FlinkExecutionMode mode, String appId) {
-            if (FlinkExecutionMode.isYarnMode(mode)) {
+        public AlertTemplateBuilder link(FlinkDeployMode mode, String appId) {
+            if (FlinkDeployMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
                 this.link = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
             } else {
@@ -98,8 +98,8 @@ public class AlertTemplate implements Serializable {
             return this;
         }
 
-        public AlertTemplateBuilder link(SparkExecutionMode mode, String appId) {
-            if (SparkExecutionMode.isYarnMode(mode)) {
+        public AlertTemplateBuilder link(SparkDeployMode mode, String appId) {
+            if (SparkDeployMode.isYarnMode(mode)) {
                 String format = "%s/proxy/%s/";
                 this.link = String.format(format, YarnUtils.getRMWebAppURL(false), appId);
             } else {

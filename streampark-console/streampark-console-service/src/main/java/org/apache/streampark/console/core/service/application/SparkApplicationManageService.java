@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.application;
 
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.core.entity.SparkApplication;
 
@@ -158,11 +158,11 @@ public interface SparkApplicationManageService extends IService<SparkApplication
      * Retrieves a list of applications by team ID and execution modes.
      *
      * @param teamId The ID of the team to filter by
-     * @param executionModeEnums The collection of execution modes to filter by
+     * @param deployModeEnums The collection of execution modes to filter by
      * @return A list of applications that belong to the specified team and have the specified
      *     execution modes
      */
-    List<SparkApplication> listByTeamIdAndExecutionModes(
-                                                         Long teamId,
-                                                         Collection<SparkExecutionMode> executionModeEnums);
+    List<SparkApplication> listByTeamIdAndDeployModes(
+                                                      Long teamId,
+                                                      Collection<SparkDeployMode> deployModeEnums);
 }

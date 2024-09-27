@@ -20,13 +20,13 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.console.base.util.ConsistentHash;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.FlinkTaskItem;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.DistributedTask;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.mapper.DistributedTaskMapper;
 import org.apache.streampark.console.core.service.DistributedTaskService;
-import org.apache.streampark.console.core.service.application.ApplicationActionService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,7 +57,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     private Executor taskExecutor;
 
     @Autowired
-    private ApplicationActionService applicationActionService;
+    private FlinkApplicationActionService applicationActionService;
 
     /**
      * Server Id
@@ -119,7 +119,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
         // Execute Distributed task
         log.info("Execute Distributed task: {}", DistributedTask);
         FlinkTaskItem flinkTaskItem = getFlinkTaskItem(DistributedTask);
-        Application appParam = getAppByFlinkTaskItem(flinkTaskItem);
+        FlinkApplication appParam = getAppByFlinkTaskItem(flinkTaskItem);
         switch (DistributedTask.getAction()) {
             case START:
                 applicationActionService.start(appParam, flinkTaskItem.getAutoStart());
@@ -147,7 +147,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
      * @return List<Application> List of tasks that need to be monitored
      */
     @Override
-    public List<Application> getMonitoredTaskList(List<Application> applications) {
+    public List<FlinkApplication> getMonitoredTaskList(List<FlinkApplication> applications) {
         return applications.stream()
             .filter(application -> isLocalProcessing(application.getId()))
             .collect(Collectors.toList());
@@ -192,7 +192,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveDistributedTask(Application appParam, boolean autoStart, DistributedTaskEnum action) {
+    public void saveDistributedTask(FlinkApplication appParam, boolean autoStart, DistributedTaskEnum action) {
         try {
             DistributedTask DistributedTask = getDistributedTaskByApp(appParam, autoStart, action);
             this.save(DistributedTask);
@@ -201,7 +201,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
         }
     }
 
-    public DistributedTask getDistributedTaskByApp(Application appParam, boolean autoStart,
+    public DistributedTask getDistributedTaskByApp(FlinkApplication appParam, boolean autoStart,
                                                    DistributedTaskEnum action) throws JsonProcessingException {
         FlinkTaskItem flinkTaskItem = new FlinkTaskItem();
         flinkTaskItem.setAppId(appParam.getId());
@@ -225,8 +225,8 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
         return JacksonUtils.read(DistributedTask.getProperties(), FlinkTaskItem.class);
     }
 
-    public Application getAppByFlinkTaskItem(FlinkTaskItem flinkTaskItem) {
-        Application appParam = new Application();
+    public FlinkApplication getAppByFlinkTaskItem(FlinkTaskItem flinkTaskItem) {
+        FlinkApplication appParam = new FlinkApplication();
         appParam.setId(flinkTaskItem.getAppId());
         appParam.setArgs(flinkTaskItem.getArgs());
         appParam.setDynamicProperties(flinkTaskItem.getDynamicProperties());

@@ -19,8 +19,8 @@ package org.apache.streampark.console.core.service.impl;
 
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.ApplicationLog;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.service.FlinkClusterService;
@@ -93,11 +93,11 @@ public class ProxyServiceImpl implements ProxyService {
     }
 
     @Override
-    public ResponseEntity<?> proxyFlink(HttpServletRequest request, Application app) throws Exception {
+    public ResponseEntity<?> proxyFlink(HttpServletRequest request, FlinkApplication app) throws Exception {
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
         String url = null;
-        switch (app.getFlinkExecutionMode()) {
+        switch (app.getFlinkDeployMode()) {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
@@ -115,7 +115,7 @@ public class ProxyServiceImpl implements ProxyService {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(app.getFlinkExecutionMode().getName()));
+                    "unsupported deployMode ".concat(app.getFlinkDeployMode().getName()));
         }
 
         if (url == null) {
@@ -179,7 +179,7 @@ public class ProxyServiceImpl implements ProxyService {
         }
 
         url += getRequestURL(request, "/proxy/cluster/" + clusterId);
-        switch (cluster.getFlinkExecutionModeEnum()) {
+        switch (cluster.getFlinkDeployModeEnum()) {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
@@ -190,7 +190,7 @@ public class ProxyServiceImpl implements ProxyService {
                 return proxyRequest(request, url);
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(cluster.getFlinkExecutionModeEnum().getName()));
+                    "unsupported deployMode ".concat(cluster.getFlinkDeployModeEnum().getName()));
         }
     }
 

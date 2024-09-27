@@ -17,18 +17,6 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.apache.streampark.console.core.mapper.FlinkEnvMapper">
-    <resultMap id="BaseResultMap" type="org.apache.streampark.console.core.entity.FlinkEnv">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="flink_name" jdbcType="VARCHAR" property="flinkName"/>
-        <result column="flink_home" jdbcType="VARCHAR" property="flinkHome"/>
-        <result column="flink_conf" jdbcType="VARCHAR" property="flinkConf"/>
-        <result column="description" jdbcType="VARCHAR" property="description"/>
-        <result column="version" jdbcType="VARCHAR" property="version"/>
-        <result column="scala_version" jdbcType="VARCHAR" property="scalaVersion"/>
-        <result column="is_default" jdbcType="BOOLEAN" property="isDefault"/>
-        <result column="create_time" jdbcType="DATE" property="createTime"/>
-    </resultMap>
-
     <select id="findPage" resultType="org.apache.streampark.console.core.entity.FlinkEnv">
         select * from t_flink_env
         <where>

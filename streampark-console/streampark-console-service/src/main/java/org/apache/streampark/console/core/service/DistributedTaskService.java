@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.DistributedTask;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -49,7 +49,7 @@ public interface DistributedTaskService extends IService<DistributedTask> {
      * @param applications List<Application>
      * @return List<Application> List of tasks that need to be monitored
      */
-    List<Application> getMonitoredTaskList(List<Application> applications);
+    List<FlinkApplication> getMonitoredTaskList(List<FlinkApplication> applications);
 
     /**
      * This interface handles task redistribution when server nodes are added.
@@ -78,5 +78,5 @@ public interface DistributedTaskService extends IService<DistributedTask> {
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
-    public void saveDistributedTask(Application appParam, boolean autoStart, DistributedTaskEnum action);
+    public void saveDistributedTask(FlinkApplication appParam, boolean autoStart, DistributedTaskEnum action);
 }

@@ -103,7 +103,7 @@
       setFieldsValue({
         clusterName: cluster.clusterName,
         clusterId: cluster.clusterId,
-        executionMode: cluster.executionMode,
+        deployMode: cluster.deployMode,
         address: cluster.address,
         description: cluster.description,
         dynamicProperties: cluster.dynamicProperties,

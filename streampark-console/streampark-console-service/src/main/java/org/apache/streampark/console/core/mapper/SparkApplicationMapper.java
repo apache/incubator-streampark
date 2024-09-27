@@ -43,7 +43,7 @@ public interface SparkApplicationMapper extends BaseMapper<SparkApplication> {
     List<String> selectRecentK8sNamespaces(@Param("limitSize") Integer limit);
 
     List<String> selectRecentK8sClusterIds(
-                                           @Param("executionMode") Integer executionMode,
+                                           @Param("deployMode") Integer deployMode,
                                            @Param("limitSize") Integer limit);
 
     List<String> selectRecentK8sPodTemplates(@Param("limitSize") Integer limit);

@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.watcher;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.HttpClientUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -30,7 +30,7 @@ import org.apache.streampark.console.core.metrics.flink.Overview;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.alert.AlertService;
-import org.apache.streampark.console.core.service.application.ApplicationInfoService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +69,7 @@ public class FlinkClusterWatcher {
     private AlertService alertService;
 
     @Autowired
-    private ApplicationInfoService applicationInfoService;
+    private FlinkApplicationInfoService applicationInfoService;
 
     private static final Timeout HTTP_TIMEOUT = Timeout.ofSeconds(5L);
 
@@ -99,7 +99,7 @@ public class FlinkClusterWatcher {
                 new LambdaQueryWrapper<FlinkCluster>()
                     .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
                     // excluding flink clusters on kubernetes
-                    .notIn(FlinkCluster::getExecutionMode, FlinkExecutionMode.getKubernetesMode()));
+                    .notIn(FlinkCluster::getDeployMode, FlinkDeployMode.getKubernetesMode()));
         flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
     }
 
@@ -194,7 +194,7 @@ public class FlinkClusterWatcher {
      * @return
      */
     private ClusterState httpClusterState(FlinkCluster flinkCluster) {
-        switch (flinkCluster.getFlinkExecutionModeEnum()) {
+        switch (flinkCluster.getFlinkDeployModeEnum()) {
             case REMOTE:
                 return httpRemoteClusterState(flinkCluster);
             case YARN_SESSION:
@@ -263,7 +263,7 @@ public class FlinkClusterWatcher {
      * @param flinkCluster
      */
     public static void addWatching(FlinkCluster flinkCluster) {
-        if (!FlinkExecutionMode.isKubernetesMode(flinkCluster.getFlinkExecutionModeEnum())
+        if (!FlinkDeployMode.isKubernetesMode(flinkCluster.getFlinkDeployModeEnum())
             && !WATCHER_CLUSTERS.containsKey(flinkCluster.getId())) {
             log.info("add the cluster with id:{} to watcher cluster cache", flinkCluster.getId());
             WATCHER_CLUSTERS.put(flinkCluster.getId(), flinkCluster);

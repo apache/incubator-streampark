@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -322,7 +322,7 @@ public class SparkApplicationManageServiceImpl
         newApp.setAppType(oldApp.getAppType());
         newApp.setVersionId(oldApp.getVersionId());
         newApp.setAppName(appParam.getAppName());
-        newApp.setExecutionMode(oldApp.getExecutionMode());
+        newApp.setDeployMode(oldApp.getDeployMode());
         newApp.setResourceFrom(oldApp.getResourceFrom());
         newApp.setProjectId(oldApp.getProjectId());
         newApp.setModule(oldApp.getModule());
@@ -385,7 +385,7 @@ public class SparkApplicationManageServiceImpl
         SparkApplication application = getById(appParam.getId());
 
         /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
-        SparkExecutionMode sparkExecutionMode = application.getSparkExecutionMode();
+        SparkDeployMode sparkDeployMode = application.getSparkDeployMode();
 
         boolean success = validateQueueIfNeeded(application, appParam);
         ApiAlertException.throwIfFalse(
@@ -429,7 +429,7 @@ public class SparkApplicationManageServiceImpl
         // changes to the following parameters need to be re-release to take effect
         application.setVersionId(appParam.getVersionId());
         application.setAppName(appParam.getAppName());
-        application.setExecutionMode(appParam.getExecutionMode());
+        application.setDeployMode(appParam.getDeployMode());
         application.setAppProperties(appParam.getAppProperties());
         application.setAppArgs(appParam.getAppArgs());
         application.setOptions(appParam.getOptions());
@@ -449,7 +449,7 @@ public class SparkApplicationManageServiceImpl
         application.setRestartSize(appParam.getRestartSize());
         application.setTags(appParam.getTags());
 
-        switch (appParam.getSparkExecutionMode()) {
+        switch (appParam.getSparkDeployMode()) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 application.setHadoopUser(appParam.getHadoopUser());
@@ -564,18 +564,18 @@ public class SparkApplicationManageServiceImpl
     }
 
     @Override
-    public List<SparkApplication> listByTeamIdAndExecutionModes(
-                                                                Long teamId,
-                                                                Collection<SparkExecutionMode> executionModeEnums) {
+    public List<SparkApplication> listByTeamIdAndDeployModes(
+                                                             Long teamId,
+                                                             Collection<SparkDeployMode> deployModeEnums) {
         return getBaseMapper()
             .selectList(
                 new LambdaQueryWrapper<SparkApplication>()
                     .eq((SFunction<SparkApplication, Long>) SparkApplication::getTeamId,
                         teamId)
                     .in(
-                        SparkApplication::getExecutionMode,
-                        executionModeEnums.stream()
-                            .map(SparkExecutionMode::getMode)
+                        SparkApplication::getDeployMode,
+                        deployModeEnums.stream()
+                            .map(SparkDeployMode::getMode)
                             .collect(Collectors.toSet())));
     }
 
@@ -644,7 +644,7 @@ public class SparkApplicationManageServiceImpl
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(SparkApplication appParam) {
-        yarnQueueService.checkQueueLabel(appParam.getSparkExecutionMode(), appParam.getYarnQueue());
+        yarnQueueService.checkQueueLabel(appParam.getSparkDeployMode(), appParam.getYarnQueue());
         if (!isYarnNotDefaultQueue(appParam)) {
             return true;
         }
@@ -660,13 +660,13 @@ public class SparkApplicationManageServiceImpl
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(SparkApplication oldApp, SparkApplication newApp) {
-        yarnQueueService.checkQueueLabel(newApp.getSparkExecutionMode(), newApp.getYarnQueue());
+        yarnQueueService.checkQueueLabel(newApp.getSparkDeployMode(), newApp.getYarnQueue());
         if (!isYarnNotDefaultQueue(newApp)) {
             return true;
         }
 
         oldApp.resolveYarnQueue();
-        if (SparkExecutionMode.isYarnMode(newApp.getSparkExecutionMode())
+        if (SparkDeployMode.isYarnMode(newApp.getSparkDeployMode())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
@@ -678,18 +678,18 @@ public class SparkApplicationManageServiceImpl
      * empty queue label.
      *
      * @param application application entity.
-     * @return If the executionMode is (Yarn PerJob or application mode) and the queue label is not
+     * @return If the deployMode is (Yarn PerJob or application mode) and the queue label is not
      *     (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(SparkApplication application) {
-        return SparkExecutionMode.isYarnMode(application.getSparkExecutionMode())
+        return SparkDeployMode.isYarnMode(application.getSparkDeployMode())
             && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
     private boolean isYarnApplicationModeChange(
                                                 SparkApplication application, SparkApplication appParam) {
-        return !application.getExecutionMode().equals(appParam.getExecutionMode())
-            && (SparkExecutionMode.YARN_CLIENT == appParam.getSparkExecutionMode()
-                || SparkExecutionMode.YARN_CLUSTER == application.getSparkExecutionMode());
+        return !application.getDeployMode().equals(appParam.getDeployMode())
+            && (SparkDeployMode.YARN_CLIENT == appParam.getSparkDeployMode()
+                || SparkDeployMode.YARN_CLUSTER == application.getSparkDeployMode());
     }
 }

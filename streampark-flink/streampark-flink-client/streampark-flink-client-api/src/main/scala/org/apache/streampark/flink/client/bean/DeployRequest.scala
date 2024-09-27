@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
-import org.apache.streampark.common.enums.{FlinkExecutionMode, FlinkK8sRestExposedType}
+import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkK8sRestExposedType}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.util.FlinkUtils
 
@@ -31,7 +31,7 @@ import java.io.File
 
 case class DeployRequest(
     flinkVersion: FlinkVersion,
-    executionMode: FlinkExecutionMode,
+    deployMode: FlinkDeployMode,
     properties: JavaMap[String, Any],
     clusterId: String,
     id: Long,

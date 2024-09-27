@@ -10,8 +10,8 @@ export enum BuildStateEnum {
   /** build failed  */
   FAILED = 2,
 }
-/* ExecutionMode  */
-export enum ExecModeEnum {
+/* deployMode  */
+export enum DeployMode {
   /** standalone */
   STANDALONE = 1,
   /** yarn per-job (deprecated, please use yarn-application mode) */

@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.YarnUtils;
@@ -216,7 +216,7 @@ public class SparkApplicationInfoServiceImpl
         if (application == null) {
             return AppExistsStateEnum.INVALID;
         }
-        if (SparkExecutionMode.isYarnMode(application.getExecutionMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployMode())) {
             boolean exists = !getYarnAppReport(application.getAppName()).isEmpty();
             return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
         }
@@ -284,7 +284,7 @@ public class SparkApplicationInfoServiceImpl
             // has stopped status
             if (SparkAppStateEnum.isEndState(app.getState())) {
                 // check whether jobName exists on yarn
-                if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
+                if (SparkDeployMode.isYarnMode(appParam.getDeployMode())
                     && YarnUtils.isContains(appParam.getAppName())) {
                     return AppExistsStateEnum.IN_YARN;
                 }
@@ -295,7 +295,7 @@ public class SparkApplicationInfoServiceImpl
             }
 
             // check whether jobName exists on yarn
-            if (SparkExecutionMode.isYarnMode(appParam.getExecutionMode())
+            if (SparkDeployMode.isYarnMode(appParam.getDeployMode())
                 && YarnUtils.isContains(appParam.getAppName())) {
                 return AppExistsStateEnum.IN_YARN;
             }

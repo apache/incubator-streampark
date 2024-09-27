@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.base.domain.RestRequest;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
@@ -105,7 +105,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
      *
      * @param application Application
      */
-    void rollback(Application application);
+    void rollback(FlinkApplication application);
 
     /**
      * Verify whether the entered SQL is correct

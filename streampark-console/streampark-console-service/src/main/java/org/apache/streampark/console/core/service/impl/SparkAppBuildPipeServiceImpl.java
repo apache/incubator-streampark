@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -370,9 +370,9 @@ public class SparkAppBuildPipeServiceImpl
             }
         }
 
-        SparkExecutionMode executionModeEnum = app.getSparkExecutionMode();
+        SparkDeployMode deployModeEnum = app.getSparkDeployMode();
         String mainClass = Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS;
-        switch (executionModeEnum) {
+        switch (deployModeEnum) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 String yarnProvidedPath = app.getAppLib();
@@ -392,7 +392,7 @@ public class SparkAppBuildPipeServiceImpl
                 return SparkYarnApplicationBuildPipeline.of(yarnAppRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for ExecutionMode: " + app.getSparkExecutionMode());
+                    "Unsupported Building Application for DeployMode: " + app.getSparkDeployMode());
         }
     }
 
@@ -416,7 +416,7 @@ public class SparkAppBuildPipeServiceImpl
             case SPARK_SQL:
                 String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
 
-                if (app.getSparkExecutionMode() == SparkExecutionMode.YARN_CLUSTER) {
+                if (app.getSparkDeployMode() == SparkDeployMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }

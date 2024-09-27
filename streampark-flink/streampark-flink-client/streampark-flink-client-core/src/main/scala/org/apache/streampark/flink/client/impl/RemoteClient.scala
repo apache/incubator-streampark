@@ -63,7 +63,7 @@ object RemoteClient extends FlinkClientTrait {
     var standAloneDescriptor: (StandaloneClusterId, StandaloneClusterDescriptor) = null
     try {
       flinkConfig
-        .safeSet(DeploymentOptions.TARGET, request.executionMode.getName)
+        .safeSet(DeploymentOptions.TARGET, request.deployMode.getName)
         .safeSet(RestOptions.ADDRESS, request.properties.get(RestOptions.ADDRESS.key()).toString)
         .safeSet[JavaInt](
           RestOptions.PORT,
@@ -118,7 +118,7 @@ object RemoteClient extends FlinkClientTrait {
     val jobId =
       FlinkSessionSubmitHelper.submitViaRestApi(client.getWebInterfaceURL, fatJar, flinkConfig)
     logInfo(
-      s"${submitRequest.executionMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+      s"${submitRequest.deployMode} mode submit by restApi, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
     val resp =
       SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     closeSubmit(submitRequest, client, clusterDescriptor)
@@ -143,7 +143,7 @@ object RemoteClient extends FlinkClientTrait {
       clusterDescriptor.retrieve(standAloneDescriptor._1).getClusterClient
     val jobId = client.submitJob(jobGraph).get().toString
     logInfo(
-      s"${submitRequest.executionMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
+      s"${submitRequest.deployMode} mode submit by jobGraph, WebInterfaceURL ${client.getWebInterfaceURL}, jobId: $jobId")
     val result =
       SubmitResponse(null, flinkConfig.toMap, jobId, client.getWebInterfaceURL)
     closeSubmit(submitRequest, packageProgram, client, clusterDescriptor)

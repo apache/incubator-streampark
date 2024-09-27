@@ -27,7 +27,7 @@ export default {
   releaseBuild: 'Release Status',
   jobType: 'Job Type',
   appType: 'Application Type',
-  executionMode: 'Deploy Mode',
+  deployMode: 'Deploy Mode',
   historyVersion: 'History Version',
   resource: 'Resource',
   resourcePlaceHolder: 'Please choose resource',
@@ -256,8 +256,8 @@ export default {
   addAppTips: {
     jobTypePlaceholder: 'Please select job type',
     jobTypeIsRequiredMessage: 'Job Type is required',
-    executionModePlaceholder: 'Please select deploy mode',
-    executionModeIsRequiredMessage: 'Deploy Mode is required',
+    deployModePlaceholder: 'Please select deploy mode',
+    deployModeIsRequiredMessage: 'Deploy Mode is required',
     hadoopEnvInitMessage:
       'Hadoop environment initialization failed, please check the environment settings',
     resourceFromMessage: 'resource from is required',

@@ -19,8 +19,8 @@ package org.apache.streampark.console;
 
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.console.core.entity.Application;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
 
@@ -106,18 +106,18 @@ public abstract class SpringUnitTestBase {
         cluster.setClusterName(name);
         cluster.setYarnQueue(yarnQueue);
         cluster.setVersionId(versionId);
-        cluster.setExecutionMode(FlinkExecutionMode.YARN_SESSION.getMode());
+        cluster.setDeployMode(FlinkDeployMode.YARN_SESSION.getMode());
         return cluster;
     }
 
-    protected Application mockYarnModeJobApp(
-                                             Long teamId, String name, String yarnQueue,
-                                             FlinkExecutionMode executionModeEnum) {
-        Application application = new Application();
+    protected FlinkApplication mockYarnModeJobApp(
+                                                  Long teamId, String name, String yarnQueue,
+                                                  FlinkDeployMode deployModeEnum) {
+        FlinkApplication application = new FlinkApplication();
         application.setYarnQueue(yarnQueue);
         application.setTeamId(teamId);
         application.setJobName(name);
-        application.setExecutionMode(executionModeEnum.getMode());
+        application.setDeployMode(deployModeEnum.getMode());
         application.doSetHotParams();
         return application;
     }

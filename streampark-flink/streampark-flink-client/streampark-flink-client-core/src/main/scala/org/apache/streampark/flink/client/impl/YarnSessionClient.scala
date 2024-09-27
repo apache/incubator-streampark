@@ -122,7 +122,7 @@ object YarnSessionClient extends YarnClientTrait {
          |--------------------------------------- flink yarn sesion start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
-         |    execMode         : ${deployRequest.executionMode.name()}
+         |    deployMode       : ${deployRequest.deployMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
          |    properties       : ${deployRequest.properties.mkString(",")}
          |-------------------------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ object YarnSessionClient extends YarnClientTrait {
       }
     } catch {
       case e: Exception =>
-        logError(s"start flink session fail in ${deployRequest.executionMode} mode")
+        logError(s"start flink session fail in ${deployRequest.deployMode} mode")
         e.printStackTrace()
         throw e
     } finally {
@@ -202,7 +202,7 @@ object YarnSessionClient extends YarnClientTrait {
       ShutDownResponse(shutDownRequest.clusterId)
     } catch {
       case e: Exception =>
-        logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
+        logError(s"shutdown flink session fail in ${shutDownRequest.deployMode} mode")
         e.printStackTrace()
         throw e
     } finally {
