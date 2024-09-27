@@ -458,18 +458,15 @@ public class SparkApplicationManageServiceImpl
                 break;
         }
 
-        // Spark Sql job...
         if (application.isSparkSqlJob()) {
             updateSparkSqlJob(application, appParam);
-            return true;
-        }
-
-        if (application.isStreamParkJob()) {
-            // configService.update(appParam, application.isRunning());
-        } else {
+        } else if (application.isSparkJarJob()) {
             application.setJar(appParam.getJar());
             application.setMainClass(appParam.getMainClass());
         }
+
+        // update config
+        configService.update(appParam, application.isRunning());
         this.updateById(application);
         return true;
     }
@@ -492,19 +489,19 @@ public class SparkApplicationManageServiceImpl
             sparkSqlService.create(sql);
             application.setBuild(true);
         } else {
-            // get previous flink sql and decode
+            // get previous spark sql and decode
             SparkSql copySourceSparkSql = sparkSqlService.getById(appParam.getSqlId());
             ApiAlertException.throwIfNull(
-                copySourceSparkSql, "Flink sql is null, update flink sql job failed.");
+                copySourceSparkSql, "Spark sql is null, update spark sql job failed.");
             copySourceSparkSql.decode();
 
-            // get submit flink sql
-            SparkSql targetFlinkSql = new SparkSql(appParam);
+            // get submit spark sql
+            SparkSql targetSparkSql = new SparkSql(appParam);
 
             // judge sql and dependency has changed
-            ChangeTypeEnum changeTypeEnum = copySourceSparkSql.checkChange(targetFlinkSql);
+            ChangeTypeEnum changeTypeEnum = copySourceSparkSql.checkChange(targetSparkSql);
 
-            log.info("updateFlinkSqlJob changeTypeEnum: {}", changeTypeEnum);
+            log.info("updateSparkSqlJob changeTypeEnum: {}", changeTypeEnum);
 
             // if has been changed
             if (changeTypeEnum.hasChanged()) {
@@ -542,7 +539,6 @@ public class SparkApplicationManageServiceImpl
             }
         }
         this.updateById(application);
-        // this.configService.update(appParam, application.isRunning());
     }
 
     @Override
