@@ -80,7 +80,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -310,7 +309,6 @@ public class SparkApplicationActionServiceImpl
 
         // Get the args after placeholder replacement
         String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getAppArgs());
-        List<String> sparkArgs = Arrays.asList(applicationArgs.split("\\s+"));
 
         SubmitRequest submitRequest = new SubmitRequest(
             sparkEnv.getSparkVersion(),
@@ -322,7 +320,7 @@ public class SparkApplicationActionServiceImpl
             application.getMainClass(),
             appConf,
             PropertiesUtils.extractSparkPropertiesAsJava(application.getAppProperties()),
-            sparkArgs,
+            PropertiesUtils.extractSparkArgumentsAsJava(applicationArgs),
             application.getApplicationType(),
             application.getHadoopUser(),
             buildResult,

@@ -252,11 +252,11 @@
   }
 
   async function handleYarnUrl(id: string) {
-    window.open(baseUrl() + '/proxy/yarn/' + id + '/');
+    window.open(baseUrl() + '/spark/proxy/yarn/' + id + '/');
   }
 
   async function handleViewHistory(id: string) {
-    window.open(baseUrl() + '/proxy/history/' + id + '/');
+    window.open(baseUrl() + '/spark/proxy/history/' + id + '/');
   }
 
   function getBackupAction(record: Recordable): ActionItem[] {
