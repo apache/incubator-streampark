@@ -131,9 +131,8 @@ object YarnClient extends SparkClientTrait {
       .setAppResource(submitRequest.userJarPath)
       .setMainClass(submitRequest.appMain)
       .setAppName(submitRequest.appName)
-      .setConf(
-        "spark.yarn.jars",
-        submitRequest.hdfsWorkspace.sparkLib + "/*.jar")
+      .setConf("spark.yarn.dist.jars", submitRequest.hdfsWorkspace.sparkLib)
+      .setConf("spark.yarn.applicationType", "StreamPark Spark")
       .setVerbose(true)
       .setMaster("yarn")
       .setDeployMode(submitRequest.executionMode match {
@@ -166,7 +165,7 @@ object YarnClient extends SparkClientTrait {
     }
   }
 
-  protected def setYarnQueue(submitRequest: SubmitRequest): Unit = {
+  private def setYarnQueue(submitRequest: SubmitRequest): Unit = {
     if (submitRequest.hasExtra(KEY_SPARK_YARN_QUEUE_NAME)) {
       submitRequest.appProperties.put(KEY_SPARK_YARN_QUEUE, submitRequest.getExtra(KEY_SPARK_YARN_QUEUE_NAME).asInstanceOf[String])
     }

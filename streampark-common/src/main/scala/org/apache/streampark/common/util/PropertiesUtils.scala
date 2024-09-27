@@ -37,12 +37,6 @@ object PropertiesUtils extends Logger {
 
   private[this] lazy val PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)")
 
-  private[this] lazy val SPARK_PROPERTY_COMPLEX_PATTERN = Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$")
-
-  // scalastyle:off
-  private[this] lazy val SPARK_ARGUMENT_REGEXP = "\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?"
-  // scalastyle:on
-
   private[this] lazy val MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']"
 
   private[this] lazy val MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP)
@@ -398,7 +392,7 @@ object PropertiesUtils extends Logger {
         case d if Utils.isNotEmpty(d) =>
           d.foreach(x => {
             if (x.nonEmpty) {
-              val p = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(x)
+              val p = PROPERTY_PATTERN.matcher(x)
               if (p.matches) {
                 map += p.group(1).trim -> p.group(2).trim
               }
@@ -407,24 +401,6 @@ object PropertiesUtils extends Logger {
         case _ =>
       }
       map.toMap
-    }
-  }
-
-  /** extract spark configuration from sparkApplication.appArgs */
-  @Nonnull def extractSparkArgumentsAsJava(arguments: String): JavaList[String] = {
-    val list = new JavaArrayList[String]()
-    if (StringUtils.isEmpty(arguments)) list
-    else {
-      arguments.split(SPARK_ARGUMENT_REGEXP) match {
-        case d if Utils.isNotEmpty(d) =>
-          d.foreach(x => {
-            if (x.nonEmpty) {
-              list.add(x)
-            }
-          })
-        case _ =>
-      }
-      list
     }
   }
 }
