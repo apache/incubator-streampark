@@ -85,8 +85,8 @@
                     #{item}
                 </foreach>
             </if>
-            <if test="app.executionMode != null and app.executionMode != ''">
-                and t.execution_mode = #{app.executionMode}
+            <if test="app.deployMode != null and app.deployMode != ''">
+                and t.execution_mode = #{app.deployMode}
             </if>
             <if test="app.jobName != null and app.jobName != ''">
                 <if test="_databaseId == 'mysql'">
@@ -239,7 +239,7 @@
             select cluster_id, max(create_time) as ct
             from t_flink_app
             where cluster_id is not null
-            and execution_mode = #{executionMode}
+            and execution_mode = #{deployMode}
             group by cluster_id
             order by ct desc
         ) as ci

@@ -39,7 +39,7 @@
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
   import { useDrawer } from '/@/components/Drawer';
-  import { ExecModeEnum, ResourceFromEnum } from '/@/enums/flinkEnum';
+  import { DeployMode, ResourceFromEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -74,7 +74,7 @@
   });
 
   /* Form reset */
-  function handleReset(executionMode?: string) {
+  function handleReset(deployMode?: string) {
     nextTick(async () => {
       let selectAlertId: string | undefined;
       if (app.alertId) {
@@ -91,7 +91,7 @@
         hadoopUser: app.hadoopUser,
         dynamicProperties: app.dynamicProperties,
         resolveOrder: app.resolveOrder,
-        executionMode: app.executionMode,
+        deployMode: app.deployMode,
         yarnQueue: app.yarnQueue,
         restartSize: app.restartSize,
         checkPointFailure: {
@@ -108,17 +108,17 @@
         module: app.module,
         ...resetParams,
       };
-      if (!executionMode) {
-        Object.assign(defaultParams, { executionMode: app.executionMode });
+      if (!deployMode) {
+        Object.assign(defaultParams, { deployMode: app.deployMode });
       }
-      switch (app.executionMode) {
-        case ExecModeEnum.STANDALONE:
+      switch (app.deployMode) {
+        case DeployMode.STANDALONE:
           defaultParams['remoteClusterId'] = app.flinkClusterId;
           break;
-        case ExecModeEnum.YARN_SESSION:
+        case DeployMode.YARN_SESSION:
           defaultParams['yarnSessionClusterId'] = app.flinkClusterId;
           break;
-        case ExecModeEnum.KUBERNETES_SESSION:
+        case DeployMode.KUBERNETES_SESSION:
           defaultParams['k8sSessionClusterId'] = app.flinkClusterId;
           break;
         default:

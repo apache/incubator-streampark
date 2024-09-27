@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.watcher;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -111,7 +111,7 @@ public class FlinkK8sWatcherWrapper {
         final LambdaQueryWrapper<FlinkApplication> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
             .eq(FlinkApplication::getTracking, 1)
-            .in(FlinkApplication::getExecutionMode, FlinkExecutionMode.getKubernetesMode());
+            .in(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode());
 
         List<FlinkApplication> k8sApplication = applicationManageService.list(queryWrapper);
         if (CollectionUtils.isEmpty(k8sApplication)) {
@@ -134,7 +134,7 @@ public class FlinkK8sWatcherWrapper {
         if (archiveDir != null) {
             properties.put(JobManagerOptions.ARCHIVE_DIR.key(), archiveDir);
         }
-        if (FlinkExecutionMode.isKubernetesApplicationMode(app.getExecutionMode())) {
+        if (FlinkDeployMode.isKubernetesApplicationMode(app.getDeployMode())) {
             return TrackId.onApplication(
                 app.getK8sNamespace(),
                 app.getJobName(),
@@ -142,7 +142,7 @@ public class FlinkK8sWatcherWrapper {
                 app.getJobId(),
                 app.getTeamId().toString(),
                 properties);
-        } else if (FlinkExecutionMode.isKubernetesSessionMode(app.getExecutionMode())) {
+        } else if (FlinkDeployMode.isKubernetesSessionMode(app.getDeployMode())) {
             FlinkCluster flinkCluster = flinkClusterService.getById(app.getFlinkClusterId());
             String namespace = flinkCluster.getK8sNamespace();
             String clusterId = flinkCluster.getClusterId();
@@ -154,7 +154,7 @@ public class FlinkK8sWatcherWrapper {
                 app.getTeamId().toString(),
                 properties);
         } else {
-            throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
+            throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getDeployMode());
         }
     }
 }

@@ -17,13 +17,13 @@
 import { computed, onMounted, ref, unref, type Ref } from 'vue';
 import type { FormSchema } from '/@/components/Form';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { AppExistsStateEnum, JobTypeEnum, ExecModeEnum } from '/@/enums/sparkEnum';
+import { AppExistsStateEnum, JobTypeEnum, DeployMode } from '/@/enums/sparkEnum';
 import { ResourceFromEnum } from '/@/enums/flinkEnum';
 import type { SparkEnv } from '/@/api/spark/home.type';
 import type { RuleObject } from 'ant-design-vue/lib/form';
 import type { StoreValue } from 'ant-design-vue/lib/form/interface';
 import { renderIsSetConfig, renderStreamParkResource, sparkJobTypeMap } from './useSparkRender';
-import { executionModes } from '../data';
+import { deployModes } from '../data';
 import { useDrawer } from '/@/components/Drawer';
 import { fetchVariableAll } from '/@/api/resource/variable';
 import { fetchTeamResource } from '/@/api/resource/upload';
@@ -120,22 +120,22 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
     return [
       ...getJobTypeSchema.value,
       {
-        field: 'executionMode',
-        label: t('spark.app.executionMode'),
+        field: 'deployMode',
+        label: t('spark.app.deployMode'),
         component: 'Select',
         itemProps: {
           autoLink: false, //Resolve multiple trigger validators with null value ·
         },
         componentProps: {
-          placeholder: t('spark.app.addAppTips.executionModePlaceholder'),
-          options: executionModes,
+          placeholder: t('spark.app.addAppTips.deployModePlaceholder'),
+          options: deployModes,
         },
         rules: [
           {
             required: true,
             validator: async (_rule, value) => {
               if (value === null || value === undefined || value === '') {
-                return Promise.reject(t('spark.app.addAppTips.executionModeIsRequiredMessage'));
+                return Promise.reject(t('spark.app.addAppTips.deployModeIsRequiredMessage'));
               } else {
                 return Promise.resolve();
               }
@@ -235,16 +235,16 @@ export function useSparkSchema(sparkEnvs: Ref<SparkEnv[]>) {
         label: t('spark.app.hadoopUser'),
         component: 'Input',
         ifShow: ({ values }) =>
-          values?.executionMode == ExecModeEnum.YARN_CLIENT ||
-          values?.executionMode == ExecModeEnum.YARN_CLUSTER,
+          values?.deployMode == DeployMode.YARN_CLIENT ||
+          values?.deployMode == DeployMode.YARN_CLUSTER,
       },
       {
         field: 'yarnQueue',
         label: t('spark.app.yarnQueue'),
         component: 'Input',
         ifShow: ({ values }) =>
-          values?.executionMode == ExecModeEnum.YARN_CLIENT ||
-          values?.executionMode == ExecModeEnum.YARN_CLUSTER,
+          values?.deployMode == DeployMode.YARN_CLIENT ||
+          values?.deployMode == DeployMode.YARN_CLUSTER,
         render: ({ model, field }) => {
           return (
             <div>

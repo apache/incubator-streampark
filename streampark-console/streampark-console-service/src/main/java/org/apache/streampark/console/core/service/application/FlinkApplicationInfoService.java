@@ -182,11 +182,11 @@ public interface FlinkApplicationInfoService extends IService<FlinkApplication> 
     /**
      * Retrieves the list of recent K8s cluster IDs based on the specified execution mode.
      *
-     * @param executionMode The execution mode to filter the recent K8s cluster IDs. 1: Production
+     * @param deployMode The execution mode to filter the recent K8s cluster IDs. 1: Production
      *     mode 2: Test mode 3: Development mode -1: All modes
      * @return The list of recent K8s cluster IDs based on the specified execution mode.
      */
-    List<String> listRecentK8sClusterId(Integer executionMode);
+    List<String> listRecentK8sClusterId(Integer deployMode);
 
     /**
      * Retrieves the list of recent Flink base images.

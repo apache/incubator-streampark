@@ -35,9 +35,9 @@ import java.nio.file.Files
 
 case class SubmitRequest(
     sparkVersion: SparkVersion,
-    executionMode: SparkExecutionMode,
+    deployMode: SparkDeployMode,
     sparkYaml: String,
-    developmentMode: SparkDevelopmentMode,
+    developmentMode: SparkJobType,
     id: Long,
     appName: String,
     mainClass: String,
@@ -60,13 +60,13 @@ case class SubmitRequest(
     KEY_SPARK_PROPERTY_PREFIX)
 
   lazy val appMain: String = this.developmentMode match {
-    case SparkDevelopmentMode.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
-    case SparkDevelopmentMode.SPARK_JAR | SparkDevelopmentMode.PYSPARK => mainClass
-    case SparkDevelopmentMode.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
+    case SparkJobType.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
+    case SparkJobType.SPARK_JAR | SparkJobType.PYSPARK => mainClass
+    case SparkJobType.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")
   }
 
   lazy val userJarPath: String = {
-    executionMode match {
+    deployMode match {
       case _ =>
         checkBuildResult()
         buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
@@ -149,7 +149,7 @@ case class SubmitRequest(
 
   @throws[Exception]
   private def checkBuildResult(): Unit = {
-    executionMode match {
+    deployMode match {
       case _ =>
         if (this.buildResult == null) {
           throw new Exception(

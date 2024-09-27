@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { FailoverStrategyEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
-import { ExecModeEnum } from '/@/enums/sparkEnum';
+import { DeployMode } from '/@/enums/sparkEnum';
 
 /* Get diff editor configuration */
 export const getMonacoOptions = (readOnly: boolean) => {
@@ -61,10 +61,10 @@ export const k8sRestExposedType = [
   { label: 'NodePort', value: 2 },
 ];
 
-export const executionModes = [
-  { label: 'Standalone', value: ExecModeEnum.REMOTE, disabled: false },
-  { label: 'Yarn-Cluster', value: ExecModeEnum.YARN_CLUSTER, disabled: false },
-  { label: 'Yarn-Client', value: ExecModeEnum.YARN_CLIENT, disabled: false },
+export const deployModes = [
+  { label: 'Standalone', value: DeployMode.REMOTE, disabled: false },
+  { label: 'Yarn-Cluster', value: DeployMode.YARN_CLUSTER, disabled: false },
+  { label: 'Yarn-Client', value: DeployMode.YARN_CLIENT, disabled: false },
 ];
 
 export const cpTriggerAction = [

@@ -19,7 +19,7 @@ import { computed, h, Ref, ref, unref } from 'vue';
 import {
   AppTypeEnum,
   ConfigTypeEnum,
-  ExecModeEnum,
+  DeployMode,
   JobTypeEnum,
   ResourceFromEnum,
 } from '/@/enums/flinkEnum';
@@ -72,7 +72,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
     teamResource,
     getFlinkSqlSchema,
     getFlinkClusterSchemas,
-    getExecutionModeSchema,
+    getDeployModeSchema,
     getFlinkFormOtherSchemas,
     suggestions,
   } = useCreateAndEditSchema(dependencyRef);
@@ -117,7 +117,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         defaultValue: String(JobTypeEnum.SQL),
         rules: [{ required: true, message: t('flink.app.addAppTips.jobTypeIsRequiredMessage') }],
       },
-      ...getExecutionModeSchema.value,
+      ...getDeployModeSchema.value,
       ...getFlinkClusterSchemas.value,
       ...getFlinkSqlSchema.value,
       {
@@ -299,7 +299,7 @@ export const useCreateSchema = (dependencyRef: Ref) => {
         component: 'Switch',
         slot: 'useSysHadoopConf',
         defaultValue: false,
-        ifShow: ({ values }) => values.executionMode == ExecModeEnum.KUBERNETES_APPLICATION,
+        ifShow: ({ values }) => values.deployMode == DeployMode.KUBERNETES_APPLICATION,
       },
       ...getFlinkFormOtherSchemas.value,
     ];

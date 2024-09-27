@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.client.bean
 
 import org.apache.streampark.common.conf.FlinkVersion
-import org.apache.streampark.common.enums.FlinkExecutionMode
+import org.apache.streampark.common.enums.FlinkDeployMode
 import org.apache.streampark.common.util.Implicits.JavaMap
 
 import javax.annotation.Nullable
@@ -26,7 +26,7 @@ import javax.annotation.Nullable
 trait DeployRequestTrait {
 
   val flinkVersion: FlinkVersion
-  val executionMode: FlinkExecutionMode
+  val deployMode: FlinkDeployMode
   val properties: JavaMap[String, Any]
   val clusterId: String
   val id: Long

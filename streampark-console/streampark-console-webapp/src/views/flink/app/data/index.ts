@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ExecModeEnum, FailoverStrategyEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
+import { DeployMode, FailoverStrategyEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
 
 /* Get diff editor configuration */
 export const getMonacoOptions = (readOnly: boolean) => {
@@ -60,19 +60,19 @@ export const k8sRestExposedType = [
   { label: 'NodePort', value: 2 },
 ];
 
-export const executionModes = [
-  { label: 'standalone', value: ExecModeEnum.STANDALONE, disabled: false },
-  { label: 'yarn application', value: ExecModeEnum.YARN_APPLICATION, disabled: false },
-  { label: 'yarn session', value: ExecModeEnum.YARN_SESSION, disabled: false },
-  { label: 'kubernetes session', value: ExecModeEnum.KUBERNETES_SESSION, disabled: false },
+export const deployModes = [
+  { label: 'standalone', value: DeployMode.STANDALONE, disabled: false },
+  { label: 'yarn application', value: DeployMode.YARN_APPLICATION, disabled: false },
+  { label: 'yarn session', value: DeployMode.YARN_SESSION, disabled: false },
+  { label: 'kubernetes session', value: DeployMode.KUBERNETES_SESSION, disabled: false },
   {
     label: 'kubernetes application',
-    value: ExecModeEnum.KUBERNETES_APPLICATION,
+    value: DeployMode.KUBERNETES_APPLICATION,
     disabled: false,
   },
   {
     label: 'yarn per-job (deprecated, please use yarn-application mode)',
-    value: ExecModeEnum.YARN_PER_JOB,
+    value: DeployMode.YARN_PER_JOB,
     disabled: false,
   },
 ];

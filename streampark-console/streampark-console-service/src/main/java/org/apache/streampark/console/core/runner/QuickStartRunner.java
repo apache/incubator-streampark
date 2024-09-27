@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.runner;
 
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkCluster;
@@ -80,7 +80,7 @@ public class QuickStartRunner implements ApplicationRunner {
             flinkCluster.setClusterName("quickstart");
             flinkCluster.setVersionId(flinkEnv.getId());
             flinkCluster.setClusterState(ClusterState.RUNNING.getState());
-            flinkCluster.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+            flinkCluster.setDeployMode(FlinkDeployMode.REMOTE.getMode());
             flinkCluster.setAddress("http://localhost:" + quickstart.get("flink_port"));
             flinkClusterService.create(flinkCluster, defaultId);
 
@@ -90,7 +90,7 @@ public class QuickStartRunner implements ApplicationRunner {
             FlinkApplication application = applicationManageService.getApp(app.getId());
             application.setFlinkClusterId(flinkCluster.getId());
             application.setVersionId(flinkEnv.getId());
-            application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+            application.setDeployMode(FlinkDeployMode.REMOTE.getMode());
 
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
             application.setFlinkSql(flinkSql.getSql());

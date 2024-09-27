@@ -18,11 +18,11 @@
 package org.apache.streampark.flink.kubernetes.model
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode
 
 /** flink cluster identifier on kubernetes */
 case class ClusterKey(
-    executeMode: FlinkK8sExecuteMode.Value,
+    executeMode: FlinkK8sDeployMode.Value,
     namespace: String = "default",
     clusterId: String) {
 

@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.client.impl
 
-import org.apache.streampark.common.enums.FlinkExecutionMode
+import org.apache.streampark.common.enums.FlinkDeployMode
 import org.apache.streampark.common.util.{Logger, Utils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.client.`trait`.KubernetesNativeClientTrait
@@ -25,7 +25,7 @@ import org.apache.streampark.flink.client.bean._
 import org.apache.streampark.flink.client.tool.FlinkSessionSubmitHelper
 import org.apache.streampark.flink.core.FlinkKubernetesClient
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
 import org.apache.commons.lang3.StringUtils
@@ -64,7 +64,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
 
     // get jm rest url of flink session cluster
     val clusterKey = ClusterKey(
-      FlinkK8sExecuteMode.SESSION,
+      FlinkK8sDeployMode.SESSION,
       submitRequest.kubernetesNamespace,
       submitRequest.clusterId)
     val jmRestUrl = KubernetesRetriever
@@ -109,7 +109,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): CancelResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
-      FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+      FlinkDeployMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doCancel(cancelRequest, flinkConfig)
   }
 
@@ -120,7 +120,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
          |--------------------------------------- kubernetes cluster start ---------------------------------------
          |    userFlinkHome    : ${deployRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${deployRequest.flinkVersion.version}
-         |    execMode         : ${deployRequest.executionMode.name()}
+         |    deployMode       : ${deployRequest.deployMode.name()}
          |    clusterId        : ${deployRequest.clusterId}
          |    namespace        : ${deployRequest.k8sParam.kubernetesNamespace}
          |    exposedType      : ${deployRequest.k8sParam.flinkRestExposedType}
@@ -177,7 +177,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       }
     } catch {
       case e: Exception =>
-        logError(s"shutdown flink session fail in ${shutDownRequest.executionMode} mode")
+        logError(s"shutdown flink session fail in ${shutDownRequest.deployMode} mode")
         e.printStackTrace()
         throw e
     } finally {
@@ -190,7 +190,7 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       flinkConfig: Configuration): SavepointResponse = {
     flinkConfig.safeSet(
       DeploymentOptions.TARGET,
-      FlinkExecutionMode.KUBERNETES_NATIVE_SESSION.getName)
+      FlinkDeployMode.KUBERNETES_NATIVE_SESSION.getName)
     super.doTriggerSavepoint(triggerSavepointRequest, flinkConfig)
   }
 

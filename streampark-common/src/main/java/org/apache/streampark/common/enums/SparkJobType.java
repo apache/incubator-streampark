@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** The spark deployment mode enum. */
-public enum SparkDevelopmentMode {
+public enum SparkJobType {
 
     /** Unknown type replace null */
     UNKNOWN("Unknown", -1),
@@ -39,28 +39,28 @@ public enum SparkDevelopmentMode {
 
     private final Integer mode;
 
-    SparkDevelopmentMode(@Nonnull String name, @Nonnull Integer mode) {
+    SparkJobType(@Nonnull String name, @Nonnull Integer mode) {
         this.name = name;
         this.mode = mode;
     }
 
     /**
-     * Try to resolve the mode value into {@link SparkDevelopmentMode}.
+     * Try to resolve the mode value into {@link SparkJobType}.
      *
      * @param value The mode value of potential spark deployment mode.
      * @return The parsed spark deployment mode.
      */
     @Nonnull
-    public static SparkDevelopmentMode valueOf(@Nullable Integer value) {
-        for (SparkDevelopmentMode sparkDevelopmentMode : values()) {
+    public static SparkJobType valueOf(@Nullable Integer value) {
+        for (SparkJobType sparkDevelopmentMode : values()) {
             if (sparkDevelopmentMode.mode.equals(value)) {
                 return sparkDevelopmentMode;
             }
         }
-        return SparkDevelopmentMode.UNKNOWN;
+        return SparkJobType.UNKNOWN;
     }
 
-    /** Get the mode value of the current {@link SparkDevelopmentMode} enum. */
+    /** Get the mode value of the current {@link SparkJobType} enum. */
     @Nonnull
     public Integer getMode() {
         return mode;

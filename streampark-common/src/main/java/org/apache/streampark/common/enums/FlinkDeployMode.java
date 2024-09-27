@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /** Flink execution mode enum. */
-public enum FlinkExecutionMode {
+public enum FlinkDeployMode {
 
     /** Unknown Mode */
     UNKNOWN(-1, "Unknown"),
@@ -54,41 +54,41 @@ public enum FlinkExecutionMode {
 
     private final String name;
 
-    FlinkExecutionMode(@Nonnull Integer mode, @Nonnull String name) {
+    FlinkDeployMode(@Nonnull Integer mode, @Nonnull String name) {
         this.mode = mode;
         this.name = name;
     }
 
     /**
-     * Try to resolve the mode value into {@link FlinkExecutionMode}.
+     * Try to resolve the mode value into {@link FlinkDeployMode}.
      *
      * @param value The mode value of potential flink execution mode.
      * @return The parsed flink execution mode enum.
      */
     @Nonnull
-    public static FlinkExecutionMode of(@Nullable Integer value) {
-        for (FlinkExecutionMode mode : values()) {
+    public static FlinkDeployMode of(@Nullable Integer value) {
+        for (FlinkDeployMode mode : values()) {
             if (mode.mode.equals(value)) {
                 return mode;
             }
         }
-        return FlinkExecutionMode.UNKNOWN;
+        return FlinkDeployMode.UNKNOWN;
     }
 
     /**
-     * Try to resolve the mode name into {@link FlinkExecutionMode}.
+     * Try to resolve the mode name into {@link FlinkDeployMode}.
      *
      * @param name The mode name of potential flink execution mode.
      * @return The parsed flink execution mode enum.
      */
     @Nonnull
-    public static FlinkExecutionMode of(@Nullable String name) {
-        for (FlinkExecutionMode mode : values()) {
+    public static FlinkDeployMode of(@Nullable String name) {
+        for (FlinkDeployMode mode : values()) {
             if (mode.name.equals(name)) {
                 return mode;
             }
         }
-        return FlinkExecutionMode.UNKNOWN;
+        return FlinkDeployMode.UNKNOWN;
     }
 
     public int getMode() {
@@ -106,7 +106,7 @@ public enum FlinkExecutionMode {
      * @param mode The given mode.
      * @return The judged result.
      */
-    public static boolean isYarnMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isYarnMode(@Nullable FlinkDeployMode mode) {
         return YARN_PER_JOB == mode || YARN_APPLICATION == mode || YARN_SESSION == mode;
     }
 
@@ -117,7 +117,7 @@ public enum FlinkExecutionMode {
      * @return The judged result. TODO: We'll inline this method back to the corresponding caller
      *     lines after dropping the yarn perjob mode.
      */
-    public static boolean isYarnPerJobOrAppMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isYarnPerJobOrAppMode(@Nullable FlinkDeployMode mode) {
         return YARN_PER_JOB == mode || YARN_APPLICATION == mode;
     }
 
@@ -127,7 +127,7 @@ public enum FlinkExecutionMode {
      * @param mode The given mode.
      * @return The judged result.
      */
-    public static boolean isYarnSessionMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isYarnSessionMode(@Nullable FlinkDeployMode mode) {
         return YARN_SESSION == mode;
     }
 
@@ -157,7 +157,7 @@ public enum FlinkExecutionMode {
      * @param mode The given flink execution mode.
      * @return The judged result.
      */
-    public static boolean isKubernetesMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isKubernetesMode(@Nullable FlinkDeployMode mode) {
         return KUBERNETES_NATIVE_SESSION == mode || KUBERNETES_NATIVE_APPLICATION == mode;
     }
 
@@ -189,7 +189,7 @@ public enum FlinkExecutionMode {
     }
 
     /** Judge the given flink execution mode whether is session execution mode. */
-    public static boolean isSessionMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isSessionMode(@Nullable FlinkDeployMode mode) {
         return KUBERNETES_NATIVE_SESSION == mode || YARN_SESSION == mode;
     }
 
@@ -199,7 +199,7 @@ public enum FlinkExecutionMode {
     }
 
     /** Judge the given flink execution mode whether is remote execution mode. */
-    public static boolean isRemoteMode(@Nullable FlinkExecutionMode mode) {
+    public static boolean isRemoteMode(@Nullable FlinkDeployMode mode) {
         return REMOTE == mode;
     }
 }

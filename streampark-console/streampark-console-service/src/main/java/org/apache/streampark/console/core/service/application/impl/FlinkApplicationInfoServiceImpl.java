@@ -18,7 +18,7 @@
 package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.Utils;
@@ -222,8 +222,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
             envInitializer.storageInitialize(application.getStorageType());
 
-            if (FlinkExecutionMode.YARN_SESSION == application.getFlinkExecutionMode()
-                || FlinkExecutionMode.REMOTE == application.getFlinkExecutionMode()) {
+            if (FlinkDeployMode.YARN_SESSION == application.getFlinkDeployMode()
+                || FlinkDeployMode.REMOTE == application.getFlinkDeployMode()) {
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
                 if (!conned) {
@@ -303,8 +303,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
     }
 
     @Override
-    public List<String> listRecentK8sClusterId(Integer executionMode) {
-        return baseMapper.selectRecentK8sClusterIds(executionMode, DEFAULT_HISTORY_RECORD_LIMIT);
+    public List<String> listRecentK8sClusterId(Integer deployMode) {
+        return baseMapper.selectRecentK8sClusterIds(deployMode, DEFAULT_HISTORY_RECORD_LIMIT);
     }
 
     @Override
@@ -333,7 +333,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
         if (application == null) {
             return AppExistsStateEnum.INVALID;
         }
-        if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
+        if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
             boolean exists = !getYarnAppReport(application.getJobName()).isEmpty();
             return exists ? AppExistsStateEnum.IN_YARN : AppExistsStateEnum.NO;
         }
@@ -370,8 +370,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s can't be found.", id));
         ApiAlertException.throwIfFalse(
-            FlinkExecutionMode.isKubernetesMode(application.getFlinkExecutionMode()),
-            "Job executionMode must be kubernetes-session|kubernetes-application.");
+            FlinkDeployMode.isKubernetesMode(application.getFlinkDeployMode()),
+            "Job deployMode must be kubernetes-session|kubernetes-application.");
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(
             () -> KubernetesDeploymentHelper.watchDeploymentLog(
@@ -440,7 +440,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             return AppExistsStateEnum.IN_DB;
         }
 
-        if (FlinkExecutionMode.isYarnMode(appParam.getExecutionMode())
+        if (FlinkDeployMode.isYarnMode(appParam.getDeployMode())
             && YarnUtils.isContains(jobName)) {
             return AppExistsStateEnum.IN_YARN;
         }

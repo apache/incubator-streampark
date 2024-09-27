@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Spark execution mode enum. */
-public enum SparkExecutionMode {
+public enum SparkDeployMode {
 
     /** Unknown Mode */
     UNKNOWN(-1, "Unknown"),
@@ -42,41 +42,41 @@ public enum SparkExecutionMode {
 
     private final String name;
 
-    SparkExecutionMode(@Nonnull Integer mode, @Nonnull String name) {
+    SparkDeployMode(@Nonnull Integer mode, @Nonnull String name) {
         this.mode = mode;
         this.name = name;
     }
 
     /**
-     * Try to resolve the mode value into {@link SparkExecutionMode}.
+     * Try to resolve the mode value into {@link SparkDeployMode}.
      *
      * @param value The mode value of potential spark execution mode.
      * @return The parsed spark execution mode enum.
      */
     @Nonnull
-    public static SparkExecutionMode of(@Nullable Integer value) {
-        for (SparkExecutionMode mode : values()) {
+    public static SparkDeployMode of(@Nullable Integer value) {
+        for (SparkDeployMode mode : values()) {
             if (mode.mode.equals(value)) {
                 return mode;
             }
         }
-        return SparkExecutionMode.UNKNOWN;
+        return SparkDeployMode.UNKNOWN;
     }
 
     /**
-     * Try to resolve the mode name into {@link SparkExecutionMode}.
+     * Try to resolve the mode name into {@link SparkDeployMode}.
      *
      * @param name The mode name of potential spark execution mode.
      * @return The parsed spark execution mode enum.
      */
     @Nonnull
-    public static SparkExecutionMode of(@Nullable String name) {
-        for (SparkExecutionMode mode : values()) {
+    public static SparkDeployMode of(@Nullable String name) {
+        for (SparkDeployMode mode : values()) {
             if (mode.name.equals(name)) {
                 return mode;
             }
         }
-        return SparkExecutionMode.UNKNOWN;
+        return SparkDeployMode.UNKNOWN;
     }
 
     public int getMode() {
@@ -94,7 +94,7 @@ public enum SparkExecutionMode {
      * @param mode The given mode.
      * @return The judged result.
      */
-    public static boolean isYarnMode(@Nullable SparkExecutionMode mode) {
+    public static boolean isYarnMode(@Nullable SparkDeployMode mode) {
         return YARN_CLUSTER == mode || YARN_CLIENT == mode;
     }
 
@@ -114,7 +114,7 @@ public enum SparkExecutionMode {
     }
 
     /** Judge the given spark execution mode whether is remote execution mode. */
-    public static boolean isRemoteMode(@Nullable SparkExecutionMode mode) {
+    public static boolean isRemoteMode(@Nullable SparkDeployMode mode) {
         return REMOTE == mode;
     }
 }

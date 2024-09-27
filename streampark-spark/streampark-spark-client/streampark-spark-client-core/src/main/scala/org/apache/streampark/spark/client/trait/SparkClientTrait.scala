@@ -34,7 +34,7 @@ trait SparkClientTrait extends Logger {
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
          |    appName          : ${submitRequest.appName}
          |    devMode          : ${submitRequest.developmentMode.name()}
-         |    execMode         : ${submitRequest.executionMode.name()}
+         |    deployMode       : ${submitRequest.deployMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    appArgs          : ${submitRequest.appArgs}
          |    appConf          : ${submitRequest.appConf}
@@ -51,7 +51,7 @@ trait SparkClientTrait extends Logger {
       case Failure(e) =>
         logError(
           s"spark job ${submitRequest.appName} start failed, " +
-            s"executionMode: ${submitRequest.executionMode.getName}, " +
+            s"deployMode: ${submitRequest.deployMode.getName}, " +
             s"detail: ${ExceptionUtils.stringifyException(e)}")
         throw e
     }

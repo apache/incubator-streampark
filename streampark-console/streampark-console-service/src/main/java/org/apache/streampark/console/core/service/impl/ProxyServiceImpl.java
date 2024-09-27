@@ -97,7 +97,7 @@ public class ProxyServiceImpl implements ProxyService {
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
         String url = null;
-        switch (app.getFlinkExecutionMode()) {
+        switch (app.getFlinkDeployMode()) {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
@@ -115,7 +115,7 @@ public class ProxyServiceImpl implements ProxyService {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(app.getFlinkExecutionMode().getName()));
+                    "unsupported deployMode ".concat(app.getFlinkDeployMode().getName()));
         }
 
         if (url == null) {
@@ -179,7 +179,7 @@ public class ProxyServiceImpl implements ProxyService {
         }
 
         url += getRequestURL(request, "/proxy/cluster/" + clusterId);
-        switch (cluster.getFlinkExecutionModeEnum()) {
+        switch (cluster.getFlinkDeployModeEnum()) {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
@@ -190,7 +190,7 @@ public class ProxyServiceImpl implements ProxyService {
                 return proxyRequest(request, url);
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(cluster.getFlinkExecutionModeEnum().getName()));
+                    "unsupported deployMode ".concat(cluster.getFlinkDeployModeEnum().getName()));
         }
     }
 

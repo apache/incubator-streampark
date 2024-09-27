@@ -19,7 +19,7 @@ package org.apache.streampark.flink.kubernetes
 
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.Logger
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode
 import org.apache.streampark.flink.kubernetes.ingress.IngressController
 import org.apache.streampark.flink.kubernetes.model.ClusterKey
 
@@ -66,7 +66,7 @@ object KubernetesRetriever extends Logger {
   def newFinkClusterClient(
       clusterId: String,
       @Nullable namespace: String,
-      executeMode: FlinkK8sExecuteMode.Value): Option[ClusterClient[String]] = {
+      executeMode: FlinkK8sDeployMode.Value): Option[ClusterClient[String]] = {
     // build flink config
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)

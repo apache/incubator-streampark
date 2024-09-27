@@ -49,7 +49,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
   import VariableReview from './components/VariableReview.vue';
-  import { ExecModeEnum, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
+  import { DeployMode, JobTypeEnum, UseStrategyEnum } from '/@/enums/flinkEnum';
 
   const route = useRoute();
   const go = useGo();
@@ -96,7 +96,7 @@
   const [registerReviewDrawer, { openDrawer: openReviewDrawer }] = useDrawer();
 
   /* Form reset */
-  function handleReset(executionMode?: string) {
+  function handleReset(deployMode?: string) {
     let selectAlertId = '';
     if (app.alertId) {
       selectAlertId = unref(alerts).filter((t) => t.id == app.alertId)[0]?.id;
@@ -125,21 +125,21 @@
         k8sNamespace: app.k8sNamespace,
         ...resetParams,
       };
-      switch (app.executionMode) {
-        case ExecModeEnum.STANDALONE:
+      switch (app.deployMode) {
+        case DeployMode.STANDALONE:
           defaultParams['remoteClusterId'] = app.flinkClusterId;
           break;
-        case ExecModeEnum.YARN_SESSION:
+        case DeployMode.YARN_SESSION:
           defaultParams['yarnSessionClusterId'] = app.flinkClusterId;
           break;
-        case ExecModeEnum.KUBERNETES_SESSION:
+        case DeployMode.KUBERNETES_SESSION:
           defaultParams['k8sSessionClusterId'] = app.flinkClusterId;
           break;
         default:
           break;
       }
-      if (!executionMode) {
-        Object.assign(defaultParams, { executionMode: app.executionMode });
+      if (!deployMode) {
+        Object.assign(defaultParams, { deployMode: app.deployMode });
       }
       setFieldsValue(defaultParams);
       app.args && programArgRef.value?.setContent(app.args);
@@ -304,7 +304,7 @@
     setFieldsValue({
       jobType: res.jobType,
       appType: res.appType,
-      executionMode: res.executionMode,
+      deployMode: res.deployMode,
       flinkSql: res.flinkSql ? decodeByBase64(res.flinkSql) : '',
       dependency: '',
       module: res.module,

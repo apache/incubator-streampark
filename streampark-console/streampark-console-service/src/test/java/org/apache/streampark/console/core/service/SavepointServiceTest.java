@@ -18,8 +18,8 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.util.DeflaterUtils;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.Effective;
@@ -103,14 +103,14 @@ class SavepointServiceTest extends SpringUnitTestBase {
         app.setAppType(ApplicationType.APACHE_FLINK.getType());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-        app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
+        app.setJobType(FlinkJobType.CUSTOM_CODE.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
         // Test for (StreamPark job Or FlinkSQL job) without application config.
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
         app.setAppType(ApplicationType.STREAMPARK_FLINK.getType());
-        app.setJobType(FlinkDevelopmentMode.CUSTOM_CODE.getMode());
+        app.setJobType(FlinkJobType.CUSTOM_CODE.getMode());
         assertThat(savepointServiceImpl.getSavepointFromConfig(app)).isNull();
 
         // Test for (StreamPark job Or FlinkSQL job) with application config just disabled checkpoint.
@@ -155,7 +155,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
         application.setId(appId);
         application.setTeamId(teamId);
         application.setVersionId(idOfFlinkEnv);
-        application.setExecutionMode(FlinkExecutionMode.YARN_APPLICATION.getMode());
+        application.setDeployMode(FlinkDeployMode.YARN_APPLICATION.getMode());
         applicationManageService.save(application);
 
         FlinkEnv flinkEnv = new FlinkEnv();
@@ -175,7 +175,7 @@ class SavepointServiceTest extends SpringUnitTestBase {
         Long clusterId = 1L;
 
         // Test for it without cluster.
-        application.setExecutionMode(FlinkExecutionMode.REMOTE.getMode());
+        application.setDeployMode(FlinkDeployMode.REMOTE.getMode());
         application.setFlinkClusterId(clusterId);
         assertThatThrownBy(() -> savepointServiceImpl.getSavepointFromDeployLayer(application))
             .isInstanceOf(NullPointerException.class);

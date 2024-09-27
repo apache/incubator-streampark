@@ -20,8 +20,8 @@ package org.apache.streampark.console.core.service.impl;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -455,13 +455,13 @@ public class AppBuildPipeServiceImpl
             }
         }
 
-        FlinkExecutionMode executionModeEnum = app.getFlinkExecutionMode();
+        FlinkDeployMode deployModeEnum = app.getFlinkDeployMode();
         String mainClass = Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
-        switch (executionModeEnum) {
+        switch (deployModeEnum) {
             case YARN_APPLICATION:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                if (FlinkDevelopmentMode.CUSTOM_CODE == app.getDevelopmentMode()
+                if (FlinkJobType.CUSTOM_CODE == app.getDevelopmentMode()
                     && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
@@ -490,7 +490,7 @@ public class AppBuildPipeServiceImpl
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for ExecutionMode: " + app.getFlinkExecutionMode());
+                    "Unsupported Building Application for DeployMode: " + app.getFlinkDeployMode());
         }
     }
 
@@ -521,7 +521,7 @@ public class AppBuildPipeServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
@@ -549,7 +549,7 @@ public class AppBuildPipeServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
@@ -569,7 +569,7 @@ public class AppBuildPipeServiceImpl
             mainClass,
             flinkUserJar,
             app.isCustomCodeJob(),
-            app.getFlinkExecutionMode(),
+            app.getFlinkDeployMode(),
             app.getDevelopmentMode(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app));
@@ -594,7 +594,7 @@ public class AppBuildPipeServiceImpl
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
-                if (app.getFlinkExecutionMode() == FlinkExecutionMode.YARN_APPLICATION) {
+                if (app.getFlinkDeployMode() == FlinkDeployMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }

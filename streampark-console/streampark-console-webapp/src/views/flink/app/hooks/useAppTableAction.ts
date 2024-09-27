@@ -26,7 +26,7 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import {
   AppStateEnum,
   AppTypeEnum,
-  ExecModeEnum,
+  DeployMode,
   JobTypeEnum,
   OptionStateEnum,
   ReleaseStateEnum,
@@ -118,8 +118,8 @@ export const useAppTableAction = (
       },
       {
         tooltip: { title: t('flink.app.operation.startLog') },
-        ifShow: [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(
-          record.executionMode,
+        ifShow: [DeployMode.KUBERNETES_SESSION, DeployMode.KUBERNETES_APPLICATION].includes(
+          record.deployMode,
         ),
         auth: 'app:detail',
         icon: 'ant-design:code-outlined',

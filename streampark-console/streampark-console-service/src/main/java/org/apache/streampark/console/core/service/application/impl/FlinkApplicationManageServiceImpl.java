@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service.application.impl;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.ClusterState;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
@@ -382,7 +382,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         newApp.setJobName(jobName);
         newApp.setClusterId(
-            FlinkExecutionMode.isSessionMode(persist.getFlinkExecutionMode())
+            FlinkDeployMode.isSessionMode(persist.getFlinkDeployMode())
                 ? persist.getClusterId()
                 : null);
         newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : persist.getArgs());
@@ -394,7 +394,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         newApp.setOptions(persist.getOptions());
         newApp.setDynamicProperties(persist.getDynamicProperties());
         newApp.setResolveOrder(persist.getResolveOrder());
-        newApp.setExecutionMode(persist.getExecutionMode());
+        newApp.setDeployMode(persist.getDeployMode());
         newApp.setFlinkImage(persist.getFlinkImage());
         newApp.setK8sNamespace(persist.getK8sNamespace());
         newApp.setK8sRestExposedType(persist.getK8sRestExposedType());
@@ -461,8 +461,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         FlinkApplication application = getById(appParam.getId());
 
         /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
-        FlinkExecutionMode flinkExecutionMode = application.getFlinkExecutionMode();
-        switch (flinkExecutionMode) {
+        FlinkDeployMode flinkDeployMode = application.getFlinkDeployMode();
+        switch (flinkDeployMode) {
             case REMOTE:
             case YARN_SESSION:
             case KUBERNETES_NATIVE_SESSION:
@@ -526,7 +526,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setOptions(appParam.getOptions());
         application.setDynamicProperties(appParam.getDynamicProperties());
         application.setResolveOrder(appParam.getResolveOrder());
-        application.setExecutionMode(appParam.getExecutionMode());
+        application.setDeployMode(appParam.getDeployMode());
         application.setFlinkImage(appParam.getFlinkImage());
         application.setK8sNamespace(appParam.getK8sNamespace());
         application.updateHotParams(appParam);
@@ -546,7 +546,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
         application.setTags(appParam.getTags());
 
-        switch (appParam.getFlinkExecutionMode()) {
+        switch (appParam.getFlinkDeployMode()) {
             case YARN_APPLICATION:
                 application.setHadoopUser(appParam.getHadoopUser());
                 break;
@@ -675,18 +675,18 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     }
 
     @Override
-    public List<FlinkApplication> listByTeamIdAndExecutionModes(
-                                                                Long teamId,
-                                                                @Nonnull Collection<FlinkExecutionMode> executionModeEnums) {
+    public List<FlinkApplication> listByTeamIdAndDeployModes(
+                                                             Long teamId,
+                                                             @Nonnull Collection<FlinkDeployMode> deployModeEnums) {
         return getBaseMapper()
             .selectList(
                 new LambdaQueryWrapper<FlinkApplication>()
                     .eq((SFunction<FlinkApplication, Long>) FlinkApplication::getTeamId,
                         teamId)
                     .in(
-                        FlinkApplication::getExecutionMode,
-                        executionModeEnums.stream()
-                            .map(FlinkExecutionMode::getMode)
+                        FlinkApplication::getDeployMode,
+                        deployModeEnums.stream()
+                            .map(FlinkDeployMode::getMode)
                             .collect(Collectors.toSet())));
     }
 
@@ -772,7 +772,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(FlinkApplication appParam) {
-        yarnQueueService.checkQueueLabel(appParam.getFlinkExecutionMode(), appParam.getYarnQueue());
+        yarnQueueService.checkQueueLabel(appParam.getFlinkDeployMode(), appParam.getYarnQueue());
         if (!isYarnNotDefaultQueue(appParam)) {
             return true;
         }
@@ -788,13 +788,13 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(FlinkApplication oldApp, FlinkApplication newApp) {
-        yarnQueueService.checkQueueLabel(newApp.getFlinkExecutionMode(), newApp.getYarnQueue());
+        yarnQueueService.checkQueueLabel(newApp.getFlinkDeployMode(), newApp.getYarnQueue());
         if (!isYarnNotDefaultQueue(newApp)) {
             return true;
         }
 
         oldApp.setYarnQueueByHotParams();
-        if (FlinkExecutionMode.isYarnPerJobOrAppMode(newApp.getFlinkExecutionMode())
+        if (FlinkDeployMode.isYarnPerJobOrAppMode(newApp.getFlinkDeployMode())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
@@ -806,16 +806,16 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      * empty queue label.
      *
      * @param application application entity.
-     * @return If the executionMode is (Yarn PerJob or application mode) and the queue label is not
+     * @return If the deployMode is (Yarn PerJob or application mode) and the queue label is not
      *     (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(FlinkApplication application) {
-        return FlinkExecutionMode.isYarnPerJobOrAppMode(application.getFlinkExecutionMode())
+        return FlinkDeployMode.isYarnPerJobOrAppMode(application.getFlinkDeployMode())
             && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
     private boolean isK8sPodTemplateChanged(FlinkApplication application, FlinkApplication appParam) {
-        return FlinkExecutionMode.isKubernetesMode(appParam.getExecutionMode())
+        return FlinkDeployMode.isKubernetesMode(appParam.getDeployMode())
             && (ObjectUtils.trimNoEquals(
                 application.getK8sRestExposedType(), appParam.getK8sRestExposedType())
                 || ObjectUtils.trimNoEquals(
@@ -834,8 +834,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     }
 
     private boolean isYarnApplicationModeChange(FlinkApplication application, FlinkApplication appParam) {
-        return !application.getExecutionMode().equals(appParam.getExecutionMode())
-            && (FlinkExecutionMode.YARN_APPLICATION == appParam.getFlinkExecutionMode()
-                || FlinkExecutionMode.YARN_APPLICATION == application.getFlinkExecutionMode());
+        return !application.getDeployMode().equals(appParam.getDeployMode())
+            && (FlinkDeployMode.YARN_APPLICATION == appParam.getFlinkDeployMode()
+                || FlinkDeployMode.YARN_APPLICATION == application.getFlinkDeployMode());
     }
 }

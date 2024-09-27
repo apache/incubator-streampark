@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.CompletableFutureUtils;
 import org.apache.streampark.common.util.ExceptionUtils;
@@ -292,7 +292,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     private Map<String, Object> tryGetRestProps(FlinkApplication application, FlinkCluster cluster) {
         Map<String, Object> properties = new HashMap<>();
 
-        if (FlinkExecutionMode.isRemoteMode(application.getFlinkExecutionMode())) {
+        if (FlinkDeployMode.isRemoteMode(application.getFlinkDeployMode())) {
             AssertUtils.notNull(
                 cluster,
                 String.format(
@@ -306,12 +306,12 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     }
 
     private String getClusterId(FlinkApplication application, FlinkCluster cluster) {
-        if (FlinkExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-            return FlinkExecutionMode.isKubernetesSessionMode(application.getExecutionMode())
+        if (FlinkDeployMode.isKubernetesMode(application.getDeployMode())) {
+            return FlinkDeployMode.isKubernetesSessionMode(application.getDeployMode())
                 ? cluster.getClusterId()
                 : application.getClusterId();
-        } else if (FlinkExecutionMode.isYarnMode(application.getExecutionMode())) {
-            if (FlinkExecutionMode.YARN_SESSION.equals(application.getFlinkExecutionMode())) {
+        } else if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
+            if (FlinkDeployMode.YARN_SESSION.equals(application.getFlinkDeployMode())) {
                 AssertUtils.notNull(
                     cluster,
                     String.format(
@@ -373,7 +373,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @Nullable
     public String getSavepointFromDeployLayer(FlinkApplication application) throws JsonProcessingException {
         // At the yarn or k8s mode, then read the savepoint in flink-conf.yml in the bound flink
-        if (!FlinkExecutionMode.isRemoteMode(application.getExecutionMode())) {
+        if (!FlinkDeployMode.isRemoteMode(application.getDeployMode())) {
             FlinkEnv flinkEnv = flinkEnvService.getById(application.getVersionId());
             return flinkEnv.convertFlinkYamlAsMap().get(SAVEPOINT_DIRECTORY.key());
         }
@@ -493,7 +493,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         return new TriggerSavepointRequest(
             application.getId(),
             flinkEnv.getFlinkVersion(),
-            application.getFlinkExecutionMode(),
+            application.getFlinkDeployMode(),
             properties,
             clusterId,
             application.getJobId(),

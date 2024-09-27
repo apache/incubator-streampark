@@ -68,7 +68,7 @@ export interface AppListRecord {
   options: string;
   hotParams?: string;
   resolveOrder: number;
-  executionMode: number;
+  deployMode: number;
   dynamicProperties?: string;
   appType: number;
   tracking: number;
@@ -157,7 +157,7 @@ export interface CancelParam {
 // create Params
 export interface CreateParams {
   jobType: number;
-  executionMode: number;
+  deployMode: number;
   versionId: string;
   flinkSql: string;
   appType: number;

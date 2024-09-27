@@ -21,8 +21,8 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.ApplicationType;
-import org.apache.streampark.common.enums.FlinkDevelopmentMode;
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
@@ -147,7 +147,8 @@ public class FlinkApplication implements Serializable {
     private String hotParams;
 
     private Integer resolveOrder;
-    private Integer executionMode;
+
+    private Integer deployMode;
 
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String dynamicProperties;
@@ -275,8 +276,8 @@ public class FlinkApplication implements Serializable {
     }
 
     public void setYarnQueueByHotParams() {
-        if (!(FlinkExecutionMode.YARN_APPLICATION == this.getFlinkExecutionMode()
-            || FlinkExecutionMode.YARN_PER_JOB == this.getFlinkExecutionMode())) {
+        if (!(FlinkDeployMode.YARN_APPLICATION == this.getFlinkDeployMode()
+            || FlinkDeployMode.YARN_PER_JOB == this.getFlinkDeployMode())) {
             return;
         }
 
@@ -340,8 +341,8 @@ public class FlinkApplication implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkDevelopmentMode getDevelopmentMode() {
-        return FlinkDevelopmentMode.of(jobType);
+    public FlinkJobType getDevelopmentMode() {
+        return FlinkJobType.of(jobType);
     }
 
     @JsonIgnore
@@ -355,8 +356,8 @@ public class FlinkApplication implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkExecutionMode getFlinkExecutionMode() {
-        return FlinkExecutionMode.of(executionMode);
+    public FlinkDeployMode getFlinkDeployMode() {
+        return FlinkDeployMode.of(deployMode);
     }
 
     public boolean cpFailedTrigger() {
@@ -396,10 +397,10 @@ public class FlinkApplication implements Serializable {
         return path;
     }
 
-    /** Automatically identify remoteAppHome or localAppHome based on app FlinkExecutionMode */
+    /** Automatically identify remoteAppHome or localAppHome based on app FlinkDeployMode */
     @JsonIgnore
     public String getAppHome() {
-        switch (this.getFlinkExecutionMode()) {
+        switch (this.getFlinkDeployMode()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
             case YARN_PER_JOB:
@@ -411,7 +412,7 @@ public class FlinkApplication implements Serializable {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported executionMode ".concat(getFlinkExecutionMode().getName()));
+                    "unsupported deployMode ".concat(getFlinkDeployMode().getName()));
         }
     }
 
@@ -439,24 +440,24 @@ public class FlinkApplication implements Serializable {
 
     @JsonIgnore
     public boolean isFlinkSqlJob() {
-        return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType());
+        return FlinkJobType.FLINK_SQL.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isFlinkSqlJobOrPyFlinkJob() {
-        return FlinkDevelopmentMode.FLINK_SQL.getMode().equals(this.getJobType())
-            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+        return FlinkJobType.FLINK_SQL.getMode().equals(this.getJobType())
+            || FlinkJobType.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isCustomCodeJob() {
-        return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType());
+        return FlinkJobType.CUSTOM_CODE.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
     public boolean isCustomCodeOrPyFlinkJob() {
-        return FlinkDevelopmentMode.CUSTOM_CODE.getMode().equals(this.getJobType())
-            || FlinkDevelopmentMode.PYFLINK.getMode().equals(this.getJobType());
+        return FlinkJobType.CUSTOM_CODE.getMode().equals(this.getJobType())
+            || FlinkJobType.PYFLINK.getMode().equals(this.getJobType());
     }
 
     @JsonIgnore
@@ -506,12 +507,12 @@ public class FlinkApplication implements Serializable {
 
     @JsonIgnore
     public StorageType getStorageType() {
-        return getStorageType(getExecutionMode());
+        return getStorageType(getDeployMode());
     }
 
-    public static StorageType getStorageType(Integer execMode) {
-        FlinkExecutionMode executionModeEnum = FlinkExecutionMode.of(execMode);
-        switch (Objects.requireNonNull(executionModeEnum)) {
+    public static StorageType getStorageType(Integer deployMode) {
+        FlinkDeployMode deployModeEnum = FlinkDeployMode.of(deployMode);
+        switch (Objects.requireNonNull(deployModeEnum)) {
             case YARN_APPLICATION:
                 return StorageType.HDFS;
             case YARN_PER_JOB:
@@ -521,7 +522,7 @@ public class FlinkApplication implements Serializable {
             case REMOTE:
                 return StorageType.LFS;
             default:
-                throw new UnsupportedOperationException("Unsupported ".concat(executionModeEnum.getName()));
+                throw new UnsupportedOperationException("Unsupported ".concat(deployModeEnum.getName()));
         }
     }
 
@@ -557,12 +558,12 @@ public class FlinkApplication implements Serializable {
         if (appParam != this) {
             this.hotParams = null;
         }
-        FlinkExecutionMode executionModeEnum = appParam.getFlinkExecutionMode();
+        FlinkDeployMode deployModeEnum = appParam.getFlinkDeployMode();
         Map<String, String> hotParams = new HashMap<>(0);
-        if (needFillYarnQueueLabel(executionModeEnum)) {
+        if (needFillYarnQueueLabel(deployModeEnum)) {
             hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
         }
-        if (executionModeEnum == FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION) {
+        if (deployModeEnum == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
             if (StringUtils.isNotBlank(appParam.getServiceAccount())) {
                 hotParams.put(ConfigKeys.KEY_KERBEROS_SERVICE_ACCOUNT(), appParam.getServiceAccount());
             }
@@ -572,8 +573,8 @@ public class FlinkApplication implements Serializable {
         }
     }
 
-    private boolean needFillYarnQueueLabel(FlinkExecutionMode mode) {
-        return FlinkExecutionMode.YARN_PER_JOB == mode || FlinkExecutionMode.YARN_APPLICATION == mode;
+    private boolean needFillYarnQueueLabel(FlinkDeployMode mode) {
+        return FlinkDeployMode.YARN_PER_JOB == mode || FlinkDeployMode.YARN_APPLICATION == mode;
     }
 
     @Override
@@ -593,7 +594,7 @@ public class FlinkApplication implements Serializable {
     }
 
     public boolean isKubernetesModeJob() {
-        return FlinkExecutionMode.isKubernetesMode(this.getFlinkExecutionMode());
+        return FlinkDeployMode.isKubernetesMode(this.getFlinkDeployMode());
     }
 
     public static class SFunc {
@@ -611,7 +612,7 @@ public class FlinkApplication implements Serializable {
         public static final SFunction<FlinkApplication, Integer> STATE = FlinkApplication::getState;
         public static final SFunction<FlinkApplication, String> OPTIONS = FlinkApplication::getOptions;
         public static final SFunction<FlinkApplication, Integer> AVAILABLE_SLOT = FlinkApplication::getAvailableSlot;
-        public static final SFunction<FlinkApplication, Integer> EXECUTION_MODE = FlinkApplication::getExecutionMode;
+        public static final SFunction<FlinkApplication, Integer> EXECUTION_MODE = FlinkApplication::getDeployMode;
         public static final SFunction<FlinkApplication, String> JOB_MANAGER_URL = FlinkApplication::getJobManagerUrl;
     }
 

@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** The flink deployment mode enum. */
-public enum FlinkDevelopmentMode {
+public enum FlinkJobType {
 
     /** Unknown type replace null */
     UNKNOWN("Unknown", -1),
@@ -39,28 +39,28 @@ public enum FlinkDevelopmentMode {
 
     private final Integer mode;
 
-    FlinkDevelopmentMode(@Nonnull String name, @Nonnull Integer mode) {
+    FlinkJobType(@Nonnull String name, @Nonnull Integer mode) {
         this.name = name;
         this.mode = mode;
     }
 
     /**
-     * Try to resolve the mode value into {@link FlinkDevelopmentMode}.
+     * Try to resolve the mode value into {@link FlinkJobType}.
      *
      * @param value The mode value of potential flink deployment mode.
      * @return The parsed flink deployment mode.
      */
     @Nonnull
-    public static FlinkDevelopmentMode of(@Nullable Integer value) {
-        for (FlinkDevelopmentMode flinkDevelopmentMode : values()) {
+    public static FlinkJobType of(@Nullable Integer value) {
+        for (FlinkJobType flinkDevelopmentMode : values()) {
             if (flinkDevelopmentMode.mode.equals(value)) {
                 return flinkDevelopmentMode;
             }
         }
-        return FlinkDevelopmentMode.UNKNOWN;
+        return FlinkJobType.UNKNOWN;
     }
 
-    /** Get the mode value of the current {@link FlinkDevelopmentMode} enum. */
+    /** Get the mode value of the current {@link FlinkJobType} enum. */
     @Nonnull
     public Integer getMode() {
         return mode;

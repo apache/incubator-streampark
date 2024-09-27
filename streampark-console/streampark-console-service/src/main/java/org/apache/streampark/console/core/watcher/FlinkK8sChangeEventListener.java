@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.watcher;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.core.component.FlinkCheckpointProcessor;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
-import org.apache.streampark.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 import org.apache.streampark.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobCheckpointChangeEvent;
 import org.apache.streampark.flink.kubernetes.event.FlinkJobStatusChangeEvent;
@@ -118,9 +118,9 @@ public class FlinkK8sChangeEventListener {
     @Subscribe
     public void subscribeMetricsChange(FlinkClusterMetricChangeEvent event) {
         TrackId trackId = event.trackId();
-        FlinkExecutionMode mode = FlinkK8sExecuteMode.toFlinkExecutionMode(trackId.executeMode());
+        FlinkDeployMode mode = FlinkK8sDeployMode.toFlinkDeployMode(trackId.executeMode());
         // discard session mode change
-        if (FlinkExecutionMode.KUBERNETES_NATIVE_SESSION == mode) {
+        if (FlinkDeployMode.KUBERNETES_NATIVE_SESSION == mode) {
             return;
         }
 

@@ -17,8 +17,8 @@
 
 package org.apache.streampark.console.core.service.impl;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
-import org.apache.streampark.common.enums.SparkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
+import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
@@ -175,19 +175,19 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
      * Only check the validation of queue-labelExpression when using yarn application or yarn-session
      * mode or yarn-perjob mode.
      *
-     * @param executionModeEnum execution mode.
+     * @param deployModeEnum execution mode.
      * @param queueLabel queueLabel expression.
      */
     @Override
-    public void checkQueueLabel(FlinkExecutionMode executionModeEnum, String queueLabel) {
-        if (FlinkExecutionMode.isYarnMode(executionModeEnum)) {
+    public void checkQueueLabel(FlinkDeployMode deployModeEnum, String queueLabel) {
+        if (FlinkDeployMode.isYarnMode(deployModeEnum)) {
             ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
         }
     }
 
     @Override
-    public void checkQueueLabel(SparkExecutionMode executionModeEnum, String queueLabel) {
-        if (SparkExecutionMode.isYarnMode(executionModeEnum)) {
+    public void checkQueueLabel(SparkDeployMode deployModeEnum, String queueLabel) {
+        if (SparkDeployMode.isYarnMode(deployModeEnum)) {
             ApiAlertException.throwIfFalse(isValid(queueLabel, true), ERR_FORMAT_HINTS);
         }
     }
@@ -227,7 +227,7 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
     public void checkNotReferencedByFlinkClusters(
                                                   @Nonnull String queueLabel, @Nonnull String operation) {
         List<FlinkCluster> clustersReferenceYarnQueueLabel = flinkClusterService
-            .listByExecutionModes(Sets.newHashSet(FlinkExecutionMode.YARN_SESSION))
+            .listByDeployModes(Sets.newHashSet(FlinkDeployMode.YARN_SESSION))
             .stream()
             .filter(flinkCluster -> StringUtils.equals(flinkCluster.getYarnQueue(), queueLabel))
             .collect(Collectors.toList());
@@ -241,11 +241,11 @@ public class YarnQueueServiceImpl extends ServiceImpl<YarnQueueMapper, YarnQueue
                                                  @Nonnull Long teamId, @Nonnull String queueLabel,
                                                  @Nonnull String operation) {
         List<FlinkApplication> appsReferenceQueueLabel = applicationManageService
-            .listByTeamIdAndExecutionModes(
+            .listByTeamIdAndDeployModes(
                 teamId,
                 Sets.newHashSet(
-                    FlinkExecutionMode.YARN_APPLICATION,
-                    FlinkExecutionMode.YARN_PER_JOB))
+                    FlinkDeployMode.YARN_APPLICATION,
+                    FlinkDeployMode.YARN_PER_JOB))
             .stream()
             .filter(
                 application -> {

@@ -19,7 +19,7 @@ import { AppListRecord } from '/@/api/flink/app.type';
 import {
   AppStateEnum,
   ConfigTypeEnum,
-  ExecModeEnum,
+  DeployMode,
   ReleaseStateEnum,
   OptionStateEnum,
   PipelineStepEnum,
@@ -142,8 +142,8 @@ export function handleIsStart(app: Recordable, optionApps: Recordable) {
 
 export function handleYarnQueue(values: Recordable) {
   if (
-    values.executionMode == ExecModeEnum.YARN_APPLICATION ||
-    values.executionMode == ExecModeEnum.YARN_PER_JOB
+    values.deployMode == DeployMode.YARN_APPLICATION ||
+    values.deployMode == DeployMode.YARN_PER_JOB
   ) {
     const queue = values['yarnQueue'];
     if (queue != null && queue !== '' && queue !== undefined) {
@@ -246,13 +246,13 @@ export function handleDependencyJsonToPom(json, pomMap, jarMap) {
 }
 
 function getFlinkClusterId(values: Recordable) {
-  if (values.executionMode == ExecModeEnum.YARN_SESSION) {
+  if (values.deployMode == DeployMode.YARN_SESSION) {
     return values.yarnSessionClusterId;
   }
-  if (values.executionMode == ExecModeEnum.STANDALONE) {
+  if (values.deployMode == DeployMode.STANDALONE) {
     return values.remoteClusterId;
   }
-  if (values.executionMode == ExecModeEnum.KUBERNETES_SESSION) {
+  if (values.deployMode == DeployMode.KUBERNETES_SESSION) {
     return values.k8sSessionClusterId;
   }
   return null;
@@ -265,7 +265,7 @@ export function handleSubmitParams(
 ) {
   const options = handleFormValue(values);
   Object.assign(params, {
-    executionMode: values.executionMode,
+    deployMode: values.deployMode,
     versionId: values.versionId,
     jobName: values.jobName,
     tags: values.tags,
@@ -286,7 +286,7 @@ export function handleSubmitParams(
     flinkClusterId: getFlinkClusterId(values),
     flinkImage: values.flinkImage || null,
   });
-  if (params.executionMode == ExecModeEnum.KUBERNETES_APPLICATION) {
+  if (params.deployMode == DeployMode.KUBERNETES_APPLICATION) {
     Object.assign(params, {
       serviceAccount: values.serviceAccount,
       k8sPodTemplate: k8sTemplate.podTemplate,
@@ -302,8 +302,8 @@ export const filterOption = (input: string, options: Recordable) => {
 };
 
 // k8s mode
-export function isK8sExecMode(mode: number): boolean {
-  return [ExecModeEnum.KUBERNETES_SESSION, ExecModeEnum.KUBERNETES_APPLICATION].includes(mode);
+export function isK8sDeployMode(mode: number): boolean {
+  return [DeployMode.KUBERNETES_SESSION, DeployMode.KUBERNETES_APPLICATION].includes(mode);
 }
 
 export function handleTeamResource(resource: string) {

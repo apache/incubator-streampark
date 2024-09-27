@@ -22,7 +22,7 @@ import { fetchBuild, fetchBuildDetail } from '/@/api/flink/flinkBuild';
 import { fetchSavePointHistory } from '/@/api/flink/savepoint';
 import { fetchAppOwners } from '/@/api/system/user';
 import { SvgIcon } from '/@/components/Icon';
-import { AppStateEnum, ExecModeEnum, OptionStateEnum } from '/@/enums/flinkEnum';
+import { AppStateEnum, DeployMode, OptionStateEnum } from '/@/enums/flinkEnum';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 
@@ -130,7 +130,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
         historySavePoint.value = resp.records.filter((x: Recordable) => x.path);
         const latest = resp.records.find((x: Recordable) => x.latest) || null;
         openStartModal(true, {
-          executionMode: app.executionMode,
+          deployMode: app.deployMode,
           application: app,
           historySavePoint: historySavePoint.value,
           selected: latest,
@@ -327,10 +327,10 @@ export const useFlinkApplication = (openStartModal: Fn) => {
               <Alert message={app.jobName} type="info" />
             </Form.Item>
             {[
-              ExecModeEnum.YARN_PER_JOB,
-              ExecModeEnum.YARN_SESSION,
-              ExecModeEnum.YARN_APPLICATION,
-            ].includes(app.executionMode) && (
+              DeployMode.YARN_PER_JOB,
+              DeployMode.YARN_SESSION,
+              DeployMode.YARN_APPLICATION,
+            ].includes(app.deployMode) && (
               <Form.Item
                 label="YARN Application Id"
                 name="appId"

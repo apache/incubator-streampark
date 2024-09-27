@@ -17,27 +17,27 @@
 
 package org.apache.streampark.flink.kubernetes.enums
 
-import org.apache.streampark.common.enums.FlinkExecutionMode
+import org.apache.streampark.common.enums.FlinkDeployMode
 
 /** execution mode of flink on kubernetes */
-object FlinkK8sExecuteMode extends Enumeration {
+object FlinkK8sDeployMode extends Enumeration {
 
-  val SESSION: FlinkK8sExecuteMode.Value = Value("kubernetes-session")
-  val APPLICATION: FlinkK8sExecuteMode.Value = Value("kubernetes-application")
+  val SESSION: FlinkK8sDeployMode.Value = Value("kubernetes-session")
+  val APPLICATION: FlinkK8sDeployMode.Value = Value("kubernetes-application")
 
-  def of(mode: FlinkExecutionMode): Value = {
+  def of(mode: FlinkDeployMode): Value = {
     mode match {
-      case FlinkExecutionMode.KUBERNETES_NATIVE_SESSION => SESSION
-      case FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION => APPLICATION
+      case FlinkDeployMode.KUBERNETES_NATIVE_SESSION => SESSION
+      case FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION => APPLICATION
       case _ =>
         throw new IllegalStateException(s"Illegal K8sExecuteMode, ${mode.name}")
     }
   }
 
-  def toFlinkExecutionMode(mode: FlinkK8sExecuteMode.Value): FlinkExecutionMode = {
+  def toFlinkDeployMode(mode: FlinkK8sDeployMode.Value): FlinkDeployMode = {
     mode match {
-      case SESSION => FlinkExecutionMode.KUBERNETES_NATIVE_SESSION
-      case APPLICATION => FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION
+      case SESSION => FlinkDeployMode.KUBERNETES_NATIVE_SESSION
+      case APPLICATION => FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION
     }
   }
 

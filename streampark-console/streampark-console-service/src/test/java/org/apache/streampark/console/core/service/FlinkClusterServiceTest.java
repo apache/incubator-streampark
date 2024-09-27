@@ -17,7 +17,7 @@
 
 package org.apache.streampark.console.core.service;
 
-import org.apache.streampark.common.enums.FlinkExecutionMode;
+import org.apache.streampark.common.enums.FlinkDeployMode;
 import org.apache.streampark.console.SpringUnitTestBase;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.YarnQueue;
@@ -97,7 +97,7 @@ class FlinkClusterServiceTest extends SpringUnitTestBase {
         assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isTrue();
 
         // Test non-existed queue
-        cluster1.setExecutionMode(FlinkExecutionMode.KUBERNETES_NATIVE_APPLICATION.getMode());
+        cluster1.setDeployMode(FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getMode());
         cluster2.setYarnQueue(nonExistedQueue);
         assertThat(clusterServiceImpl.validateQueueIfNeeded(cluster1, cluster2)).isFalse();
     }
