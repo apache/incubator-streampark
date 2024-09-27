@@ -173,14 +173,14 @@ create table `t_flink_env` (
 
 
 -- ----------------------------
--- table structure for t_flink_log
+-- table structure for t_app_log
 -- ----------------------------
-drop table if exists `t_flink_log`;
-create table `t_flink_log` (
+drop table if exists `t_app_log`;
+create table `t_app_log` (
   `id` bigint not null auto_increment,
   `app_id` bigint default null,
-  `yarn_app_id` varchar(64) collate utf8mb4_general_ci default null,
-  `job_manager_url` varchar(255) collate utf8mb4_general_ci default null,
+  `cluster_id` varchar(64) collate utf8mb4_general_ci default null,
+  `tracking_url` varchar(255) collate utf8mb4_general_ci default null,
   `success` tinyint default null,
   `exception` text collate utf8mb4_general_ci,
   `option_time` datetime default null,

@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 
 @Data
-@TableName("t_flink_log")
+@TableName("t_app_log")
 @Slf4j
 public class ApplicationLog {
 

@@ -528,44 +528,44 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                                    FlinkApplication appParam,
                                    SubmitResponse response,
                                    ApplicationLog applicationLog,
-                                   FlinkApplication application) {
+                                   FlinkApplication flinkApplication) {
         applicationLog.setSuccess(true);
         if (response.flinkConfig() != null) {
             String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
             if (jmMemory != null) {
-                application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
+                flinkApplication.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
             }
             String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
             if (tmMemory != null) {
-                application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
+                flinkApplication.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
             }
         }
         if (StringUtils.isNoneEmpty(response.jobId())) {
-            application.setJobId(response.jobId());
+            flinkApplication.setJobId(response.jobId());
         }
 
-        if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
-            application.setClusterId(response.clusterId());
+        if (FlinkDeployMode.isYarnMode(flinkApplication.getDeployMode())) {
+            flinkApplication.setClusterId(response.clusterId());
             applicationLog.setClusterId(response.clusterId());
         }
 
         if (StringUtils.isNoneEmpty(response.jobManagerUrl())) {
-            application.setJobManagerUrl(response.jobManagerUrl());
+            flinkApplication.setJobManagerUrl(response.jobManagerUrl());
             applicationLog.setTrackingUrl(response.jobManagerUrl());
         }
         applicationLog.setClusterId(response.clusterId());
-        application.setStartTime(new Date());
-        application.setEndTime(null);
+        flinkApplication.setStartTime(new Date());
+        flinkApplication.setEndTime(null);
 
         // if start completed, will be added task to tracking queue
-        if (application.isKubernetesModeJob()) {
-            processForK8sApp(application, applicationLog);
+        if (flinkApplication.isKubernetesModeJob()) {
+            processForK8sApp(flinkApplication, applicationLog);
         } else {
             FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.STARTING);
-            FlinkAppHttpWatcher.doWatching(application);
+            FlinkAppHttpWatcher.doWatching(flinkApplication);
         }
         // update app
-        updateById(application);
+        updateById(flinkApplication);
         // save log
         applicationLogService.save(applicationLog);
     }
