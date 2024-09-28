@@ -253,8 +253,8 @@ export const useSparkAction = (optionApps: Recordable) => {
           <Form class="!pt-50px">
             <Form.Item
               label="Job Name"
-              labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
-              wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
+              layout="vertical"
+              baseColProps={{ span: 22, offset: 1 }}
               validateStatus={unref(validateStatus)}
               help={help}
               rules={[{ required: true }]}
@@ -343,8 +343,8 @@ export const useSparkAction = (optionApps: Recordable) => {
             class="!pt-40px"
             ref={mappingRef}
             name="mappingForm"
-            labelCol={{ lg: { span: 7 }, sm: { span: 7 } }}
-            wrapperCol={{ lg: { span: 16 }, sm: { span: 4 } }}
+            layout="vertical"
+            baseColProps={{ span: 22, offset: 1 }}
             v-model:model={formValue}
           >
             <Form.Item label="Job Name">

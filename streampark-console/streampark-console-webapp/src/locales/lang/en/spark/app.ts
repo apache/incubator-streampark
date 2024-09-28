@@ -211,7 +211,7 @@ export default {
     startLog: 'View Spark Start Log',
     abort: 'Terminate Job',
     copy: 'Copy Job',
-    remapping: 'Remap Job',
+    remapping: 'Remapping Job',
     deleteTip: 'Are you sure you want to delete this job?',
     canceling: 'Current job is stopping',
     starting: 'Current job is starting',
