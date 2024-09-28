@@ -76,11 +76,10 @@ object SparkShimsProxy extends Logger {
     logInfo(s"Add verify sql lib,spark version: $sparkVersion")
     VERIFY_SQL_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
-        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars")
         val shimsUrls = ListBuffer[URL](libUrl: _*)
 
         // TODO If there are compatibility issues with different versions
-
         addShimsUrls(
           sparkVersion,
           file => {
@@ -151,9 +150,8 @@ object SparkShimsProxy extends Logger {
     SHIMS_CLASS_LOADER_CACHE.getOrElseUpdate(
       s"${sparkVersion.fullVersion}", {
         // 1) spark/lib
-        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars", f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+        val libUrl = getSparkHomeLib(sparkVersion.sparkHome, "jars")
         val shimsUrls = ListBuffer[URL](libUrl: _*)
-
         // 2) add all shims jar
         addShimsUrls(
           sparkVersion,
@@ -174,10 +172,18 @@ object SparkShimsProxy extends Logger {
   private[this] def getSparkHomeLib(
       sparkHome: String,
       childDir: String,
-      filterFun: File => Boolean): List[URL] = {
+      filterFun: File => Boolean = null): List[URL] = {
     val file = new File(sparkHome, childDir)
     require(file.isDirectory, s"SPARK_HOME $file does not exist")
-    file.listFiles.filter(filterFun).map(_.toURI.toURL).toList
+    file.listFiles
+      .filter(f => !f.getName.startsWith("log4j") && !f.getName.startsWith("slf4j"))
+      .filter(f => {
+        if (filterFun != null) {
+          filterFun(f)
+        } else {
+          true
+        }
+      }).map(_.toURI.toURL).toList
   }
 
   @throws[Exception]
