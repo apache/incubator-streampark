@@ -39,11 +39,13 @@ import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
+import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkOperationEnum;
 import org.apache.streampark.console.core.enums.SparkOptionStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationMapper;
+import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
@@ -129,6 +131,9 @@ public class SparkApplicationActionServiceImpl
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private DistributedTaskService distributedTaskService;
+
     private final Map<Long, CompletableFuture<SubmitResponse>> startJobFutureMap = new ConcurrentHashMap<>();
 
     private final Map<Long, CompletableFuture<CancelResponse>> cancelJobFutureMap = new ConcurrentHashMap<>();
@@ -136,6 +141,11 @@ public class SparkApplicationActionServiceImpl
     @Override
     public void revoke(Long appId) throws ApplicationException {
         SparkApplication application = getById(appId);
+        // For HA purposes, if the task is not processed locally, save the Distribution task and return
+        if (!distributedTaskService.isLocalProcessing(appId)) {
+            distributedTaskService.saveDistributedTask(application, false, DistributedTaskEnum.REVOKE);
+            return;
+        }
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s not found, revoke failed.", appId));
 
@@ -161,15 +171,25 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void restart(SparkApplication appParam) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the Distribution task and return
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.RESTART);
+            return;
+        }
         this.stop(appParam);
         this.start(appParam, false);
     }
 
     @Override
     public void forcedStop(Long id) {
+        SparkApplication application = this.baseMapper.selectApp(id);
+        // For HA purposes, if the task is not processed locally, save the Distribution task and return
+        if (!distributedTaskService.isLocalProcessing(id)) {
+            distributedTaskService.saveDistributedTask(application, false, DistributedTaskEnum.FORCED_STOP);
+            return;
+        }
         CompletableFuture<SubmitResponse> startFuture = startJobFutureMap.remove(id);
         CompletableFuture<CancelResponse> stopFuture = cancelJobFutureMap.remove(id);
-        SparkApplication application = this.baseMapper.selectApp(id);
         if (startFuture != null) {
             startFuture.cancel(true);
         }
@@ -183,6 +203,11 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void stop(SparkApplication appParam) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the Distribution task and return
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.STOP);
+            return;
+        }
         SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STOPPING);
         SparkApplication application = getById(appParam.getId());
         application.setState(SparkAppStateEnum.STOPPING.getValue());
@@ -245,6 +270,11 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void start(SparkApplication appParam, boolean auto) throws Exception {
+        // For HA purposes, if the task is not processed locally, save the Distribution task and return
+        if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.START);
+            return;
+        }
         // 1) check application
         final SparkApplication application = getById(appParam.getId());
         AssertUtils.notNull(application);

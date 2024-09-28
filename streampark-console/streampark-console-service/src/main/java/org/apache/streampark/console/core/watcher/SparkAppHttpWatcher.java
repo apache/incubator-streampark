@@ -28,6 +28,7 @@ import org.apache.streampark.console.core.enums.StopFromEnum;
 import org.apache.streampark.console.core.metrics.spark.Job;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
+import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -83,6 +85,9 @@ public class SparkAppHttpWatcher {
 
     @Autowired
     private SparkEnvService sparkEnvService;
+
+    @Autowired
+    private DistributedTaskService distributedTaskService;
 
     @Autowired
     private AlertService alertService;
@@ -134,16 +139,19 @@ public class SparkAppHttpWatcher {
     @PostConstruct
     public void init() {
         WATCHING_APPS.clear();
-        List<SparkApplication> applications =
-            applicationManageService.list(
-                new LambdaQueryWrapper<SparkApplication>()
-                    .eq(SparkApplication::getTracking, 1)
-                    .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue()));
-        applications.forEach(
-            (app) -> {
-                WATCHING_APPS.put(app.getId(), app);
-                STARTING_CACHE.put(app.getId(), DEFAULT_FLAG_BYTE);
-            });
+        List<SparkApplication> applications = applicationManageService.list(
+            new LambdaQueryWrapper<SparkApplication>()
+                .eq(SparkApplication::getTracking, 1)
+                .ne(SparkApplication::getState, SparkAppStateEnum.LOST.getValue()))
+            .stream()
+            .filter(application -> distributedTaskService.isLocalProcessing(application.getId()))
+            .collect(Collectors.toList());
+
+        applications.forEach(app -> {
+            Long appId = app.getId();
+            WATCHING_APPS.put(appId, app);
+            STARTING_CACHE.put(appId, DEFAULT_FLAG_BYTE);
+        });
     }
 
     @PreDestroy
