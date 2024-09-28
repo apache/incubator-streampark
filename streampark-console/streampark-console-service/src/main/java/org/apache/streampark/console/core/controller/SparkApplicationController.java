@@ -152,8 +152,8 @@ public class SparkApplicationController {
 
     @PostMapping("cancel")
     @RequiresPermissions("app:cancel")
-    public RestResponse stop(SparkApplication app) throws Exception {
-        applicationActionService.stop(app);
+    public RestResponse cancel(SparkApplication app) throws Exception {
+        applicationActionService.cancel(app);
         return RestResponse.success();
     }
 

@@ -161,7 +161,7 @@ public class SparkApplicationActionServiceImpl
 
     @Override
     public void restart(SparkApplication appParam) throws Exception {
-        this.stop(appParam);
+        this.cancel(appParam);
         this.start(appParam, false);
     }
 
@@ -182,7 +182,7 @@ public class SparkApplicationActionServiceImpl
     }
 
     @Override
-    public void stop(SparkApplication appParam) throws Exception {
+    public void cancel(SparkApplication appParam) throws Exception {
         SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STOPPING);
         SparkApplication application = getById(appParam.getId());
         application.setState(SparkAppStateEnum.STOPPING.getValue());
