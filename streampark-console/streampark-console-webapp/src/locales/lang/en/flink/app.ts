@@ -111,7 +111,7 @@ export default {
     lost: 'LOST',
   },
   detail: {
-    detailTitle: 'Application Info',
+    detailTitle: 'Job Details',
     flinkWebUi: 'Flink Web UI',
     compareConfig: 'Compare Config',
     compareFlinkSql: 'Compare Flink SQL',

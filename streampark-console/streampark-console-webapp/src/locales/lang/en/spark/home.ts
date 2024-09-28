@@ -40,7 +40,7 @@ export default {
   },
   form: {
     sparkName: 'Spark Name',
-    sparkHome: 'Installation Path',
+    sparkHome: 'Spark Home',
     description: 'Description',
   },
   placeholder: {
