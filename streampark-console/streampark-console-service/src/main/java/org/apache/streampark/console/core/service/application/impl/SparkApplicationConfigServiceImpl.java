@@ -104,6 +104,9 @@ public class SparkApplicationConfigServiceImpl
     @Override
     public synchronized void update(SparkApplication appParam, Boolean latest) {
         // spark sql job
+        if (appParam.getConfig() == null) {
+            return;
+        }
         SparkApplicationConfig latestConfig = getLatest(appParam.getId());
         if (appParam.isSparkSqlJob()) {
             updateForSparkSqlJob(appParam, latest, latestConfig);
@@ -133,15 +136,15 @@ public class SparkApplicationConfigServiceImpl
             }
         } else {
             SparkApplicationConfig config = getEffective(appParam.getId());
-            if (config != null) {
+            if (config == null) {
+                this.create(appParam, latest);
+            } else {
                 String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
                 String encode = DeflaterUtils.zipString(decode.trim());
                 // create...
                 if (!config.getContent().equals(encode)) {
                     this.create(appParam, latest);
                 }
-            } else {
-                this.create(appParam, latest);
             }
         }
     }

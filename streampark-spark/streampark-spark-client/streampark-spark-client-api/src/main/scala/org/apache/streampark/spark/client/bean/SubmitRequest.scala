@@ -37,7 +37,7 @@ case class SubmitRequest(
     sparkVersion: SparkVersion,
     deployMode: SparkDeployMode,
     sparkYaml: String,
-    developmentMode: SparkJobType,
+    jobType: SparkJobType,
     id: Long,
     appName: String,
     mainClass: String,
@@ -59,7 +59,7 @@ case class SubmitRequest(
   lazy val sparkParameterMap: Map[String, String] = getParameterMap(
     KEY_SPARK_PROPERTY_PREFIX)
 
-  lazy val appMain: String = this.developmentMode match {
+  lazy val appMain: String = this.jobType match {
     case SparkJobType.SPARK_SQL => Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS
     case SparkJobType.SPARK_JAR | SparkJobType.PYSPARK => mainClass
     case SparkJobType.UNKNOWN => throw new IllegalArgumentException("Unknown deployment Mode")

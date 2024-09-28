@@ -51,7 +51,7 @@ object YarnApplicationClient extends YarnClientTrait {
         submitRequest.hdfsWorkspace.flinkLib,
         submitRequest.hdfsWorkspace.flinkPlugins,
         submitRequest.hdfsWorkspace.appJars)
-      submitRequest.developmentMode match {
+      submitRequest.jobType match {
         case FlinkJobType.FLINK_SQL =>
           array += s"${workspace.APP_SHIMS}/flink-${submitRequest.flinkVersion.majorVersion}"
           val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.id}/lib"
@@ -80,7 +80,7 @@ object YarnApplicationClient extends YarnClientTrait {
       // yarn application Type
       .safeSet(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType.getName)
 
-    if (submitRequest.developmentMode == FlinkJobType.PYFLINK) {
+    if (submitRequest.jobType == FlinkJobType.PYFLINK) {
       val pyVenv: String = workspace.APP_PYTHON_VENV
       AssertUtils.required(FsOperator.hdfs.exists(pyVenv), s"$pyVenv File does not exist")
 

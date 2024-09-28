@@ -94,7 +94,10 @@ export const useSparkTableAction = (handlePageDataReload: Fn, optionApps: Record
       {
         tooltip: { title: t('spark.app.operation.cancel') },
         ifShow:
-          record.state == AppStateEnum.ACCEPTED && record['optionState'] == OptionStateEnum.NONE,
+          (record.state == AppStateEnum.ACCEPTED ||
+            record.state == AppStateEnum.RUNNING ||
+            record.state == AppStateEnum.SUBMITTED) &&
+          record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         popConfirm: {

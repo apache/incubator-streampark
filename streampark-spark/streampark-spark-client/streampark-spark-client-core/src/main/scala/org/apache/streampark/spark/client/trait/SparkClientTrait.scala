@@ -33,7 +33,7 @@ trait SparkClientTrait extends Logger {
          |    userSparkHome    : ${submitRequest.sparkVersion.sparkHome}
          |    sparkVersion     : ${submitRequest.sparkVersion.version}
          |    appName          : ${submitRequest.appName}
-         |    devMode          : ${submitRequest.developmentMode.name()}
+         |    jobType          : ${submitRequest.jobType.name()}
          |    deployMode       : ${submitRequest.deployMode.name()}
          |    applicationType  : ${submitRequest.applicationType.getName}
          |    appArgs          : ${submitRequest.appArgs}

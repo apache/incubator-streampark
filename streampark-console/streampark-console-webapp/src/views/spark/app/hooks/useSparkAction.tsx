@@ -70,9 +70,9 @@ export const useSparkAction = (optionApps: Recordable) => {
       if (!message) {
         message = t('spark.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
       }
-      Swal.fire('Failed', message, 'error');
+      await Swal.fire('Failed', message, 'error');
     } else {
-      Swal.fire({
+      await Swal.fire({
         icon: 'success',
         title: t('spark.app.release.releasing'),
         showConfirmButton: false,
@@ -250,11 +250,9 @@ export const useSparkAction = (optionApps: Recordable) => {
       ],
       content: () => {
         return (
-          <Form class="!pt-50px">
+          <Form class="!pt-50px" layout="vertical" baseColProps={{ span: 22, offset: 1 }}>
             <Form.Item
               label="Job Name"
-              layout="vertical"
-              baseColProps={{ span: 22, offset: 1 }}
               validateStatus={unref(validateStatus)}
               help={help}
               rules={[{ required: true }]}

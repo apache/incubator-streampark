@@ -65,7 +65,7 @@ trait FlinkClientTrait extends Logger {
          |    userFlinkHome    : ${submitRequest.flinkVersion.flinkHome}
          |    flinkVersion     : ${submitRequest.flinkVersion.version}
          |    appName          : ${submitRequest.effectiveAppName}
-         |    devMode          : ${submitRequest.developmentMode.name()}
+         |    jobType          : ${submitRequest.jobType.name()}
          |    deployMode       : ${submitRequest.deployMode.name()}
          |    k8sNamespace     : ${submitRequest.kubernetesNamespace}
          |    flinkExposedType : ${submitRequest.flinkRestExposedType}
@@ -99,7 +99,7 @@ trait FlinkClientTrait extends Logger {
 
     val (commandLine, flinkConfig) = getCommandLineAndFlinkConfig(submitRequest)
 
-    submitRequest.developmentMode match {
+    submitRequest.jobType match {
       case FlinkJobType.PYFLINK =>
         val pythonVenv: String = Workspace.local.APP_PYTHON_VENV
         AssertUtils.required(FsOperator.lfs.exists(pythonVenv), s"$pythonVenv File does not exist")
@@ -287,7 +287,7 @@ trait FlinkClientTrait extends Logger {
             .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
             .orElse(Lists.newArrayList()): _*)
 
-      submitRequest.developmentMode match {
+      submitRequest.jobType match {
         case FlinkJobType.PYFLINK =>
           if (submitRequest.libs.nonEmpty) {
             // BUG: https://github.com/apache/incubator-streampark/issues/3761
@@ -477,7 +477,7 @@ trait FlinkClientTrait extends Logger {
       programArgs += PARAM_KEY_APP_NAME += DeflaterUtils.zipString(submitRequest.effectiveAppName)
       programArgs += PARAM_KEY_FLINK_PARALLELISM += getParallelism(submitRequest).toString
 
-      submitRequest.developmentMode match {
+      submitRequest.jobType match {
         case FlinkJobType.FLINK_SQL =>
           programArgs += PARAM_KEY_FLINK_SQL += submitRequest.flinkSQL
           if (submitRequest.appConf != null) {
@@ -501,7 +501,7 @@ trait FlinkClientTrait extends Logger {
       case _ =>
     }
 
-    if (submitRequest.developmentMode == FlinkJobType.PYFLINK) {
+    if (submitRequest.jobType == FlinkJobType.PYFLINK) {
       // TODO why deployMode is not yarn-application ???
       if (submitRequest.deployMode != FlinkDeployMode.YARN_APPLICATION) {
         // python file

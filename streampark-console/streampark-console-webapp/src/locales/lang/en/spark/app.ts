@@ -55,7 +55,7 @@ export default {
   tags: 'Job Tags',
   owner: 'Creator',
   sparkVersion: 'Spark Version',
-  duration: 'Runtime',
+  duration: 'Duration',
   modifiedTime: 'Modification Time',
   runStatus: 'Run Status',
   releaseBuild: 'Release Status',
