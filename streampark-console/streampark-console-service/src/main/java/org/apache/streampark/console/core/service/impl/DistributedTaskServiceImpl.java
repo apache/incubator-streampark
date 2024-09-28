@@ -17,16 +17,20 @@
 
 package org.apache.streampark.console.core.service.impl;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.ConsistentHash;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.FlinkTaskItem;
+import org.apache.streampark.console.core.bean.SparkTaskItem;
 import org.apache.streampark.console.core.entity.DistributedTask;
 import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.mapper.DistributedTaskMapper;
 import org.apache.streampark.console.core.service.DistributedTaskService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
+import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +47,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,7 +60,10 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
     private Executor taskExecutor;
 
     @Autowired
-    private FlinkApplicationActionService applicationActionService;
+    private FlinkApplicationActionService flinkApplicationActionService;
+
+    @Autowired
+    private SparkApplicationActionService sparkApplicationActionService;
 
     /**
      * Server Id
@@ -112,45 +118,57 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param DistributedTask DistributedTask
+     * @param distributedTask distributedTask
      */
     @Override
-    public void executeDistributedTask(DistributedTask DistributedTask) throws Exception {
+    public void executeDistributedTask(DistributedTask distributedTask) throws Exception {
         // Execute Distributed task
-        log.info("Execute Distributed task: {}", DistributedTask);
-        FlinkTaskItem flinkTaskItem = getFlinkTaskItem(DistributedTask);
-        FlinkApplication appParam = getAppByFlinkTaskItem(flinkTaskItem);
-        switch (DistributedTask.getAction()) {
-            case START:
-                applicationActionService.start(appParam, flinkTaskItem.getAutoStart());
-                break;
-            case RESTART:
-                applicationActionService.restart(appParam);
-                break;
-            case REVOKE:
-                applicationActionService.revoke(appParam.getId());
-                break;
-            case CANCEL:
-                applicationActionService.cancel(appParam);
-                break;
-            case ABORT:
-                applicationActionService.abort(appParam.getId());
-                break;
-            default:
-                log.error("Unsupported task: {}", DistributedTask.getAction());
+        log.info("Execute Distributed task: {}", distributedTask);
+        if (distributedTask.getEngineType() == EngineTypeEnum.FLINK) {
+            FlinkTaskItem flinkTaskItem = getFlinkTaskItem(distributedTask);
+            FlinkApplication appParam = getAppByFlinkTaskItem(flinkTaskItem);
+            switch (distributedTask.getAction()) {
+                case START:
+                    flinkApplicationActionService.start(appParam, flinkTaskItem.getAutoStart());
+                    break;
+                case RESTART:
+                    flinkApplicationActionService.restart(appParam);
+                    break;
+                case REVOKE:
+                    flinkApplicationActionService.revoke(appParam.getId());
+                    break;
+                case CANCEL:
+                    flinkApplicationActionService.cancel(appParam);
+                    break;
+                case ABORT:
+                    flinkApplicationActionService.abort(appParam.getId());
+                    break;
+                default:
+                    log.error("Unsupported flink task action: {}", distributedTask.getAction());
+            }
+        } else if (distributedTask.getEngineType() == EngineTypeEnum.SPARK) {
+            SparkTaskItem sparkTaskItem = getSparkTaskItem(distributedTask);
+            SparkApplication appParam = getAppBySparkTaskItem(sparkTaskItem);
+            switch (distributedTask.getAction()) {
+                case START:
+                    sparkApplicationActionService.start(appParam, sparkTaskItem.getAutoStart());
+                    break;
+                case RESTART:
+                    sparkApplicationActionService.restart(appParam);
+                    break;
+                case REVOKE:
+                    sparkApplicationActionService.revoke(appParam.getId());
+                    break;
+                case STOP:
+                    sparkApplicationActionService.stop(appParam);
+                    break;
+                case FORCED_STOP:
+                    sparkApplicationActionService.forcedStop(appParam.getId());
+                    break;
+                default:
+                    log.error("Unsupported spark task action: {}", distributedTask.getAction());
+            }
         }
-    }
-
-    /**
-     * Through this interface, the watcher obtains the list of tasks that need to be monitored.
-     * @param applications List<Application>
-     * @return List<Application> List of tasks that need to be monitored
-     */
-    @Override
-    public List<FlinkApplication> getMonitoredTaskList(List<FlinkApplication> applications) {
-        return applications.stream()
-            .filter(application -> isLocalProcessing(application.getId()))
-            .collect(Collectors.toList());
     }
 
     /**
@@ -192,17 +210,25 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
     @Override
-    public void saveDistributedTask(FlinkApplication appParam, boolean autoStart, DistributedTaskEnum action) {
+    public void saveDistributedTask(BaseEntity appParam, boolean autoStart, DistributedTaskEnum action) {
         try {
-            DistributedTask DistributedTask = getDistributedTaskByApp(appParam, autoStart, action);
-            this.save(DistributedTask);
+            DistributedTask distributedTask;
+            if (appParam instanceof FlinkApplication) {
+                distributedTask = getDistributedTaskByFlinkApp((FlinkApplication) appParam, autoStart, action);
+            } else if (appParam instanceof SparkApplication) {
+                distributedTask = getDistributedTaskBySparkApp((SparkApplication) appParam, autoStart, action);
+            } else {
+                log.error("Unsupported application type: {}", appParam.getClass().getName());
+                return;
+            }
+            this.save(distributedTask);
         } catch (JsonProcessingException e) {
             log.error("Failed to save Distributed task: {}", e.getMessage());
         }
     }
 
-    public DistributedTask getDistributedTaskByApp(FlinkApplication appParam, boolean autoStart,
-                                                   DistributedTaskEnum action) throws JsonProcessingException {
+    public DistributedTask getDistributedTaskByFlinkApp(FlinkApplication appParam, boolean autoStart,
+                                                        DistributedTaskEnum action) throws JsonProcessingException {
         FlinkTaskItem flinkTaskItem = new FlinkTaskItem();
         flinkTaskItem.setAppId(appParam.getId());
         flinkTaskItem.setAutoStart(autoStart);
@@ -221,8 +247,25 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
         return distributedTask;
     }
 
-    public FlinkTaskItem getFlinkTaskItem(DistributedTask DistributedTask) throws JsonProcessingException {
-        return JacksonUtils.read(DistributedTask.getProperties(), FlinkTaskItem.class);
+    public DistributedTask getDistributedTaskBySparkApp(SparkApplication appParam, boolean autoStart,
+                                                        DistributedTaskEnum action) throws JsonProcessingException {
+        SparkTaskItem sparkTaskItem = new SparkTaskItem();
+        sparkTaskItem.setAppId(appParam.getId());
+        sparkTaskItem.setAutoStart(autoStart);
+
+        DistributedTask distributedTask = new DistributedTask();
+        distributedTask.setAction(action);
+        distributedTask.setEngineType(EngineTypeEnum.SPARK);
+        distributedTask.setProperties(JacksonUtils.write(sparkTaskItem));
+        return distributedTask;
+    }
+
+    public FlinkTaskItem getFlinkTaskItem(DistributedTask distributedTask) throws JsonProcessingException {
+        return JacksonUtils.read(distributedTask.getProperties(), FlinkTaskItem.class);
+    }
+
+    public SparkTaskItem getSparkTaskItem(DistributedTask distributedTask) throws JsonProcessingException {
+        return JacksonUtils.read(distributedTask.getProperties(), SparkTaskItem.class);
     }
 
     public FlinkApplication getAppByFlinkTaskItem(FlinkTaskItem flinkTaskItem) {
@@ -235,6 +278,12 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
         appParam.setDrain(flinkTaskItem.getDrain());
         appParam.setNativeFormat(flinkTaskItem.getNativeFormat());
         appParam.setRestoreMode(flinkTaskItem.getRestoreMode());
+        return appParam;
+    }
+
+    public SparkApplication getAppBySparkTaskItem(SparkTaskItem sparkTaskItem) {
+        SparkApplication appParam = new SparkApplication();
+        appParam.setId(sparkTaskItem.getAppId());
         return appParam;
     }
 

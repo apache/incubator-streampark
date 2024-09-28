@@ -180,15 +180,19 @@ public class FlinkAppHttpWatcher {
     @PostConstruct
     public void init() {
         WATCHING_APPS.clear();
-        List<FlinkApplication> applications = distributedTaskService.getMonitoredTaskList(applicationManageService.list(
+        List<FlinkApplication> applications = applicationManageService.list(
             new LambdaQueryWrapper<FlinkApplication>()
                 .eq(FlinkApplication::getTracking, 1)
-                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode())));
-        applications.forEach(
-            (app) -> {
-                WATCHING_APPS.put(app.getId(), app);
-                STARTING_CACHE.put(app.getId(), DEFAULT_FLAG_BYTE);
-            });
+                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode()))
+            .stream()
+            .filter(application -> distributedTaskService.isLocalProcessing(application.getId()))
+            .collect(Collectors.toList());
+
+        applications.forEach(app -> {
+            Long appId = app.getId();
+            WATCHING_APPS.put(appId, app);
+            STARTING_CACHE.put(appId, DEFAULT_FLAG_BYTE);
+        });
     }
 
     @PreDestroy
