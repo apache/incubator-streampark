@@ -32,4 +32,6 @@ public class AppControl {
 
     /** allow to build the application */
     private boolean allowBuild;
+
+    private boolean allowView;
 }
