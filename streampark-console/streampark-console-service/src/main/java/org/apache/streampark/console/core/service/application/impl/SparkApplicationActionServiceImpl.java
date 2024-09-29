@@ -213,7 +213,7 @@ public class SparkApplicationActionServiceImpl
         application.setState(SparkAppStateEnum.STOPPING.getValue());
 
         SparkApplicationLog applicationLog = new SparkApplicationLog();
-        applicationLog.setOptionName(SparkOperationEnum.STOP.getValue());
+        applicationLog.setOptionName(SparkOperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
         applicationLog.setSparkAppId(application.getAppId());

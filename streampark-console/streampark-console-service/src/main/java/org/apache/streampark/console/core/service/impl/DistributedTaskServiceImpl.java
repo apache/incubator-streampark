@@ -160,7 +160,7 @@ public class DistributedTaskServiceImpl extends ServiceImpl<DistributedTaskMappe
                     sparkApplicationActionService.revoke(appParam.getId());
                     break;
                 case STOP:
-                    sparkApplicationActionService.stop(appParam);
+                    sparkApplicationActionService.cancel(appParam);
                     break;
                 case FORCED_STOP:
                     sparkApplicationActionService.forcedStop(appParam.getId());

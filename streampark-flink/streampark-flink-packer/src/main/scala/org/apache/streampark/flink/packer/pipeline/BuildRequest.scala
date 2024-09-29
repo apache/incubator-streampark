@@ -128,6 +128,6 @@ case class SparkYarnBuildRequest(
     mainClass: String,
     localWorkspace: String,
     yarnProvidedPath: String,
-    sparkJobType: SparkJobType,
+    jobType: SparkJobType,
     deployMode: SparkDeployMode,
-    dependencyInfo: DependencyInfo)
+    dependencyInfo: DependencyInfo) extends BuildParam
