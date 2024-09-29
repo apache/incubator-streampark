@@ -66,11 +66,8 @@ case class SubmitRequest(
   }
 
   lazy val userJarPath: String = {
-    deployMode match {
-      case _ =>
-        checkBuildResult()
-        buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
-    }
+    checkBuildResult()
+    buildResult.asInstanceOf[ShadedBuildResponse].shadedJarPath
   }
 
   def hasExtra(key: String): Boolean = MapUtils.isNotEmpty(extraParameter) && extraParameter.containsKey(key)
@@ -149,16 +146,13 @@ case class SubmitRequest(
 
   @throws[Exception]
   private def checkBuildResult(): Unit = {
-    deployMode match {
-      case _ =>
-        if (this.buildResult == null) {
-          throw new Exception(
-            s"[spark-submit] current job: $appName was not yet built, buildResult is empty")
-        }
-        if (!this.buildResult.pass) {
-          throw new Exception(
-            s"[spark-submit] current job $appName build failed, please check")
-        }
+    if (this.buildResult == null) {
+      throw new Exception(
+        s"[spark-submit] current job: $appName was not yet built, buildResult is empty")
+    }
+    if (!this.buildResult.pass) {
+      throw new Exception(
+        s"[spark-submit] current job $appName build failed, please check")
     }
   }
 

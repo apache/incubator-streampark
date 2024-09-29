@@ -292,7 +292,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     private Map<String, Object> tryGetRestProps(FlinkApplication application, FlinkCluster cluster) {
         Map<String, Object> properties = new HashMap<>();
 
-        if (FlinkDeployMode.isRemoteMode(application.getFlinkDeployMode())) {
+        if (FlinkDeployMode.isRemoteMode(application.getDeployModeEnum())) {
             AssertUtils.notNull(
                 cluster,
                 String.format(
@@ -311,7 +311,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
                 ? cluster.getClusterId()
                 : application.getClusterId();
         } else if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
-            if (FlinkDeployMode.YARN_SESSION.equals(application.getFlinkDeployMode())) {
+            if (FlinkDeployMode.YARN_SESSION.equals(application.getDeployModeEnum())) {
                 AssertUtils.notNull(
                     cluster,
                     String.format(
@@ -493,7 +493,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         return new TriggerSavepointRequest(
             application.getId(),
             flinkEnv.getFlinkVersion(),
-            application.getFlinkDeployMode(),
+            application.getDeployModeEnum(),
             properties,
             clusterId,
             application.getJobId(),

@@ -61,8 +61,8 @@ import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
-import org.apache.streampark.flink.packer.pipeline.SparkYarnApplicationBuildRequest;
-import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnApplicationBuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.SparkYarnBuildRequest;
+import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnBuildPipeline;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -370,34 +370,35 @@ public class SparkAppBuildPipeServiceImpl
             }
         }
 
-        SparkDeployMode deployModeEnum = app.getSparkDeployMode();
+        SparkDeployMode deployModeEnum = app.getDeployModeEnum();
         String mainClass = Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS;
         switch (deployModeEnum) {
-            case YARN_CLUSTER:
             case YARN_CLIENT:
+            case YARN_CLUSTER:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
                 if (ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
-                SparkYarnApplicationBuildRequest yarnAppRequest = new SparkYarnApplicationBuildRequest(
+                SparkYarnBuildRequest yarnAppRequest = new SparkYarnBuildRequest(
                     app.getAppName(),
                     mainClass,
                     localWorkspace,
                     yarnProvidedPath,
-                    app.getDevelopmentMode(),
+                    app.getJobTypeEnum(),
+                    deployModeEnum,
                     getMergedDependencyInfo(app));
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
-                return SparkYarnApplicationBuildPipeline.of(yarnAppRequest);
+                return SparkYarnBuildPipeline.of(yarnAppRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for DeployMode: " + app.getSparkDeployMode());
+                    "Unsupported Building Application for DeployMode: " + app.getDeployModeEnum());
         }
     }
 
     private String retrieveSparkUserJar(SparkEnv sparkEnv, SparkApplication app) {
-        switch (app.getDevelopmentMode()) {
+        switch (app.getJobTypeEnum()) {
             case SPARK_JAR:
                 switch (app.getApplicationType()) {
                     case STREAMPARK_SPARK:
@@ -412,18 +413,16 @@ public class SparkAppBuildPipeServiceImpl
                 }
             case PYSPARK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
-
             case SPARK_SQL:
                 String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
-
-                if (app.getSparkDeployMode() == SparkDeployMode.YARN_CLUSTER) {
+                if (app.getDeployModeEnum() == SparkDeployMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
-                    "[StreamPark] unsupported JobType: " + app.getDevelopmentMode());
+                    "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());
         }
     }
 

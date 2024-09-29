@@ -254,7 +254,7 @@ public class SparkApplicationActionServiceImpl
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
         ApiAlertException.throwIfNull(sparkEnv, "[StreamPark] can no found spark version");
 
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             checkYarnBeforeStart(application);
         }
 
@@ -297,7 +297,7 @@ public class SparkApplicationActionServiceImpl
         String appConf = userJarAndAppConf.f1;
 
         BuildResult buildResult = buildPipeline.getBuildResult();
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
                 extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
@@ -408,7 +408,7 @@ public class SparkApplicationActionServiceImpl
 
     private Tuple2<String, String> getUserJarAndAppConf(
                                                         SparkEnv sparkEnv, SparkApplication application) {
-        SparkDeployMode deployModeEnum = application.getSparkDeployMode();
+        SparkDeployMode deployModeEnum = application.getDeployModeEnum();
         SparkApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
         ApiAlertException.throwIfNull(
@@ -417,7 +417,7 @@ public class SparkApplicationActionServiceImpl
         String sparkUserJar = null;
         String appConf = null;
 
-        switch (application.getDevelopmentMode()) {
+        switch (application.getJobTypeEnum()) {
             case SPARK_SQL:
                 SparkSql sparkSql = sparkSqlService.getEffective(application.getId(), false);
                 AssertUtils.notNull(sparkSql);
@@ -520,7 +520,7 @@ public class SparkApplicationActionServiceImpl
         updateById(application);
         SparkAppHttpWatcher.unWatching(application.getId());
         // kill application
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             try {
                 List<ApplicationReport> applications = applicationInfoService
                     .getYarnAppReport(application.getAppName());

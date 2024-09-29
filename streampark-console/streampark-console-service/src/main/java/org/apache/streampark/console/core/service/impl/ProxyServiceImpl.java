@@ -97,7 +97,7 @@ public class ProxyServiceImpl implements ProxyService {
         ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE);
 
         String url = null;
-        switch (app.getFlinkDeployMode()) {
+        switch (app.getDeployModeEnum()) {
             case YARN_PER_JOB:
             case YARN_APPLICATION:
             case YARN_SESSION:
@@ -115,7 +115,7 @@ public class ProxyServiceImpl implements ProxyService {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported deployMode ".concat(app.getFlinkDeployMode().getName()));
+                    "unsupported deployMode ".concat(app.getDeployModeEnum().getName()));
         }
 
         if (url == null) {

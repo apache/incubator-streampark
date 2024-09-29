@@ -276,8 +276,8 @@ public class FlinkApplication implements Serializable {
     }
 
     public void setYarnQueueByHotParams() {
-        if (!(FlinkDeployMode.YARN_APPLICATION == this.getFlinkDeployMode()
-            || FlinkDeployMode.YARN_PER_JOB == this.getFlinkDeployMode())) {
+        if (!(FlinkDeployMode.YARN_APPLICATION == this.getDeployModeEnum()
+            || FlinkDeployMode.YARN_PER_JOB == this.getDeployModeEnum())) {
             return;
         }
 
@@ -341,7 +341,7 @@ public class FlinkApplication implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkJobType getDevelopmentMode() {
+    public FlinkJobType getJobTypeEnum() {
         return FlinkJobType.of(jobType);
     }
 
@@ -356,7 +356,7 @@ public class FlinkApplication implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkDeployMode getFlinkDeployMode() {
+    public FlinkDeployMode getDeployModeEnum() {
         return FlinkDeployMode.of(deployMode);
     }
 
@@ -400,7 +400,7 @@ public class FlinkApplication implements Serializable {
     /** Automatically identify remoteAppHome or localAppHome based on app FlinkDeployMode */
     @JsonIgnore
     public String getAppHome() {
-        switch (this.getFlinkDeployMode()) {
+        switch (this.getDeployModeEnum()) {
             case KUBERNETES_NATIVE_APPLICATION:
             case KUBERNETES_NATIVE_SESSION:
             case YARN_PER_JOB:
@@ -412,7 +412,7 @@ public class FlinkApplication implements Serializable {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported deployMode ".concat(getFlinkDeployMode().getName()));
+                    "unsupported deployMode ".concat(getDeployModeEnum().getName()));
         }
     }
 
@@ -558,7 +558,7 @@ public class FlinkApplication implements Serializable {
         if (appParam != this) {
             this.hotParams = null;
         }
-        FlinkDeployMode deployModeEnum = appParam.getFlinkDeployMode();
+        FlinkDeployMode deployModeEnum = appParam.getDeployModeEnum();
         Map<String, String> hotParams = new HashMap<>(0);
         if (needFillYarnQueueLabel(deployModeEnum)) {
             hotParams.putAll(YarnQueueLabelExpression.getQueueLabelMap(appParam.getYarnQueue()));
@@ -594,7 +594,7 @@ public class FlinkApplication implements Serializable {
     }
 
     public boolean isKubernetesModeJob() {
-        return FlinkDeployMode.isKubernetesMode(this.getFlinkDeployMode());
+        return FlinkDeployMode.isKubernetesMode(this.getDeployModeEnum());
     }
 
     public static class SFunc {

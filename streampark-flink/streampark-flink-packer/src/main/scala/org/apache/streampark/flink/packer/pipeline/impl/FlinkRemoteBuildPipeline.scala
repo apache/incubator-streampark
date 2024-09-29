@@ -47,7 +47,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
       // build flink job shaded jar
       val shadedJar =
         execStep(2) {
-          request.developmentMode match {
+          request.flinkJobType match {
             case FlinkJobType.FLINK_SQL =>
               val output = MavenTool.buildFatJar(
                 request.mainClass,
@@ -61,7 +61,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
 
       val mavenJars =
         execStep(3) {
-          request.developmentMode match {
+          request.flinkJobType match {
             case FlinkJobType.PYFLINK =>
               val mavenArts =
                 MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
@@ -71,7 +71,7 @@ class FlinkRemoteBuildPipeline(request: FlinkRemotePerJobBuildRequest) extends B
         }.getOrElse(throw getError.exception)
 
       execStep(4) {
-        request.developmentMode match {
+        request.flinkJobType match {
           case FlinkJobType.PYFLINK =>
             mavenJars.foreach(jar => {
               val lfs: FsOperator = FsOperator.lfs

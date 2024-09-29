@@ -233,8 +233,8 @@ public class SparkApplication extends BaseEntity {
     }
 
     public void resolveYarnQueue() {
-        if (!(SparkDeployMode.YARN_CLIENT == this.getSparkDeployMode()
-            || SparkDeployMode.YARN_CLUSTER == this.getSparkDeployMode())) {
+        if (!(SparkDeployMode.YARN_CLIENT == this.getDeployModeEnum()
+            || SparkDeployMode.YARN_CLUSTER == this.getDeployModeEnum())) {
             return;
         }
         if (StringUtils.isBlank(this.yarnQueue)) {
@@ -312,7 +312,7 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public SparkJobType getDevelopmentMode() {
+    public SparkJobType getJobTypeEnum() {
         return SparkJobType.valueOf(jobType);
     }
 
@@ -322,7 +322,7 @@ public class SparkApplication extends BaseEntity {
     }
 
     @JsonIgnore
-    public SparkDeployMode getSparkDeployMode() {
+    public SparkDeployMode getDeployModeEnum() {
         return SparkDeployMode.of(deployMode);
     }
 
@@ -351,7 +351,7 @@ public class SparkApplication extends BaseEntity {
     /** Automatically identify remoteAppHome or localAppHome based on app SparkDeployMode */
     @JsonIgnore
     public String getAppHome() {
-        switch (this.getSparkDeployMode()) {
+        switch (this.getDeployModeEnum()) {
             case REMOTE:
             case LOCAL:
                 return getLocalAppHome();
@@ -360,7 +360,7 @@ public class SparkApplication extends BaseEntity {
                 return getRemoteAppHome();
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported deployMode ".concat(getSparkDeployMode().getName()));
+                    "unsupported deployMode ".concat(getDeployModeEnum().getName()));
         }
     }
 

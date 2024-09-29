@@ -39,7 +39,7 @@ import java.util.Optional;
 @Validated
 @RestController
 @RequestMapping("spark/pipe")
-public class SparkApplicationBuildPipelineController {
+public class SparkBuildPipelineController {
 
     @Autowired
     private SparkAppBuildPipeService appBuildPipeService;

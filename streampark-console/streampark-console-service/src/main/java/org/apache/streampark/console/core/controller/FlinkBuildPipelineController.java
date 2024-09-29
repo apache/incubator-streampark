@@ -42,7 +42,7 @@ import java.util.Optional;
 @Validated
 @RestController
 @RequestMapping("flink/pipe")
-public class FlinkApplicationBuildPipelineController {
+public class FlinkBuildPipelineController {
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;

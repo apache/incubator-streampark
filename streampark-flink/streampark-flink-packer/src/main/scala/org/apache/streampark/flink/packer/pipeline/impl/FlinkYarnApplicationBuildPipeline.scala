@@ -45,7 +45,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
   @throws[Throwable]
   override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
-      request.developmentMode match {
+      request.flinkJobType match {
         case FlinkJobType.FLINK_SQL | FlinkJobType.PYFLINK =>
           LfsOperator.mkCleanDirs(request.localWorkspace)
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
@@ -56,7 +56,7 @@ class FlinkYarnApplicationBuildPipeline(request: FlinkYarnApplicationBuildReques
 
     val mavenJars =
       execStep(2) {
-        request.developmentMode match {
+        request.flinkJobType match {
           case FlinkJobType.FLINK_SQL | FlinkJobType.PYFLINK =>
             val mavenArts =
               MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
