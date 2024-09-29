@@ -28,7 +28,7 @@ import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
-import org.apache.streampark.console.core.mapper.FlinkApplicationBackUpMapper;
+import org.apache.streampark.console.core.mapper.FlinkApplicationBackupMapper;
 import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
@@ -49,9 +49,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class FlinkApplicationBackUpServiceImpl
+public class FlinkApplicationBackupServiceImpl
     extends
-        ServiceImpl<FlinkApplicationBackUpMapper, FlinkApplicationBackup>
+        ServiceImpl<FlinkApplicationBackupMapper, FlinkApplicationBackup>
     implements
         FlinkApplicationBackupService {
 
