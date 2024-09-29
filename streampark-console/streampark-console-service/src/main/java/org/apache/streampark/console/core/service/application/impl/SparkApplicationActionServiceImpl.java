@@ -205,7 +205,7 @@ public class SparkApplicationActionServiceImpl
     public void cancel(SparkApplication appParam) throws Exception {
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
         if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
-            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.STOP);
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.CANCEL);
             return;
         }
         SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STOPPING);

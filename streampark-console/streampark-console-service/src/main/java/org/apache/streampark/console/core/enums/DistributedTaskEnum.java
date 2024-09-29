@@ -48,14 +48,9 @@ public enum DistributedTaskEnum {
     ABORT(4),
 
     /**
-     * Stop the given application.
-     */
-    STOP(5),
-
-    /**
      * Forces the given application to stop.
      */
-    FORCED_STOP(6);
+    FORCED_STOP(5);
 
     private final int value;
 
