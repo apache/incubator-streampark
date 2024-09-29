@@ -19,7 +19,7 @@ package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
+import org.apache.streampark.console.core.entity.SparkApplication;
 
 import org.springframework.http.ResponseEntity;
 
@@ -29,11 +29,11 @@ public interface ProxyService {
 
     ResponseEntity<?> proxyFlink(HttpServletRequest request, FlinkApplication app) throws Exception;
 
-    ResponseEntity<?> proxyYarn(HttpServletRequest request, SparkApplicationLog log) throws Exception;
+    ResponseEntity<?> proxySpark(HttpServletRequest request, SparkApplication app) throws Exception;
 
     ResponseEntity<?> proxyYarn(HttpServletRequest request, ApplicationLog log) throws Exception;
 
     ResponseEntity<?> proxyHistory(HttpServletRequest request, ApplicationLog log) throws Exception;
 
-    ResponseEntity<?> proxyCluster(HttpServletRequest request, Long clusterId) throws Exception;
+    ResponseEntity<?> proxyFlinkCluster(HttpServletRequest request, Long clusterId) throws Exception;
 }

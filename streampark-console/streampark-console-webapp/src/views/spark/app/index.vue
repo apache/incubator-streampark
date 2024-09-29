@@ -97,13 +97,6 @@
 
       const timestamp = new Date().getTime();
       res.records.forEach((x) => {
-        Object.assign(x, {
-          expanded: [
-            {
-              appId: x.appId,
-            },
-          ],
-        });
         if (x['optionState'] === OptionStateEnum.NONE) {
           if (optionApps.starting.get(x.id)) {
             if (timestamp - optionApps.starting.get(x.id) > 2000 * 2) {

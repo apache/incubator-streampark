@@ -59,7 +59,7 @@ public interface SparkApplicationActionService extends IService<SparkApplication
      * @param appParam the application to be stopped
      * @throws Exception if stop fails
      */
-    void stop(SparkApplication appParam) throws Exception;
+    void cancel(SparkApplication appParam) throws Exception;
 
     /**
      * Forces the given application to stop.

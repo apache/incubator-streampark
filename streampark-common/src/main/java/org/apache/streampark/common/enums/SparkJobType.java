@@ -52,9 +52,9 @@ public enum SparkJobType {
      */
     @Nonnull
     public static SparkJobType valueOf(@Nullable Integer value) {
-        for (SparkJobType sparkDevelopmentMode : values()) {
-            if (sparkDevelopmentMode.mode.equals(value)) {
-                return sparkDevelopmentMode;
+        for (SparkJobType sparkJobType : values()) {
+            if (sparkJobType.mode.equals(value)) {
+                return sparkJobType;
             }
         }
         return SparkJobType.UNKNOWN;

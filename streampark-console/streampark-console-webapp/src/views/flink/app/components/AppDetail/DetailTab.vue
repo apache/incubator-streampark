@@ -393,14 +393,14 @@
               </Tag>
               <Tag color="orange" v-if="record.optionName === OperationEnum.CANCEL"> Cancel </Tag>
             </template>
-            <template v-if="column.dataIndex === 'yarnAppId'">
+            <template v-if="column.dataIndex === 'clusterId'">
               <a type="link" @click="handleYarnUrl(record.id)" target="_blank">
-                {{ record.yarnAppId }}
+                {{ record.clusterId }}
               </a>
             </template>
-            <template v-if="column.dataIndex === 'jobManagerUrl'">
+            <template v-if="column.dataIndex === 'trackingUrl'">
               <a type="link" @click="handleViewHistory(record.id)" target="_blank">
-                {{ record.jobManagerUrl }}
+                {{ record.trackingUrl }}
               </a>
             </template>
             <template v-if="column.dataIndex === 'optionTime'">

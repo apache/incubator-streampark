@@ -25,7 +25,7 @@ import java.util.Arrays;
 @Getter
 public enum SparkOperationEnum {
 
-    RELEASE(0), START(1), STOP(2);
+    RELEASE(0), START(1), CANCEL(2);
 
     private final int value;
 

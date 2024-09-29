@@ -116,7 +116,7 @@ import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-public class AppBuildPipeServiceImpl
+public class FlinkAppBuildPipeServiceImpl
     extends
         ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline>
     implements
@@ -455,13 +455,13 @@ public class AppBuildPipeServiceImpl
             }
         }
 
-        FlinkDeployMode deployModeEnum = app.getFlinkDeployMode();
+        FlinkDeployMode deployModeEnum = app.getDeployModeEnum();
         String mainClass = Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
         switch (deployModeEnum) {
             case YARN_APPLICATION:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
-                if (FlinkJobType.CUSTOM_CODE == app.getDevelopmentMode()
+                if (FlinkJobType.CUSTOM_CODE == app.getJobTypeEnum()
                     && ApplicationType.APACHE_FLINK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
@@ -490,7 +490,7 @@ public class AppBuildPipeServiceImpl
                 return FlinkK8sApplicationBuildPipeline.of(k8sApplicationBuildRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for DeployMode: " + app.getFlinkDeployMode());
+                    "Unsupported Building Application for DeployMode: " + app.getDeployModeEnum());
         }
     }
 
@@ -505,7 +505,7 @@ public class AppBuildPipeServiceImpl
             mainClass,
             localWorkspace,
             yarnProvidedPath,
-            app.getDevelopmentMode(),
+            app.getJobTypeEnum(),
             getMergedDependencyInfo(app));
     }
 
@@ -521,8 +521,8 @@ public class AppBuildPipeServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkDeployMode(),
-            app.getDevelopmentMode(),
+            app.getDeployModeEnum(),
+            app.getJobTypeEnum(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
             app.getJobName(),
@@ -549,8 +549,8 @@ public class AppBuildPipeServiceImpl
             app.getLocalAppHome(),
             mainClass,
             flinkUserJar,
-            app.getFlinkDeployMode(),
-            app.getDevelopmentMode(),
+            app.getDeployModeEnum(),
+            app.getJobTypeEnum(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app),
             app.getClusterId(),
@@ -569,15 +569,15 @@ public class AppBuildPipeServiceImpl
             mainClass,
             flinkUserJar,
             app.isCustomCodeJob(),
-            app.getFlinkDeployMode(),
-            app.getDevelopmentMode(),
+            app.getDeployModeEnum(),
+            app.getJobTypeEnum(),
             flinkEnv.getFlinkVersion(),
             getMergedDependencyInfo(app));
     }
 
     /** copy from {@link FlinkApplicationActionService#start(FlinkApplication, boolean)} */
     private String retrieveFlinkUserJar(FlinkEnv flinkEnv, FlinkApplication app) {
-        switch (app.getDevelopmentMode()) {
+        switch (app.getJobTypeEnum()) {
             case CUSTOM_CODE:
                 switch (app.getApplicationType()) {
                     case STREAMPARK_FLINK:
@@ -594,14 +594,14 @@ public class AppBuildPipeServiceImpl
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
             case FLINK_SQL:
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
-                if (app.getFlinkDeployMode() == FlinkDeployMode.YARN_APPLICATION) {
+                if (app.getDeployModeEnum() == FlinkDeployMode.YARN_APPLICATION) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
-                    "[StreamPark] unsupported JobType: " + app.getDevelopmentMode());
+                    "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());
         }
     }
 

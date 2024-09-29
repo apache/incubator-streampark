@@ -86,7 +86,7 @@ public class FlinkSQL118OnYarnTest {
         applicationsPage
             .createApplication()
             .addApplication(
-                ApplicationForm.DevelopmentMode.FLINK_SQL,
+                ApplicationForm.FlinkJobType.FLINK_SQL,
                 ApplicationForm.DeployMode.YARN_APPLICATION,
                 applicationName)
             .flinkVersion(flinkName)
@@ -189,7 +189,7 @@ public class FlinkSQL118OnYarnTest {
         applicationsPage
             .createApplication()
             .addApplication(
-                ApplicationForm.DevelopmentMode.FLINK_SQL,
+                ApplicationForm.FlinkJobType.FLINK_SQL,
                 ApplicationForm.DeployMode.YARN_PER_JOB,
                 applicationName)
             .flinkVersion(flinkName)
@@ -292,7 +292,7 @@ public class FlinkSQL118OnYarnTest {
         applicationsPage
             .createApplication()
             .addApplication(
-                ApplicationForm.DevelopmentMode.FLINK_SQL,
+                ApplicationForm.FlinkJobType.FLINK_SQL,
                 ApplicationForm.DeployMode.YARN_SESSION,
                 applicationName)
             .flinkVersion(flinkName)

@@ -192,7 +192,7 @@
         </template>
         <template v-if="column.dataIndex === 'address'">
           <a
-            :href="`/proxy/cluster/${record.id}/`"
+            :href="`/proxy/flink_cluster/${record.id}/`"
             target="_blank"
             v-if="
               record.deployMode === DeployMode.STANDALONE ||
@@ -240,7 +240,7 @@
                 auth: 'app:detail',
                 disabled: !handleIsStart(record),
                 tooltip: t('setting.flinkCluster.detail'),
-                href: `/proxy/cluster/${record.id}/`,
+                href: `/proxy/flink_cluster/${record.id}/`,
                 target: '_blank',
               },
               {

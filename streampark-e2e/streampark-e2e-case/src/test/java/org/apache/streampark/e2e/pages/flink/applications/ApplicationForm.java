@@ -38,13 +38,13 @@ public final class ApplicationForm {
     public WebDriver driver;
 
     @FindBy(xpath = "//div[contains(@codefield, 'jobType')]//div[contains(@class, 'ant-select-selector')]")
-    public WebElement buttonDevelopmentModeDropdown;
+    public WebElement buttonJobTypeDropdown;
 
     @FindBys({
             @FindBy(css = "[codefield=jobType]"),
             @FindBy(className = "ant-select-item-option-content")
     })
-    public List<WebElement> selectDevelopmentMode;
+    public List<WebElement> selectJobType;
 
     @FindBy(xpath = "//div[contains(@codefield, 'deployMode')]//div[contains(@class, 'ant-select-selector')]")
     public WebElement buttonDeployModeDropdown;
@@ -86,34 +86,34 @@ public final class ApplicationForm {
     }
 
     @SneakyThrows
-    public ApplicationForm addApplication(DevelopmentMode developmentMode,
+    public ApplicationForm addApplication(FlinkJobType jobType,
                                           DeployMode deployMode,
                                           String applicationName) {
         Thread.sleep(Constants.DEFAULT_SLEEP_MILLISECONDS);
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.elementToBeClickable(buttonDevelopmentModeDropdown));
-        buttonDevelopmentModeDropdown.click();
+            .until(ExpectedConditions.elementToBeClickable(buttonJobTypeDropdown));
+        buttonJobTypeDropdown.click();
         new WebDriverWait(driver, Constants.DEFAULT_WEBDRIVER_WAIT_DURATION)
-            .until(ExpectedConditions.visibilityOfAllElements(selectDevelopmentMode));
-        switch (developmentMode) {
+            .until(ExpectedConditions.visibilityOfAllElements(selectJobType));
+        switch (jobType) {
             case CUSTOM_CODE:
-                selectDevelopmentMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.CUSTOM_CODE.desc))
+                selectJobType.stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(FlinkJobType.CUSTOM_CODE.desc))
                     .findFirst()
                     .orElseThrow(
                         () -> new IllegalArgumentException(
                             String.format("Development mode not found: %s",
-                                developmentMode.desc)))
+                                jobType.desc)))
                     .click();
                 break;
             case FLINK_SQL:
-                selectDevelopmentMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.FLINK_SQL.desc))
+                selectJobType.stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(FlinkJobType.FLINK_SQL.desc))
                     .findFirst()
                     .orElseThrow(
                         () -> new IllegalArgumentException(
                             String.format("Development mode not found: %s",
-                                developmentMode.desc)))
+                                jobType.desc)))
                     .click();
                 buttonDeployModeDropdown.click();
                 switch (deployMode) {
@@ -188,18 +188,18 @@ public final class ApplicationForm {
                 }
                 break;
             case PYTHON_FLINK:
-                selectDevelopmentMode.stream()
-                    .filter(e -> e.getText().equalsIgnoreCase(DevelopmentMode.PYTHON_FLINK.toString()))
+                selectJobType.stream()
+                    .filter(e -> e.getText().equalsIgnoreCase(FlinkJobType.PYTHON_FLINK.toString()))
                     .findFirst()
                     .orElseThrow(
                         () -> new IllegalArgumentException(
                             String.format("Development mode not found: %s",
-                                developmentMode)))
+                                jobType)))
                     .click();
                 break;
             default:
                 throw new IllegalArgumentException(
-                    String.format("Unknown development mode: %s", developmentMode));
+                    String.format("Unknown development mode: %s", jobType));
         }
         inputApplicationName.sendKeys(applicationName);
 
@@ -248,7 +248,7 @@ public final class ApplicationForm {
     }
 
     @Getter
-    public enum DevelopmentMode {
+    public enum FlinkJobType {
 
         CUSTOM_CODE("custom code"),
         FLINK_SQL("flink sql"),
@@ -256,7 +256,7 @@ public final class ApplicationForm {
 
         private final String desc;
 
-        DevelopmentMode(String desc) {
+        FlinkJobType(String desc) {
             this.desc = desc;
         }
     }

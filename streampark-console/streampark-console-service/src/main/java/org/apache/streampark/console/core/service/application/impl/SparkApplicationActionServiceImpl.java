@@ -32,14 +32,15 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.SparkAppStateEnum;
 import org.apache.streampark.console.core.enums.SparkOperationEnum;
@@ -50,11 +51,11 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
@@ -114,7 +115,7 @@ public class SparkApplicationActionServiceImpl
     private SparkApplicationConfigService configService;
 
     @Autowired
-    private SparkApplicationLogService applicationLogService;
+    private ApplicationLogService applicationLogService;
 
     @Autowired
     private SparkEnvService sparkEnvService;
@@ -176,7 +177,7 @@ public class SparkApplicationActionServiceImpl
             distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.RESTART);
             return;
         }
-        this.stop(appParam);
+        this.cancel(appParam);
         this.start(appParam, false);
     }
 
@@ -202,21 +203,22 @@ public class SparkApplicationActionServiceImpl
     }
 
     @Override
-    public void stop(SparkApplication appParam) throws Exception {
+    public void cancel(SparkApplication appParam) throws Exception {
         // For HA purposes, if the task is not processed locally, save the Distribution task and return
         if (!distributedTaskService.isLocalProcessing(appParam.getId())) {
-            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.STOP);
+            distributedTaskService.saveDistributedTask(appParam, false, DistributedTaskEnum.CANCEL);
             return;
         }
         SparkAppHttpWatcher.setOptionState(appParam.getId(), SparkOptionStateEnum.STOPPING);
         SparkApplication application = getById(appParam.getId());
         application.setState(SparkAppStateEnum.STOPPING.getValue());
 
-        SparkApplicationLog applicationLog = new SparkApplicationLog();
-        applicationLog.setOptionName(SparkOperationEnum.STOP.getValue());
+        ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
+        applicationLog.setOptionName(SparkOperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
-        applicationLog.setSparkAppId(application.getAppId());
+        applicationLog.setClusterId(application.getClusterId());
         applicationLog.setUserId(ServiceHelper.getUserId());
         application.setOptionTime(new Date());
         this.baseMapper.updateById(application);
@@ -236,7 +238,7 @@ public class SparkApplicationActionServiceImpl
                 sparkEnv.getSparkVersion(),
                 SparkDeployMode.of(application.getDeployMode()),
                 stopProper,
-                application.getAppId());
+                application.getClusterId());
 
         CompletableFuture<CancelResponse> stopFuture =
             CompletableFuture.supplyAsync(() -> SparkClient.cancel(stopRequest), executorService);
@@ -284,7 +286,7 @@ public class SparkApplicationActionServiceImpl
         SparkEnv sparkEnv = sparkEnvService.getByIdOrDefault(application.getVersionId());
         ApiAlertException.throwIfNull(sparkEnv, "[StreamPark] can no found spark version");
 
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             checkYarnBeforeStart(application);
         }
 
@@ -304,7 +306,8 @@ public class SparkApplicationActionServiceImpl
         // 2) update app state to starting...
         starting(application);
 
-        SparkApplicationLog applicationLog = new SparkApplicationLog();
+        ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(SparkOperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());
@@ -327,7 +330,7 @@ public class SparkApplicationActionServiceImpl
         String appConf = userJarAndAppConf.f1;
 
         BuildResult buildResult = buildPipeline.getBuildResult();
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
                 extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
@@ -387,10 +390,10 @@ public class SparkApplicationActionServiceImpl
                 applicationLog.setSuccess(true);
                 application.resolveScheduleConf(response.sparkProperties());
                 if (StringUtils.isNoneEmpty(response.sparkAppId())) {
-                    application.setAppId(response.sparkAppId());
+                    application.setClusterId(response.sparkAppId());
                 }
-                applicationLog.setSparkAppId(response.sparkAppId());
-                applicationLog.setTrackUrl(response.trackingUrl());
+                applicationLog.setClusterId(response.sparkAppId());
+                applicationLog.setTrackingUrl(response.trackingUrl());
                 application.setStartTime(new Date());
                 application.setEndTime(null);
 
@@ -438,7 +441,7 @@ public class SparkApplicationActionServiceImpl
 
     private Tuple2<String, String> getUserJarAndAppConf(
                                                         SparkEnv sparkEnv, SparkApplication application) {
-        SparkDeployMode deployModeEnum = application.getSparkDeployMode();
+        SparkDeployMode deployModeEnum = application.getDeployModeEnum();
         SparkApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
         ApiAlertException.throwIfNull(
@@ -447,7 +450,7 @@ public class SparkApplicationActionServiceImpl
         String sparkUserJar = null;
         String appConf = null;
 
-        switch (application.getDevelopmentMode()) {
+        switch (application.getJobTypeEnum()) {
             case SPARK_SQL:
                 SparkSql sparkSql = sparkSqlService.getEffective(application.getId(), false);
                 AssertUtils.notNull(sparkSql);
@@ -550,7 +553,7 @@ public class SparkApplicationActionServiceImpl
         updateById(application);
         SparkAppHttpWatcher.unWatching(application.getId());
         // kill application
-        if (SparkDeployMode.isYarnMode(application.getSparkDeployMode())) {
+        if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             try {
                 List<ApplicationReport> applications = applicationInfoService
                     .getYarnAppReport(application.getAppName());

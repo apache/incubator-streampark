@@ -46,10 +46,10 @@ import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
 import org.apache.streampark.console.core.service.application.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.ApplicationService;
 import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
@@ -107,7 +107,7 @@ public class SparkApplicationManageServiceImpl
     private SparkApplicationConfigService configService;
 
     @Autowired
-    private SparkApplicationLogService applicationLogService;
+    private ApplicationLogService applicationLogService;
 
     @Autowired
     private SparkSqlService sparkSqlService;
@@ -153,9 +153,7 @@ public class SparkApplicationManageServiceImpl
 
     @Override
     public boolean mapping(SparkApplication appParam) {
-        boolean mapping = this.baseMapper.mapping(appParam);
-        SparkApplication application = getById(appParam.getId());
-        return mapping;
+        return this.baseMapper.mapping(appParam);
     }
 
     @Override
@@ -237,7 +235,8 @@ public class SparkApplicationManageServiceImpl
                                 && PipelineStatusEnum.success
                                     .getCode()
                                     .equals(record.getBuildStatus()))
-                        .setAllowStop(record.isRunning());
+                        .setAllowStop(record.isRunning())
+                        .setAllowView(record.shouldTracking());
                     record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());
@@ -396,7 +395,7 @@ public class SparkApplicationManageServiceImpl
         SparkApplication application = getById(appParam.getId());
 
         /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
-        SparkDeployMode sparkDeployMode = application.getSparkDeployMode();
+        SparkDeployMode sparkDeployMode = application.getDeployModeEnum();
 
         boolean success = validateQueueIfNeeded(application, appParam);
         ApiAlertException.throwIfFalse(
@@ -460,7 +459,7 @@ public class SparkApplicationManageServiceImpl
         application.setRestartSize(appParam.getRestartSize());
         application.setTags(appParam.getTags());
 
-        switch (appParam.getSparkDeployMode()) {
+        switch (appParam.getDeployModeEnum()) {
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 application.setHadoopUser(appParam.getHadoopUser());
@@ -655,7 +654,7 @@ public class SparkApplicationManageServiceImpl
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(SparkApplication appParam) {
-        yarnQueueService.checkQueueLabel(appParam.getSparkDeployMode(), appParam.getYarnQueue());
+        yarnQueueService.checkQueueLabel(appParam.getDeployModeEnum(), appParam.getYarnQueue());
         if (!isYarnNotDefaultQueue(appParam)) {
             return true;
         }
@@ -671,13 +670,13 @@ public class SparkApplicationManageServiceImpl
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(SparkApplication oldApp, SparkApplication newApp) {
-        yarnQueueService.checkQueueLabel(newApp.getSparkDeployMode(), newApp.getYarnQueue());
+        yarnQueueService.checkQueueLabel(newApp.getDeployModeEnum(), newApp.getYarnQueue());
         if (!isYarnNotDefaultQueue(newApp)) {
             return true;
         }
 
         oldApp.resolveYarnQueue();
-        if (SparkDeployMode.isYarnMode(newApp.getSparkDeployMode())
+        if (SparkDeployMode.isYarnMode(newApp.getDeployModeEnum())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
@@ -693,14 +692,14 @@ public class SparkApplicationManageServiceImpl
      *     (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(SparkApplication application) {
-        return SparkDeployMode.isYarnMode(application.getSparkDeployMode())
+        return SparkDeployMode.isYarnMode(application.getDeployModeEnum())
             && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
     private boolean isYarnApplicationModeChange(
                                                 SparkApplication application, SparkApplication appParam) {
         return !application.getDeployMode().equals(appParam.getDeployMode())
-            && (SparkDeployMode.YARN_CLIENT == appParam.getSparkDeployMode()
-                || SparkDeployMode.YARN_CLUSTER == application.getSparkDeployMode());
+            && (SparkDeployMode.YARN_CLIENT == appParam.getDeployModeEnum()
+                || SparkDeployMode.YARN_CLUSTER == application.getDeployModeEnum());
     }
 }

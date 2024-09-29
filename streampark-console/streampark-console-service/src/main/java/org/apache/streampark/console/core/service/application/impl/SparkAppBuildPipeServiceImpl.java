@@ -30,14 +30,15 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
@@ -47,10 +48,10 @@ import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
@@ -61,8 +62,8 @@ import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.PipeWatcher;
 import org.apache.streampark.flink.packer.pipeline.PipelineSnapshot;
 import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
-import org.apache.streampark.flink.packer.pipeline.SparkYarnApplicationBuildRequest;
-import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnApplicationBuildPipeline;
+import org.apache.streampark.flink.packer.pipeline.SparkYarnBuildRequest;
+import org.apache.streampark.flink.packer.pipeline.impl.SparkYarnBuildPipeline;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -111,13 +112,13 @@ public class SparkAppBuildPipeServiceImpl
     private MessageService messageService;
 
     @Autowired
+    private ApplicationLogService applicationLogService;
+
+    @Autowired
     private SparkApplicationManageService applicationManageService;
 
     @Autowired
     private SparkApplicationInfoService applicationInfoService;
-
-    @Autowired
-    private SparkApplicationLogService applicationLogService;
 
     @Autowired
     private SparkAppHttpWatcher sparkAppHttpWatcher;
@@ -145,7 +146,8 @@ public class SparkAppBuildPipeServiceImpl
         checkBuildEnv(appId, forceBuild);
 
         SparkApplication app = applicationManageService.getById(appId);
-        SparkApplicationLog applicationLog = new SparkApplicationLog();
+        ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());
@@ -370,34 +372,35 @@ public class SparkAppBuildPipeServiceImpl
             }
         }
 
-        SparkDeployMode deployModeEnum = app.getSparkDeployMode();
+        SparkDeployMode deployModeEnum = app.getDeployModeEnum();
         String mainClass = Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS;
         switch (deployModeEnum) {
-            case YARN_CLUSTER:
             case YARN_CLIENT:
+            case YARN_CLUSTER:
                 String yarnProvidedPath = app.getAppLib();
                 String localWorkspace = app.getLocalAppHome().concat("/lib");
                 if (ApplicationType.APACHE_SPARK == app.getApplicationType()) {
                     yarnProvidedPath = app.getAppHome();
                     localWorkspace = app.getLocalAppHome();
                 }
-                SparkYarnApplicationBuildRequest yarnAppRequest = new SparkYarnApplicationBuildRequest(
+                SparkYarnBuildRequest yarnAppRequest = new SparkYarnBuildRequest(
                     app.getAppName(),
                     mainClass,
                     localWorkspace,
                     yarnProvidedPath,
-                    app.getDevelopmentMode(),
+                    app.getJobTypeEnum(),
+                    deployModeEnum,
                     getMergedDependencyInfo(app));
                 log.info("Submit params to building pipeline : {}", yarnAppRequest);
-                return SparkYarnApplicationBuildPipeline.of(yarnAppRequest);
+                return SparkYarnBuildPipeline.of(yarnAppRequest);
             default:
                 throw new UnsupportedOperationException(
-                    "Unsupported Building Application for DeployMode: " + app.getSparkDeployMode());
+                    "Unsupported Building Application for DeployMode: " + app.getDeployModeEnum());
         }
     }
 
     private String retrieveSparkUserJar(SparkEnv sparkEnv, SparkApplication app) {
-        switch (app.getDevelopmentMode()) {
+        switch (app.getJobTypeEnum()) {
             case SPARK_JAR:
                 switch (app.getApplicationType()) {
                     case STREAMPARK_SPARK:
@@ -412,18 +415,16 @@ public class SparkAppBuildPipeServiceImpl
                 }
             case PYSPARK:
                 return String.format("%s/%s", app.getAppHome(), app.getJar());
-
             case SPARK_SQL:
                 String sqlDistJar = ServiceHelper.getSparkSqlClientJar(sparkEnv);
-
-                if (app.getSparkDeployMode() == SparkDeployMode.YARN_CLUSTER) {
+                if (app.getDeployModeEnum() == SparkDeployMode.YARN_CLUSTER) {
                     String clientPath = Workspace.remote().APP_CLIENT();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
-                    "[StreamPark] unsupported JobType: " + app.getDevelopmentMode());
+                    "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());
         }
     }
 

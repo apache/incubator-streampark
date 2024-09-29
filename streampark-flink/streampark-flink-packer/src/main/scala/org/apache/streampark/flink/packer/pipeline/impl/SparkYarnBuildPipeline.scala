@@ -29,15 +29,19 @@ import org.apache.commons.codec.digest.DigestUtils
 import java.io.{File, FileInputStream, IOException}
 
 /** Building pipeline for spark yarn application mode */
-class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildRequest)
+class SparkYarnBuildPipeline(request: SparkYarnBuildRequest)
   extends BuildPipeline {
 
   /** the type of pipeline */
   override def pipeType: PipelineTypeEnum =
-    PipelineTypeEnum.SPARK_YARN_APPLICATION
+    PipelineTypeEnum.SPARK_CLUSTER
 
-  override def offerBuildParam: SparkYarnApplicationBuildRequest = request
+  override def offerBuildParam: SparkYarnBuildRequest = request
 
+  /**
+   * the actual build process. the effective steps progress should be implemented in multiple
+   * BuildPipeline.execStep() functions.
+   */
   /**
    * the actual build process. the effective steps progress should be implemented in multiple
    * BuildPipeline.execStep() functions.
@@ -45,7 +49,7 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
   @throws[Throwable]
   override protected def buildProcess(): SimpleBuildResponse = {
     execStep(1) {
-      request.developmentMode match {
+      request.jobType match {
         case SparkJobType.SPARK_SQL =>
           LfsOperator.mkCleanDirs(request.localWorkspace)
           HdfsOperator.mkCleanDirs(request.yarnProvidedPath)
@@ -56,7 +60,7 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
 
     val mavenJars =
       execStep(2) {
-        request.developmentMode match {
+        request.jobType match {
           case SparkJobType.SPARK_SQL =>
             val mavenArts =
               MavenTool.resolveArtifacts(request.dependencyInfo.mavenArts)
@@ -71,7 +75,6 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
         uploadJarToHdfsOrLfs(FsOperator.hdfs, jar, request.yarnProvidedPath)
       })
     }.getOrElse(throw getError.exception)
-
     SimpleBuildResponse()
   }
 
@@ -115,7 +118,7 @@ class SparkYarnApplicationBuildPipeline(request: SparkYarnApplicationBuildReques
 
 }
 
-object SparkYarnApplicationBuildPipeline {
-  def of(request: SparkYarnApplicationBuildRequest): SparkYarnApplicationBuildPipeline =
-    new SparkYarnApplicationBuildPipeline(request)
+object SparkYarnBuildPipeline {
+  def of(request: SparkYarnBuildRequest): SparkYarnBuildPipeline =
+    new SparkYarnBuildPipeline(request)
 }

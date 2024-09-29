@@ -70,9 +70,9 @@ export const useSparkAction = (optionApps: Recordable) => {
       if (!message) {
         message = t('spark.app.release.releaseFail') + message.replaceAll(/\[StreamPark]/g, '');
       }
-      Swal.fire('Failed', message, 'error');
+      await Swal.fire('Failed', message, 'error');
     } else {
-      Swal.fire({
+      await Swal.fire({
         icon: 'success',
         title: t('spark.app.release.releasing'),
         showConfirmButton: false,
@@ -250,11 +250,9 @@ export const useSparkAction = (optionApps: Recordable) => {
       ],
       content: () => {
         return (
-          <Form class="!pt-50px">
+          <Form class="!pt-50px" layout="vertical" baseColProps={{ span: 22, offset: 1 }}>
             <Form.Item
               label="Job Name"
-              layout="vertical"
-              baseColProps={{ span: 22, offset: 1 }}
               validateStatus={unref(validateStatus)}
               help={help}
               rules={[{ required: true }]}
@@ -353,10 +351,14 @@ export const useSparkAction = (optionApps: Recordable) => {
             {[DeployMode.YARN_CLIENT, DeployMode.YARN_CLUSTER].includes(app.deployMode) && (
               <Form.Item
                 label="YARN Application Id"
-                name="appId"
+                name="clusterId"
                 rules={[{ required: true, message: 'YARN ApplicationId is required' }]}
               >
-                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
+                <Input
+                  type="text"
+                  placeholder="ApplicationId"
+                  v-model:value={formValue.clusterId}
+                />
               </Form.Item>
             )}
             <Form.Item
@@ -376,7 +378,7 @@ export const useSparkAction = (optionApps: Recordable) => {
           await mappingRef.value.validate();
           await fetchSparkMapping({
             id: app.id,
-            appId: formValue.appId,
+            clusterId: formValue.clusterId,
           });
           Swal.fire({
             icon: 'success',

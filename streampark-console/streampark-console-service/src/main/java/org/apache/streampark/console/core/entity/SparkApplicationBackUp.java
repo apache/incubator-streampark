@@ -64,7 +64,7 @@ public class SparkApplicationBackUp {
     }
 
     private void renderPath(SparkApplication application) {
-        switch (application.getSparkDeployMode()) {
+        switch (application.getDeployModeEnum()) {
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",
@@ -78,7 +78,7 @@ public class SparkApplicationBackUp {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                    "unsupported deployMode ".concat(application.getSparkDeployMode().getName()));
+                    "unsupported deployMode ".concat(application.getDeployModeEnum().getName()));
         }
     }
 }

@@ -222,8 +222,8 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             envInitializer.checkFlinkEnv(application.getStorageType(), flinkEnv);
             envInitializer.storageInitialize(application.getStorageType());
 
-            if (FlinkDeployMode.YARN_SESSION == application.getFlinkDeployMode()
-                || FlinkDeployMode.REMOTE == application.getFlinkDeployMode()) {
+            if (FlinkDeployMode.YARN_SESSION == application.getDeployModeEnum()
+                || FlinkDeployMode.REMOTE == application.getDeployModeEnum()) {
                 FlinkCluster flinkCluster = flinkClusterService.getById(application.getFlinkClusterId());
                 boolean conned = flinkClusterWatcher.verifyClusterConnection(flinkCluster);
                 if (!conned) {
@@ -370,7 +370,7 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s can't be found.", id));
         ApiAlertException.throwIfFalse(
-            FlinkDeployMode.isKubernetesMode(application.getFlinkDeployMode()),
+            FlinkDeployMode.isKubernetesMode(application.getDeployModeEnum()),
             "Job deployMode must be kubernetes-session|kubernetes-application.");
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(

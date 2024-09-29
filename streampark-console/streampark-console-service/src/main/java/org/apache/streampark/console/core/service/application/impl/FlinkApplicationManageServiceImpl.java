@@ -311,7 +311,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                 !record.shouldTracking()
                     && PipelineStatusEnum.success.getCode()
                         .equals(record.getBuildStatus()))
-            .setAllowStop(record.isRunning());
+            .setAllowStop(record.isRunning())
+            .setAllowView(record.shouldTracking());
     }
 
     @Override
@@ -393,7 +394,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         newApp.setJobName(jobName);
         newApp.setClusterId(
-            FlinkDeployMode.isSessionMode(persist.getFlinkDeployMode())
+            FlinkDeployMode.isSessionMode(persist.getDeployModeEnum())
                 ? persist.getClusterId()
                 : null);
         newApp.setArgs(appParam.getArgs() != null ? appParam.getArgs() : persist.getArgs());
@@ -475,7 +476,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         FlinkApplication application = getById(appParam.getId());
 
         /* If the original mode is remote, k8s-session, yarn-session, check cluster status */
-        FlinkDeployMode flinkDeployMode = application.getFlinkDeployMode();
+        FlinkDeployMode flinkDeployMode = application.getDeployModeEnum();
         switch (flinkDeployMode) {
             case REMOTE:
             case YARN_SESSION:
@@ -560,7 +561,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         application.setCpMaxFailureInterval(appParam.getCpMaxFailureInterval());
         application.setTags(appParam.getTags());
 
-        switch (appParam.getFlinkDeployMode()) {
+        switch (appParam.getDeployModeEnum()) {
             case YARN_APPLICATION:
                 application.setHadoopUser(appParam.getHadoopUser());
                 break;
@@ -786,7 +787,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(FlinkApplication appParam) {
-        yarnQueueService.checkQueueLabel(appParam.getFlinkDeployMode(), appParam.getYarnQueue());
+        yarnQueueService.checkQueueLabel(appParam.getDeployModeEnum(), appParam.getYarnQueue());
         if (!isYarnNotDefaultQueue(appParam)) {
             return true;
         }
@@ -802,13 +803,13 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      */
     @VisibleForTesting
     public boolean validateQueueIfNeeded(FlinkApplication oldApp, FlinkApplication newApp) {
-        yarnQueueService.checkQueueLabel(newApp.getFlinkDeployMode(), newApp.getYarnQueue());
+        yarnQueueService.checkQueueLabel(newApp.getDeployModeEnum(), newApp.getYarnQueue());
         if (!isYarnNotDefaultQueue(newApp)) {
             return true;
         }
 
         oldApp.setYarnQueueByHotParams();
-        if (FlinkDeployMode.isYarnPerJobOrAppMode(newApp.getFlinkDeployMode())
+        if (FlinkDeployMode.isYarnPerJobOrAppMode(newApp.getDeployModeEnum())
             && StringUtils.equals(oldApp.getYarnQueue(), newApp.getYarnQueue())) {
             return true;
         }
@@ -824,7 +825,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
      *     (empty or default), return true, false else.
      */
     private boolean isYarnNotDefaultQueue(FlinkApplication application) {
-        return FlinkDeployMode.isYarnPerJobOrAppMode(application.getFlinkDeployMode())
+        return FlinkDeployMode.isYarnPerJobOrAppMode(application.getDeployModeEnum())
             && !yarnQueueService.isDefaultQueue(application.getYarnQueue());
     }
 
@@ -849,7 +850,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
     private boolean isYarnApplicationModeChange(FlinkApplication application, FlinkApplication appParam) {
         return !application.getDeployMode().equals(appParam.getDeployMode())
-            && (FlinkDeployMode.YARN_APPLICATION == appParam.getFlinkDeployMode()
-                || FlinkDeployMode.YARN_APPLICATION == application.getFlinkDeployMode());
+            && (FlinkDeployMode.YARN_APPLICATION == appParam.getDeployModeEnum()
+                || FlinkDeployMode.YARN_APPLICATION == application.getDeployModeEnum());
     }
 }

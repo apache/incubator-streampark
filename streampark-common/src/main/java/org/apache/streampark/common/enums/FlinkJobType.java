@@ -52,9 +52,9 @@ public enum FlinkJobType {
      */
     @Nonnull
     public static FlinkJobType of(@Nullable Integer value) {
-        for (FlinkJobType flinkDevelopmentMode : values()) {
-            if (flinkDevelopmentMode.mode.equals(value)) {
-                return flinkDevelopmentMode;
+        for (FlinkJobType flinkJobType : values()) {
+            if (flinkJobType.mode.equals(value)) {
+                return flinkJobType;
             }
         }
         return FlinkJobType.UNKNOWN;

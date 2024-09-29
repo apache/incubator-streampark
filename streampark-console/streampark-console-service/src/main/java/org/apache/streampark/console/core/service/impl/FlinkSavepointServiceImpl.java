@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.mapper.FlinkSavepointMapper;
@@ -189,6 +190,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @Nonnull
     private ApplicationLog getApplicationLog(FlinkApplication application) {
         ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.FLINK.getCode());
         applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackingUrl(application.getJobManagerUrl());
@@ -292,7 +294,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     private Map<String, Object> tryGetRestProps(FlinkApplication application, FlinkCluster cluster) {
         Map<String, Object> properties = new HashMap<>();
 
-        if (FlinkDeployMode.isRemoteMode(application.getFlinkDeployMode())) {
+        if (FlinkDeployMode.isRemoteMode(application.getDeployModeEnum())) {
             AssertUtils.notNull(
                 cluster,
                 String.format(
@@ -311,7 +313,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
                 ? cluster.getClusterId()
                 : application.getClusterId();
         } else if (FlinkDeployMode.isYarnMode(application.getDeployMode())) {
-            if (FlinkDeployMode.YARN_SESSION.equals(application.getFlinkDeployMode())) {
+            if (FlinkDeployMode.YARN_SESSION.equals(application.getDeployModeEnum())) {
                 AssertUtils.notNull(
                     cluster,
                     String.format(
@@ -493,7 +495,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         return new TriggerSavepointRequest(
             application.getId(),
             flinkEnv.getFlinkVersion(),
-            application.getFlinkDeployMode(),
+            application.getDeployModeEnum(),
             properties,
             clusterId,
             application.getJobId(),

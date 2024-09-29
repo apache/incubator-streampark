@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline
 
 import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
-import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkJobType, SparkJobType}
+import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkJobType, SparkDeployMode, SparkJobType}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
 import org.apache.streampark.flink.packer.maven.DependencyInfo
@@ -40,7 +40,7 @@ sealed trait FlinkBuildParam extends BuildParam {
 
   def deployMode: FlinkDeployMode
 
-  def developmentMode: FlinkJobType
+  def flinkJobType: FlinkJobType
 
   def flinkVersion: FlinkVersion
 
@@ -51,7 +51,7 @@ sealed trait FlinkBuildParam extends BuildParam {
   lazy val providedLibs: DependencyInfo = {
     val providedLibs =
       ArrayBuffer(localWorkspace.APP_JARS, customFlinkUserJar)
-    if (developmentMode == FlinkJobType.FLINK_SQL) {
+    if (flinkJobType == FlinkJobType.FLINK_SQL) {
       providedLibs += s"${localWorkspace.APP_SHIMS}/flink-${flinkVersion.majorVersion}"
     }
     dependencyInfo.merge(providedLibs.toSet)
@@ -77,7 +77,7 @@ case class FlinkK8sSessionBuildRequest(
     mainClass: String,
     customFlinkUserJar: String,
     deployMode: FlinkDeployMode,
-    developmentMode: FlinkJobType,
+    flinkJobType: FlinkJobType,
     flinkVersion: FlinkVersion,
     dependencyInfo: DependencyInfo,
     clusterId: String,
@@ -90,7 +90,7 @@ case class FlinkK8sApplicationBuildRequest(
     mainClass: String,
     customFlinkUserJar: String,
     deployMode: FlinkDeployMode,
-    developmentMode: FlinkJobType,
+    flinkJobType: FlinkJobType,
     flinkVersion: FlinkVersion,
     dependencyInfo: DependencyInfo,
     clusterId: String,
@@ -109,7 +109,7 @@ case class FlinkRemotePerJobBuildRequest(
     customFlinkUserJar: String,
     skipBuild: Boolean,
     deployMode: FlinkDeployMode,
-    developmentMode: FlinkJobType,
+    flinkJobType: FlinkJobType,
     flinkVersion: FlinkVersion,
     dependencyInfo: DependencyInfo)
   extends FlinkBuildParam
@@ -119,15 +119,15 @@ case class FlinkYarnApplicationBuildRequest(
     mainClass: String,
     localWorkspace: String,
     yarnProvidedPath: String,
-    developmentMode: FlinkJobType,
+    flinkJobType: FlinkJobType,
     dependencyInfo: DependencyInfo)
   extends BuildParam
 
-case class SparkYarnApplicationBuildRequest(
+case class SparkYarnBuildRequest(
     appName: String,
     mainClass: String,
     localWorkspace: String,
     yarnProvidedPath: String,
-    developmentMode: SparkJobType,
-    dependencyInfo: DependencyInfo)
-  extends BuildParam
+    jobType: SparkJobType,
+    deployMode: SparkDeployMode,
+    dependencyInfo: DependencyInfo) extends BuildParam

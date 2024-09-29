@@ -53,6 +53,7 @@ export interface SparkApplication {
   appProperties?: string;
   appArgs?: string;
   appId?: string;
+  clusterId?: string;
   yarnQueue?: string;
   yarnQueueName?: string;
   yarnQueueLabel?: string;

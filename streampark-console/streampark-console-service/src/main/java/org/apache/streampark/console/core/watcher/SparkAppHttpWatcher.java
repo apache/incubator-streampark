@@ -29,11 +29,9 @@ import org.apache.streampark.console.core.metrics.spark.Job;
 import org.apache.streampark.console.core.metrics.spark.SparkApplicationSummary;
 import org.apache.streampark.console.core.metrics.yarn.YarnAppInfo;
 import org.apache.streampark.console.core.service.DistributedTaskService;
-import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.utils.AlertTemplateUtils;
 
@@ -79,12 +77,6 @@ public class SparkAppHttpWatcher {
 
     @Autowired
     private SparkApplicationInfoService applicationInfoService;
-
-    @Autowired
-    private SparkApplicationLogService applicationLogService;
-
-    @Autowired
-    private SparkEnvService sparkEnvService;
 
     @Autowired
     private DistributedTaskService distributedTaskService;
@@ -227,7 +219,7 @@ public class SparkAppHttpWatcher {
                     log.info(
                         "[StreamPark][SparkAppHttpWatcher] getStateFromYarn, app {} was ended, appId is {}, state is {}",
                         application.getId(),
-                        application.getAppId(),
+                        application.getClusterId(),
                         sparkAppStateEnum);
                     application.setEndTime(new Date());
                     if (appFinalStatus.equals(FinalApplicationStatus.FAILED)) {
@@ -329,12 +321,12 @@ public class SparkAppHttpWatcher {
     }
 
     private YarnAppInfo httpYarnAppInfo(SparkApplication application) throws Exception {
-        String reqURL = "ws/v1/cluster/apps/".concat(application.getAppId());
+        String reqURL = "ws/v1/cluster/apps/".concat(application.getClusterId());
         return yarnRestRequest(reqURL, YarnAppInfo.class);
     }
     private Job[] httpJobsStatus(SparkApplication application) throws IOException {
         String format = "proxy/%s/api/v1/applications/%s/jobs";
-        String reqURL = String.format(format, application.getAppId(), application.getAppId());
+        String reqURL = String.format(format, application.getClusterId(), application.getClusterId());
         return yarnRestRequest(reqURL, Job[].class);
     }
 

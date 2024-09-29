@@ -113,8 +113,8 @@ export const getBackupColumns = (): BasicColumn[] => [
 
 export const getOptionLogColumns = (): BasicColumn[] => [
   { title: 'Operation Name', dataIndex: 'optionName' },
-  { title: 'Application Id', dataIndex: 'sparkAppId' },
-  { title: 'Tracking Url', dataIndex: 'trackUrl' },
+  { title: 'Application Id', dataIndex: 'clusterId' },
+  { title: 'Tracking Url', dataIndex: 'trackingUrl' },
   { title: 'Start Status', dataIndex: 'success' },
   { title: 'Option Time', dataIndex: 'optionTime' },
 ];

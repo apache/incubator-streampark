@@ -81,9 +81,9 @@ public enum PipelineTypeEnum {
             .build(),
         K8sAppModeBuildResponse.class),
 
-    SPARK_YARN_APPLICATION(
+    SPARK_CLUSTER(
         6,
-        "spark yarn application mode task building pipeline",
+        "spark yarn cluster mode task building pipeline",
         ImmutableMap.<Integer, String>builder()
             .put(1, "Prepare hadoop yarn environment and building workspace")
             .put(2, "Resolve maven dependencies")

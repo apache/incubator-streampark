@@ -112,8 +112,8 @@
       // },
     ],
     data: app,
-    layout: 'vertical',
-    column: 3,
+    layout: 'horizontal',
+    column: 2,
   });
 
   const [registerConfDrawer] = useDrawer();

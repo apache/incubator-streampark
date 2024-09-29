@@ -57,7 +57,7 @@ export const stateMap = {
     title: t('spark.app.runState.running'),
     class: 'status-processing-running',
   },
-  [AppStateEnum.FINISHED]: { color: '#52c41a', title: t('spark.app.runState.finished') },
+  [AppStateEnum.FINISHED]: { color: '#1890ff', title: t('spark.app.runState.finished') },
   [AppStateEnum.FAILED]: { color: '#f5222d', title: t('spark.app.runState.failed') },
   [AppStateEnum.LOST]: { color: '#333333', title: t('spark.app.runState.lost') },
   [AppStateEnum.MAPPING]: {
