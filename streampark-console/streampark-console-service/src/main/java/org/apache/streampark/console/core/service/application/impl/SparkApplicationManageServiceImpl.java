@@ -235,7 +235,8 @@ public class SparkApplicationManageServiceImpl
                                 && PipelineStatusEnum.success
                                     .getCode()
                                     .equals(record.getBuildStatus()))
-                        .setAllowStop(record.isRunning());
+                        .setAllowStop(record.isRunning())
+                        .setAllowView(record.shouldTracking());
                     record.setAppControl(appControl);
                 })
             .collect(Collectors.toList());

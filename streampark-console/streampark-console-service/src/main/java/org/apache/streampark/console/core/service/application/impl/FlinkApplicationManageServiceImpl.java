@@ -312,12 +312,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                     && PipelineStatusEnum.success.getCode()
                         .equals(record.getBuildStatus()))
             .setAllowStop(record.isRunning())
-            .setAllowView(appShouldBeTrack(record));
-
-    }
-
-    private boolean appShouldBeTrack(FlinkApplication record) {
-        return false;
+            .setAllowView(record.shouldTracking());
     }
 
     @Override
