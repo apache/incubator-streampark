@@ -53,8 +53,8 @@
             <if test="app.appName != null and app.appName != ''">
                 and t.app_name like concat('%', '${app.appName}', '%')
             </if>
-            <if test="app.appId != null and app.appId != ''">
-                and t.app_id = #{app.appId}
+            <if test="app.clusterId != null and app.clusterId != ''">
+                and t.cluster_id = #{app.clusterId}
             </if>
             <if test="app.state != null and app.state != ''">
                 and t.state = #{app.state}
@@ -92,8 +92,8 @@
     <update id="mapping" parameterType="org.apache.streampark.console.core.entity.SparkApplication">
         update t_spark_app
         <set>
-            <if test="app.appId != null">
-                app_id=#{app.appId},
+            <if test="app.cluster_id != null">
+                cluster_id=#{app.clusterId},
             </if>
             end_time=null,
             state=14,
@@ -117,8 +117,8 @@
     <update id="persistMetrics" parameterType="org.apache.streampark.console.core.entity.SparkApplication">
         update t_spark_app
         <set>
-            <if test="app.appId != null and app.appId != ''">
-                app_id=#{app.appId},
+            <if test="app.clusterId != null and app.clusterId != ''">
+                cluster_id=#{app.clusterId},
             </if>
             <if test="app.tracking != null">
                 tracking=#{app.tracking},

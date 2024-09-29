@@ -32,6 +32,7 @@ import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.entity.FlinkSavepoint;
 import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.mapper.FlinkSavepointMapper;
@@ -189,6 +190,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @Nonnull
     private ApplicationLog getApplicationLog(FlinkApplication application) {
         ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.FLINK.getCode());
         applicationLog.setOptionName(OperationEnum.SAVEPOINT.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackingUrl(application.getJobManagerUrl());

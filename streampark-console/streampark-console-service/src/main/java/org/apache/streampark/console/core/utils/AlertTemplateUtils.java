@@ -120,7 +120,7 @@ public class AlertTemplateUtils {
         return AlertTemplate.builder()
             .duration(application.getStartTime(), application.getEndTime())
             .jobName(application.getAppName())
-            .link(application.getDeployModeEnum(), application.getAppId())
+            .link(application.getDeployModeEnum(), application.getClusterId())
             .startTime(application.getStartTime())
             .endTime(application.getEndTime())
             .restart(application.isNeedRestartOnFailed(), application.getRestartCount())

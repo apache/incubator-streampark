@@ -331,10 +331,14 @@ export const useFlinkApplication = (openStartModal: Fn) => {
             ].includes(app.deployMode) && (
               <Form.Item
                 label="YARN Application Id"
-                name="appId"
+                name="clusterId"
                 rules={[{ required: true, message: 'YARN ApplicationId is required' }]}
               >
-                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
+                <Input
+                  type="text"
+                  placeholder="ApplicationId"
+                  v-model:value={formValue.clusterId}
+                />
               </Form.Item>
             )}
             <Form.Item
@@ -354,7 +358,7 @@ export const useFlinkApplication = (openStartModal: Fn) => {
           await mappingRef.value.validate();
           await fetchMapping({
             id: app.id,
-            appId: formValue.appId,
+            clusterId: formValue.clusterId,
             jobId: formValue.jobId,
           });
           Swal.fire({

@@ -110,7 +110,7 @@ public class SparkApplication extends BaseEntity {
      * driver pod name for spark on K8s.(will be supported in the future)
      */
     @TableField(updateStrategy = FieldStrategy.IGNORED)
-    private String appId;
+    private String clusterId;
 
     private String yarnQueue;
 
@@ -509,7 +509,7 @@ public class SparkApplication extends BaseEntity {
     public static class SFunc {
 
         public static final SFunction<SparkApplication, Long> ID = SparkApplication::getId;
-        public static final SFunction<SparkApplication, String> APP_ID = SparkApplication::getAppId;
+        public static final SFunction<SparkApplication, String> APP_ID = SparkApplication::getClusterId;
         public static final SFunction<SparkApplication, Date> START_TIME = SparkApplication::getStartTime;
         public static final SFunction<SparkApplication, Date> END_TIME = SparkApplication::getEndTime;
         public static final SFunction<SparkApplication, Long> DURATION = SparkApplication::getDuration;

@@ -113,7 +113,6 @@
       dataSource.forEach((x) => {
         x.expanded = [
           {
-            appId: x.appId,
             jmMemory: x.jmMemory,
             tmMemory: x.tmMemory,
             totalTM: x.totalTM,

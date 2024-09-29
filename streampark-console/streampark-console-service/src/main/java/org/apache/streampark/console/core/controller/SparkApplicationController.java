@@ -23,15 +23,15 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.core.annotation.AppChangeEvent;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
 import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.service.ResourceService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -69,7 +69,7 @@ public class SparkApplicationController {
     private FlinkApplicationBackUpService backUpService;
 
     @Autowired
-    private SparkApplicationLogService applicationLogService;
+    private ApplicationLogService applicationLogService;
 
     @Autowired
     private ResourceService resourceService;
@@ -202,8 +202,8 @@ public class SparkApplicationController {
     }
 
     @PostMapping("opt_log")
-    public RestResponse optionlog(SparkApplicationLog applicationLog, RestRequest request) {
-        IPage<SparkApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
+    public RestResponse optionlog(ApplicationLog applicationLog, RestRequest request) {
+        IPage<ApplicationLog> applicationList = applicationLogService.getPage(applicationLog, request);
         return RestResponse.success(applicationList);
     }
 

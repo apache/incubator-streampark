@@ -49,6 +49,7 @@ import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
 import org.apache.streampark.console.core.enums.ConfigFileTypeEnum;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
@@ -270,6 +271,7 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         application.setState(FlinkAppStateEnum.CANCELLING.getValue());
 
         ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.FLINK.getCode());
         applicationLog.setOptionName(OperationEnum.CANCEL.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setTrackingUrl(application.getJobManagerUrl());
@@ -517,6 +519,7 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
     @Nonnull
     private ApplicationLog constructAppLog(FlinkApplication application) {
         ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.FLINK.getCode());
         applicationLog.setOptionName(OperationEnum.START.getValue());
         applicationLog.setAppId(application.getId());
         applicationLog.setOptionTime(new Date());

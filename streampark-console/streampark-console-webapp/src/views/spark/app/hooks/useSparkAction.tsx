@@ -351,10 +351,14 @@ export const useSparkAction = (optionApps: Recordable) => {
             {[DeployMode.YARN_CLIENT, DeployMode.YARN_CLUSTER].includes(app.deployMode) && (
               <Form.Item
                 label="YARN Application Id"
-                name="appId"
+                name="clusterId"
                 rules={[{ required: true, message: 'YARN ApplicationId is required' }]}
               >
-                <Input type="text" placeholder="ApplicationId" v-model:value={formValue.appId} />
+                <Input
+                  type="text"
+                  placeholder="ApplicationId"
+                  v-model:value={formValue.clusterId}
+                />
               </Form.Item>
             )}
             <Form.Item
@@ -374,7 +378,7 @@ export const useSparkAction = (optionApps: Recordable) => {
           await mappingRef.value.validate();
           await fetchSparkMapping({
             id: app.id,
-            appId: formValue.appId,
+            clusterId: formValue.clusterId,
           });
           Swal.fire({
             icon: 'success',

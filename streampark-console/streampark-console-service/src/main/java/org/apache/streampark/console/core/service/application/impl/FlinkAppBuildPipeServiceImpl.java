@@ -116,7 +116,7 @@ import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-public class AppBuildPipeServiceImpl
+public class FlinkAppBuildPipeServiceImpl
     extends
         ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline>
     implements

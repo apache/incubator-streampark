@@ -30,14 +30,15 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
 import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
-import org.apache.streampark.console.core.entity.SparkApplicationLog;
 import org.apache.streampark.console.core.entity.SparkEnv;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
@@ -47,10 +48,10 @@ import org.apache.streampark.console.core.service.MessageService;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
+import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkAppBuildPipeService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
-import org.apache.streampark.console.core.service.application.SparkApplicationLogService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.SparkAppHttpWatcher;
@@ -111,13 +112,13 @@ public class SparkAppBuildPipeServiceImpl
     private MessageService messageService;
 
     @Autowired
+    private ApplicationLogService applicationLogService;
+
+    @Autowired
     private SparkApplicationManageService applicationManageService;
 
     @Autowired
     private SparkApplicationInfoService applicationInfoService;
-
-    @Autowired
-    private SparkApplicationLogService applicationLogService;
 
     @Autowired
     private SparkAppHttpWatcher sparkAppHttpWatcher;
@@ -145,7 +146,8 @@ public class SparkAppBuildPipeServiceImpl
         checkBuildEnv(appId, forceBuild);
 
         SparkApplication app = applicationManageService.getById(appId);
-        SparkApplicationLog applicationLog = new SparkApplicationLog();
+        ApplicationLog applicationLog = new ApplicationLog();
+        applicationLog.setJobType(EngineTypeEnum.SPARK.getCode());
         applicationLog.setOptionName(RELEASE.getValue());
         applicationLog.setAppId(app.getId());
         applicationLog.setOptionTime(new Date());

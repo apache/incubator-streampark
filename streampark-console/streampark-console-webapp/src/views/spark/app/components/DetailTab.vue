@@ -252,11 +252,11 @@
   }
 
   async function handleYarnUrl(id: string) {
-    window.open(baseUrl() + '/spark/proxy/yarn/' + id + '/');
+    window.open(baseUrl() + '/proxy/yarn/' + id + '/');
   }
 
   async function handleViewHistory(id: string) {
-    window.open(baseUrl() + '/spark/proxy/history/' + id + '/');
+    window.open(baseUrl() + '/proxy/history/' + id + '/');
   }
 
   function getBackupAction(record: Recordable): ActionItem[] {
@@ -342,14 +342,14 @@
               <Tag color="green" v-if="record.optionName === OperationEnum.START"> Start </Tag>
               <Tag color="orange" v-if="record.optionName === OperationEnum.STOP"> STOP </Tag>
             </template>
-            <template v-if="column.dataIndex === 'yarnAppId'">
-              <a type="link" @click="handleYarnUrl(record.yarnAppId)" target="_blank">
-                {{ record.yarnAppId }}
+            <template v-if="column.dataIndex === 'clusterId'">
+              <a type="link" @click="handleYarnUrl(record.clusterId)" target="_blank">
+                {{ record.clusterId }}
               </a>
             </template>
-            <template v-if="column.dataIndex === 'trackUrl'">
+            <template v-if="column.dataIndex === 'trackingUrl'">
               <a type="link" @click="handleViewHistory(record.id)" target="_blank">
-                {{ record.trackUrl }}
+                {{ record.trackingUrl }}
               </a>
             </template>
             <template v-if="column.dataIndex === 'optionTime'">

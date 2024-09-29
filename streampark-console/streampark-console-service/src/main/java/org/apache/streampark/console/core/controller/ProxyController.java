@@ -20,15 +20,17 @@ package org.apache.streampark.console.core.controller;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.SparkApplication;
+import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.UserTypeEnum;
 import org.apache.streampark.console.core.service.ProxyService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
+import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.system.entity.Member;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
-import org.apache.streampark.console.system.service.UserService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -53,16 +55,16 @@ public class ProxyController {
     private ProxyService proxyService;
 
     @Autowired
-    private FlinkApplicationManageService applicationManageService;
+    private FlinkApplicationManageService flinkApplicationManageService;
+
+    @Autowired
+    private SparkApplicationManageService sparkApplicationManageService;
 
     @Autowired
     private ApplicationLogService logService;
 
     @Autowired
     private MemberService memberService;
-
-    @Autowired
-    private UserService userService;
 
     @GetMapping("{type}/{id}/assets/**")
     public ResponseEntity<?> proxyFlinkAssets(HttpServletRequest request, @PathVariable("type") String type,
@@ -79,15 +81,17 @@ public class ProxyController {
 
     private ResponseEntity<?> proxy(String type, HttpServletRequest request, Long id) throws Exception {
         ApplicationLog log;
-        FlinkApplication app;
-
         switch (type) {
             case "flink":
-                app = applicationManageService.getApp(id);
-                checkProxyApp(app);
-                return proxyService.proxyFlink(request, app);
-            case "cluster":
-                return proxyService.proxyCluster(request, id);
+                FlinkApplication flinkApplication = flinkApplicationManageService.getApp(id);
+                checkProxyApp(flinkApplication.getTeamId());
+                return proxyService.proxyFlink(request, flinkApplication);
+            case "spark":
+                SparkApplication sparkApplication = sparkApplicationManageService.getApp(id);
+                checkProxyApp(sparkApplication.getTeamId());
+                return proxyService.proxySpark(request, sparkApplication);
+            case "flink_cluster":
+                return proxyService.proxyFlinkCluster(request, id);
             case "history":
                 log = logService.getById(id);
                 checkProxyAppLog(log);
@@ -101,14 +105,12 @@ public class ProxyController {
         }
     }
 
-    private void checkProxyApp(FlinkApplication app) {
-        ApiAlertException.throwIfNull(app, "Invalid operation, application is invalid.");
-
+    private void checkProxyApp(Long teamId) {
         User user = ServiceHelper.getLoginUser();
         ApiAlertException.throwIfNull(user, "Permission denied, please login first.");
 
         if (user.getUserType() != UserTypeEnum.ADMIN) {
-            Member member = memberService.getByTeamIdUserName(app.getTeamId(), user.getUsername());
+            Member member = memberService.getByTeamIdUserName(teamId, user.getUsername());
             ApiAlertException.throwIfNull(member,
                 "Permission denied, this job not created by the current user, And the job cannot be found in the current user's team.");
         }
@@ -116,7 +118,13 @@ public class ProxyController {
 
     private void checkProxyAppLog(ApplicationLog log) {
         ApiAlertException.throwIfNull(log, "Invalid operation, The application log not found.");
-        FlinkApplication app = applicationManageService.getById(log.getAppId());
-        checkProxyApp(app);
+        if (log.getJobType() == EngineTypeEnum.FLINK.getCode()) {
+            FlinkApplication app = flinkApplicationManageService.getById(log.getAppId());
+            checkProxyApp(app.getTeamId());
+        }
+        if (log.getJobType() == EngineTypeEnum.SPARK.getCode()) {
+            SparkApplication app = sparkApplicationManageService.getById(log.getAppId());
+            checkProxyApp(app.getTeamId());
+        }
     }
 }
