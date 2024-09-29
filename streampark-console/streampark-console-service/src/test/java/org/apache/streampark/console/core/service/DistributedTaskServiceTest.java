@@ -18,8 +18,10 @@
 package org.apache.streampark.console.core.service;
 
 import org.apache.streampark.console.core.bean.FlinkTaskItem;
+import org.apache.streampark.console.core.bean.SparkTaskItem;
 import org.apache.streampark.console.core.entity.DistributedTask;
 import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.SparkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 import org.apache.streampark.console.core.service.impl.DistributedTaskServiceImpl;
 
@@ -57,17 +59,32 @@ class DistributedTaskServiceTest {
     }
 
     @Test
-    void testGetTaskAndApp() {
+    void testFlinkTaskAndApp() {
         FlinkApplication application = new FlinkApplication();
         application.setId(0L);
         try {
-            DistributedTask DistributedTask =
-                distributionTaskService.getDistributedTaskByApp(application, false, DistributedTaskEnum.START);
-            FlinkTaskItem flinkTaskItem = distributionTaskService.getFlinkTaskItem(DistributedTask);
+            DistributedTask distributedTask =
+                distributionTaskService.getDistributedTaskByFlinkApp(application, false, DistributedTaskEnum.START);
+            FlinkTaskItem flinkTaskItem = distributionTaskService.getFlinkTaskItem(distributedTask);
             FlinkApplication newApplication = distributionTaskService.getAppByFlinkTaskItem(flinkTaskItem);
             assert (application.equals(newApplication));
         } catch (JacksonException e) {
-            log.error("testGetTaskAndApp failed:", e);
+            log.error("testFlinkTaskAndApp failed:", e);
+        }
+    }
+
+    @Test
+    void testSparkTaskAndApp() {
+        SparkApplication application = new SparkApplication();
+        application.setId(0L);
+        try {
+            DistributedTask distributedTask =
+                distributionTaskService.getDistributedTaskBySparkApp(application, false, DistributedTaskEnum.START);
+            SparkTaskItem sparkTaskItem = distributionTaskService.getSparkTaskItem(distributedTask);
+            SparkApplication newApplication = distributionTaskService.getAppBySparkTaskItem(sparkTaskItem);
+            assert (application.equals(newApplication));
+        } catch (JacksonException e) {
+            log.error("testSparkTaskAndApp failed:", e);
         }
     }
 

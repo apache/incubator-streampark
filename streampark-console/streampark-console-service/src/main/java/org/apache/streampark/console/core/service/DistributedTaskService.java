@@ -17,13 +17,12 @@
 
 package org.apache.streampark.console.core.service;
 
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.core.entity.DistributedTask;
-import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.enums.DistributedTaskEnum;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,16 +39,9 @@ public interface DistributedTaskService extends IService<DistributedTask> {
 
     /**
      * This interface is responsible for polling the database to retrieve task records and execute the corresponding operations.
-     * @param DistributedTask DistributedTask
+     * @param distributedTask distributedTask
      */
-    void executeDistributedTask(DistributedTask DistributedTask) throws Exception;
-
-    /**
-     * Through this interface, the watcher obtains the list of tasks that need to be monitored.
-     * @param applications List<Application>
-     * @return List<Application> List of tasks that need to be monitored
-     */
-    List<FlinkApplication> getMonitoredTaskList(List<FlinkApplication> applications);
+    void executeDistributedTask(DistributedTask distributedTask) throws Exception;
 
     /**
      * This interface handles task redistribution when server nodes are added.
@@ -74,9 +66,9 @@ public interface DistributedTaskService extends IService<DistributedTask> {
     /**
      * Save Distributed Task.
      *
-     * @param appParam  Application
+     * @param appParam It may be one of the following values: FlinkApplication, SparkApplication
      * @param autoStart boolean
      * @param action It may be one of the following values: START, RESTART, REVOKE, CANCEL, ABORT
      */
-    public void saveDistributedTask(FlinkApplication appParam, boolean autoStart, DistributedTaskEnum action);
+    public void saveDistributedTask(BaseEntity appParam, boolean autoStart, DistributedTaskEnum action);
 }

@@ -26,6 +26,7 @@ import org.apache.streampark.common.enums.FlinkJobType;
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.console.base.mybatis.entity.BaseEntity;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.bean.Dependency;
@@ -53,7 +54,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,7 +64,7 @@ import java.util.Optional;
 @Data
 @TableName("t_flink_app")
 @Slf4j
-public class FlinkApplication implements Serializable {
+public class FlinkApplication extends BaseEntity {
 
     @TableId(type = IdType.INPUT)
     private Long id;
