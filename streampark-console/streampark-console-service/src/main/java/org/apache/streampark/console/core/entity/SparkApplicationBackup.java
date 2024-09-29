@@ -30,7 +30,7 @@ import java.util.Date;
 @Data
 @TableName("t_spark_app_backup")
 @Slf4j
-public class SparkApplicationBackUp {
+public class SparkApplicationBackup {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -51,10 +51,10 @@ public class SparkApplicationBackUp {
 
     private transient boolean backup;
 
-    public SparkApplicationBackUp() {
+    public SparkApplicationBackup() {
     }
 
-    public SparkApplicationBackUp(SparkApplication application) {
+    public SparkApplicationBackup(SparkApplication application) {
         this.appId = application.getId();
         this.sqlId = application.getSqlId();
         this.configId = application.getConfigId();

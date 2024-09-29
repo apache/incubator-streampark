@@ -31,7 +31,7 @@ import org.apache.streampark.console.core.mapper.FlinkSqlMapper;
 import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.flink.core.FlinkSqlValidationResult;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
@@ -61,7 +61,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
     private FlinkEffectiveService effectiveService;
 
     @Autowired
-    private FlinkApplicationBackUpService backUpService;
+    private FlinkApplicationBackupService backUpService;
 
     @Autowired
     private FlinkEnvService flinkEnvService;

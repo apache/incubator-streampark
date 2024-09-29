@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
+import org.apache.streampark.console.core.entity.SparkApplicationBackup;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface SparkApplicationBackUpMapper extends BaseMapper<SparkApplicationBackUp> {
+public interface SparkApplicationBackUpMapper extends BaseMapper<SparkApplicationBackup> {
 }

@@ -30,7 +30,7 @@ import java.util.Date;
 @Data
 @TableName("t_flink_app_backup")
 @Slf4j
-public class FlinkApplicationBackUp {
+public class FlinkApplicationBackup {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -49,10 +49,10 @@ public class FlinkApplicationBackUp {
 
     private transient String teamId;
 
-    public FlinkApplicationBackUp() {
+    public FlinkApplicationBackup() {
     }
 
-    public FlinkApplicationBackUp(FlinkApplication application) {
+    public FlinkApplicationBackup(FlinkApplication application) {
         this.appId = application.getId();
         this.sqlId = application.getSqlId();
         this.configId = application.getConfigId();

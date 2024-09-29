@@ -37,7 +37,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.util.Tuple2;
 import org.apache.streampark.console.base.util.Tuple3;
-import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
@@ -63,10 +63,10 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.VariableService;
-import org.apache.streampark.console.core.service.application.AppBuildPipeService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
-import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
@@ -137,7 +137,7 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
     private Executor executorService;
 
     @Autowired
-    private FlinkApplicationBackUpService backUpService;
+    private FlinkApplicationBackupService backUpService;
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;
@@ -167,7 +167,7 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
     private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
     @Autowired
     private FlinkClusterService flinkClusterService;
@@ -423,7 +423,7 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                 "[StreamPark] The same task name is already running in the yarn queue");
         }
 
-        AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+        ApplicationBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         AssertUtils.notNull(buildPipeline);
 
         FlinkEnv flinkEnv = flinkEnvService.getByIdOrDefault(application.getVersionId());

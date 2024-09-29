@@ -45,10 +45,10 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.service.application.AppBuildPipeService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.ApplicationService;
-import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -101,7 +101,7 @@ public class SparkApplicationManageServiceImpl
     private ApplicationService applicationService;
 
     @Autowired
-    private SparkApplicationBackUpService backUpService;
+    private SparkApplicationBackupService backUpService;
 
     @Autowired
     private SparkApplicationConfigService configService;
@@ -116,7 +116,7 @@ public class SparkApplicationManageServiceImpl
     private SparkEffectiveService effectiveService;
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
     @Autowired
     private YarnQueueService yarnQueueService;

@@ -23,7 +23,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.FlinkApplication;
-import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
@@ -31,7 +31,7 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.FlinkApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
@@ -51,9 +51,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlinkApplicationBackUpServiceImpl
     extends
-        ServiceImpl<FlinkApplicationBackUpMapper, FlinkApplicationBackUp>
+        ServiceImpl<FlinkApplicationBackUpMapper, FlinkApplicationBackup>
     implements
-        FlinkApplicationBackUpService {
+        FlinkApplicationBackupService {
 
     @Autowired
     private FlinkApplicationManageService applicationManageService;
@@ -68,15 +68,15 @@ public class FlinkApplicationBackUpServiceImpl
     private FlinkSqlService flinkSqlService;
 
     @Override
-    public IPage<FlinkApplicationBackUp> getPage(FlinkApplicationBackUp bakParam, RestRequest request) {
-        Page<FlinkApplicationBackUp> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<FlinkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackUp>()
-            .eq(FlinkApplicationBackUp::getAppId, bakParam.getAppId());
+    public IPage<FlinkApplicationBackup> getPage(FlinkApplicationBackup bakParam, RestRequest request) {
+        Page<FlinkApplicationBackup> page = MybatisPager.getPage(request);
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, bakParam.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override
-    public void rollback(FlinkApplicationBackUp bakParam) {
+    public void rollback(FlinkApplicationBackup bakParam) {
 
         FlinkApplication application = applicationManageService.getById(bakParam.getAppId());
 
@@ -133,15 +133,15 @@ public class FlinkApplicationBackUpServiceImpl
 
     @Override
     public void revoke(FlinkApplication appParam) {
-        Page<FlinkApplicationBackUp> page = new Page<>();
+        Page<FlinkApplicationBackup> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<FlinkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackUp>()
-            .eq(FlinkApplicationBackUp::getAppId, appParam.getId())
-            .orderByDesc(FlinkApplicationBackUp::getCreateTime);
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, appParam.getId())
+            .orderByDesc(FlinkApplicationBackup::getCreateTime);
 
-        Page<FlinkApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
+        Page<FlinkApplicationBackup> backUpPages = baseMapper.selectPage(page, queryWrapper);
         if (!backUpPages.getRecords().isEmpty()) {
-            FlinkApplicationBackUp backup = backUpPages.getRecords().get(0);
+            FlinkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
             appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
@@ -152,8 +152,8 @@ public class FlinkApplicationBackUpServiceImpl
     public void remove(FlinkApplication appParam) {
         try {
             baseMapper.delete(
-                new LambdaQueryWrapper<FlinkApplicationBackUp>()
-                    .eq(FlinkApplicationBackUp::getAppId, appParam.getId()));
+                new LambdaQueryWrapper<FlinkApplicationBackup>()
+                    .eq(FlinkApplicationBackup::getAppId, appParam.getId()));
             appParam
                 .getFsOperator()
                 .delete(
@@ -169,10 +169,10 @@ public class FlinkApplicationBackUpServiceImpl
 
     @Override
     public void rollbackFlinkSql(FlinkApplication appParam, FlinkSql flinkSqlParam) {
-        LambdaQueryWrapper<FlinkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackUp>()
-            .eq(FlinkApplicationBackUp::getAppId, appParam.getId())
-            .eq(FlinkApplicationBackUp::getSqlId, flinkSqlParam.getId());
-        FlinkApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, appParam.getId())
+            .eq(FlinkApplicationBackup::getSqlId, flinkSqlParam.getId());
+        FlinkApplicationBackup backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
             backUp, "Application backup can't be null. Rollback flink sql failed.");
         // rollback config and sql
@@ -182,7 +182,7 @@ public class FlinkApplicationBackUpServiceImpl
 
     @Override
     public Boolean removeById(Long id) throws InternalException {
-        FlinkApplicationBackUp backUp = getById(id);
+        FlinkApplicationBackup backUp = getById(id);
         try {
             FlinkApplication application = applicationManageService.getById(backUp.getAppId());
             application.getFsOperator().delete(backUp.getPath());
@@ -215,7 +215,7 @@ public class FlinkApplicationBackUpServiceImpl
                 version = config.getVersion();
             }
 
-            FlinkApplicationBackUp applicationBackUp = new FlinkApplicationBackUp(appParam);
+            FlinkApplicationBackup applicationBackUp = new FlinkApplicationBackup(appParam);
             applicationBackUp.setVersion(version);
 
             this.save(applicationBackUp);

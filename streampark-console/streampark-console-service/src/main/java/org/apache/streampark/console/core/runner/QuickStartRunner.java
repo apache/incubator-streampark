@@ -27,7 +27,7 @@ import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
-import org.apache.streampark.console.core.service.application.AppBuildPipeService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,9 +57,9 @@ public class QuickStartRunner implements ApplicationRunner {
     private FlinkApplicationManageService applicationManageService;
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
-    private static Long defaultId = 100000L;
+    private static final Long defaultId = 100000L;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

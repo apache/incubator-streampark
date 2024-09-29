@@ -29,7 +29,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.Dependency;
-import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Message;
 import org.apache.streampark.console.core.entity.Resource;
@@ -49,7 +49,7 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
-import org.apache.streampark.console.core.service.application.SparkAppBuildPipeService;
+import org.apache.streampark.console.core.service.application.SparkAplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
@@ -96,11 +96,11 @@ import static org.apache.streampark.console.core.enums.OperationEnum.RELEASE;
 @Service
 @Slf4j
 @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-public class SparkAppBuildPipeServiceImpl
+public class SparkApplicationBuildPipelineServiceImpl
     extends
-        ServiceImpl<ApplicationBuildPipelineMapper, AppBuildPipeline>
+        ServiceImpl<ApplicationBuildPipelineMapper, ApplicationBuildPipeline>
     implements
-        SparkAppBuildPipeService {
+        SparkAplicationBuildPipelineService {
 
     @Autowired
     private SparkEnvService sparkEnvService;
@@ -185,7 +185,7 @@ public class SparkAppBuildPipeServiceImpl
 
                 @Override
                 public void onStart(PipelineSnapshot snapshot) {
-                    AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
                         .setAppId(app.getId());
                     saveEntity(buildPipeline);
 
@@ -266,14 +266,14 @@ public class SparkAppBuildPipeServiceImpl
 
                 @Override
                 public void onStepStateChange(PipelineSnapshot snapshot) {
-                    AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
                         .setAppId(app.getId());
                     saveEntity(buildPipeline);
                 }
 
                 @Override
                 public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
-                    AppBuildPipeline buildPipeline = AppBuildPipeline.fromPipeSnapshot(snapshot)
+                    ApplicationBuildPipeline buildPipeline = ApplicationBuildPipeline.fromPipeSnapshot(snapshot)
                         .setAppId(app.getId())
                         .setBuildResult(result);
                     saveEntity(buildPipeline);
@@ -327,7 +327,8 @@ public class SparkAppBuildPipeServiceImpl
                 }
             });
         // save pipeline instance snapshot to db before release it.
-        AppBuildPipeline buildPipeline = AppBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
+        ApplicationBuildPipeline buildPipeline =
+            ApplicationBuildPipeline.initFromPipeline(pipeline).setAppId(app.getId());
         boolean saved = saveEntity(buildPipeline);
         // async release pipeline
         executorService.submit((Runnable) pipeline::launch);
@@ -429,7 +430,7 @@ public class SparkAppBuildPipeServiceImpl
     }
 
     @Override
-    public Optional<AppBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
+    public Optional<ApplicationBuildPipeline> getCurrentBuildPipeline(@Nonnull Long appId) {
         return Optional.ofNullable(getById(appId));
     }
 
@@ -445,21 +446,21 @@ public class SparkAppBuildPipeServiceImpl
         if (CollectionUtils.isEmpty(appIds)) {
             return new HashMap<>();
         }
-        LambdaQueryWrapper<AppBuildPipeline> queryWrapper = new LambdaQueryWrapper<AppBuildPipeline>()
-            .in(AppBuildPipeline::getAppId, appIds);
+        LambdaQueryWrapper<ApplicationBuildPipeline> queryWrapper = new LambdaQueryWrapper<ApplicationBuildPipeline>()
+            .in(ApplicationBuildPipeline::getAppId, appIds);
 
-        List<AppBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
+        List<ApplicationBuildPipeline> appBuildPipelines = baseMapper.selectList(queryWrapper);
         if (CollectionUtils.isEmpty(appBuildPipelines)) {
             return new HashMap<>();
         }
         return appBuildPipelines.stream()
-            .collect(Collectors.toMap(AppBuildPipeline::getAppId, AppBuildPipeline::getPipelineStatus));
+            .collect(Collectors.toMap(ApplicationBuildPipeline::getAppId, ApplicationBuildPipeline::getPipelineStatus));
     }
 
     @Override
     public void removeByAppId(Long appId) {
         baseMapper.delete(
-            new LambdaQueryWrapper<AppBuildPipeline>().eq(AppBuildPipeline::getAppId, appId));
+            new LambdaQueryWrapper<ApplicationBuildPipeline>().eq(ApplicationBuildPipeline::getAppId, appId));
     }
 
     /**
@@ -468,8 +469,8 @@ public class SparkAppBuildPipeServiceImpl
      * @param pipe application build pipeline
      * @return value after the save or update
      */
-    public boolean saveEntity(AppBuildPipeline pipe) {
-        AppBuildPipeline old = getById(pipe.getAppId());
+    public boolean saveEntity(ApplicationBuildPipeline pipe) {
+        ApplicationBuildPipeline old = getById(pipe.getAppId());
         if (old == null) {
             return save(pipe);
         }

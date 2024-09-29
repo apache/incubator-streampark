@@ -42,7 +42,7 @@ import java.util.Map;
 @Validated
 @RestController
 @RequestMapping("flink/conf")
-public class ConfigController {
+public class FlinkConfigController {
 
     @Autowired
     private FlinkApplicationConfigService applicationConfigService;

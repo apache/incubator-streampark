@@ -23,7 +23,7 @@ import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
+import org.apache.streampark.console.core.entity.SparkApplicationBackup;
 import org.apache.streampark.console.core.entity.SparkApplicationConfig;
 import org.apache.streampark.console.core.entity.SparkSql;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
@@ -31,7 +31,7 @@ import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.mapper.SparkApplicationBackUpMapper;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkSqlService;
-import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
 
@@ -49,11 +49,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SparkApplicationBackUpServiceImpl
+public class SparkApplicationBackupServiceImpl
     extends
-        ServiceImpl<SparkApplicationBackUpMapper, SparkApplicationBackUp>
+        ServiceImpl<SparkApplicationBackUpMapper, SparkApplicationBackup>
     implements
-        SparkApplicationBackUpService {
+        SparkApplicationBackupService {
 
     @Autowired
     private SparkApplicationManageService applicationManageService;
@@ -68,15 +68,15 @@ public class SparkApplicationBackUpServiceImpl
     private SparkSqlService sparkSqlService;
 
     @Override
-    public IPage<SparkApplicationBackUp> getPage(SparkApplicationBackUp bakParam, RestRequest request) {
-        Page<SparkApplicationBackUp> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, bakParam.getAppId());
+    public IPage<SparkApplicationBackup> getPage(SparkApplicationBackup bakParam, RestRequest request) {
+        Page<SparkApplicationBackup> page = MybatisPager.getPage(request);
+        LambdaQueryWrapper<SparkApplicationBackup> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackup>()
+            .eq(SparkApplicationBackup::getAppId, bakParam.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override
-    public void rollback(SparkApplicationBackUp bakParam) {
+    public void rollback(SparkApplicationBackup bakParam) {
 
         SparkApplication application = applicationManageService.getById(bakParam.getAppId());
 
@@ -133,15 +133,15 @@ public class SparkApplicationBackUpServiceImpl
 
     @Override
     public void revoke(SparkApplication appParam) {
-        Page<SparkApplicationBackUp> page = new Page<>();
+        Page<SparkApplicationBackup> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, appParam.getId())
-            .orderByDesc(SparkApplicationBackUp::getCreateTime);
+        LambdaQueryWrapper<SparkApplicationBackup> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackup>()
+            .eq(SparkApplicationBackup::getAppId, appParam.getId())
+            .orderByDesc(SparkApplicationBackup::getCreateTime);
 
-        Page<SparkApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
+        Page<SparkApplicationBackup> backUpPages = baseMapper.selectPage(page, queryWrapper);
         if (!backUpPages.getRecords().isEmpty()) {
-            SparkApplicationBackUp backup = backUpPages.getRecords().get(0);
+            SparkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
             appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
@@ -152,8 +152,8 @@ public class SparkApplicationBackUpServiceImpl
     public void remove(SparkApplication appParam) {
         try {
             baseMapper.delete(
-                new LambdaQueryWrapper<SparkApplicationBackUp>()
-                    .eq(SparkApplicationBackUp::getAppId, appParam.getId()));
+                new LambdaQueryWrapper<SparkApplicationBackup>()
+                    .eq(SparkApplicationBackup::getAppId, appParam.getId()));
             appParam
                 .getFsOperator()
                 .delete(
@@ -169,10 +169,10 @@ public class SparkApplicationBackUpServiceImpl
 
     @Override
     public void rollbackSparkSql(SparkApplication appParam, SparkSql sparkSqlParam) {
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, appParam.getId())
-            .eq(SparkApplicationBackUp::getSqlId, sparkSqlParam.getId());
-        SparkApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<SparkApplicationBackup> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackup>()
+            .eq(SparkApplicationBackup::getAppId, appParam.getId())
+            .eq(SparkApplicationBackup::getSqlId, sparkSqlParam.getId());
+        SparkApplicationBackup backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
             backUp, "Application backup can't be null. Rollback spark sql failed.");
         // rollback config and sql
@@ -182,7 +182,7 @@ public class SparkApplicationBackUpServiceImpl
 
     @Override
     public Boolean removeById(Long id) throws InternalException {
-        SparkApplicationBackUp backUp = getById(id);
+        SparkApplicationBackup backUp = getById(id);
         try {
             SparkApplication application = applicationManageService.getById(backUp.getAppId());
             application.getFsOperator().delete(backUp.getPath());
@@ -215,7 +215,7 @@ public class SparkApplicationBackUpServiceImpl
                 version = config.getVersion();
             }
 
-            SparkApplicationBackUp applicationBackUp = new SparkApplicationBackUp(appParam);
+            SparkApplicationBackup applicationBackUp = new SparkApplicationBackup(appParam);
             applicationBackUp.setVersion(version);
 
             this.save(applicationBackUp);
