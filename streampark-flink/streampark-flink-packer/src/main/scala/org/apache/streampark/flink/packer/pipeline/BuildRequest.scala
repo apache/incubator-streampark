@@ -17,7 +17,7 @@
 
 package org.apache.streampark.flink.packer.pipeline
 
-import org.apache.streampark.common.conf.{FlinkVersion, SparkVersion, Workspace}
+import org.apache.streampark.common.conf.{FlinkVersion, Workspace}
 import org.apache.streampark.common.enums.{FlinkDeployMode, FlinkJobType, SparkDeployMode, SparkJobType}
 import org.apache.streampark.flink.kubernetes.model.K8sPodTemplates
 import org.apache.streampark.flink.packer.docker.DockerConf
@@ -60,38 +60,6 @@ sealed trait FlinkBuildParam extends BuildParam {
   def getShadedJarPath(rootWorkspace: String): String = {
     val safeAppName: String = appName.replaceAll("\\s+", "_")
     s"$rootWorkspace/streampark-flinkjob_$safeAppName.jar"
-  }
-
-}
-
-sealed trait SparkBuildParam extends BuildParam {
-
-  private[this] val localWorkspace = Workspace.local
-
-  def workspace: String
-
-  def deployMode: SparkDeployMode
-
-  def jobType: SparkJobType
-
-  def sparkVersion: SparkVersion
-
-  def dependencyInfo: DependencyInfo
-
-  def customSparkUserJar: String
-
-  lazy val providedLibs: DependencyInfo = {
-    val providedLibs =
-      ArrayBuffer(localWorkspace.APP_JARS, customSparkUserJar)
-    if (jobType == SparkJobType.SPARK_SQL) {
-      providedLibs += s"${localWorkspace.APP_SHIMS}/spark-${sparkVersion.majorVersion}"
-    }
-    dependencyInfo.merge(providedLibs.toSet)
-  }
-
-  def getShadedJarPath(rootWorkspace: String): String = {
-    val safeAppName: String = appName.replaceAll("\\s+", "_")
-    s"$rootWorkspace/streampark-sparkjob_$safeAppName.jar"
   }
 
 }
@@ -163,4 +131,3 @@ case class SparkYarnBuildRequest(
     sparkJobType: SparkJobType,
     deployMode: SparkDeployMode,
     dependencyInfo: DependencyInfo)
-  extends SparkBuildParam
