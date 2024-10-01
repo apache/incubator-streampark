@@ -18,14 +18,16 @@
 package org.apache.streampark.console.core.metrics.spark;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
 
 import scala.collection.Map;
 
-@Data
+@Getter
+@Setter
 public class Job implements Serializable {
 
     @JsonProperty("jobId")

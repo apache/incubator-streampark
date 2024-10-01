@@ -18,17 +18,20 @@
 package org.apache.streampark.console.core.metrics.flink;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class JobsOverview implements Serializable {
 
     private List<Job> jobs;
 
-    @Data
+    @Getter
+    @Setter
     public static class Job implements Serializable {
 
         @JsonProperty("jid")
@@ -51,7 +54,8 @@ public class JobsOverview implements Serializable {
         private Task tasks;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class Task implements Serializable {
 
         private int total;

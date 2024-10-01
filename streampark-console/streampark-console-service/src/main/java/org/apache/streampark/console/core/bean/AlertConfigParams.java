@@ -23,13 +23,15 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 @Slf4j
 public class AlertConfigParams implements Serializable {
 

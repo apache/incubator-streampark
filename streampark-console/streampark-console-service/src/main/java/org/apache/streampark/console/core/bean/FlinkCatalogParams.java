@@ -22,7 +22,8 @@ import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCatalog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.beans.BeanUtils;
@@ -32,7 +33,8 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @Slf4j
 public class FlinkCatalogParams implements Serializable {
 
@@ -91,7 +93,8 @@ public class FlinkCatalogParams implements Serializable {
         return flinkCatalogParams;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class FlinkJDBCCatalog implements Serializable {
 
         @NotBlank
@@ -111,7 +114,8 @@ public class FlinkCatalogParams implements Serializable {
         private String baseUrl;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class FlinkHiveCatalog implements Serializable {
 
         @NotBlank
@@ -132,7 +136,8 @@ public class FlinkCatalogParams implements Serializable {
         private String hadoopConfDir;
     }
 
-    @Data
+    @Getter
+    @Setter
     public static class FlinkPaimonCatalog implements Serializable {
 
         @NotBlank

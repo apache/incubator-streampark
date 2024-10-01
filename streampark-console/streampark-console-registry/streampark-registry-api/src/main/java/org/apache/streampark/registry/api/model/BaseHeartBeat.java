@@ -20,11 +20,13 @@ package org.apache.streampark.registry.api.model;
 import org.apache.streampark.registry.api.enums.ServerStatusEnum;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

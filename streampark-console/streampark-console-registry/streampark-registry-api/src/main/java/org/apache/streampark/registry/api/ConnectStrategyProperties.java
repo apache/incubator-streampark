@@ -17,11 +17,13 @@
 
 package org.apache.streampark.registry.api;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Duration;
 
-@Data
+@Getter
+@Setter
 public class ConnectStrategyProperties {
 
     private StrategyType strategy = StrategyType.STOP;

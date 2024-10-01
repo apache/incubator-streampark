@@ -18,11 +18,13 @@
 package org.apache.streampark.console.core.metrics.spark;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class SparkApplicationSummary implements Serializable {
 

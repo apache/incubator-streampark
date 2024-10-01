@@ -37,8 +37,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +58,8 @@ import java.util.stream.Collectors;
  * corresponding ApplicationBuildPipeline record.
  */
 @TableName("t_app_build_pipe")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -273,7 +275,8 @@ public class ApplicationBuildPipeline {
     }
 
     /** View object of AppBuildPipeline */
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     @NoArgsConstructor
     public static class View {
@@ -329,7 +332,8 @@ public class ApplicationBuildPipeline {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     @NoArgsConstructor
     public static class Step {

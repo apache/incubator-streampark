@@ -22,7 +22,8 @@ import org.apache.streampark.flink.packer.pipeline.DockerPullSnapshot;
 import org.apache.streampark.flink.packer.pipeline.DockerPushSnapshot;
 import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
@@ -33,7 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /** View for DockerResolveProgress */
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class AppBuildDockerResolvedDetail {
 
@@ -55,7 +57,8 @@ public class AppBuildDockerResolvedDetail {
             .setPush(ImagePush.of(snapshot.push()));
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     public static class ImagePull {
 
@@ -83,7 +86,8 @@ public class AppBuildDockerResolvedDetail {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     public static class ImageBuild {
 
@@ -104,7 +108,8 @@ public class AppBuildDockerResolvedDetail {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     public static class ImagePush {
 
@@ -132,7 +137,8 @@ public class AppBuildDockerResolvedDetail {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     public static class ImageLayer {
 

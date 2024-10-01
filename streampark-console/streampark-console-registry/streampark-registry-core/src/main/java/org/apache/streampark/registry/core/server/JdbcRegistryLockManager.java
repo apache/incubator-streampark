@@ -25,8 +25,9 @@ import org.apache.streampark.registry.core.repository.JdbcRegistryLockRepository
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -135,7 +136,8 @@ public class JdbcRegistryLockManager implements IJdbcRegistryLockManager {
         jdbcRegistryLockHolderMap.remove(lockKey);
     }
 
-    @Data
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

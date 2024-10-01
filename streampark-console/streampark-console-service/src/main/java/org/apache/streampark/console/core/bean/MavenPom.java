@@ -19,11 +19,13 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 public class MavenPom {
 
     private String groupId;

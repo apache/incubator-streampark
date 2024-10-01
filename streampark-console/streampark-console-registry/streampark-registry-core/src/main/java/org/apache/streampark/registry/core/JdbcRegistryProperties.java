@@ -22,7 +22,8 @@ import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.zaxxer.hikari.HikariConfig;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +36,8 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 
-@Data
+@Getter
+@Setter
 @Slf4j
 @Validated
 @Configuration

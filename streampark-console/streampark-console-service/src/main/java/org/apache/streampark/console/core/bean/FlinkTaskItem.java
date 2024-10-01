@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.bean;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 public class FlinkTaskItem implements Serializable {
 
     /** appId */
