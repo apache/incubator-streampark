@@ -27,7 +27,7 @@
         limit 1
     </select>
 
-    <select id="selectByCatalogName" resultMap="BaseResultMap" parameterType="java.lang.String">
+    <select id="selectByCatalogName" resultType="org.apache.streampark.console.core.entity.FlinkCatalog" parameterType="java.lang.String">
         select
         *
         from t_flink_catalog
