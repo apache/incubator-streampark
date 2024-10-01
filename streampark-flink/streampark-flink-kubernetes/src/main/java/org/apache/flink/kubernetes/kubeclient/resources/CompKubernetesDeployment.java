@@ -17,7 +17,7 @@
 
 package org.apache.flink.kubernetes.kubeclient.resources;
 
-import io.fabric8.kubernetes.api.model.apps.Deployment;
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.Deployment;
 
 public class CompKubernetesDeployment extends KubernetesResource<Deployment> {
 

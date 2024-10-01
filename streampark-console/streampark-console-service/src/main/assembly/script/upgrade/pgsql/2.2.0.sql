@@ -150,3 +150,33 @@ create table t_jdbc_registry_data_change_event
     create_time        timestamp not null default current_timestamp,
     primary key (id)
 );
+
+-- ----------------------------
+-- table structure for t_flink_catalog
+-- ----------------------------
+
+create sequence "public"."streampark_t_flink_catalog_id_seq"
+    increment 1 start 10000 cache 1 minvalue 10000 maxvalue 9223372036854775807;
+
+CREATE TABLE "public"."t_flink_catalog" (
+    "id" int8 not null default nextval('streampark_t_flink_catalog_id_seq'::regclass),
+    "team_id" BIGINT NOT NULL,
+    "user_id" BIGINT DEFAULT NULL,
+    "catalog_type" VARCHAR(255) NOT NULL,
+    "catalog_name" VARCHAR(255) NOT NULL,
+    "configuration" TEXT,
+    "create_time" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    "update_time" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uniq_catalog_name UNIQUE (catalog_name)
+);
+alter table "public"."t_flink_catalog" add constraint "t_flink_catalog_pkey" primary key ("id");
+
+insert into "public"."t_menu" values (130701, 130700, 'catalog view', null, null, 'catalog:view', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130702, 130700, 'catalog create', null, null, 'catalog:create', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130703, 130700, 'catalog delete', null, null, 'catalog:delete', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130704, 130700, 'catalog update', null, null, 'catalog:update', '', '1', '0', null, now(), now());
+
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130701);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130702);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130703);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130704);

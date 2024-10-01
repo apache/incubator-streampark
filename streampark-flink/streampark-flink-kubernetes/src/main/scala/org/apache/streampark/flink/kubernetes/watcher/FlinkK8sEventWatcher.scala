@@ -21,9 +21,9 @@ import org.apache.streampark.common.util.Logger
 import org.apache.streampark.flink.kubernetes.{FlinkK8sWatchController, KubernetesRetriever}
 import org.apache.streampark.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
 
-import io.fabric8.kubernetes.api.model.apps.Deployment
-import io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
 import org.apache.flink.kubernetes.kubeclient.resources.{CompatibleKubernetesWatcher, CompKubernetesDeployment}
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.Deployment
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.{KubernetesClient, Watcher}
 
 import javax.annotation.concurrent.ThreadSafe
 

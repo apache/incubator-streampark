@@ -87,4 +87,7 @@ public final class WebUtils {
         return getAppDir(CLIENT);
     }
 
+    public static File getPluginDir() {
+        return getAppDir(PLUGINS);
+    }
 }

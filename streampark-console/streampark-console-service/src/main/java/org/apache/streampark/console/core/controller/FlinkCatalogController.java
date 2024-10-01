@@ -21,6 +21,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.FlinkCatalogParams;
+import org.apache.streampark.console.core.entity.FlinkCatalog;
 import org.apache.streampark.console.core.service.FlinkCatalogService;
 import org.apache.streampark.console.core.util.ServiceHelper;
 
@@ -30,6 +31,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,6 +65,14 @@ public class FlinkCatalogController {
         return RestResponse.success(catalogList);
     }
 
+    @GetMapping("get/{catalogName}")
+    @Permission(team = "#teamId")
+    @RequiresPermissions("catalog:view")
+    public RestResponse get(@PathVariable String catalogName, Long teamId) {
+        FlinkCatalog catalog = catalogService.getCatalog(catalogName);
+        return RestResponse.success(FlinkCatalogParams.of(catalog));
+    }
+
     @PostMapping("delete")
     @Permission(team = "#app.teamId")
     @RequiresPermissions("catalog:delete")
@@ -73,7 +84,7 @@ public class FlinkCatalogController {
     @PostMapping("update")
     @Permission(team = "#app.teamId")
     @RequiresPermissions("catalog:update")
-    public RestResponse remove(FlinkCatalogParams catalog) {
+    public RestResponse update(FlinkCatalogParams catalog) {
         Long userId = ServiceHelper.getUserId();
         boolean updated = catalogService.update(catalog, userId);
         return RestResponse.success(updated);

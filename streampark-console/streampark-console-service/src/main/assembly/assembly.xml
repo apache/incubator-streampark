@@ -67,6 +67,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/plugins</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>${project.build.directory}/../src/main/assembly/conf</directory>
             <outputDirectory>conf</outputDirectory>
             <lineEnding>unix</lineEnding>

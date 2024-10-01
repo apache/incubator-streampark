@@ -49,10 +49,13 @@ public interface FlinkCatalogService extends IService<FlinkCatalog> {
      */
     IPage<FlinkCatalogParams> page(FlinkCatalogParams catalog, RestRequest request);
 
+    FlinkCatalog getCatalog(Long catalogId);
+
+    FlinkCatalog getCatalog(String catalogName);
     /**
      * update Catalog
      *
      * @param catalog The {@link FlinkCatalogParams} object containing the search criteria.
      */
-    boolean update(FlinkCatalogParams catalog, long userId);
+    boolean update(FlinkCatalogParams catalog, Long userId);
 }

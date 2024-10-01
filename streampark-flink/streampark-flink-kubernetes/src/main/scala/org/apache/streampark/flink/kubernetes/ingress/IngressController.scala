@@ -17,11 +17,11 @@
 
 package org.apache.streampark.flink.kubernetes.ingress
 
-import org.apache.streampark.common.util.Implicits._
+import org.apache.streampark.common.util.Implicits.AutoCloseImplicits
 import org.apache.streampark.common.util.Logger
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 object IngressController extends Logger {
 

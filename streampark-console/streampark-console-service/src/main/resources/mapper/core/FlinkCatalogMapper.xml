@@ -27,6 +27,14 @@
         limit 1
     </select>
 
+    <select id="selectByCatalogName" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        *
+        from t_flink_catalog
+        where catalog_name = #{catalogName}
+        limit 1
+    </select>
+
     <select id="selectPage" resultType="org.apache.streampark.console.core.entity.FlinkCatalog" parameterType="org.apache.streampark.console.core.entity.FlinkCatalog">
         select * from t_flink_catalog
         <where>

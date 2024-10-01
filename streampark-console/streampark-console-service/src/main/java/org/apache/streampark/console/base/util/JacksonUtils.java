@@ -29,6 +29,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 /** Serialization utils */
 public final class JacksonUtils {
@@ -66,5 +67,9 @@ public final class JacksonUtils {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public static Map<String, String> toMap(String jsonStr) throws JsonProcessingException {
+        return (Map<String, String>) MAPPER.readValue(jsonStr, Map.class);
     }
 }

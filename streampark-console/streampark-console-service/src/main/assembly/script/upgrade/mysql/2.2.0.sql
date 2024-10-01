@@ -155,4 +155,30 @@ CREATE TABLE `t_jdbc_registry_data_change_event` (
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
+-- ----------------------------
+-- table structure for t_flink_catalog
+-- ----------------------------
+drop table if exists `t_flink_catalog`;
+CREATE TABLE `t_flink_catalog` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `team_id` BIGINT NOT NULL,
+    `user_id` BIGINT DEFAULT NULL,
+    `catalog_type` VARCHAR(255) NOT NULL,
+    `catalog_name` VARCHAR(255) NOT NULL,
+    `configuration` TEXT,
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `update_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_catalog_name (`catalog_name`)
+) ENGINE=InnoDB auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+insert into `t_menu` values (150601, 150600, 'catalog view', null, null, 'catalog:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150602, 150600, 'catalog create', null, null, 'catalog:create', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150603, 150600, 'catalog update', null, null, 'catalog:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150604, 150600, 'catalog delete', null, null, 'catalog:delete', null, '1', 1, null, now(), now());
+
+insert into `t_role_menu` values (100107, 100002, 150601);
+insert into `t_role_menu` values (100108, 100002, 150602);
+insert into `t_role_menu` values (100109, 100002, 150603);
+insert into `t_role_menu` values (100110, 100002, 150604);
+
 set foreign_key_checks = 1;

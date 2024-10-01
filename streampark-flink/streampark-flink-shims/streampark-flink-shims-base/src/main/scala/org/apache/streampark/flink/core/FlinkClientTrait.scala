@@ -19,6 +19,7 @@ package org.apache.streampark.flink.core
 
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.core.execution.SavepointFormatType
 
 import java.util.concurrent.CompletableFuture
 
@@ -28,14 +29,14 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
       jobID: JobID,
       savepointDir: String,
       nativeFormat: Boolean = false): CompletableFuture[String] = {
-    clusterClient.triggerSavepoint(jobID, savepointDir)
+    clusterClient.triggerSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT)
   }
 
   def cancelWithSavepoint(
       jobID: JobID,
       savepointDir: String,
       nativeFormat: Boolean = false): CompletableFuture[String] = {
-    clusterClient.cancelWithSavepoint(jobID, savepointDir)
+    clusterClient.cancelWithSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT)
   }
 
   def stopWithSavepoint(
@@ -43,6 +44,6 @@ abstract class FlinkClientTrait[T](clusterClient: ClusterClient[T]) {
       advanceToEndOfEventTime: Boolean,
       savepointDir: String,
       nativeFormat: Boolean = false): CompletableFuture[String] =
-    clusterClient.stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDir)
+    clusterClient.stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDir, SavepointFormatType.DEFAULT)
 
 }

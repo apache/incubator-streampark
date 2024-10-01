@@ -181,6 +181,10 @@ insert into `t_menu` values (150502, 150500, 'member add', null, null, 'member:a
 insert into `t_menu` values (150503, 150500, 'member update', null, null, 'member:update', null, '1', 1, null, now(), now());
 insert into `t_menu` values (150504, 150500, 'member delete', null, null, 'member:delete', null, '1', 1, null, now(), now());
 
+insert into `t_menu` values (150601, 150600, 'catalog view', null, null, 'catalog:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150602, 150600, 'catalog create', null, null, 'catalog:create', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150603, 150600, 'catalog update', null, null, 'catalog:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (150604, 150600, 'catalog delete', null, null, 'catalog:delete', null, '1', 1, null, now(), now());
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
@@ -301,6 +305,10 @@ insert into `t_role_menu` values (100107, 100002, 150501);
 insert into `t_role_menu` values (100108, 100002, 150502);
 insert into `t_role_menu` values (100109, 100002, 150503);
 insert into `t_role_menu` values (100110, 100002, 150504);
+insert into `t_role_menu` values (100107, 100002, 150601);
+insert into `t_role_menu` values (100108, 100002, 150602);
+insert into `t_role_menu` values (100109, 100002, 150603);
+insert into `t_role_menu` values (100110, 100002, 150604);
 
 -- ----------------------------
 -- Records of t_setting

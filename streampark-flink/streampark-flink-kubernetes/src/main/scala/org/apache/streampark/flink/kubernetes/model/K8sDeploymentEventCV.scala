@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.kubernetes.model
 
-import io.fabric8.kubernetes.api.model.apps.Deployment
-import io.fabric8.kubernetes.client.Watcher.Action
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.Deployment
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.Watcher.Action
 
 /**
  * @param action

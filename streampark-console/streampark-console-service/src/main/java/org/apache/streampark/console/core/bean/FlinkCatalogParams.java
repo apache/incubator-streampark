@@ -21,10 +21,10 @@ import org.apache.streampark.common.enums.CatalogType;
 import org.apache.streampark.console.base.util.JacksonUtils;
 import org.apache.streampark.console.core.entity.FlinkCatalog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.NotBlank;
@@ -67,6 +67,9 @@ public class FlinkCatalogParams implements Serializable {
         BeanUtils.copyProperties(flinkCatalog, flinkCatalogParams, "configuration");
         try {
             switch (flinkCatalog.getCatalogType()) {
+                case MYSQL:
+                case PGSQL:
+                case ORACLE:
                 case JDBC:
                     flinkCatalogParams.setFlinkJDBCCatalog(
                         JacksonUtils.read(flinkCatalog.getConfiguration(), FlinkJDBCCatalog.class));
@@ -116,8 +119,6 @@ public class FlinkCatalogParams implements Serializable {
 
         @NotBlank
         private String type;
-        @NotBlank
-        private String name;
 
         @JsonProperty("hive-conf-dir")
         private String hiveConfDir;
@@ -130,6 +131,46 @@ public class FlinkCatalogParams implements Serializable {
 
         @JsonProperty("hadoop-conf-dir")
         private String hadoopConfDir;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getHiveConfDir() {
+            return hiveConfDir;
+        }
+
+        public void setHiveConfDir(String hiveConfDir) {
+            this.hiveConfDir = hiveConfDir;
+        }
+
+        public String getDefaultDatabase() {
+            return defaultDatabase;
+        }
+
+        public void setDefaultDatabase(String defaultDatabase) {
+            this.defaultDatabase = defaultDatabase;
+        }
+
+        public String getHiveVersion() {
+            return hiveVersion;
+        }
+
+        public void setHiveVersion(String hiveVersion) {
+            this.hiveVersion = hiveVersion;
+        }
+
+        public String getHadoopConfDir() {
+            return hadoopConfDir;
+        }
+
+        public void setHadoopConfDir(String hadoopConfDir) {
+            this.hadoopConfDir = hadoopConfDir;
+        }
     }
 
     @Data

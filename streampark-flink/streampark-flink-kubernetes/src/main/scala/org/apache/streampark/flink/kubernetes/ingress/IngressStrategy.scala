@@ -20,9 +20,9 @@ package org.apache.streampark.flink.kubernetes.ingress
 import org.apache.streampark.common.conf.{ConfigKeys, InternalConfigHolder, K8sFlinkConfig}
 import org.apache.streampark.common.util.FileUtils
 
-import io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.{OwnerReference, OwnerReferenceBuilder}
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.DefaultKubernetesClient
 
 import java.io.File
 

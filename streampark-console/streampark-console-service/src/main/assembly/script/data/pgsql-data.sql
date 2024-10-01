@@ -153,6 +153,10 @@ insert into "public"."t_menu" values (130504, 130500, 'link delete', null, null,
 insert into "public"."t_menu" values (130601, 130600, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130602, 130600, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130603, 130600, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130701, 130700, 'catalog view', null, null, 'catalog:view', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130702, 130700, 'catalog create', null, null, 'catalog:create', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130703, 130700, 'catalog delete', null, null, 'catalog:delete', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130704, 130700, 'catalog update', null, null, 'catalog:update', '', '1', '0', null, now(), now());
 
 -- ----------------------------
 -- Records of t_role
@@ -258,6 +262,10 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130600);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130601);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130602);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130603);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130701);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130702);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130703);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130704);
 
 -- ----------------------------
 -- Records of t_setting
