@@ -18,7 +18,6 @@
 package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
-import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.bean.TableParams;
 import org.apache.streampark.console.core.service.TableService;
 
@@ -64,7 +63,6 @@ public class TableController {
         return RestResponse.success(saved);
     }
 
-    @Permission(team = "#table.teamId")
     @GetMapping("column/list")
     @RequiresPermissions("table:column:list")
     public RestResponse listColumns(
@@ -117,7 +115,7 @@ public class TableController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("table:list")
+    @RequiresPermissions("table:view")
     public RestResponse listTable(TableParams table) {
         List<TableParams> tableParamsList = tableService.listTables(table);
         if (Objects.nonNull(table.getCatalogId()) && Objects.nonNull(table.getDatabaseName())) {

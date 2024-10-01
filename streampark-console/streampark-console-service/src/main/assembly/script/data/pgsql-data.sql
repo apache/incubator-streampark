@@ -157,7 +157,18 @@ insert into "public"."t_menu" values (130701, 130700, 'catalog view', null, null
 insert into "public"."t_menu" values (130702, 130700, 'catalog create', null, null, 'catalog:create', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130703, 130700, 'catalog delete', null, null, 'catalog:delete', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130704, 130700, 'catalog update', null, null, 'catalog:update', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (150605, 150600, 'database view', null, null, 'database:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150606, 150600, 'database create', null, null, 'database:create', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150607, 150600, 'database delete', null, null, 'database:delete', null, '1', 1, null, now(), now());
 
+insert into "public"."t_menu" values (150608, 150600, 'table view', null, null, 'table:view', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150609, 150600, 'table create', null, null, 'table:create', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150610, 150600, 'table update', null, null, 'table:update', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150611, 150600, 'table view', null, null, 'table:column:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150612, 150600, 'table column list', null, null, 'table:column:list', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150613, 150600, 'table column drop', null, null, 'table:column:drop', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150614, 150600, 'table option add', null, null, 'option:add', null, '1', 1, null, now(), now());
+insert into "public"."t_menu" values (150615, 150600, 'table option remove', null, null, 'option:remove', null, '1', 1, null, now(), now());
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
@@ -266,6 +277,19 @@ insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130701);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130702);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130703);
 insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130704);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150605);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150606);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150607);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150608);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150609);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150610);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150611);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150612);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150613);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150614);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150615);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 150600);
+insert into "public"."t_role_menu" (role_id, menu_id) values (100001, 150600);
 
 -- ----------------------------
 -- Records of t_setting

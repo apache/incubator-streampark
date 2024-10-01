@@ -72,6 +72,9 @@ public class FlinkCatalog implements Serializable {
             "flinkPaimonCatalog",
             "customCatalogConfig");
 
+        if (null == flinkCatalogParams.getCatalogType()) {
+            return flinkCatalog;
+        }
         try {
             switch (flinkCatalogParams.getCatalogType()) {
                 case MYSQL:

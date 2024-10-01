@@ -39,7 +39,7 @@ public class CatalogServiceUtils {
 
     private static final Pattern PATTERN_FLINK_CONNECTOR_PLUGIN =
         Pattern.compile(
-            "^streampark-flink-connector-plugin-([^-.]+)-([^-.]+)\\.jar$\n",
+            "^streampark-flink-connector-plugin-(\\d+)\\.(\\d+)\\.(\\d+)(?:-([^-]+))?\\.jar$",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public static Catalog getCatalog(
