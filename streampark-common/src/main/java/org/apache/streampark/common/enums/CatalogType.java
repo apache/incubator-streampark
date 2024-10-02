@@ -19,6 +19,9 @@ package org.apache.streampark.common.enums;
 
 /** catalog type */
 public enum CatalogType {
+    MYSQL,
+    PGSQL,
+    ORACLE,
     JDBC,
     HIVE,
     PAIMON,

@@ -114,6 +114,12 @@
             <version>${flink.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-catalog-store</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -133,6 +139,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.apache.flink:flink-table-api-scala-bridge_${scala.binary.version}</include>
+                                    <include>org.apache.streampark:streampark-flink-catalog-store</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -145,6 +152,9 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"></transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

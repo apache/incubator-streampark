@@ -35,6 +35,22 @@ spring:
       username: sa
       password: sa
       mode: always
+## flink catalog store config
+table:
+  catalog-store:
+    kind: jdbc
+    jdbc:
+      url: jdbc://mysql:127.0.0.1:3306/flink-test
+    # The JDBC database url.
+      table-name: t_flink_catalog
+    ## catalog store table
+      driver: com.mysql.cj.jdbc.Driver
+    # The class name of the JDBC driver to use to connect to this URL, if not set, it will automatically be derived from the URL.
+      username: flinkuser
+    # The JDBC user name. 'username' and 'password' must both be specified if any of them is specified.
+      password: flinkpw
+    # 	The JDBC password.
+      max-retry-timeout: 600
 
 streampark:
   # console heartbeat interval

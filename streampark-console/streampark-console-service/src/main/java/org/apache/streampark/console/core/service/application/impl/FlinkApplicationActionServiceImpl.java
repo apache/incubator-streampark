@@ -92,6 +92,7 @@ import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.KubernetesClientException;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -101,7 +102,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Sets;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -128,7 +128,9 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicationMapper, FlinkApplication>
+public class FlinkApplicationActionServiceImpl
+    extends
+        ServiceImpl<FlinkApplicationMapper, FlinkApplication>
     implements
         FlinkApplicationActionService {
 
@@ -187,9 +189,11 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
     @Autowired
     private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
-    private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<SubmitResponse>> startFutureMap =
+        new ConcurrentHashMap<>();
 
-    private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap = new ConcurrentHashMap<>();
+    private final Map<Long, CompletableFuture<CancelResponse>> cancelFutureMap =
+        new ConcurrentHashMap<>();
 
     @Override
     public void revoke(Long appId) throws ApplicationException {
@@ -320,26 +324,28 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
             properties.put(RestOptions.PORT.key(), activeAddress.getPort());
         }
 
-        Tuple3<String, String, FlinkK8sRestExposedType> clusterIdNamespace = getNamespaceClusterId(application);
+        Tuple3<String, String, FlinkK8sRestExposedType> clusterIdNamespace =
+            getNamespaceClusterId(application);
         String namespace = clusterIdNamespace.t1;
         String clusterId = clusterIdNamespace.t2;
 
-        CancelRequest cancelRequest = new CancelRequest(
-            application.getId(),
-            flinkEnv.getFlinkVersion(),
-            FlinkDeployMode.of(application.getDeployMode()),
-            properties,
-            clusterId,
-            application.getJobId(),
-            appParam.getRestoreOrTriggerSavepoint(),
-            appParam.getDrain(),
-            customSavepoint,
-            appParam.getNativeFormat(),
-            namespace);
+        CancelRequest cancelRequest =
+            new CancelRequest(
+                application.getId(),
+                flinkEnv.getFlinkVersion(),
+                FlinkDeployMode.of(application.getDeployMode()),
+                properties,
+                clusterId,
+                application.getJobId(),
+                appParam.getRestoreOrTriggerSavepoint(),
+                appParam.getDrain(),
+                customSavepoint,
+                appParam.getNativeFormat(),
+                namespace);
 
         final Date triggerTime = new Date();
-        CompletableFuture<CancelResponse> cancelFuture = CompletableFuture
-            .supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
+        CompletableFuture<CancelResponse> cancelFuture =
+            CompletableFuture.supplyAsync(() -> FlinkClient.cancel(cancelRequest), executorService);
 
         cancelFutureMap.put(application.getId(), cancelFuture);
 
@@ -464,41 +470,45 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         }
 
         // Get the args after placeholder replacement
-        String args = StringUtils.isBlank(appParam.getArgs()) ? application.getArgs() : appParam.getArgs();
+        String args =
+            StringUtils.isBlank(appParam.getArgs()) ? application.getArgs() : appParam.getArgs();
         String applicationArgs = variableService.replaceVariable(application.getTeamId(), args);
 
-        Tuple3<String, String, FlinkK8sRestExposedType> clusterIdNamespace = getNamespaceClusterId(application);
+        Tuple3<String, String, FlinkK8sRestExposedType> clusterIdNamespace =
+            getNamespaceClusterId(application);
         String k8sNamespace = clusterIdNamespace.t1;
         String k8sClusterId = clusterIdNamespace.t2;
         FlinkK8sRestExposedType exposedType = clusterIdNamespace.t3;
 
         String dynamicProperties =
-            StringUtils.isBlank(appParam.getDynamicProperties()) ? application.getDynamicProperties()
+            StringUtils.isBlank(appParam.getDynamicProperties())
+                ? application.getDynamicProperties()
                 : appParam.getDynamicProperties();
 
-        SubmitRequest submitRequest = new SubmitRequest(
-            flinkEnv.getFlinkVersion(),
-            FlinkDeployMode.of(application.getDeployMode()),
-            getProperties(application, dynamicProperties),
-            flinkEnv.getFlinkConf(),
-            FlinkJobType.of(application.getJobType()),
-            application.getId(),
-            new JobID().toHexString(),
-            application.getJobName(),
-            appConf,
-            application.getApplicationType(),
-            getSavepointPath(appParam),
-            FlinkRestoreMode.of(appParam.getRestoreMode()),
-            applicationArgs,
-            k8sClusterId,
-            application.getHadoopUser(),
-            buildResult,
-            extraParameter,
-            k8sNamespace,
-            exposedType);
+        SubmitRequest submitRequest =
+            new SubmitRequest(
+                flinkEnv.getFlinkVersion(),
+                FlinkDeployMode.of(application.getDeployMode()),
+                getProperties(application, dynamicProperties),
+                flinkEnv.getFlinkConf(),
+                FlinkJobType.of(application.getJobType()),
+                application.getId(),
+                new JobID().toHexString(),
+                application.getJobName(),
+                appConf,
+                application.getApplicationType(),
+                getSavepointPath(appParam),
+                FlinkRestoreMode.of(appParam.getRestoreMode()),
+                applicationArgs,
+                k8sClusterId,
+                application.getHadoopUser(),
+                buildResult,
+                extraParameter,
+                k8sNamespace,
+                exposedType);
 
-        CompletableFuture<SubmitResponse> future = CompletableFuture
-            .supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
+        CompletableFuture<SubmitResponse> future =
+            CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);
 
         startFutureMap.put(application.getId(), future);
 
@@ -628,10 +638,11 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
     private boolean checkAppRepeatInYarn(String jobName) {
         try {
             YarnClient yarnClient = HadoopUtils.yarnClient();
-            Set<String> types = Sets.newHashSet(
-                ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
-            EnumSet<YarnApplicationState> states = EnumSet.of(YarnApplicationState.RUNNING,
-                YarnApplicationState.ACCEPTED);
+            Set<String> types =
+                Sets.newHashSet(
+                    ApplicationType.STREAMPARK_FLINK.getName(), ApplicationType.APACHE_FLINK.getName());
+            EnumSet<YarnApplicationState> states =
+                EnumSet.of(YarnApplicationState.RUNNING, YarnApplicationState.ACCEPTED);
             List<ApplicationReport> applications = yarnClient.getApplications(types, states);
             for (ApplicationReport report : applications) {
                 if (report.getName().equals(jobName)) {
@@ -650,7 +661,8 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         updateById(application);
     }
 
-    private Tuple2<String, String> getUserJarAndAppConf(FlinkEnv flinkEnv, FlinkApplication application) {
+    private Tuple2<String, String> getUserJarAndAppConf(
+                                                        FlinkEnv flinkEnv, FlinkApplication application) {
         FlinkDeployMode deployModeEnum = application.getDeployModeEnum();
         FlinkApplicationConfig applicationConfig = configService.getEffective(application.getId());
 
@@ -667,9 +679,10 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                 // 1) dist_userJar
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
                 // 2) appConfig
-                appConf = applicationConfig == null
-                    ? null
-                    : String.format("yaml://%s", applicationConfig.getContent());
+                appConf =
+                    applicationConfig == null
+                        ? null
+                        : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (FlinkDeployMode.YARN_APPLICATION == deployModeEnum) {
                     String clientPath = Workspace.remote().APP_CLIENT();
@@ -678,7 +691,8 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                 break;
 
             case PYFLINK:
-                Resource resource = resourceService.findByResourceName(application.getTeamId(), application.getJar());
+                Resource resource =
+                    resourceService.findByResourceName(application.getTeamId(), application.getJar());
 
                 ApiAlertException.throwIfNull(
                     resource, "pyflink file can't be null, start application failed.");
@@ -695,25 +709,28 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
 
             case CUSTOM_CODE:
                 if (application.isUploadJob()) {
-                    appConf = String.format(
-                        "json://{\"%s\":\"%s\"}",
-                        ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                    appConf =
+                        String.format(
+                            "json://{\"%s\":\"%s\"}",
+                            ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_FLINK:
                             ConfigFileTypeEnum fileType = ConfigFileTypeEnum.of(applicationConfig.getFormat());
                             if (fileType != null && ConfigFileTypeEnum.UNKNOWN != fileType) {
-                                appConf = String.format(
-                                    "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
+                                appConf =
+                                    String.format(
+                                        "%s://%s", fileType.getTypeName(), applicationConfig.getContent());
                             } else {
                                 throw new IllegalArgumentException(
                                     "application' config type error,must be ( yaml| properties| hocon )");
                             }
                             break;
                         case APACHE_FLINK:
-                            appConf = String.format(
-                                "json://{\"%s\":\"%s\"}",
-                                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                            appConf =
+                                String.format(
+                                    "json://{\"%s\":\"%s\"}",
+                                    ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(
@@ -724,21 +741,23 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                 if (FlinkDeployMode.YARN_APPLICATION == deployModeEnum) {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_FLINK:
-                            flinkUserJar = String.format(
-                                "%s/%s",
-                                application.getAppLib(),
-                                application.getModule().concat(Constants.JAR_SUFFIX));
+                            flinkUserJar =
+                                String.format(
+                                    "%s/%s",
+                                    application.getAppLib(),
+                                    application.getModule().concat(Constants.JAR_SUFFIX));
                             break;
                         case APACHE_FLINK:
                             flinkUserJar = String.format("%s/%s", application.getAppHome(), application.getJar());
                             if (!FsOperator.hdfs().exists(flinkUserJar)) {
-                                resource = resourceService.findByResourceName(
-                                    application.getTeamId(), application.getJar());
+                                resource =
+                                    resourceService.findByResourceName(
+                                        application.getTeamId(), application.getJar());
                                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                                    flinkUserJar = String.format(
-                                        "%s/%s",
-                                        application.getAppHome(),
-                                        new File(resource.getFilePath()).getName());
+                                    flinkUserJar =
+                                        String.format(
+                                            "%s/%s",
+                                            application.getAppHome(), new File(resource.getFilePath()).getName());
                                 }
                             }
                             break;
@@ -752,7 +771,8 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         return Tuple2.of(flinkUserJar, appConf);
     }
 
-    private Map<String, Object> getProperties(FlinkApplication application, String runtimeProperties) {
+    private Map<String, Object> getProperties(
+                                              FlinkApplication application, String runtimeProperties) {
         Map<String, Object> properties = new HashMap<>(application.getOptionMap());
         if (FlinkDeployMode.isRemoteMode(application.getDeployModeEnum())) {
             FlinkCluster cluster = flinkClusterService.getById(application.getFlinkClusterId());
@@ -776,8 +796,10 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
                         application.getFlinkClusterId()));
                 properties.put(ConfigKeys.KEY_YARN_APP_ID(), cluster.getClusterId());
             } else {
-                String yarnQueue = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
-                String yarnLabelExpr = (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
+                String yarnQueue =
+                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
+                String yarnLabelExpr =
+                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
                 Optional.ofNullable(yarnQueue)
                     .ifPresent(yq -> properties.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yq));
                 Optional.ofNullable(yarnLabelExpr)
@@ -795,7 +817,8 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
             properties.put(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE.key(), true);
         }
 
-        Map<String, String> dynamicProperties = PropertiesUtils.extractDynamicPropertiesAsJava(runtimeProperties);
+        Map<String, String> dynamicProperties =
+            PropertiesUtils.extractDynamicPropertiesAsJava(runtimeProperties);
         properties.putAll(dynamicProperties);
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
         if (resolveOrder != null) {
@@ -823,8 +846,8 @@ public class FlinkApplicationActionServiceImpl extends ServiceImpl<FlinkApplicat
         // kill application
         if (FlinkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             try {
-                List<ApplicationReport> applications = applicationInfoService
-                    .getYarnAppReport(application.getJobName());
+                List<ApplicationReport> applications =
+                    applicationInfoService.getYarnAppReport(application.getJobName());
                 if (!applications.isEmpty()) {
                     YarnClient yarnClient = HadoopUtils.yarnClient();
                     yarnClient.killApplication(applications.get(0).getApplicationId());

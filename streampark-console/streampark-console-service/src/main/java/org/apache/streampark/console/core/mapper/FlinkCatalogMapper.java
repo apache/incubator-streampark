@@ -30,5 +30,7 @@ public interface FlinkCatalogMapper extends BaseMapper<FlinkCatalog> {
 
     boolean existsByCatalogName(@Param("catalogName") String catalogName);
 
+    FlinkCatalog selectByCatalogName(@Param("catalogName") String catalogName);
+
     IPage<FlinkCatalog> selectPage(Page<FlinkCatalog> page, @Param("catalog") FlinkCatalog catalog);
 }

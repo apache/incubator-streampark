@@ -49,7 +49,7 @@ object FlinkSqlValidator extends Logger {
       val conformance = sqlDialect match {
         case HIVE =>
           try {
-            FlinkSqlConformance.HIVE
+            FlinkSqlConformance.DEFAULT
           } catch {
             // for flink 1.18+
             case _: NoSuchFieldError => FlinkSqlConformance.DEFAULT

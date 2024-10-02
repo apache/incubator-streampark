@@ -93,7 +93,17 @@ public class FlinkCatalogServiceImpl extends ServiceImpl<FlinkCatalogMapper, Fli
     }
 
     @Override
-    public boolean update(FlinkCatalogParams catalogParam, long userId) {
+    public FlinkCatalog getCatalog(Long catalogId) {
+        return this.baseMapper.selectById(catalogId);
+    }
+
+    @Override
+    public FlinkCatalog getCatalog(String catalogName) {
+        return this.baseMapper.selectByCatalogName(catalogName);
+    }
+
+    @Override
+    public boolean update(FlinkCatalogParams catalogParam, Long userId) {
         AlertException.throwIfNull(
             catalogParam.getTeamId(), "The teamId can't be null. List catalog failed.");
         FlinkCatalog catalog = getById(catalogParam.getId());

@@ -667,6 +667,22 @@ create table `t_spark_log` (
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
 
 -- ----------------------------
+-- table structure for t_flink_catalog
+-- ----------------------------
+drop table if exists `t_flink_catalog`;
+CREATE TABLE `t_flink_catalog` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `team_id` BIGINT NOT NULL,
+    `user_id` BIGINT DEFAULT NULL,
+    `catalog_type` VARCHAR(255) NOT NULL,
+    `catalog_name` VARCHAR(255) NOT NULL,
+    `configuration` TEXT,
+    `create_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `update_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_catalog_name (`catalog_name`)
+) ENGINE=InnoDB auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;
+
+-- ----------------------------
 -- Table structure for jdbc registry
 -- ----------------------------
 DROP TABLE IF EXISTS `t_jdbc_registry_data`;

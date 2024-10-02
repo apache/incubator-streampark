@@ -72,8 +72,14 @@ public class FlinkCatalog implements Serializable {
             "flinkPaimonCatalog",
             "customCatalogConfig");
 
+        if (null == flinkCatalogParams.getCatalogType()) {
+            return flinkCatalog;
+        }
         try {
             switch (flinkCatalogParams.getCatalogType()) {
+                case MYSQL:
+                case PGSQL:
+                case ORACLE:
                 case JDBC:
                     flinkCatalog.setConfiguration(
                         JacksonUtils.write(flinkCatalogParams.getFlinkJDBCCatalog()));

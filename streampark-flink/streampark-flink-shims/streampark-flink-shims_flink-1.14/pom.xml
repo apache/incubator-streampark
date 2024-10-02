@@ -29,7 +29,7 @@
     <name>StreamPark : Flink Shims 1.14</name>
 
     <properties>
-        <flink.version>1.14.0</flink.version>
+        <flink.version>1.14.3</flink.version>
     </properties>
 
     <dependencies>

@@ -33,6 +33,6 @@ abstract class FlinkKubernetesClientTrait(kubeClient: FlinkKubeClient) {
    *   Return the optional kubernetes service of the specified name.
    */
   def getService(serviceName: String): Optional[KubernetesService] =
-    kubeClient.getRestService(serviceName)
+    kubeClient.getService(serviceName)
 
 }

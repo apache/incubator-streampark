@@ -72,15 +72,15 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-statebackend-rocksdb${scala.binary.flink.version}</artifactId>
+            <artifactId>flink-statebackend-rocksdb</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc${scala.binary.flink.version}</artifactId>
-            <version>${flink.version}</version>
+            <artifactId>flink-connector-jdbc</artifactId>
+            <version>${flink.connector.version}</version>
             <optional>true</optional>
         </dependency>
 

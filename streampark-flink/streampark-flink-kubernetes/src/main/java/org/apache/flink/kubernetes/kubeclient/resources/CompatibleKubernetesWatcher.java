@@ -17,7 +17,7 @@
 
 package org.apache.flink.kubernetes.kubeclient.resources;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
+import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.HasMetadata;
 
 /** Compatible AbstractKubernetesWatcher for fabric8. */
 public abstract class CompatibleKubernetesWatcher<T extends HasMetadata, K extends KubernetesResource<T>>

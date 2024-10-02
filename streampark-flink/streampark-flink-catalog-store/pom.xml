@@ -29,7 +29,6 @@
 
     <properties>
         <flink.shaded.version19>19.0</flink.shaded.version19>
-        <flink.version>1.18.1</flink.version>
         <flink.shaded.jackson.version>2.15.3</flink.shaded.jackson.version>
     </properties>
 
@@ -45,6 +44,37 @@
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-jackson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.flink</groupId>
+                    <artifactId>flink-shaded-jackson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-sql-gateway-api</artifactId>
+            <version>${flink.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.flink</groupId>
@@ -95,7 +125,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
-            <version>1.19.0</version>
+            <version>${testcontainer.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -117,6 +147,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.apache.streampark:*</include>
+                                    <include>org.apache.flink:flink-sql-gateway-api</include>
                                 </includes>
                             </artifactSet>
                             <filters>
