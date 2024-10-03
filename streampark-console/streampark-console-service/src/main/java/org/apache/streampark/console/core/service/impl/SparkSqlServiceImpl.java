@@ -31,7 +31,7 @@ import org.apache.streampark.console.core.mapper.SparkSqlMapper;
 import org.apache.streampark.console.core.service.SparkEffectiveService;
 import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
-import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.SparkApplicationBackupService;
 import org.apache.streampark.spark.client.proxy.SparkShimsProxy;
 import org.apache.streampark.spark.core.util.SparkSqlValidationResult;
 
@@ -61,7 +61,7 @@ public class SparkSqlServiceImpl extends ServiceImpl<SparkSqlMapper, SparkSql>
     private SparkEffectiveService effectiveService;
 
     @Autowired
-    private SparkApplicationBackUpService backUpService;
+    private SparkApplicationBackupService backUpService;
 
     @Autowired
     private SparkEnvService sparkEnvService;

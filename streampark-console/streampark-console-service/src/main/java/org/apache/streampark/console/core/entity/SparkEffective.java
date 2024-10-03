@@ -22,12 +22,14 @@ import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @TableName("t_spark_effective")
 @Slf4j
 public class SparkEffective {

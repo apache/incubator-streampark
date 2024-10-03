@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.core.bean;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
-@Data
+@Getter
+@Setter
 public class FlinkConnector {
 
     private String className;

@@ -17,9 +17,9 @@
 
 package org.apache.streampark.console.core.mapper;
 
-import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface FlinkApplicationBackUpMapper extends BaseMapper<FlinkApplicationBackUp> {
+public interface FlinkApplicationBackupMapper extends BaseMapper<FlinkApplicationBackup> {
 }

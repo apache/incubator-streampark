@@ -24,7 +24,8 @@ import org.apache.streampark.console.core.service.SettingService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
@@ -32,7 +33,8 @@ import java.util.Map;
  * This class represents the Maven configuration for the application. It provides methods to
  * retrieve the various Maven configuration options.
  */
-@Data
+@Getter
+@Setter
 public class MavenConfig {
 
     /** File path for Maven settings. */

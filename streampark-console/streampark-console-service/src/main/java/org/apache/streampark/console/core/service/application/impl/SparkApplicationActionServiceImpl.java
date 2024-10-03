@@ -31,7 +31,7 @@ import org.apache.streampark.common.util.HadoopUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApplicationException;
-import org.apache.streampark.console.core.entity.AppBuildPipeline;
+import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.entity.SparkApplication;
@@ -52,7 +52,7 @@ import org.apache.streampark.console.core.service.SparkEnvService;
 import org.apache.streampark.console.core.service.SparkSqlService;
 import org.apache.streampark.console.core.service.VariableService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
-import org.apache.streampark.console.core.service.application.SparkAppBuildPipeService;
+import org.apache.streampark.console.core.service.application.SparkAplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.SparkApplicationActionService;
 import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.SparkApplicationInfoService;
@@ -124,7 +124,7 @@ public class SparkApplicationActionServiceImpl
     private SparkSqlService sparkSqlService;
 
     @Autowired
-    private SparkAppBuildPipeService appBuildPipeService;
+    private SparkAplicationBuildPipelineService appBuildPipeService;
 
     @Autowired
     private VariableService variableService;
@@ -290,7 +290,7 @@ public class SparkApplicationActionServiceImpl
             checkYarnBeforeStart(application);
         }
 
-        AppBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
+        ApplicationBuildPipeline buildPipeline = appBuildPipeService.getById(application.getId());
         AssertUtils.notNull(buildPipeline);
 
         // if manually started, clear the restart flag

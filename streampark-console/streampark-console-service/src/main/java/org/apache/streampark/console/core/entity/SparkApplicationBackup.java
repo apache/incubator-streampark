@@ -22,23 +22,29 @@ import org.apache.streampark.common.conf.Workspace;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 
-@Data
-@TableName("t_flink_app_backup")
+@Getter
+@Setter
+@TableName("t_spark_app_backup")
 @Slf4j
-public class FlinkApplicationBackUp {
+public class SparkApplicationBackup {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private Long appId;
-    private Long sqlId;
+
     private Long configId;
+
+    private Long sqlId;
+
     private String path;
+
     private String description;
     /** version number at the backup */
     private Integer version;
@@ -47,12 +53,10 @@ public class FlinkApplicationBackUp {
 
     private transient boolean backup;
 
-    private transient String teamId;
-
-    public FlinkApplicationBackUp() {
+    public SparkApplicationBackup() {
     }
 
-    public FlinkApplicationBackUp(FlinkApplication application) {
+    public SparkApplicationBackup(SparkApplication application) {
         this.appId = application.getId();
         this.sqlId = application.getSqlId();
         this.configId = application.getConfigId();
@@ -61,19 +65,15 @@ public class FlinkApplicationBackUp {
         renderPath(application);
     }
 
-    private void renderPath(FlinkApplication application) {
+    private void renderPath(SparkApplication application) {
         switch (application.getDeployModeEnum()) {
-            case KUBERNETES_NATIVE_APPLICATION:
-            case KUBERNETES_NATIVE_SESSION:
-            case YARN_PER_JOB:
-            case YARN_SESSION:
-            case REMOTE:
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",
                     Workspace.local().APP_BACKUPS(), application.getId(), createTime.getTime());
                 break;
-            case YARN_APPLICATION:
+            case YARN_CLUSTER:
+            case YARN_CLIENT:
                 this.path = String.format(
                     "%s/%d/%d",
                     Workspace.remote().APP_BACKUPS(), application.getId(), createTime.getTime());

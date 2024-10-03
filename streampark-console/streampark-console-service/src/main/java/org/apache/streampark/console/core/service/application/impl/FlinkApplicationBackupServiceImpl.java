@@ -22,18 +22,18 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.InternalException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
-import org.apache.streampark.console.core.entity.SparkApplication;
-import org.apache.streampark.console.core.entity.SparkApplicationBackUp;
-import org.apache.streampark.console.core.entity.SparkApplicationConfig;
-import org.apache.streampark.console.core.entity.SparkSql;
+import org.apache.streampark.console.core.entity.FlinkApplication;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
+import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
+import org.apache.streampark.console.core.entity.FlinkSql;
 import org.apache.streampark.console.core.enums.EffectiveTypeEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
-import org.apache.streampark.console.core.mapper.SparkApplicationBackUpMapper;
-import org.apache.streampark.console.core.service.SparkEffectiveService;
-import org.apache.streampark.console.core.service.SparkSqlService;
-import org.apache.streampark.console.core.service.application.SparkApplicationBackUpService;
-import org.apache.streampark.console.core.service.application.SparkApplicationConfigService;
-import org.apache.streampark.console.core.service.application.SparkApplicationManageService;
+import org.apache.streampark.console.core.mapper.FlinkApplicationBackupMapper;
+import org.apache.streampark.console.core.service.FlinkEffectiveService;
+import org.apache.streampark.console.core.service.FlinkSqlService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -49,36 +49,36 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SparkApplicationBackUpServiceImpl
+public class FlinkApplicationBackupServiceImpl
     extends
-        ServiceImpl<SparkApplicationBackUpMapper, SparkApplicationBackUp>
+        ServiceImpl<FlinkApplicationBackupMapper, FlinkApplicationBackup>
     implements
-        SparkApplicationBackUpService {
+        FlinkApplicationBackupService {
 
     @Autowired
-    private SparkApplicationManageService applicationManageService;
+    private FlinkApplicationManageService applicationManageService;
 
     @Autowired
-    private SparkApplicationConfigService configService;
+    private FlinkApplicationConfigService configService;
 
     @Autowired
-    private SparkEffectiveService effectiveService;
+    private FlinkEffectiveService effectiveService;
 
     @Autowired
-    private SparkSqlService sparkSqlService;
+    private FlinkSqlService flinkSqlService;
 
     @Override
-    public IPage<SparkApplicationBackUp> getPage(SparkApplicationBackUp bakParam, RestRequest request) {
-        Page<SparkApplicationBackUp> page = MybatisPager.getPage(request);
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, bakParam.getAppId());
+    public IPage<FlinkApplicationBackup> getPage(FlinkApplicationBackup bakParam, RestRequest request) {
+        Page<FlinkApplicationBackup> page = MybatisPager.getPage(request);
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, bakParam.getAppId());
         return this.baseMapper.selectPage(page, queryWrapper);
     }
 
     @Override
-    public void rollback(SparkApplicationBackUp bakParam) {
+    public void rollback(FlinkApplicationBackup bakParam) {
 
-        SparkApplication application = applicationManageService.getById(bakParam.getAppId());
+        FlinkApplication application = applicationManageService.getById(bakParam.getAppId());
 
         FsOperator fsOperator = application.getFsOperator();
         // backup files not exist
@@ -92,9 +92,9 @@ public class SparkApplicationBackUpServiceImpl
         // If necessary, perform the backup first
         if (bakParam.isBackup()) {
             application.setBackUpDescription(bakParam.getDescription());
-            if (application.isSparkSqlJob()) {
-                SparkSql sparkSql = sparkSqlService.getEffective(application.getId(), false);
-                backup(application, sparkSql);
+            if (application.isFlinkSqlJob()) {
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                backup(application, flinkSql);
             } else {
                 backup(application, null);
             }
@@ -108,11 +108,11 @@ public class SparkApplicationBackUpServiceImpl
             configService.setLatestOrEffective(true, bakParam.getId(), bakParam.getAppId());
         } else {
             effectiveService.saveOrUpdate(
-                bakParam.getAppId(), EffectiveTypeEnum.SPARKCONFIG, bakParam.getId());
-            // if spark sql task, will be rollback sql and dependencies
-            if (application.isSparkSqlJob()) {
+                bakParam.getAppId(), EffectiveTypeEnum.CONFIG, bakParam.getId());
+            // if flink sql task, will be rollback sql and dependencies
+            if (application.isFlinkSqlJob()) {
                 effectiveService.saveOrUpdate(
-                    bakParam.getAppId(), EffectiveTypeEnum.SPARKSQL, bakParam.getSqlId());
+                    bakParam.getAppId(), EffectiveTypeEnum.FLINKSQL, bakParam.getSqlId());
             }
         }
 
@@ -125,23 +125,23 @@ public class SparkApplicationBackUpServiceImpl
 
         // update restart status
         applicationManageService.update(
-            new UpdateWrapper<SparkApplication>()
+            new UpdateWrapper<FlinkApplication>()
                 .lambda()
-                .eq(SparkApplication::getId, application.getId())
-                .set(SparkApplication::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
+                .eq(FlinkApplication::getId, application.getId())
+                .set(FlinkApplication::getRelease, ReleaseStateEnum.NEED_RESTART.get()));
     }
 
     @Override
-    public void revoke(SparkApplication appParam) {
-        Page<SparkApplicationBackUp> page = new Page<>();
+    public void revoke(FlinkApplication appParam) {
+        Page<FlinkApplicationBackup> page = new Page<>();
         page.setCurrent(0).setSize(1).setSearchCount(false);
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, appParam.getId())
-            .orderByDesc(SparkApplicationBackUp::getCreateTime);
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, appParam.getId())
+            .orderByDesc(FlinkApplicationBackup::getCreateTime);
 
-        Page<SparkApplicationBackUp> backUpPages = baseMapper.selectPage(page, queryWrapper);
+        Page<FlinkApplicationBackup> backUpPages = baseMapper.selectPage(page, queryWrapper);
         if (!backUpPages.getRecords().isEmpty()) {
-            SparkApplicationBackUp backup = backUpPages.getRecords().get(0);
+            FlinkApplicationBackup backup = backUpPages.getRecords().get(0);
             String path = backup.getPath();
             appParam.getFsOperator().move(path, appParam.getWorkspace().APP_WORKSPACE());
             super.removeById(backup.getId());
@@ -149,11 +149,11 @@ public class SparkApplicationBackUpServiceImpl
     }
 
     @Override
-    public void remove(SparkApplication appParam) {
+    public void remove(FlinkApplication appParam) {
         try {
             baseMapper.delete(
-                new LambdaQueryWrapper<SparkApplicationBackUp>()
-                    .eq(SparkApplicationBackUp::getAppId, appParam.getId()));
+                new LambdaQueryWrapper<FlinkApplicationBackup>()
+                    .eq(FlinkApplicationBackup::getAppId, appParam.getId()));
             appParam
                 .getFsOperator()
                 .delete(
@@ -168,23 +168,23 @@ public class SparkApplicationBackUpServiceImpl
     }
 
     @Override
-    public void rollbackSparkSql(SparkApplication appParam, SparkSql sparkSqlParam) {
-        LambdaQueryWrapper<SparkApplicationBackUp> queryWrapper = new LambdaQueryWrapper<SparkApplicationBackUp>()
-            .eq(SparkApplicationBackUp::getAppId, appParam.getId())
-            .eq(SparkApplicationBackUp::getSqlId, sparkSqlParam.getId());
-        SparkApplicationBackUp backUp = baseMapper.selectOne(queryWrapper);
+    public void rollbackFlinkSql(FlinkApplication appParam, FlinkSql flinkSqlParam) {
+        LambdaQueryWrapper<FlinkApplicationBackup> queryWrapper = new LambdaQueryWrapper<FlinkApplicationBackup>()
+            .eq(FlinkApplicationBackup::getAppId, appParam.getId())
+            .eq(FlinkApplicationBackup::getSqlId, flinkSqlParam.getId());
+        FlinkApplicationBackup backUp = baseMapper.selectOne(queryWrapper);
         ApiAlertException.throwIfNull(
-            backUp, "Application backup can't be null. Rollback spark sql failed.");
+            backUp, "Application backup can't be null. Rollback flink sql failed.");
         // rollback config and sql
-        effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.SPARKCONFIG, backUp.getId());
-        effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.SPARKSQL, backUp.getSqlId());
+        effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.CONFIG, backUp.getId());
+        effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveTypeEnum.FLINKSQL, backUp.getSqlId());
     }
 
     @Override
     public Boolean removeById(Long id) throws InternalException {
-        SparkApplicationBackUp backUp = getById(id);
+        FlinkApplicationBackup backUp = getById(id);
         try {
-            SparkApplication application = applicationManageService.getById(backUp.getAppId());
+            FlinkApplication application = applicationManageService.getById(backUp.getAppId());
             application.getFsOperator().delete(backUp.getPath());
             super.removeById(id);
             return true;
@@ -194,28 +194,28 @@ public class SparkApplicationBackUpServiceImpl
     }
 
     @Override
-    public void backup(SparkApplication appParam, SparkSql sparkSqlParam) {
+    public void backup(FlinkApplication appParam, FlinkSql flinkSqlParam) {
         // basic configuration file backup
-        String appHome = (appParam.isCICDJob())
+        String appHome = (appParam.isCustomCodeJob() && appParam.isCICDJob())
             ? appParam.getDistHome()
             : appParam.getAppHome();
         FsOperator fsOperator = appParam.getFsOperator();
         if (fsOperator.exists(appHome)) {
             // move files to back up directory
-            SparkApplicationConfig config = configService.getEffective(appParam.getId());
+            FlinkApplicationConfig config = configService.getEffective(appParam.getId());
             if (config != null) {
                 appParam.setConfigId(config.getId());
             }
-            // spark sql tasks need to back up sql and dependencies
+            // flink sql tasks need to back up sql and dependencies
             int version = 1;
-            if (sparkSqlParam != null) {
-                appParam.setSqlId(sparkSqlParam.getId());
-                version = sparkSqlParam.getVersion();
+            if (flinkSqlParam != null) {
+                appParam.setSqlId(flinkSqlParam.getId());
+                version = flinkSqlParam.getVersion();
             } else if (config != null) {
                 version = config.getVersion();
             }
 
-            SparkApplicationBackUp applicationBackUp = new SparkApplicationBackUp(appParam);
+            FlinkApplicationBackup applicationBackUp = new FlinkApplicationBackup(appParam);
             applicationBackUp.setVersion(version);
 
             this.save(applicationBackUp);

@@ -19,11 +19,8 @@ package org.apache.streampark.console.core.controller;
 
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.core.annotation.Permission;
-import org.apache.streampark.console.core.bean.AppBuildDockerResolvedDetail;
-import org.apache.streampark.console.core.entity.AppBuildPipeline;
-import org.apache.streampark.console.core.service.application.AppBuildPipeService;
-import org.apache.streampark.flink.packer.pipeline.DockerResolvedSnapshot;
-import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
+import org.apache.streampark.console.core.entity.ApplicationBuildPipeline;
+import org.apache.streampark.console.core.service.application.SparkAplicationBuildPipelineService;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 
@@ -41,18 +38,29 @@ import java.util.Optional;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("flink/pipe")
-public class FlinkBuildPipelineController {
+@RequestMapping("spark/pipe")
+public class SparkPipelineController {
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private SparkAplicationBuildPipelineService appBuildPipeService;
 
-    @Permission(app = "#appId")
+    /**
+     * Release application building pipeline.
+     *
+     * @param appId application id
+     * @param forceBuild forced start pipeline or not
+     * @return Whether the pipeline was successfully started
+     */
     @PostMapping("build")
     @RequiresPermissions("app:create")
-    public RestResponse buildApplication(Long appId, boolean forceBuild) throws Exception {
-        boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
-        return RestResponse.success(actionResult);
+    @Permission(app = "#appId")
+    public RestResponse buildApplication(Long appId, boolean forceBuild) {
+        try {
+            boolean actionResult = appBuildPipeService.buildApplication(appId, forceBuild);
+            return RestResponse.success(actionResult);
+        } catch (Exception e) {
+            return RestResponse.success(false).message(e.getMessage());
+        }
     }
 
     /**
@@ -62,18 +70,12 @@ public class FlinkBuildPipelineController {
      * @return "pipeline" -> pipeline details, "docker" -> docker resolved snapshot
      */
     @PostMapping("/detail")
-    @Permission(app = "#appId")
     @RequiresPermissions("app:view")
+    @Permission(app = "#appId")
     public RestResponse getBuildProgressDetail(Long appId) {
         Map<String, Object> details = new HashMap<>(0);
-        Optional<AppBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
-        details.put("pipeline", pipeline.map(AppBuildPipeline::toView).orElse(null));
-
-        if (pipeline.isPresent()
-            && PipelineTypeEnum.FLINK_NATIVE_K8S_APPLICATION == pipeline.get().getPipeType()) {
-            DockerResolvedSnapshot dockerProgress = appBuildPipeService.getDockerProgressDetailSnapshot(appId);
-            details.put("docker", AppBuildDockerResolvedDetail.of(dockerProgress));
-        }
+        Optional<ApplicationBuildPipeline> pipeline = appBuildPipeService.getCurrentBuildPipeline(appId);
+        details.put("pipeline", pipeline.map(ApplicationBuildPipeline::toView).orElse(null));
         return RestResponse.success(details);
     }
 }

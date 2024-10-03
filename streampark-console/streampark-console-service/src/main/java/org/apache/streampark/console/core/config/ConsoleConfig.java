@@ -23,7 +23,8 @@ import org.apache.streampark.registry.api.enums.RegistryNodeType;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,7 +35,8 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 
-@Data
+@Getter
+@Setter
 @Validated
 @Configuration
 @ConfigurationProperties(prefix = "server")

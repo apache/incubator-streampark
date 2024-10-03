@@ -45,7 +45,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +55,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @TableName("t_spark_app")
 @Slf4j
 public class SparkApplication extends BaseEntity {

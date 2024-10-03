@@ -26,12 +26,12 @@ import org.apache.streampark.console.core.annotation.AppChangeEvent;
 import org.apache.streampark.console.core.annotation.Permission;
 import org.apache.streampark.console.core.entity.ApplicationLog;
 import org.apache.streampark.console.core.entity.FlinkApplication;
-import org.apache.streampark.console.core.entity.FlinkApplicationBackUp;
+import org.apache.streampark.console.core.entity.FlinkApplicationBackup;
 import org.apache.streampark.console.core.enums.AppExistsStateEnum;
 import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationActionService;
-import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationInfoService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 
@@ -67,7 +67,7 @@ public class FlinkApplicationController {
     private FlinkApplicationInfoService applicationInfoService;
 
     @Autowired
-    private FlinkApplicationBackUpService backUpService;
+    private FlinkApplicationBackupService backUpService;
 
     @Autowired
     private ApplicationLogService applicationLogService;
@@ -208,8 +208,8 @@ public class FlinkApplicationController {
 
     @PostMapping("backups")
     @Permission(app = "#backUp.appId", team = "#backUp.teamId")
-    public RestResponse backups(FlinkApplicationBackUp backUp, RestRequest request) {
-        IPage<FlinkApplicationBackUp> backups = backUpService.getPage(backUp, request);
+    public RestResponse backups(FlinkApplicationBackup backUp, RestRequest request) {
+        IPage<FlinkApplicationBackup> backups = backUpService.getPage(backUp, request);
         return RestResponse.success(backups);
     }
 
@@ -238,7 +238,7 @@ public class FlinkApplicationController {
 
     @Permission(app = "#backUp.appId")
     @PostMapping("delete/backup")
-    public RestResponse deleteBackup(FlinkApplicationBackUp backUp) throws InternalException {
+    public RestResponse deleteBackup(FlinkApplicationBackup backUp) throws InternalException {
         Boolean deleted = backUpService.removeById(backUp.getId());
         return RestResponse.success(deleted);
     }

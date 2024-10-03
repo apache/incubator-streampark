@@ -17,11 +17,13 @@
 
 package org.apache.streampark.console.base.domain;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 public class RestRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -50,10 +50,10 @@ import org.apache.streampark.console.core.service.ResourceService;
 import org.apache.streampark.console.core.service.SavepointService;
 import org.apache.streampark.console.core.service.SettingService;
 import org.apache.streampark.console.core.service.YarnQueueService;
-import org.apache.streampark.console.core.service.application.AppBuildPipeService;
 import org.apache.streampark.console.core.service.application.ApplicationLogService;
 import org.apache.streampark.console.core.service.application.ApplicationService;
-import org.apache.streampark.console.core.service.application.FlinkApplicationBackUpService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBackupService;
+import org.apache.streampark.console.core.service.application.FlinkApplicationBuildPipelineService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationConfigService;
 import org.apache.streampark.console.core.service.application.FlinkApplicationManageService;
 import org.apache.streampark.console.core.util.ServiceHelper;
@@ -111,7 +111,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     private ApplicationService applicationService;
 
     @Autowired
-    private FlinkApplicationBackUpService backUpService;
+    private FlinkApplicationBackupService backUpService;
 
     @Autowired
     private FlinkApplicationConfigService configService;
@@ -135,7 +135,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     private FlinkK8sWatcher k8SFlinkTrackMonitor;
 
     @Autowired
-    private AppBuildPipeService appBuildPipeService;
+    private FlinkApplicationBuildPipelineService appBuildPipeService;
 
     @Autowired
     private YarnQueueService yarnQueueService;

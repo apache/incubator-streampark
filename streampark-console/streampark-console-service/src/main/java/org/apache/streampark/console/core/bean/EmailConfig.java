@@ -19,7 +19,8 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.console.core.service.SettingService;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,7 +30,8 @@ import lombok.extern.slf4j.Slf4j;
  * <p>This class also provides a static factory method to create an EmailConfig object from a map of
  * settings.
  */
-@Data
+@Getter
+@Setter
 @Slf4j
 public class EmailConfig {
 

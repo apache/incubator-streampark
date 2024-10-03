@@ -37,8 +37,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,12 +58,13 @@ import java.util.stream.Collectors;
  * corresponding ApplicationBuildPipeline record.
  */
 @TableName("t_app_build_pipe")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Slf4j
-public class AppBuildPipeline {
+public class ApplicationBuildPipeline {
 
     @TableId(type = IdType.INPUT)
     private Long appId;
@@ -100,7 +102,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public AppBuildPipeline setPipeType(@Nonnull PipelineTypeEnum pipeType) {
+    public ApplicationBuildPipeline setPipeType(@Nonnull PipelineTypeEnum pipeType) {
         this.pipeTypeCode = pipeType.getCode();
         return this;
     }
@@ -112,7 +114,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public AppBuildPipeline setPipeStatus(@Nonnull PipelineStatusEnum pipeStatus) {
+    public ApplicationBuildPipeline setPipeStatus(@Nonnull PipelineStatusEnum pipeStatus) {
         this.pipeStatusCode = pipeStatus.getCode();
         return this;
     }
@@ -135,7 +137,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public AppBuildPipeline setStepStatus(@Nonnull Map<Integer, PipelineStepStatusEnum> stepStatus) {
+    public ApplicationBuildPipeline setStepStatus(@Nonnull Map<Integer, PipelineStepStatusEnum> stepStatus) {
         try {
             this.stepStatusJson = JacksonUtils.write(stepStatus);
         } catch (JsonProcessingException e) {
@@ -169,7 +171,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public AppBuildPipeline setStepStatusTimestamp(@Nonnull Map<Integer, Long> stepStatusSt) {
+    public ApplicationBuildPipeline setStepStatusTimestamp(@Nonnull Map<Integer, Long> stepStatusSt) {
         try {
             this.stepStatusTimestampJson = JacksonUtils.write(stepStatusSt);
         } catch (JsonProcessingException e) {
@@ -198,7 +200,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public AppBuildPipeline setError(@Nonnull PipeError error) {
+    public ApplicationBuildPipeline setError(@Nonnull PipeError error) {
         try {
             this.errorJson = JacksonUtils.write(error);
         } catch (JsonProcessingException e) {
@@ -208,7 +210,7 @@ public class AppBuildPipeline {
     }
 
     @JsonIgnore
-    public <R extends BuildResult> AppBuildPipeline setBuildResult(@Nonnull R result) {
+    public <R extends BuildResult> ApplicationBuildPipeline setBuildResult(@Nonnull R result) {
         try {
             this.buildResultJson = JacksonUtils.write(result);
         } catch (JsonProcessingException e) {
@@ -250,13 +252,13 @@ public class AppBuildPipeline {
     }
 
     /** Initialize from BuildPipeline */
-    public static AppBuildPipeline initFromPipeline(@Nonnull BuildPipeline pipeline) {
+    public static ApplicationBuildPipeline initFromPipeline(@Nonnull BuildPipeline pipeline) {
         return fromPipeSnapshot(pipeline.snapshot());
     }
 
     /** Create object from PipeSnapshot */
-    public static AppBuildPipeline fromPipeSnapshot(@Nonnull PipelineSnapshot snapshot) {
-        return new AppBuildPipeline()
+    public static ApplicationBuildPipeline fromPipeSnapshot(@Nonnull PipelineSnapshot snapshot) {
+        return new ApplicationBuildPipeline()
             .setPipeType(snapshot.pipeType())
             .setPipeStatus(snapshot.pipeStatus())
             .setTotalStep(snapshot.allSteps())
@@ -273,7 +275,8 @@ public class AppBuildPipeline {
     }
 
     /** View object of AppBuildPipeline */
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     @NoArgsConstructor
     public static class View {
@@ -291,7 +294,7 @@ public class AppBuildPipeline {
         private String errorStack;
         private Date updateTime;
 
-        public static View of(@Nonnull AppBuildPipeline pipe) {
+        public static View of(@Nonnull ApplicationBuildPipeline pipe) {
             // combine step info
             Map<Integer, String> stepDesc = pipe.getPipeType().getSteps();
             Map<Integer, PipelineStepStatusEnum> stepStatus = pipe.getStepStatus();
@@ -329,7 +332,8 @@ public class AppBuildPipeline {
         }
     }
 
-    @Data
+    @Getter
+    @Setter
     @Accessors(chain = true)
     @NoArgsConstructor
     public static class Step {

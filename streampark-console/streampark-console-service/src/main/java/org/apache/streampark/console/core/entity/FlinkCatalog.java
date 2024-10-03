@@ -27,7 +27,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
@@ -35,7 +36,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /** catalog store */
-@Data
+@Getter
+@Setter
 @TableName("t_flink_catalog")
 @Slf4j
 public class FlinkCatalog implements Serializable {

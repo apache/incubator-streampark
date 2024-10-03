@@ -19,13 +19,15 @@ package org.apache.streampark.console.core.bean;
 
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Set;
 
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class AlertProbeMsg {
 
     private Set<Long> alertId;

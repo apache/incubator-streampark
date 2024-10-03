@@ -18,14 +18,17 @@
 package org.apache.streampark.console.core.metrics.yarn;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class YarnAppInfo {
 
     private App app;
 
-    @Data
+    @Getter
+    @Setter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class App {
 

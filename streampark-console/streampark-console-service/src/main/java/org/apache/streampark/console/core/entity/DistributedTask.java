@@ -23,12 +23,14 @@ import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
 @TableName("t_distributed_task")
 @Slf4j
 public class DistributedTask implements Serializable {
