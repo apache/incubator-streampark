@@ -118,6 +118,12 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         }
     }
 
+    parameter.get(KEY_FLINK_CONF(), null) match {
+      case null | "" =>
+        throw new ExceptionInInitializerError(
+          "[StreamPark] Usage:can't find config,please set \"--flink.conf $conf \" in main arguments")
+      case conf => builder.withConfiguration(Configuration.fromMap(PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(conf))))
+    }
     val buildWith =
       (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
