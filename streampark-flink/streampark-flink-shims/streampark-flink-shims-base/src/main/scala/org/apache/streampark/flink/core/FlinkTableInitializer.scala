@@ -197,7 +197,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           }
         }
 
-        val envConfig = Configuration.fromMap(flinkConf + appFlinkConf)
+        val envConfig = Configuration.fromMap(flinkConf ++ appFlinkConf)
         val tableConfig = Configuration.fromMap(tableConf)
 
         val parameterTool = ParameterTool
