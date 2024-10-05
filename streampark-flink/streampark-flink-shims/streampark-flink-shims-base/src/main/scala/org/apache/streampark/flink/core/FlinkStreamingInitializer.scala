@@ -86,16 +86,26 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       throw new IllegalArgumentException(
         "[StreamPark] Usage:can't fond config, please set \"--conf $path \" in main arguments")
     }
-    val flinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
+    val appFlinkConf = extractConfigByPrefix(configMap, KEY_FLINK_PROPERTY_PREFIX)
     val appConf = extractConfigByPrefix(configMap, KEY_APP_PREFIX)
     // config priority: explicitly specified priority > project profiles > system profiles
     val parameter = ParameterTool
       .fromSystemProperties()
-      .mergeWith(ParameterTool.fromMap(flinkConf))
+      .mergeWith(ParameterTool.fromMap(appFlinkConf))
       .mergeWith(ParameterTool.fromMap(appConf))
       .mergeWith(argsMap)
 
-    val envConfig = Configuration.fromMap(flinkConf)
+    val flinkConf: Map[String, String] = {
+      parameter.get(KEY_FLINK_CONF(), null) match {
+        case flinkConf if flinkConf != null =>
+          PropertiesUtils
+            .loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
+            .filter(_._2.nonEmpty)
+        case _ => Map.empty
+      }
+    }
+
+    val envConfig = Configuration.fromMap(flinkConf + appFlinkConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 
