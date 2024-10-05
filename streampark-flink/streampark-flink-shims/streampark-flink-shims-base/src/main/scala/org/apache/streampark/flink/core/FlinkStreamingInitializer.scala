@@ -107,7 +107,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         case _ => Map.empty
       }
     }
-    val envConfig = Configuration.fromMap(flinkConf + appFlinkConf)
+    val envConfig = Configuration.fromMap(flinkConf ++ appFlinkConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 
