@@ -187,17 +187,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         val tableConf = extractConfigByPrefix(configMap, KEY_FLINK_TABLE_PREFIX)
         val sqlConf = extractConfigByPrefix(configMap, KEY_SQL_PREFIX)
 
-        val flinkConf: Map[String, String] = {
-          parameter.get(KEY_FLINK_CONF(), null) match {
-            case flinkConf if flinkConf != null =>
-              PropertiesUtils
-                .loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
-                .filter(_._2.nonEmpty)
-            case _ => Map.empty
-          }
-        }
-
-        val envConfig = Configuration.fromMap(flinkConf ++ appFlinkConf)
+        val envConfig = Configuration.fromMap(appFlinkConf)
         val tableConfig = Configuration.fromMap(tableConf)
 
         val parameterTool = ParameterTool

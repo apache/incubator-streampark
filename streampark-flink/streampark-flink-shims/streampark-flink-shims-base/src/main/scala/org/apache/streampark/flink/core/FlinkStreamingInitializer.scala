@@ -95,17 +95,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       .mergeWith(ParameterTool.fromMap(appConf))
       .mergeWith(argsMap)
 
-    val flinkConf: Map[String, String] = {
-      parameter.get(KEY_FLINK_CONF(), null) match {
-        case flinkConf if flinkConf != null =>
-          PropertiesUtils
-            .loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
-            .filter(_._2.nonEmpty)
-        case _ => Map.empty
-      }
-    }
-
-    val envConfig = Configuration.fromMap(flinkConf ++ appFlinkConf)
+    val envConfig = Configuration.fromMap(appFlinkConf)
     FlinkConfiguration(parameter, envConfig, null)
   }
 

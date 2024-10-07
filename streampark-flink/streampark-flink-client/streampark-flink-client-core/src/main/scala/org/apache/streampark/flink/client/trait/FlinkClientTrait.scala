@@ -77,7 +77,7 @@ trait FlinkClientTrait extends Logger {
          |""".stripMargin)
 
     val flinkConfig = prepareConfig(submitRequest)
-
+    flinkConfig.toMap.foreach(c => logInfo(s"flinkConfig:  ${c._1}: ${c._2}"))
     setConfig(submitRequest, flinkConfig)
 
     Try(doSubmit(submitRequest, flinkConfig)) match {
