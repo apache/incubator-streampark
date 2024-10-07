@@ -22,7 +22,7 @@
   import { useModal } from '/@/components/Modal';
   import { PageWrapper } from '/@/components/Page';
   import { Description, useDescription } from '/@/components/Description';
-  import { Icon } from '/@/components/Icon';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app/app';
   import { onUnmounted, reactive, h, ref, onMounted } from 'vue';
@@ -210,7 +210,7 @@
           :disabled="appNotRunning"
           class="float-right -mt-8px mr-20px"
         >
-          <Icon icon="ant-design:cloud-outlined" />
+          <SvgIcon name="flink" class="mr-1" />
           {{ t('flink.app.detail.flinkWebUi') }}
         </a-button>
       </div>

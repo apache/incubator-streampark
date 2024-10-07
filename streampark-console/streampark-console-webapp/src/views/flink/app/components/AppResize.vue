@@ -119,6 +119,7 @@
 
     &.app-vertical {
       width: 7px;
+      margin-left: -1px;
       height: calc(100% - 95px);
       border-left: 1px solid var(--resize-border-color);
       cursor: col-resize;

@@ -60,13 +60,8 @@ export const useSavepoint = (updateOption: Fn) => {
       },
       content: () => {
         return (
-          <Form class="!pt-50px">
-            <Form.Item
-              name="customSavepoint"
-              label="Custom Savepoint"
-              label-col={{ lg: { span: 7, offset: 0 }, sm: { span: 7, offset: 0 } }}
-              wrapper-col={{ lg: { span: 16, offset: 0 }, sm: { span: 4, offset: 0 } }}
-            >
+          <Form class="!pt-50px" layout="vertical" baseColProps={{ span: 20, offset: 2 }}>
+            <Form.Item name="customSavepoint" label="Custom Savepoint">
               <Input
                 placeholder="Optional: Entry the custom savepoint path"
                 allowClear={true}

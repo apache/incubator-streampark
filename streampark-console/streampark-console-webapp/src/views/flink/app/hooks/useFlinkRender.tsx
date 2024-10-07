@@ -486,7 +486,7 @@ export const renderSqlHistory = (
       width: 600,
       content: () => {
         return (
-          <Form class="!pt-30px">
+          <Form class="!pt-30px" layout="vertical" baseColProps={{ span: 20, offset: 2 }}>
             <Form.Item
               label={t('flink.app.flinkSql.version')}
               label-col={{ lg: { span: 5 }, sm: { span: 7 } }}
