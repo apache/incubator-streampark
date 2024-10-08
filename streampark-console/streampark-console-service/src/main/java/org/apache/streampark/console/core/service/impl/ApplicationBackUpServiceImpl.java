@@ -207,37 +207,22 @@ public class ApplicationBackUpServiceImpl
   @Override
   @Transactional(rollbackFor = {Exception.class})
   public void backup(Application application, FlinkSql flinkSql) {
-    // basic configuration file backup
-    log.info("skip backup..");
-    if (application != null) {
-      return;
+    ApplicationConfig config = configService.getEffective(application.getId());
+    if (config != null) {
+      application.setConfigId(config.getId());
     }
-    String appHome =
-        (application.isCustomCodeJob() && application.isCICDJob())
-            ? application.getDistHome()
-            : application.getAppHome();
-    FsOperator fsOperator = application.getFsOperator();
-    if (fsOperator.exists(appHome)) {
-      // move files to back up directory
-      ApplicationConfig config = configService.getEffective(application.getId());
-      if (config != null) {
-        application.setConfigId(config.getId());
-      }
-      // flink sql tasks need to back up sql and dependencies
-      int version = 1;
-      if (flinkSql != null) {
-        application.setSqlId(flinkSql.getId());
-        version = flinkSql.getVersion();
-      } else if (config != null) {
-        version = config.getVersion();
-      }
-
-      ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
-      applicationBackUp.setVersion(version);
-
-      this.save(applicationBackUp);
-      fsOperator.mkdirs(applicationBackUp.getPath());
-      fsOperator.copyDir(appHome, applicationBackUp.getPath());
+    // flink sql tasks need to back up sql and dependencies
+    int version = 1;
+    if (flinkSql != null) {
+      application.setSqlId(flinkSql.getId());
+      version = flinkSql.getVersion();
+    } else if (config != null) {
+      version = config.getVersion();
     }
+
+    ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
+    applicationBackUp.setVersion(version);
+
+    this.save(applicationBackUp);
   }
 }
