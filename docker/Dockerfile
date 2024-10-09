@@ -19,19 +19,12 @@ FROM ubuntu:22.04
 USER root
 
 # Install basic tools
-RUN apt update && apt install -y wget curl vim net-tools iputils-ping \
-    && apt install software-properties-common -y \
-    && add-apt-repository ppa:openjdk-r/ppa -y
-RUN apt update && apt install -y openjdk-8-jdk
-RUN JAVA_PATH=$(ls -l /usr/lib/jvm | grep java-8-openjdk | grep ^d | awk -F ' ' '{print $9}'); \
-    if [ -z "${JAVA_PATH}" ];then \
-        echo "JAVA_PATH not found: $JAVA_PATH"; \
-        exit 2; \
-    else \
-        ln -s /usr/lib/jvm/$JAVA_PATH/ /usr/lib/jvm/jdk8; \
-    fi
-ENV JAVA_HOME=/usr/lib/jvm/jdk8
+RUN apt update && apt install -y wget curl vim net-tools iputils-ping tini openjdk-11-jdk maven && apt clean
 
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV MAVEN_HOME=/usr/share/maven
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV PATH=$MAVEN_HOME/bin:$PATH
 
 # Install docker
 RUN \
@@ -50,24 +43,9 @@ RUN \
     # Install the Docker packages.
     apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-
-# Install Tini
-ARG TARGETPLATFORM
-ENV TINI_VERSION v0.19.0
-RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
-RUN \
-    if [ "$TARGETPLATFORM" = "linux/amd64" ];then \
-        TINI_PLATFORM=amd64; \
-        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ];then \
-        TINI_PLATFORM=arm64; \
-        wget --no-check-certificate -O /usr/sbin/tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-$TINI_PLATFORM; \
-    else \
-        echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
-        exit 2;  \
-    fi
-RUN chmod +x /usr/sbin/tini
-
+RUN curl -LO "https://dl.k8s.io/release/v1.23.0/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/kubectl
 
 # Install StreamPark
 COPY dist/apache-streampark_*-bin.tar.gz /
@@ -76,4 +54,4 @@ RUN tar -zxvf apache-streampark_*-bin.tar.gz \
     && rm -f apache-streampark_*-bin.tar.gz
 
 
-ENTRYPOINT ["/usr/sbin/tini", "--", "/streampark/bin/streampark.sh", "start_docker"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/streampark/bin/streampark.sh", "start_docker"]

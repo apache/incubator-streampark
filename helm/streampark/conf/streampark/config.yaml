@@ -48,7 +48,7 @@ datasource:
 streampark:
   workspace:
     # Local workspace, storage of clone projects and compiled projects,Do not set under $APP_HOME. Set it to a directory outside of $APP_HOME.
-    local: /tmp/streampark
+    local: /path/to/your/workspace
     # The root hdfs path of the jars, Same as yarn.provided.lib.dirs for flink on yarn-application
     # and Same as --jars for spark on yarn
     remote: hdfs:///streampark/
