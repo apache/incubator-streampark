@@ -54,6 +54,18 @@
     </a-card>
     <BasicTable @register="registerTable">
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'name'">
+          {{ record.name }}
+          <a-badge
+            class="build-badge"
+            v-if="
+              record.buildState == BuildStateEnum.NEED_REBUILD ||
+              record.buildState == BuildStateEnum.BUILDING
+            "
+            count="NEW"
+            title="this project has changed, need rebuild"
+          />
+        </template>
         <template v-if="column.dataIndex === 'branches'">
           <a-tag
             v-if="record.refs.startsWith('refs/tags/')"
@@ -67,15 +79,7 @@
           </a-tag>
         </template>
         <template v-if="column.dataIndex === 'type'">
-          <a-badge
-            class="build-badge"
-            v-if="record.buildState == BuildStateEnum.NEED_REBUILD"
-            count="NEW"
-            title="this project has changed, need rebuild"
-          >
-            <svg-icon class="avatar" :name="projectMap[record.type]" :size="20" />
-          </a-badge>
-          <svg-icon v-else class="avatar" :name="projectMap[record.type]" :size="20" />
+          <svg-icon class="avatar" :name="projectMap[record.type]" :size="20" />
           {{ projectMap[record.type].toUpperCase() }}
         </template>
         <template v-if="column.dataIndex === 'buildState'">
@@ -359,5 +363,16 @@
   }
   .status-processing-running {
     animation: running-color 800ms ease-out infinite alternate;
+  }
+
+  .build-badge {
+    float: right;
+    margin-right: 5px;
+    font-size: 12px;
+    transform: scale(0.7, 0.7);
+
+    .ant-badge-count {
+      padding: 0 5px 1px;
+    }
   }
 </style>
