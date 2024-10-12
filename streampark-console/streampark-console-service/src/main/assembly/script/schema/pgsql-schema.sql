@@ -433,7 +433,8 @@ create table "public"."t_flink_project" (
   "description" varchar(255) collate "pg_catalog"."default",
   "build_state" int2 default -1,
   "create_time" timestamp(6),
-  "modify_time" timestamp(6)
+  "modify_time" timestamp(6),
+  "build_type" int2
 )
 ;
 alter table "public"."t_flink_project" add constraint "t_flink_project_pkey" primary key ("id");

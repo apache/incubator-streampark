@@ -197,6 +197,7 @@ create table `t_flink_project` (
   `build_state` tinyint default -1,
   `create_time` datetime default null comment 'create time',
   `modify_time` datetime default null comment 'modify time',
+  `build_type` tinyint default null,
   primary key (`id`) using btree,
   index `inx_team` (`team_id`) using btree
 ) engine=innodb auto_increment=100000 default charset=utf8mb4 collate=utf8mb4_general_ci;

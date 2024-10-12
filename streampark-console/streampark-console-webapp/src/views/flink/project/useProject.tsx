@@ -24,9 +24,10 @@ import { useRoute } from 'vue-router';
 import { ProjectRecord } from '/@/api/flink/project/model/projectModel';
 import { filterOption } from '../app/utils';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { ProjectTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
+import { ProjectTypeEnum, ProjectBuildTypeEnum, CVSTypeEnum } from '/@/enums/projectEnum';
 import RepositoryGroup from './components/RepositoryGroup';
 import { Form } from 'ant-design-vue';
+import { build } from 'vite';
 
 const { t } = useI18n();
 export const useProject = () => {
@@ -81,7 +82,28 @@ export const useProject = () => {
           },
         ],
       },
-
+      {
+        field: 'buildType',
+        label: t('flink.project.form.projectBuildType'),
+        component: 'Select',
+        componentProps: {
+          placeholder: t('flink.project.form.projectBuildTypePlaceholder'),
+          options: [
+            { label: 'Maven', value: ProjectBuildTypeEnum.MAVEN, disabled: false },
+            { label: 'Gradle', value: ProjectBuildTypeEnum.GRADLE, disabled: false },
+          ],
+          showSearch: true,
+          optionFilterProp: 'children',
+          filterOption,
+        },
+        rules: [
+          {
+            required: true,
+            type: 'number',
+            message: t('flink.project.operationTips.projectBuildTypeIsRequiredMessage'),
+          },
+        ],
+      },
       {
         field: 'repository',
         label: t('flink.project.form.cvs'),
@@ -311,6 +333,7 @@ export const useProject = () => {
       setFieldsValue({
         name: res.name,
         type: res.type,
+        buildType: res.buildType,
         repository: res.repository,
         url: res.url,
         userName: res.userName,

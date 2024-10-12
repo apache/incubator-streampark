@@ -137,6 +137,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     project.setPassword(projectParam.getPassword());
     project.setPom(projectParam.getPom());
     project.setDescription(projectParam.getDescription());
+    project.setBuildType(projectParam.getBuildType());
     project.setBuildArgs(projectParam.getBuildArgs());
     project.setModifyTime(new Date());
     if (GitUtils.isSshRepositoryUrl(project.getUrl())) {
