@@ -51,7 +51,12 @@
                 and t.deploy_mode = #{app.deployMode}
             </if>
             <if test="app.appName != null and app.appName != ''">
-                and t.app_name like concat('%', '${app.appName}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and t.app_name like concat('%', #{app.appName},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.app_name like '%' || #{app.appName} || '%'
+                </if>
             </if>
             <if test="app.clusterId != null and app.clusterId != ''">
                 and t.cluster_id = #{app.clusterId}
@@ -63,7 +68,12 @@
                 and t.user_id = #{app.userId}
             </if>
             <if test="app.tags != null and app.tags != ''">
-                and t.tags like concat('%', '${app.tags}', '%')
+                <if test="_databaseId == 'mysql'">
+                    and t.tags like concat('%', #{app.tags},'%')
+                </if>
+                <if test="_databaseId == 'pgsql'">
+                    and t.tags like '%' || #{app.tags} || '%'
+                </if>
             </if>
         </where>
     </select>
