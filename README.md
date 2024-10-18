@@ -32,7 +32,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/ASFStreamPark?label=follow&logo=x&style=for-the-badge)](https://twitter.com/ASFStreamPark)
 
 **[Website](https://streampark.apache.org)**&nbsp;&nbsp;|&nbsp;&nbsp;
-**[Official Documentation](https://streampark.apache.org/docs/get-started/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
+**[Official Docs](https://streampark.apache.org/docs/get-started/intro)**&nbsp;&nbsp;|&nbsp;&nbsp;
 **[FAQ](https://github.com/apache/incubator-streampark/issues/507)**
 
 ![](https://streampark.apache.org/image/dashboard-preview.png)
@@ -56,10 +56,13 @@
 
 ## 🚀 QuickStart
 
+```shell
+curl -L https://streampark.apache.org/quickstart.sh | sh
+```
+more:
 - [Start with Docker](docker/README.md)
 - [Start with Kubernetes](helm/README.md)
-
-Click [Official Documentation](https://streampark.apache.org/docs/framework/quick-start) for more information
+- [Official Docs](https://streampark.apache.org/docs/framework/quick-start)
 
 ## 🔨 How to Build
 
