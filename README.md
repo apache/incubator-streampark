@@ -67,8 +67,6 @@ more:
 ## 🔨 How to Build
 
 ```shell
-git clone git@github.com:apache/incubator-streampark.git
-cd incubator-streampark
 ./build.sh
 ```
 
