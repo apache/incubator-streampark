@@ -41,10 +41,6 @@ public class RegistryClient {
 
     public RegistryClient(Registry registry) {
         this.registry = registry;
-        // TODO: remove this
-        if (!registry.exists(RegistryNodeType.CONSOLE_SERVER.getRegistryPath())) {
-            registry.put(RegistryNodeType.CONSOLE_SERVER.getRegistryPath(), EMPTY);
-        }
     }
 
     /**

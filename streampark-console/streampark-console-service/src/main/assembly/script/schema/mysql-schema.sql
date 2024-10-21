@@ -605,7 +605,7 @@ create table `t_spark_app` (
   `jar_check_sum` bigint default null,
   `app_properties` text collate utf8mb4_general_ci comment 'Arbitrary Spark configuration property in key=value format (e.g. spark.driver.cores=1)',
   `app_args` text collate utf8mb4_general_ci comment 'Arguments passed to the main method of your main class',
-  `app_id` varchar(64) collate utf8mb4_general_ci default null comment '(1)application_id on yarn(2)driver_pod_name on k8s',
+  `cluster_id` varchar(64) collate utf8mb4_general_ci default null comment '(1)application_id on yarn(2)driver_pod_name on k8s',
   `yarn_queue` varchar(128) collate utf8mb4_general_ci default null,
   `k8s_master_url` varchar(128) collate utf8mb4_general_ci default null,
   `k8s_container_image` varchar(128) collate utf8mb4_general_ci default null,

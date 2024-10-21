@@ -101,7 +101,7 @@ public class ConsoleRegistryClient implements AutoCloseable {
             }
             distributedTaskService.addServer(serverHost);
         } catch (Exception e) {
-            log.error("{} server failover failed, host:{}", nodeType, serverHost, e);
+            log.error("{} server add failed, host:{}", nodeType, serverHost, e);
         }
     }
 
