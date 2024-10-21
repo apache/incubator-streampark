@@ -19,7 +19,6 @@ package org.apache.streampark.registry.core.server;
 
 import org.apache.streampark.registry.core.JdbcRegistryProperties;
 import org.apache.streampark.registry.core.JdbcRegistryThreadFactory;
-import org.apache.streampark.registry.core.model.DTO.DataType;
 import org.apache.streampark.registry.core.model.DTO.JdbcRegistryDataChanceEventDTO;
 import org.apache.streampark.registry.core.model.DTO.JdbcRegistryDataDTO;
 import org.apache.streampark.registry.core.repository.JdbcRegistryDataChanceEventRepository;
@@ -129,12 +128,6 @@ public class JdbcRegistryDataManager
     }
 
     @Override
-    public boolean existKey(String key) {
-        checkNotNull(key);
-        return jdbcRegistryDataRepository.selectByKey(key).isPresent();
-    }
-
-    @Override
     public Optional<JdbcRegistryDataDTO> getRegistryDataByKey(String key) {
         checkNotNull(key);
         return jdbcRegistryDataRepository.selectByKey(key);
@@ -151,27 +144,13 @@ public class JdbcRegistryDataManager
     }
 
     @Override
-    public void putJdbcRegistryData(Long clientId, String key, String value, DataType dataType) {
-        checkNotNull(clientId);
+    public void putJdbcRegistryData(String key, String value) {
         checkNotNull(key);
-        checkNotNull(dataType);
+        checkNotNull(value);
 
         Optional<JdbcRegistryDataDTO> jdbcRegistryDataOptional = jdbcRegistryDataRepository.selectByKey(key);
         if (jdbcRegistryDataOptional.isPresent()) {
             JdbcRegistryDataDTO jdbcRegistryData = jdbcRegistryDataOptional.get();
-            if (!dataType.name().equals(jdbcRegistryData.getDataType())) {
-                throw new UnsupportedOperationException("The data type: " + jdbcRegistryData.getDataType()
-                    + " of the key: " + key + " cannot be updated");
-            }
-
-            if (DataType.EPHEMERAL.name().equals(jdbcRegistryData.getDataType())) {
-                if (!jdbcRegistryData.getClientId().equals(clientId)) {
-                    throw new UnsupportedOperationException(
-                        "The EPHEMERAL data: " + key + " can only be updated by its owner: "
-                            + jdbcRegistryData.getClientId() + " but not: " + clientId);
-                }
-            }
-
             jdbcRegistryData.setDataValue(value);
             jdbcRegistryData.setLastUpdateTime(new Date());
             jdbcRegistryDataRepository.updateById(jdbcRegistryData);
@@ -184,10 +163,8 @@ public class JdbcRegistryDataManager
             jdbcRegistryDataChanceEventRepository.insert(jdbcRegistryDataChanceEvent);
         } else {
             JdbcRegistryDataDTO jdbcRegistryDataDTO = JdbcRegistryDataDTO.builder()
-                .clientId(clientId)
                 .dataKey(key)
                 .dataValue(value)
-                .dataType(dataType.name())
                 .createTime(new Date())
                 .lastUpdateTime(new Date())
                 .build();
@@ -260,5 +237,4 @@ public class JdbcRegistryDataManager
             }
         });
     }
-
 }

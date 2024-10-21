@@ -17,10 +17,7 @@
 
 package org.apache.streampark.registry.api;
 
-import lombok.NonNull;
-
 import java.io.Closeable;
-import java.time.Duration;
 import java.util.Collection;
 
 /**
@@ -34,21 +31,6 @@ public interface Registry extends Closeable {
     void start();
 
     /**
-     * Whether the registry is connected
-     *
-     * @return true if connected, false otherwise.
-     */
-    boolean isConnected();
-
-    /**
-     * Connect to the registry, will wait in the given timeout
-     *
-     * @param timeout max timeout, if timeout <= 0 will wait indefinitely.
-     * @throws RegistryException cannot connect in the given timeout
-     */
-    void connectUntilTimeout(@NonNull Duration timeout) throws RegistryException;
-
-    /**
      * Subscribe the path, when the path has expose {@link Event}, the listener will be triggered.
      * <p>
      * The sub path will also be watched, if the sub path has event, the listener will be triggered.
@@ -57,11 +39,6 @@ public interface Registry extends Closeable {
      * @param listener the listener to be triggered
      */
     void subscribe(String path, SubscribeListener listener);
-
-    /**
-     * Add a connection listener to collection.
-     */
-    void addConnectionStateListener(ConnectionListener listener);
 
     /**
      * Get the value of the key, if key not exist will throw {@link RegistryException}
@@ -73,9 +50,8 @@ public interface Registry extends Closeable {
      *
      * @param key                the key, cannot be null
      * @param value              the value, cannot be null
-     * @param deleteOnDisconnect if true, when the connection state is disconnected, the key will be deleted
      */
-    void put(String key, String value, boolean deleteOnDisconnect);
+    void put(String key, String value);
 
     /**
      * Delete the key from the registry
@@ -94,19 +70,4 @@ public interface Registry extends Closeable {
      * @return true if the key exists
      */
     boolean exists(String key);
-
-    /**
-     * Acquire the lock of the prefix {@param key}
-     */
-    boolean acquireLock(String key);
-
-    /**
-     * Acquire the lock of the prefix {@param key}, if acquire in the given timeout return true, else return false.
-     */
-    boolean acquireLock(String key, long timeout);
-
-    /**
-     * Release the lock of the prefix {@param key}
-     */
-    boolean releaseLock(String key);
 }

@@ -26,7 +26,6 @@ public enum RegistryNodeType {
 
     ALL_SERVERS("nodes", "/nodes"),
     CONSOLE_SERVER("ConsoleServer", "/nodes/console-server"),
-    CONSOLE_NODE_LOCK("ConsoleNodeLock", "/lock/console"),
     ;
 
     private final String name;

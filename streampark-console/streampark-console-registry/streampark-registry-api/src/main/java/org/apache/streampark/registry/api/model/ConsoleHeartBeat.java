@@ -17,11 +17,23 @@
 
 package org.apache.streampark.registry.api.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
-public class ConsoleHeartBeat extends BaseHeartBeat implements HeartBeat {
+@AllArgsConstructor
+public class ConsoleHeartBeat implements HeartBeat {
+
+    protected long startupTime;
+    protected long reportTime;
+
+    protected String host;
+    protected int port;
 
 }

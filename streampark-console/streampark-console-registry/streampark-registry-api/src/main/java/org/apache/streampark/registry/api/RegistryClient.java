@@ -17,29 +17,16 @@
 
 package org.apache.streampark.registry.api;
 
-import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.constants.Constants;
-import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.registry.api.enums.RegistryNodeType;
-import org.apache.streampark.registry.api.model.ConsoleHeartBeat;
-import org.apache.streampark.registry.api.model.Server;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Strings;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -48,87 +35,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Slf4j
 public class RegistryClient {
 
-    private IStoppable stoppable;
-
     private static final String EMPTY = "";
 
     private final Registry registry;
 
     public RegistryClient(Registry registry) {
         this.registry = registry;
+        // TODO: remove this
         if (!registry.exists(RegistryNodeType.CONSOLE_SERVER.getRegistryPath())) {
-            registry.put(RegistryNodeType.CONSOLE_SERVER.getRegistryPath(), EMPTY, false);
+            registry.put(RegistryNodeType.CONSOLE_SERVER.getRegistryPath(), EMPTY);
         }
-    }
-
-    public boolean isConnected() {
-        return registry.isConnected();
-
-    }
-
-    public void connectUntilTimeout(@NonNull Duration duration) throws RegistryException {
-        registry.connectUntilTimeout(duration);
-    }
-
-    public List<Server> getServerList(RegistryNodeType registryNodeType) {
-        Map<String, String> serverMaps = getServerMaps(registryNodeType);
-
-        List<Server> serverList = new ArrayList<>();
-        for (Map.Entry<String, String> entry : serverMaps.entrySet()) {
-            String serverPath = entry.getKey();
-            String heartBeatJson = entry.getValue();
-            if (StringUtils.isEmpty(heartBeatJson)) {
-                log.error("The heartBeatJson is empty, serverPath: {}", serverPath);
-                continue;
-            }
-            Server server = new Server();
-            switch (registryNodeType) {
-                case CONSOLE_SERVER:
-                    ConsoleHeartBeat consoleHeartBeat =
-                        JSONUtils.parseObject(heartBeatJson, ConsoleHeartBeat.class);
-                    server.setCreateTime(new Date(consoleHeartBeat.getStartupTime()));
-                    server.setLastHeartbeatTime(new Date(consoleHeartBeat.getReportTime()));
-                    server.setId(consoleHeartBeat.getProcessId());
-                    server.setHost(consoleHeartBeat.getHost());
-                    server.setPort(consoleHeartBeat.getPort());
-                    break;
-                default:
-                    log.warn("unknown registry node type: {}", registryNodeType);
-            }
-
-            server.setResInfo(heartBeatJson);
-            // todo: add host, port in heartBeat Info, so that we don't need to parse this again
-            server.setZkDirectory(registryNodeType.getRegistryPath() + "/" + serverPath);
-            serverList.add(server);
-        }
-        return serverList;
-    }
-
-    /**
-     * Return server host:port -> value
-     */
-    public Map<String, String> getServerMaps(RegistryNodeType nodeType) {
-        Map<String, String> serverMap = new HashMap<>();
-        try {
-            Collection<String> serverList = getServerNodes(nodeType);
-            for (String server : serverList) {
-                serverMap.putIfAbsent(server, get(nodeType.getRegistryPath() + Constants.SINGLE_SLASH + server));
-            }
-        } catch (Exception e) {
-            log.error("get server list failed", e);
-        }
-
-        return serverMap;
-    }
-
-    public boolean checkNodeExists(String host, RegistryNodeType nodeType) {
-        return getServerMaps(nodeType).keySet()
-            .stream()
-            .anyMatch(it -> it.contains(host));
-    }
-
-    public Collection<String> getConsoleNodesDirectly() {
-        return getChildrenKeys(RegistryNodeType.CONSOLE_SERVER.getRegistryPath());
     }
 
     /**
@@ -151,11 +67,11 @@ public class RegistryClient {
         registry.close();
     }
 
-    public void persistEphemeral(String key, String value) {
-        registry.put(key, value, true);
+    public void put(String key, String value) {
+        registry.put(key, value);
     }
 
-    public void remove(String key) {
+    public void delete(String key) {
         registry.delete(key);
     }
 
@@ -167,33 +83,8 @@ public class RegistryClient {
         registry.subscribe(path, listener);
     }
 
-    public void addConnectionStateListener(ConnectionListener listener) {
-        registry.addConnectionStateListener(listener);
-    }
-
     public boolean exists(String key) {
         return registry.exists(key);
-    }
-
-    public boolean getLock(String key) {
-        return registry.acquireLock(key);
-    }
-
-    public boolean releaseLock(String key) {
-        return registry.releaseLock(key);
-    }
-
-    public void setStoppable(IStoppable stoppable) {
-        this.stoppable = stoppable;
-    }
-
-    public IStoppable getStoppable() {
-        return stoppable;
-    }
-
-    public boolean isConsolePath(String path) {
-        return path != null
-            && path.startsWith(RegistryNodeType.CONSOLE_SERVER.getRegistryPath() + Constants.SINGLE_SLASH);
     }
 
     public Collection<String> getChildrenKeys(final String key) {
@@ -210,5 +101,11 @@ public class RegistryClient {
 
     private Collection<String> getServerNodes(RegistryNodeType nodeType) {
         return getChildrenKeys(nodeType.getRegistryPath());
+    }
+
+    public boolean checkNodeExists(String host, RegistryNodeType nodeType) {
+        return getServerNodes(nodeType)
+            .stream()
+            .anyMatch(it -> it.contains(host));
     }
 }

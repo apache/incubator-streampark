@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.registry;
 
-import org.apache.streampark.common.IStoppable;
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.common.utils.NetworkUtils;
 import org.apache.streampark.console.core.config.ConsoleConfig;
@@ -26,8 +25,6 @@ import org.apache.streampark.console.core.task.ConsoleHeartBeatTask;
 import org.apache.streampark.registry.api.RegistryClient;
 import org.apache.streampark.registry.api.RegistryException;
 import org.apache.streampark.registry.api.enums.RegistryNodeType;
-import org.apache.streampark.registry.api.enums.ServerStatusEnum;
-import org.apache.streampark.registry.api.model.ConsoleHeartBeat;
 import org.apache.streampark.registry.api.thread.ThreadUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,9 +52,6 @@ public class ConsoleRegistryClient implements AutoCloseable {
     private ConsoleConfig consoleConfig;
 
     @Autowired
-    private ConsoleConnectStrategy consoleConnectStrategy;
-
-    @Autowired
     private DistributedTaskService distributedTaskService;
 
     private ConsoleHeartBeatTask consoleHeartBeatTask;
@@ -68,20 +62,16 @@ public class ConsoleRegistryClient implements AutoCloseable {
             this.consoleHeartBeatTask = new ConsoleHeartBeatTask(consoleConfig, registryClient);
             // console registry
             registry();
-            registryClient.addConnectionStateListener(new ConsoleConnectionStateListener(consoleConnectStrategy));
             registryClient.subscribe(RegistryNodeType.ALL_SERVERS.getRegistryPath(), new ConsoleRegistryDataListener());
         } catch (Exception e) {
             throw new RegistryException("Console registry client start up error", e);
         }
     }
 
-    public void setRegistryStoppable(IStoppable stoppable) {
-        registryClient.setStoppable(stoppable);
-    }
-
     @Override
     public void close() {
         // TODO unsubscribe ConsoleRegistryDataListener
+        log.info("ConsoleRegistryClient close");
         deregister();
     }
 
@@ -153,18 +143,12 @@ public class ConsoleRegistryClient implements AutoCloseable {
         log.info("Console node : {} registering to registry center", consoleConfig.getConsoleAddress());
         String consoleRegistryPath = consoleConfig.getConsoleRegistryPath();
 
-        ConsoleHeartBeat heartBeat = consoleHeartBeatTask.getHeartBeat();
-        while (ServerStatusEnum.BUSY.equals(heartBeat.getServerStatusEnum())) {
-            log.warn("Console node is BUSY: {}", heartBeat);
-            ThreadUtils.sleep(SLEEP_TIME_MILLIS);
-            heartBeat = consoleHeartBeatTask.getHeartBeat();
-        }
-
-        // remove before persist
-        registryClient.remove(consoleRegistryPath);
-        registryClient.persistEphemeral(consoleRegistryPath,
+        // delete before persist
+        registryClient.delete(consoleRegistryPath);
+        registryClient.put(consoleRegistryPath,
             JSONUtils.toJsonString(consoleHeartBeatTask.getHeartBeat()));
 
+        // waiting for the console server node to be registered
         while (!registryClient.checkNodeExists(NetworkUtils.getHost(), RegistryNodeType.CONSOLE_SERVER)) {
             log.warn("The current console server node:{} cannot find in registry", NetworkUtils.getHost());
             ThreadUtils.sleep(SLEEP_TIME_MILLIS);
@@ -173,16 +157,17 @@ public class ConsoleRegistryClient implements AutoCloseable {
         // sleep 1s, waiting console failover remove
         ThreadUtils.sleep(SLEEP_TIME_MILLIS);
 
+        // start console heart beat task
         consoleHeartBeatTask.start();
-        Set<String> allServers = getServerNodes(RegistryNodeType.CONSOLE_SERVER);
+
+        Set<String> allServers = registryClient.getServerNodeSet(RegistryNodeType.CONSOLE_SERVER);
         distributedTaskService.init(allServers, consoleConfig.getConsoleAddress());
         log.info("Console node : {} registered to registry center successfully", consoleConfig.getConsoleAddress());
-
     }
 
     public void deregister() {
         try {
-            registryClient.remove(consoleConfig.getConsoleRegistryPath());
+            registryClient.delete(consoleConfig.getConsoleRegistryPath());
             log.info("Console node : {} unRegistry to register center.", consoleConfig.getConsoleAddress());
             if (consoleHeartBeatTask != null) {
                 consoleHeartBeatTask.shutdown();
@@ -191,13 +176,5 @@ public class ConsoleRegistryClient implements AutoCloseable {
         } catch (Exception e) {
             log.error("ConsoleServer remove registry path exception ", e);
         }
-    }
-
-    public boolean isAvailable() {
-        return registryClient.isConnected();
-    }
-
-    public Set<String> getServerNodes(RegistryNodeType nodeType) {
-        return registryClient.getServerNodeSet(nodeType);
     }
 }

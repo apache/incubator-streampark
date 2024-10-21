@@ -17,25 +17,18 @@
 
 package org.apache.streampark.registry.core;
 
-import org.apache.streampark.registry.api.ConnectionListener;
-import org.apache.streampark.registry.api.ConnectionState;
 import org.apache.streampark.registry.api.Event;
 import org.apache.streampark.registry.api.Registry;
 import org.apache.streampark.registry.api.RegistryException;
 import org.apache.streampark.registry.api.SubscribeListener;
-import org.apache.streampark.registry.core.client.JdbcRegistryClient;
-import org.apache.streampark.registry.core.model.DTO.DataType;
 import org.apache.streampark.registry.core.model.DTO.JdbcRegistryDataDTO;
-import org.apache.streampark.registry.core.server.ConnectionStateListener;
 import org.apache.streampark.registry.core.server.IJdbcRegistryServer;
 import org.apache.streampark.registry.core.server.JdbcRegistryDataChangeListener;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -50,15 +43,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Slf4j
 public final class JdbcRegistry implements Registry {
 
-    private final JdbcRegistryProperties jdbcRegistryProperties;
-    private final JdbcRegistryClient jdbcRegistryClient;
-
     private final IJdbcRegistryServer jdbcRegistryServer;
 
-    JdbcRegistry(JdbcRegistryProperties jdbcRegistryProperties, IJdbcRegistryServer jdbcRegistryServer) {
-        this.jdbcRegistryProperties = jdbcRegistryProperties;
+    JdbcRegistry(IJdbcRegistryServer jdbcRegistryServer) {
         this.jdbcRegistryServer = jdbcRegistryServer;
-        this.jdbcRegistryClient = new JdbcRegistryClient(jdbcRegistryProperties, jdbcRegistryServer);
         log.info("Initialize Jdbc Registry...");
     }
 
@@ -66,41 +54,14 @@ public final class JdbcRegistry implements Registry {
     public void start() {
         log.info("Starting Jdbc Registry...");
         jdbcRegistryServer.start();
-        jdbcRegistryClient.start();
         log.info("Started Jdbc Registry...");
-    }
-
-    @Override
-    public boolean isConnected() {
-        return jdbcRegistryClient.isConnectivity();
-    }
-
-    @Override
-    public void connectUntilTimeout(@NonNull Duration timeout) throws RegistryException {
-        long beginTimeMillis = System.currentTimeMillis();
-        long endTimeMills = timeout.getSeconds() <= 0 ? Long.MAX_VALUE : beginTimeMillis + timeout.toMillis();
-        while (true) {
-            if (System.currentTimeMillis() > endTimeMills) {
-                throw new RegistryException(
-                    String.format("Cannot connect to jdbc registry in %s s", timeout.getSeconds()));
-            }
-            if (jdbcRegistryClient.isConnectivity()) {
-                return;
-            }
-            try {
-                Thread.sleep(jdbcRegistryProperties.getHeartbeatRefreshInterval().toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RegistryException("Cannot connect to jdbc registry due to interrupted exception", e);
-            }
-        }
     }
 
     @Override
     public void subscribe(String path, SubscribeListener listener) {
         checkNotNull(path);
         checkNotNull(listener);
-        jdbcRegistryClient.subscribeJdbcRegistryDataChange(new JdbcRegistryDataChangeListener() {
+        jdbcRegistryServer.subscribeJdbcRegistryDataChange(new JdbcRegistryDataChangeListener() {
 
             @Override
             public void onJdbcRegistryDataChanged(String key, String value) {
@@ -146,33 +107,11 @@ public final class JdbcRegistry implements Registry {
     }
 
     @Override
-    public void addConnectionStateListener(ConnectionListener listener) {
-        checkNotNull(listener);
-        jdbcRegistryClient.subscribeConnectionStateChange(new ConnectionStateListener() {
-
-            @Override
-            public void onConnected() {
-                listener.onUpdate(ConnectionState.CONNECTED);
-            }
-
-            @Override
-            public void onDisConnected() {
-                listener.onUpdate(ConnectionState.DISCONNECTED);
-            }
-
-            @Override
-            public void onReconnected() {
-                listener.onUpdate(ConnectionState.RECONNECTED);
-            }
-        });
-    }
-
-    @Override
     public String get(String key) {
         try {
             // get the key value
             // Directly get from the db?
-            Optional<JdbcRegistryDataDTO> jdbcRegistryDataOptional = jdbcRegistryClient.getJdbcRegistryDataByKey(key);
+            Optional<JdbcRegistryDataDTO> jdbcRegistryDataOptional = jdbcRegistryServer.getJdbcRegistryDataByKey(key);
             if (!jdbcRegistryDataOptional.isPresent()) {
                 throw new RegistryException("key: " + key + " not exist");
             }
@@ -185,10 +124,9 @@ public final class JdbcRegistry implements Registry {
     }
 
     @Override
-    public void put(String key, String value, boolean deleteOnDisconnect) {
+    public void put(String key, String value) {
         try {
-            DataType dataType = deleteOnDisconnect ? DataType.EPHEMERAL : DataType.PERSISTENT;
-            jdbcRegistryClient.putJdbcRegistryData(key, value, dataType);
+            jdbcRegistryServer.putJdbcRegistryData(key, value);
         } catch (Exception ex) {
             throw new RegistryException(String.format("put key:%s, value:%s error", key, value), ex);
         }
@@ -197,7 +135,7 @@ public final class JdbcRegistry implements Registry {
     @Override
     public void delete(String key) {
         try {
-            jdbcRegistryClient.deleteJdbcRegistryDataByKey(key);
+            jdbcRegistryServer.deleteJdbcRegistryDataByKey(key);
         } catch (Exception e) {
             throw new RegistryException(String.format("Delete key: %s error", key), e);
         }
@@ -206,7 +144,7 @@ public final class JdbcRegistry implements Registry {
     @Override
     public Collection<String> children(String key) {
         try {
-            List<JdbcRegistryDataDTO> children = jdbcRegistryClient.listJdbcRegistryDataChildren(key);
+            List<JdbcRegistryDataDTO> children = jdbcRegistryServer.listJdbcRegistryDataChildren(key);
             return children
                 .stream()
                 .map(JdbcRegistryDataDTO::getDataKey)
@@ -222,39 +160,10 @@ public final class JdbcRegistry implements Registry {
     @Override
     public boolean exists(String key) {
         try {
-            return jdbcRegistryClient.existJdbcRegistryDataKey(key);
+            return jdbcRegistryServer.getJdbcRegistryDataByKey(key).isPresent();
         } catch (Exception e) {
             throw new RegistryException(String.format("Check key: %s exist error", key), e);
         }
-    }
-
-    @Override
-    public boolean acquireLock(String key) {
-        try {
-            jdbcRegistryClient.acquireJdbcRegistryLock(key);
-            return true;
-        } catch (RegistryException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RegistryException(String.format("Acquire lock: %s error", key), e);
-        }
-    }
-
-    @Override
-    public boolean acquireLock(String key, long timeout) {
-        try {
-            return jdbcRegistryClient.acquireJdbcRegistryLock(key, timeout);
-        } catch (RegistryException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RegistryException(String.format("Acquire lock: %s error", key), e);
-        }
-    }
-
-    @Override
-    public boolean releaseLock(String key) {
-        jdbcRegistryClient.releaseJdbcRegistryLock(key);
-        return true;
     }
 
     @Override
@@ -263,7 +172,6 @@ public final class JdbcRegistry implements Registry {
         // remove the current Ephemeral node, if can connect to jdbc
         try {
             jdbcRegistryServer.close();
-            jdbcRegistryClient.close();
         } catch (Exception e) {
             log.error("Close Jdbc Registry error", e);
         }

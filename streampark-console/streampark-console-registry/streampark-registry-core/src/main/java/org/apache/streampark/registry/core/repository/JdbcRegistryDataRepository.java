@@ -19,12 +19,10 @@ package org.apache.streampark.registry.core.repository;
 
 import org.apache.streampark.registry.core.mapper.JdbcRegistryDataMapper;
 import org.apache.streampark.registry.core.model.DO.JdbcRegistryData;
-import org.apache.streampark.registry.core.model.DTO.DataType;
 import org.apache.streampark.registry.core.model.DTO.JdbcRegistryDataDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,13 +45,6 @@ public class JdbcRegistryDataRepository {
     public Optional<JdbcRegistryDataDTO> selectByKey(String key) {
         return Optional.ofNullable(jdbcRegistryDataMapper.selectByKey(key))
             .map(JdbcRegistryDataDTO::fromJdbcRegistryData);
-    }
-
-    public void deleteEphemeralDateByClientIds(List<Long> clientIds) {
-        if (CollectionUtils.isEmpty(clientIds)) {
-            return;
-        }
-        jdbcRegistryDataMapper.deleteByClientIds(clientIds, DataType.EPHEMERAL.name());
     }
 
     public void deleteByKey(String key) {

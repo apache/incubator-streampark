@@ -80,14 +80,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-registry-it</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
         </dependency>
