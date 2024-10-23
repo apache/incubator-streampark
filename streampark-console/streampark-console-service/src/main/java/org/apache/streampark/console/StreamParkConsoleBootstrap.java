@@ -78,7 +78,6 @@ public class StreamParkConsoleBootstrap implements IStoppable {
     @PostConstruct
     public void run() {
         consoleRegistryClient.start();
-        consoleRegistryClient.setRegistryStoppable(this);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!ServerLifeCycleManager.isStopped()) {

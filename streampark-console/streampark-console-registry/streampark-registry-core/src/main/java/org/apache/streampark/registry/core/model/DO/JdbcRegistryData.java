@@ -40,8 +40,6 @@ public class JdbcRegistryData {
     private Long id;
     private String dataKey;
     private String dataValue;
-    private String dataType;
-    private long clientId;
     private Date createTime;
     private Date lastUpdateTime;
 

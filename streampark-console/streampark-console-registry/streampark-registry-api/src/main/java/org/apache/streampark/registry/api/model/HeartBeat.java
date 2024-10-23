@@ -17,10 +17,6 @@
 
 package org.apache.streampark.registry.api.model;
 
-import org.apache.streampark.registry.api.enums.ServerStatusEnum;
-
 public interface HeartBeat {
-
-    ServerStatusEnum getServerStatusEnum();
 
 }

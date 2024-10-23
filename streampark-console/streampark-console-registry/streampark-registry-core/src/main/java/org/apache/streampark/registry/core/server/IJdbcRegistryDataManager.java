@@ -17,15 +17,12 @@
 
 package org.apache.streampark.registry.core.server;
 
-import org.apache.streampark.registry.core.model.DTO.DataType;
 import org.apache.streampark.registry.core.model.DTO.JdbcRegistryDataDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IJdbcRegistryDataManager {
-
-    boolean existKey(String key);
 
     /**
      * Get the {@link JdbcRegistryDataDTO} by key.
@@ -46,7 +43,7 @@ public interface IJdbcRegistryDataManager {
      * <p>
      * If the key is already exist, then update the {@link JdbcRegistryDataDTO}. If the key is not exist, then insert a new {@link JdbcRegistryDataDTO}.
      */
-    void putJdbcRegistryData(Long clientId, String key, String value, DataType dataType);
+    void putJdbcRegistryData(String key, String value);
 
     /**
      * Delete the {@link JdbcRegistryDataDTO} by key.

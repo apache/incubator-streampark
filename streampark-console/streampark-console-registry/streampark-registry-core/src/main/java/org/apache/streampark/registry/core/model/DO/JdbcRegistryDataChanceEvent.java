@@ -38,11 +38,8 @@ public class JdbcRegistryDataChanceEvent {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
     private String eventType;
-
     private String jdbcRegistryData;
-
     private Date createTime;
 
 }

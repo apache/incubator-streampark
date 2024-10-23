@@ -58,6 +58,10 @@ public class ConsoleRegistryDataListener implements SubscribeListener {
                 log.info("console node deleted : {}", path);
                 consoleRegistryClient.removeConsoleNodePath(path, RegistryNodeType.CONSOLE_SERVER, true);
                 break;
+            case UPDATE:
+                // TODO: update console node
+                log.info("console node updated : {}", path);
+                break;
             default:
                 break;
         }

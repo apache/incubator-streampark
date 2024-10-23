@@ -29,7 +29,7 @@ public class ServerLifeCycleManager {
     private static volatile ServerLifeCycle serverLifeCycle = ServerLifeCycle.RUNNING;
 
     @Getter
-    private static long serverStartupTime = System.currentTimeMillis();
+    private final static long serverStartupTime = System.currentTimeMillis();
 
     public static boolean isRunning() {
         return serverLifeCycle == ServerLifeCycle.RUNNING;
@@ -37,39 +37,6 @@ public class ServerLifeCycleManager {
 
     public static boolean isStopped() {
         return serverLifeCycle == ServerLifeCycle.STOPPED;
-    }
-
-    /**
-     * Change the current server state to {@link ServerLifeCycle#WAITING}, only {@link ServerLifeCycle#RUNNING} can change to {@link ServerLifeCycle#WAITING}.
-     *
-     * @throws ServerLifeCycleException if change failed.
-     */
-    public static synchronized void toWaiting() throws ServerLifeCycleException {
-        if (isStopped()) {
-            throw new ServerLifeCycleException("The current server is already stopped, cannot change to waiting");
-        }
-
-        if (serverLifeCycle == ServerLifeCycle.WAITING) {
-            log.warn("The current server is already at waiting status, cannot change to waiting");
-            return;
-        }
-        serverLifeCycle = ServerLifeCycle.WAITING;
-    }
-
-    /**
-     * Recover from {@link ServerLifeCycle#WAITING} to {@link ServerLifeCycle#RUNNING}.
-     */
-    public static synchronized void recoverFromWaiting() throws ServerLifeCycleException {
-        if (isStopped()) {
-            throw new ServerLifeCycleException("The current server is already stopped, cannot recovery");
-        }
-
-        if (serverLifeCycle == ServerLifeCycle.RUNNING) {
-            log.warn("The current server status is already running, cannot recover form waiting");
-            return;
-        }
-        serverStartupTime = System.currentTimeMillis();
-        serverLifeCycle = ServerLifeCycle.RUNNING;
     }
 
     public static synchronized boolean toStopped() {

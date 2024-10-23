@@ -37,18 +37,14 @@ import java.util.Date;
 public class JdbcRegistryDataChanceEventDTO {
 
     private Long id;
-
     private EventType eventType;
-
     private JdbcRegistryDataDTO jdbcRegistryData;
-
     private Date createTime;
 
     public enum EventType {
         ADD,
         UPDATE,
         DELETE;
-
     }
 
     public static JdbcRegistryDataChanceEventDTO fromJdbcRegistryDataChanceEvent(JdbcRegistryDataChanceEvent jdbcRegistryDataChanceEvent) {

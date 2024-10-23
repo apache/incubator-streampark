@@ -23,8 +23,8 @@ spring:
 
 registry:
   type: jdbc
-  heartbeat-refresh-interval: 1s
-  session-timeout: 3s
+  heartbeat-refresh-interval: 3s
+  session-timeout: 60s
 
 network:
   # network interface preferred like eth0, default: empty

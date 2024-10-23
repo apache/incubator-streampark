@@ -680,38 +680,10 @@ CREATE TABLE `t_jdbc_registry_data`
     `id`               bigint(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
     `data_key`         varchar(256) NOT NULL COMMENT 'key, like zookeeper node path',
     `data_value`       text         NOT NULL COMMENT 'data, like zookeeper node value',
-    `data_type`        varchar(64)  NOT NULL COMMENT 'EPHEMERAL, PERSISTENT',
-    `client_id`        bigint       NOT NULL COMMENT 'client id',
     `create_time`      timestamp    NOT NULL default current_timestamp COMMENT 'create time',
     `last_update_time` timestamp    NOT NULL default current_timestamp COMMENT 'last update time',
     PRIMARY KEY (`id`),
     unique KEY `uk_t_jdbc_registry_dataKey`(`data_key`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
-
-DROP TABLE IF EXISTS `t_jdbc_registry_lock`;
-CREATE TABLE `t_jdbc_registry_lock`
-(
-    `id`          bigint(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
-    `lock_key`    varchar(256) NOT NULL COMMENT 'lock path',
-    `lock_owner`  varchar(256) NOT NULL COMMENT 'the lock owner, ip_processId',
-    `client_id`   bigint       NOT NULL COMMENT 'client id',
-    `create_time` timestamp    NOT NULL default current_timestamp COMMENT 'create time',
-    PRIMARY KEY (`id`),
-    unique KEY `uk_t_jdbc_registry_lockKey`(`lock_key`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
-DROP TABLE IF EXISTS `t_jdbc_registry_client_heartbeat`;
-CREATE TABLE `t_jdbc_registry_client_heartbeat`
-(
-    `id`                  bigint(11) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
-    `client_name`         varchar(256) NOT NULL COMMENT 'client name, ip_processId',
-    `last_heartbeat_time` bigint       NOT NULL COMMENT 'last heartbeat timestamp',
-    `connection_config`   text         NOT NULL COMMENT 'connection config',
-    `create_time`         timestamp    NOT NULL default current_timestamp COMMENT 'create time',
-    PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 

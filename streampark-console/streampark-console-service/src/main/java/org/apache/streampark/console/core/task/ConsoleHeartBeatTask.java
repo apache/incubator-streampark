@@ -19,10 +19,8 @@ package org.apache.streampark.console.core.task;
 
 import org.apache.streampark.common.utils.JSONUtils;
 import org.apache.streampark.common.utils.NetworkUtils;
-import org.apache.streampark.common.utils.OSUtils;
 import org.apache.streampark.console.core.config.ConsoleConfig;
 import org.apache.streampark.registry.api.RegistryClient;
-import org.apache.streampark.registry.api.enums.ServerStatusEnum;
 import org.apache.streampark.registry.api.lifecycle.ServerLifeCycleManager;
 import org.apache.streampark.registry.api.model.BaseHeartBeatTask;
 import org.apache.streampark.registry.api.model.ConsoleHeartBeat;
@@ -39,15 +37,12 @@ public class ConsoleHeartBeatTask extends BaseHeartBeatTask<ConsoleHeartBeat> {
 
     private final String heartBeatPath;
 
-    private final int processId;
-
     public ConsoleHeartBeatTask(@NonNull ConsoleConfig consoleConfig,
                                 @NonNull RegistryClient registryClient) {
         super("ConsoleHeartBeatTask", consoleConfig.getMaxHeartbeatInterval().toMillis());
         this.consoleConfig = consoleConfig;
         this.registryClient = registryClient;
         this.heartBeatPath = consoleConfig.getConsoleRegistryPath();
-        this.processId = OSUtils.getProcessID();
     }
 
     @Override
@@ -55,8 +50,6 @@ public class ConsoleHeartBeatTask extends BaseHeartBeatTask<ConsoleHeartBeat> {
         return ConsoleHeartBeat.builder()
             .startupTime(ServerLifeCycleManager.getServerStartupTime())
             .reportTime(System.currentTimeMillis())
-            .processId(processId)
-            .serverStatusEnum(ServerStatusEnum.NORMAL)
             .host(NetworkUtils.getHost())
             .port(consoleConfig.getListenPort())
             .build();
@@ -65,7 +58,7 @@ public class ConsoleHeartBeatTask extends BaseHeartBeatTask<ConsoleHeartBeat> {
     @Override
     public void writeHeartBeat(ConsoleHeartBeat consoleHeartBeat) {
         String masterHeartBeatJson = JSONUtils.toJsonString(consoleHeartBeat);
-        registryClient.persistEphemeral(heartBeatPath, masterHeartBeatJson);
+        registryClient.put(heartBeatPath, masterHeartBeatJson);
         log.debug("Success write master heartBeatInfo into registry, masterRegistryPath: {}, heartBeatInfo: {}",
             heartBeatPath, masterHeartBeatJson);
     }

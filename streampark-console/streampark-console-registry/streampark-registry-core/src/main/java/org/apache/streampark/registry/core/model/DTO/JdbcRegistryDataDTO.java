@@ -37,8 +37,6 @@ public class JdbcRegistryDataDTO {
     private Long id;
     private String dataKey;
     private String dataValue;
-    private String dataType;
-    private Long clientId;
     private Date createTime;
     private Date lastUpdateTime;
 
@@ -47,8 +45,6 @@ public class JdbcRegistryDataDTO {
             .id(jdbcRegistryData.getId())
             .dataKey(jdbcRegistryData.getDataKey())
             .dataValue(jdbcRegistryData.getDataValue())
-            .dataType(jdbcRegistryData.getDataType())
-            .clientId(jdbcRegistryData.getClientId())
             .createTime(jdbcRegistryData.getCreateTime())
             .lastUpdateTime(jdbcRegistryData.getLastUpdateTime())
             .build();
@@ -59,8 +55,6 @@ public class JdbcRegistryDataDTO {
             .id(jdbcRegistryData.getId())
             .dataKey(jdbcRegistryData.getDataKey())
             .dataValue(jdbcRegistryData.getDataValue())
-            .dataType(jdbcRegistryData.getDataType())
-            .clientId(jdbcRegistryData.getClientId())
             .createTime(jdbcRegistryData.getCreateTime())
             .lastUpdateTime(jdbcRegistryData.getLastUpdateTime())
             .build();

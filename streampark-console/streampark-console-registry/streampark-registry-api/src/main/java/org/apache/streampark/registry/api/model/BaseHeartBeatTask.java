@@ -61,8 +61,7 @@ public abstract class BaseHeartBeatTask<T extends HeartBeat> extends BaseDaemonT
                 }
                 T heartBeat = getHeartBeat();
                 // if first time or heartBeat status changed, write heartBeatInfo into registry
-                if (System.currentTimeMillis() - lastWriteTime >= heartBeatInterval
-                    || !lastHeartBeat.getServerStatusEnum().equals(heartBeat.getServerStatusEnum())) {
+                if (System.currentTimeMillis() - lastWriteTime >= heartBeatInterval) {
                     lastHeartBeat = heartBeat;
                     writeHeartBeat(heartBeat);
                     lastWriteTime = System.currentTimeMillis();

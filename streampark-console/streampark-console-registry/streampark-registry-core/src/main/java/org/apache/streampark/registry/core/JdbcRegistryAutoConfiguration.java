@@ -17,14 +17,10 @@
 
 package org.apache.streampark.registry.core;
 
-import org.apache.streampark.registry.core.mapper.JdbcRegistryClientHeartbeatMapper;
 import org.apache.streampark.registry.core.mapper.JdbcRegistryDataChanceEventMapper;
 import org.apache.streampark.registry.core.mapper.JdbcRegistryDataMapper;
-import org.apache.streampark.registry.core.mapper.JdbcRegistryLockMapper;
-import org.apache.streampark.registry.core.repository.JdbcRegistryClientRepository;
 import org.apache.streampark.registry.core.repository.JdbcRegistryDataChanceEventRepository;
 import org.apache.streampark.registry.core.repository.JdbcRegistryDataRepository;
-import org.apache.streampark.registry.core.repository.JdbcRegistryLockRepository;
 import org.apache.streampark.registry.core.server.IJdbcRegistryServer;
 import org.apache.streampark.registry.core.server.JdbcRegistryServer;
 
@@ -57,22 +53,17 @@ public class JdbcRegistryAutoConfiguration {
 
     @Bean
     public IJdbcRegistryServer jdbcRegistryServer(JdbcRegistryDataRepository jdbcRegistryDataRepository,
-                                                  JdbcRegistryLockRepository jdbcRegistryLockRepository,
-                                                  JdbcRegistryClientRepository jdbcRegistryClientRepository,
                                                   JdbcRegistryDataChanceEventRepository jdbcRegistryDataChanceEventRepository,
                                                   JdbcRegistryProperties jdbcRegistryProperties) {
         return new JdbcRegistryServer(
             jdbcRegistryDataRepository,
-            jdbcRegistryLockRepository,
-            jdbcRegistryClientRepository,
             jdbcRegistryDataChanceEventRepository,
             jdbcRegistryProperties);
     }
 
     @Bean
-    public JdbcRegistry jdbcRegistry(JdbcRegistryProperties jdbcRegistryProperties,
-                                     IJdbcRegistryServer jdbcRegistryServer) {
-        JdbcRegistry jdbcRegistry = new JdbcRegistry(jdbcRegistryProperties, jdbcRegistryServer);
+    public JdbcRegistry jdbcRegistry(IJdbcRegistryServer jdbcRegistryServer) {
+        JdbcRegistry jdbcRegistry = new JdbcRegistry(jdbcRegistryServer);
         jdbcRegistry.start();
         return jdbcRegistry;
     }
@@ -100,21 +91,9 @@ public class JdbcRegistryAutoConfiguration {
     }
 
     @Bean
-    public JdbcRegistryLockMapper jdbcRegistryLockMapper(SqlSessionTemplate jdbcRegistrySqlSessionTemplate) {
-        jdbcRegistrySqlSessionTemplate.getConfiguration().addMapper(JdbcRegistryLockMapper.class);
-        return jdbcRegistrySqlSessionTemplate.getMapper(JdbcRegistryLockMapper.class);
-    }
-
-    @Bean
     public JdbcRegistryDataChanceEventMapper jdbcRegistryDataChanceEventMapper(SqlSessionTemplate jdbcRegistrySqlSessionTemplate) {
         jdbcRegistrySqlSessionTemplate.getConfiguration().addMapper(JdbcRegistryDataChanceEventMapper.class);
         return jdbcRegistrySqlSessionTemplate.getMapper(JdbcRegistryDataChanceEventMapper.class);
-    }
-
-    @Bean
-    public JdbcRegistryClientHeartbeatMapper jdbcRegistryClientHeartbeatMapper(SqlSessionTemplate jdbcRegistrySqlSessionTemplate) {
-        jdbcRegistrySqlSessionTemplate.getConfiguration().addMapper(JdbcRegistryClientHeartbeatMapper.class);
-        return jdbcRegistrySqlSessionTemplate.getMapper(JdbcRegistryClientHeartbeatMapper.class);
     }
 
 }

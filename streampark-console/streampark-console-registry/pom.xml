@@ -30,7 +30,6 @@
     <modules>
         <module>streampark-registry-api</module>
         <module>streampark-registry-core</module>
-        <module>streampark-registry-it</module>
     </modules>
 
     <dependencies>

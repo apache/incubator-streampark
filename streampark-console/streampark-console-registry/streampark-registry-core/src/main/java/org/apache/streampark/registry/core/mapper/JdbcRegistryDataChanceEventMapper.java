@@ -36,6 +36,6 @@ public interface JdbcRegistryDataChanceEventMapper extends BaseMapper<JdbcRegist
     @Select("select * from t_jdbc_registry_data_change_event where id > #{id} order by id asc limit 1000")
     List<JdbcRegistryDataChanceEvent> selectJdbcRegistryDataChangeEventWhereIdAfter(@Param("id") long id);
 
-    @Delete("delete from t_jdbc_registry_data_change_event where create_time > #{createTime}")
+    @Delete("delete from t_jdbc_registry_data_change_event where create_time < #{createTime}")
     void deleteJdbcRegistryDataChangeEventBeforeCreateTime(@Param("createTime") Date createTime);
 }

@@ -37,15 +37,4 @@ public interface JdbcRegistryDataMapper extends BaseMapper<JdbcRegistryData> {
 
     @Delete("delete from t_jdbc_registry_data where data_key = #{key}")
     void deleteByKey(@Param("key") String key);
-
-    @Delete({"<script>",
-            "delete from t_jdbc_registry_data",
-            "where client_id IN ",
-            "<foreach item='clientId' index='index' collection='clientIds' open='(' separator=',' close=')'>",
-            "   #{clientId}",
-            "</foreach>",
-            "and data_type = #{dataType}",
-            "</script>"})
-    void deleteByClientIds(@Param("clientIds") List<Long> clientIds, @Param("dataType") String dataType);
-
 }
