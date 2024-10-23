@@ -24,12 +24,22 @@
         from t_resource v
         inner join t_user u
         on v.creator_id = u.user_id
-        and v.team_id = ${resource.teamId}
+        and v.team_id = #{resource.teamId}
         <if test="resource.resourceName != null and resource.resourceName != ''">
-            and v.resourceName like concat('%', '${resource.resourceName}', '%')
+            <if test="_databaseId == 'mysql'">
+                and v.resourceName like concat('%', #{resource.resourceName},'%')
+            </if>
+            <if test="_databaseId == 'pgsql'">
+                and v.resourceName like '%' || #{resource.resourceName} || '%'
+            </if>
         </if>
         <if test="resource.description != null and resource.description != ''">
-            and v.description like concat('%', '${resource.description}', '%')
+            <if test="_databaseId == 'mysql'">
+                and v.description like concat('%', #{resource.description},'%')
+            </if>
+            <if test="_databaseId == 'pgsql'">
+                and v.description like '%' || #{resource.description} || '%'
+            </if>
         </if>
     </select>
 
@@ -40,7 +50,7 @@
                 END
         from t_resource
         where creator_id = #{userId}
-        limit 1
+         limit 1
     </select>
 
 
