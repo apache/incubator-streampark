@@ -1,0 +1,14 @@
+.n-modal-mask {
+  backdrop-filter: blur(2px);
+}
+
+/* 解决tabs组件不贴合下边缘问题 */
+.v-x-scroll {
+  height: 100%;
+}
+
+/* 解决二维码尺寸问题 */
+.n-qr-code{
+  height: unset !important;
+  width: unset !important;;
+}

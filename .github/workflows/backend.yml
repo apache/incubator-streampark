@@ -28,6 +28,7 @@ on:
       - 'deploy/**'
       - 'script/**'
       - 'streampark-console/streampark-console-webapp/**'
+      - 'streampark-console/streampark-console-webapp-v2/**'
   pull_request:
 
 

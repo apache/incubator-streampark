@@ -24,7 +24,7 @@ on:
 
 defaults:
   run:
-    working-directory: streampark-console/streampark-console-webapp
+    working-directory: streampark-console/streampark-console-webapp-v2
 
 concurrency:
   group: frontend-${{ github.event.pull_request.number || github.ref }}
@@ -58,14 +58,14 @@ jobs:
         with:
           submodules: true
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
       - run: corepack enable
       - name: Compile and Build
         run: |
           pnpm install
-          pnpm run lint:lint-staged
+          pnpm run typecheck
           pnpm run build
   result:
     name: Frontend - Result

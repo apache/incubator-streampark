@@ -36,7 +36,7 @@
         <postgresql.version>42.5.1</postgresql.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
-        <frontend.project.name>streampark-console-webapp</frontend.project.name>
+        <frontend.project.name>streampark-console-webapp-v2</frontend.project.name>
         <CodeCacheSize>512m</CodeCacheSize>
 
         <commons-compress.version>1.21</commons-compress.version>
