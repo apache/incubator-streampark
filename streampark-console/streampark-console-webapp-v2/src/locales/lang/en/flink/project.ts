@@ -1,0 +1,94 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+export default {
+  projectStatus: {
+    all: 'ALL',
+    notBuild: 'Not Build',
+    building: 'Building',
+    buildSuccess: 'Build Success',
+    buildFailed: 'Build Failed',
+    needRebuild: 'NEED REBUILD',
+    successful: 'SUCCESSFUL',
+    failed: 'FAILED',
+  },
+  searchPlaceholder: 'Please enter a keyword to search',
+  form: {
+    projectName: 'Project Name',
+    projectNamePlaceholder: 'Please input project name',
+    projectType: 'Project Type',
+    projectTypePlaceholder: 'Please select project type',
+    cvs: 'CVS',
+    prvkeyPath: 'Private Key Path',
+    prvkeyPathPlaceholder: 'private key path, e.g: ~/.ssh/id_rsa',
+    cvsPlaceholder: 'CVS',
+    repositoryURL: 'Repository URL',
+    repositoryURLPlaceholder: 'The Repository URL for this project',
+    repositoryURLRequired: 'The repository URL is required',
+    credentialError: 'The repository address must be a valid ssh or http(s) address',
+    userName: 'UserName',
+    userNamePlaceholder: 'UserName for this project',
+    password: 'Password',
+    passwordPlaceholder: 'Password for this project',
+    branches: 'Branches',
+    branchesPlaceholder: 'Select a branch',
+    tags: 'Tags',
+    pom: 'POM',
+    pomPlaceholder:
+      'By default,lookup pom.xml in root path,you can manually specify the module to compile pom.xml',
+    buildArgs: 'Build Argument',
+    buildArgsPlaceholder: 'Build Argument, e.g: -Pprod',
+    description: 'description',
+    descriptionPlaceholder: 'Description for this project',
+    lastBuild: 'Last Build',
+    buildState: 'Build State',
+  },
+  operationTips: {
+    projectNameIsRequiredMessage: 'Project Name is required',
+    projectNameIsUniqueMessage: 'The Project Name already exists. Please check',
+    projectTypeIsRequiredMessage: 'Project Type is required',
+    cvsIsRequiredMessage: 'CVS is required',
+    repositoryURLIsRequiredMessage: 'Repository URL is required',
+    pomSpecifiesModuleMessage:
+      'Specifies the module to compile pom.xml if it is not specified, it is found under the root path pom.xml',
+    projectIsbuildingMessage: 'The current project is building',
+    projectIsbuildFailedMessage: 'Build Fail',
+    deleteProjectSuccessMessage: 'delete successful',
+    deleteProjectFailedMessage: 'Delete Fail',
+    deleteProjectFailedDetailMessage: 'Please check if any application belongs to this project',
+    notAuthorizedMessage: 'not authorized ..>﹏<.. <br><br> userName and password is required',
+    authenticationErrorMessage:
+      'authentication error ..>﹏<.. <br><br> please check userName and password',
+    seeBuildLog: 'See Build log',
+    buildProject: 'Build Project',
+    buildProjectMessage: 'Are you sure build this project?',
+    updateProject: 'Update Project',
+    deleteProject: 'Delete Project',
+    deleteProjectMessage: 'Are you sure delete this project ?',
+    httpsCredential: 'Use Git or checkout with SVN using the web URL.',
+    sshCredential: 'Use a password-protected SSH key.',
+  },
+  tooltip: {
+    needRebuild: 'this project has changed, need rebuild',
+    installing: 'installing',
+  },
+  createSuccess: 'created successfully',
+  updateSuccess: 'update successfully',
+  gettingBranch: 'Getting branch',
+  saveFailed: 'Project save failed, please check',
+  saveFailedWithMessage: 'Project save failed: {message}',
+  appIdEmpty: 'appid can not be empty',
+};
