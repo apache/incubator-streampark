@@ -93,7 +93,7 @@
         <flink.version>1.20.1</flink.version>
         <flink.shaded.version>1.8.1</flink.shaded.version>
         <streampark.shaded.version>1.0.0</streampark.shaded.version>
-        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
         <spark.version>3.1.2</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
