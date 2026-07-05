@@ -51,7 +51,11 @@ public class HBaseQuery extends Scan implements Serializable {
     if (htable == null) {
       synchronized (HBaseQuery.class) {
         if (htable == null) {
-          htable = HBaseClient.apply(prop).table(this.getTable());
+          try {
+            htable = HBaseClient.apply(prop).table(this.getTable());
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
         }
       }
     }

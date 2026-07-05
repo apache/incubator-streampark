@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -70,8 +71,12 @@ public class Dependency {
         File localUploads = new File(Workspace.local().APP_UPLOADS());
         Set<String> otherJars = new HashSet<>(other.jar);
         for (String jarName : jar) {
-            if (!otherJars.contains(jarName)
-                || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+            try {
+                if (!otherJars.contains(jarName)
+                    || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+                    return false;
+                }
+            } catch (IOException e) {
                 return false;
             }
         }

@@ -31,24 +31,7 @@ public class DorisSink<T> {
     this.context = context;
   }
 
-  /**
-   * java stream
-   *
-   * @param source
-   * @return
-   */
   public DataStreamSink<T> sink(DataStream<T> source) {
-    DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
-    return source.addSink(sinkFunction);
-  }
-
-  /**
-   * scala stream
-   *
-   * @param source
-   * @return
-   */
-  public DataStreamSink<T> sink(org.apache.flink.streaming.api.scala.DataStream<T> source) {
     DorisSinkFunction<T> sinkFunction = new DorisSinkFunction<>(context);
     return source.addSink(sinkFunction);
   }

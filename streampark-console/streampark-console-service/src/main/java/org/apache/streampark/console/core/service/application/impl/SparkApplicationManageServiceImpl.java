@@ -196,8 +196,8 @@ public class SparkApplicationManageServiceImpl
                 .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
             String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
-            if (HdfsOperator.exists(path)) {
-                HdfsOperator.delete(path);
+            if (HdfsOperator.getInstance().exists(path)) {
+                HdfsOperator.getInstance().delete(path);
             }
         } catch (Exception e) {
             // skip

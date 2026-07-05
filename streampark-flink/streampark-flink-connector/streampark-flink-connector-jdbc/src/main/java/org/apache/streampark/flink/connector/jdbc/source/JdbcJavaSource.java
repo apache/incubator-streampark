@@ -27,6 +27,7 @@ import org.apache.streampark.flink.core.scala.StreamingContext;
 
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
+import java.util.Objects;
 import java.util.Properties;
 
 public class JdbcJavaSource<T> {
@@ -54,10 +55,10 @@ public class JdbcJavaSource<T> {
       SQLResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.requireNotNull(queryFunction, "'queryFunction' must not be null");
-    Utils.requireNotNull(resultFunction, "'resultFunction' must not be null");
+    Objects.requireNonNull(queryFunction, "'queryFunction' must not be null");
+    Objects.requireNonNull(resultFunction, "'resultFunction' must not be null");
     this.jdbc =
-        this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
+        this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter.toMap(), alias) : this.jdbc;
     JdbcSourceFunction<T> sourceFunction =
         new JdbcSourceFunction<>(jdbc, queryFunction, resultFunction, runningFunc, null);
     return context.getJavaEnv().addSource(sourceFunction);

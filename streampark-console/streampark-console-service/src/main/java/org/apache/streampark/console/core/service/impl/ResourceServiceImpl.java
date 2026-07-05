@@ -301,7 +301,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     @Override
     public List<String> listHistoryUploadJars() {
-        return Arrays.stream(LfsOperator.listDir(Workspace.of(LFS).APP_UPLOADS()))
+        return Arrays.stream(LfsOperator.getInstance().listDir(Workspace.of(LFS).APP_UPLOADS()))
             .filter(File::isFile)
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)

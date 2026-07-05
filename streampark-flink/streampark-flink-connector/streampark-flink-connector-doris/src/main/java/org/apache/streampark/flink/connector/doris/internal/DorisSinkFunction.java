@@ -18,6 +18,7 @@
 package org.apache.streampark.flink.connector.doris.internal;
 
 import org.apache.streampark.common.enums.Semantic;
+import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.connector.doris.conf.DorisConfig;
 import org.apache.streampark.flink.connector.doris.bean.DorisSinkBufferEntry;
 import org.apache.streampark.flink.connector.doris.bean.DorisSinkRowDataWithMeta;
@@ -58,7 +59,7 @@ public class DorisSinkFunction<T> extends RichSinkFunction<T> implements Checkpo
   private static final String COUNTER_INVOKE_ROWS = "totalInvokeRows";
 
   public DorisSinkFunction(StreamingContext context) {
-    this.properties = context.parameter().getProperties();
+    this.properties = Utils.toProperties(context.parameter.toMap());
     this.dorisConfig = new DorisConfig(properties);
     this.dorisSinkWriter = new DorisSinkWriter(dorisConfig);
   }
