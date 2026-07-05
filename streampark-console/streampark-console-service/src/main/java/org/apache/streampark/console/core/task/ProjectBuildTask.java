@@ -139,12 +139,16 @@ public class ProjectBuildTask extends AbstractLogFileTask {
     }
 
     private boolean projectBuild(Project project) {
-        int code =
-            CommandUtils.execute(
-                project.getMavenWorkHome(),
-                Collections.singletonList(project.getMavenArgs()),
-                (line) -> fileLogger.info(line));
-        return code == 0;
+        try {
+            int code =
+                CommandUtils.execute(
+                    project.getMavenWorkHome(),
+                    Collections.singletonList(project.getMavenArgs()),
+                    (line) -> fileLogger.info(line));
+            return code == 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void deploy(Project project) throws Exception {

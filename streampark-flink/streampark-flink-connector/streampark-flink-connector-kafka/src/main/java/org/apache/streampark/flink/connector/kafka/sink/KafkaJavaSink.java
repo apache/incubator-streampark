@@ -47,7 +47,7 @@ public class KafkaJavaSink<T> {
   public KafkaJavaSink(StreamingContext context) {
     this.context = context;
     // The default partitioner is KafkaEqualityPartitioner
-    partitioner = new KafkaEqualityPartitioner<T>(context.getParallelism());
+    partitioner = new KafkaEqualityPartitioner<>(context.getJavaEnv().getParallelism());
   }
 
   public KafkaJavaSink<T> parallelism(Integer parallelism) {
@@ -130,13 +130,8 @@ public class KafkaJavaSink<T> {
 
   public DataStreamSink<T> sink(DataStream<T> source, String topic) {
     this.topic(topic);
-    KafkaSink scalaSink =
-        new KafkaSink(this.context, this.property, this.parallelism, this.name, this.uid);
-    return scalaSink.sink(
-        new org.apache.flink.streaming.api.scala.DataStream<>(source),
-        this.alias,
-        this.topic,
-        this.serializer,
-        this.partitioner);
+    KafkaSink<T> kafkaSink =
+        new KafkaSink<>(this.context, this.property, this.parallelism, this.name, this.uid);
+    return kafkaSink.sink(source, this.alias, this.topic, this.serializer, this.partitioner);
   }
 }

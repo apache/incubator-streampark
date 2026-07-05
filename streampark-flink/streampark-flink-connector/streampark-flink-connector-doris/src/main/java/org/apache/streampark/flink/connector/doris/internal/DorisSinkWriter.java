@@ -20,6 +20,7 @@ package org.apache.streampark.flink.connector.doris.internal;
 import org.apache.streampark.common.enums.Semantic;
 import org.apache.streampark.common.util.ThreadUtils;
 import org.apache.streampark.connector.doris.conf.DorisConfig;
+import org.apache.streampark.connector.doris.conf.DorisSinkConfigOption;
 import org.apache.streampark.flink.connector.doris.bean.DorisSinkBufferEntry;
 import org.apache.streampark.flink.connector.doris.bean.LoadStatusFailedException;
 
@@ -234,7 +235,8 @@ public class DorisSinkWriter implements Serializable {
           "Timeout while offering data to flushQueue, exceed "
               + dorisConfig.sinkOfferTimeout()
               + " ms, see "
-              + dorisConfig.sinkOption().sinkOfferTimeout().key());
+              + DorisSinkConfigOption.DORIS_SINK_PREFIX
+              + ".sinkOfferTimeout");
     }
   }
 

@@ -86,10 +86,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <scala.version>2.12.17</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <scala.xml.version>1.3.0</scala.xml.version>
-        <scalatest.version>3.2.9</scalatest.version>
         <scala.binary.flink.version>_${scala.binary.version}</scala.binary.flink.version>
         <flink.connector.version>3.2.0-1.18</flink.connector.version>
         <flink.elasticserch.connector.version>3.0.1-1.17</flink.elasticserch.connector.version>
@@ -116,40 +113,23 @@
         <mysql.version>8.0.27</mysql.version>
         <hikariCP.version>3.4.5</hikariCP.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <typesafe-conf.version>1.4.2</typesafe-conf.version>
-        <json4s-jackson.version>3.7.0-M11</json4s-jackson.version>
-        <commons-cli.version>1.5.0</commons-cli.version>
+        <typesafe-conf.version>1.4.2</typesafe-conf.version>        <commons-cli.version>1.5.0</commons-cli.version>
         <commons-net.version>3.9.0</commons-net.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
-        <enumeratum.version>1.6.1</enumeratum.version>
-        <assertj.version>3.23.1</assertj.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>        <assertj.version>3.23.1</assertj.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
-        <scala-maven-plugin.version>4.7.1</scala-maven-plugin.version>
-        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
-        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
-        <maven-silencer-plugin.version>1.7.13</maven-silencer-plugin.version>
-        <spotless.scalafmt.version>3.7.5</spotless.scalafmt.version>
-        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
-        <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
-        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <httpclient5.version>5.1</httpclient5.version>
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
-        <mockito.version>3.4.6</mockito.version>
-        <mockito-scala.version>1.17.14</mockito-scala.version>
-        <assertj.version>3.23.1</assertj.version>
+        <mockito.version>3.4.6</mockito.version>        <assertj.version>3.23.1</assertj.version>
         <testcontainer.version>1.19.8</testcontainer.version>
-
-        <maven.scaladoc.skip>false</maven.scaladoc.skip>
-        <maven.scalastyle.skip>false</maven.scalastyle.skip>
-
         <spotless.skip>false</spotless.skip>
         <rat.skip>false</rat.skip>
         <owasp.skip>true</owasp.skip>
@@ -162,31 +142,6 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>force-shading</artifactId>
                 <version>${flink.shaded.version}</version>
-            </dependency>
-
-            <!--scala-->
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-library</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-compiler</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-reflect</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scala-lang.modules</groupId>
-                <artifactId>scala-xml_${scala.binary.version}</artifactId>
-                <version>${scala.xml.version}</version>
             </dependency>
 
             <dependency>
@@ -206,20 +161,8 @@
             </dependency>
 
             <dependency>
-                <groupId>com.beachape</groupId>
-                <artifactId>enumeratum_${scala.binary.version}</artifactId>
-                <version>${enumeratum.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.streampark</groupId>
-                <artifactId>streampark-common_${scala.binary.version}</artifactId>
+                <artifactId>streampark-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -273,18 +216,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.json4s</groupId>
-                <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-                <version>${json4s-jackson.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -294,18 +225,6 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
-                <version>${jackson.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!--apache.commons -->
@@ -487,25 +406,6 @@
             <artifactId>force-shading</artifactId>
         </dependency>
 
-        <!--scala-->
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-reflect</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -532,7 +432,6 @@
                             <configuration>
                                 <sources>
                                     <source>${basedir}/src/main/java</source>
-                                    <source>${basedir}/src/main/scala</source>
                                 </sources>
                             </configuration>
                         </execution>
@@ -588,31 +487,6 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.scalastyle</groupId>
-                    <artifactId>scalastyle-maven-plugin</artifactId>
-                    <version>${maven-scalastyle-plugin.version}</version>
-                    <configuration>
-                        <verbose>false</verbose>
-                        <failOnViolation>true</failOnViolation>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <failOnWarning>false</failOnWarning>
-                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-                        <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>${maven.multiModuleProjectDirectory}/tools/checkstyle/scalastyle-config.xml</configLocation>
-                        <outputFile>${project.build.directory}/scalastyle-output.xml</outputFile>
-                        <outputEncoding>UTF-8</outputEncoding>
-                        <skip>${maven.scalastyle.skip}</skip>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${maven-spotless-plugin.version}</version>
@@ -651,22 +525,6 @@
                             </replaceRegex>
                             <removeUnusedImports></removeUnusedImports>
                         </java>
-
-                        <scala>
-                            <includes>
-                                <include>src/main/scala/**/*.scala</include>
-                                <include>src/main/scala-*/**/*.scala</include>
-                                <include>src/test/scala/**/*.scala</include>
-                                <include>src/test/scala-*/**/*.scala</include>
-                            </includes>
-                            <scalafmt>
-                                <version>${spotless.scalafmt.version}</version>
-                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
-                            </scalafmt>
-                            <licenseHeader>
-                                <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/copyright.txt</file>
-                            </licenseHeader>
-                        </scala>
                         <pom>
                             <includes>
                                 <include>pom.xml</include>
@@ -706,63 +564,6 @@
                             <arg>-Xpkginfo:always</arg>
                         </compilerArgs>
                     </configuration>
-                </plugin>
-
-                <!--scala-->
-                <plugin>
-                    <groupId>net.alchim31.maven</groupId>
-                    <artifactId>scala-maven-plugin</artifactId>
-                    <version>${scala-maven-plugin.version}</version>
-                    <configuration>
-                        <addScalacArgs>-target:${project.build.jdk}</addScalacArgs>
-                        <target>${project.build.jdk}</target>
-                        <source>${project.build.jdk}</source>
-                        <args>
-                            <arg>-unchecked</arg>
-                            <arg>-deprecation</arg>
-                            <arg>-feature</arg>
-                            <arg>-explaintypes</arg>
-                            <arg>-P:silencer:globalFilters=.*deprecated.*</arg>
-                            <arg>-P:silencer:globalFilters=.*Could not find any member to link for.*</arg>
-                            <arg>-P:silencer:globalFilters=.*undefined in comment for class.*</arg>
-                            <arg>-Xfatal-warnings</arg>
-                            <arg>-Ywarn-unused:imports</arg>
-                        </args>
-                        <jvmArgs>
-                            <jvmArg>-Xms1024m</jvmArg>
-                            <jvmArg>-Xmx1024m</jvmArg>
-                            <jvmArg>-XX:ReservedCodeCacheSize=512M</jvmArg>
-                        </jvmArgs>
-                        <javacArgs>
-                            <javacArg>-Xlint:all,-serial,-path,-try,-processing</javacArg>
-                        </javacArgs>
-                        <compilerPlugins>
-                            <compilerPlugin>
-                                <groupId>com.github.ghik</groupId>
-                                <artifactId>silencer-plugin_${scala.version}</artifactId>
-                                <version>${maven-silencer-plugin.version}</version>
-                            </compilerPlugin>
-                        </compilerPlugins>
-                        <!-- only skipping `scala:doc-jar` -->
-                        <skip>${maven.scaladoc.skip}</skip>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>install-scala</id>
-                            <goals>
-                                <goal>add-source</goal>
-                                <goal>compile</goal>
-                            </goals>
-                            <phase>process-resources</phase>
-                        </execution>
-                        <execution>
-                            <id>test-compile-scala</id>
-                            <goals>
-                                <goal>testCompile</goal>
-                            </goals>
-                            <phase>test-compile</phase>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <!--(start) shade-->
@@ -934,11 +735,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
@@ -999,10 +795,7 @@
             <id>fast</id>
             <properties>
                 <enforcer.skip>true</enforcer.skip>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <maven.scaladoc.skip>true</maven.scaladoc.skip>
-                <maven.scalastyle.skip>true</maven.scalastyle.skip>
-                <skipTests>true</skipTests>
+                <maven.javadoc.skip>true</maven.javadoc.skip>                <skipTests>true</skipTests>
                 <rat.skip>true</rat.skip>
                 <owasp.skip>true</owasp.skip>
                 <spotless.skip>true</spotless.skip>

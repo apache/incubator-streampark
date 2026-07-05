@@ -6,7 +6,7 @@
 // biome-ignore lint: disable
 export {}
 
-type serviceName = 'api'
+type serviceName = never
 
 declare global {
   const __URL_MAP__: {

@@ -21,8 +21,6 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 
 import lombok.Getter;
 
-import scala.Enumeration;
-
 /** Describe the status of Flink Application */
 @Getter
 public enum FlinkAppStateEnum {
@@ -149,16 +147,16 @@ public enum FlinkAppStateEnum {
     @Deprecated
     public static class Bridge {
 
-        /** covert from org.apache.streampark.flink.k8s.enums.FlinkJobState */
-        public static FlinkAppStateEnum fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-            if (FlinkJobState.K8S_INITIALIZING() == flinkJobState) {
+        /** covert from org.apache.streampark.flink.kubernetes.enums.FlinkJobState */
+        public static FlinkAppStateEnum fromK8sFlinkJobState(FlinkJobState flinkJobState) {
+            if (FlinkJobState.K8S_INITIALIZING == flinkJobState) {
                 return INITIALIZING;
             }
-            return getState(flinkJobState.toString());
+            return getState(flinkJobState.name());
         }
 
-        /** covert to org.apache.streampark.flink.k8s.enums.FlinkJobState */
-        public static Enumeration.Value toK8sFlinkJobState(FlinkAppStateEnum flinkAppStateEnum) {
+        /** covert to org.apache.streampark.flink.kubernetes.enums.FlinkJobState */
+        public static FlinkJobState toK8sFlinkJobState(FlinkAppStateEnum flinkAppStateEnum) {
             return FlinkJobState.of(flinkAppStateEnum.name());
         }
     }

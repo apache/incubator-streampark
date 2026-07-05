@@ -19,6 +19,7 @@ package org.apache.streampark.flink.connector.doris.bean;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /** doris sink buffer */

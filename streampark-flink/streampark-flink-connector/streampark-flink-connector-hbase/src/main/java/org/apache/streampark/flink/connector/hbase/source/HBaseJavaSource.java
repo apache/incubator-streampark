@@ -26,6 +26,7 @@ import org.apache.streampark.flink.core.scala.StreamingContext;
 
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
+import java.util.Objects;
 import java.util.Properties;
 
 public class HBaseJavaSource<T> {
@@ -42,8 +43,8 @@ public class HBaseJavaSource<T> {
       HBaseResultFunction<T> resultFunction,
       RunningFunction runningFunc) {
 
-    Utils.requireNotNull(queryFunction, "QueryFunction must not be null");
-    Utils.requireNotNull(resultFunction, "ResultFunction must not be null");
+    Objects.requireNonNull(queryFunction, "QueryFunction must not be null");
+    Objects.requireNonNull(resultFunction, "ResultFunction must not be null");
     HBaseSourceFunction<T> sourceFunction =
         new HBaseSourceFunction<>(property, queryFunction, resultFunction, runningFunc, null);
     return context.getJavaEnv().addSource(sourceFunction);

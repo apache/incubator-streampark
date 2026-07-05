@@ -85,6 +85,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -529,9 +530,12 @@ public class SparkApplicationBuildPipelineServiceImpl
         if (!fsOperator.exists(targetJar)) {
             fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
         } else {
-            // The file exists to check whether it is consistent, and if it is inconsistent, re-upload it
-            if (!FileUtils.equals(localJar, new File(targetJar))) {
-                fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
+            try {
+                if (!FileUtils.equals(localJar, new File(targetJar))) {
+                    fsOperator.upload(localJar.getAbsolutePath(), targetDir, false, true);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
