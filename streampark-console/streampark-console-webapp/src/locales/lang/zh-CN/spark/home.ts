@@ -25,8 +25,9 @@ export default {
   tips: {
     remove: '当前的 spark home 已被成功删除。',
     setDefault: '成功设置默认spark home',
-    sparkName: 'Spark别名,举例: Spark-1.12',
-    sparkHome: 'Spark所在服务器的绝对路径,举例: /usr/local/spark',
+    sparkName: 'Spark别名,举例: Spark-3.5',
+    sparkHome:
+      'Spark所在服务器的绝对路径,举例: /usr/local/spark。Spark 4.x 集群侧需要 JDK 17+，通常无需升级 StreamPark 服务自身 JDK。',
     sparkNameIsRequired: 'Spark名称必填',
     sparkHomeIsRequired: 'Spark Home 不能为空',
     sparkNameIsRepeated: 'Spark名称已存在',

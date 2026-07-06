@@ -20,6 +20,7 @@ package org.apache.streampark.spark.client.impl;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.util.HadoopUtils;
+import org.apache.streampark.common.util.SparkEnvUtils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.spark.client.bean.CancelRequest;
 import org.apache.streampark.spark.client.bean.CancelResponse;
@@ -154,6 +155,14 @@ public final class YarnClient extends SparkClientTrait {
         if (StringUtils.isNotBlank(submitRequest.getHadoopUser())) {
             env.put("HADOOP_USER_NAME", submitRequest.getHadoopUser());
         }
+        SparkEnvUtils.resolveJavaHome(
+                        submitRequest.getSparkVersion().getSparkHome(),
+                        submitRequest.getSparkVersion().getVersion())
+                .ifPresent(
+                        javaHome -> {
+                            env.put("JAVA_HOME", javaHome);
+                            logger.info("[StreamPark][Spark][YarnClient] Using JAVA_HOME: {}", javaHome);
+                        });
         String deployMode;
         if (submitRequest.getDeployMode() == SparkDeployMode.YARN_CLIENT) {
             deployMode = "client";
@@ -164,16 +173,22 @@ public final class YarnClient extends SparkClientTrait {
                     "[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".");
         }
         try {
-            return new SparkLauncher(env)
-                    .setSparkHome(submitRequest.getSparkVersion().getSparkHome())
-                    .setAppResource(submitRequest.getUserJarPath())
-                    .setMainClass(submitRequest.getAppMain())
-                    .setAppName(submitRequest.getAppName())
-                    .setConf("spark.yarn.dist.jars", submitRequest.getHdfsWorkspace().getSparkLib())
-                    .setConf("spark.yarn.applicationType", "StreamPark Spark")
-                    .setVerbose(true)
-                    .setMaster("yarn")
-                    .setDeployMode(deployMode);
+            SparkLauncher launcher =
+                    new SparkLauncher(env)
+                            .setSparkHome(submitRequest.getSparkVersion().getSparkHome())
+                            .setAppResource(submitRequest.getUserJarPath())
+                            .setMainClass(submitRequest.getAppMain())
+                            .setAppName(submitRequest.getAppName())
+                            .setConf("spark.yarn.dist.jars", submitRequest.getHdfsWorkspace().getSparkLib())
+                            .setConf("spark.yarn.applicationType", "StreamPark Spark")
+                            .setVerbose(true)
+                            .setMaster("yarn")
+                            .setDeployMode(deployMode);
+            SparkEnvUtils.resolveJavaHome(
+                            submitRequest.getSparkVersion().getSparkHome(),
+                            submitRequest.getSparkVersion().getVersion())
+                    .ifPresent(launcher::setJavaHome);
+            return launcher;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

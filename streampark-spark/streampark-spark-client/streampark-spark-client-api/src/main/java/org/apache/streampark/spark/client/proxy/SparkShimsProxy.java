@@ -154,7 +154,6 @@ public final class SparkShimsProxy {
             throw new IllegalArgumentException("lib path does not exist: " + libPath);
         }
         String majorVersion = sparkVersion.majorVersion();
-        String scalaVersion = sparkVersion.scalaVersion();
         File[] files = libPath.listFiles();
         if (files == null) {
             return;
@@ -165,7 +164,7 @@ public final class SparkShimsProxy {
                 continue;
             }
             if (jarName.startsWith(SPARK_SHIMS_PREFIX)) {
-                String prefixVer = SPARK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
+                String prefixVer = SPARK_SHIMS_PREFIX + "-" + majorVersion + "-";
                 if (jarName.startsWith(prefixVer)) {
                     addShimUrl.accept(jar);
                     LOG.info("Include spark shims jar lib: {}", jarName);
@@ -173,7 +172,7 @@ public final class SparkShimsProxy {
             } else if (INCLUDE_PATTERN.matcher(jarName).matches()) {
                 addShimUrl.accept(jar);
                 LOG.info("Include jar lib: {}", jarName);
-            } else if (jarName.matches("^streampark-(?!flink).*_" + scalaVersion + ".*$")) {
+            } else if (jarName.matches("^streampark-(?!flink).*\\.jar$")) {
                 addShimUrl.accept(jar);
                 LOG.info("Include streampark lib: {}", jarName);
             }

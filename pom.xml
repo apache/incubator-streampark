@@ -94,7 +94,7 @@
         <flink.shaded.version>1.8.1</flink.shaded.version>
         <streampark.shaded.version>1.0.0</streampark.shaded.version>
         <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
-        <spark.version>3.1.2</spark.version>
+        <spark.version>3.5.4</spark.version>
         <scalikejdbc.version>4.0.0</scalikejdbc.version>
         <hive.version>2.3.4</hive.version>
         <hadoop.version>3.3.4</hadoop.version>
@@ -115,7 +115,9 @@
         <snakeyaml.version>2.0</snakeyaml.version>
         <typesafe-conf.version>1.4.2</typesafe-conf.version>        <commons-cli.version>1.5.0</commons-cli.version>
         <commons-net.version>3.9.0</commons-net.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>        <assertj.version>3.23.1</assertj.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <assertj.version>3.23.1</assertj.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
