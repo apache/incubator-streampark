@@ -898,6 +898,7 @@
                             <exclude>src/main/resources/*.dict</exclude>
 
                             <exclude>streampark-console-webapp/**</exclude>
+                            <exclude>streampark-console-webapp-v2/**</exclude>
                         </excludes>
                     </configuration>
                     <executions>

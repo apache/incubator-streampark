@@ -80,6 +80,7 @@ header:
     - 'streampark-console/streampark-console-webapp/src/views/base/exception'
     - 'streampark-console/streampark-console-webapp/src/views/base/lock'
     - 'streampark-console/streampark-console-webapp/src/views/base/redirect'
+    - 'streampark-console/streampark-console-webapp-v2/**'
     - 'tools/dependencies/known-dependencies.txt'
 
   comment: on-failure
