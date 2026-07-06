@@ -4,12 +4,8 @@ interface StorageData<T> {
   value: T
   expire: number | null
 }
-/**
- * LocalStorage部分操作
- */
-function createLocalStorage<T extends Storage.Local>() {
-  // 默认缓存期限为7天
 
+function createLocalStorage<T extends Storage.Local>() {
   function set<K extends keyof T>(key: K, value: T[K], expire: number = 60 * 60 * 24 * 7) {
     const storageData: StorageData<T[K]> = {
       value,
@@ -48,9 +44,6 @@ function createLocalStorage<T extends Storage.Local>() {
     clear,
   }
 }
-/**
- * sessionStorage部分操作
- */
 
 function createSessionStorage<T extends Storage.Session>() {
   function set<K extends keyof T>(key: K, value: T[K]) {

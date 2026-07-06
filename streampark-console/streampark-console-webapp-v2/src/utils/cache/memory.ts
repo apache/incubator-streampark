@@ -24,15 +24,6 @@ export class Memory<T = any, V = any> {
     this.cache = cache;
   }
 
-  // get<K extends keyof T>(key: K) {
-  //   const item = this.getItem(key);
-  //   const time = item?.time;
-  //   if (!isNullOrUnDef(time) && time < new Date().getTime()) {
-  //     this.remove(key);
-  //   }
-  //   return item?.value ?? undefined;
-  // }
-
   get<K extends keyof T>(key: K) {
     return this.cache[key];
   }

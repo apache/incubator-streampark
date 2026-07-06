@@ -59,7 +59,6 @@ export const useAppStore = defineStore('app-store', {
     },
   },
   actions: {
-    // 重置所有设置
     resetAlltheme() {
       this.theme = themeConfig
       this.primaryColor = '#18a058'
@@ -76,7 +75,6 @@ export const useAppStore = defineStore('app-store', {
       this.transitionAnimation = ''
       this.layoutMode = 'vertical'
 
-      // 重置所有配色
       this.setPrimaryColor(this.primaryColor)
     },
     async setAppLang(lang: AppLocale | string) {
@@ -87,7 +85,6 @@ export const useAppStore = defineStore('app-store', {
       local.set('lang', normalized)
       this.lang = normalized
     },
-    /* 设置主题色 */
     setPrimaryColor(color: string) {
       const brightenColor = colord(color).lighten(0.05).toHex()
       const darkenColor = colord(color).darken(0.05).toHex()
@@ -99,19 +96,12 @@ export const useAppStore = defineStore('app-store', {
     setColorMode(mode: 'light' | 'dark' | 'auto') {
       store.value = mode
     },
-    /* 切换侧边栏收缩 */
     toggleCollapse() {
       this.collapsed = !this.collapsed
     },
-    /* 切换全屏 */
     toggleFullScreen() {
       toggle()
     },
-    /**
-     * @description: 页面内容重载
-     * @param {number} delay - 延迟毫秒数
-     * @return {*}
-     */
     async reloadPage(delay = 0) {
       this.loadFlag = false
       await nextTick()
@@ -120,12 +110,10 @@ export const useAppStore = defineStore('app-store', {
       }
       this.loadFlag = true
     },
-    /* 切换色弱模式 */
     toggleColorWeak() {
       docEle.value.classList.toggle('color-weak')
       this.colorWeak = docEle.value.classList.contains('color-weak')
     },
-    /* 切换灰色模式 */
     toggleGrayMode() {
       docEle.value.classList.toggle('gray-mode')
       this.grayMode = docEle.value.classList.contains('gray-mode')

@@ -17,20 +17,16 @@ interface IconList {
 }
 const value = defineModel('value', { type: String })
 
-// Ionicons5 via Iconify API（与 @vicons/ionicons5 同源）
+// Ionicons5 via Iconify API (same source as @vicons/ionicons5)
 const nameList = ['ion', 'carbon']
 
-// 获取单个图标库数据
 async function fetchIconList(name: string): Promise<IconList> {
   return await fetch(`https://api.iconify.design/collection?prefix=${name}`).then(res => res.json())
 }
 
-// 获取所有图标库数据
 async function fetchIconAllList(nameList: string[]) {
-  // 并行请求所有图标列表
   const targets = await Promise.all(nameList.map(fetchIconList))
 
-  // 处理每个返回的图标数据
   const iconList = targets.map((item) => {
     const icons = [
       ...(item.categories ? Object.values(item.categories).flat() : []),
@@ -39,12 +35,10 @@ async function fetchIconAllList(nameList: string[]) {
     return { ...item, icons }
   })
 
-  // 处理本地图标
   const svgNames = Object.keys(import.meta.glob('@/assets/svg-icons/*.svg')).map(
     path => path.split('/').pop()?.replace('.svg', ''),
-  ).filter(Boolean) as string[] // 过滤掉 undefined 并断言为 string[]
+  ).filter(Boolean) as string[]
 
-  // 在数组开头添加
   iconList.unshift({
     prefix: 'local',
     title: 'Local Icons',
@@ -62,59 +56,48 @@ onMounted(async () => {
   iconList.value = await fetchIconAllList(nameList)
 })
 
-// 当前tab
 const currentTab = shallowRef(0)
-// 当前tag
 const currentTag = shallowRef('')
 
-// 搜索图标输入框值
 const searchValue = ref('')
 
-// 当前页数
 const currentPage = shallowRef(1)
 
-// 切换tab
 function handleChangeTab(index: number) {
   currentTab.value = index
   currentTag.value = ''
   currentPage.value = 1
 }
 
-// 选择分类tag
 function handleSelectIconTag(icon: string) {
   currentTag.value = currentTag.value === icon ? '' : icon
   currentPage.value = 1
 }
 
-// 包含当前分类或所有图标列表
 const icons = computed(() => {
   if (!iconList.value[currentTab.value])
     return []
   const hasTag = !!currentTag.value
   return hasTag
-    ? iconList.value[currentTab.value]?.categories?.[currentTag.value] || [] // 使用可选链
+    ? iconList.value[currentTab.value]?.categories?.[currentTag.value] || []
     : iconList.value[currentTab.value].icons || []
 })
 
-// 符合搜索条件的图标列表
 const filteredIcons = computed(() => {
   return icons.value?.filter(i => i.includes(searchValue.value)) || []
 })
 
-// 当前页显示的图标
 const visibleIcons = computed(() => {
   return filteredIcons.value.slice((currentPage.value - 1) * 200, currentPage.value * 200)
 })
 
 const showModal = ref(false)
 
-// 选择图标
 function handleSelectIcon(icon: string) {
   value.value = icon
   showModal.value = false
 }
 
-// 清除图标
 function clearIcon() {
   value.value = ''
   showModal.value = false

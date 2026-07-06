@@ -5,7 +5,7 @@ defineOptions({
   name: 'PcaCascader',
 })
 
-// 获取原始数据，数据来源仓库 https://github.com/modood/Administrative-divisions-of-China
+// Data from https://github.com/modood/Administrative-divisions-of-China
 const pcaCode = shallowRef<CascaderOption[]>()
 async function fetchPcaCode() {
   return await fetch('https://cdn.jsdelivr.net/gh/modood/Administrative-divisions-of-China/dist/pca-code.json').then(res => res.json())

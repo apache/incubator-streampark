@@ -1,8 +1,6 @@
 /**
- * 统一化存储单位，字节转化为英文缩写`bytes`, `KB`, `MB`, `GB`
+ * Formats byte counts as `bytes`, `KB`, `MB`, or `GB`.
  *
- * @param {number} bytes 需要转换的字节大小
- * @returns {string} 转化后的字节字符串
  * @example
  * ```
  * // Output: '1 MB'
