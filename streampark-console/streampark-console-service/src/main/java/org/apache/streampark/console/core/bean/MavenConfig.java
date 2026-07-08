@@ -53,24 +53,24 @@ public class MavenConfig {
     public static MavenConfig fromSetting() {
         MavenConfig mavenConfig = new MavenConfig();
         Map<String, Setting> settings = SettingService.SETTINGS;
-        if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH().key())) {
+        if (settings.containsKey(CommonConfig.MAVEN_SETTINGS_PATH.key())) {
             mavenConfig.setMvnSettings(
-                settings.get(CommonConfig.MAVEN_SETTINGS_PATH().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_SETTINGS_PATH.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_REMOTE_URL().key())) {
+        if (settings.containsKey(CommonConfig.MAVEN_REMOTE_URL.key())) {
             mavenConfig.setMvnRepository(
-                settings.get(CommonConfig.MAVEN_REMOTE_URL().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_REMOTE_URL.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_AUTH_USER().key())) {
+        if (settings.containsKey(CommonConfig.MAVEN_AUTH_USER.key())) {
             mavenConfig.setMvnAuthUser(
-                settings.get(CommonConfig.MAVEN_AUTH_USER().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_AUTH_USER.key()).getSettingValue());
         }
 
-        if (settings.containsKey(CommonConfig.MAVEN_AUTH_PASSWORD().key())) {
+        if (settings.containsKey(CommonConfig.MAVEN_AUTH_PASSWORD.key())) {
             mavenConfig.setMvnAuthPassword(
-                settings.get(CommonConfig.MAVEN_AUTH_PASSWORD().key()).getSettingValue());
+                settings.get(CommonConfig.MAVEN_AUTH_PASSWORD.key()).getSettingValue());
         }
 
         return mavenConfig;
@@ -84,19 +84,19 @@ public class MavenConfig {
     public void updateConfig() {
 
         if (StringUtils.isNotBlank(mvnSettings)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH(), mvnSettings);
+            InternalConfigHolder.set(CommonConfig.MAVEN_SETTINGS_PATH, mvnSettings);
         }
 
         if (StringUtils.isNotBlank(mvnRepository)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL(), mvnRepository);
+            InternalConfigHolder.set(CommonConfig.MAVEN_REMOTE_URL, mvnRepository);
         }
 
         if (StringUtils.isNotBlank(mvnAuthUser)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER(), mvnAuthUser);
+            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_USER, mvnAuthUser);
         }
 
         if (StringUtils.isNotBlank(mvnAuthPassword)) {
-            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD(), mvnAuthPassword);
+            InternalConfigHolder.set(CommonConfig.MAVEN_AUTH_PASSWORD, mvnAuthPassword);
         }
     }
 }

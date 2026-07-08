@@ -46,12 +46,12 @@ public class InfluxFunction<T> extends RichSinkFunction<T> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        String url = config.getProperty(ConfigKeys.KEY_JDBC_URL());
+        String url = config.getProperty(ConfigKeys.KEY_JDBC_URL);
         if (url == null) {
             throw new IllegalArgumentException("Influx url must not be null");
         }
-        String username = config.getProperty(ConfigKeys.KEY_JDBC_USER());
-        String password = config.getProperty(ConfigKeys.KEY_JDBC_PASSWORD());
+        String username = config.getProperty(ConfigKeys.KEY_JDBC_USER);
+        String password = config.getProperty(ConfigKeys.KEY_JDBC_PASSWORD);
         if (username == null) {
             influxDB = InfluxDBFactory.connect(url);
         } else {

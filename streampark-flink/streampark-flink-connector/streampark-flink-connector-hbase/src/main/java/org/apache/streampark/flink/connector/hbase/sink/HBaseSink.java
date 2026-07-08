@@ -66,7 +66,7 @@ public class HBaseSink implements Sink {
     private Properties checkProp(Object stream, String tableName, Object fun) {
         Properties prop =
                 ConfigUtils.getConf(
-                        ctx.parameter.toMap(), ConfigKeys.HBASE_PREFIX(), ConfigKeys.HBASE_PREFIX(), alias);
+                        ctx.parameter.toMap(), ConfigKeys.HBASE_PREFIX, ConfigKeys.HBASE_PREFIX, alias);
         Utils.copyProperties(property, prop);
         if (stream == null) {
             throw new IllegalArgumentException("Sink Stream must not null");

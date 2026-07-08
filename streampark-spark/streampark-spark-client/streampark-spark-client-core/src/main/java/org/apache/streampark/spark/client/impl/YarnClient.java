@@ -202,17 +202,17 @@ public final class YarnClient extends SparkClientTrait {
     }
 
     private void setYarnQueue(SubmitRequest submitRequest) {
-        if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME())) {
+        if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME)) {
             submitRequest
                 .getAppProperties()
                 .put(
-                    ConfigKeys.KEY_SPARK_YARN_QUEUE(),
-                    submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME()).toString());
+                    ConfigKeys.KEY_SPARK_YARN_QUEUE,
+                    submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME).toString());
         }
-        if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL())) {
-            String label = submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL()).toString();
-            submitRequest.getAppProperties().put(ConfigKeys.KEY_SPARK_YARN_AM_NODE_LABEL(), label);
-            submitRequest.getAppProperties().put(ConfigKeys.KEY_SPARK_YARN_EXECUTOR_NODE_LABEL(), label);
+        if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL)) {
+            String label = submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL).toString();
+            submitRequest.getAppProperties().put(ConfigKeys.KEY_SPARK_YARN_AM_NODE_LABEL, label);
+            submitRequest.getAppProperties().put(ConfigKeys.KEY_SPARK_YARN_EXECUTOR_NODE_LABEL, label);
         }
     }
 }

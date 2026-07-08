@@ -87,7 +87,7 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
             if (fsOperator == FsOperator.lfs()) {
                 fsOperator.copy(originFile.getAbsolutePath(), target);
             } else {
-                String uploadFile = Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
+                String uploadFile = Workspace.remote().getAppUploads() + "/" + originFile.getName();
                 if (fsOperator.exists(uploadFile)) {
                     try (FileInputStream in = new FileInputStream(originFile)) {
                         String localMd5 = DigestUtils.md5Hex(in); // NOSONAR java:S4790 - upload integrity check only

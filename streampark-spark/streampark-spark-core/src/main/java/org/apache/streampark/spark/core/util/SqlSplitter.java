@@ -38,7 +38,7 @@ public final class SqlSplitter {
 
     static {
         Set<String> prefixes = new HashSet<>();
-        prefixes.add(ConfigKeys.PARAM_PREFIX());
+        prefixes.add(ConfigKeys.PARAM_PREFIX);
         SINGLE_LINE_COMMENT_PREFIX_LIST = Collections.unmodifiableSet(prefixes);
     }
 
@@ -190,7 +190,7 @@ public final class SqlSplitter {
             lineNumber++;
             String line = scanner.nextLine().trim();
             boolean nonEmpty =
-                StringUtils.isNotBlank(line) && !line.startsWith(ConfigKeys.PARAM_PREFIX());
+                StringUtils.isNotBlank(line) && !line.startsWith(ConfigKeys.PARAM_PREFIX);
             if (line.startsWith("/*")) {
                 startComment = true;
                 hasComment = true;
@@ -239,7 +239,7 @@ public final class SqlSplitter {
     }
 
     private static boolean isSingleLineComment(String text) {
-        return text.trim().startsWith(ConfigKeys.PARAM_PREFIX());
+        return text.trim().startsWith(ConfigKeys.PARAM_PREFIX);
     }
 
     private static boolean isMultipleLineComment(String text) {

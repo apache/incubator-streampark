@@ -44,7 +44,7 @@ public abstract class FlinkStreaming implements Serializable {
     }
 
     private void init(String[] args) {
-        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkStreaming.class);
+        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME, FlinkStreaming.class);
         context =
             new StreamingContext(
                 FlinkStreamingInitializer.initialize(

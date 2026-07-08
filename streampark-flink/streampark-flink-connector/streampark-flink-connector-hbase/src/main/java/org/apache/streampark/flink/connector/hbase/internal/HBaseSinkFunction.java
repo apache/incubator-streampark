@@ -70,9 +70,9 @@ public class HBaseSinkFunction<T> extends RichSinkFunction<T> {
         this.tabName = tabName;
         this.prop = properties;
         this.transformFunc = transformFunc;
-        Object batch = prop.getOrDefault(ConfigKeys.KEY_HBASE_COMMIT_BATCH(), String.valueOf(ConfigKeys.DEFAULT_HBASE_COMMIT_BATCH));
+        Object batch = prop.getOrDefault(ConfigKeys.KEY_HBASE_COMMIT_BATCH, String.valueOf(ConfigKeys.DEFAULT_HBASE_COMMIT_BATCH));
         this.commitBatch = Integer.parseInt(batch.toString());
-        Object writeSize = prop.getOrDefault(ConfigKeys.KEY_HBASE_WRITE_SIZE(), String.valueOf(ConfigKeys.DEFAULT_HBASE_WRITE_SIZE));
+        Object writeSize = prop.getOrDefault(ConfigKeys.KEY_HBASE_WRITE_SIZE, String.valueOf(ConfigKeys.DEFAULT_HBASE_WRITE_SIZE));
         this.writeBufferSize = Long.parseLong(writeSize.toString());
     }
 

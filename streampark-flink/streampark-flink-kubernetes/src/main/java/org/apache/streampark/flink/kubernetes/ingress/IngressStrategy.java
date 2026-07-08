@@ -74,7 +74,7 @@ public abstract class IngressStrategy {
     protected Map<String, String> buildIngressLabels(String clusterId) {
         Map<String, String> map = new HashMap<>();
         map.put("app", clusterId);
-        map.put("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL());
+        map.put("type", ConfigKeys.FLINK_NATIVE_KUBERNETES_LABEL);
         map.put("component", "ingress");
         return map;
     }

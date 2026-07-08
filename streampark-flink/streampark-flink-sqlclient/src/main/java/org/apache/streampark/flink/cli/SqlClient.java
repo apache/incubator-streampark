@@ -49,7 +49,7 @@ public final class SqlClient {
 
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
 
-        String sql = parameterTool.get(ConfigKeys.KEY_FLINK_SQL());
+        String sql = parameterTool.get(ConfigKeys.KEY_FLINK_SQL);
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: flink sql cannot be null");
         }
@@ -82,7 +82,7 @@ public final class SqlClient {
         } else {
             String configuredMode = parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null);
             if (configuredMode == null) {
-                String appConf = parameterTool.get(ConfigKeys.KEY_APP_CONF(), null);
+                String appConf = parameterTool.get(ConfigKeys.KEY_APP_CONF, null);
                 if (appConf == null) {
                     mode = defaultMode;
                 } else {
@@ -90,7 +90,7 @@ public final class SqlClient {
                         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.substring(7)));
                     mode =
                         parameter
-                            .getOrDefault(ConfigKeys.KEY_FLINK_TABLE_MODE(), defaultMode)
+                            .getOrDefault(ConfigKeys.KEY_FLINK_TABLE_MODE, defaultMode)
                             .toUpperCase();
                 }
                 arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + mode);

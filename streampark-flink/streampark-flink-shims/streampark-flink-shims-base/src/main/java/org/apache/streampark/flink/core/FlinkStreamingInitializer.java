@@ -88,16 +88,16 @@ public class FlinkStreamingInitializer {
 
     FlinkConfiguration initParameter() {
         ParameterTool argsMap = ParameterTool.fromArgs(args);
-        String configFile = argsMap.get(ConfigKeys.KEY_APP_CONF(), null);
+        String configFile = argsMap.get(ConfigKeys.KEY_APP_CONF, null);
         if (configFile == null || configFile.isEmpty()) {
             throw new ExceptionInInitializerError(
                 "[StreamPark] Usage:can't find config,please set \"--conf $path \" in main arguments");
         }
         Map<String, String> configMap = parseConfig(configFile);
         Map<String, String> properConf =
-            extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
+            extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX);
         Map<String, String> appConf =
-            extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
+            extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX);
 
         ParameterTool parameter =
             ParameterTool.fromSystemProperties()

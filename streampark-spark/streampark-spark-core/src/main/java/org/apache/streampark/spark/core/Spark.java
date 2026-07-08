@@ -92,7 +92,7 @@ public abstract class Spark implements Serializable {
 
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
         String sparkSqls;
-        String sql = parameterTool.get(ConfigKeys.KEY_SPARK_SQL());
+        String sql = parameterTool.get(ConfigKeys.KEY_SPARK_SQL);
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: spark sql cannot be null");
         }
@@ -142,11 +142,11 @@ public abstract class Spark implements Serializable {
             } else if ("--createOnError".equals(current) && idx + 1 < argv.size()) {
                 createOnError = Boolean.parseBoolean(argv.get(idx + 1));
                 idx += 2;
-            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX()) && idx + 1 < argv.size()) {
+            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX) && idx + 1 < argv.size()) {
                 userArgs.add(
-                    Map.entry(current.substring(ConfigKeys.PARAM_PREFIX().length()), argv.get(idx + 1)));
+                    Map.entry(current.substring(ConfigKeys.PARAM_PREFIX.length()), argv.get(idx + 1)));
                 idx += 2;
-            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX())) {
+            } else if (current.startsWith(ConfigKeys.PARAM_PREFIX)) {
                 LOG.error("Unrecognized options: {}", String.join(" ", argv.subList(idx, argv.size())));
                 printUsageAndExit();
             } else {
@@ -181,16 +181,16 @@ public abstract class Spark implements Serializable {
 
         String appMain =
             sparkConf.get(
-                ConfigKeys.KEY_SPARK_MAIN_CLASS(),
+                ConfigKeys.KEY_SPARK_MAIN_CLASS,
                 "org.apache.streampark.spark.cli.SqlClient");
         if (appMain == null) {
             LOG.error(
                 "[StreamPark] parameter: {} must not be empty!",
-                ConfigKeys.KEY_SPARK_MAIN_CLASS());
+                ConfigKeys.KEY_SPARK_MAIN_CLASS);
             System.exit(1);
         }
 
-        String appName = sparkConf.get(ConfigKeys.KEY_SPARK_APP_NAME(), null);
+        String appName = sparkConf.get(ConfigKeys.KEY_SPARK_APP_NAME, null);
         if (appName == null || appName.isEmpty()) {
             appName = appMain;
         }

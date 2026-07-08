@@ -29,7 +29,7 @@ import java.io.File;
 @Slf4j
 public final class PackerResourceGC {
 
-    private static final String APP_WORKSPACE_PATH = Workspace.local().APP_WORKSPACE();
+    private static final String APP_WORKSPACE_PATH = Workspace.local().getAppWorkspace();
     private PackerResourceGC() {
     }
 

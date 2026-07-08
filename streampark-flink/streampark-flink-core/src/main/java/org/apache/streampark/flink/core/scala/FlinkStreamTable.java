@@ -44,7 +44,7 @@ public abstract class FlinkStreamTable {
     }
 
     private void init(String[] args) {
-        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkStreamTable.class);
+        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME, FlinkStreamTable.class);
         context =
             new StreamTableContext(
                 FlinkTableInitializer.initialize(

@@ -48,30 +48,6 @@ public class Workspace {
         return REMOTE;
     }
 
-    public static String APP_LOCAL_DIST() {
-        return appLocalDist();
-    }
-
-    public static String MAVEN_LOCAL_PATH() {
-        return mavenLocalPath();
-    }
-
-    public static String PROJECT_LOCAL_PATH() {
-        return projectLocalPath();
-    }
-
-    public static String LOG_LOCAL_PATH() {
-        return logLocalPath();
-    }
-
-    public static String PROJECT_BUILD_LOG_PATH() {
-        return projectBuildLogPath();
-    }
-
-    public static String ARCHIVES_FILE_PATH() {
-        return archivesFilePath();
-    }
-
     public static String appLocalDist() {
         return local().getWorkspace() + "/dist";
     }
@@ -118,16 +94,16 @@ public class Workspace {
     public String getWorkspace() {
         switch (storageType) {
             case LFS:
-                String path = getConfigValue(CommonConfig.STREAMPARK_WORKSPACE_LOCAL());
+                String path = getConfigValue(CommonConfig.STREAMPARK_WORKSPACE_LOCAL);
                 if (path == null) {
                     throw new IllegalArgumentException("[StreamPark] streampark.workspace.local must not be null");
                 }
                 return path;
             case HDFS:
-                String remotePath = getConfigValue(CommonConfig.STREAMPARK_WORKSPACE_REMOTE());
+                String remotePath = getConfigValue(CommonConfig.STREAMPARK_WORKSPACE_REMOTE);
                 if (remotePath == null || remotePath.isEmpty()) {
                     return HdfsUtils.getDefaultFS()
-                        + CommonConfig.STREAMPARK_WORKSPACE_REMOTE().getDefaultValue();
+                        + CommonConfig.STREAMPARK_WORKSPACE_REMOTE.getDefaultValue();
                 }
                 String defaultFs = HdfsUtils.getDefaultFS();
                 if (remotePath.startsWith("hdfs://")) {
@@ -189,58 +165,5 @@ public class Workspace {
 
     public String getAppJars() {
         return getWorkspace() + "/jars";
-    }
-
-    /** Scala/Java API alias for {@link #getWorkspace()}. */
-    public String WORKSPACE() {
-        return getWorkspace();
-    }
-
-    public String APP_PLUGINS() {
-        return getAppPlugins();
-    }
-
-    public String APP_CLIENT() {
-        return getAppClient();
-    }
-
-    public String APP_SHIMS() {
-        return getAppShims();
-    }
-
-    public String APP_UPLOADS() {
-        return getAppUploads();
-    }
-
-    public String APP_PYTHON() {
-        return getAppPython();
-    }
-
-    public String APP_PYTHON_VENV() {
-        return getAppPythonVenv();
-    }
-
-    public String APP_WORKSPACE() {
-        return getAppWorkspace();
-    }
-
-    public String APP_FLINK() {
-        return getAppFlink();
-    }
-
-    public String APP_SPARK() {
-        return getAppSpark();
-    }
-
-    public String APP_BACKUPS() {
-        return getAppBackups();
-    }
-
-    public String APP_SAVEPOINTS() {
-        return getAppSavepoints();
-    }
-
-    public String APP_JARS() {
-        return getAppJars();
     }
 }

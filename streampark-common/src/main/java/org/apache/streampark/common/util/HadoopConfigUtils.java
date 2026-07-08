@@ -46,27 +46,27 @@ public final class HadoopConfigUtils {
     private static final Map<String, String> KERBEROS_CONF = loadKerberosConf();
 
     public static final String HADOOP_USER_NAME =
-        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
+        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME);
 
     public static String hadoopUserName() {
         return HADOOP_USER_NAME;
     }
 
     public static final String KERBEROS_DEBUG =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG(), "false");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG, "false");
 
     public static final boolean KERBEROS_ENABLE =
         Boolean.parseBoolean(
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE(), "false"));
+            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE, "false"));
 
     public static final String KERBEROS_PRINCIPAL =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL(), "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim();
 
     public static final String KERBEROS_KEYTAB =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB(), "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB, "").trim();
 
     public static final String KERBEROS_KRB5 =
-        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF(), "");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF, "");
 
     private HadoopConfigUtils() {
     }

@@ -134,7 +134,7 @@ public class SpringProperties {
                     "[StreamPark] The system initialization check failed. If started local for development and debugging,"
                         + " please ensure the -D%s parameter is clearly specified,"
                         + " more detail: https://streampark.apache.org/docs/development/development/",
-                    ConfigKeys.KEY_APP_HOME()));
+                    ConfigKeys.KEY_APP_HOME));
         }
         Properties properties = new Properties();
         File file = new File(appHome, "conf/config.yaml");

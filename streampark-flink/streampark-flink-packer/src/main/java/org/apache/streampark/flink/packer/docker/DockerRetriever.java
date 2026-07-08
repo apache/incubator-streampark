@@ -39,10 +39,10 @@ public final class DockerRetriever {
         new ApacheDockerHttpClient.Builder()
             .dockerHost(DOCKER_CLIENT_CONF.getDockerHost())
             .sslConfig(DOCKER_CLIENT_CONF.getSSLConfig())
-            .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS()))
+            .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS))
             .connectionTimeout(
-                Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC())))
-            .responseTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC())));
+                Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC)))
+            .responseTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC)));
 
     private DockerRetriever() {
     }
@@ -53,7 +53,7 @@ public final class DockerRetriever {
     }
 
     private static void setDockerHost() {
-        String dockerHost = InternalConfigHolder.get(CommonConfig.DOCKER_HOST());
+        String dockerHost = InternalConfigHolder.get(CommonConfig.DOCKER_HOST);
         if (Utils.isNotEmpty(dockerHost)) {
             DOCKER_HTTP_CLIENT_BUILDER.dockerHost(URI.create(dockerHost));
         }
