@@ -247,8 +247,7 @@ public final class FileUtils {
     }
 
     public static String readFile(String filename) throws IOException {
-        Path path = SafePathUtils.resolveConfigPath(filename);
-        return Files.readString(path, StandardCharsets.UTF_8);
+        return SafePathUtils.readConfigFile(filename);
     }
 
     public static String readFile(File file) throws IOException {

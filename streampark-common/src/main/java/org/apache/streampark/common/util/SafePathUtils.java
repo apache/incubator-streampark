@@ -19,6 +19,7 @@ package org.apache.streampark.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,12 +30,7 @@ public final class SafePathUtils {
     private SafePathUtils() {}
 
     public static Path resolveConfigPath(String filename) {
-        if (filename == null || filename.isEmpty()) {
-            throw new IllegalArgumentException("filename must not be blank");
-        }
-        if (filename.contains("..")) {
-            throw new IllegalArgumentException("invalid file path: " + filename);
-        }
+        validateConfigFilename(filename);
         Path base = Paths.get("").toAbsolutePath().normalize();
         Path resolved = base.resolve(filename).normalize();
         if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
@@ -44,7 +40,23 @@ public final class SafePathUtils {
     }
 
     public static InputStream openConfigFile(String filename) throws IOException {
-        return Files.newInputStream(resolveConfigPath(filename));
+        validateConfigFilename(filename);
+        Path base = Paths.get("").toAbsolutePath().normalize();
+        Path resolved = base.resolve(filename).normalize();
+        if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
+            throw new IOException("invalid file path: " + filename);
+        }
+        return Files.newInputStream(resolved);
+    }
+
+    public static String readConfigFile(String filename) throws IOException {
+        validateConfigFilename(filename);
+        Path base = Paths.get("").toAbsolutePath().normalize();
+        Path resolved = base.resolve(filename).normalize();
+        if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
+            throw new IOException("invalid file path: " + filename);
+        }
+        return Files.readString(resolved, StandardCharsets.UTF_8);
     }
 
     public static Path resolveJarPath(java.net.URL jar) throws IOException {
@@ -57,6 +69,25 @@ public final class SafePathUtils {
             return base.resolve(Paths.get(jar.toURI())).normalize();
         } catch (Exception e) {
             throw new IOException("JAR file path is invalid " + jar, e);
+        }
+    }
+
+    public static InputStream openJarFile(java.net.URL jar) throws IOException {
+        String location = jar.toString();
+        if (location.contains("..")) {
+            throw new IOException("JAR file path is invalid " + jar);
+        }
+        Path base = Paths.get("").toAbsolutePath().normalize();
+        Path resolved = base.resolve(Paths.get(jar.toURI())).normalize();
+        return Files.newInputStream(resolved);
+    }
+
+    private static void validateConfigFilename(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            throw new IllegalArgumentException("filename must not be blank");
+        }
+        if (filename.contains("..")) {
+            throw new IllegalArgumentException("invalid file path: " + filename);
         }
     }
 }
