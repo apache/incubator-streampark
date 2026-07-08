@@ -22,14 +22,16 @@ import java.util.function.Function;
 /** AutoCloseable resource management utilities. */
 public final class AutoCloseUtils {
 
-    private AutoCloseUtils() {}
+    private AutoCloseUtils() {
+    }
 
     public static <T extends AutoCloseable, R> R using(T autoCloseable, Function<T, R> func) {
         return using(autoCloseable, func, null);
     }
 
     public static <T extends AutoCloseable, R> R using(
-            T autoCloseable, Function<T, R> func, Function<Throwable, R> excFunc) {
+                                                       T autoCloseable, Function<T, R> func,
+                                                       Function<Throwable, R> excFunc) {
         try (T resource = autoCloseable) {
             return func.apply(resource);
         } catch (Throwable e) {

@@ -37,9 +37,10 @@ import java.security.Permission;
 public final class FlinkClient {
 
     private static final String FLINK_CLIENT_ENTRYPOINT_CLASS =
-            "org.apache.streampark.flink.client.FlinkClientEntrypoint";
+        "org.apache.streampark.flink.client.FlinkClientEntrypoint";
 
-    private FlinkClient() {}
+    private FlinkClient() {
+    }
 
     public static SubmitResponse submit(SubmitRequest submitRequest) {
         SecurityManager securityManager = System.getSecurityManager();
@@ -53,58 +54,58 @@ public final class FlinkClient {
 
     public static CancelResponse cancel(CancelRequest cancelRequest) {
         return proxy(
-                cancelRequest,
-                cancelRequest.getFlinkVersion(),
-                CancelRequest.class.getName(),
-                "cancel");
+            cancelRequest,
+            cancelRequest.getFlinkVersion(),
+            CancelRequest.class.getName(),
+            "cancel");
     }
 
     public static DeployResponse deploy(DeployRequest deployRequest) {
         return proxy(
-                deployRequest,
-                deployRequest.getFlinkVersion(),
-                DeployRequest.class.getName(),
-                "deploy");
+            deployRequest,
+            deployRequest.getFlinkVersion(),
+            DeployRequest.class.getName(),
+            "deploy");
     }
 
     public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) {
         return proxy(
-                shutDownRequest,
-                shutDownRequest.getFlinkVersion(),
-                ShutDownRequest.class.getName(),
-                "shutdown");
+            shutDownRequest,
+            shutDownRequest.getFlinkVersion(),
+            ShutDownRequest.class.getName(),
+            "shutdown");
     }
 
     public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) {
         return proxy(
-                savepointRequest,
-                savepointRequest.getFlinkVersion(),
-                TriggerSavepointRequest.class.getName(),
-                "triggerSavepoint");
+            savepointRequest,
+            savepointRequest.getFlinkVersion(),
+            TriggerSavepointRequest.class.getName(),
+            "triggerSavepoint");
     }
 
     @SuppressWarnings("unchecked")
     private static <T> T proxy(
-            Object request, FlinkVersion flinkVersion, String requestClassName, String methodName) {
+                               Object request, FlinkVersion flinkVersion, String requestClassName, String methodName) {
         flinkVersion.checkVersion();
         return FlinkShimsProxy.proxy(
-                flinkVersion,
-                classLoader -> {
-                    try {
-                        Class<?> submitClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS);
-                        Class<?> requestClass = classLoader.loadClass(requestClassName);
-                        Method method = submitClass.getDeclaredMethod(methodName, requestClass);
-                        method.setAccessible(true);
-                        Object obj =
-                                method.invoke(null, FlinkShimsProxy.getObject(classLoader, request));
-                        if (obj == null) {
-                            return null;
-                        }
-                        return (T) FlinkShimsProxy.getObject(FlinkClient.class.getClassLoader(), obj);
-                    } catch (ReflectiveOperationException e) {
-                        throw new RuntimeException(e);
+            flinkVersion,
+            classLoader -> {
+                try {
+                    Class<?> submitClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS);
+                    Class<?> requestClass = classLoader.loadClass(requestClassName);
+                    Method method = submitClass.getDeclaredMethod(methodName, requestClass);
+                    method.setAccessible(true);
+                    Object obj =
+                        method.invoke(null, FlinkShimsProxy.getObject(classLoader, request));
+                    if (obj == null) {
+                        return null;
                     }
-                });
+                    return (T) FlinkShimsProxy.getObject(FlinkClient.class.getClassLoader(), obj);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 }
 
@@ -114,11 +115,12 @@ class ExitSecurityManager extends SecurityManager {
     @Override
     public void checkExit(int status) {
         throw new SecurityException(
-                "System.exit("
-                        + status
-                        + ") was called in your flink job, The job has been stopped, please check your program...");
+            "System.exit("
+                + status
+                + ") was called in your flink job, The job has been stopped, please check your program...");
     }
 
     @Override
-    public void checkPermission(Permission perm) {}
+    public void checkPermission(Permission perm) {
+    }
 }

@@ -32,9 +32,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CancelRequest {
+
     private long id;
     private SparkVersion sparkVersion;
     private SparkDeployMode deployMode;
-    @Nullable private Map<String, String> properties;
+    @Nullable
+    private Map<String, String> properties;
     private String appId;
 }

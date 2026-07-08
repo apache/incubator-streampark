@@ -19,6 +19,7 @@ package org.apache.streampark.flink.kubernetes;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
@@ -30,12 +31,13 @@ import java.util.Map;
 public final class PodTemplateParser {
 
     public static final String POD_TEMPLATE_INIT_CONTENT =
-            "apiVersion: v1\n"
-                    + "kind: Pod\n"
-                    + "metadata:\n"
-                    + "  name: pod-template\n";
+        "apiVersion: v1\n"
+            + "kind: Pod\n"
+            + "metadata:\n"
+            + "  name: pod-template\n";
 
-    private PodTemplateParser() {}
+    private PodTemplateParser() {
+    }
 
     public static String getInitPodTemplateContent() {
         return POD_TEMPLATE_INIT_CONTENT.concat("spec:\n");

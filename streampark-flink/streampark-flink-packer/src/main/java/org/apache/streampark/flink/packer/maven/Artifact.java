@@ -40,10 +40,18 @@ public class Artifact {
         this.classifier = classifier;
     }
 
-    public String groupId() { return groupId; }
-    public String artifactId() { return artifactId; }
-    public String version() { return version; }
-    public String classifier() { return classifier; }
+    public String groupId() {
+        return groupId;
+    }
+    public String artifactId() {
+        return artifactId;
+    }
+    public String version() {
+        return version;
+    }
+    public String classifier() {
+        return classifier;
+    }
 
     public boolean eq(org.eclipse.aether.artifact.Artifact artifact) {
         if (!groupId.equals(artifact.getGroupId())) {
@@ -61,6 +69,7 @@ public class Artifact {
             return new Artifact(matcher.group(1), matcher.group(2), matcher.group(3));
         }
         throw new IllegalArgumentException(
-            "Bad artifact coordinates " + coords + ", expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>");
+            "Bad artifact coordinates " + coords
+                + ", expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>");
     }
 }

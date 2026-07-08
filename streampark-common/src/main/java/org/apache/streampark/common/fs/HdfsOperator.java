@@ -26,7 +26,8 @@ public final class HdfsOperator extends FsOperator {
 
     private static final HdfsOperator INSTANCE = new HdfsOperator();
 
-    private HdfsOperator() {}
+    private HdfsOperator() {
+    }
 
     public static HdfsOperator getInstance() {
         return INSTANCE;

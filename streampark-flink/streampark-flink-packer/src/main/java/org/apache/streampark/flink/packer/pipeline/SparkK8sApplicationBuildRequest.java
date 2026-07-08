@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.conf.SparkVersion;
@@ -31,6 +32,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class SparkK8sApplicationBuildRequest implements BuildParam {
+
     private String appName;
     private String workspace;
     private String mainClass;

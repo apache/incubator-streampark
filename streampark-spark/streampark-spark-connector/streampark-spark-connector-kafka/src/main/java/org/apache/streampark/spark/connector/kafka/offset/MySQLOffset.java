@@ -64,19 +64,19 @@ class MySQLOffset extends Offset {
             where = " `topic` = \"" + topics.iterator().next() + "\" ";
         } else {
             where =
-                    " `topic` in ("
-                            + topics.stream()
-                                    .map(t -> "\"" + t + "\"")
-                                    .collect(Collectors.joining(","))
-                            + ") ";
+                " `topic` in ("
+                    + topics.stream()
+                        .map(t -> "\"" + t + "\"")
+                        .collect(Collectors.joining(","))
+                    + ") ";
         }
         String sql =
-                "select `topic`,`partition`,`offset` from "
-                        + table
-                        + " where `groupId`='"
-                        + groupId
-                        + "' and "
-                        + where;
+            "select `topic`,`partition`,`offset` from "
+                + table
+                + " where `groupId`='"
+                + groupId
+                + "' and "
+                + where;
         List<Map<String, Object>> rows = JdbcUtils.select(sql, jdbcConfig);
         if (rows.isEmpty()) {
             return Collections.emptyMap();
@@ -84,8 +84,9 @@ class MySQLOffset extends Offset {
         Map<TopicPartition, Long> result = new HashMap<>();
         for (Map<String, Object> row : rows) {
             result.put(
-                    new TopicPartition(String.valueOf(row.get("topic")), Integer.parseInt(String.valueOf(row.get("partition")))),
-                    Long.parseLong(String.valueOf(row.get("offset"))));
+                new TopicPartition(String.valueOf(row.get("topic")),
+                    Integer.parseInt(String.valueOf(row.get("partition")))),
+                Long.parseLong(String.valueOf(row.get("offset"))));
         }
         return result;
     }
@@ -95,17 +96,17 @@ class MySQLOffset extends Offset {
         for (Map.Entry<TopicPartition, Long> entry : offsetInfos.entrySet()) {
             TopicPartition tp = entry.getKey();
             String sql =
-                    "insert into "
-                            + table
-                            + "(`topic`,`groupId`,`partition`,`offset`) values('"
-                            + tp.topic()
-                            + "','"
-                            + groupId
-                            + "','"
-                            + tp.partition()
-                            + "','"
-                            + entry.getValue()
-                            + "') on duplicate key update `offset`= values(`offset`) ";
+                "insert into "
+                    + table
+                    + "(`topic`,`groupId`,`partition`,`offset`) values('"
+                    + tp.topic()
+                    + "','"
+                    + groupId
+                    + "','"
+                    + tp.partition()
+                    + "','"
+                    + entry.getValue()
+                    + "') on duplicate key update `offset`= values(`offset`) ";
             int updated = JdbcUtils.update(sql, jdbcConfig);
             if (updated == 0) {
                 throw new RuntimeException("Commit kafka topic :" + tp.topic() + " failed!");
@@ -118,8 +119,8 @@ class MySQLOffset extends Offset {
     public void delete(String groupId, Set<String> topics) {
         for (String topic : topics) {
             JdbcUtils.update(
-                    "delete from " + table + " where topic='" + topic + "' and groupId='" + groupId + "'",
-                    jdbcConfig);
+                "delete from " + table + " where topic='" + topic + "' and groupId='" + groupId + "'",
+                jdbcConfig);
         }
         log.info("storeType:MySQL,deleteOffsets [ {},{} ]", groupId, topics);
     }

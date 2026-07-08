@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.core.conf;
 
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.ParameterTool;
 
 /** Flink runtime configuration holder. */
 public class FlinkConfiguration {

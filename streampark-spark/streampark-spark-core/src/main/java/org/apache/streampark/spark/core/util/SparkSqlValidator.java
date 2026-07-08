@@ -20,6 +20,7 @@ package org.apache.streampark.spark.core.util;
 import org.apache.streampark.common.enums.SparkSqlValidationFailedType;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.lang.reflect.Method;
@@ -31,21 +32,22 @@ import java.util.regex.Pattern;
 public final class SparkSqlValidator {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory()
-                    .getLogger(SparkSqlValidator.class.getName());
+        StreamParkLoggerFactory.loggerFactory()
+            .getLogger(SparkSqlValidator.class.getName());
 
     private static final String SPARK_SQL_PARSER_CLASS =
-            "org.apache.spark.sql.execution.SparkSqlParser";
+        "org.apache.spark.sql.execution.SparkSqlParser";
 
     private static final Pattern SYNTAX_ERROR_REGEXP =
-            Pattern.compile(".*\\(line\\s(\\d+),\\spos\\s(\\d+)\\).*");
+        Pattern.compile(".*\\(line\\s(\\d+),\\spos\\s(\\d+)\\).*");
 
-    private SparkSqlValidator() {}
+    private SparkSqlValidator() {
+    }
 
     public static SparkSqlValidationResult verifySql(String sql) {
         final SparkSqlValidationResult[] earlyReturn = new SparkSqlValidationResult[1];
         List<SqlCommandCall> sqlCommands =
-                SqlCommandParser.parseSQL(sql, result -> earlyReturn[0] = result);
+            SqlCommandParser.parseSQL(sql, result -> earlyReturn[0] = result);
         if (earlyReturn[0] != null) {
             return earlyReturn[0];
         }
@@ -62,7 +64,7 @@ public final class SparkSqlValidator {
                     String exception = ExceptionUtils.stringifyException(e);
                     int causedByIndex = exception.indexOf("Caused by:");
                     String causedBy =
-                            causedByIndex >= 0 ? exception.substring(causedByIndex) : exception;
+                        causedByIndex >= 0 ? exception.substring(causedByIndex) : exception;
                     String cleanUpError = exception.replaceAll("[\r\n]", "");
                     Matcher syntaxMatcher = SYNTAX_ERROR_REGEXP.matcher(cleanUpError);
                     if (syntaxMatcher.find()) {
@@ -70,34 +72,34 @@ public final class SparkSqlValidator {
                         int column = Integer.parseInt(syntaxMatcher.group(2));
                         int errorLine = call.lineStart + line - 1;
                         return SparkSqlValidationResult.builder()
-                                .success(false)
-                                .failedType(SparkSqlValidationFailedType.SYNTAX_ERROR)
-                                .lineStart(call.lineStart)
-                                .lineEnd(call.lineEnd)
-                                .errorLine(errorLine)
-                                .errorColumn(column)
-                                .sql(call.originSql)
-                                .exception(
-                                        causedBy.replaceAll(
-                                                "at\\sline\\s" + line, "at line " + errorLine))
-                                .build();
-                    }
-                    return SparkSqlValidationResult.builder()
                             .success(false)
                             .failedType(SparkSqlValidationFailedType.SYNTAX_ERROR)
                             .lineStart(call.lineStart)
                             .lineEnd(call.lineEnd)
+                            .errorLine(errorLine)
+                            .errorColumn(column)
                             .sql(call.originSql)
-                            .exception(causedBy)
+                            .exception(
+                                causedBy.replaceAll(
+                                    "at\\sline\\s" + line, "at line " + errorLine))
                             .build();
+                    }
+                    return SparkSqlValidationResult.builder()
+                        .success(false)
+                        .failedType(SparkSqlValidationFailedType.SYNTAX_ERROR)
+                        .lineStart(call.lineStart)
+                        .lineEnd(call.lineEnd)
+                        .sql(call.originSql)
+                        .exception(causedBy)
+                        .build();
                 }
             }
         } catch (Exception e) {
             return SparkSqlValidationResult.builder()
-                    .success(false)
-                    .failedType(SparkSqlValidationFailedType.CLASS_ERROR)
-                    .exception(ExceptionUtils.stringifyException(e))
-                    .build();
+                .success(false)
+                .failedType(SparkSqlValidationFailedType.CLASS_ERROR)
+                .exception(ExceptionUtils.stringifyException(e))
+                .build();
         }
         return SparkSqlValidationResult.ok();
     }

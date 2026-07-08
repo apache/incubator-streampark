@@ -35,15 +35,19 @@ public class SubmitResponse {
     private String clusterId;
     private Map<String, String> flinkConfig;
 
-    @Nullable @Builder.Default private String jobId = "";
+    @Nullable
+    @Builder.Default
+    private String jobId = "";
 
-    @Nullable @Builder.Default private String jobManagerUrl = "";
+    @Nullable
+    @Builder.Default
+    private String jobManagerUrl = "";
 
     public SubmitResponse(
-            String clusterId,
-            Map<String, String> flinkConfig,
-            String jobId,
-            String jobManagerUrl) {
+                          String clusterId,
+                          Map<String, String> flinkConfig,
+                          String jobId,
+                          String jobManagerUrl) {
         this.clusterId = clusterId;
         this.flinkConfig = flinkConfig;
         this.jobId = jobId;

@@ -97,6 +97,7 @@ public class SparkSqlValidationResult {
 
     /** Builder for {@link SparkSqlValidationResult}. */
     public static final class Builder {
+
         private boolean success = true;
         private SparkSqlValidationFailedType failedType;
         private int lineStart;

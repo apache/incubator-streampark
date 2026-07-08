@@ -27,15 +27,16 @@ public final class SQLContextUtil {
     private static SQLContext instance;
     private static SQLContext hiveContext;
 
-    private SQLContextUtil() {}
+    private SQLContextUtil() {
+    }
 
     public static SQLContext getSqlContext(SparkContext sparkContext) {
         if (instance == null) {
             instance =
-                    SparkSession.builder()
-                            .config(sparkContext.getConf())
-                            .getOrCreate()
-                            .sqlContext();
+                SparkSession.builder()
+                    .config(sparkContext.getConf())
+                    .getOrCreate()
+                    .sqlContext();
         }
         return instance;
     }
@@ -43,11 +44,11 @@ public final class SQLContextUtil {
     public static SQLContext getHiveContext(SparkContext sparkContext) {
         if (hiveContext == null) {
             hiveContext =
-                    SparkSession.builder()
-                            .config(sparkContext.getConf())
-                            .enableHiveSupport()
-                            .getOrCreate()
-                            .sqlContext();
+                SparkSession.builder()
+                    .config(sparkContext.getConf())
+                    .enableHiveSupport()
+                    .getOrCreate()
+                    .sqlContext();
         }
         return hiveContext;
     }

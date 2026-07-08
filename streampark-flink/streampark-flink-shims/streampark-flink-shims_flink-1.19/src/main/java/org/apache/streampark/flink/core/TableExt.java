@@ -24,7 +24,8 @@ import org.apache.flink.types.Row;
 /** Table API extensions for Flink 1.19 Java stream-table applications. */
 public final class TableExt {
 
-    private TableExt() {}
+    private TableExt() {
+    }
 
     /** Table alias helper (Scala {@code ->} operator equivalent: {@code as}). */
     public static final class Table {
@@ -57,7 +58,7 @@ public final class TableExt {
 
         /** Append stream conversion (Scala {@code >>} operator equivalent). */
         public <T> DataStream<T> toAppendDataStream(
-                TypeInformation<T> typeInfo, StreamTableContext context) {
+                                                    TypeInformation<T> typeInfo, StreamTableContext context) {
             context.isConvertedToDataStream = true;
             return context.toAppendStream(table, typeInfo);
         }

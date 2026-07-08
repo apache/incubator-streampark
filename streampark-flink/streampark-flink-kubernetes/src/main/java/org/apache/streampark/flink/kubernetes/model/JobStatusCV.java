@@ -29,6 +29,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobStatusCV {
+
     private FlinkJobState jobState;
     private String jobId;
     private String jobName = "";

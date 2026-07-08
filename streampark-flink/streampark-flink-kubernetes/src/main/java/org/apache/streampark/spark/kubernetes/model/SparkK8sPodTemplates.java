@@ -30,6 +30,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SparkK8sPodTemplates {
+
     private String driverPodTemplate = "";
     private String executorPodTemplate = "";
 

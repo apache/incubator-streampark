@@ -46,13 +46,13 @@ public class ParameterTool {
             key = args[index].substring(1);
         } else {
             throw new IllegalArgumentException(
-                    String.format(
-                            "Error parsing arguments '%s' on '%s'. Please prefix keys with -- or -.",
-                            Arrays.toString(args), args[index]));
+                String.format(
+                    "Error parsing arguments '%s' on '%s'. Please prefix keys with -- or -.",
+                    Arrays.toString(args), args[index]));
         }
         if (key.isEmpty()) {
             throw new IllegalArgumentException(
-                    "The input " + Arrays.toString(args) + " contains an empty argument");
+                "The input " + Arrays.toString(args) + " contains an empty argument");
         }
         return key;
     }

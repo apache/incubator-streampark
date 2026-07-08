@@ -27,6 +27,7 @@ import java.util.Map;
 @Accessors(fluent = true)
 @NoArgsConstructor
 public class SubmitResponse {
+
     private String sparkAppId;
     private String trackingUrl;
     private Map<String, String> sparkProperties;

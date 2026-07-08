@@ -20,6 +20,7 @@ package org.apache.streampark.flink.kubernetes.watcher;
 import org.apache.streampark.common.util.JsonUtils;
 import org.apache.streampark.flink.kubernetes.enums.FlinkJobState;
 import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
+
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
@@ -29,7 +30,8 @@ import java.util.Optional;
 /** Flink REST API response models and parsers. */
 final class FlinkRestModels {
 
-    private FlinkRestModels() {}
+    private FlinkRestModels() {
+    }
 
     static Optional<JobDetails> parseJobDetails(String json) {
         try {
@@ -42,26 +44,26 @@ final class FlinkRestModels {
             for (JsonNode node : jobsNode) {
                 JsonNode task = node.get("tasks");
                 details.add(
-                        new JobDetail(
-                                text(node, "jid"),
-                                text(node, "name"),
-                                text(node, "state"),
-                                longVal(node, "start-time"),
-                                longVal(node, "end-time"),
-                                longVal(node, "duration"),
-                                longVal(node, "last-modification"),
-                                new JobTask(
-                                        intVal(task, "total"),
-                                        intVal(task, "created"),
-                                        intVal(task, "scheduled"),
-                                        intVal(task, "deploying"),
-                                        intVal(task, "running"),
-                                        intVal(task, "finished"),
-                                        intVal(task, "canceling"),
-                                        intVal(task, "canceled"),
-                                        intVal(task, "failed"),
-                                        intVal(task, "reconciling"),
-                                        intVal(task, "initializing"))));
+                    new JobDetail(
+                        text(node, "jid"),
+                        text(node, "name"),
+                        text(node, "state"),
+                        longVal(node, "start-time"),
+                        longVal(node, "end-time"),
+                        longVal(node, "duration"),
+                        longVal(node, "last-modification"),
+                        new JobTask(
+                            intVal(task, "total"),
+                            intVal(task, "created"),
+                            intVal(task, "scheduled"),
+                            intVal(task, "deploying"),
+                            intVal(task, "running"),
+                            intVal(task, "finished"),
+                            intVal(task, "canceling"),
+                            intVal(task, "canceled"),
+                            intVal(task, "failed"),
+                            intVal(task, "reconciling"),
+                            intVal(task, "initializing"))));
             }
             return Optional.of(new JobDetails(details.toArray(new JobDetail[0])));
         } catch (Exception e) {
@@ -73,15 +75,15 @@ final class FlinkRestModels {
         try {
             JsonNode root = JsonUtils.read(json, JsonNode.class);
             return Optional.of(
-                    new FlinkRestOverview(
-                            intVal(root, "taskmanagers"),
-                            intVal(root, "slots-total"),
-                            intVal(root, "slots-available"),
-                            intVal(root, "jobs-running"),
-                            intVal(root, "jobs-finished"),
-                            intVal(root, "jobs-cancelled"),
-                            intVal(root, "jobs-failed"),
-                            text(root, "flink-version")));
+                new FlinkRestOverview(
+                    intVal(root, "taskmanagers"),
+                    intVal(root, "slots-total"),
+                    intVal(root, "slots-available"),
+                    intVal(root, "jobs-running"),
+                    intVal(root, "jobs-finished"),
+                    intVal(root, "jobs-cancelled"),
+                    intVal(root, "jobs-failed"),
+                    text(root, "flink-version")));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -111,13 +113,13 @@ final class FlinkRestModels {
                 return Optional.empty();
             }
             return Optional.of(
-                    new CheckpointResponse(
-                            longVal(completed, "id"),
-                            text(completed, "status"),
-                            text(completed, "external_path"),
-                            completed.path("is_savepoint").asBoolean(false),
-                            text(completed, "checkpoint_type"),
-                            longVal(completed, "trigger_timestamp")));
+                new CheckpointResponse(
+                    longVal(completed, "id"),
+                    text(completed, "status"),
+                    text(completed, "external_path"),
+                    completed.path("is_savepoint").asBoolean(false),
+                    text(completed, "checkpoint_type"),
+                    longVal(completed, "trigger_timestamp")));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -139,6 +141,7 @@ final class FlinkRestModels {
     }
 
     static final class JobDetails {
+
         private final JobDetail[] jobs;
 
         JobDetails(JobDetail[] jobs) {
@@ -151,6 +154,7 @@ final class FlinkRestModels {
     }
 
     static final class JobDetail {
+
         private final String jid;
         private final String name;
         private final String state;
@@ -161,14 +165,14 @@ final class FlinkRestModels {
         private final JobTask tasks;
 
         JobDetail(
-                String jid,
-                String name,
-                String state,
-                long startTime,
-                long endTime,
-                long duration,
-                long lastModification,
-                JobTask tasks) {
+                  String jid,
+                  String name,
+                  String state,
+                  long startTime,
+                  long endTime,
+                  long duration,
+                  long lastModification,
+                  JobTask tasks) {
             this.jid = jid;
             this.name = name;
             this.state = state;
@@ -181,15 +185,15 @@ final class FlinkRestModels {
 
         JobStatusCV toJobStatusCV(long pollEmitTime, long pollAckTime) {
             return new JobStatusCV(
-                    FlinkJobState.of(state),
-                    jid,
-                    name,
-                    startTime,
-                    endTime,
-                    duration,
-                    tasks.total,
-                    pollEmitTime,
-                    pollAckTime);
+                FlinkJobState.of(state),
+                jid,
+                name,
+                startTime,
+                endTime,
+                duration,
+                tasks.total,
+                pollEmitTime,
+                pollAckTime);
         }
 
         String jid() {
@@ -198,6 +202,7 @@ final class FlinkRestModels {
     }
 
     static final class JobTask {
+
         private final int total;
         private final int created;
         private final int scheduled;
@@ -237,6 +242,7 @@ final class FlinkRestModels {
     }
 
     static final class FlinkRestOverview {
+
         private final Integer taskManagers;
         private final Integer slotsTotal;
         private final Integer slotsAvailable;
@@ -247,14 +253,14 @@ final class FlinkRestModels {
         private final String flinkVersion;
 
         FlinkRestOverview(
-                Integer taskManagers,
-                Integer slotsTotal,
-                Integer slotsAvailable,
-                Integer jobsRunning,
-                Integer jobsFinished,
-                Integer jobsCancelled,
-                Integer jobsFailed,
-                String flinkVersion) {
+                          Integer taskManagers,
+                          Integer slotsTotal,
+                          Integer slotsAvailable,
+                          Integer jobsRunning,
+                          Integer jobsFinished,
+                          Integer jobsCancelled,
+                          Integer jobsFailed,
+                          String flinkVersion) {
             this.taskManagers = taskManagers;
             this.slotsTotal = slotsTotal;
             this.slotsAvailable = slotsAvailable;
@@ -265,16 +271,31 @@ final class FlinkRestModels {
             this.flinkVersion = flinkVersion;
         }
 
-        Integer taskManagers() { return taskManagers; }
-        Integer slotsTotal() { return slotsTotal; }
-        Integer slotsAvailable() { return slotsAvailable; }
-        Integer jobsRunning() { return jobsRunning; }
-        Integer jobsFinished() { return jobsFinished; }
-        Integer jobsCancelled() { return jobsCancelled; }
-        Integer jobsFailed() { return jobsFailed; }
+        Integer taskManagers() {
+            return taskManagers;
+        }
+        Integer slotsTotal() {
+            return slotsTotal;
+        }
+        Integer slotsAvailable() {
+            return slotsAvailable;
+        }
+        Integer jobsRunning() {
+            return jobsRunning;
+        }
+        Integer jobsFinished() {
+            return jobsFinished;
+        }
+        Integer jobsCancelled() {
+            return jobsCancelled;
+        }
+        Integer jobsFailed() {
+            return jobsFailed;
+        }
     }
 
     static final class FlinkRestJmConfigItem {
+
         private final String key;
         private final String value;
 
@@ -293,6 +314,7 @@ final class FlinkRestModels {
     }
 
     static final class CheckpointResponse {
+
         private final long id;
         private final String status;
         private final String externalPath;
@@ -301,12 +323,12 @@ final class FlinkRestModels {
         private final long triggerTimestamp;
 
         CheckpointResponse(
-                long id,
-                String status,
-                String externalPath,
-                boolean isSavepoint,
-                String checkpointType,
-                long triggerTimestamp) {
+                           long id,
+                           String status,
+                           String externalPath,
+                           boolean isSavepoint,
+                           String checkpointType,
+                           long triggerTimestamp) {
             this.id = id;
             this.status = status;
             this.externalPath = externalPath;
@@ -315,11 +337,23 @@ final class FlinkRestModels {
             this.triggerTimestamp = triggerTimestamp;
         }
 
-        long id() { return id; }
-        String status() { return status; }
-        String externalPath() { return externalPath; }
-        boolean isSavepoint() { return isSavepoint; }
-        String checkpointType() { return checkpointType; }
-        long triggerTimestamp() { return triggerTimestamp; }
+        long id() {
+            return id;
+        }
+        String status() {
+            return status;
+        }
+        String externalPath() {
+            return externalPath;
+        }
+        boolean isSavepoint() {
+            return isSavepoint;
+        }
+        String checkpointType() {
+            return checkpointType;
+        }
+        long triggerTimestamp() {
+            return triggerTimestamp;
+        }
     }
 }

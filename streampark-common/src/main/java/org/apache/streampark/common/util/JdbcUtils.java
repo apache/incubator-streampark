@@ -19,10 +19,10 @@ package org.apache.streampark.common.util;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -46,21 +46,22 @@ import java.util.function.Consumer;
 public final class JdbcUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(JdbcUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(JdbcUtils.class.getName());
 
     private static final ConcurrentHashMap<String, ReentrantLock> LOCK_MAP = new ConcurrentHashMap<>();
 
     private static final ConcurrentHashMap<String, HikariDataSource> DATA_SOURCE_HOLDER =
-            new ConcurrentHashMap<>();
+        new ConcurrentHashMap<>();
 
-    private JdbcUtils() {}
+    private JdbcUtils() {
+    }
 
     public static List<Map<String, Object>> select(String sql, Properties jdbcConfig) {
         return select(sql, null, jdbcConfig);
     }
 
     public static List<Map<String, Object>> select(
-            String sql, Consumer<ResultSet> func, Properties jdbcConfig) {
+                                                   String sql, Consumer<ResultSet> func, Properties jdbcConfig) {
         if (sql == null || sql.isEmpty()) {
             return Collections.emptyList();
         }
@@ -239,7 +240,7 @@ public final class JdbcUtils {
                         setFieldValue(field, jdbcConfig, value);
                     } catch (NoSuchFieldException e) {
                         String setMethod =
-                                "set" + key.substring(0, 1).toUpperCase() + key.substring(1);
+                            "set" + key.substring(0, 1).toUpperCase() + key.substring(1);
                         Method method = null;
                         for (Method m : jdbcConfig.getClass().getMethods()) {
                             if (m.getName().equals(setMethod) && m.getParameterCount() == 1) {
@@ -252,9 +253,9 @@ public final class JdbcUtils {
                             invokeSetter(method, jdbcConfig, value);
                         } else {
                             throw new IllegalArgumentException(
-                                    "jdbcConfig error,property:"
-                                            + key
-                                            + " invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP");
+                                "jdbcConfig error,property:"
+                                    + key
+                                    + " invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP");
                         }
                     }
                 }
@@ -269,8 +270,8 @@ public final class JdbcUtils {
         }
     }
 
-    private static void setFieldValue(Field field, HikariConfig jdbcConfig, String value)
-            throws IllegalAccessException {
+    private static void setFieldValue(Field field, HikariConfig jdbcConfig,
+                                      String value) throws IllegalAccessException {
         String type = field.getType().getSimpleName();
         switch (type) {
             case "String":
@@ -290,8 +291,7 @@ public final class JdbcUtils {
         }
     }
 
-    private static void invokeSetter(Method method, HikariConfig jdbcConfig, String value)
-            throws Exception {
+    private static void invokeSetter(Method method, HikariConfig jdbcConfig, String value) throws Exception {
         String type = method.getParameterTypes()[0].getSimpleName();
         switch (type) {
             case "String":

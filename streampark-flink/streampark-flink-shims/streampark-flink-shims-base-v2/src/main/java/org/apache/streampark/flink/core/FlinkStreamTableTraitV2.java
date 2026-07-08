@@ -24,12 +24,10 @@ import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.cache.DistributedCache;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.io.FileInputFormat;
-import org.apache.flink.api.common.io.FilePathFilter;
 import org.apache.flink.api.common.io.InputFormat;
 import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.api.connector.source.SourceSplit;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.core.execution.JobListener;
@@ -54,16 +52,14 @@ import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDescriptor;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.expressions.Expression;
-import org.apache.flink.table.functions.AggregateFunction;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.flink.table.functions.TableAggregateFunction;
-import org.apache.flink.table.functions.TableFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
 import org.apache.flink.table.module.ModuleEntry;
 import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.types.AbstractDataType;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.ParameterTool;
 import org.apache.flink.util.SplittableIterator;
 
 import java.util.Collection;
@@ -89,9 +85,9 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
     public boolean isConvertedToDataStream;
 
     protected FlinkStreamTableTraitV2(
-            ParameterTool parameter,
-            StreamExecutionEnvironment streamEnv,
-            StreamTableEnvironment tableEnv) {
+                                      ParameterTool parameter,
+                                      StreamExecutionEnvironment streamEnv,
+                                      StreamTableEnvironment tableEnv) {
         this.parameter = parameter;
         this.streamEnv = streamEnv;
         this.tableEnv = tableEnv;
@@ -196,22 +192,9 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
         return streamEnv.getCheckpointingMode();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     public void $configure(ReadableConfig configuration, ClassLoader classLoader) {
         streamEnv.configure(configuration, classLoader);
     }
-
 
     public <T> DataStream<T> $fromData(T data) {
         return streamEnv.fromData(data);
@@ -221,11 +204,9 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
         return streamEnv.fromSequence(from, to);
     }
 
-
     public <T> DataStream<T> $fromCollection(Collection<T> data) {
         return streamEnv.fromCollection(data);
     }
-
 
     public <T> DataStream<T> $fromParallelCollection(SplittableIterator<T> data, Class<T> clazz) {
         return streamEnv.fromParallelCollection(data, clazz);
@@ -236,15 +217,15 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
     }
 
     public <T> DataStream<T> $readFile(
-            FileInputFormat<T> inputFormat,
-            String filePath,
-            FileProcessingMode watchType,
-            long interval) {
+                                       FileInputFormat<T> inputFormat,
+                                       String filePath,
+                                       FileProcessingMode watchType,
+                                       long interval) {
         return streamEnv.readFile(inputFormat, filePath, watchType, interval);
     }
 
     public DataStream<String> $socketTextStream(
-            String hostname, int port, char delimiter, long maxRetry) {
+                                                String hostname, int port, char delimiter, long maxRetry) {
         return streamEnv.socketTextStream(hostname, port, delimiter, maxRetry);
     }
 
@@ -252,11 +233,10 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
         return streamEnv.createInput(inputFormat);
     }
 
-
     public <T> DataStream<T> $fromSource(
-            Source<T, ? extends SourceSplit, ?> source,
-            WatermarkStrategy<T> watermarkStrategy,
-            String sourceName) {
+                                         Source<T, ? extends SourceSplit, ?> source,
+                                         WatermarkStrategy<T> watermarkStrategy,
+                                         String sourceName) {
         return streamEnv.fromSource(source, watermarkStrategy, sourceName);
     }
 
@@ -312,10 +292,6 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
         return streamEnv.isForceUnalignedCheckpoints();
     }
 
-
-
-
-
     @Override
     public <T> Table fromDataStream(DataStream<T> dataStream, Schema schema) {
         return tableEnv.fromDataStream(dataStream, schema);
@@ -333,7 +309,7 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public Table fromChangelogStream(
-            DataStream<Row> dataStream, Schema schema, ChangelogMode changelogMode) {
+                                     DataStream<Row> dataStream, Schema schema, ChangelogMode changelogMode) {
         return tableEnv.fromChangelogStream(dataStream, schema, changelogMode);
     }
 
@@ -374,7 +350,7 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public DataStream<Row> toChangelogStream(
-            Table table, Schema targetSchema, ChangelogMode changelogMode) {
+                                             Table table, Schema targetSchema, ChangelogMode changelogMode) {
         isConvertedToDataStream = true;
         return tableEnv.toChangelogStream(table, targetSchema, changelogMode);
     }
@@ -403,28 +379,28 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public void createFunction(
-            String path, String className, List<ResourceUri> resourceUris) {
+                               String path, String className, List<ResourceUri> resourceUris) {
         tableEnv.createFunction(path, className, resourceUris);
     }
 
     @Override
     public void createFunction(
-            String path,
-            String className,
-            List<ResourceUri> resourceUris,
-            boolean ignoreIfExists) {
+                               String path,
+                               String className,
+                               List<ResourceUri> resourceUris,
+                               boolean ignoreIfExists) {
         tableEnv.createFunction(path, className, resourceUris, ignoreIfExists);
     }
 
     @Override
     public void createTemporaryFunction(
-            String path, String className, List<ResourceUri> resourceUris) {
+                                        String path, String className, List<ResourceUri> resourceUris) {
         tableEnv.createTemporaryFunction(path, className, resourceUris);
     }
 
     @Override
     public void createTemporarySystemFunction(
-            String name, String className, List<ResourceUri> resourceUris) {
+                                              String name, String className, List<ResourceUri> resourceUris) {
         tableEnv.createTemporarySystemFunction(name, className, resourceUris);
     }
 
@@ -455,7 +431,7 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public String explainSql(
-            String statement, ExplainFormat format, ExplainDetail... extraDetails) {
+                             String statement, ExplainFormat format, ExplainDetail... extraDetails) {
         return tableEnv.explainSql(statement, format, extraDetails);
     }
 
@@ -486,7 +462,7 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public <T> void createTemporaryView(
-            String path, DataStream<T> dataStream, Expression... fields) {
+                                        String path, DataStream<T> dataStream, Expression... fields) {
         tableEnv.createTemporaryView(path, dataStream, fields);
     }
 
@@ -532,13 +508,13 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public void createTemporarySystemFunction(
-            String name, Class<? extends UserDefinedFunction> functionClass) {
+                                              String name, Class<? extends UserDefinedFunction> functionClass) {
         tableEnv.createTemporarySystemFunction(name, functionClass);
     }
 
     @Override
     public void createTemporarySystemFunction(
-            String name, UserDefinedFunction functionInstance) {
+                                              String name, UserDefinedFunction functionInstance) {
         tableEnv.createTemporarySystemFunction(name, functionInstance);
     }
 
@@ -554,9 +530,9 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public void createFunction(
-            String path,
-            Class<? extends UserDefinedFunction> functionClass,
-            boolean ignoreIfExists) {
+                               String path,
+                               Class<? extends UserDefinedFunction> functionClass,
+                               boolean ignoreIfExists) {
         tableEnv.createFunction(path, functionClass, ignoreIfExists);
     }
 
@@ -567,7 +543,7 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
 
     @Override
     public void createTemporaryFunction(
-            String path, Class<? extends UserDefinedFunction> functionClass) {
+                                        String path, Class<? extends UserDefinedFunction> functionClass) {
         tableEnv.createTemporaryFunction(path, functionClass);
     }
 

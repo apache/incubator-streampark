@@ -38,7 +38,8 @@ import java.util.Map;
 /** Flink SQL client entry point. */
 public final class SqlClient {
 
-    private SqlClient() {}
+    private SqlClient() {
+    }
 
     public static void main(String[] args) {
         List<String> arguments = new ArrayList<>();
@@ -57,7 +58,7 @@ public final class SqlClient {
             flinkSql = DeflaterUtils.unzipString(sql);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Usage: flink sql is invalid or null, please check", e);
+                "Usage: flink sql is invalid or null, please check", e);
         }
 
         List<SqlCommandCall> sets = new ArrayList<>();
@@ -71,9 +72,9 @@ public final class SqlClient {
         String mode;
 
         java.util.Optional<SqlCommandCall> runtimeModeSet =
-                sets.stream()
-                        .filter(e -> ExecutionOptions.RUNTIME_MODE.key().equals(e.operands[0]))
-                        .findFirst();
+            sets.stream()
+                .filter(e -> ExecutionOptions.RUNTIME_MODE.key().equals(e.operands[0]))
+                .findFirst();
 
         if (runtimeModeSet.isPresent()) {
             mode = runtimeModeSet.get().operands[1].toUpperCase();
@@ -86,11 +87,11 @@ public final class SqlClient {
                     mode = defaultMode;
                 } else {
                     Map<String, String> parameter =
-                            PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.substring(7)));
+                        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(appConf.substring(7)));
                     mode =
-                            parameter
-                                    .getOrDefault(ConfigKeys.KEY_FLINK_TABLE_MODE(), defaultMode)
-                                    .toUpperCase();
+                        parameter
+                            .getOrDefault(ConfigKeys.KEY_FLINK_TABLE_MODE(), defaultMode)
+                            .toUpperCase();
                 }
                 arguments.add("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=" + mode);
             } else {
@@ -109,11 +110,12 @@ public final class SqlClient {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]");
+                    "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]");
         }
     }
 
     private static final class BatchSqlApp extends FlinkTable {
+
         @Override
         protected void handle() {
             context.sql(null);
@@ -121,6 +123,7 @@ public final class SqlClient {
     }
 
     private static final class StreamSqlApp extends FlinkStreamTable {
+
         @Override
         protected void handle() {
             context.sql(null);

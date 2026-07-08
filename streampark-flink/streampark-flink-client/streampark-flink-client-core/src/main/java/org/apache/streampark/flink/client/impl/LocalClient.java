@@ -26,6 +26,7 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.FlinkClientTrait;
 import org.apache.streampark.flink.client.util.FlinkConfigurationEnhancer;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.flink.client.deployment.executors.RemoteExecutor;
@@ -48,49 +49,49 @@ public final class LocalClient extends FlinkClientTrait {
     public static final LocalClient INSTANCE = new LocalClient();
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(LocalClient.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(LocalClient.class.getName());
 
-    private LocalClient() {}
+    private LocalClient() {
+    }
 
     @Override
     public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         FlinkConfigurationEnhancer.safeSet(flinkConfig, PipelineOptions.NAME, submitRequest.getEffectiveAppName());
         LOG.info(
-                "\n------------------------------------------------------------------\n"
-                        + "Effective submit configuration: {}\n"
-                        + "------------------------------------------------------------------\n",
-                flinkConfig);
+            "\n------------------------------------------------------------------\n"
+                + "Effective submit configuration: {}\n"
+                + "------------------------------------------------------------------\n",
+            flinkConfig);
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
-            throws Exception {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
         JobGraphPackagedProgram programJobGraph =
-                getJobGraph(flinkConfig, submitRequest, submitRequest.getUserJarFile());
+            getJobGraph(flinkConfig, submitRequest, submitRequest.getUserJarFile());
         PackagedProgram packageProgram = programJobGraph.packagedProgram;
         JobGraph jobGraph = programJobGraph.jobGraph;
         MiniClusterClient client = createLocalCluster(flinkConfig);
         String jobId = client.submitJob(jobGraph).get().toString();
         SubmitResponse resp =
-                SubmitResponse.builder()
-                        .clusterId(jobId)
-                        .flinkConfig(flinkConfig.toMap())
-                        .jobId(jobId)
-                        .jobManagerUrl(client.getWebInterfaceURL())
-                        .build();
+            SubmitResponse.builder()
+                .clusterId(jobId)
+                .flinkConfig(flinkConfig.toMap())
+                .jobId(jobId)
+                .jobManagerUrl(client.getWebInterfaceURL())
+                .build();
         closeSubmit(submitRequest, packageProgram, client);
         return resp;
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
-            TriggerSavepointRequest savepointRequest, Configuration flinkConfig) throws Exception {
+                                                TriggerSavepointRequest savepointRequest,
+                                                Configuration flinkConfig) throws Exception {
         return RemoteClient.INSTANCE.doTriggerSavepoint(savepointRequest, flinkConfig);
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig)
-            throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
         return RemoteClient.INSTANCE.doCancel(cancelRequest, flinkConfig);
     }
 
@@ -98,17 +99,17 @@ public final class LocalClient extends FlinkClientTrait {
         FlinkConfigurationEnhancer.safeSet(flinkConfig, JobManagerOptions.PORT, 0);
 
         int numTaskManagers =
-                flinkConfig.getInteger(
-                        ConfigConstants.LOCAL_NUMBER_TASK_MANAGER,
-                        ConfigConstants.DEFAULT_LOCAL_NUMBER_TASK_MANAGER);
+            flinkConfig.getInteger(
+                ConfigConstants.LOCAL_NUMBER_TASK_MANAGER,
+                ConfigConstants.DEFAULT_LOCAL_NUMBER_TASK_MANAGER);
         int numSlotsPerTaskManager = flinkConfig.getInteger(TaskManagerOptions.NUM_TASK_SLOTS);
 
         MiniClusterConfiguration miniClusterConfig =
-                new MiniClusterConfiguration.Builder()
-                        .setConfiguration(flinkConfig)
-                        .setNumSlotsPerTaskManager(numSlotsPerTaskManager)
-                        .setNumTaskManagers(numTaskManagers)
-                        .build();
+            new MiniClusterConfiguration.Builder()
+                .setConfiguration(flinkConfig)
+                .setNumSlotsPerTaskManager(numSlotsPerTaskManager)
+                .setNumTaskManagers(numTaskManagers)
+                .build();
 
         MiniCluster cluster = new MiniCluster(miniClusterConfig);
         cluster.start();

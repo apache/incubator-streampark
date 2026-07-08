@@ -23,10 +23,11 @@ import java.util.Optional;
 public final class SqlCommandConverters {
 
     public static final SqlCommandConverter DEFAULT =
-            groups -> Optional.of(new String[] {groups.length > 0 ? groups[0] : ""});
+        groups -> Optional.of(new String[]{groups.length > 0 ? groups[0] : ""});
 
     public static final SqlCommandConverter NO_OPERANDS =
-            groups -> Optional.of(new String[0]);
+        groups -> Optional.of(new String[0]);
 
-    private SqlCommandConverters() {}
+    private SqlCommandConverters() {
+    }
 }

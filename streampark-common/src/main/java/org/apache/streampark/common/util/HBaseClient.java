@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.common.conf.ConfigKeys;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -24,22 +26,25 @@ import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.apache.streampark.common.conf.ConfigKeys;
 
 import java.io.Serializable;
 import java.util.Properties;
 import java.util.function.Supplier;
 
 public class HBaseClient implements Serializable {
+
     private static final long serialVersionUID = 1L;
     public static final Configuration CONF = HBaseConfiguration.create();
     private final Supplier<Connection> func;
     private transient Connection connection;
 
-    public HBaseClient(Supplier<Connection> func) { this.func = func; }
+    public HBaseClient(Supplier<Connection> func) {
+        this.func = func;
+    }
 
     public Connection getConnection() {
-        if (connection == null) connection = func.get();
+        if (connection == null)
+            connection = func.get();
         return connection;
     }
 
@@ -49,7 +54,8 @@ public class HBaseClient implements Serializable {
 
     public static HBaseClient apply(Properties prop) {
         Object user = prop.remove(ConfigKeys.KEY_HBASE_AUTH_USER());
-        for (String key : prop.stringPropertyNames()) CONF.set(key, prop.getProperty(key));
+        for (String key : prop.stringPropertyNames())
+            CONF.set(key, prop.getProperty(key));
         return new HBaseClient(() -> {
             try {
                 if (user != null) {
@@ -59,17 +65,19 @@ public class HBaseClient implements Serializable {
                 }
                 Connection connection = ConnectionFactory.createConnection(CONF);
                 Runtime.getRuntime()
-                        .addShutdownHook(
-                                new Thread(
-                                        () -> {
-                                            try {
-                                                connection.close();
-                                            } catch (Exception ignored) {
-                                                // ignore
-                                            }
-                                        }));
+                    .addShutdownHook(
+                        new Thread(
+                            () -> {
+                                try {
+                                    connection.close();
+                                } catch (Exception ignored) {
+                                    // ignore
+                                }
+                            }));
                 return connection;
-            } catch (Exception e) { throw new RuntimeException(e); }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 }

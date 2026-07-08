@@ -24,7 +24,8 @@ import org.apache.flink.types.Row;
 /** Table API extensions for Flink 2.2 Java stream-table applications. */
 public final class TableExt {
 
-    private TableExt() {}
+    private TableExt() {
+    }
 
     /** Table alias helper (Scala {@code ->} operator equivalent: {@code as}). */
     public static final class Table {
@@ -48,7 +49,7 @@ public final class TableExt {
         private final StreamTableEnvironment streamTableEnv;
 
         public TableConversions(
-                org.apache.flink.table.api.Table table, StreamTableEnvironment streamTableEnv) {
+                                org.apache.flink.table.api.Table table, StreamTableEnvironment streamTableEnv) {
             this.table = table;
             this.streamTableEnv = streamTableEnv;
         }

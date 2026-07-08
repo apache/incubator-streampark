@@ -24,9 +24,9 @@ import org.apache.streampark.common.util.HdfsUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.flink.core.conf.FlinkConfiguration;
 
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.ParameterTool;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,14 +52,14 @@ public class FlinkStreamingInitializerV2 {
         FlinkStreamingInitializerV2 flinkInitializer = new FlinkStreamingInitializerV2(args);
         flinkInitializer.javaStreamEnvConfFunc = config;
         return new StreamingInitResult(
-                flinkInitializer.getConfiguration().parameter, flinkInitializer.getStreamEnv());
+            flinkInitializer.getConfiguration().parameter, flinkInitializer.getStreamEnv());
     }
 
     public static StreamingInitResult initialize(StreamEnvConfig args) {
         FlinkStreamingInitializerV2 flinkInitializer = new FlinkStreamingInitializerV2(args.args);
         flinkInitializer.javaStreamEnvConfFunc = args.conf;
         return new StreamingInitResult(
-                flinkInitializer.getConfiguration().parameter, flinkInitializer.getStreamEnv());
+            flinkInitializer.getConfiguration().parameter, flinkInitializer.getStreamEnv());
     }
 
     ParameterTool getParameter() {
@@ -76,8 +76,8 @@ public class FlinkStreamingInitializerV2 {
     StreamExecutionEnvironment getStreamEnv() {
         if (streamEnv == null) {
             streamEnv =
-                    StreamExecutionEnvironment.getExecutionEnvironment(
-                            getConfiguration().envConfig);
+                StreamExecutionEnvironment.getExecutionEnvironment(
+                    getConfiguration().envConfig);
             if (javaStreamEnvConfFunc != null) {
                 javaStreamEnvConfFunc.configuration(streamEnv, getConfiguration().parameter);
             }
@@ -91,19 +91,19 @@ public class FlinkStreamingInitializerV2 {
         String configFile = argsMap.get(ConfigKeys.KEY_APP_CONF(), null);
         if (configFile == null || configFile.isEmpty()) {
             throw new ExceptionInInitializerError(
-                    "[StreamPark] Usage:can't find config,please set \"--conf $path \" in main arguments");
+                "[StreamPark] Usage:can't find config,please set \"--conf $path \" in main arguments");
         }
         Map<String, String> configMap = parseConfig(configFile);
         Map<String, String> properConf =
-                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
+            extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
         Map<String, String> appConf =
-                extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
+            extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
 
         ParameterTool parameter =
-                ParameterTool.fromSystemProperties()
-                        .mergeWith(ParameterTool.fromMap(properConf))
-                        .mergeWith(ParameterTool.fromMap(appConf))
-                        .mergeWith(argsMap);
+            ParameterTool.fromSystemProperties()
+                .mergeWith(ParameterTool.fromMap(properConf))
+                .mergeWith(ParameterTool.fromMap(appConf))
+                .mergeWith(argsMap);
 
         Configuration envConfig = Configuration.fromMap(properConf);
         return new FlinkConfiguration(parameter, envConfig, null);
@@ -117,38 +117,38 @@ public class FlinkStreamingInitializerV2 {
             map = PropertiesUtils.fromHoconText(DeflaterUtils.unzipString(config.substring(7)));
         } else if (config.startsWith("prop://")) {
             map =
-                    PropertiesUtils.fromPropertiesText(
-                            DeflaterUtils.unzipString(config.substring(7)));
+                PropertiesUtils.fromPropertiesText(
+                    DeflaterUtils.unzipString(config.substring(7)));
         } else if (config.startsWith("hdfs://")) {
             try {
                 String text = HdfsUtils.read(config);
                 map = readConfig(config, text);
             } catch (IOException e) {
                 throw new IllegalArgumentException(
-                        "[StreamPark] Failed to read application config from HDFS: " + config, e);
+                    "[StreamPark] Failed to read application config from HDFS: " + config, e);
             }
         } else {
             File file = new File(config);
             if (!file.exists()) {
                 throw new IllegalArgumentException(
-                        "[StreamPark] Usage: application config file: "
-                                + file
-                                + " is not found!!!");
+                    "[StreamPark] Usage: application config file: "
+                        + file
+                        + " is not found!!!");
             }
             try {
                 map = readConfig(config, FileUtils.readFile(file));
             } catch (IOException e) {
                 throw new IllegalArgumentException(
-                        "[StreamPark] Failed to read application config file: " + config, e);
+                    "[StreamPark] Failed to read application config file: " + config, e);
             }
         }
         Map<String, String> filtered = new HashMap<>();
         map.forEach(
-                (key, value) -> {
-                    if (value != null && !value.isEmpty()) {
-                        filtered.put(key, value);
-                    }
-                });
+            (key, value) -> {
+                if (value != null && !value.isEmpty()) {
+                    filtered.put(key, value);
+                }
+            });
         return filtered;
     }
 
@@ -164,18 +164,18 @@ public class FlinkStreamingInitializerV2 {
                 return PropertiesUtils.fromPropertiesText(text);
             default:
                 throw new IllegalArgumentException(
-                        "[StreamPark] Usage: application config file error,must be [yaml|conf|properties]");
+                    "[StreamPark] Usage: application config file error,must be [yaml|conf|properties]");
         }
     }
 
     Map<String, String> extractConfigByPrefix(Map<String, String> configMap, String prefix) {
         Map<String, String> map = new HashMap<>();
         configMap.forEach(
-                (key, value) -> {
-                    if (key.startsWith(prefix)) {
-                        map.put(key.substring(prefix.length()), value);
-                    }
-                });
+            (key, value) -> {
+                if (key.startsWith(prefix)) {
+                    map.put(key.substring(prefix.length()), value);
+                }
+            });
         return map;
     }
 

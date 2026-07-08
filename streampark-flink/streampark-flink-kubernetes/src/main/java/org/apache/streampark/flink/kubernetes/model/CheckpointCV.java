@@ -25,6 +25,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class CheckpointCV {
+
     private long id;
     private String status;
     private String externalPath;

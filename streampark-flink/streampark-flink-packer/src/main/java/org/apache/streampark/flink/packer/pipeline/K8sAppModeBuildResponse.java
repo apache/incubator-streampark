@@ -14,21 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.Set;
-
-import lombok.experimental.Accessors;
 
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class K8sAppModeBuildResponse implements FlinkBuildResult {
+
     private String workspacePath;
     private String flinkBaseImage;
     private String mainJarPath;

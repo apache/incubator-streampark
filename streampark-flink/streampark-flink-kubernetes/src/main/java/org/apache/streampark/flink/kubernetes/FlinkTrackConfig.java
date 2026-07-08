@@ -28,6 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class FlinkTrackConfig {
+
     private JobStatusWatcherConfig jobStatusWatcherConf;
     private MetricWatcherConfig metricWatcherConf;
 

@@ -26,7 +26,8 @@ import java.util.Properties;
 
 public final class ConfigUtils {
 
-    private ConfigUtils() {}
+    private ConfigUtils() {
+    }
 
     public static Properties getConf(Map<String, String> parameter) {
         return getConf(parameter, "", "", "");
@@ -37,7 +38,7 @@ public final class ConfigUtils {
     }
 
     public static Properties getConf(
-            Map<String, String> parameter, String prefix, String addfix, String alias) {
+                                     Map<String, String> parameter, String prefix, String addfix, String alias) {
         Map<String, String> map = filterParam(parameter, prefix + alias);
         Properties prop = new Properties();
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -61,7 +62,7 @@ public final class ConfigUtils {
     }
 
     public static Properties getKafkaSinkConf(
-            Map<String, String> parameter, String topic, String alias) {
+                                              Map<String, String> parameter, String topic, String alias) {
         String prefix = ConfigKeys.KAFKA_SINK_PREFIX() + alias;
         if (!prefix.endsWith(".")) {
             prefix = prefix + ".";
@@ -79,7 +80,7 @@ public final class ConfigUtils {
             Object top = kafkaProperty.get(ConfigKeys.KEY_KAFKA_TOPIC());
             if (top == null || top.toString().split(",|\\s+").length > 1) {
                 throw new IllegalArgumentException(
-                        "Can't find a unique topic!!!,you must be input a topic");
+                    "Can't find a unique topic!!!,you must be input a topic");
             }
             resolvedTopic = top.toString();
         }
@@ -118,13 +119,13 @@ public final class ConfigUtils {
         String password = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_PASSWORD(), null);
         if (driver == null || url == null) {
             throw new IllegalArgumentException(
-                    "Jdbc instance:" + prefix + " error,[driver|url] must not be null");
+                "Jdbc instance:" + prefix + " error,[driver|url] must not be null");
         }
         if ((user != null && password == null) || (user == null && password != null)) {
             throw new IllegalArgumentException(
-                    "Jdbc instance:"
-                            + prefix
-                            + " error, [user|password] must be all null,or all not null ");
+                "Jdbc instance:"
+                    + prefix
+                    + " error, [user|password] must be all null,or all not null ");
         }
         Map<String, String> param = filterParam(parameter, prefix);
         Properties properties = new Properties();
@@ -142,7 +143,7 @@ public final class ConfigUtils {
     }
 
     public static Properties getConfFromProperties(
-            Properties properties, String prefix, String addfix, String alias) {
+                                                   Properties properties, String prefix, String addfix, String alias) {
         Map<String, String> map = new HashMap<>();
         if (properties != null) {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -168,8 +169,8 @@ public final class ConfigUtils {
         for (Map.Entry<String, String> entry : parameter.entrySet()) {
             if (entry.getKey().startsWith(fix) && entry.getValue() != null) {
                 result.put(
-                        entry.getKey().substring(fix.length()).replaceFirst("^\\.", ""),
-                        entry.getValue());
+                    entry.getKey().substring(fix.length()).replaceFirst("^\\.", ""),
+                    entry.getValue());
             }
         }
         return result;

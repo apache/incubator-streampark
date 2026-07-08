@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.table.api.TableConfig;
+import org.apache.flink.util.ParameterTool;
 
 @FunctionalInterface
 public interface TableEnvConfigFunction {

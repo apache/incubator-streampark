@@ -17,6 +17,12 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.ConfigKeys;
+import org.apache.streampark.common.conf.InternalConfigHolder;
+
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -31,10 +37,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.ConfigKeys;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import javax.security.auth.kerberos.KerberosTicket;
 
@@ -48,13 +50,12 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /** Hadoop filesystem and YARN client utilities. */
 public final class HadoopUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(HadoopUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(HadoopUtils.class.getName());
 
     private static final String HADOOP_HOME = "HADOOP_HOME";
     private static final String HADOOP_CONF_DIR = "HADOOP_CONF_DIR";
@@ -71,7 +72,8 @@ public final class HadoopUtils {
     private static String hadoopConfDir;
     private static Long tgtRefreshTime;
 
-    private HadoopUtils() {}
+    private HadoopUtils() {
+    }
 
     public static UserGroupInformation getUgi() {
         if (ugi == null) {
@@ -90,7 +92,7 @@ public final class HadoopUtils {
                 hadoopConfDir = FileUtils.getPathFromEnv(HADOOP_CONF_DIR);
             } catch (Exception e) {
                 hadoopConfDir =
-                        FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
+                    FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
             }
         }
         return hadoopConfDir;
@@ -110,7 +112,7 @@ public final class HadoopUtils {
                 } else {
                     LOG.warn("[StreamPark] get kerberos tgtRefreshTime failed, try get kerberos.ttl.");
                     DateUtils.TimeUnitPair timeUnit =
-                            DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL()));
+                        DateUtils.getTimeUnit(InternalConfigHolder.get(CommonConfig.KERBEROS_TTL()));
                     switch (timeUnit.unit) {
                         case SECONDS:
                             tgtRefreshTime = (long) timeUnit.num * 1000;
@@ -126,9 +128,9 @@ public final class HadoopUtils {
                             break;
                         default:
                             throw new IllegalArgumentException(
-                                    "[StreamPark] parameter:"
-                                            + CommonConfig.KERBEROS_TTL().getKey()
-                                            + " invalided, unit options are [s|m|h|d]");
+                                "[StreamPark] parameter:"
+                                    + CommonConfig.KERBEROS_TTL().getKey()
+                                    + " invalided, unit options are [s|m|h|d]");
                     }
                 }
             } catch (Exception e) {
@@ -144,27 +146,27 @@ public final class HadoopUtils {
 
     public static Configuration getConfigurationFromHadoopConfDir(String confDir) {
         return CONFIGURATION_CACHE.computeIfAbsent(
-                confDir,
-                dir -> {
-                    FileUtils.exists(dir);
-                    File hadoopConfDirFile = new File(dir);
-                    List<String> confName =
-                            Arrays.asList(
-                                    "hdfs-default.xml",
-                                    "core-site.xml",
-                                    "hdfs-site.xml",
-                                    "yarn-site.xml");
-                    File[] allFiles = hadoopConfDirFile.listFiles();
-                    HadoopConfiguration conf = new HadoopConfiguration();
-                    if (allFiles != null && CollectionUtils.isNotEmpty(Arrays.asList(allFiles))) {
-                        for (File file : allFiles) {
-                            if (file.isFile() && confName.contains(file.getName())) {
-                                conf.addResource(new Path(file.getAbsolutePath()));
-                            }
+            confDir,
+            dir -> {
+                FileUtils.exists(dir);
+                File hadoopConfDirFile = new File(dir);
+                List<String> confName =
+                    Arrays.asList(
+                        "hdfs-default.xml",
+                        "core-site.xml",
+                        "hdfs-site.xml",
+                        "yarn-site.xml");
+                File[] allFiles = hadoopConfDirFile.listFiles();
+                HadoopConfiguration conf = new HadoopConfiguration();
+                if (allFiles != null && CollectionUtils.isNotEmpty(Arrays.asList(allFiles))) {
+                    for (File file : allFiles) {
+                        if (file.isFile() && confName.contains(file.getName())) {
+                            conf.addResource(new Path(file.getAbsolutePath()));
                         }
                     }
-                    return conf;
-                });
+                }
+                return conf;
+            });
     }
 
     public static Configuration hadoopConf() {
@@ -223,12 +225,12 @@ public final class HadoopUtils {
         LOG.info("[StreamPark] kerberos login starting....");
 
         if (HadoopConfigUtils.KERBEROS_PRINCIPAL.isEmpty()
-                || HadoopConfigUtils.KERBEROS_KEYTAB.isEmpty()) {
+            || HadoopConfigUtils.KERBEROS_KEYTAB.isEmpty()) {
             throw new IllegalArgumentException(
-                    ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL()
-                            + " and "
-                            + ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB()
-                            + " must not be empty");
+                ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL()
+                    + " and "
+                    + ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB()
+                    + " must not be empty");
         }
 
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
@@ -241,15 +243,15 @@ public final class HadoopUtils {
         System.setProperty("sun.security.spnego.debug", HadoopConfigUtils.KERBEROS_DEBUG);
         System.setProperty("sun.security.krb5.debug", HadoopConfigUtils.KERBEROS_DEBUG);
         hadoopConf()
-                .set(
-                        ConfigKeys.KEY_HADOOP_SECURITY_AUTHENTICATION(),
-                        ConfigKeys.KEY_KERBEROS());
+            .set(
+                ConfigKeys.KEY_HADOOP_SECURITY_AUTHENTICATION(),
+                ConfigKeys.KEY_KERBEROS());
 
         try {
             UserGroupInformation.setConfiguration(hadoopConf());
             UserGroupInformation kerberosUgi =
-                    UserGroupInformation.loginUserFromKeytabAndReturnUGI(
-                            HadoopConfigUtils.KERBEROS_PRINCIPAL, HadoopConfigUtils.KERBEROS_KEYTAB);
+                UserGroupInformation.loginUserFromKeytabAndReturnUGI(
+                    HadoopConfigUtils.KERBEROS_PRINCIPAL, HadoopConfigUtils.KERBEROS_KEYTAB);
             UserGroupInformation.setLoginUser(kerberosUgi);
             LOG.info("[StreamPark] kerberos authentication successful");
             return kerberosUgi;
@@ -262,31 +264,31 @@ public final class HadoopUtils {
         if (reusableHdfs == null) {
             try {
                 reusableHdfs =
-                        getUgi()
-                                .doAs(
-                                        (PrivilegedAction<FileSystem>)
-                                                () -> {
-                                                    try {
-                                                        return FileSystem.get(hadoopConf());
-                                                    } catch (IOException e) {
-                                                        throw new RuntimeException(e);
-                                                    }
-                                                });
+                    getUgi()
+                        .doAs(
+                            (PrivilegedAction<FileSystem>) () -> {
+                                try {
+                                    return FileSystem.get(hadoopConf());
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
                 if (HadoopConfigUtils.KERBEROS_ENABLE) {
                     Timer timer = new Timer();
                     long refreshTime = getTgtRefreshTime();
                     timer.schedule(
-                            new TimerTask() {
-                                @Override
-                                public void run() {
-                                    closeHadoop();
-                                    LOG.info(
-                                            "[StreamPark] Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: {}",
-                                            DateUtils.format());
-                                }
-                            },
-                            refreshTime,
-                            refreshTime);
+                        new TimerTask() {
+
+                            @Override
+                            public void run() {
+                                closeHadoop();
+                                LOG.info(
+                                    "[StreamPark] Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: {}",
+                                    DateUtils.format());
+                            }
+                        },
+                        refreshTime,
+                        refreshTime);
                 }
             } catch (Exception e) {
                 throw new IllegalArgumentException("[StreamPark] access hdfs error: " + e, e);
@@ -299,20 +301,19 @@ public final class HadoopUtils {
         if (reusableYarnClient == null || !reusableYarnClient.isInState(Service.STATE.STARTED)) {
             try {
                 reusableYarnClient =
-                        getUgi()
-                                .doAs(
-                                        (PrivilegedAction<YarnClient>)
-                                                () -> {
-                                                    YarnConfiguration yarnConf =
-                                                            new YarnConfiguration(hadoopConf());
-                                                    YarnClient client = YarnClient.createYarnClient();
-                                                    client.init(yarnConf);
-                                                    client.start();
-                                                    return client;
-                                                });
+                    getUgi()
+                        .doAs(
+                            (PrivilegedAction<YarnClient>) () -> {
+                                YarnConfiguration yarnConf =
+                                    new YarnConfiguration(hadoopConf());
+                                YarnClient client = YarnClient.createYarnClient();
+                                client.init(yarnConf);
+                                client.start();
+                                return client;
+                            });
             } catch (Exception e) {
                 throw new IllegalArgumentException(
-                        "[StreamPark] access yarnClient error: " + e, e);
+                    "[StreamPark] access yarnClient error: " + e, e);
             }
         }
         return reusableYarnClient;
@@ -321,11 +322,11 @@ public final class HadoopUtils {
     public static ApplicationId toApplicationId(String appId) {
         if (appId == null) {
             throw new IllegalArgumentException(
-                    "[StreamPark] HadoopUtils.toApplicationId: applicationId muse not be null");
+                "[StreamPark] HadoopUtils.toApplicationId: applicationId muse not be null");
         }
         String[] timestampAndId = appId.split("_");
         return ApplicationId.newInstance(
-                Long.parseLong(timestampAndId[1]), Integer.parseInt(timestampAndId[timestampAndId.length - 1]));
+            Long.parseLong(timestampAndId[1]), Integer.parseInt(timestampAndId[timestampAndId.length - 1]));
     }
 
     public static String downloadJar(String jarOnHdfs) throws IOException {
@@ -361,18 +362,18 @@ public final class HadoopUtils {
     private static final class HadoopConfiguration extends Configuration {
 
         private static final List<String> REWRITE_NAMES =
-                Arrays.asList(
-                        "dfs.blockreport.initialDelay",
-                        "dfs.datanode.directoryscan.interval",
-                        "dfs.heartbeat.interval",
-                        "dfs.namenode.decommission.interval",
-                        "dfs.namenode.replication.interval",
-                        "dfs.namenode.checkpoint.period",
-                        "dfs.namenode.checkpoint.check.period",
-                        "dfs.client.datanode-restart.timeout",
-                        "dfs.ha.log-roll.period",
-                        "dfs.ha.tail-edits.period",
-                        "dfs.datanode.bp-ready.timeout");
+            Arrays.asList(
+                "dfs.blockreport.initialDelay",
+                "dfs.datanode.directoryscan.interval",
+                "dfs.heartbeat.interval",
+                "dfs.namenode.decommission.interval",
+                "dfs.namenode.replication.interval",
+                "dfs.namenode.checkpoint.period",
+                "dfs.namenode.checkpoint.check.period",
+                "dfs.client.datanode-restart.timeout",
+                "dfs.ha.log-roll.period",
+                "dfs.ha.tail-edits.period",
+                "dfs.datanode.bp-ready.timeout");
 
         private static String getHexDigits(String value) {
             boolean negative = false;

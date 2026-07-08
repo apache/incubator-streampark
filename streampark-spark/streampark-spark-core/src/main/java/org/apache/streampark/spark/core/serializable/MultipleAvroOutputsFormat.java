@@ -25,11 +25,12 @@ import org.apache.hadoop.io.NullWritable;
 
 /** Multiple Avro output format. */
 public class MultipleAvroOutputsFormat<T extends GenericContainer>
-        extends MultipleOutputsFormat<AvroKey<T>, NullWritable> {
+    extends
+        MultipleOutputsFormat<AvroKey<T>, NullWritable> {
 
     public MultipleAvroOutputsFormat() {
         super(
-                new AvroKeyOutputFormat<>(),
-                ioContext -> new MultipleOutputer.AvroMultipleOutputer<>(new AvroMultipleOutputs(ioContext)));
+            new AvroKeyOutputFormat<>(),
+            ioContext -> new MultipleOutputer.AvroMultipleOutputer<>(new AvroMultipleOutputs(ioContext)));
     }
 }

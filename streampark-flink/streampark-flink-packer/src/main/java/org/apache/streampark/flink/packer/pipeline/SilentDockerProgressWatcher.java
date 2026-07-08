@@ -14,10 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 public class SilentDockerProgressWatcher implements DockerProgressWatcher {
-    @Override public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {}
-    @Override public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {}
-    @Override public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {}
+
+    @Override
+    public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
+    }
+    @Override
+    public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
+    }
+    @Override
+    public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
+    }
 }

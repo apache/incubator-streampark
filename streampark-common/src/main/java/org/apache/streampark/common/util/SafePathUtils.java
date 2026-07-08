@@ -27,7 +27,8 @@ import java.nio.file.Paths;
 /** Path resolution helpers for user-supplied file locations. */
 public final class SafePathUtils {
 
-    private SafePathUtils() {}
+    private SafePathUtils() {
+    }
 
     public static Path resolveConfigPath(String filename) {
         validateConfigFilename(filename);
@@ -56,7 +57,8 @@ public final class SafePathUtils {
         if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
             throw new IOException("invalid file path: " + filename);
         }
-        return Files.readString(resolved, StandardCharsets.UTF_8); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
+        return Files.readString(resolved, StandardCharsets.UTF_8); // NOSONAR javasecurity:S2083 - path validated via
+                                                                   // Path.resolve above
     }
 
     public static Path resolveJarPath(java.net.URL jar) throws IOException {

@@ -32,32 +32,32 @@ public class FlinkClusterClient<T> extends FlinkClientTrait<T> {
 
     @Override
     public CompletableFuture<String> triggerSavepoint(
-            JobID jobID, String savepointDir, boolean nativeFormat) {
+                                                      JobID jobID, String savepointDir, boolean nativeFormat) {
         return clusterClient.triggerSavepoint(
-                jobID,
-                savepointDir,
-                nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
+            jobID,
+            savepointDir,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
     }
 
     @Override
     public CompletableFuture<String> cancelWithSavepoint(
-            JobID jobID, String savepointDirectory, boolean nativeFormat) {
+                                                         JobID jobID, String savepointDirectory, boolean nativeFormat) {
         return clusterClient.cancelWithSavepoint(
-                jobID,
-                savepointDirectory,
-                nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
+            jobID,
+            savepointDirectory,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
     }
 
     @Override
     public CompletableFuture<String> stopWithSavepoint(
-            JobID jobID,
-            boolean advanceToEndOfEventTime,
-            String savepointDirectory,
-            boolean nativeFormat) {
+                                                       JobID jobID,
+                                                       boolean advanceToEndOfEventTime,
+                                                       String savepointDirectory,
+                                                       boolean nativeFormat) {
         return clusterClient.stopWithSavepoint(
-                jobID,
-                advanceToEndOfEventTime,
-                savepointDirectory,
-                nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
+            jobID,
+            advanceToEndOfEventTime,
+            savepointDirectory,
+            nativeFormat ? SavepointFormatType.NATIVE : SavepointFormatType.CANONICAL);
     }
 }

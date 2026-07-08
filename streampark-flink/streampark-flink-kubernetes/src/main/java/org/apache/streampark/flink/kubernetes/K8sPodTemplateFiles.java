@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes;
 
 import org.apache.flink.configuration.Configuration;
@@ -28,6 +29,7 @@ import java.util.Map;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class K8sPodTemplateFiles {
+
     private Map<String, String> tmplFiles;
 
     public void mergeToFlinkConf(Configuration flinkConf) {

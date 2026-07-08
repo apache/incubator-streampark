@@ -351,10 +351,10 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             File jarFile;
             try {
                 jarFile =
-                        FileUtils.resolveChildFile(
-                                new File(Workspace.local().APP_UPLOADS()),
-                                String.valueOf(appParam.getTeamId()),
-                                org.apache.commons.io.FilenameUtils.getName(appParam.getJar()));
+                    FileUtils.resolveChildFile(
+                        new File(Workspace.local().APP_UPLOADS()),
+                        String.valueOf(appParam.getTeamId()),
+                        org.apache.commons.io.FilenameUtils.getName(appParam.getJar()));
             } catch (IOException e) {
                 throw new ApiAlertException("Invalid jar path: " + appParam.getJar(), e);
             }

@@ -45,23 +45,25 @@ public abstract class FlinkTable {
     private void init(String[] args) {
         SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkTable.class);
         context =
-                new TableContext(
-                        FlinkTableInitializer.initialize(
-                                new TableEnvConfig(
-                                        args,
-                                        (tableConfig, parameter) ->
-                                                config(tableConfig, parameter))));
+            new TableContext(
+                FlinkTableInitializer.initialize(
+                    new TableEnvConfig(
+                        args,
+                        (tableConfig, parameter) -> config(tableConfig, parameter))));
     }
 
     protected ParameterTool getParameter() {
         return context.parameter;
     }
 
-    protected void ready() {}
+    protected void ready() {
+    }
 
-    protected void config(TableConfig tableConfig, ParameterTool parameter) {}
+    protected void config(TableConfig tableConfig, ParameterTool parameter) {
+    }
 
     protected abstract void handle();
 
-    protected void destroy() {}
+    protected void destroy() {
+    }
 }

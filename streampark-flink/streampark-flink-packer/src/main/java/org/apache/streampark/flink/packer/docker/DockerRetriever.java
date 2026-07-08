@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import org.apache.streampark.common.conf.CommonConfig;
@@ -39,10 +40,12 @@ public final class DockerRetriever {
             .dockerHost(DOCKER_CLIENT_CONF.getDockerHost())
             .sslConfig(DOCKER_CLIENT_CONF.getSSLConfig())
             .maxConnections(InternalConfigHolder.get(CommonConfig.DOCKER_MAX_CONNECTIONS()))
-            .connectionTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC())))
+            .connectionTimeout(
+                Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_CONNECTION_TIMEOUT_SEC())))
             .responseTimeout(Duration.ofSeconds(InternalConfigHolder.get(CommonConfig.DOCKER_RESPONSE_TIMEOUT_SEC())));
 
-    private DockerRetriever() {}
+    private DockerRetriever() {
+    }
 
     public static DockerClient newDockerClient() {
         setDockerHost();

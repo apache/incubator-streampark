@@ -30,6 +30,7 @@ import scala.reflect.ClassTag$;
 
 /** DStream Kafka writer. */
 public class DStreamKafkaWriter<T> extends KafkaWriter<T> {
+
     private final DStream<T> dstream;
 
     public DStreamKafkaWriter(DStream<T> dstream) {
@@ -39,13 +40,13 @@ public class DStreamKafkaWriter<T> extends KafkaWriter<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <K, V> void writeToKafka(
-            Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
+                                    Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
         ClassTag<T> tag = (ClassTag<T>) (ClassTag<?>) ClassTag$.MODULE$.Any();
         dstream.foreachRDD(
-                (RDD<T> rdd) -> {
-                    new RDDKafkaWriter<>(JavaRDD.fromRDD(rdd, tag))
-                            .writeToKafka(producerConfig, serializerFunc);
-                    return scala.runtime.BoxedUnit.UNIT;
-                });
+            (RDD<T> rdd) -> {
+                new RDDKafkaWriter<>(JavaRDD.fromRDD(rdd, tag))
+                    .writeToKafka(producerConfig, serializerFunc);
+                return scala.runtime.BoxedUnit.UNIT;
+            });
     }
 }

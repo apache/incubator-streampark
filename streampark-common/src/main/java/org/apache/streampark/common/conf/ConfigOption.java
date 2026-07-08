@@ -39,14 +39,14 @@ public class ConfigOption<T> {
     private final Properties prop;
 
     public ConfigOption(
-            String key,
-            T defaultValue,
-            boolean required,
-            Class<?> classType,
-            String description,
-            Function<String, T> handle,
-            String prefix,
-            Properties prop) {
+                        String key,
+                        T defaultValue,
+                        boolean required,
+                        Class<?> classType,
+                        String description,
+                        Function<String, T> handle,
+                        String prefix,
+                        Properties prop) {
         this.key = key;
         this.defaultValue = defaultValue;
         this.required = required;
@@ -99,10 +99,11 @@ public class ConfigOption<T> {
 
     private IllegalArgumentException error(String message) {
         return new IllegalArgumentException(
-                "[StreamPark] config error: key:" + fullKey() + ", detail: " + message);
+            "[StreamPark] config error: key:" + fullKey() + ", detail: " + message);
     }
 
     public static class Builder<T> {
+
         private final String key;
         private T defaultValue;
         private boolean required;

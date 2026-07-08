@@ -23,6 +23,7 @@ import java.util.Set;
 
 /** Flink job status on kubernetes. */
 public enum FlinkJobState {
+
     STARTING,
     K8S_INITIALIZING,
     SILENT,
@@ -41,13 +42,13 @@ public enum FlinkJobState {
     RESTARTING;
 
     private static final Set<FlinkJobState> ENDING_STATES =
-            EnumSet.of(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST);
+        EnumSet.of(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST);
 
     public static FlinkJobState of(String value) {
         return Arrays.stream(values())
-                .filter(state -> state.name().equals(value))
-                .findFirst()
-                .orElse(OTHER);
+            .filter(state -> state.name().equals(value))
+            .findFirst()
+            .orElse(OTHER);
     }
 
     public static boolean isEndState(FlinkJobState state) {

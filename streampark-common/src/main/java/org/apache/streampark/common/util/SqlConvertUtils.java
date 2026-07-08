@@ -30,22 +30,23 @@ import java.util.regex.Pattern;
 public final class SqlConvertUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(SqlConvertUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(SqlConvertUtils.class.getName());
 
     private static final Pattern FIELD_REGEXP =
-            Pattern.compile(
-                    "\\s*(.*?)\\s+(([a-z]+)\\((.*?)\\)|[a-z]+)(\\s*|((.*?)(comment)\\s+(['|\"](.*?)['|\"])|(.*?))),$",
-                    Pattern.CASE_INSENSITIVE);
+        Pattern.compile(
+            "\\s*(.*?)\\s+(([a-z]+)\\((.*?)\\)|[a-z]+)(\\s*|((.*?)(comment)\\s+(['|\"](.*?)['|\"])|(.*?))),$",
+            Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PRIMARY_REGEXP =
-            Pattern.compile("primary\\s+key\\s+\\((.*?)\\)", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("primary\\s+key\\s+\\((.*?)\\)", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern COMMENT_REGEXP =
-            Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern LENGTH_REGEXP = Pattern.compile("(.*?)\\s*\\([^\\\\)|^\\n]+,$");
 
-    private SqlConvertUtils() {}
+    private SqlConvertUtils() {
+    }
 
     private static String toFlinkDataType(String dataType, String length) {
         switch (dataType.toUpperCase()) {
@@ -117,11 +118,11 @@ public final class SqlConvertUtils {
 
     private static String formatSql(String sql) {
         String body =
-                sql.substring(sql.indexOf('('), sql.lastIndexOf(')') + 1)
-                        .replaceAll("\r|\n|\r\n", "")
-                        .replaceFirst("\\(", "(\n")
-                        .replaceFirst("\\)$", "\n)")
-                        .replaceAll(",", ",\n");
+            sql.substring(sql.indexOf('('), sql.lastIndexOf(')') + 1)
+                .replaceAll("\r|\n|\r\n", "")
+                .replaceFirst("\\(", "(\n")
+                .replaceFirst("\\)$", "\n)")
+                .replaceAll(",", ",\n");
 
         Scanner scanner = new Scanner(body);
         Map<Integer, String> map = new HashMap<>();
@@ -153,7 +154,8 @@ public final class SqlConvertUtils {
     }
 
     private static AbstractMap.SimpleEntry<Integer, String> commentJoin(
-            Map<Integer, String> map, int index, String segment) {
+                                                                        Map<Integer, String> map, int index,
+                                                                        String segment) {
         Matcher matcher = COMMENT_REGEXP.matcher(segment);
         if (!matcher.find()) {
             return new AbstractMap.SimpleEntry<>(index, segment);
@@ -161,7 +163,7 @@ public final class SqlConvertUtils {
         String quote = matcher.group(2);
         String regexp = "\\" + quote + "(,|)$";
         String cleaned =
-                segment.replaceFirst("(?i)(comment)\\s+(['\"])", "").replace("\\" + quote, "");
+            segment.replaceFirst("(?i)(comment)\\s+(['\"])", "").replace("\\" + quote, "");
         if (cleaned.matches(".*" + regexp)) {
             return new AbstractMap.SimpleEntry<>(index, segment);
         }
@@ -170,7 +172,8 @@ public final class SqlConvertUtils {
     }
 
     private static AbstractMap.SimpleEntry<Integer, String> lengthJoin(
-            Map<Integer, String> map, int index, String segment) {
+                                                                       Map<Integer, String> map, int index,
+                                                                       String segment) {
         if (!LENGTH_REGEXP.matcher(segment).find()) {
             return commentJoin(map, index, segment);
         }
@@ -179,15 +182,17 @@ public final class SqlConvertUtils {
     }
 
     private interface TypeConverter {
+
         String convert(String dataType, String length);
     }
 
     private interface KeyConverter {
+
         String convert(String line);
     }
 
     private static String convertSql(
-            String sql, TypeConverter typeFunc, KeyConverter keyFunc, String postfix) {
+                                     String sql, TypeConverter typeFunc, KeyConverter keyFunc, String postfix) {
         String formattedSql = formatSql(sql);
         Scanner scanner = new Scanner(formattedSql);
         StringBuilder sqlBuffer = new StringBuilder();
@@ -241,16 +246,16 @@ public final class SqlConvertUtils {
 
     public static String mysqlToFlinkSql(String sql, String postfix) {
         return convertSql(
-                sql,
-                SqlConvertUtils::toFlinkDataType,
-                line -> {
-                    Matcher matcher = PRIMARY_REGEXP.matcher(line);
-                    if (matcher.find()) {
-                        return matcher.group() + " NOT ENFORCED";
-                    }
-                    return null;
-                },
-                postfix);
+            sql,
+            SqlConvertUtils::toFlinkDataType,
+            line -> {
+                Matcher matcher = PRIMARY_REGEXP.matcher(line);
+                if (matcher.find()) {
+                    return matcher.group() + " NOT ENFORCED";
+                }
+                return null;
+            },
+            postfix);
     }
 
     public static String mysqlToClickhouse(String sql, String postfix) {

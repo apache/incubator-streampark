@@ -31,16 +31,16 @@ public class ChangeEventBus {
     private static final int CPU_NUM = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     private final ThreadPoolExecutor execPool =
-            new ThreadPoolExecutor(
-                    CPU_NUM,
-                    CPU_NUM * 5,
-                    60L,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>(),
-                    ThreadUtils.threadFactory("streampark-k8s-watching-thread"));
+        new ThreadPoolExecutor(
+            CPU_NUM,
+            CPU_NUM * 5,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(),
+            ThreadUtils.threadFactory("streampark-k8s-watching-thread"));
 
     private final AsyncEventBus asyncEventBus =
-            new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool);
+        new AsyncEventBus("[StreamPark][flink-k8s]AsyncEventBus", execPool);
 
     private final EventBus syncEventBus = new EventBus("[StreamPark][flink-k8s]SyncEventBus");
 

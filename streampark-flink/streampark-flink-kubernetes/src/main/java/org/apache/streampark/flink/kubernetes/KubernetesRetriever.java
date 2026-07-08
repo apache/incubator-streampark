@@ -48,17 +48,18 @@ import java.util.Optional;
 public final class KubernetesRetriever {
 
     public static final Timeout FLINK_CLIENT_TIMEOUT_SEC =
-            Timeout.ofMilliseconds(ClientOptions.CLIENT_TIMEOUT.defaultValue().toMillis());
+        Timeout.ofMilliseconds(ClientOptions.CLIENT_TIMEOUT.defaultValue().toMillis());
 
     public static final Timeout FLINK_REST_AWAIT_TIMEOUT_SEC =
-            Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue().toMillis());
+        Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue().toMillis());
 
     private static final Map<String, Long> DEPLOYMENT_LOST_TIME = new HashMap<>();
 
     private static final DefaultClusterClientServiceLoader CLUSTER_CLIENT_SERVICE_LOADER =
-            new DefaultClusterClientServiceLoader();
+        new DefaultClusterClientServiceLoader();
 
-    private KubernetesRetriever() {}
+    private KubernetesRetriever() {
+    }
 
     public static KubernetesClient newK8sClient() throws KubernetesClientException {
         return new DefaultKubernetesClient();
@@ -73,32 +74,33 @@ public final class KubernetesRetriever {
     }
 
     public static Optional<ClusterClient<String>> newFinkClusterClient(
-            String clusterId, @Nullable String namespace, FlinkK8sDeployMode executeMode) {
+                                                                       String clusterId, @Nullable String namespace,
+                                                                       FlinkK8sDeployMode executeMode) {
         Configuration flinkConfig = new Configuration();
         flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString());
         flinkConfig.setString(KubernetesConfigOptions.CLUSTER_ID, clusterId);
         flinkConfig.set(ClientOptions.CLIENT_TIMEOUT, ClientOptions.CLIENT_TIMEOUT.defaultValue());
         flinkConfig.set(
-                RestOptions.AWAIT_LEADER_TIMEOUT, RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue());
+            RestOptions.AWAIT_LEADER_TIMEOUT, RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue());
         flinkConfig.set(
-                RestOptions.RETRY_MAX_ATTEMPTS, RestOptions.RETRY_MAX_ATTEMPTS.defaultValue());
+            RestOptions.RETRY_MAX_ATTEMPTS, RestOptions.RETRY_MAX_ATTEMPTS.defaultValue());
         if (namespace == null || namespace.isEmpty()) {
             flinkConfig.setString(
-                    KubernetesConfigOptions.NAMESPACE,
-                    KubernetesConfigOptions.NAMESPACE.defaultValue());
+                KubernetesConfigOptions.NAMESPACE,
+                KubernetesConfigOptions.NAMESPACE.defaultValue());
         } else {
             flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, namespace);
         }
         try {
             ClusterDescriptor<?> clusterDescriptor =
-                    CLUSTER_CLIENT_SERVICE_LOADER
-                            .getClusterClientFactory(flinkConfig)
-                            .createClusterDescriptor(flinkConfig);
+                CLUSTER_CLIENT_SERVICE_LOADER
+                    .getClusterClientFactory(flinkConfig)
+                    .createClusterDescriptor(flinkConfig);
             KubernetesClusterDescriptor descriptor = (KubernetesClusterDescriptor) clusterDescriptor;
             ClusterClient<String> clusterClient =
-                    descriptor
-                            .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-                            .getClusterClient();
+                descriptor
+                    .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+                    .getClusterClient();
             return Optional.of(clusterClient);
         } catch (Exception e) {
             log.error("Get flinkClient error, the error is: {}", e.getMessage(), e);
@@ -109,43 +111,41 @@ public final class KubernetesRetriever {
     public static boolean isDeploymentExists(String namespace, String deploymentName) {
         try {
             return AutoCloseUtils.using(
-                    newK8sClient(),
-                    client ->
-                            client.apps()
-                                    .deployments()
-                                    .inNamespace(namespace)
-                                    .withLabel("type", "flink-native-kubernetes")
-                                    .list()
-                                    .getItems()
-                                    .stream()
-                                    .anyMatch(
-                                            deployment ->
-                                                    deploymentName.equals(
-                                                            deployment.getMetadata().getName())),
-                    error -> handleDeploymentExistsError(namespace, deploymentName, error));
+                newK8sClient(),
+                client -> client.apps()
+                    .deployments()
+                    .inNamespace(namespace)
+                    .withLabel("type", "flink-native-kubernetes")
+                    .list()
+                    .getItems()
+                    .stream()
+                    .anyMatch(
+                        deployment -> deploymentName.equals(
+                            deployment.getMetadata().getName())),
+                error -> handleDeploymentExistsError(namespace, deploymentName, error));
         } catch (Exception e) {
             return handleDeploymentExistsError(namespace, deploymentName, e);
         }
     }
 
     private static boolean handleDeploymentExistsError(
-            String namespace, String deploymentName, Throwable e) {
+                                                       String namespace, String deploymentName, Throwable e) {
         log.warn(
-                "[StreamPark] check deploymentExists WARN, namespace: {}, deploymentName: {}, error: {}",
-                namespace,
-                deploymentName,
-                e.getMessage());
+            "[StreamPark] check deploymentExists WARN, namespace: {}, deploymentName: {}, error: {}",
+            namespace,
+            deploymentName,
+            e.getMessage());
         String key = namespace + "_" + deploymentName;
         Long lostTime = DEPLOYMENT_LOST_TIME.get(key);
         if (lostTime != null) {
             long timeOut = 1000 * 60 * 3L;
             if (System.currentTimeMillis() - lostTime >= timeOut) {
                 log.error(
-                        "[StreamPark] check deploymentExists Failed, namespace: {}, deploymentName: {}, detail: deployment: {} Not Found more than 3 minutes, {}",
-                        namespace,
-                        deploymentName,
-                        deploymentName,
-                        e.getMessage());
+                    "[StreamPark] check deploymentExists Failed, namespace: {}, deploymentName: {}, detail: deployment: {} Not Found more than 3 minutes, {}",
+                    namespace,
+                    deploymentName,
+                    deploymentName,
+                    e.getMessage());
                 DEPLOYMENT_LOST_TIME.remove(key);
                 return false;
             }
@@ -157,14 +157,14 @@ public final class KubernetesRetriever {
 
     public static Optional<String> retrieveFlinkRestUrl(ClusterKey clusterKey) {
         Optional<ClusterClient<String>> client =
-                newFinkClusterClient(
-                        clusterKey.clusterId(), clusterKey.namespace(), clusterKey.executeMode());
+            newFinkClusterClient(
+                clusterKey.clusterId(), clusterKey.namespace(), clusterKey.executeMode());
         if (!client.isPresent()) {
             return Optional.empty();
         }
         String url =
-                IngressController.getIngressUrlAddress(
-                        clusterKey.namespace(), clusterKey.clusterId(), client.get());
+            IngressController.getIngressUrlAddress(
+                clusterKey.namespace(), clusterKey.clusterId(), client.get());
         log.info("retrieve flink jobManager rest url: {}", url);
         return Optional.of(url);
     }

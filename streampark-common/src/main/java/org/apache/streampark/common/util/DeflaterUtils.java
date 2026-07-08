@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.apache.streampark.shaded.org.slf4j.Logger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
@@ -29,9 +30,10 @@ import java.util.zip.Inflater;
 public final class DeflaterUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(DeflaterUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(DeflaterUtils.class.getName());
 
-    private DeflaterUtils() {}
+    private DeflaterUtils() {
+    }
 
     public static String zipString(String text) {
         if (StringUtils.isBlank(text)) {

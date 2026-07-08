@@ -24,14 +24,14 @@ import java.io.File;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
-import java.util.Properties;
 
 public final class SystemPropertyUtils {
 
     private static final Logger LOG =
-            LoggerFactory.getLogger(SystemPropertyUtils.class);
+        LoggerFactory.getLogger(SystemPropertyUtils.class);
 
-    private SystemPropertyUtils() {}
+    private SystemPropertyUtils() {
+    }
 
     public static String getUserHome() {
         return System.getProperty("user.home");
@@ -58,15 +58,15 @@ public final class SystemPropertyUtils {
                 value = System.getProperty(key);
             } else {
                 value =
-                        AccessController.doPrivileged(
-                                (PrivilegedAction<String>) () -> System.getProperty(key));
+                    AccessController.doPrivileged(
+                        (PrivilegedAction<String>) () -> System.getProperty(key));
             }
             return value != null ? value : defaultValue;
         } catch (Exception e) {
             LOG.warn(
-                    "[StreamPark] Unable to retrieve a system property '{}'; default values will be used, {}.",
-                    key,
-                    e.getMessage());
+                "[StreamPark] Unable to retrieve a system property '{}'; default values will be used, {}.",
+                key,
+                e.getMessage());
             return defaultValue;
         }
     }
@@ -90,10 +90,10 @@ public final class SystemPropertyUtils {
                     return false;
                 }
                 LOG.warn(
-                        "[StreamPark] Unable to parse the boolean system property '{}':{} - using the default value: {}.",
-                        key,
-                        value,
-                        defaultValue);
+                    "[StreamPark] Unable to parse the boolean system property '{}':{} - using the default value: {}.",
+                    key,
+                    value,
+                    defaultValue);
                 return defaultValue;
         }
     }

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -24,26 +25,26 @@ import java.util.concurrent.TimeUnit;
 
 public final class ThreadUtils {
 
-    private ThreadUtils() {}
+    private ThreadUtils() {
+    }
 
     public static ThreadFactory threadFactory(String threadName, boolean isDaemon) {
         return new ThreadFactoryBuilder()
-                .setNameFormat(threadName + "-%d")
-                .setDaemon(isDaemon)
-                .build();
+            .setNameFormat(threadName + "-%d")
+            .setDaemon(isDaemon)
+            .build();
     }
 
     public static ThreadFactory threadFactory(String threadName) {
         return threadFactory(threadName, true);
     }
 
-    public static void shutdownExecutorService(ExecutorService executorService)
-            throws InterruptedException {
+    public static void shutdownExecutorService(ExecutorService executorService) throws InterruptedException {
         shutdownExecutorService(executorService, 5);
     }
 
-    public static void shutdownExecutorService(ExecutorService executorService, int timeoutS)
-            throws InterruptedException {
+    public static void shutdownExecutorService(ExecutorService executorService,
+                                               int timeoutS) throws InterruptedException {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();
             if (!executorService.awaitTermination(timeoutS, TimeUnit.SECONDS)) {

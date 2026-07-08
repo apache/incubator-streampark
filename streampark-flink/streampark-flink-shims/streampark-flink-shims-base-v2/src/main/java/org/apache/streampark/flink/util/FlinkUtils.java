@@ -20,8 +20,8 @@ package org.apache.streampark.flink.util;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.util.TimeUtils;
 
 import java.io.File;

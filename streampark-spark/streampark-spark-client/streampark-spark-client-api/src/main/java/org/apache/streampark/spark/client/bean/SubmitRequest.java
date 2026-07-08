@@ -31,11 +31,11 @@ import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
@@ -75,25 +75,28 @@ public class SubmitRequest {
     private Map<String, String> appProperties = new HashMap<>();
     private List<String> appArgs;
     private ApplicationType applicationType;
-    @Nullable private String hadoopUser;
-    @Nullable private BuildResult buildResult;
-    @Nullable private Map<String, Object> extraParameter;
+    @Nullable
+    private String hadoopUser;
+    @Nullable
+    private BuildResult buildResult;
+    @Nullable
+    private Map<String, Object> extraParameter;
 
     public SubmitRequest(
-            SparkVersion sparkVersion,
-            SparkDeployMode deployMode,
-            String sparkYaml,
-            SparkJobType jobType,
-            long id,
-            String appName,
-            String mainClass,
-            String appConf,
-            Map<String, String> appProperties,
-            List<String> appArgs,
-            ApplicationType applicationType,
-            String hadoopUser,
-            BuildResult buildResult,
-            Map<String, Object> extraParameter) {
+                         SparkVersion sparkVersion,
+                         SparkDeployMode deployMode,
+                         String sparkYaml,
+                         SparkJobType jobType,
+                         long id,
+                         String appName,
+                         String mainClass,
+                         String appConf,
+                         Map<String, String> appProperties,
+                         List<String> appArgs,
+                         ApplicationType applicationType,
+                         String hadoopUser,
+                         BuildResult buildResult,
+                         Map<String, Object> extraParameter) {
         this.sparkVersion = sparkVersion;
         this.deployMode = deployMode;
         this.sparkYaml = sparkYaml;
@@ -172,7 +175,7 @@ public class SubmitRequest {
                         String text = HdfsUtils.read(appConf);
                         int dotIndex = appConf.lastIndexOf('.');
                         String extension =
-                                dotIndex >= 0 ? appConf.substring(dotIndex + 1).toLowerCase() : "";
+                            dotIndex >= 0 ? appConf.substring(dotIndex + 1).toLowerCase() : "";
                         switch (extension) {
                             case "yml":
                             case "yaml":
@@ -186,7 +189,7 @@ public class SubmitRequest {
                                 break;
                             default:
                                 throw new IllegalArgumentException(
-                                        "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
+                                    "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -197,9 +200,9 @@ public class SubmitRequest {
             }
         }
         return map.entrySet().stream()
-                .filter(e -> e.getKey().startsWith(prefix))
-                .filter(e -> StringUtils.isNotEmpty(e.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .filter(e -> e.getKey().startsWith(prefix))
+            .filter(e -> StringUtils.isNotEmpty(e.getValue()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public HdfsWorkspace getHdfsWorkspace() throws IOException {
@@ -207,22 +210,22 @@ public class SubmitRequest {
         String sparkHome = sparkVersion.getSparkHome();
         File sparkHomeDir = new File(sparkHome);
         String sparkName =
-                Files.isSymbolicLink(sparkHomeDir.toPath())
-                        ? sparkHomeDir.getCanonicalFile().getName()
-                        : sparkHomeDir.getName();
+            Files.isSymbolicLink(sparkHomeDir.toPath())
+                ? sparkHomeDir.getCanonicalFile().getName()
+                : sparkHomeDir.getName();
         String sparkHdfsHome = workspace.APP_SPARK() + "/" + sparkName;
         return new HdfsWorkspace(
-                sparkName,
-                sparkHome,
-                sparkHdfsHome + "/jars",
-                sparkHdfsHome + "/plugins",
-                workspace.APP_JARS());
+            sparkName,
+            sparkHome,
+            sparkHdfsHome + "/jars",
+            sparkHdfsHome + "/plugins",
+            workspace.APP_JARS());
     }
 
     private void checkBuildResult() {
         if (buildResult == null) {
             throw new RuntimeException(
-                    "[spark-submit] current job: " + appName + " was not yet built, buildResult is empty");
+                "[spark-submit] current job: " + appName + " was not yet built, buildResult is empty");
         }
         if (!buildResult.pass()) {
             throw new RuntimeException("[spark-submit] current job " + appName + " build failed, please check");

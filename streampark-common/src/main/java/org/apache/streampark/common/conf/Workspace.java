@@ -127,7 +127,7 @@ public class Workspace {
                 String remotePath = getConfigValue(CommonConfig.STREAMPARK_WORKSPACE_REMOTE());
                 if (remotePath == null || remotePath.isEmpty()) {
                     return HdfsUtils.getDefaultFS()
-                            + CommonConfig.STREAMPARK_WORKSPACE_REMOTE().getDefaultValue();
+                        + CommonConfig.STREAMPARK_WORKSPACE_REMOTE().getDefaultValue();
                 }
                 String defaultFs = HdfsUtils.getDefaultFS();
                 if (remotePath.startsWith("hdfs://")) {

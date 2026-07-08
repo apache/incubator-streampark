@@ -22,12 +22,13 @@ import lombok.Getter;
 /** Cache storage for docker resolved progress. */
 @Getter
 public class DockerResolveProgress {
+
     private final DockerPullProgress pull;
     private final DockerBuildProgress build;
     private final DockerPushProgress push;
 
     public DockerResolveProgress(
-            DockerPullProgress pull, DockerBuildProgress build, DockerPushProgress push) {
+                                 DockerPullProgress pull, DockerBuildProgress build, DockerPushProgress push) {
         this.pull = pull;
         this.build = build;
         this.push = push;
@@ -35,6 +36,6 @@ public class DockerResolveProgress {
 
     public static DockerResolveProgress createEmpty() {
         return new DockerResolveProgress(
-                DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty());
+            DockerPullProgress.empty(), DockerBuildProgress.empty(), DockerPushProgress.empty());
     }
 }

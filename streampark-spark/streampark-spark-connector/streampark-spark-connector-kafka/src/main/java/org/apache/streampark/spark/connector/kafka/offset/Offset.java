@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.connector.kafka.offset;
 
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -27,7 +28,6 @@ import org.apache.spark.SparkConf;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ import scala.Tuple2;
 public abstract class Offset implements Serializable {
 
     protected final Logger log =
-            StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
 
     protected final SparkConf sparkConf;
     protected Map<String, String> storeParams;
@@ -59,13 +59,13 @@ public abstract class Offset implements Serializable {
         if (storeParams == null) {
             storeParams = new HashMap<>();
             scala.collection.Iterator<Tuple2<String, String>> iter =
-                    scala.collection.JavaConverters.asScalaIteratorConverter(
-                                    Arrays.asList(
-                                                    sparkConf.getAllWithPrefix(
-                                                            "spark.source.kafka.offset.store."))
-                                            .iterator())
-                            .asScala()
-                            .toIterator();
+                scala.collection.JavaConverters.asScalaIteratorConverter(
+                    Arrays.asList(
+                        sparkConf.getAllWithPrefix(
+                            "spark.source.kafka.offset.store."))
+                        .iterator())
+                    .asScala()
+                    .toIterator();
             while (iter.hasNext()) {
                 Tuple2<String, String> t = iter.next();
                 storeParams.put(t._1(), t._2());
@@ -95,7 +95,7 @@ public abstract class Offset implements Serializable {
     private String[] getHostPort() {
         String servers = sparkConf.get("spark.source.kafka.consume.bootstrap.servers");
         String[] hp = servers.split(",")[0].split(":");
-        return new String[] {hp[0], hp[1]};
+        return new String[]{hp[0], hp[1]};
     }
 
     public abstract Map<TopicPartition, Long> get(String groupId, java.util.Set<String> topics);

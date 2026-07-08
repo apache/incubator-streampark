@@ -26,6 +26,7 @@ import java.util.function.Function;
 
 /** RDD Kafka writer. */
 public class RDDKafkaWriter<T> extends KafkaWriter<T> {
+
     private final JavaRDD<T> rdd;
 
     public RDDKafkaWriter(JavaRDD<T> rdd) {
@@ -34,13 +35,13 @@ public class RDDKafkaWriter<T> extends KafkaWriter<T> {
 
     @Override
     public <K, V> void writeToKafka(
-            Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
+                                    Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
         rdd.foreachPartition(
-                events -> {
-                    KafkaProducer<K, V> producer = getProducer(producerConfig);
-                    while (events.hasNext()) {
-                        producer.send(serializerFunc.apply(events.next()));
-                    }
-                });
+            events -> {
+                KafkaProducer<K, V> producer = getProducer(producerConfig);
+                while (events.hasNext()) {
+                    producer.send(serializerFunc.apply(events.next()));
+                }
+            });
     }
 }

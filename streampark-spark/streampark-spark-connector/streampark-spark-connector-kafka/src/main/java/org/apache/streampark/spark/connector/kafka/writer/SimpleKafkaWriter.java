@@ -25,6 +25,7 @@ import java.util.function.Function;
 
 /** Simple single-message Kafka writer. */
 public class SimpleKafkaWriter<T> extends KafkaWriter<T> {
+
     private final T msg;
 
     public SimpleKafkaWriter(T msg) {
@@ -33,7 +34,7 @@ public class SimpleKafkaWriter<T> extends KafkaWriter<T> {
 
     @Override
     public <K, V> void writeToKafka(
-            Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
+                                    Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
         KafkaProducer<K, V> producer = getProducer(producerConfig);
         producer.send(serializerFunc.apply(msg));
     }

@@ -17,10 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.dockerjava.api.model.PushResponseItem;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,6 +28,7 @@ import java.util.Map;
 
 @Getter
 public class DockerPushProgress {
+
     private final Map<String, DockerLayerProgress> layers = new LinkedHashMap<>();
     private String error = "";
     private long lastTime;
@@ -42,33 +43,33 @@ public class DockerPushProgress {
 
     public void update(PushResponseItem pushRsp) {
         if (pushRsp == null
-                || StringUtils.isBlank(pushRsp.getId())
-                || StringUtils.isBlank(pushRsp.getStatus())) {
+            || StringUtils.isBlank(pushRsp.getId())
+            || StringUtils.isBlank(pushRsp.getStatus())) {
             return;
         }
         if (pushRsp.getStatus().contains("complete")) {
             layers.put(
-                    pushRsp.getId(),
-                    new DockerLayerProgress(pushRsp.getId(), pushRsp.getStatus(), 1, 1));
+                pushRsp.getId(),
+                new DockerLayerProgress(pushRsp.getId(), pushRsp.getStatus(), 1, 1));
             lastTime = System.currentTimeMillis();
         } else {
             long cur =
-                    pushRsp.getProgressDetail() == null
-                                    || pushRsp.getProgressDetail().getCurrent() == null
-                            ? 0L
-                            : pushRsp.getProgressDetail().getCurrent();
+                pushRsp.getProgressDetail() == null
+                    || pushRsp.getProgressDetail().getCurrent() == null
+                        ? 0L
+                        : pushRsp.getProgressDetail().getCurrent();
             long total =
-                    pushRsp.getProgressDetail() == null
-                                    || pushRsp.getProgressDetail().getTotal() == null
-                            ? 0L
-                            : pushRsp.getProgressDetail().getTotal();
+                pushRsp.getProgressDetail() == null
+                    || pushRsp.getProgressDetail().getTotal() == null
+                        ? 0L
+                        : pushRsp.getProgressDetail().getTotal();
             layers.put(
-                    pushRsp.getId(),
-                    new DockerLayerProgress(pushRsp.getId(), pushRsp.getStatus(), cur, total));
+                pushRsp.getId(),
+                new DockerLayerProgress(pushRsp.getId(), pushRsp.getStatus(), cur, total));
             error =
-                    pushRsp.getErrorDetail() != null && pushRsp.getErrorDetail().getMessage() != null
-                            ? pushRsp.getErrorDetail().getMessage()
-                            : "";
+                pushRsp.getErrorDetail() != null && pushRsp.getErrorDetail().getMessage() != null
+                    ? pushRsp.getErrorDetail().getMessage()
+                    : "";
             lastTime = System.currentTimeMillis();
         }
     }

@@ -32,22 +32,23 @@ public final class SqlCommandParser {
 
     private static final String SQL_EMPTY_ERROR = "verify failed: spark sql cannot be empty.";
 
-    private SqlCommandParser() {}
+    private SqlCommandParser() {
+    }
 
     public static List<SqlCommandCall> parseSQL(String sql) {
         return parseSQL(sql, null);
     }
 
     public static List<SqlCommandCall> parseSQL(
-            String sql, Consumer<SparkSqlValidationResult> validationCallback) {
+                                                String sql, Consumer<SparkSqlValidationResult> validationCallback) {
         if (StringUtils.isBlank(sql)) {
             if (validationCallback != null) {
                 validationCallback.accept(
-                        SparkSqlValidationResult.builder()
-                                .success(false)
-                                .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
-                                .exception(SQL_EMPTY_ERROR)
-                                .build());
+                    SparkSqlValidationResult.builder()
+                        .success(false)
+                        .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
+                        .exception(SQL_EMPTY_ERROR)
+                        .build());
                 return null;
             }
             throw new IllegalArgumentException(SQL_EMPTY_ERROR);
@@ -57,11 +58,11 @@ public final class SqlCommandParser {
         if (sqlSegments.isEmpty()) {
             if (validationCallback != null) {
                 validationCallback.accept(
-                        SparkSqlValidationResult.builder()
-                                .success(false)
-                                .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
-                                .exception(SQL_EMPTY_ERROR)
-                                .build());
+                    SparkSqlValidationResult.builder()
+                        .success(false)
+                        .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
+                        .exception(SQL_EMPTY_ERROR)
+                        .build());
                 return null;
             }
             throw new IllegalArgumentException(SQL_EMPTY_ERROR);
@@ -74,14 +75,14 @@ public final class SqlCommandParser {
                 calls.add(parsed.get());
             } else if (validationCallback != null) {
                 validationCallback.accept(
-                        SparkSqlValidationResult.builder()
-                                .success(false)
-                                .failedType(SparkSqlValidationFailedType.UNSUPPORTED_SQL)
-                                .lineStart(segment.start)
-                                .lineEnd(segment.end)
-                                .exception("unsupported sql")
-                                .sql(segment.sql)
-                                .build());
+                    SparkSqlValidationResult.builder()
+                        .success(false)
+                        .failedType(SparkSqlValidationFailedType.UNSUPPORTED_SQL)
+                        .lineStart(segment.start)
+                        .lineEnd(segment.end)
+                        .exception("unsupported sql")
+                        .sql(segment.sql)
+                        .build());
             } else {
                 throw new UnsupportedOperationException("unsupported sql: " + segment.sql);
             }
@@ -90,11 +91,11 @@ public final class SqlCommandParser {
         if (calls.isEmpty()) {
             if (validationCallback != null) {
                 validationCallback.accept(
-                        SparkSqlValidationResult.builder()
-                                .success(false)
-                                .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
-                                .exception("spark sql syntax error, no executable sql")
-                                .build());
+                    SparkSqlValidationResult.builder()
+                        .success(false)
+                        .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
+                        .exception("spark sql syntax error, no executable sql")
+                        .build());
                 return null;
             }
             throw new UnsupportedOperationException("spark sql syntax error, no executable sql");
@@ -113,15 +114,14 @@ public final class SqlCommandParser {
             groups[i] = matcher.group(i + 1);
         }
         return sqlCommand
-                .getConverter()
-                .convert(groups)
-                .map(
-                        operands ->
-                                new SqlCommandCall(
-                                        sqlSegment.start,
-                                        sqlSegment.end,
-                                        sqlCommand,
-                                        operands,
-                                        sqlSegment.sql.trim()));
+            .getConverter()
+            .convert(groups)
+            .map(
+                operands -> new SqlCommandCall(
+                    sqlSegment.start,
+                    sqlSegment.end,
+                    sqlCommand,
+                    operands,
+                    sqlSegment.sql.trim()));
     }
 }

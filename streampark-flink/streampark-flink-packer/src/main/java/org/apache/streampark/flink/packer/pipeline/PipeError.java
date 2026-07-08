@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,17 +29,24 @@ import javax.annotation.Nullable;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"exception"})
 public class PipeError {
+
     private String summary;
-    @Nullable private transient Throwable exception;
-    @Nullable private String exceptionStack;
+    @Nullable
+    private transient Throwable exception;
+    @Nullable
+    private String exceptionStack;
 
     public boolean nonEmpty() {
         return (summary != null && !summary.isEmpty()) || exception != null;
     }
 
-    public boolean isEmpty() { return !nonEmpty(); }
+    public boolean isEmpty() {
+        return !nonEmpty();
+    }
 
-    public static PipeError empty() { return of("", null); }
+    public static PipeError empty() {
+        return of("", null);
+    }
 
     public static PipeError of(String summary, @Nullable Throwable exception) {
         String stack = exception == null ? "" : stackTraceToString(exception);

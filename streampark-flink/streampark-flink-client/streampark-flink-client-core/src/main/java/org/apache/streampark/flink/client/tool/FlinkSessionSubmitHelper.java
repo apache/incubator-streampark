@@ -21,6 +21,7 @@ import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.JsonUtils;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
+
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
@@ -41,9 +42,10 @@ import java.util.List;
 public final class FlinkSessionSubmitHelper {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(FlinkSessionSubmitHelper.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(FlinkSessionSubmitHelper.class.getName());
 
-    private FlinkSessionSubmitHelper() {}
+    private FlinkSessionSubmitHelper() {
+    }
 
     /**
      * Submit Flink Job via Rest API.
@@ -53,41 +55,41 @@ public final class FlinkSessionSubmitHelper {
      * @param flinkConfig flink configuration
      * @return jobID of submitted flink job
      */
-    public static String submitViaRestApi(String jmRestUrl, File flinkJobJar, Configuration flinkConfig)
-            throws Exception {
+    public static String submitViaRestApi(String jmRestUrl, File flinkJobJar,
+                                          Configuration flinkConfig) throws Exception {
         String uploadResult =
-                Request.post(jmRestUrl + "/jars/upload")
-                        .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                        .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                        .body(
-                                MultipartEntityBuilder.create()
-                                        .addBinaryBody(
-                                                "jarfile",
-                                                flinkJobJar,
-                                                ContentType.create("application/java-archive"),
-                                                flinkJobJar.getName())
-                                        .build())
-                        .execute()
-                        .returnContent()
-                        .asString(StandardCharsets.UTF_8);
+            Request.post(jmRestUrl + "/jars/upload")
+                .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                .body(
+                    MultipartEntityBuilder.create()
+                        .addBinaryBody(
+                            "jarfile",
+                            flinkJobJar,
+                            ContentType.create("application/java-archive"),
+                            flinkJobJar.getName())
+                        .build())
+                .execute()
+                .returnContent()
+                .asString(StandardCharsets.UTF_8);
 
         JarUploadResponse jarUploadResponse = parseJarUploadResponse(uploadResult);
 
         AssertUtils.required(
-                jarUploadResponse != null && jarUploadResponse.isSuccessful(),
-                "[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl="
-                        + jmRestUrl
-                        + ", response="
-                        + jarUploadResponse);
+            jarUploadResponse != null && jarUploadResponse.isSuccessful(),
+            "[flink-submit] upload flink jar to flink session cluster failed, jmRestUrl="
+                + jmRestUrl
+                + ", response="
+                + jarUploadResponse);
 
         String resp =
-                Request.post(jmRestUrl + "/jars/" + jarUploadResponse.getJarId() + "/run")
-                        .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                        .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                        .body(new StringEntity(JsonUtils.write(new JarRunRequest(flinkConfig))))
-                        .execute()
-                        .returnContent()
-                        .asString(StandardCharsets.UTF_8);
+            Request.post(jmRestUrl + "/jars/" + jarUploadResponse.getJarId() + "/run")
+                .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                .body(new StringEntity(JsonUtils.write(new JarRunRequest(flinkConfig))))
+                .execute()
+                .returnContent()
+                .asString(StandardCharsets.UTF_8);
 
         return parseJobId(resp);
     }
@@ -96,10 +98,10 @@ public final class FlinkSessionSubmitHelper {
         try {
             JsonNode ok = JsonUtils.read(uploadResult, JsonNode.class);
             return new JarUploadResponse(
-                    ok.has("filename") && !ok.get("filename").isNull()
-                            ? ok.get("filename").asText()
-                            : null,
-                    ok.has("status") && !ok.get("status").isNull() ? ok.get("status").asText() : null);
+                ok.has("filename") && !ok.get("filename").isNull()
+                    ? ok.get("filename").asText()
+                    : null,
+                ok.has("status") && !ok.get("status").isNull() ? ok.get("status").asText() : null);
         } catch (Exception e) {
             LOG.warn("Failed to parse jar upload response: {}", uploadResult, e);
             return null;
@@ -157,7 +159,7 @@ public final class FlinkSessionSubmitHelper {
             this.parallelism = String.valueOf(flinkConf.get(CoreOptions.DEFAULT_PARALLELISM));
             this.savepointPath = flinkConf.get(SavepointConfigOptions.SAVEPOINT_PATH);
             this.allowNonRestoredState =
-                    flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
+                flinkConf.getBoolean(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE);
         }
     }
 }

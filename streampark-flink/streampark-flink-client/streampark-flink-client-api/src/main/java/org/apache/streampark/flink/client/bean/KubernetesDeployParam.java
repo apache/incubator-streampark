@@ -19,12 +19,12 @@ package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +39,8 @@ public class KubernetesDeployParam {
     @Builder.Default
     private String kubernetesNamespace = KubernetesConfigOptions.NAMESPACE.defaultValue();
 
-    @Builder.Default private String kubeConf = "~/.kube/config";
+    @Builder.Default
+    private String kubeConf = "~/.kube/config";
 
     @Builder.Default
     private String serviceAccount = KubernetesConfigOptions.KUBERNETES_SERVICE_ACCOUNT.defaultValue();

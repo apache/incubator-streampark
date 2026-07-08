@@ -17,6 +17,12 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.common.conf.CommonConfig;
+import org.apache.streampark.common.conf.InternalConfigHolder;
+import org.apache.streampark.common.constants.Constants;
+
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
@@ -29,10 +35,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.RMHAUtils;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.util.Timeout;
-import org.apache.streampark.common.conf.CommonConfig;
-import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.constants.Constants;
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -50,21 +52,22 @@ import java.util.concurrent.TimeUnit;
 public final class YarnUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(YarnUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(YarnUtils.class.getName());
 
     private static String rmHttpURL;
 
     public static final String PROXY_YARN_URL =
-            InternalConfigHolder.get(CommonConfig.STREAMPARK_PROXY_YARN_URL());
+        InternalConfigHolder.get(CommonConfig.STREAMPARK_PROXY_YARN_URL());
 
     public static final boolean HAS_YARN_HTTP_KERBEROS_AUTH =
-            "kerberos"
-                    .equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
+        "kerberos"
+            .equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
 
     public static final boolean HAS_YARN_HTTP_SIMPLE_AUTH =
-            "simple".equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
+        "simple".equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
 
-    private YarnUtils() {}
+    private YarnUtils() {
+    }
 
     public static boolean hasYarnHttpKerberosAuth() {
         return HAS_YARN_HTTP_KERBEROS_AUTH;
@@ -76,10 +79,10 @@ public final class YarnUtils {
 
     public static List<ApplicationId> getAppId(String appName) {
         EnumSet<YarnApplicationState> appStates =
-                EnumSet.of(
-                        YarnApplicationState.RUNNING,
-                        YarnApplicationState.ACCEPTED,
-                        YarnApplicationState.SUBMITTED);
+            EnumSet.of(
+                YarnApplicationState.RUNNING,
+                YarnApplicationState.ACCEPTED,
+                YarnApplicationState.SUBMITTED);
         try {
             List<ApplicationId> appIds = new ArrayList<>();
             for (ApplicationReport report : HadoopUtils.yarnClient().getApplications(appStates)) {
@@ -98,7 +101,7 @@ public final class YarnUtils {
         ApplicationId applicationId = ApplicationId.fromString(appId);
         try {
             ApplicationReport applicationReport =
-                    HadoopUtils.yarnClient().getApplicationReport(applicationId);
+                HadoopUtils.yarnClient().getApplicationReport(applicationId);
             return applicationReport.getYarnApplicationState();
         } catch (Exception e) {
             LOG.warn("Failed to get YARN application state for appId={}", appId, e);
@@ -109,7 +112,7 @@ public final class YarnUtils {
     public static boolean isContains(String appName) {
         try {
             List<ApplicationReport> runningApps =
-                    HadoopUtils.yarnClient().getApplications(EnumSet.of(YarnApplicationState.RUNNING));
+                HadoopUtils.yarnClient().getApplications(EnumSet.of(YarnApplicationState.RUNNING));
             if (runningApps != null) {
                 for (ApplicationReport app : runningApps) {
                     if (appName.equals(app.getName())) {
@@ -164,23 +167,23 @@ public final class YarnUtils {
                         String activeRMId = RMHAUtils.findActiveRMHAId(yarnConf);
                         if (activeRMId == null) {
                             LOG.warn(
-                                    "[StreamPark] 'findActiveRMHAId' is null,config yarn.acl.enable:{},now http try it.",
-                                    yarnConf.get("yarn.acl.enable"));
+                                "[StreamPark] 'findActiveRMHAId' is null,config yarn.acl.enable:{},now http try it.",
+                                yarnConf.get("yarn.acl.enable"));
                             Map<String, String> idUrlMap = new HashMap<>();
                             for (String id : HAUtil.getRMHAIds(conf)) {
                                 String address = conf.get(HAUtil.addSuffix(addressPrefix, id));
                                 if (address == null) {
                                     String hostname =
-                                            conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id));
+                                        conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id));
                                     address = hostname + ":" + defaultPort;
                                 }
                                 idUrlMap.put(protocol + address, id);
                             }
                             activeRMId = null;
                             int rpcTimeoutForChecks =
-                                    yarnConf.getInt(
-                                            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-                                            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT);
+                                yarnConf.getInt(
+                                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+                                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT);
                             for (Map.Entry<String, String> entry : idUrlMap.entrySet()) {
                                 String activeUrl = httpTestYarnRMUrl(entry.getKey(), rpcTimeoutForChecks);
                                 if (activeUrl != null) {
@@ -193,14 +196,14 @@ public final class YarnUtils {
                         }
                         if (activeRMId == null) {
                             throw new IllegalArgumentException(
-                                    "[StreamPark] YarnUtils.getRMWebAppURL: can not found yarn active node");
+                                "[StreamPark] YarnUtils.getRMWebAppURL: can not found yarn active node");
                         }
                         LOG.info("[StreamPark] Current activeRMHAId: {}", activeRMId);
                         String appActiveRMKey = HAUtil.addSuffix(addressPrefix, activeRMId);
                         String hostnameActiveRMKey =
-                                HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId);
+                            HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, activeRMId);
                         if (HAUtil.getConfValueForRMInstance(appActiveRMKey, yarnConf) == null
-                                && HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf) != null) {
+                            && HAUtil.getConfValueForRMInstance(hostnameActiveRMKey, yarnConf) != null) {
                             LOG.info("[StreamPark] Find rm web address by : {}", hostnameActiveRMKey);
                             name = hostnameActiveRMKey;
                         } else {
@@ -210,15 +213,15 @@ public final class YarnUtils {
                     }
 
                     java.net.InetSocketAddress inetSocketAddress =
-                            conf.getSocketAddr(name, "0.0.0.0:" + defaultPort, Integer.parseInt(defaultPort));
+                        conf.getSocketAddr(name, "0.0.0.0:" + defaultPort, Integer.parseInt(defaultPort));
 
                     java.net.InetSocketAddress address = NetUtils.getConnectAddress(inetSocketAddress);
 
                     StringBuilder buffer = new StringBuilder(protocol);
                     java.net.InetAddress resolved = address.getAddress();
                     if (resolved != null
-                            && !resolved.isAnyLocalAddress()
-                            && !resolved.isLoopbackAddress()) {
+                        && !resolved.isAnyLocalAddress()
+                        && !resolved.isLoopbackAddress()) {
                         buffer.append(address.getHostName());
                     } else {
                         try {
@@ -238,7 +241,7 @@ public final class YarnUtils {
 
     private static String httpTestYarnRMUrl(String url, int timeout) {
         RequestConfig config =
-                RequestConfig.custom().setConnectTimeout(timeout, TimeUnit.MILLISECONDS).build();
+            RequestConfig.custom().setConnectTimeout(timeout, TimeUnit.MILLISECONDS).build();
         return HttpClientUtils.httpGetRequest(url, config);
     }
 
@@ -268,15 +271,15 @@ public final class YarnUtils {
             return request(getRMWebAppURL() + "/" + url, timeout);
         } catch (Exception first) {
             Optional<String> retried =
-                    Utils.retry(
-                            5,
-                            Duration.ofSeconds(5),
-                            () -> request(getRMWebAppURL(true) + "/" + url, timeout));
+                Utils.retry(
+                    5,
+                    Duration.ofSeconds(5),
+                    () -> request(getRMWebAppURL(true) + "/" + url, timeout));
             if (retried.isPresent()) {
                 return retried.get();
             }
             throw new IOException(
-                    "yarnUtils restRequest retry 5 times all failed. detail: " + first, first);
+                "yarnUtils restRequest retry 5 times all failed. detail: " + first, first);
         }
     }
 
@@ -284,9 +287,8 @@ public final class YarnUtils {
         RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).build();
         if (HAS_YARN_HTTP_KERBEROS_AUTH) {
             return HadoopUtils.getUgi()
-                    .doAs(
-                            (PrivilegedExceptionAction<String>)
-                                    () -> HttpClientUtils.httpAuthGetRequest(reqUrl, config));
+                .doAs(
+                    (PrivilegedExceptionAction<String>) () -> HttpClientUtils.httpAuthGetRequest(reqUrl, config));
         }
         String url;
         if (!HAS_YARN_HTTP_SIMPLE_AUTH) {

@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.connector.sink;
 
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.spark.SparkContext;
@@ -38,7 +39,7 @@ import scala.reflect.ClassTag$;
 public abstract class Sink<T> implements Serializable {
 
     protected final Logger log =
-            StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
 
     protected final transient SparkContext sc;
     protected transient org.apache.spark.SparkConf sparkConf;
@@ -61,10 +62,10 @@ public abstract class Sink<T> implements Serializable {
         if (param == null) {
             param = new HashMap<>();
             scala.collection.Iterator<scala.Tuple2<String, String>> iter =
-                    scala.collection.JavaConverters.asScalaIteratorConverter(
-                                    java.util.Arrays.asList(getSparkConf().getAll()).iterator())
-                            .asScala()
-                            .toIterator();
+                scala.collection.JavaConverters.asScalaIteratorConverter(
+                    java.util.Arrays.asList(getSparkConf().getAll()).iterator())
+                    .asScala()
+                    .toIterator();
             String prefix = getPrefix();
             while (iter.hasNext()) {
                 scala.Tuple2<String, String> t = iter.next();
@@ -77,7 +78,8 @@ public abstract class Sink<T> implements Serializable {
     }
 
     protected Properties filterProp(
-            Map<String, String> param, Map<String, String> overrides, String prefix, String replacement) {
+                                    Map<String, String> param, Map<String, String> overrides, String prefix,
+                                    String replacement) {
         Properties p = new Properties();
         Map<String, String> map = new HashMap<>(param);
         map.putAll(overrides);

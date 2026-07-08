@@ -51,9 +51,9 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkCheckpointWatcher(
-            MetricWatcherConfig conf,
-            FlinkK8sWatchController watchController,
-            ChangeEventBus eventBus) {
+                                  MetricWatcherConfig conf,
+                                  FlinkK8sWatchController watchController,
+                                  ChangeEventBus eventBus) {
         this.conf = conf;
         this.watchController = watchController;
         this.eventBus = eventBus;
@@ -62,8 +62,8 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
     @Override
     protected void doStart() {
         timerSchedule =
-                watchExecutor.scheduleAtFixedRate(
-                        this::doWatch, 0, conf.requestIntervalSec(), TimeUnit.SECONDS);
+            watchExecutor.scheduleAtFixedRate(
+                this::doWatch, 0, conf.requestIntervalSec(), TimeUnit.SECONDS);
         log.info("[flink-k8s] FlinkCheckpointWatcher started.");
     }
 
@@ -96,32 +96,29 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         }
 
         Set<CompletableFuture<Optional<CheckpointCV>>> futures =
-                trackIds.stream()
-                        .map(
-                                id ->
-                                        CompletableFuture.supplyAsync(() -> collect(id), watchExecutor)
-                                                .whenComplete(
-                                                        (cp, error) ->
-                                                                cp.ifPresent(
-                                                                        checkpoint ->
-                                                                                eventBus.postAsync(
-                                                                                        new FlinkJobCheckpointChangeEvent(
-                                                                                                id,
-                                                                                                checkpoint))))
-                        .collect(Collectors.toSet());
+            trackIds.stream().map(this::watchCheckpointAsync).collect(Collectors.toSet());
 
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+                .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("[FlinkCheckpointWatcher] interrupted while waiting for checkpoint collection");
         } catch (Exception e) {
             log.error(
-                    "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",
-                    conf.requestTimeoutSec(),
-                    trackIds);
+                "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",
+                conf.requestTimeoutSec(),
+                trackIds);
         }
+    }
+
+    private CompletableFuture<Optional<CheckpointCV>> watchCheckpointAsync(TrackId id) {
+        return CompletableFuture.supplyAsync(() -> collect(id), watchExecutor)
+            .whenComplete(
+                (cp, error) -> cp.ifPresent(
+                    checkpoint -> eventBus.postAsync(
+                        new FlinkJobCheckpointChangeEvent(
+                            id, checkpoint))));
     }
 
     public Optional<CheckpointCV> collect(TrackId trackId) {
@@ -129,33 +126,33 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
             return Optional.empty();
         }
         Optional<String> flinkJmRestUrl =
-                watchController
-                        .getClusterRestUrl(ClusterKey.of(trackId))
-                        .filter(url -> !url.isEmpty());
+            watchController
+                .getClusterRestUrl(ClusterKey.of(trackId))
+                .filter(url -> !url.isEmpty());
         if (!flinkJmRestUrl.isPresent()) {
             return Optional.empty();
         }
         try {
             String json =
-                    Request.get(flinkJmRestUrl.get() + "/jobs/" + trackId.jobId() + "/checkpoints")
-                            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                            .execute()
-                            .returnContent()
-                            .asString(StandardCharsets.UTF_8);
+                Request.get(flinkJmRestUrl.get() + "/jobs/" + trackId.jobId() + "/checkpoints")
+                    .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                    .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                    .execute()
+                    .returnContent()
+                    .asString(StandardCharsets.UTF_8);
             Optional<CheckpointResponse> checkpoint = FlinkRestModels.parseCheckpoint(json);
             if (!checkpoint.isPresent()) {
                 return Optional.empty();
             }
             CheckpointResponse cp = checkpoint.get();
             return Optional.of(
-                    new CheckpointCV(
-                            cp.id(),
-                            cp.status(),
-                            cp.externalPath(),
-                            cp.isSavepoint(),
-                            cp.checkpointType(),
-                            cp.triggerTimestamp()));
+                new CheckpointCV(
+                    cp.id(),
+                    cp.status(),
+                    cp.externalPath(),
+                    cp.isSavepoint(),
+                    cp.checkpointType(),
+                    cp.triggerTimestamp()));
         } catch (Exception e) {
             return Optional.empty();
         }

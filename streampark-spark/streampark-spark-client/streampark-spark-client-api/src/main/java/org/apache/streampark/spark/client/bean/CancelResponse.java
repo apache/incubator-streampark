@@ -25,5 +25,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CancelResponse {
+
     private String savePoint;
 }

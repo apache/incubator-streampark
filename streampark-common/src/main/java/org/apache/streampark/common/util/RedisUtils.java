@@ -35,9 +35,10 @@ import java.util.function.Function;
 public final class RedisUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(RedisUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(RedisUtils.class.getName());
 
-    private RedisUtils() {}
+    private RedisUtils() {
+    }
 
     public static boolean exists(String key, RedisEndpoint endpoint) {
         return doRedis(jedis -> jedis.exists(key), endpoint);
@@ -73,34 +74,35 @@ public final class RedisUtils {
 
     public static Long setnx(String key, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long x = jedis.setnx(key, value);
-                    if (x == 1 && ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return x;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long x = jedis.setnx(key, value);
+                if (x == 1 && ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return x;
+            },
+            func,
+            endpoint);
     }
 
     public static Long hsetnx(
-            String key, String field, String value, Integer ttl, RedisEndpoint endpoint) {
+                              String key, String field, String value, Integer ttl, RedisEndpoint endpoint) {
         return hsetnx(key, field, value, ttl, null, endpoint);
     }
 
     public static Long hsetnx(
-            String key, String field, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                              String key, String field, String value, Integer ttl, Runnable func,
+                              RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long x = jedis.hsetnx(key, field, value);
-                    if (x == 1 && ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return x;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long x = jedis.hsetnx(key, field, value);
+                if (x == 1 && ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return x;
+            },
+            func,
+            endpoint);
     }
 
     public static String[] mget(String[] keys, RedisEndpoint endpoint) {
@@ -121,15 +123,15 @@ public final class RedisUtils {
 
     public static String set(String key, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    String s = jedis.set(key, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return s;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                String s = jedis.set(key, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return s;
+            },
+            func,
+            endpoint);
     }
 
     public static Long hset(String key, String field, String value, Integer ttl, RedisEndpoint endpoint) {
@@ -137,36 +139,38 @@ public final class RedisUtils {
     }
 
     public static Long hset(
-            String key, String field, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                            String key, String field, String value, Integer ttl, Runnable func,
+                            RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long s = jedis.hset(key, field, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return s;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long s = jedis.hset(key, field, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return s;
+            },
+            func,
+            endpoint);
     }
 
     public static String hmset(
-            String key, Map<String, String> hash, Integer ttl, RedisEndpoint endpoint) {
+                               String key, Map<String, String> hash, Integer ttl, RedisEndpoint endpoint) {
         return hmset(key, hash, ttl, null, endpoint);
     }
 
     public static String hmset(
-            String key, Map<String, String> hash, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                               String key, Map<String, String> hash, Integer ttl, Runnable func,
+                               RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    String s = jedis.hmset(key, hash);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return s;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                String s = jedis.hmset(key, hash);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return s;
+            },
+            func,
+            endpoint);
     }
 
     public static List<String> hmget(String key, String[] fields, RedisEndpoint endpoint) {
@@ -193,17 +197,17 @@ public final class RedisUtils {
     }
 
     public static Long sadd(
-            String key, List<String> members, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                            String key, List<String> members, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long res = jedis.sadd(key, members.toArray(new String[0]));
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return res;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long res = jedis.sadd(key, members.toArray(new String[0]));
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return res;
+            },
+            func,
+            endpoint);
     }
 
     public static Set<String> smembers(String key, RedisEndpoint endpoint) {
@@ -219,30 +223,30 @@ public final class RedisUtils {
     }
 
     public static String getOrElseHset(
-            String key, String field, String value, Integer ttl, RedisEndpoint endpoint) {
+                                       String key, String field, String value, Integer ttl, RedisEndpoint endpoint) {
         return getOrElseHset(key, field, value, ttl, null, endpoint);
     }
 
     public static String getOrElseHset(
-            String key,
-            String field,
-            String value,
-            Integer ttl,
-            Runnable func,
-            RedisEndpoint endpoint) {
+                                       String key,
+                                       String field,
+                                       String value,
+                                       Integer ttl,
+                                       Runnable func,
+                                       RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    String v = jedis.hget(key, field);
-                    if (v == null) {
-                        jedis.hset(key, field, value);
-                        if (ttl != null) {
-                            jedis.expire(key, ttl);
-                        }
+            jedis -> {
+                String v = jedis.hget(key, field);
+                if (v == null) {
+                    jedis.hset(key, field, value);
+                    if (ttl != null) {
+                        jedis.expire(key, ttl);
                     }
-                    return v;
-                },
-                func,
-                endpoint);
+                }
+                return v;
+            },
+            func,
+            endpoint);
     }
 
     public static String getOrElseSet(String key, String value, Integer ttl, RedisEndpoint endpoint) {
@@ -250,58 +254,60 @@ public final class RedisUtils {
     }
 
     public static String getOrElseSet(
-            String key, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                                      String key, String value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    String v = jedis.get(key);
-                    if (v == null) {
-                        jedis.set(key, value);
-                        if (ttl != null) {
-                            jedis.expire(key, ttl);
-                        }
+            jedis -> {
+                String v = jedis.get(key);
+                if (v == null) {
+                    jedis.set(key, value);
+                    if (ttl != null) {
+                        jedis.expire(key, ttl);
                     }
-                    return v;
-                },
-                func,
-                endpoint);
+                }
+                return v;
+            },
+            func,
+            endpoint);
     }
 
     public static Long hincrBy(
-            String key, String field, long value, Integer ttl, RedisEndpoint endpoint) {
+                               String key, String field, long value, Integer ttl, RedisEndpoint endpoint) {
         return hincrBy(key, field, value, ttl, null, endpoint);
     }
 
     public static Long hincrBy(
-            String key, String field, long value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                               String key, String field, long value, Integer ttl, Runnable func,
+                               RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long reply = jedis.hincrBy(key, field, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return reply;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long reply = jedis.hincrBy(key, field, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return reply;
+            },
+            func,
+            endpoint);
     }
 
     public static Double hincrByFloat(
-            String key, String field, double value, Integer ttl, RedisEndpoint endpoint) {
+                                      String key, String field, double value, Integer ttl, RedisEndpoint endpoint) {
         return hincrByFloat(key, field, value, ttl, null, endpoint);
     }
 
     public static Double hincrByFloat(
-            String key, String field, double value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                                      String key, String field, double value, Integer ttl, Runnable func,
+                                      RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Double reply = jedis.hincrByFloat(key, field, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return reply;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Double reply = jedis.hincrByFloat(key, field, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return reply;
+            },
+            func,
+            endpoint);
     }
 
     public static Long incrBy(String key, long value, Integer ttl, RedisEndpoint endpoint) {
@@ -309,17 +315,17 @@ public final class RedisUtils {
     }
 
     public static Long incrBy(
-            String key, long value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                              String key, long value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Long reply = jedis.incrBy(key, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return reply;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Long reply = jedis.incrBy(key, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return reply;
+            },
+            func,
+            endpoint);
     }
 
     public static Double incrByFloat(String key, double value, Integer ttl, RedisEndpoint endpoint) {
@@ -327,17 +333,17 @@ public final class RedisUtils {
     }
 
     public static Double incrByFloat(
-            String key, double value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                                     String key, double value, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    Double reply = jedis.incrByFloat(key, value);
-                    if (ttl != null) {
-                        jedis.expire(key, ttl);
-                    }
-                    return reply;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                Double reply = jedis.incrByFloat(key, value);
+                if (ttl != null) {
+                    jedis.expire(key, ttl);
+                }
+                return reply;
+            },
+            func,
+            endpoint);
     }
 
     public static Long mSets(List<Map.Entry<String, String>> kvs, Integer ttl, RedisEndpoint endpoint) {
@@ -345,22 +351,22 @@ public final class RedisUtils {
     }
 
     public static Long mSets(
-            List<Map.Entry<String, String>> kvs, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                             List<Map.Entry<String, String>> kvs, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    long start = System.currentTimeMillis();
-                    Pipeline pipe = jedis.pipelined();
-                    for (Map.Entry<String, String> kv : kvs) {
-                        pipe.mset(kv.getKey(), kv.getValue());
-                        if (ttl != null) {
-                            pipe.expire(kv.getKey(), ttl);
-                        }
+            jedis -> {
+                long start = System.currentTimeMillis();
+                Pipeline pipe = jedis.pipelined();
+                for (Map.Entry<String, String> kv : kvs) {
+                    pipe.mset(kv.getKey(), kv.getValue());
+                    if (ttl != null) {
+                        pipe.expire(kv.getKey(), ttl);
                     }
-                    pipe.sync();
-                    return System.currentTimeMillis() - start;
-                },
-                func,
-                endpoint);
+                }
+                pipe.sync();
+                return System.currentTimeMillis() - start;
+            },
+            func,
+            endpoint);
     }
 
     public static Long mSetex(List<Map.Entry<String, String>> kvs, Integer ttl, RedisEndpoint endpoint) {
@@ -368,22 +374,22 @@ public final class RedisUtils {
     }
 
     public static Long mSetex(
-            List<Map.Entry<String, String>> kvs, Integer ttl, Runnable func, RedisEndpoint endpoint) {
+                              List<Map.Entry<String, String>> kvs, Integer ttl, Runnable func, RedisEndpoint endpoint) {
         return doRedis(
-                jedis -> {
-                    long start = System.currentTimeMillis();
-                    Pipeline pipe = jedis.pipelined();
-                    for (Map.Entry<String, String> kv : kvs) {
-                        pipe.setnx(kv.getKey(), kv.getValue());
-                        if (ttl != null) {
-                            pipe.expire(kv.getKey(), ttl);
-                        }
+            jedis -> {
+                long start = System.currentTimeMillis();
+                Pipeline pipe = jedis.pipelined();
+                for (Map.Entry<String, String> kv : kvs) {
+                    pipe.setnx(kv.getKey(), kv.getValue());
+                    if (ttl != null) {
+                        pipe.expire(kv.getKey(), ttl);
                     }
-                    pipe.sync();
-                    return System.currentTimeMillis() - start;
-                },
-                func,
-                endpoint);
+                }
+                pipe.sync();
+                return System.currentTimeMillis() - start;
+            },
+            func,
+            endpoint);
     }
 
     public static Long expire(String key, int seconds, RedisEndpoint endpoint) {
@@ -396,23 +402,23 @@ public final class RedisUtils {
 
     public static void delByPattern(String key, Runnable func, RedisEndpoint endpoint) {
         doRedis(
-                jedis -> {
-                    ScanParams scanParams = new ScanParams();
-                    scanParams.match(key);
-                    scanParams.count(10000);
-                    String cursor = ScanParams.SCAN_POINTER_START;
-                    do {
-                        redis.clients.jedis.ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
-                        cursor = scanResult.getCursor();
-                        List<String> keys = scanResult.getResult();
-                        if (!keys.isEmpty()) {
-                            jedis.del(keys.toArray(new String[0]));
-                        }
-                    } while (!"0".equals(cursor));
-                    return null;
-                },
-                func,
-                endpoint);
+            jedis -> {
+                ScanParams scanParams = new ScanParams();
+                scanParams.match(key);
+                scanParams.count(10000);
+                String cursor = ScanParams.SCAN_POINTER_START;
+                do {
+                    redis.clients.jedis.ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
+                    cursor = scanResult.getCursor();
+                    List<String> keys = scanResult.getResult();
+                    if (!keys.isEmpty()) {
+                        jedis.del(keys.toArray(new String[0]));
+                    }
+                } while (!"0".equals(cursor));
+                return null;
+            },
+            func,
+            endpoint);
     }
 
     public static Long hlen(String key, RedisEndpoint endpoint) {
