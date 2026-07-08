@@ -41,6 +41,28 @@ public final class FileUtils {
 
     private FileUtils() {}
 
+    public static File toCanonicalFile(String path) throws IOException {
+        return new File(path).getCanonicalFile();
+    }
+
+    public static File resolveChildFile(File baseDir, String... childSegments) throws IOException {
+        File base = baseDir.getCanonicalFile();
+        File current = base;
+        for (String segment : childSegments) {
+            if (segment == null || segment.isEmpty() || segment.contains("..")) {
+                throw new IOException("Invalid path segment: " + segment);
+            }
+            current = new File(current, segment);
+        }
+        File resolved = current.getCanonicalFile();
+        String basePath = base.getPath();
+        String resolvedPath = resolved.getPath();
+        if (!resolvedPath.equals(basePath) && !resolvedPath.startsWith(basePath + File.separator)) {
+            throw new IOException("Resolved path escapes base directory: " + resolvedPath);
+        }
+        return resolved;
+    }
+
     private static String bytesToHexString(byte[] src) {
         if (src == null || src.length <= 0) {
             return null;
@@ -222,11 +244,12 @@ public final class FileUtils {
     }
 
     public static String readFile(File file) throws IOException {
-        if (file.length() >= Integer.MAX_VALUE) {
+        File canonicalFile = file.getCanonicalFile();
+        if (canonicalFile.length() >= Integer.MAX_VALUE) {
             throw new IOException("Too large file, unexpected!");
         }
-        byte[] array = new byte[(int) file.length()];
-        try (InputStream is = Files.newInputStream(file.toPath())) {
+        byte[] array = new byte[(int) canonicalFile.length()];
+        try (InputStream is = Files.newInputStream(canonicalFile.toPath())) {
             readInputStream(is, array);
         }
         return new String(array, StandardCharsets.UTF_8);
