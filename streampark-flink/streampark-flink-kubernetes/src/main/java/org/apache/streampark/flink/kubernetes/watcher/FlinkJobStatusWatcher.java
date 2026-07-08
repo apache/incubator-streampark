@@ -120,13 +120,15 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                                                         () -> touchApplicationJob(id),
                                                         watchExecutor)
                                                 .whenComplete(
-                                                        (jobState, error) -> {
-                                                            if (jobState != null && jobState.isPresent()) {
-                                                                updateState(
-                                                                        id.copy().jobId(jobState.get().jobId()),
-                                                                        jobState.get());
-                                                            }
-                                                        }))
+                                                        (jobState, error) ->
+                                                                jobState.ifPresent(
+                                                                        state ->
+                                                                                updateState(
+                                                                                        id.copy()
+                                                                                                .jobId(
+                                                                                                        state
+                                                                                                                .jobId()),
+                                                                                        state))))
                         .collect(Collectors.toSet());
 
         Set<TrackId> sessionIds =
@@ -166,20 +168,22 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                                                                                                             trackId
                                                                                                                     .jobId()))
                                                                             .findFirst();
-                                                            if (matched.isPresent()) {
-                                                                Map.Entry<TrackId, JobStatusCV> job =
-                                                                        matched.get();
-                                                                updateState(
-                                                                        job.getKey()
-                                                                                .copy()
-                                                                                .appId(trackId.appId()),
-                                                                        job.getValue());
-                                                            } else {
+                                                            matched.ifPresent(
+                                                                    job ->
+                                                                            updateState(
+                                                                                    job.getKey()
+                                                                                            .copy()
+                                                                                            .appId(
+                                                                                                    trackId
+                                                                                                            .appId()),
+                                                                                    job.getValue()));
+                                                            if (!matched.isPresent()) {
                                                                 touchSessionJob(trackId)
                                                                         .ifPresent(
                                                                                 state ->
                                                                                         updateState(
-                                                                                                trackId, state));
+                                                                                                trackId,
+                                                                                                state));
                                                             }
                                                         }))
                         .collect(Collectors.toSet());
@@ -187,6 +191,9 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(appFutures.toArray(new CompletableFuture[0]))
                     .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("[FlinkJobStatusWatcher] interrupted while waiting for application job status");
         } catch (Exception e) {
             log.warn(
                     "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native application mode timeout, limitSeconds={}, trackIds={}",
@@ -197,6 +204,9 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(sessionFutures.toArray(new CompletableFuture[0]))
                     .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("[FlinkJobStatusWatcher] interrupted while waiting for session job status");
         } catch (Exception e) {
             log.warn(
                     "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session mode timeout, limitSeconds={}, trackIds={}",

@@ -31,7 +31,7 @@ public final class ClickhouseConvertUtils {
             f.setAccessible(true);
             try {
                 Object v = f.get(value);
-                if ("String".equals(f.getType().getSimpleName())) {
+                if (f.getType() == String.class) {
                     buffer.append("\"").append(v).append("\",");
                 } else {
                     buffer.append(v).append(",");

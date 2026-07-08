@@ -74,12 +74,7 @@ public class DorisSinkConfigOption implements Serializable {
                                     }
                                     return Arrays.stream(value.split(SIGN_COMMA))
                                             .filter(s -> !s.isEmpty())
-                                            .map(
-                                                    s ->
-                                                            s.replaceAll("\\s+", "")
-                                                                    .replaceFirst(
-                                                                            "^http://|^",
-                                                                            Constants.HTTP_SCHEMA))
+                                            .map(DorisSinkConfigOption::normalizeLoadUrl)
                                             .collect(Collectors.toList());
                                 })
                         .build();
@@ -237,5 +232,13 @@ public class DorisSinkConfigOption implements Serializable {
 
     public Properties getInternalProperties() {
         return ConfigUtils.getConf(prop, prefix, ".properties");
+    }
+
+    private static String normalizeLoadUrl(String host) {
+        String trimmed = host.replaceAll("\\s++", "");
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return trimmed;
+        }
+        return Constants.HTTP_SCHEMA + trimmed;
     }
 }
