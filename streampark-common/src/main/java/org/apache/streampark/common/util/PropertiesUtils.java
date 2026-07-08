@@ -42,7 +42,12 @@ public final class PropertiesUtils {
     private PropertiesUtils() {}
 
     public static String readFile(String filename) {
-        File file = new File(filename);
+        File file;
+        try {
+            file = FileUtils.toCanonicalFile(filename);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("[StreamPark] readFile: invalid file path " + filename, e);
+        }
         if (!file.exists()) {
             throw new IllegalArgumentException("[StreamPark] readFile: file " + file + " does not exist");
         }
@@ -95,7 +100,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromYamlFile(String filename) {
-        File file = new File(filename);
+        File file = toConfigFile(filename, "fromYamlFile");
         if (!file.exists()) {
             throw new IllegalArgumentException("[StreamPark] fromYamlFile: Yaml file " + file + " does not exist");
         }
@@ -110,7 +115,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromHoconFile(String filename) {
-        File file = new File(filename);
+        File file = toConfigFile(filename, "fromHoconFile");
         if (!file.exists()) {
             throw new IllegalArgumentException("[StreamPark] fromHoconFile: file " + file + " does not exist");
         }
@@ -122,7 +127,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromPropertiesFile(String filename) {
-        File file = new File(filename);
+        File file = toConfigFile(filename, "fromPropertiesFile");
         if (!file.exists()) {
             throw new IllegalArgumentException(
                     "[StreamPark] fromPropertiesFile: Properties file " + file + " does not exist");
@@ -232,6 +237,14 @@ public final class PropertiesUtils {
 
     public static Map<String, String> fromPropertiesFileAsJava(InputStream inputStream) {
         return new HashMap<>(fromPropertiesFile(inputStream));
+    }
+
+    private static File toConfigFile(String filename, String method) {
+        try {
+            return FileUtils.toCanonicalFile(filename);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("[StreamPark] " + method + ": invalid file path " + filename, e);
+        }
     }
 
     @SuppressWarnings("unchecked")

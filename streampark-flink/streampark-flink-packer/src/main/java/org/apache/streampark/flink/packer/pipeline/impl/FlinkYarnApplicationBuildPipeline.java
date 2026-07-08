@@ -65,6 +65,7 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
         return new SimpleBuildResponse();
     }
 
+    @SuppressWarnings("java:S4790")
     private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws Exception {
         File originFile = new File(origin);
         if (!fsOperator.exists(target)) fsOperator.mkdirs(target);

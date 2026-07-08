@@ -23,6 +23,7 @@ import org.apache.streampark.common.enums.SparkDeployMode;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.util.DeflaterUtils;
+import org.apache.streampark.common.util.FileUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
@@ -275,15 +276,27 @@ public class SparkApplicationManageServiceImpl
             }
         }
         if (appParam.isFromUploadJob()) {
-            String jarPath = String.format(
-                "%s/%d/%s", Workspace.local().APP_UPLOADS(), appParam.getTeamId(), appParam.getJar());
-            if (!new File(jarPath).exists()) {
+            File jarFile;
+            try {
+                jarFile =
+                        FileUtils.resolveChildFile(
+                                new File(Workspace.local().APP_UPLOADS()),
+                                String.valueOf(appParam.getTeamId()),
+                                org.apache.commons.io.FilenameUtils.getName(appParam.getJar()));
+            } catch (IOException e) {
+                throw new ApiAlertException("Invalid jar path: " + appParam.getJar(), e);
+            }
+            if (!jarFile.exists()) {
                 Resource resource = resourceService.findByResourceName(appParam.getTeamId(), appParam.getJar());
                 if (resource != null && StringUtils.isNotBlank(resource.getFilePath())) {
-                    jarPath = resource.getFilePath();
+                    try {
+                        jarFile = FileUtils.toCanonicalFile(resource.getFilePath());
+                    } catch (IOException e) {
+                        throw new ApiAlertException("Invalid resource path: " + resource.getFilePath(), e);
+                    }
                 }
             }
-            appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(new File(jarPath)));
+            appParam.setJarCheckSum(org.apache.commons.io.FileUtils.checksumCRC32(jarFile));
         }
 
         boolean saveSuccess = save(appParam);
@@ -403,7 +416,12 @@ public class SparkApplicationManageServiceImpl
             if (!Objects.equals(application.getJar(), appParam.getJar())) {
                 application.setBuild(true);
             } else {
-                File jarFile = new File(WebUtils.getAppTempDir(), appParam.getJar());
+                File jarFile;
+                try {
+                    jarFile = WebUtils.resolveTempFile(appParam.getJar());
+                } catch (IOException e) {
+                    throw new RuntimeException("Invalid jar path: " + appParam.getJar(), e);
+                }
                 if (jarFile.exists()) {
                     try {
                         long checkSum = org.apache.commons.io.FileUtils.checksumCRC32(jarFile);

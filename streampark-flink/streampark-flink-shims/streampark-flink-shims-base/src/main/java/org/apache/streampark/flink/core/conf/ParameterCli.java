@@ -96,7 +96,7 @@ public final class ParameterCli {
                                 }
                             }
                         } catch (Exception exception) {
-                            exception.printStackTrace();
+                            // Ignore invalid CLI options and continue with parsed values.
                         }
                         String mainClass = map.get(OPTION_MAIN);
                         if (mainClass != null) {
@@ -147,7 +147,6 @@ public final class ParameterCli {
                                         FlinkRunOption.DETACHED_OPTION.getLongOpt());
                             return detached ? "Detached" : "Attach";
                         } catch (Exception e) {
-                            e.printStackTrace();
                             return "Attach";
                         }
                     default:
@@ -191,7 +190,7 @@ public final class ParameterCli {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                // Ignore invalid CLI options merged from program args.
             }
         }
         List<String> array = new ArrayList<>();
