@@ -62,7 +62,7 @@ public class JdbcSink implements Sink {
 
     public <T> DataStreamSink<T> sink(DataStream<T> stream, Function<T, String> toSQLFn) {
         Properties prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap(), alias);
-        Semantic semantic = Semantic.of(prop.getProperty(ConfigKeys.KEY_SEMANTIC(), Semantic.NONE.name()));
+        Semantic semantic = Semantic.of(prop.getProperty(ConfigKeys.KEY_SEMANTIC, Semantic.NONE.name()));
         DataStreamSink<T> sink;
         if (Semantic.EXACTLY_ONCE.equals(semantic)) {
             TransformFunction<T, String> func = toSQLFn::apply;

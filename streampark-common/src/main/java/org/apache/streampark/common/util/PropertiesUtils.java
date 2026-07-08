@@ -52,8 +52,8 @@ public final class PropertiesUtils {
                 buffer.append(scanner.nextLine()).append("\r\n");
             }
             return buffer.toString();
-        } catch (java.io.FileNotFoundException e) {
-            throw new IllegalArgumentException("[StreamPark] readFile: file " + path + " does not exist", e);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("[StreamPark] readFile: failed to read " + path, e);
         }
     }
 

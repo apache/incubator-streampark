@@ -66,10 +66,10 @@ public class KafkaSink<T> implements Sink {
 
         Properties prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap(), topic, alias != null ? alias : "");
         Utils.copyProperties(property, prop);
-        String topicId = prop.remove(ConfigKeys.KEY_KAFKA_TOPIC()).toString();
+        String topicId = prop.remove(ConfigKeys.KEY_KAFKA_TOPIC).toString();
 
         FlinkKafkaProducer.Semantic semantic;
-        Object semanticVal = prop.remove(ConfigKeys.KEY_KAFKA_SEMANTIC());
+        Object semanticVal = prop.remove(ConfigKeys.KEY_KAFKA_SEMANTIC);
         if (semanticVal == null) {
             semantic = FlinkKafkaProducer.Semantic.AT_LEAST_ONCE;
         } else {

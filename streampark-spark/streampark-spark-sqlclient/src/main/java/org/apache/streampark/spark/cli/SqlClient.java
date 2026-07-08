@@ -32,7 +32,7 @@ public class SqlClient {
 
     public static void main(String[] args) {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        String sql = parameterTool.get(ConfigKeys.KEY_SPARK_SQL());
+        String sql = parameterTool.get(ConfigKeys.KEY_SPARK_SQL);
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: spark sql cannot be null");
         }

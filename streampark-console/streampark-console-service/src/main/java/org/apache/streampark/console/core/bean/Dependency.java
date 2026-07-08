@@ -68,7 +68,7 @@ public class Dependency {
             return false;
         }
         File localJar = WebUtils.getAppTempDir();
-        File localUploads = new File(Workspace.local().APP_UPLOADS());
+        File localUploads = new File(Workspace.local().getAppUploads());
         Set<String> otherJars = new HashSet<>(other.jar);
         for (String jarName : jar) {
             try {
@@ -86,7 +86,7 @@ public class Dependency {
     public DependencyInfo toJarPackDeps() {
         List<Artifact> mvnArts = toArtifact();
         List<String> extJars = this.jar.stream()
-            .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+            .map(jar -> Workspace.local().getAppUploads() + "/" + jar)
             .collect(Collectors.toList());
         return new DependencyInfo(mvnArts, extJars);
     }

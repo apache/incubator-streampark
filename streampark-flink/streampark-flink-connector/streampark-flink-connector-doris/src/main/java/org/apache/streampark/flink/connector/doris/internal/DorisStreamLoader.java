@@ -226,7 +226,7 @@ public class DorisStreamLoader implements Serializable {
   }
 
   private byte[] joinRows(List<byte[]> rows, int totalBytes) {
-    if (DorisConfig.CSV().equalsIgnoreCase(dorisConfig.loadFormat())) {
+    if (DorisConfig.CSV_FORMAT.equalsIgnoreCase(dorisConfig.loadFormat())) {
       byte[] lineDelimiter =
           DorisDelimiterParser.parse(dorisConfig.rowDelimiter()).getBytes(StandardCharsets.UTF_8);
       ByteBuffer bos = ByteBuffer.allocate(totalBytes + rows.size() * lineDelimiter.length);
@@ -237,7 +237,7 @@ public class DorisStreamLoader implements Serializable {
       return bos.array();
     }
 
-    if (DorisConfig.JSON().equalsIgnoreCase(dorisConfig.loadFormat())) {
+    if (DorisConfig.JSON_FORMAT.equalsIgnoreCase(dorisConfig.loadFormat())) {
       ByteBuffer bos = ByteBuffer.allocate(totalBytes + (rows.isEmpty() ? 2 : rows.size() + 1));
       bos.put("[".getBytes(StandardCharsets.UTF_8));
       byte[] jsonDelimiter = ",".getBytes(StandardCharsets.UTF_8);

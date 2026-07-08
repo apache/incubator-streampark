@@ -115,7 +115,7 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
                 fsOperator.copy(originFile.getAbsolutePath(), target);
             } else {
                 String uploadFile =
-                    Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
+                    Workspace.remote().getAppUploads() + "/" + originFile.getName();
                 if (fsOperator.exists(uploadFile)) {
                     try (FileInputStream in = new FileInputStream(originFile)) {
                         String localMd5 = DigestUtils.md5Hex(in); // NOSONAR java:S4790 - upload integrity check only

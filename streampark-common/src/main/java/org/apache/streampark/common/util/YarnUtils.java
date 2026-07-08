@@ -57,14 +57,14 @@ public final class YarnUtils {
     private static String rmHttpURL;
 
     public static final String PROXY_YARN_URL =
-        InternalConfigHolder.get(CommonConfig.STREAMPARK_PROXY_YARN_URL());
+        InternalConfigHolder.get(CommonConfig.STREAMPARK_PROXY_YARN_URL);
 
     public static final boolean HAS_YARN_HTTP_KERBEROS_AUTH =
         "kerberos"
-            .equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
+            .equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH));
 
     public static final boolean HAS_YARN_HTTP_SIMPLE_AUTH =
-        "simple".equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH()));
+        "simple".equalsIgnoreCase(InternalConfigHolder.get(CommonConfig.STREAMPARK_YARN_AUTH));
 
     private YarnUtils() {
     }

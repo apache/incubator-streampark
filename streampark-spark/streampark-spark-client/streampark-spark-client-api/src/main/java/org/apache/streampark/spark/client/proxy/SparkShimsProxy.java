@@ -146,10 +146,10 @@ public final class SparkShimsProxy {
     }
 
     private static void addShimsUrls(SparkVersion sparkVersion, java.util.function.Consumer<File> addShimUrl) {
-        String appHome = System.getProperty(ConfigKeys.KEY_APP_HOME());
+        String appHome = System.getProperty(ConfigKeys.KEY_APP_HOME);
         if (appHome == null) {
             throw new IllegalArgumentException(
-                String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME()));
+                String.format("%s is not found on System env.", ConfigKeys.KEY_APP_HOME));
         }
         File libPath = new File(appHome + "/lib");
         if (!libPath.exists()) {

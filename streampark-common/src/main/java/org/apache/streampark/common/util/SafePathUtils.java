@@ -79,9 +79,13 @@ public final class SafePathUtils {
         if (location.contains("..")) {
             throw new IOException("JAR file path is invalid " + jar);
         }
-        Path base = Paths.get("").toAbsolutePath().normalize();
-        Path resolved = base.resolve(Paths.get(jar.toURI())).normalize();
-        return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
+        try {
+            Path base = Paths.get("").toAbsolutePath().normalize();
+            Path resolved = base.resolve(Paths.get(jar.toURI())).normalize();
+            return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
+        } catch (Exception e) {
+            throw new IOException("JAR file path is invalid " + jar, e);
+        }
     }
 
     private static void validateConfigFilename(String filename) {

@@ -68,7 +68,7 @@ public class FailoverWriter implements AutoCloseable {
                 break;
             case Kafka:
                 initKafkaIfNeeded(table);
-                String topic = properties.getProperty(ConfigKeys.KEY_KAFKA_TOPIC());
+                String topic = properties.getProperty(ConfigKeys.KEY_KAFKA_TOPIC);
                 long timestamp = System.currentTimeMillis();
                 List<String> kafkaRecords =
                         request.getRecords().stream().map(this::cleanUp).collect(Collectors.toList());
@@ -153,7 +153,7 @@ public class FailoverWriter implements AutoCloseable {
                 Lock.lock.lock();
                 if (!Lock.initialized) {
                     Lock.initialized = true;
-                    properties.put(ConfigKeys.KEY_ALIAS(), "failover-" + table);
+                    properties.put(ConfigKeys.KEY_ALIAS, "failover-" + table);
                     java.sql.Connection mysqlConnect = JdbcUtils.getConnection(properties);
                     java.sql.ResultSet mysqlTable =
                             mysqlConnect

@@ -39,9 +39,9 @@ public abstract class FlinkBuildParam implements BuildParam {
     public abstract String customFlinkUserJar();
 
     public DependencyInfo providedLibs() {
-        Set<String> provided = new HashSet<>(Arrays.asList(localWorkspace.APP_JARS(), customFlinkUserJar()));
+        Set<String> provided = new HashSet<>(Arrays.asList(localWorkspace.getAppJars(), customFlinkUserJar()));
         if (flinkJobType() == FlinkJobType.FLINK_SQL) {
-            provided.add(localWorkspace.APP_SHIMS() + "/flink-" + flinkVersion().majorVersion());
+            provided.add(localWorkspace.getAppShims() + "/flink-" + flinkVersion().majorVersion());
         }
         return dependencyInfo().merge(provided);
     }

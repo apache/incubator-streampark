@@ -235,7 +235,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                     applicationInfoService.checkEnv(app);
 
                     // 2) some preparatory work
-                    String appUploads = app.getWorkspace().APP_UPLOADS();
+                    String appUploads = app.getWorkspace().getAppUploads();
 
                     if (app.isFlinkJarOrPyFlink()) {
                         // flinkJar upload jar to appHome...
@@ -247,7 +247,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                             File localJar = new File(
                                 String.format(
                                     "%s/%d/%s",
-                                    Workspace.local().APP_UPLOADS(),
+                                    Workspace.local().getAppUploads(),
                                     app.getTeamId(),
                                     app.getJar()));
                             if (!localJar.exists()) {
@@ -284,7 +284,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                         }
                     } else {
                         if (!app.getDependencyObject().getJar().isEmpty()) {
-                            String localUploads = Workspace.local().APP_UPLOADS();
+                            String localUploads = Workspace.local().getAppUploads();
                             // copy jar to local upload dir
                             for (String jar : app.getDependencyObject().getJar()) {
                                 File localJar = new File(WebUtils.getAppTempDir(), jar);
@@ -605,10 +605,10 @@ public class FlinkApplicationBuildPipelineServiceImpl
             case FLINK_SQL:
                 String sqlDistJar = ServiceHelper.getFlinkSqlClientJar(flinkEnv);
                 if (app.getDeployModeEnum() == FlinkDeployMode.YARN_APPLICATION) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.remote().getAppClient();
                     return String.format("%s/%s", clientPath, sqlDistJar);
                 }
-                return Workspace.local().APP_CLIENT().concat("/").concat(sqlDistJar);
+                return Workspace.local().getAppClient().concat("/").concat(sqlDistJar);
             default:
                 throw new UnsupportedOperationException(
                     "[StreamPark] unsupported JobType: " + app.getJobTypeEnum());
@@ -763,7 +763,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
                 jar -> jarLibs.add(
                     String.format(
                         "%s/%d/%s",
-                        Workspace.local().APP_UPLOADS(),
+                        Workspace.local().getAppUploads(),
                         application.getTeamId(), jar)));
     }
 }

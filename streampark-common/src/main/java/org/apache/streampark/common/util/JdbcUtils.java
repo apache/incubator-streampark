@@ -222,7 +222,7 @@ public final class JdbcUtils {
     }
 
     public static Connection getConnection(Properties prop) {
-        String alias = prop.getProperty(ConfigKeys.KEY_ALIAS());
+        String alias = prop.getProperty(ConfigKeys.KEY_ALIAS);
         ReentrantLock lock = LOCK_MAP.computeIfAbsent(alias, k -> new ReentrantLock());
         lock.lock();
         try {
@@ -230,7 +230,7 @@ public final class JdbcUtils {
             if (ds == null) {
                 HikariConfig jdbcConfig = new HikariConfig();
                 for (String key : prop.stringPropertyNames()) {
-                    if (ConfigKeys.KEY_ALIAS().equals(key) || ConfigKeys.KEY_SEMANTIC().equals(key)) {
+                    if (ConfigKeys.KEY_ALIAS.equals(key) || ConfigKeys.KEY_SEMANTIC.equals(key)) {
                         continue;
                     }
                     String value = prop.getProperty(key);

@@ -91,12 +91,12 @@ public abstract class FlinkClientTrait {
     private static final Logger LOG =
         StreamParkLoggerFactory.loggerFactory().getLogger(FlinkClientTrait.class.getName());
 
-    private final String paramKeyFlinkConf = ConfigKeys.KEY_FLINK_CONF(ConfigKeys.PARAM_PREFIX());
-    private final String paramKeyFlinkSql = ConfigKeys.KEY_FLINK_SQL(ConfigKeys.PARAM_PREFIX());
-    private final String paramKeyAppConf = ConfigKeys.KEY_APP_CONF(ConfigKeys.PARAM_PREFIX());
-    private final String paramKeyAppName = ConfigKeys.KEY_APP_NAME(ConfigKeys.PARAM_PREFIX());
+    private final String paramKeyFlinkConf = ConfigKeys.keyFlinkConf(ConfigKeys.PARAM_PREFIX);
+    private final String paramKeyFlinkSql = ConfigKeys.keyFlinkSql(ConfigKeys.PARAM_PREFIX);
+    private final String paramKeyAppConf = ConfigKeys.keyAppConf(ConfigKeys.PARAM_PREFIX);
+    private final String paramKeyAppName = ConfigKeys.keyAppName(ConfigKeys.PARAM_PREFIX);
     private final String paramKeyFlinkParallelism =
-        ConfigKeys.KEY_FLINK_PARALLELISM(ConfigKeys.PARAM_PREFIX());
+        ConfigKeys.keyFlinkParallelism(ConfigKeys.PARAM_PREFIX);
 
     public SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
         LOG.info(
@@ -306,8 +306,8 @@ public abstract class FlinkClientTrait {
     }
 
     protected Integer getParallelism(SubmitRequest submitRequest) {
-        if (submitRequest.hasProp(ConfigKeys.KEY_FLINK_PARALLELISM())) {
-            return Integer.valueOf(submitRequest.getProp(ConfigKeys.KEY_FLINK_PARALLELISM()).toString());
+        if (submitRequest.hasProp(ConfigKeys.KEY_FLINK_PARALLELISM)) {
+            return Integer.valueOf(submitRequest.getProp(ConfigKeys.KEY_FLINK_PARALLELISM).toString());
         }
         return getFlinkDefaultConfiguration(submitRequest.getFlinkVersion().flinkHome)
             .getInteger(
@@ -384,7 +384,7 @@ public abstract class FlinkClientTrait {
         Configuration flinkConfig = commandLineAndConfig.flinkConfig;
 
         if (submitRequest.getJobType() == FlinkJobType.PYFLINK) {
-            String pythonVenv = Workspace.local().APP_PYTHON_VENV();
+            String pythonVenv = Workspace.local().getAppPythonVenv();
             AssertUtils.required(
                 FsOperator.lfs().exists(pythonVenv), pythonVenv + " File does not exist");
             FlinkConfigurationEnhancer.safeSet(flinkConfig, PythonOptions.PYTHON_ARCHIVES, pythonVenv);
@@ -619,7 +619,7 @@ public abstract class FlinkClientTrait {
                     .stringType()
                     .defaultValue(
                         request.getDeployMode() == FlinkDeployMode.YARN_APPLICATION
-                            ? Workspace.remote().APP_SAVEPOINTS()
+                            ? Workspace.remote().getAppSavepoints()
                             : null));
         AssertUtils.required(
             StringUtils.isNotBlank(configDir),

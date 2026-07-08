@@ -137,7 +137,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
 
         PlannerType plannerType;
         try {
-            plannerType = PlannerType.withName(parameter.get(ConfigKeys.KEY_FLINK_TABLE_PLANNER()));
+            plannerType = PlannerType.withName(parameter.get(ConfigKeys.KEY_FLINK_TABLE_PLANNER));
         } catch (IllegalArgumentException e) {
             plannerType = PlannerType.BLINK;
         }
@@ -156,7 +156,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
                 break;
         }
 
-        String flinkConf = parameter.get(ConfigKeys.KEY_FLINK_CONF(), null);
+        String flinkConf = parameter.get(ConfigKeys.KEY_FLINK_CONF, null);
         if (flinkConf == null || flinkConf.isEmpty()) {
             throw new ExceptionInInitializerError(
                 "[StreamPark] Usage:can't find config,please set \"--flink.conf $conf \" in main arguments");
@@ -165,8 +165,8 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             Configuration.fromMap(
                 PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))));
 
-        String catalog = parameter.get(ConfigKeys.KEY_FLINK_TABLE_CATALOG(), null);
-        String database = parameter.get(ConfigKeys.KEY_FLINK_TABLE_DATABASE(), null);
+        String catalog = parameter.get(ConfigKeys.KEY_FLINK_TABLE_CATALOG, null);
+        String database = parameter.get(ConfigKeys.KEY_FLINK_TABLE_DATABASE, null);
         if (catalog != null && database != null) {
             LOG.info("with built in catalog: {}", catalog);
             LOG.info("with built in database: {}", database);
@@ -201,7 +201,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
     @Override
     FlinkConfiguration initParameter() {
         ParameterTool argsMap = ParameterTool.fromArgs(args);
-        String configFile = argsMap.get(ConfigKeys.KEY_APP_CONF(), null);
+        String configFile = argsMap.get(ConfigKeys.KEY_APP_CONF, null);
         FlinkConfiguration configuration;
         if (configFile == null || configFile.isEmpty()) {
             LOG.warn("Usage:can't find config,you can set \"--conf $path \" in main arguments");
@@ -213,17 +213,17 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             Map<String, String> sqlConf = new HashMap<>();
             configMap.forEach(
                 (key, value) -> {
-                    if (key.startsWith(ConfigKeys.KEY_SQL_PREFIX())) {
-                        sqlConf.put(key.substring(ConfigKeys.KEY_SQL_PREFIX().length()), value);
+                    if (key.startsWith(ConfigKeys.KEY_SQL_PREFIX)) {
+                        sqlConf.put(key.substring(ConfigKeys.KEY_SQL_PREFIX.length()), value);
                     }
                 });
 
             Map<String, String> properConf =
-                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX);
             Map<String, String> appConf =
-                extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX);
             Map<String, String> tableConf =
-                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_TABLE_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_TABLE_PREFIX);
 
             Configuration tableConfig = Configuration.fromMap(tableConf);
             Configuration envConfig = Configuration.fromMap(properConf);
@@ -239,7 +239,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             configuration = new FlinkConfiguration(parameter, envConfig, tableConfig);
         }
 
-        String flinkSql = configuration.parameter.get(ConfigKeys.KEY_FLINK_SQL(), null);
+        String flinkSql = configuration.parameter.get(ConfigKeys.KEY_FLINK_SQL, null);
         if (flinkSql == null) {
             return configuration;
         }
@@ -249,7 +249,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             return configuration.withParameter(
                 configuration.parameter.mergeWith(
                     ParameterTool.fromMap(
-                        Map.of(ConfigKeys.KEY_FLINK_SQL(), value))));
+                        Map.of(ConfigKeys.KEY_FLINK_SQL, value))));
         } catch (Exception ignored) {
             File sqlFile = new File(flinkSql);
             try {

@@ -54,7 +54,7 @@ public class InfluxSink implements Sink {
     }
 
     public <T> DataStreamSink<T> sink(DataStream<T> stream, String alias, InfluxEntity<T> entity) {
-        String influxPrefix = ConfigKeys.INFLUX_PREFIX() + (alias != null ? alias : "");
+        String influxPrefix = ConfigKeys.INFLUX_PREFIX + (alias != null ? alias : "");
         Properties prop = ConfigUtils.getConf(ctx.parameter.toMap(), influxPrefix, "", "");
         Utils.copyProperties(property, prop);
         InfluxFunction<T> sinkFun = new InfluxFunction<>(prop, entity);
