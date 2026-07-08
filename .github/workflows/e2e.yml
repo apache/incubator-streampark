@@ -77,10 +77,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: 8
+          java-version: 11
           distribution: 'adopt'
       - name: Cache local Maven repository
         uses: actions/cache@v4
@@ -232,5 +232,5 @@ jobs:
           fi
           if [[ ${{ needs.e2e.result }} != 'success' ]]; then
             echo "E2E Failed!"
-            exit 0
+            exit 1
           fi
