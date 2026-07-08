@@ -54,8 +54,7 @@
     </dependencies>
 
     <build>
-        <plugins>
-        </plugins>
+        <plugins></plugins>
     </build>
 
     <profiles>

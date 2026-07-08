@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.connector.kafka.offset;
 
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -25,31 +26,28 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.StreamingContext;
-import org.apache.spark.streaming.dstream.DStream;
 import org.apache.spark.streaming.dstream.InputDStream;
 import org.apache.spark.streaming.kafka010.CanCommitOffsets;
 import org.apache.spark.streaming.kafka010.ConsumerStrategies;
-import org.apache.spark.streaming.kafka010.HasOffsetRanges;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
 import org.apache.spark.streaming.kafka010.LocationStrategy;
 import org.apache.spark.streaming.kafka010.OffsetRange;
 
-import scala.reflect.ClassTag;
-import scala.reflect.ClassTag$;
-
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import scala.reflect.ClassTag;
+import scala.reflect.ClassTag$;
 
 /** Kafka direct stream client with offset management. */
 public class KafkaClient implements Serializable {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(KafkaClient.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(KafkaClient.class.getName());
 
     private final SparkConf sparkConf;
     private final Offset offsetManager;
@@ -72,7 +70,7 @@ public class KafkaClient implements Serializable {
                 Class<?> offsetsManagerClass = Class.forName(clazz);
                 for (Constructor<?> c : offsetsManagerClass.getConstructors()) {
                     if (c.getParameterCount() == 1
-                            && c.getParameterTypes()[0] == SparkConf.class) {
+                        && c.getParameterTypes()[0] == SparkConf.class) {
                         return (Offset) c.newInstance(sparkConf);
                     }
                 }
@@ -98,7 +96,9 @@ public class KafkaClient implements Serializable {
     }
 
     public <K, V> InputDStream<ConsumerRecord<K, V>> createDirectStream(
-            StreamingContext ssc, Map<String, Object> kafkaParams, Set<String> topics) {
+                                                                        StreamingContext ssc,
+                                                                        Map<String, Object> kafkaParams,
+                                                                        Set<String> topics) {
         Map<TopicPartition, Long> consumerOffsets = new HashMap<>();
         Object groupId = kafkaParams.get("group.id");
         if (groupId != null) {
@@ -111,16 +111,16 @@ public class KafkaClient implements Serializable {
         if (!consumerOffsets.isEmpty()) {
             LOG.info("read topics ==[{}]== from offsets ==[{}]==", topics, consumerOffsets);
             stream =
-                    KafkaUtils.createDirectStream(
-                            ssc,
-                            LocationStrategies.PreferConsistent(),
-                            ConsumerStrategies.Assign(consumerOffsets.keySet(), kafkaParams, consumerOffsets));
+                KafkaUtils.createDirectStream(
+                    ssc,
+                    LocationStrategies.PreferConsistent(),
+                    ConsumerStrategies.Assign(consumerOffsets.keySet(), kafkaParams, consumerOffsets));
         } else {
             stream =
-                    KafkaUtils.createDirectStream(
-                            ssc,
-                            LocationStrategies.PreferConsistent(),
-                            ConsumerStrategies.Subscribe(topics, kafkaParams));
+                KafkaUtils.createDirectStream(
+                    ssc,
+                    LocationStrategies.PreferConsistent(),
+                    ConsumerStrategies.Subscribe(topics, kafkaParams));
         }
         canCommitOffsets = (CanCommitOffsets) stream;
         return stream;
@@ -128,14 +128,14 @@ public class KafkaClient implements Serializable {
 
     @SuppressWarnings("unchecked")
     public <K, V> JavaRDD<ConsumerRecord<K, V>> createRDD(
-            org.apache.spark.SparkContext sc,
-            Map<String, Object> kafkaParams,
-            OffsetRange[] offsetRanges,
-            LocationStrategy locationStrategy) {
+                                                          org.apache.spark.SparkContext sc,
+                                                          Map<String, Object> kafkaParams,
+                                                          OffsetRange[] offsetRanges,
+                                                          LocationStrategy locationStrategy) {
         ClassTag<ConsumerRecord<K, V>> tag =
-                (ClassTag<ConsumerRecord<K, V>>) (ClassTag<?>) ClassTag$.MODULE$.Any();
+            (ClassTag<ConsumerRecord<K, V>>) (ClassTag<?>) ClassTag$.MODULE$.Any();
         return JavaRDD.fromRDD(
-                KafkaUtils.createRDD(sc, kafkaParams, offsetRanges, locationStrategy), tag);
+            KafkaUtils.createRDD(sc, kafkaParams, offsetRanges, locationStrategy), tag);
     }
 
     public void updateOffset(String groupId, OffsetRange[] offsetRanges) {

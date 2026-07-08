@@ -28,11 +28,14 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class DeployResponse {
 
-    @Builder.Default private String address = null;
+    @Builder.Default
+    private String address = null;
 
-    @Builder.Default private String clusterId = null;
+    @Builder.Default
+    private String clusterId = null;
 
-    @Builder.Default private Throwable error = null;
+    @Builder.Default
+    private Throwable error = null;
 
     public DeployResponse(String address, String clusterId, Throwable error) {
         this.address = address;

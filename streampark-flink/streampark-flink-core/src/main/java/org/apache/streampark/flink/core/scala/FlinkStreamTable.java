@@ -46,28 +46,30 @@ public abstract class FlinkStreamTable {
     private void init(String[] args) {
         SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkStreamTable.class);
         context =
-                new StreamTableContext(
-                        FlinkTableInitializer.initialize(
-                                new StreamTableEnvConfig(
-                                        args,
-                                        (environment, parameter) ->
-                                                configStream(environment, parameter),
-                                        (tableConfig, parameter) ->
-                                                configTable(tableConfig, parameter))));
+            new StreamTableContext(
+                FlinkTableInitializer.initialize(
+                    new StreamTableEnvConfig(
+                        args,
+                        (environment, parameter) -> configStream(environment, parameter),
+                        (tableConfig, parameter) -> configTable(tableConfig, parameter))));
     }
 
     protected ParameterTool getParameter() {
         return context.parameter;
     }
 
-    protected void ready() {}
+    protected void ready() {
+    }
 
     protected void configStream(
-            StreamExecutionEnvironment environment, ParameterTool parameter) {}
+                                StreamExecutionEnvironment environment, ParameterTool parameter) {
+    }
 
-    protected void configTable(TableConfig tableConfig, ParameterTool parameter) {}
+    protected void configTable(TableConfig tableConfig, ParameterTool parameter) {
+    }
 
     protected abstract void handle();
 
-    protected void destroy() {}
+    protected void destroy() {
+    }
 }

@@ -17,8 +17,9 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.shaded.org.slf4j.Logger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -41,11 +42,12 @@ import java.util.jar.Manifest;
 public final class Utils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(Utils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(Utils.class.getName());
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
-    private Utils() {}
+    private Utils() {
+    }
 
     public static boolean isNotEmpty(Object elem) {
         if (elem == null) {
@@ -78,8 +80,9 @@ public final class Utils {
     }
 
     public static void requireCheckJarFile(URL jar) throws IOException {
-        try (InputStream in = SafePathUtils.openJarFile(jar);
-                JarInputStream ignored = new JarInputStream(new BufferedInputStream(in))) {
+        try (
+            InputStream in = SafePathUtils.openJarFile(jar);
+            JarInputStream ignored = new JarInputStream(new BufferedInputStream(in))) {
             // verify jar is readable
         } catch (IOException e) {
             throw new IOException("Error while opening jar file '" + jar + "'", e);
@@ -87,8 +90,9 @@ public final class Utils {
     }
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
-        try (InputStream in = SafePathUtils.openJarFile(jarFile.toURI().toURL());
-                JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
+        try (
+            InputStream in = SafePathUtils.openJarFile(jarFile.toURI().toURL());
+            JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
             return jarInputStream.getManifest();
         }
     }
@@ -187,9 +191,9 @@ public final class Utils {
             if (retryCount > 0) {
                 LOG.warn("[StreamPark] Retry failed, execution caused by: ", e);
                 LOG.warn(
-                        "[StreamPark] {} times retry remaining, the next attempt will be in {} ms",
-                        retryCount,
-                        interval.toMillis());
+                    "[StreamPark] {} times retry remaining, the next attempt will be in {} ms",
+                    retryCount,
+                    interval.toMillis());
                 LockSupport.parkNanos(interval.toNanos());
                 return retry(retryCount - 1, interval, supplier);
             }
@@ -225,6 +229,7 @@ public final class Utils {
 
     @FunctionalInterface
     public interface RetrySupplier<R> {
+
         R get() throws Exception;
     }
 }

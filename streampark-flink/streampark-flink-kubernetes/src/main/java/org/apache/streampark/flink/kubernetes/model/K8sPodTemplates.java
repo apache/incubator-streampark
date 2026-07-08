@@ -29,6 +29,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class K8sPodTemplates {
+
     private String podTemplate = "";
     private String jmPodTemplate = "";
     private String tmPodTemplate = "";

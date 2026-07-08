@@ -14,19 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
+
+import org.apache.streampark.common.util.Utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.streampark.common.util.Utils;
 
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerLayerProgress {
+
     private String layerId;
     private String status;
     private long current;

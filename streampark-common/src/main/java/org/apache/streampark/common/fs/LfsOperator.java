@@ -17,11 +17,12 @@
 
 package org.apache.streampark.common.fs;
 
+import org.apache.streampark.common.util.Utils;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.streampark.common.util.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +32,8 @@ public final class LfsOperator extends FsOperator {
 
     private static final LfsOperator INSTANCE = new LfsOperator();
 
-    private LfsOperator() {}
+    private LfsOperator() {
+    }
 
     public static LfsOperator getInstance() {
         return INSTANCE;
@@ -115,7 +117,7 @@ public final class LfsOperator extends FsOperator {
         } else {
             if (!dstCandidate.getParentFile().exists()) {
                 throw new IllegalArgumentException(
-                        "[StreamPark] dstPath is invalid and does not exist. Please check");
+                    "[StreamPark] dstPath is invalid and does not exist. Please check");
             }
             dstFile = dstCandidate;
         }
@@ -124,7 +126,7 @@ public final class LfsOperator extends FsOperator {
                 return;
             }
             boolean shouldCopy =
-                    overwrite || !dstFile.exists() || !dstFile.getName().equals(srcFile.getName());
+                overwrite || !dstFile.exists() || !dstFile.getName().equals(srcFile.getName());
             if (shouldCopy) {
                 FileUtils.copyFile(srcFile, dstFile);
                 if (delSrc) {
@@ -151,9 +153,9 @@ public final class LfsOperator extends FsOperator {
         File dstFile = new File(dstPath);
         try {
             boolean shouldCopy =
-                    overwrite
-                            || !dstFile.exists()
-                            || !srcFile.getCanonicalPath().equals(dstFile.getCanonicalPath());
+                overwrite
+                    || !dstFile.exists()
+                    || !srcFile.getCanonicalPath().equals(dstFile.getCanonicalPath());
             if (shouldCopy) {
                 FileUtils.copyDirectory(srcFile, dstFile);
                 if (delSrc) {
@@ -200,7 +202,7 @@ public final class LfsOperator extends FsOperator {
             return new File[0];
         }
         if (f.isFile()) {
-            return new File[] {f};
+            return new File[]{f};
         }
         File[] files = f.listFiles();
         return files != null ? files : new File[0];

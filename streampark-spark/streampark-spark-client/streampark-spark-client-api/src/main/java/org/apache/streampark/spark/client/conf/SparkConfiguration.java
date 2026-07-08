@@ -19,5 +19,7 @@ package org.apache.streampark.spark.client.conf;
 
 /** Spark configuration placeholder. */
 public final class SparkConfiguration {
-    private SparkConfiguration() {}
+
+    private SparkConfiguration() {
+    }
 }

@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Map;
@@ -29,6 +29,7 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerImageBuildResponse implements FlinkBuildResult {
+
     private String workspacePath;
     private String flinkImageTag;
     private Map<String, String> podTemplatePaths;
@@ -36,10 +37,10 @@ public class DockerImageBuildResponse implements FlinkBuildResult {
     private boolean pass = true;
 
     public DockerImageBuildResponse(
-            String workspacePath,
-            String flinkImageTag,
-            Map<String, String> podTemplatePaths,
-            String dockerInnerMainJarPath) {
+                                    String workspacePath,
+                                    String flinkImageTag,
+                                    Map<String, String> podTemplatePaths,
+                                    String dockerInnerMainJarPath) {
         this(workspacePath, flinkImageTag, podTemplatePaths, dockerInnerMainJarPath, true);
     }
 }

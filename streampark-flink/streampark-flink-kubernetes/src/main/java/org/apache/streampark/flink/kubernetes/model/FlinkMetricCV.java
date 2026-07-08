@@ -27,6 +27,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FlinkMetricCV {
+
     private String groupId = null;
     private Integer totalJmMemory = 0;
     private Integer totalTmMemory = 0;

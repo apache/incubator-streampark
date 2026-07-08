@@ -30,6 +30,7 @@ import java.util.Objects;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class CacheKey implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private Long key;

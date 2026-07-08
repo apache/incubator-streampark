@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.ingress;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
@@ -34,7 +35,8 @@ public class IngressStrategyV1beta1 extends IngressStrategy {
     public String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient) {
         return AutoCloseUtils.using(new DefaultKubernetesClient(), client -> {
             try {
-                Ingress ingress = client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
+                Ingress ingress =
+                    client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
                 if (ingress != null && ingress.getSpec() != null && !ingress.getSpec().getRules().isEmpty()) {
                     var rule = ingress.getSpec().getRules().get(0);
                     return "http://" + rule.getHost() + rule.getHttp().getPaths().get(0).getPath();

@@ -23,7 +23,8 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 /** Multiple text output format. */
 public class MultipleTextOutputsFormat
-        extends MultipleOutputsFormat<NullWritable, Text> {
+    extends
+        MultipleOutputsFormat<NullWritable, Text> {
 
     public MultipleTextOutputsFormat() {
         super(new TextOutputFormat<>());

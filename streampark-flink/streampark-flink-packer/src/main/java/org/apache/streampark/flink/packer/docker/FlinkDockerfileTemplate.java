@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class FlinkDockerfileTemplate extends FlinkDockerfileTemplateTrait {
+
     private String workspacePath;
     private String flinkBaseImage;
     private String flinkMainJarPath;

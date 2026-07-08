@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,7 +39,8 @@ public final class JsonUtils implements Serializable {
         MAPPER.setDateFormat(new SimpleDateFormat(DateUtils.FULL_FORMAT));
     }
 
-    private JsonUtils() {}
+    private JsonUtils() {
+    }
 
     public static <T> T read(Object obj, Class<T> clazz) throws Exception {
         if (obj instanceof String) {

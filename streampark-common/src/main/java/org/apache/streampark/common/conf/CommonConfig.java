@@ -14,105 +14,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.conf;
 
 /** Common internal configuration options. */
 public final class CommonConfig {
 
-    private CommonConfig() {}
+    private CommonConfig() {
+    }
 
     private static final InternalOption STREAMPARK_WORKSPACE_LOCAL_OPTION =
-            new InternalOption("streampark.workspace.local", "/streampark", String.class);
+        new InternalOption("streampark.workspace.local", "/streampark", String.class);
 
     private static final InternalOption STREAMPARK_WORKSPACE_REMOTE_OPTION =
-            new InternalOption("streampark.workspace.remote", "/streampark", String.class);
+        new InternalOption("streampark.workspace.remote", "/streampark", String.class);
 
     private static final InternalOption STREAMPARK_HADOOP_USER_NAME_OPTION =
-            new InternalOption("streampark.hadoop-user-name", "hdfs", String.class);
+        new InternalOption("streampark.hadoop-user-name", "hdfs", String.class);
 
     private static final InternalOption STREAMPARK_PROXY_YARN_URL_OPTION =
-            new InternalOption(
-                    "streampark.proxy.yarn-url",
-                    "",
-                    String.class,
-                    "proxy yarn url. ex: knox proxy or other");
+        new InternalOption(
+            "streampark.proxy.yarn-url",
+            "",
+            String.class,
+            "proxy yarn url. ex: knox proxy or other");
 
     private static final InternalOption STREAMPARK_YARN_AUTH_OPTION =
-            new InternalOption(
-                    "streampark.yarn.http-auth",
-                    "",
-                    String.class,
-                    "yarn http auth type. ex: simple, kerberos");
+        new InternalOption(
+            "streampark.yarn.http-auth",
+            "",
+            String.class,
+            "yarn http auth type. ex: simple, kerberos");
 
     private static final InternalOption DOCKER_HOST_OPTION =
-            new InternalOption(
-                    "streampark.docker.http-client.docker-host",
-                    "",
-                    String.class,
-                    "docker host for DockerHttpClient");
+        new InternalOption(
+            "streampark.docker.http-client.docker-host",
+            "",
+            String.class,
+            "docker host for DockerHttpClient");
 
     private static final InternalOption DOCKER_MAX_CONNECTIONS_OPTION =
-            new InternalOption(
-                    "streampark.docker.http-client.max-connections",
-                    100,
-                    Integer.class,
-                    "instantiating max connections for DockerHttpClient");
+        new InternalOption(
+            "streampark.docker.http-client.max-connections",
+            100,
+            Integer.class,
+            "instantiating max connections for DockerHttpClient");
 
     private static final InternalOption DOCKER_CONNECTION_TIMEOUT_SEC_OPTION =
-            new InternalOption(
-                    "streampark.docker.http-client.connection-timeout-sec",
-                    100L,
-                    Long.class,
-                    "instantiating connection timeout for DockerHttpClient");
+        new InternalOption(
+            "streampark.docker.http-client.connection-timeout-sec",
+            100L,
+            Long.class,
+            "instantiating connection timeout for DockerHttpClient");
 
     private static final InternalOption DOCKER_RESPONSE_TIMEOUT_SEC_OPTION =
-            new InternalOption(
-                    "streampark.docker.http-client.response-timeout-sec",
-                    120L,
-                    Long.class,
-                    "instantiating connection timeout for DockerHttpClient");
+        new InternalOption(
+            "streampark.docker.http-client.response-timeout-sec",
+            120L,
+            Long.class,
+            "instantiating connection timeout for DockerHttpClient");
 
     private static final InternalOption MAVEN_SETTINGS_PATH_OPTION =
-            new InternalOption(
-                    "streampark.maven.settings",
-                    null,
-                    String.class,
-                    "maven settings.xml full path");
+        new InternalOption(
+            "streampark.maven.settings",
+            null,
+            String.class,
+            "maven settings.xml full path");
 
     private static final InternalOption MAVEN_REMOTE_URL_OPTION =
-            new InternalOption(
-                    "streampark.maven.central.repository",
-                    "https://repo1.maven.org/maven2/",
-                    String.class,
-                    "maven repository used for built-in compilation");
+        new InternalOption(
+            "streampark.maven.central.repository",
+            "https://repo1.maven.org/maven2/",
+            String.class,
+            "maven repository used for built-in compilation");
 
     private static final InternalOption MAVEN_AUTH_USER_OPTION =
-            new InternalOption(
-                    "streampark.maven.auth.user",
-                    null,
-                    String.class,
-                    "maven repository used for built-in compilation");
+        new InternalOption(
+            "streampark.maven.auth.user",
+            null,
+            String.class,
+            "maven repository used for built-in compilation");
 
     private static final InternalOption MAVEN_AUTH_PASSWORD_OPTION =
-            new InternalOption(
-                    "streampark.maven.auth.password",
-                    null,
-                    String.class,
-                    "maven repository used for built-in compilation");
+        new InternalOption(
+            "streampark.maven.auth.password",
+            null,
+            String.class,
+            "maven repository used for built-in compilation");
 
     private static final InternalOption KERBEROS_TTL_OPTION =
-            new InternalOption("security.kerberos.ttl", "2h", String.class, "kerberos default ttl");
+        new InternalOption("security.kerberos.ttl", "2h", String.class, "kerberos default ttl");
 
     private static final InternalOption READ_LOG_MAX_SIZE_OPTION =
-            new InternalOption(
-                    "streampark.read-log.max-size",
-                    "1mb",
-                    String.class,
-                    "The maximum size of the default read log");
+        new InternalOption(
+            "streampark.read-log.max-size",
+            "1mb",
+            String.class,
+            "The maximum size of the default read log");
 
     private static final InternalOption SPRING_PROFILES_ACTIVE_OPTION =
-            new InternalOption(
-                    "spring.profiles.active", "h2", String.class, "Use the database type");
+        new InternalOption(
+            "spring.profiles.active", "h2", String.class, "Use the database type");
 
     public static InternalOption STREAMPARK_WORKSPACE_LOCAL() {
         return STREAMPARK_WORKSPACE_LOCAL_OPTION;

@@ -17,14 +17,16 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class DockerBuildProgress {
+
     private final List<String> steps = new ArrayList<>();
     private long lastTime;
 

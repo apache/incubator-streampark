@@ -17,8 +17,9 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.shaded.org.slf4j.Logger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -29,12 +30,15 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ReflectUtils {
+
     private static final Logger LOG = StreamParkLoggerFactory.loggerFactory().getLogger(ReflectUtils.class.getName());
-    private ReflectUtils() {}
+    private ReflectUtils() {
+    }
 
     public static Field getField(Class<?> beanClass, String name) {
         for (Field f : beanClass.getDeclaredFields()) {
-            if (Objects.equals(name, f.getName())) return f;
+            if (Objects.equals(name, f.getName()))
+                return f;
         }
         return null;
     }
@@ -45,16 +49,22 @@ public final class ReflectUtils {
     }
 
     public static Object getFieldValue(Object obj, Field field) throws IllegalAccessException {
-        if (obj == null || field == null) return null;
+        if (obj == null || field == null)
+            return null;
         field.setAccessible(true);
         return field.get(obj);
     }
 
     public static void setFieldValue(Object obj, String fieldName, Object value) throws Exception {
         Field field = getAccessibleField(obj, fieldName);
-        if (field == null) throw new IllegalArgumentException("Could not find field [" + fieldName + "] on target [" + obj + "]");
-        try { field.set(obj, value); }
-        catch (IllegalAccessException e) { LOG.error("[StreamPark] Failed to assign to the element.", e); throw new Exception(e.getMessage()); }
+        if (field == null)
+            throw new IllegalArgumentException("Could not find field [" + fieldName + "] on target [" + obj + "]");
+        try {
+            field.set(obj, value);
+        } catch (IllegalAccessException e) {
+            LOG.error("[StreamPark] Failed to assign to the element.", e);
+            throw new Exception(e.getMessage());
+        }
     }
 
     private static Field getAccessibleField(Object obj, String fieldName) {
@@ -62,14 +72,20 @@ public final class ReflectUtils {
         AssertUtils.required(StringUtils.isNotBlank(fieldName), "fieldName can't be blank");
         Class<?> superClass = obj.getClass();
         while (superClass != Object.class) {
-            try { Field field = superClass.getDeclaredField(fieldName); makeAccessible(field); return field; }
-            catch (NoSuchFieldException ignored) { superClass = superClass.getSuperclass(); }
+            try {
+                Field field = superClass.getDeclaredField(fieldName);
+                makeAccessible(field);
+                return field;
+            } catch (NoSuchFieldException ignored) {
+                superClass = superClass.getSuperclass();
+            }
         }
         return null;
     }
 
     private static void makeAccessible(Field field) {
-        if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) || Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
+        if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
+            || Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
             field.setAccessible(true);
         }
     }
@@ -77,7 +93,8 @@ public final class ReflectUtils {
     public static List<Method> getMethodsByAnnotation(Class<?> beanClass, Class<? extends Annotation> annotClazz) {
         List<Method> methods = new ArrayList<>();
         for (Method m : beanClass.getDeclaredMethods()) {
-            if (m.getDeclaredAnnotation(annotClazz) != null) methods.add(m);
+            if (m.getDeclaredAnnotation(annotClazz) != null)
+                methods.add(m);
         }
         return methods;
     }

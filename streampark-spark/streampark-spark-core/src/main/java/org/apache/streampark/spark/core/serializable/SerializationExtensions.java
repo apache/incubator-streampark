@@ -17,8 +17,6 @@
 
 package org.apache.streampark.spark.core.serializable;
 
-import java.io.IOException;
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
@@ -34,12 +32,15 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
+import java.io.IOException;
+
 /** Avro serialization helpers for Spark. */
 public final class SerializationExtensions {
 
     private static final Logger LOGGER = Logger.getLogger(SerializationExtensions.class);
 
-    private SerializationExtensions() {}
+    private SerializationExtensions() {
+    }
 
     public static <T extends GenericRecord> Job avroJob(Class<T> clazz) {
         try {
@@ -61,53 +62,55 @@ public final class SerializationExtensions {
             return true;
         }
         LOGGER.warn(
-                "Expected field '"
-                        + field
-                        + "' to be defined, but it was not on record of type '"
-                        + record.getClass()
-                        + "'");
+            "Expected field '"
+                + field
+                + "' to be defined, but it was not on record of type '"
+                + record.getClass()
+                + "'");
         return false;
     }
 
     public static <T extends GenericRecord> JavaRDD<T> avroFile(
-            SparkContext sparkContext, String path, Class<T> clazz) {
+                                                                SparkContext sparkContext, String path,
+                                                                Class<T> clazz) {
         Job job = avroJob(clazz);
         JavaPairRDD<AvroKey, NullWritable> pairRDD =
-                JavaPairRDD.fromJavaRDD(
-                        sparkContext
-                                .newAPIHadoopFile(
-                                        path,
-                                        AvroKeyInputFormat.class,
-                                        AvroKey.class,
-                                        NullWritable.class,
-                                        job.getConfiguration())
-                                .toJavaRDD());
+            JavaPairRDD.fromJavaRDD(
+                sparkContext
+                    .newAPIHadoopFile(
+                        path,
+                        AvroKeyInputFormat.class,
+                        AvroKey.class,
+                        NullWritable.class,
+                        job.getConfiguration())
+                    .toJavaRDD());
         return pairRDD.map(tuple -> (T) tuple._1.datum());
     }
 
     public static <T extends GenericRecord> JavaRDD<T> filterIfUnexpectedNull(
-            JavaRDD<T> avroRDD, String... fields) {
+                                                                              JavaRDD<T> avroRDD, String... fields) {
         return avroRDD.filter(
-                r -> {
-                    for (String field : fields) {
-                        if (!isDefined(r, field)) {
-                            return false;
-                        }
+            r -> {
+                for (String field : fields) {
+                    if (!isDefined(r, field)) {
+                        return false;
                     }
-                    return true;
-                });
+                }
+                return true;
+            });
     }
 
     public static <T extends GenericRecord> void saveAsAvroFile(
-            JavaRDD<T> avroRDD, String outputPath, Class<T> clazz) throws Exception {
+                                                                JavaRDD<T> avroRDD, String outputPath,
+                                                                Class<T> clazz) throws Exception {
         Job job = avroJob(clazz);
         JavaPairRDD<AvroKey<T>, NullWritable> output =
-                avroRDD.mapToPair(r -> new scala.Tuple2<>(new AvroKey<>(r), NullWritable.get()));
+            avroRDD.mapToPair(r -> new scala.Tuple2<>(new AvroKey<>(r), NullWritable.get()));
         output.saveAsNewAPIHadoopFile(
-                outputPath,
-                AvroKey.class,
-                NullWritable.class,
-                AvroKeyOutputFormat.class,
-                job.getConfiguration());
+            outputPath,
+            AvroKey.class,
+            NullWritable.class,
+            AvroKeyOutputFormat.class,
+            job.getConfiguration());
     }
 }

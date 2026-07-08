@@ -22,11 +22,13 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 /** Multiple directory output abstraction. */
 public interface MultipleOutputer<K, V> {
+
     void write(K key, V value, String path) throws Exception;
 
     void close() throws Exception;
 
     final class AvroMultipleOutputer<K, V> implements MultipleOutputer<K, V> {
+
         private final AvroMultipleOutputs mo;
 
         public AvroMultipleOutputer(AvroMultipleOutputs mo) {
@@ -45,6 +47,7 @@ public interface MultipleOutputer<K, V> {
     }
 
     final class PlainMultipleOutputer<K, V> implements MultipleOutputer<K, V> {
+
         private final MultipleOutputs<K, V> mo;
 
         public PlainMultipleOutputer(MultipleOutputs<K, V> mo) {

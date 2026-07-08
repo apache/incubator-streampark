@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline.impl;
 
 import org.apache.streampark.common.conf.Workspace;
@@ -22,7 +23,6 @@ import org.apache.streampark.common.fs.FsOperator;
 import org.apache.streampark.common.fs.HdfsOperator;
 import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.flink.packer.maven.MavenTool;
-import org.apache.streampark.flink.packer.pipeline.*;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -33,12 +33,24 @@ import java.util.Collections;
 import java.util.List;
 
 public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
+
     private final FlinkYarnApplicationBuildRequest request;
-    public FlinkYarnApplicationBuildPipeline(FlinkYarnApplicationBuildRequest request) { this.request = request; }
-    public static FlinkYarnApplicationBuildPipeline of(FlinkYarnApplicationBuildRequest request) { return new FlinkYarnApplicationBuildPipeline(request); }
-    @Override public PipelineTypeEnum getPipeType() { return PipelineTypeEnum.FLINK_YARN_APPLICATION; }
-    @Override protected BuildParam offerBuildParam() { return request; }
-    @Override protected BuildResult buildProcess() throws Throwable {
+    public FlinkYarnApplicationBuildPipeline(FlinkYarnApplicationBuildRequest request) {
+        this.request = request;
+    }
+    public static FlinkYarnApplicationBuildPipeline of(FlinkYarnApplicationBuildRequest request) {
+        return new FlinkYarnApplicationBuildPipeline(request);
+    }
+    @Override
+    public PipelineTypeEnum getPipeType() {
+        return PipelineTypeEnum.FLINK_YARN_APPLICATION;
+    }
+    @Override
+    protected BuildParam offerBuildParam() {
+        return request;
+    }
+    @Override
+    protected BuildResult buildProcess() throws Throwable {
         execStep(1, () -> {
             if (request.flinkJobType() == FlinkJobType.FLINK_SQL || request.flinkJobType() == FlinkJobType.PYFLINK) {
                 LfsOperator.getInstance().mkCleanDirs(request.localWorkspace());
@@ -49,7 +61,8 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
         List<String> mavenJars = execStep(2, () -> {
             if (request.flinkJobType() == FlinkJobType.FLINK_SQL || request.flinkJobType() == FlinkJobType.PYFLINK) {
                 List<String> paths = new ArrayList<>();
-                MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts()).forEach(f -> paths.add(f.getAbsolutePath()));
+                MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts())
+                    .forEach(f -> paths.add(f.getAbsolutePath()));
                 paths.addAll(request.dependencyInfo().extJarLibs());
                 return paths;
             }
@@ -68,7 +81,8 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
     @SuppressWarnings("java:S4790")
     private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws Exception {
         File originFile = new File(origin);
-        if (!fsOperator.exists(target)) fsOperator.mkdirs(target);
+        if (!fsOperator.exists(target))
+            fsOperator.mkdirs(target);
         if (originFile.isFile()) {
             if (fsOperator == FsOperator.lfs()) {
                 fsOperator.copy(originFile.getAbsolutePath(), target);

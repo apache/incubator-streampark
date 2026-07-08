@@ -34,20 +34,22 @@ public class ShutDownRequest implements DeployRequestTrait {
     private FlinkVersion flinkVersion;
     private FlinkDeployMode deployMode;
 
-    @Nullable private Map<String, Object> properties;
+    @Nullable
+    private Map<String, Object> properties;
 
     private String clusterId;
     private long id;
 
-    @Nullable private KubernetesDeployParam k8sParam;
+    @Nullable
+    private KubernetesDeployParam k8sParam;
 
     public ShutDownRequest(
-            FlinkVersion flinkVersion,
-            FlinkDeployMode deployMode,
-            Map<String, Object> properties,
-            String clusterId,
-            long id,
-            KubernetesDeployParam k8sParam) {
+                           FlinkVersion flinkVersion,
+                           FlinkDeployMode deployMode,
+                           Map<String, Object> properties,
+                           String clusterId,
+                           long id,
+                           KubernetesDeployParam k8sParam) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = properties;

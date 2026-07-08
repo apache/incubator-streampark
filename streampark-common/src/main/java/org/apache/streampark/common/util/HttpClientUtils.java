@@ -17,8 +17,8 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.AuthSchemeFactory;
+import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -60,7 +60,8 @@ public final class HttpClientUtils {
         CONNECTION_MANAGER = connectionManager;
     }
 
-    private HttpClientUtils() {}
+    private HttpClientUtils() {
+    }
 
     private static CloseableHttpClient getHttpClient() {
         return HttpClients.custom().setConnectionManager(CONNECTION_MANAGER).build();
@@ -91,15 +92,15 @@ public final class HttpClientUtils {
     }
 
     public static String httpGetRequest(
-            String url, RequestConfig config, Map<String, Object> params) {
+                                        String url, RequestConfig config, Map<String, Object> params) {
         return getHttpResult(getHttpGet(url, params, config));
     }
 
     public static String httpGetRequest(
-            String url,
-            RequestConfig config,
-            Map<String, Object> headers,
-            Map<String, Object> params) {
+                                        String url,
+                                        RequestConfig config,
+                                        Map<String, Object> headers,
+                                        Map<String, Object> params) {
         HttpGet httpGet = getHttpGet(url, params, config);
         if (headers != null) {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
@@ -121,12 +122,13 @@ public final class HttpClientUtils {
     }
 
     public static String httpPostRequest(
-            String url, Map<String, Object> params, Map<String, Object> headers) {
+                                         String url, Map<String, Object> params, Map<String, Object> headers) {
         return httpRequest(new HttpPost(url), headers, params);
     }
 
     private static String httpRequest(
-            HttpUriRequestBase httpUri, Map<String, Object> headers, Map<String, Object> params) {
+                                      HttpUriRequestBase httpUri, Map<String, Object> headers,
+                                      Map<String, Object> params) {
         if (headers != null) {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 httpUri.addHeader(entry.getKey(), String.valueOf(entry.getValue()));
@@ -150,29 +152,30 @@ public final class HttpClientUtils {
     public static String httpAuthGetRequest(String url, RequestConfig config) {
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         Credentials credentials =
-                new Credentials() {
-                    @Override
-                    public char[] getPassword() {
-                        return null;
-                    }
+            new Credentials() {
 
-                    @Override
-                    public Principal getUserPrincipal() {
-                        return null;
-                    }
-                };
+                @Override
+                public char[] getPassword() {
+                    return null;
+                }
+
+                @Override
+                public Principal getUserPrincipal() {
+                    return null;
+                }
+            };
         credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
 
         RegistryBuilder<AuthSchemeFactory> authSchemeRegistry =
-                RegistryBuilder.<AuthSchemeFactory>create()
-                        .register(StandardAuthScheme.SPNEGO, SPNegoSchemeFactory.DEFAULT);
+            RegistryBuilder.<AuthSchemeFactory>create()
+                .register(StandardAuthScheme.SPNEGO, SPNegoSchemeFactory.DEFAULT);
 
         CloseableHttpClient httpAuthClient =
-                HttpClientBuilder.create()
-                        .setDefaultAuthSchemeRegistry(authSchemeRegistry.build())
-                        .setDefaultCredentialsProvider(credentialsProvider)
-                        .setConnectionManager(CONNECTION_MANAGER)
-                        .build();
+            HttpClientBuilder.create()
+                .setDefaultAuthSchemeRegistry(authSchemeRegistry.build())
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .setConnectionManager(CONNECTION_MANAGER)
+                .build();
 
         return getHttpResult(getHttpGet(url, null, config), httpAuthClient);
     }
@@ -184,13 +187,13 @@ public final class HttpClientUtils {
     private static String getHttpResult(HttpUriRequestBase request, CloseableHttpClient httpClient) {
         try {
             return httpClient.execute(
-                    request,
-                    response -> {
-                        if (response.getEntity() != null) {
-                            return EntityUtils.toString(response.getEntity());
-                        }
-                        return null;
-                    });
+                request,
+                response -> {
+                    if (response.getEntity() != null) {
+                        return EntityUtils.toString(response.getEntity());
+                    }
+                    return null;
+                });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

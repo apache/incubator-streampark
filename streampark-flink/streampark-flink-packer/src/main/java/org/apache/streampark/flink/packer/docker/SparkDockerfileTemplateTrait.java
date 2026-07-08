@@ -29,6 +29,7 @@ import java.util.Set;
 
 /** Spark image dockerfile template. */
 public abstract class SparkDockerfileTemplateTrait {
+
     protected static final String DEFAULT_DOCKER_FILE_NAME = "Dockerfile";
     protected static final String SPARK_LIB_PATH = "lib";
     protected static final String SPARK_HOME = "$SPARK_HOME";
@@ -55,9 +56,9 @@ public abstract class SparkDockerfileTemplateTrait {
         Path mainJarPath = Paths.get(sparkMainJarPath()).toAbsolutePath();
         if (!mainJarPath.getParent().equals(workspace())) {
             LfsOperator.getInstance()
-                    .copy(
-                            mainJarPath.toString(),
-                            workspace().toString() + "/" + mainJarPath.getFileName());
+                .copy(
+                    mainJarPath.toString(),
+                    workspace().toString() + "/" + mainJarPath.getFileName());
         }
         return mainJarPath.getFileName().toString();
     }
@@ -77,12 +78,12 @@ public abstract class SparkDockerfileTemplateTrait {
                 for (File jar : files) {
                     if (jar.isFile() && jar.getName().endsWith(Constants.JAR_SUFFIX)) {
                         LfsOperator.getInstance()
-                                .copy(jar.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
+                            .copy(jar.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
                     }
                 }
             } else {
                 LfsOperator.getInstance()
-                        .copy(f.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
+                    .copy(f.getAbsolutePath(), workspace().toString() + "/" + SPARK_LIB_PATH);
             }
         }
         return SPARK_LIB_PATH;

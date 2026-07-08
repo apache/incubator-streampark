@@ -14,10 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 public class SilentPipeWatcher implements PipeWatcher {
-    @Override public void onStart(PipelineSnapshot snapshot) {}
-    @Override public void onStepStateChange(PipelineSnapshot snapshot) {}
-    @Override public void onFinish(PipelineSnapshot snapshot, BuildResult result) {}
+
+    @Override
+    public void onStart(PipelineSnapshot snapshot) {
+    }
+    @Override
+    public void onStepStateChange(PipelineSnapshot snapshot) {
+    }
+    @Override
+    public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
+    }
 }

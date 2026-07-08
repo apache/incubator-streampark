@@ -19,7 +19,6 @@ package org.apache.streampark.spark.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,9 +29,11 @@ public enum SqlCommand {
     ALTER_TABLE("alter table", "(ALTER\\s+TABLE\\s+.+)"),
     ALTER_VIEW("alter view", "(ALTER\\s+VIEW\\s+.+)"),
     CREATE_DATABASE("create database", "(CREATE\\s+(DATABASE\\s+|SCHEMA\\s+)\\s+.+)"),
-    CREATE_FUNCTION("create function", "(CREATE\\s+(OR\\s+REPLACE\\s+|)(TEMPORARY\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+.*)"),
+    CREATE_FUNCTION("create function",
+        "(CREATE\\s+(OR\\s+REPLACE\\s+|)(TEMPORARY\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+.*)"),
     CREATE_TABLE("create table", "(CREATE\\s+(EXTERNAL\\s+|)TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+|).+)"),
-    CREATE_VIEW("create view", "(CREATE\\s+(OR\\s+REPLACE\\s+|)((GLOBAL\\s+|)TEMPORARY\\s+|)VIEW\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+SELECT\\s+.+)"),
+    CREATE_VIEW("create view",
+        "(CREATE\\s+(OR\\s+REPLACE\\s+|)((GLOBAL\\s+|)TEMPORARY\\s+|)VIEW\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+SELECT\\s+.+)"),
     DROP_DATABASE("drop database", "(DROP\\s+(DATABASE\\s+|SCHEMA\\s+)(IF\\s+EXISTS\\s+|).+)"),
     DROP_FUNCTION("drop function", "(DROP\\s+(TEMPORARY\\s+|)FUNCTION\\s+(IF\\s+EXISTS\\s+|).+)"),
     DROP_TABLE("drop table", "(DROP\\s+TABLE\\s+(IF\\s+EXISTS\\s+|).+)"),

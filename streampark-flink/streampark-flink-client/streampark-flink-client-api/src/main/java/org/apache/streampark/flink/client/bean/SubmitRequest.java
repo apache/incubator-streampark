@@ -34,14 +34,14 @@ import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.flink.util.FlinkUtils;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
@@ -71,12 +71,18 @@ public class SubmitRequest {
     private String savePoint;
     private org.apache.streampark.common.enums.FlinkRestoreMode restoreMode;
     private String args;
-    @Nullable private String clusterId;
-    @Nullable private String hadoopUser;
-    @Nullable private BuildResult buildResult;
-    @Nullable private Map<String, Object> extraParameter;
-    @Nullable private String kubernetesNamespace;
-    @Nullable private FlinkK8sRestExposedType flinkRestExposedType;
+    @Nullable
+    private String clusterId;
+    @Nullable
+    private String hadoopUser;
+    @Nullable
+    private BuildResult buildResult;
+    @Nullable
+    private Map<String, Object> extraParameter;
+    @Nullable
+    private String kubernetesNamespace;
+    @Nullable
+    private FlinkK8sRestExposedType flinkRestExposedType;
 
     private transient Map<String, String> appProperties;
     private transient Map<String, String> appOption;
@@ -92,25 +98,25 @@ public class SubmitRequest {
     private transient HdfsWorkspace hdfsWorkspace;
 
     public SubmitRequest(
-            FlinkVersion flinkVersion,
-            FlinkDeployMode deployMode,
-            Map<String, Object> properties,
-            String flinkYaml,
-            FlinkJobType jobType,
-            long id,
-            String jobId,
-            String appName,
-            String appConf,
-            ApplicationType applicationType,
-            String savePoint,
-            org.apache.streampark.common.enums.FlinkRestoreMode restoreMode,
-            String args,
-            String clusterId,
-            String hadoopUser,
-            BuildResult buildResult,
-            Map<String, Object> extraParameter,
-            String kubernetesNamespace,
-            FlinkK8sRestExposedType flinkRestExposedType) {
+                         FlinkVersion flinkVersion,
+                         FlinkDeployMode deployMode,
+                         Map<String, Object> properties,
+                         String flinkYaml,
+                         FlinkJobType jobType,
+                         long id,
+                         String jobId,
+                         String appName,
+                         String appConf,
+                         ApplicationType applicationType,
+                         String savePoint,
+                         org.apache.streampark.common.enums.FlinkRestoreMode restoreMode,
+                         String args,
+                         String clusterId,
+                         String hadoopUser,
+                         BuildResult buildResult,
+                         Map<String, Object> extraParameter,
+                         String kubernetesNamespace,
+                         FlinkK8sRestExposedType flinkRestExposedType) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = properties;
@@ -162,9 +168,9 @@ public class SubmitRequest {
     public String getEffectiveAppName() {
         if (effectiveAppName == null) {
             effectiveAppName =
-                    appName == null
-                            ? getAppProperties().get(ConfigKeys.KEY_FLINK_APP_NAME())
-                            : appName;
+                appName == null
+                    ? getAppProperties().get(ConfigKeys.KEY_FLINK_APP_NAME())
+                    : appName;
         }
         return effectiveAppName;
     }
@@ -229,7 +235,7 @@ public class SubmitRequest {
                 savepointRestoreSettings = SavepointRestoreSettings.none();
             } else {
                 savepointRestoreSettings =
-                        SavepointRestoreSettings.forPath(savePoint, isAllowNonRestoredState());
+                    SavepointRestoreSettings.forPath(savePoint, isAllowNonRestoredState());
             }
         }
         return savepointRestoreSettings;
@@ -286,22 +292,22 @@ public class SubmitRequest {
             String flinkName;
             try {
                 flinkName =
-                        FileUtils.isSymlink(flinkHomeDir)
-                                ? flinkHomeDir.getCanonicalFile().getName()
-                                : flinkHomeDir.getName();
+                    FileUtils.isSymlink(flinkHomeDir)
+                        ? flinkHomeDir.getCanonicalFile().getName()
+                        : flinkHomeDir.getName();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
             hdfsWorkspace =
-                    HdfsWorkspace.builder()
-                            .flinkName(flinkName)
-                            .flinkHome(flinkHome)
-                            .flinkLib(flinkHdfsHome + "/lib")
-                            .flinkPlugins(flinkHdfsHome + "/plugins")
-                            .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
-                            .appJars(workspace.APP_JARS())
-                            .build();
+                HdfsWorkspace.builder()
+                    .flinkName(flinkName)
+                    .flinkHome(flinkHome)
+                    .flinkLib(flinkHdfsHome + "/lib")
+                    .flinkPlugins(flinkHdfsHome + "/plugins")
+                    .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
+                    .appJars(workspace.APP_JARS())
+                    .build();
         }
         return hdfsWorkspace;
     }
@@ -309,36 +315,36 @@ public class SubmitRequest {
     public void checkBuildResult() {
         if (deployMode == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
             AssertUtils.required(
-                    buildResult != null,
-                    "[flink-submit] current job: "
-                            + getEffectiveAppName()
-                            + " was not yet built, buildResult is empty"
-                            + ",clusterId="
-                            + clusterId
-                            + ","
-                            + "namespace="
-                            + kubernetesNamespace);
+                buildResult != null,
+                "[flink-submit] current job: "
+                    + getEffectiveAppName()
+                    + " was not yet built, buildResult is empty"
+                    + ",clusterId="
+                    + clusterId
+                    + ","
+                    + "namespace="
+                    + kubernetesNamespace);
             AssertUtils.required(
-                    buildResult.pass(),
-                    "[flink-submit] current job "
-                            + getEffectiveAppName()
-                            + " build failed, clusterId"
-                            + ",clusterId="
-                            + clusterId
-                            + ","
-                            + "namespace="
-                            + kubernetesNamespace);
+                buildResult.pass(),
+                "[flink-submit] current job "
+                    + getEffectiveAppName()
+                    + " build failed, clusterId"
+                    + ",clusterId="
+                    + clusterId
+                    + ","
+                    + "namespace="
+                    + kubernetesNamespace);
         } else {
             AssertUtils.required(
-                    buildResult != null,
-                    "[flink-submit] current job: "
-                            + getEffectiveAppName()
-                            + " was not yet built, buildResult is empty");
+                buildResult != null,
+                "[flink-submit] current job: "
+                    + getEffectiveAppName()
+                    + " was not yet built, buildResult is empty");
             AssertUtils.required(
-                    buildResult.pass(),
-                    "[flink-submit] current job "
-                            + getEffectiveAppName()
-                            + " build failed, please check");
+                buildResult.pass(),
+                "[flink-submit] current job "
+                    + getEffectiveAppName()
+                    + " build failed, please check");
         }
     }
 
@@ -353,8 +359,8 @@ public class SubmitRequest {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = JsonUtils.read(json, Map.class);
                 return map.entrySet().stream()
-                        .filter(e -> e.getValue() != null)
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .filter(e -> e.getValue() != null)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -375,7 +381,7 @@ public class SubmitRequest {
                 try {
                     String text = HdfsUtils.read(appConf);
                     String extension =
-                            appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
+                        appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
                     switch (extension) {
                         case "yml":
                         case "yaml":
@@ -389,7 +395,7 @@ public class SubmitRequest {
                             break;
                         default:
                             throw new IllegalArgumentException(
-                                    "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
+                                "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
                     }
                 } catch (java.io.IOException e) {
                     throw new RuntimeException(e);

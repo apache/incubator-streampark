@@ -26,6 +26,7 @@ import java.util.function.Function;
 
 /** Iterator Kafka writer. */
 public class IterKafkaWriter<T> extends KafkaWriter<T> {
+
     private final Iterator<T> msg;
 
     public IterKafkaWriter(Iterator<T> msg) {
@@ -34,7 +35,7 @@ public class IterKafkaWriter<T> extends KafkaWriter<T> {
 
     @Override
     public <K, V> void writeToKafka(
-            Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
+                                    Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc) {
         KafkaProducer<K, V> producer = getProducer(producerConfig);
         while (msg.hasNext()) {
             producer.send(serializerFunc.apply(msg.next()));

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.common.util;
 
 import javax.annotation.Nonnull;
@@ -24,7 +25,8 @@ import java.io.StringWriter;
 
 public final class ExceptionUtils {
 
-    private ExceptionUtils() {}
+    private ExceptionUtils() {
+    }
 
     @Nonnull
     public static String stringifyException(@Nullable Throwable throwable) {
@@ -45,6 +47,7 @@ public final class ExceptionUtils {
 
     @FunctionalInterface
     public interface WrapperRuntimeExceptionHandler<I, O> {
+
         O handle(I input) throws Exception;
     }
 

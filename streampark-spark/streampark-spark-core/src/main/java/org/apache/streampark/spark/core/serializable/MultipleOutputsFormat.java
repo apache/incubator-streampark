@@ -17,8 +17,6 @@
 
 package org.apache.streampark.spark.core.serializable;
 
-import java.io.IOException;
-
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.RawKeyValueIterator;
@@ -45,18 +43,20 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
 
     @FunctionalInterface
     public interface MultipleOutputerFactory<K, V> {
+
         @SuppressWarnings("rawtypes")
         MultipleOutputer<K, V> create(ReduceContextImpl ioContext) throws Exception;
     }
 
     protected MultipleOutputsFormat(OutputFormat<K, V> outputFormat) {
         this(
-                outputFormat,
-                ioContext -> new MultipleOutputer.PlainMultipleOutputer<>(new MultipleOutputs<>(ioContext)));
+            outputFormat,
+            ioContext -> new MultipleOutputer.PlainMultipleOutputer<>(new MultipleOutputs<>(ioContext)));
     }
 
     protected MultipleOutputsFormat(
-            OutputFormat<K, V> outputFormat, MultipleOutputerFactory<K, V> multipleOutputsMaker) {
+                                    OutputFormat<K, V> outputFormat,
+                                    MultipleOutputerFactory<K, V> multipleOutputsMaker) {
         this.outputFormat = outputFormat;
         this.multipleOutputsMaker = multipleOutputsMaker;
     }
@@ -67,15 +67,14 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
     }
 
     @Override
-    public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-            throws IOException, InterruptedException {
+    public OutputCommitter getOutputCommitter(TaskAttemptContext context) throws IOException, InterruptedException {
         return outputFormat.getOutputCommitter(context);
     }
 
     @Override
-    public RecordWriter<scala.Tuple2<String, K>, V> getRecordWriter(TaskAttemptContext context)
-            throws IOException {
+    public RecordWriter<scala.Tuple2<String, K>, V> getRecordWriter(TaskAttemptContext context) throws IOException {
         return new RecordWriter<scala.Tuple2<String, K>, V>() {
+
             private final MultipleOutputer<K, V> multipleOutputs;
 
             {
@@ -84,18 +83,18 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
                     LazyOutputFormat.setOutputFormatClass(job, outputFormat.getClass());
                     @SuppressWarnings({"rawtypes", "unchecked"})
                     ReduceContextImpl ioContext =
-                            new ReduceContextImpl(
-                                    job.getConfiguration(),
-                                    context.getTaskAttemptID(),
-                                    new DummyIterator(),
-                                    new GenericCounter(),
-                                    new GenericCounter(),
-                                    new DummyRecordWriter(),
-                                    new DummyOutputCommitter(),
-                                    new TaskAttemptContextImpl.DummyReporter(),
-                                    null,
-                                    NullWritable.class,
-                                    NullWritable.class);
+                        new ReduceContextImpl(
+                            job.getConfiguration(),
+                            context.getTaskAttemptID(),
+                            new DummyIterator(),
+                            new GenericCounter(),
+                            new GenericCounter(),
+                            new DummyRecordWriter(),
+                            new DummyOutputCommitter(),
+                            new TaskAttemptContextImpl.DummyReporter(),
+                            null,
+                            NullWritable.class,
+                            NullWritable.class);
                     multipleOutputs = multipleOutputsMaker.create(ioContext);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -126,8 +125,10 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
     }
 
     private static class DummyOutputCommitter extends OutputCommitter {
+
         @Override
-        public void setupJob(JobContext jobContext) throws IOException {}
+        public void setupJob(JobContext jobContext) throws IOException {
+        }
 
         @Override
         public boolean needsTaskCommit(TaskAttemptContext taskContext) throws IOException {
@@ -135,24 +136,31 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
         }
 
         @Override
-        public void setupTask(TaskAttemptContext taskContext) throws IOException {}
+        public void setupTask(TaskAttemptContext taskContext) throws IOException {
+        }
 
         @Override
-        public void commitTask(TaskAttemptContext taskContext) throws IOException {}
+        public void commitTask(TaskAttemptContext taskContext) throws IOException {
+        }
 
         @Override
-        public void abortTask(TaskAttemptContext taskContext) throws IOException {}
+        public void abortTask(TaskAttemptContext taskContext) throws IOException {
+        }
     }
 
     private static class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
-        @Override
-        public void write(K key, V value) throws IOException {}
 
         @Override
-        public void close(TaskAttemptContext context) throws IOException {}
+        public void write(K key, V value) throws IOException {
+        }
+
+        @Override
+        public void close(TaskAttemptContext context) throws IOException {
+        }
     }
 
     private static class DummyIterator implements RawKeyValueIterator {
+
         @Override
         public DataInputBuffer getKey() throws IOException {
             return null;
@@ -169,7 +177,8 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
         }
 
         @Override
-        public void close() throws IOException {}
+        public void close() throws IOException {
+        }
 
         @Override
         public boolean next() throws IOException {

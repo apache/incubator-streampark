@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HdfsWorkspace {
+
     private String sparkName;
     private String sparkHome;
     private String sparkLib;

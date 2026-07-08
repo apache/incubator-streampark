@@ -33,75 +33,78 @@ import java.util.Set;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class SparkHadoopDockerfileTemplate extends SparkDockerfileTemplateTrait {
+
     private String workspacePath;
     private String sparkBaseImage;
     private String sparkMainJarPath;
     private Set<String> sparkExtraLibPaths;
-    @Nullable private String hadoopConfDirPath;
-    @Nullable private String hiveConfDirPath;
+    @Nullable
+    private String hadoopConfDirPath;
+    @Nullable
+    private String hiveConfDirPath;
 
     @Override
     public String offerDockerfileContent() {
         String hadoopConfDir =
-                workspace()
-                        .relativize(Paths.get(hadoopConfDirPath == null ? "" : hadoopConfDirPath))
-                        .toString();
+            workspace()
+                .relativize(Paths.get(hadoopConfDirPath == null ? "" : hadoopConfDirPath))
+                .toString();
         String hiveConfDir =
-                workspace()
-                        .relativize(Paths.get(hiveConfDirPath == null ? "" : hiveConfDirPath))
-                        .toString();
+            workspace()
+                .relativize(Paths.get(hiveConfDirPath == null ? "" : hiveConfDirPath))
+                .toString();
         StringBuilder dockerfile =
-                new StringBuilder("FROM ")
-                        .append(sparkBaseImage)
-                        .append("\nRUN mkdir -p ")
-                        .append(SPARK_HOME)
-                        .append("/usrlib\n");
+            new StringBuilder("FROM ")
+                .append(sparkBaseImage)
+                .append("\nRUN mkdir -p ")
+                .append(SPARK_HOME)
+                .append("/usrlib\n");
         if (hadoopConfDir != null && !hadoopConfDir.isEmpty()) {
             dockerfile
-                    .append("COPY ")
-                    .append(hadoopConfDir)
-                    .append(" /opt/hadoop-conf\n")
-                    .append("ENV HADOOP_CONF_DIR /opt/hadoop-conf\n");
+                .append("COPY ")
+                .append(hadoopConfDir)
+                .append(" /opt/hadoop-conf\n")
+                .append("ENV HADOOP_CONF_DIR /opt/hadoop-conf\n");
         }
         if (hiveConfDir != null && !hiveConfDir.isEmpty()) {
             dockerfile
-                    .append("COPY ")
-                    .append(hiveConfDir)
-                    .append(" /opt/hive-conf\n")
-                    .append("ENV HIVE_CONF_DIR /opt/hive-conf\n");
+                .append("COPY ")
+                .append(hiveConfDir)
+                .append(" /opt/hive-conf\n")
+                .append("ENV HIVE_CONF_DIR /opt/hive-conf\n");
         }
         dockerfile
-                .append("COPY ")
-                .append(extraLibName())
-                .append(" ")
-                .append(SPARK_HOME)
-                .append("/lib/\n")
-                .append("COPY ")
-                .append(mainJarName())
-                .append(" ")
-                .append(SPARK_HOME)
-                .append("/usrlib/")
-                .append(mainJarName())
-                .append("\n");
+            .append("COPY ")
+            .append(extraLibName())
+            .append(" ")
+            .append(SPARK_HOME)
+            .append("/lib/\n")
+            .append("COPY ")
+            .append(mainJarName())
+            .append(" ")
+            .append(SPARK_HOME)
+            .append("/usrlib/")
+            .append(mainJarName())
+            .append("\n");
         return dockerfile.toString();
     }
 
     public static SparkHadoopDockerfileTemplate fromSystemHadoopConf(
-            String workspacePath,
-            String sparkBaseImage,
-            String sparkMainJarPath,
-            Set<String> sparkExtraLibPaths) {
+                                                                     String workspacePath,
+                                                                     String sparkBaseImage,
+                                                                     String sparkMainJarPath,
+                                                                     Set<String> sparkExtraLibPaths) {
         String hadoopConfDir =
-                resolveConfDir(HadoopConfigUtils.getSystemHadoopConfDir().orElse(null), workspacePath, "hadoop-conf");
+            resolveConfDir(HadoopConfigUtils.getSystemHadoopConfDir().orElse(null), workspacePath, "hadoop-conf");
         String hiveConfDir =
-                resolveConfDir(HadoopConfigUtils.getSystemHiveConfDir().orElse(null), workspacePath, "hive-conf");
+            resolveConfDir(HadoopConfigUtils.getSystemHiveConfDir().orElse(null), workspacePath, "hive-conf");
         return new SparkHadoopDockerfileTemplate(
-                workspacePath,
-                sparkBaseImage,
-                sparkMainJarPath,
-                sparkExtraLibPaths,
-                hadoopConfDir,
-                hiveConfDir);
+            workspacePath,
+            sparkBaseImage,
+            sparkMainJarPath,
+            sparkExtraLibPaths,
+            hadoopConfDir,
+            hiveConfDir);
     }
 
     private static String resolveConfDir(String path, String workspacePath, String dirName) {

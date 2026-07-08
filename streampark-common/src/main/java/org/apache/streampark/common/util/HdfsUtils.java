@@ -17,17 +17,18 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.ipc.RPC;
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
@@ -35,14 +36,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class HdfsUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(HdfsUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(HdfsUtils.class.getName());
 
-    private HdfsUtils() {}
+    private HdfsUtils() {
+    }
 
     public static String getDefaultFS() {
         return HadoopUtils.hadoopConf().get(FileSystem.FS_DEFAULT_NAME_KEY);
@@ -64,38 +65,36 @@ public final class HdfsUtils {
         copyHdfs(src, dst, false, true);
     }
 
-    public static void copyHdfs(String src, String dst, boolean delSrc, boolean overwrite)
-            throws IOException {
+    public static void copyHdfs(String src, String dst, boolean delSrc, boolean overwrite) throws IOException {
         Path srcPath = getPath(src);
         Path dstPath = getPath(dst);
         FileStatus dstStatus = HadoopUtils.hdfs().getFileStatus(dstPath);
         Path dstFinalPath =
-                dstStatus.isFile() ? dstPath : getPath(dst + "/" + srcPath.getName());
+            dstStatus.isFile() ? dstPath : getPath(dst + "/" + srcPath.getName());
         FileUtil.copy(
-                HadoopUtils.hdfs(),
-                srcPath,
-                HadoopUtils.hdfs(),
-                dstFinalPath,
-                delSrc,
-                overwrite,
-                HadoopUtils.hadoopConf());
+            HadoopUtils.hdfs(),
+            srcPath,
+            HadoopUtils.hdfs(),
+            dstFinalPath,
+            delSrc,
+            overwrite,
+            HadoopUtils.hadoopConf());
     }
 
     public static void copyHdfsDir(String src, String dst) throws IOException {
         copyHdfsDir(src, dst, false, true);
     }
 
-    public static void copyHdfsDir(String src, String dst, boolean delSrc, boolean overwrite)
-            throws IOException {
+    public static void copyHdfsDir(String src, String dst, boolean delSrc, boolean overwrite) throws IOException {
         for (FileStatus status : list(src)) {
             FileUtil.copy(
-                    HadoopUtils.hdfs(),
-                    status,
-                    HadoopUtils.hdfs(),
-                    getPath(dst),
-                    delSrc,
-                    overwrite,
-                    HadoopUtils.hadoopConf());
+                HadoopUtils.hdfs(),
+                status,
+                HadoopUtils.hdfs(),
+                getPath(dst),
+                delSrc,
+                overwrite,
+                HadoopUtils.hadoopConf());
         }
     }
 
@@ -103,8 +102,7 @@ public final class HdfsUtils {
         upload(src, dst, false, true);
     }
 
-    public static void upload(String src, String dst, boolean delSrc, boolean overwrite)
-            throws IOException {
+    public static void upload(String src, String dst, boolean delSrc, boolean overwrite) throws IOException {
         HadoopUtils.hdfs().copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst));
     }
 
@@ -112,8 +110,7 @@ public final class HdfsUtils {
         uploadMulti(src, dst, false, true);
     }
 
-    public static void uploadMulti(String[] src, String dst, boolean delSrc, boolean overwrite)
-            throws IOException {
+    public static void uploadMulti(String[] src, String dst, boolean delSrc, boolean overwrite) throws IOException {
         Path[] paths = Arrays.stream(src).map(HdfsUtils::getPath).toArray(Path[]::new);
         HadoopUtils.hdfs().copyFromLocalFile(delSrc, overwrite, paths, getPath(dst));
     }
@@ -122,10 +119,10 @@ public final class HdfsUtils {
         download(src, dst, false, false);
     }
 
-    public static void download(String src, String dst, boolean delSrc, boolean useRawLocalFileSystem)
-            throws IOException {
+    public static void download(String src, String dst, boolean delSrc,
+                                boolean useRawLocalFileSystem) throws IOException {
         HadoopUtils.hdfs()
-                .copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem);
+            .copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem);
     }
 
     public static String getNameNode() throws IOException {
@@ -151,7 +148,7 @@ public final class HdfsUtils {
         Path path = getPath(fileName);
         if (!HadoopUtils.hdfs().exists(path) || HadoopUtils.hdfs().isDirectory(path)) {
             throw new IllegalArgumentException(
-                    "[StreamPark] HdfsUtils.read: path(" + fileName + ") not exists or isDirectory ");
+                "[StreamPark] HdfsUtils.read: path(" + fileName + ") not exists or isDirectory ");
         }
         FSDataInputStream in = HadoopUtils.hdfs().open(path);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

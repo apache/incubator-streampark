@@ -22,11 +22,11 @@ import org.apache.streampark.common.util.RedisUtils;
 
 import org.apache.kafka.common.TopicPartition;
 import org.apache.spark.SparkConf;
+
 import redis.clients.jedis.Protocol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,28 +52,28 @@ class RedisOffset extends Offset {
         Map<TopicPartition, Long> earliestOffsets = getEarliestOffsets(new ArrayList<>(topics));
         Map<TopicPartition, Long> offsetMap = new HashMap<>();
         RedisUtils.doRedis(
-                redis -> {
-                    for (String topic : topics) {
-                        Map<String, String> entries = RedisUtils.hgetAll(key(groupId, topic), endpoint());
-                        for (Map.Entry<String, String> entry : entries.entrySet()) {
-                            TopicPartition tp = new TopicPartition(topic, Integer.parseInt(entry.getKey()));
-                            Long left = earliestOffsets.get(tp);
-                            long finalOffset = entry.getValue() == null ? 0L : Long.parseLong(entry.getValue());
-                            if (left != null && left > finalOffset) {
-                                log.warn(
-                                        "storeType:Redis,consumer group:{},topic:{},partition:{} offsets Outdated,updated:{}",
-                                        groupId,
-                                        tp.topic(),
-                                        tp.partition(),
-                                        left);
-                                finalOffset = left;
-                            }
-                            offsetMap.put(tp, finalOffset);
+            redis -> {
+                for (String topic : topics) {
+                    Map<String, String> entries = RedisUtils.hgetAll(key(groupId, topic), endpoint());
+                    for (Map.Entry<String, String> entry : entries.entrySet()) {
+                        TopicPartition tp = new TopicPartition(topic, Integer.parseInt(entry.getKey()));
+                        Long left = earliestOffsets.get(tp);
+                        long finalOffset = entry.getValue() == null ? 0L : Long.parseLong(entry.getValue());
+                        if (left != null && left > finalOffset) {
+                            log.warn(
+                                "storeType:Redis,consumer group:{},topic:{},partition:{} offsets Outdated,updated:{}",
+                                groupId,
+                                tp.topic(),
+                                tp.partition(),
+                                left);
+                            finalOffset = left;
                         }
+                        offsetMap.put(tp, finalOffset);
                     }
-                    return null;
-                },
-                endpoint());
+                }
+                return null;
+            },
+            endpoint());
         Map<TopicPartition, Long> offsetMaps;
         if ("largest".equalsIgnoreCase(getReset())) {
             offsetMaps = new HashMap<>(getLatestOffsets(new ArrayList<>(topics)));
@@ -88,31 +88,31 @@ class RedisOffset extends Offset {
     @Override
     public void update(String groupId, Map<TopicPartition, Long> offsets) {
         RedisUtils.doRedis(
-                redis -> {
-                    for (Map.Entry<TopicPartition, Long> entry : offsets.entrySet()) {
-                        RedisUtils.hset(
-                                key(groupId, entry.getKey().topic()),
-                                String.valueOf(entry.getKey().partition()),
-                                String.valueOf(entry.getValue()),
-                                null,
-                                endpoint());
-                    }
-                    return null;
-                },
-                endpoint());
+            redis -> {
+                for (Map.Entry<TopicPartition, Long> entry : offsets.entrySet()) {
+                    RedisUtils.hset(
+                        key(groupId, entry.getKey().topic()),
+                        String.valueOf(entry.getKey().partition()),
+                        String.valueOf(entry.getValue()),
+                        null,
+                        endpoint());
+                }
+                return null;
+            },
+            endpoint());
         log.info("storeType:Redis,updateOffsets [ {},{} ]", groupId, offsets);
     }
 
     @Override
     public void delete(String groupId, Set<String> topics) {
         RedisUtils.doRedis(
-                redis -> {
-                    for (String topic : topics) {
-                        RedisUtils.del(key(groupId, topic), endpoint());
-                    }
-                    return null;
-                },
-                endpoint());
+            redis -> {
+                for (String topic : topics) {
+                    RedisUtils.del(key(groupId, topic), endpoint());
+                }
+                return null;
+            },
+            endpoint());
         log.info("storeType:Redis,deleteOffsets [ {},{} ]", groupId, topics);
     }
 }

@@ -38,13 +38,14 @@ public final class SparkClientEndpoint {
         CLIENTS.put(SparkDeployMode.YARN_CLIENT, YarnClient.INSTANCE);
     }
 
-    private SparkClientEndpoint() {}
+    private SparkClientEndpoint() {
+    }
 
     public static SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
         SparkClientTrait client = CLIENTS.get(submitRequest.getDeployMode());
         if (client == null) {
             throw new UnsupportedOperationException(
-                    "Unsupported " + submitRequest.getDeployMode() + " spark submit.");
+                "Unsupported " + submitRequest.getDeployMode() + " spark submit.");
         }
         return client.submit(submitRequest);
     }
@@ -53,7 +54,7 @@ public final class SparkClientEndpoint {
         SparkClientTrait client = CLIENTS.get(stopRequest.getDeployMode());
         if (client == null) {
             throw new UnsupportedOperationException(
-                    "Unsupported " + stopRequest.getDeployMode() + " spark stop.");
+                "Unsupported " + stopRequest.getDeployMode() + " spark stop.");
         }
         return client.cancel(stopRequest);
     }

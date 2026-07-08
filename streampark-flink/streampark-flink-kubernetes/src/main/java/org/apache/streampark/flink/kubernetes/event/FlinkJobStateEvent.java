@@ -28,6 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class FlinkJobStateEvent implements BuildInEvent {
+
     private TrackId trackId;
     private FlinkJobState jobState;
     private long pollTime;

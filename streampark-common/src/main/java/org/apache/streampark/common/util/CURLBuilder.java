@@ -22,14 +22,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CURLBuilder {
+
     private final String url;
     private final Map<String, String> headers = new HashMap<>();
     private final Map<String, String> formData = new HashMap<>();
-    public CURLBuilder(String url) { this.url = url; }
-    public CURLBuilder addHeader(String k, String v) { headers.put(k, v); return this; }
-    public CURLBuilder addFormData(String k, Serializable v) { formData.put(k, v.toString()); return this; }
+    public CURLBuilder(String url) {
+        this.url = url;
+    }
+    public CURLBuilder addHeader(String k, String v) {
+        headers.put(k, v);
+        return this;
+    }
+    public CURLBuilder addFormData(String k, Serializable v) {
+        formData.put(k, v.toString());
+        return this;
+    }
     public String build() {
-        if (url == null) throw new IllegalArgumentException("[StreamPark] CURL build failed, url must not be null");
+        if (url == null)
+            throw new IllegalArgumentException("[StreamPark] CURL build failed, url must not be null");
         StringBuilder cURL = new StringBuilder("curl -X POST ");
         cURL.append(String.format("'%s' \\\n", url));
         for (String h : headers.keySet()) {

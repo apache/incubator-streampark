@@ -27,11 +27,15 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ChildFirstClassLoader extends URLClassLoader {
-    static { ClassLoader.registerAsParallelCapable(); }
+
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
     private final List<String> parentFirstClasses;
     private final Predicate<String> loadJarFilter;
 
-    public ChildFirstClassLoader(URL[] urls, ClassLoader parent, List<String> parentFirstClasses, Predicate<String> loadJarFilter) {
+    public ChildFirstClassLoader(URL[] urls, ClassLoader parent, List<String> parentFirstClasses,
+                                 Predicate<String> loadJarFilter) {
         super(urls, parent);
         this.parentFirstClasses = parentFirstClasses;
         this.loadJarFilter = loadJarFilter;
@@ -43,13 +47,24 @@ public class ChildFirstClassLoader extends URLClassLoader {
             Class<?> c = findLoadedClass(name);
             if (c == null) {
                 boolean parentFirst = false;
-                for (String p : parentFirstClasses) { if (name.startsWith(p)) { parentFirst = true; break; } }
-                if (parentFirst) c = super.loadClass(name, resolve);
+                for (String p : parentFirstClasses) {
+                    if (name.startsWith(p)) {
+                        parentFirst = true;
+                        break;
+                    }
+                }
+                if (parentFirst)
+                    c = super.loadClass(name, resolve);
                 else {
-                    try { c = findClass(name); } catch (ClassNotFoundException e) { c = super.loadClass(name, resolve); }
+                    try {
+                        c = findClass(name);
+                    } catch (ClassNotFoundException e) {
+                        c = super.loadClass(name, resolve);
+                    }
                 }
             }
-            if (resolve) resolveClass(c);
+            if (resolve)
+                resolveClass(c);
             return c;
         }
     }
@@ -64,7 +79,8 @@ public class ChildFirstClassLoader extends URLClassLoader {
         if (urlClassLoaderResource != null && "jar".equals(urlClassLoaderResource.getProtocol())) {
             String spec = urlClassLoaderResource.getFile();
             String jarName = new java.io.File(spec.substring(0, spec.indexOf("!/"))).getName();
-            if (loadJarFilter.test(jarName)) return null;
+            if (loadJarFilter.test(jarName))
+                return null;
         }
         return urlClassLoaderResource;
     }
@@ -72,7 +88,8 @@ public class ChildFirstClassLoader extends URLClassLoader {
     private void addResources(List<URL> result, Enumeration<URL> resources) {
         while (resources.hasMoreElements()) {
             URL url = filterResource(resources.nextElement());
-            if (url != null) result.add(url);
+            if (url != null)
+                result.add(url);
         }
     }
 
@@ -81,7 +98,8 @@ public class ChildFirstClassLoader extends URLClassLoader {
         List<URL> result = new ArrayList<>();
         addResources(result, findResources(name));
         ClassLoader parent = getParent();
-        if (parent != null) addResources(result, parent.getResources(name));
+        if (parent != null)
+            addResources(result, parent.getResources(name));
         return Collections.enumeration(result);
     }
 }

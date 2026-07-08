@@ -28,7 +28,8 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 /** Table API extensions for Flink 1.13 Java stream-table applications. */
 public final class TableExt {
 
-    private TableExt() {}
+    private TableExt() {
+    }
 
     /** Table alias helper (Scala {@code ->} operator equivalent: {@code as}). */
     public static final class Table {
@@ -55,7 +56,7 @@ public final class TableExt {
 
         /** Batch DataSet conversion (Scala {@code \\} operator equivalent). */
         public <T> DataSet<T> toDataSet(
-                TypeInformation<T> typeInfo, StreamTableContext context) {
+                                        TypeInformation<T> typeInfo, StreamTableContext context) {
             context.isConvertedToDataStream = true;
             StreamTableEnvironment tableEnv = context.getStreamTableEnv();
             if (tableEnv instanceof BatchTableEnvironment) {
@@ -66,14 +67,15 @@ public final class TableExt {
 
         /** Append stream conversion (Scala {@code >>} operator equivalent). */
         public <T> DataStream<T> toAppendDataStream(
-                TypeInformation<T> typeInfo, StreamTableContext context) {
+                                                    TypeInformation<T> typeInfo, StreamTableContext context) {
             context.isConvertedToDataStream = true;
             return context.toAppendStream(table, typeInfo);
         }
 
         /** Retract stream conversion (Scala {@code <<} operator equivalent). */
         public <T> DataStream<Tuple2<Boolean, T>> toRetractDataStream(
-                TypeInformation<T> typeInfo, StreamTableContext context) {
+                                                                      TypeInformation<T> typeInfo,
+                                                                      StreamTableContext context) {
             context.isConvertedToDataStream = true;
             return context.toRetractStream(table, typeInfo);
         }

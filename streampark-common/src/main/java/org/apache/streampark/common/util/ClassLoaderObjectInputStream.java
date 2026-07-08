@@ -24,18 +24,29 @@ import java.io.ObjectStreamClass;
 import java.lang.reflect.Proxy;
 
 public class ClassLoaderObjectInputStream extends ObjectInputStream {
+
     private final ClassLoader classLoader;
     public ClassLoaderObjectInputStream(ClassLoader classLoader, InputStream inputStream) throws IOException {
-        super(inputStream); this.classLoader = classLoader;
+        super(inputStream);
+        this.classLoader = classLoader;
     }
-    @Override protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-        try { return Class.forName(desc.getName(), false, classLoader); }
-        catch (ClassNotFoundException e) { return super.resolveClass(desc); }
+    @Override
+    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        try {
+            return Class.forName(desc.getName(), false, classLoader);
+        } catch (ClassNotFoundException e) {
+            return super.resolveClass(desc);
+        }
     }
-    @Override protected Class<?> resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+    @Override
+    protected Class<?> resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
         Class<?>[] interfaceClasses = new Class<?>[interfaces.length];
-        for (int i = 0; i < interfaces.length; i++) interfaceClasses[i] = Class.forName(interfaces[i], false, classLoader);
-        try { return Proxy.getProxyClass(classLoader, interfaceClasses); }
-        catch (IllegalArgumentException e) { return super.resolveProxyClass(interfaces); }
+        for (int i = 0; i < interfaces.length; i++)
+            interfaceClasses[i] = Class.forName(interfaces[i], false, classLoader);
+        try {
+            return Proxy.getProxyClass(classLoader, interfaceClasses);
+        } catch (IllegalArgumentException e) {
+            return super.resolveProxyClass(interfaces);
+        }
     }
 }

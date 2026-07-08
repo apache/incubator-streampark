@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.ingress;
 
 import org.apache.streampark.common.conf.ConfigKeys;
@@ -41,8 +42,7 @@ public abstract class IngressStrategy {
 
     public abstract void configureIngress(String domainName, String clusterId, String nameSpace);
 
-    public String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates)
-            throws Exception {
+    public String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates) throws Exception {
         File workspaceDir = new File(buildWorkspace);
         if (!workspaceDir.exists()) {
             workspaceDir.mkdir();
@@ -60,14 +60,14 @@ public abstract class IngressStrategy {
         map.put("nginx.ingress.kubernetes.io/rewrite-target", "/$2");
         map.put("nginx.ingress.kubernetes.io/proxy-body-size", "1024m");
         map.put(
-                "nginx.ingress.kubernetes.io/configuration-snippet",
-                "rewrite ^(/"
-                        + clusterId
-                        + ")$ $1/ permanent; sub_filter '<base href=\"./\">' '<base href=\"/"
-                        + namespace
-                        + "/"
-                        + clusterId
-                        + "/\">'; sub_filter_once off;");
+            "nginx.ingress.kubernetes.io/configuration-snippet",
+            "rewrite ^(/"
+                + clusterId
+                + ")$ $1/ permanent; sub_filter '<base href=\"./\">' '<base href=\"/"
+                + namespace
+                + "/"
+                + clusterId
+                + "/\">'; sub_filter_once off;");
         return map;
     }
 
@@ -82,7 +82,8 @@ public abstract class IngressStrategy {
     protected OwnerReference getOwnerReference(String nameSpace, String clusterId, DefaultKubernetesClient client) {
         var deployment = client.apps().deployments().inNamespace(nameSpace).withName(clusterId).get();
         if (deployment == null) {
-            throw new IllegalStateException("Deployment with name " + clusterId + " not found in namespace " + nameSpace);
+            throw new IllegalStateException(
+                "Deployment with name " + clusterId + " not found in namespace " + nameSpace);
         }
         return new OwnerReferenceBuilder()
             .withUid(deployment.getMetadata().getUid())

@@ -19,7 +19,6 @@ package org.apache.streampark.spark.core;
 
 import org.apache.streampark.common.conf.ConfigKeys;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.SparkConf;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.StreamingContext;
@@ -37,16 +36,17 @@ public abstract class SparkStreaming extends Spark {
                 context = createContext();
             } else {
                 context =
-                        StreamingContext.getOrCreate(
-                                checkpoint,
-                                new AbstractFunction0<StreamingContext>() {
-                                    @Override
-                                    public StreamingContext apply() {
-                                        return createContext();
-                                    }
-                                },
-                                sparkSession.sparkContext().hadoopConfiguration(),
-                                createOnError);
+                    StreamingContext.getOrCreate(
+                        checkpoint,
+                        new AbstractFunction0<StreamingContext>() {
+
+                            @Override
+                            public StreamingContext apply() {
+                                return createContext();
+                            }
+                        },
+                        sparkSession.sparkContext().hadoopConfiguration(),
+                        createOnError);
                 context.checkpoint(checkpoint);
             }
         }
@@ -66,11 +66,14 @@ public abstract class SparkStreaming extends Spark {
     }
 
     @Override
-    protected void config(SparkConf sparkConf) {}
+    protected void config(SparkConf sparkConf) {
+    }
 
     @Override
-    protected void ready() {}
+    protected void ready() {
+    }
 
     @Override
-    protected void destroy() {}
+    protected void destroy() {
+    }
 }

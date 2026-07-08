@@ -17,13 +17,13 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.common.conf.ConfigKeys;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
-
-import org.apache.streampark.common.conf.ConfigKeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public final class MongoConfig {
     public static final String MIN_CONNECTIONS_PER_HOST = "min-connections-per-host";
     public static final String MAX_CONNECTIONS_PER_HOST = "max-connections-per-host";
     public static final String THREADS_ALLOWED_TO_BLOCK_FOR_CONNECTION_MULTIPLIER =
-            "threads-allowed-to-block-for-connection-multiplier";
+        "threads-allowed-to-block-for-connection-multiplier";
     public static final String SERVER_SELECTION_TIMEOUT = "server-selection-timeout";
     public static final String MAX_WAIT_TIME = "max-wait-time";
     public static final String MAX_CONNECTION_IDEL_TIME = "max-connection-idel-time";
@@ -59,7 +59,8 @@ public final class MongoConfig {
     public static final String LOCAL_THRESHOLD = "local-threshold";
     public static final String AUTHENTICATION_DATABASE = "authentication-database";
 
-    private MongoConfig() {}
+    private MongoConfig() {
+    }
 
     public static String getProperty(Properties properties, String k) {
         return getProperty(properties, k, "");
@@ -111,7 +112,7 @@ public final class MongoConfig {
         }
         if (mongoParam.containsKey(THREADS_ALLOWED_TO_BLOCK_FOR_CONNECTION_MULTIPLIER)) {
             builder.threadsAllowedToBlockForConnectionMultiplier(
-                    Integer.parseInt(mongoParam.getProperty(THREADS_ALLOWED_TO_BLOCK_FOR_CONNECTION_MULTIPLIER)));
+                Integer.parseInt(mongoParam.getProperty(THREADS_ALLOWED_TO_BLOCK_FOR_CONNECTION_MULTIPLIER)));
         }
         if (mongoParam.containsKey(SERVER_SELECTION_TIMEOUT)) {
             builder.serverSelectionTimeout(Integer.parseInt(mongoParam.getProperty(SERVER_SELECTION_TIMEOUT)));
@@ -136,7 +137,7 @@ public final class MongoConfig {
         }
         if (mongoParam.containsKey(SSL_INVALID_HOST_NAME_ALLOWED)) {
             builder.sslInvalidHostNameAllowed(
-                    Boolean.parseBoolean(mongoParam.getProperty(SSL_INVALID_HOST_NAME_ALLOWED)));
+                Boolean.parseBoolean(mongoParam.getProperty(SSL_INVALID_HOST_NAME_ALLOWED)));
         }
         if (mongoParam.containsKey(ALWAYS_USE_M_BEANS)) {
             builder.alwaysUseMBeans(Boolean.parseBoolean(mongoParam.getProperty(ALWAYS_USE_M_BEANS)));
@@ -173,10 +174,10 @@ public final class MongoConfig {
                 db = mongoParam.getProperty(DATABASE);
             }
             MongoCredential mongoCredential =
-                    MongoCredential.createScramSha1Credential(
-                            mongoParam.getProperty(USERNAME),
-                            db,
-                            mongoParam.getProperty(PASSWORD).toCharArray());
+                MongoCredential.createScramSha1Credential(
+                    mongoParam.getProperty(USERNAME),
+                    db,
+                    mongoParam.getProperty(PASSWORD).toCharArray());
             return new MongoClient(serverAddresses, mongoCredential, mongoClientOptions);
         }
         return new MongoClient(serverAddresses, mongoClientOptions);

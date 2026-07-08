@@ -45,7 +45,8 @@ public final class YarnClient extends SparkClientTrait {
 
     private final Map<String, SparkAppHandle> sparkHandles = new ConcurrentHashMap<>();
 
-    private YarnClient() {}
+    private YarnClient() {
+    }
 
     @Override
     protected CancelResponse doCancel(CancelRequest cancelRequest) throws Exception {
@@ -54,20 +55,20 @@ public final class YarnClient extends SparkClientTrait {
             try {
                 sparkAppHandle.stop();
                 logger.info(
-                        "[StreamPark][Spark][YarnClient] spark job: {} is stopped successfully.",
-                        cancelRequest.getAppId());
+                    "[StreamPark][Spark][YarnClient] spark job: {} is stopped successfully.",
+                    cancelRequest.getAppId());
                 return new CancelResponse(null);
             } catch (Exception e) {
                 logger.error(
-                        "[StreamPark][Spark][YarnClient] sparkAppHandle kill failed. Try kill by yarn",
-                        e);
+                    "[StreamPark][Spark][YarnClient] sparkAppHandle kill failed. Try kill by yarn",
+                    e);
                 yarnKill(cancelRequest.getAppId());
                 return new CancelResponse(null);
             }
         }
         logger.warn(
-                "[StreamPark][Spark][YarnClient] spark job: {} is not existed. Try kill by yarn",
-                cancelRequest.getAppId());
+            "[StreamPark][Spark][YarnClient] spark job: {} is not existed. Try kill by yarn",
+            cancelRequest.getAppId());
         yarnKill(cancelRequest.getAppId());
         return new CancelResponse(null);
     }
@@ -76,15 +77,16 @@ public final class YarnClient extends SparkClientTrait {
         try {
             HadoopUtils.yarnClient().killApplication(ApplicationId.fromString(appId));
             logger.info(
-                    "[StreamPark][Spark][YarnClient] spark job: {} is killed by yarn successfully.",
-                    appId);
+                "[StreamPark][Spark][YarnClient] spark job: {} is killed by yarn successfully.",
+                appId);
         } catch (Exception e) {
             throw e;
         }
     }
 
     @Override
-    protected void setConfig(SubmitRequest submitRequest) {}
+    protected void setConfig(SubmitRequest submitRequest) {
+    }
 
     @Override
     protected SubmitResponse doSubmit(SubmitRequest submitRequest) throws Exception {
@@ -93,58 +95,59 @@ public final class YarnClient extends SparkClientTrait {
         SparkAppHandle handle = launch(launcher);
         if (handle.getError().isPresent()) {
             logger.info(
-                    "[StreamPark][Spark][YarnClient] spark job: {} submit failed.",
-                    submitRequest.getAppName());
+                "[StreamPark][Spark][YarnClient] spark job: {} submit failed.",
+                submitRequest.getAppName());
             throw new RuntimeException(handle.getError().get());
         }
         logger.info(
-                "[StreamPark][Spark][YarnClient] spark job: {} submit successfully, appid: {}, state: {}",
-                submitRequest.getAppName(),
-                handle.getAppId(),
-                handle.getState());
+            "[StreamPark][Spark][YarnClient] spark job: {} submit successfully, appid: {}, state: {}",
+            submitRequest.getAppName(),
+            handle.getAppId(),
+            handle.getState());
         sparkHandles.put(handle.getAppId(), handle);
         String trackingUrl =
-                YarnUtils.getYarnAppTrackingUrl(HadoopUtils.toApplicationId(handle.getAppId()));
+            YarnUtils.getYarnAppTrackingUrl(HadoopUtils.toApplicationId(handle.getAppId()));
         return new SubmitResponse(handle.getAppId(), trackingUrl, submitRequest.getAppProperties());
     }
 
-    private SparkAppHandle launch(SparkLauncher sparkLauncher)
-            throws InterruptedException, IOException {
+    private SparkAppHandle launch(SparkLauncher sparkLauncher) throws InterruptedException, IOException {
         logger.info("[StreamPark][Spark][YarnClient] The spark job start submitting");
         CountDownLatch submitFinished = new CountDownLatch(1);
         SparkAppHandle sparkAppHandle =
-                sparkLauncher.startApplication(
-                        new SparkAppHandle.Listener() {
-                            @Override
-                            public void infoChanged(SparkAppHandle sparkAppHandle) {}
+            sparkLauncher.startApplication(
+                new SparkAppHandle.Listener() {
 
-                            @Override
-                            public void stateChanged(SparkAppHandle handle) {
-                                if (handle.getAppId() != null) {
-                                    logger.info(
-                                            "{} stateChanged : {}",
-                                            handle.getAppId(),
-                                            handle.getState().toString());
-                                } else {
-                                    logger.info("stateChanged : {}", handle.getState().toString());
-                                }
-                                if (handle.getAppId() != null && submitFinished.getCount() != 0) {
-                                    submitFinished.countDown();
-                                }
-                                if (handle.getState().isFinal()) {
-                                    if (StringUtils.isNotBlank(handle.getAppId())
-                                            && sparkHandles.containsKey(handle.getAppId())) {
-                                        sparkHandles.remove(handle.getAppId());
-                                    }
-                                    if (submitFinished.getCount() != 0) {
-                                        submitFinished.countDown();
-                                    }
-                                    logger.info(
-                                            "Task is end, final state : {}",
-                                            handle.getState().toString());
-                                }
+                    @Override
+                    public void infoChanged(SparkAppHandle sparkAppHandle) {
+                    }
+
+                    @Override
+                    public void stateChanged(SparkAppHandle handle) {
+                        if (handle.getAppId() != null) {
+                            logger.info(
+                                "{} stateChanged : {}",
+                                handle.getAppId(),
+                                handle.getState().toString());
+                        } else {
+                            logger.info("stateChanged : {}", handle.getState().toString());
+                        }
+                        if (handle.getAppId() != null && submitFinished.getCount() != 0) {
+                            submitFinished.countDown();
+                        }
+                        if (handle.getState().isFinal()) {
+                            if (StringUtils.isNotBlank(handle.getAppId())
+                                && sparkHandles.containsKey(handle.getAppId())) {
+                                sparkHandles.remove(handle.getAppId());
                             }
-                        });
+                            if (submitFinished.getCount() != 0) {
+                                submitFinished.countDown();
+                            }
+                            logger.info(
+                                "Task is end, final state : {}",
+                                handle.getState().toString());
+                        }
+                    }
+                });
         submitFinished.await();
         return sparkAppHandle;
     }
@@ -161,26 +164,25 @@ public final class YarnClient extends SparkClientTrait {
             deployMode = "cluster";
         } else {
             throw new IllegalArgumentException(
-                    "[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".");
+                "[StreamPark][Spark][YarnClient] Invalid spark on yarn deployMode, only support \"client\" and \"cluster\".");
         }
         try {
             return new SparkLauncher(env)
-                    .setSparkHome(submitRequest.getSparkVersion().getSparkHome())
-                    .setAppResource(submitRequest.getUserJarPath())
-                    .setMainClass(submitRequest.getAppMain())
-                    .setAppName(submitRequest.getAppName())
-                    .setConf("spark.yarn.dist.jars", submitRequest.getHdfsWorkspace().getSparkLib())
-                    .setConf("spark.yarn.applicationType", "StreamPark Spark")
-                    .setVerbose(true)
-                    .setMaster("yarn")
-                    .setDeployMode(deployMode);
+                .setSparkHome(submitRequest.getSparkVersion().getSparkHome())
+                .setAppResource(submitRequest.getUserJarPath())
+                .setMainClass(submitRequest.getAppMain())
+                .setAppName(submitRequest.getAppName())
+                .setConf("spark.yarn.dist.jars", submitRequest.getHdfsWorkspace().getSparkLib())
+                .setConf("spark.yarn.applicationType", "StreamPark Spark")
+                .setVerbose(true)
+                .setMaster("yarn")
+                .setDeployMode(deployMode);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void setSparkConfig(SubmitRequest submitRequest, SparkLauncher sparkLauncher)
-            throws Exception {
+    private void setSparkConfig(SubmitRequest submitRequest, SparkLauncher sparkLauncher) throws Exception {
         logger.info("[StreamPark][Spark][YarnClient] set spark configuration.");
         if (SparkDeployMode.isYarnMode(submitRequest.getDeployMode())) {
             setYarnQueue(submitRequest);
@@ -202,10 +204,10 @@ public final class YarnClient extends SparkClientTrait {
     private void setYarnQueue(SubmitRequest submitRequest) {
         if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME())) {
             submitRequest
-                    .getAppProperties()
-                    .put(
-                            ConfigKeys.KEY_SPARK_YARN_QUEUE(),
-                            submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME()).toString());
+                .getAppProperties()
+                .put(
+                    ConfigKeys.KEY_SPARK_YARN_QUEUE(),
+                    submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME()).toString());
         }
         if (submitRequest.hasExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL())) {
             String label = submitRequest.getExtra(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL()).toString();

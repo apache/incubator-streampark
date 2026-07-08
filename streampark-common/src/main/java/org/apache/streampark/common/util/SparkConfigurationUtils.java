@@ -17,8 +17,9 @@
 
 package org.apache.streampark.common.util;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nonnull;
 
@@ -31,11 +32,12 @@ import java.util.regex.Pattern;
 public final class SparkConfigurationUtils {
 
     private static final Pattern SPARK_PROPERTY_COMPLEX_PATTERN =
-            Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$");
+        Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$");
     private static final String SPARK_ARGUMENT_REGEXP =
-            "\"?(\\s++|$)(?=(([^\"]*\"){2})*+[^\"]*$)\"?";
+        "\"?(\\s++|$)(?=(([^\"]*\"){2})*+[^\"]*$)\"?";
 
-    private SparkConfigurationUtils() {}
+    private SparkConfigurationUtils() {
+    }
 
     @Nonnull
     public static Map<String, String> extractPropertiesAsJava(String properties) {

@@ -24,6 +24,7 @@ import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.spark.core.util.ParameterTool;
 import org.apache.streampark.spark.core.util.SqlCommandCall;
 import org.apache.streampark.spark.core.util.SqlCommandParser;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public abstract class Spark implements Serializable {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(Spark.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(Spark.class.getName());
 
     protected final transient SparkConf sparkConf = new SparkConf();
     private final transient List<String> sparkListeners = new ArrayList<>();
@@ -56,12 +57,12 @@ public abstract class Spark implements Serializable {
         config(sparkConf);
 
         scala.collection.Iterator<scala.Tuple2<String, String>> sysProps =
-                scala.collection.JavaConverters.asScalaIteratorConverter(
-                                java.util.Arrays.asList(
-                                        sparkConf.getAllWithPrefix("spark.config.system.properties"))
-                                        .iterator())
-                        .asScala()
-                        .toIterator();
+            scala.collection.JavaConverters.asScalaIteratorConverter(
+                java.util.Arrays.asList(
+                    sparkConf.getAllWithPrefix("spark.config.system.properties"))
+                    .iterator())
+                .asScala()
+                .toIterator();
         while (sysProps.hasNext()) {
             scala.Tuple2<String, String> x = sysProps.next();
             System.getProperties().setProperty(x._1().substring(1), x._2());
@@ -69,19 +70,19 @@ public abstract class Spark implements Serializable {
 
         SparkSession.Builder builder = SparkSession.builder().config(sparkConf);
         boolean enableHive =
-                sparkConf.getBoolean("spark.config.enable.hive.support", false);
+            sparkConf.getBoolean("spark.config.enable.hive.support", false);
         if (enableHive) {
             builder.enableHiveSupport();
         }
         sparkSession = builder.getOrCreate();
 
         scala.collection.Iterator<scala.Tuple2<String, String>> sparkSql =
-                scala.collection.JavaConverters.asScalaIteratorConverter(
-                                java.util.Arrays.asList(
-                                        sparkConf.getAllWithPrefix("spark.config.spark.sql"))
-                                        .iterator())
-                        .asScala()
-                        .toIterator();
+            scala.collection.JavaConverters.asScalaIteratorConverter(
+                java.util.Arrays.asList(
+                    sparkConf.getAllWithPrefix("spark.config.spark.sql"))
+                    .iterator())
+                .asScala()
+                .toIterator();
         while (sparkSql.hasNext()) {
             scala.Tuple2<String, String> x = sparkSql.next();
             sparkSession.sparkContext().getConf().set(x._1().substring(1), x._2());
@@ -99,7 +100,7 @@ public abstract class Spark implements Serializable {
             sparkSqls = DeflaterUtils.unzipString(sql);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Usage: spark sql is invalid or null, please check");
+                "Usage: spark sql is invalid or null, please check");
         }
 
         List<SqlCommandCall> commands = SqlCommandParser.parseSQL(sparkSqls);
@@ -143,7 +144,7 @@ public abstract class Spark implements Serializable {
                 idx += 2;
             } else if (current.startsWith(ConfigKeys.PARAM_PREFIX()) && idx + 1 < argv.size()) {
                 userArgs.add(
-                        Map.entry(current.substring(ConfigKeys.PARAM_PREFIX().length()), argv.get(idx + 1)));
+                    Map.entry(current.substring(ConfigKeys.PARAM_PREFIX().length()), argv.get(idx + 1)));
                 idx += 2;
             } else if (current.startsWith(ConfigKeys.PARAM_PREFIX())) {
                 LOG.error("Unrecognized options: {}", String.join(" ", argv.subList(idx, argv.size())));
@@ -156,9 +157,9 @@ public abstract class Spark implements Serializable {
         if (conf != null) {
             Map<String, String> localConf;
             String ext =
-                    conf.contains(".")
-                            ? conf.substring(conf.lastIndexOf('.') + 1)
-                            : "";
+                conf.contains(".")
+                    ? conf.substring(conf.lastIndexOf('.') + 1)
+                    : "";
             switch (ext) {
                 case "conf":
                     localConf = PropertiesUtils.fromHoconFile(conf);
@@ -172,20 +173,20 @@ public abstract class Spark implements Serializable {
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
+                        "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
             }
             localConf.forEach((k, v) -> sparkConf.set(k, v));
         }
         userArgs.forEach(e -> sparkConf.set(e.getKey(), e.getValue()));
 
         String appMain =
-                sparkConf.get(
-                        ConfigKeys.KEY_SPARK_MAIN_CLASS(),
-                        "org.apache.streampark.spark.cli.SqlClient");
+            sparkConf.get(
+                ConfigKeys.KEY_SPARK_MAIN_CLASS(),
+                "org.apache.streampark.spark.cli.SqlClient");
         if (appMain == null) {
             LOG.error(
-                    "[StreamPark] parameter: {} must not be empty!",
-                    ConfigKeys.KEY_SPARK_MAIN_CLASS());
+                "[StreamPark] parameter: {} must not be empty!",
+                ConfigKeys.KEY_SPARK_MAIN_CLASS());
             System.exit(1);
         }
 
@@ -201,29 +202,32 @@ public abstract class Spark implements Serializable {
         sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true");
 
         String extraListeners =
-                String.join(",", sparkListeners)
-                        + ","
-                        + sparkConf.get("spark.extraListeners", "");
+            String.join(",", sparkListeners)
+                + ","
+                + sparkConf.get("spark.extraListeners", "");
         if (!extraListeners.equals(",")) {
             sparkConf.set("spark.extraListeners", extraListeners);
         }
     }
 
-    protected void config(SparkConf sparkConf) {}
+    protected void config(SparkConf sparkConf) {
+    }
 
-    protected void ready() {}
+    protected void ready() {
+    }
 
     protected Dataset<Row> handle(String sql) {
         return sparkSession.sql(sql);
     }
 
-    protected void start() {}
+    protected void start() {
+    }
 
     protected abstract void destroy();
 
     private void printUsageAndExit() {
         LOG.error(
-                "\"Usage: Streaming [options]\\n\\n Options are:\\n   --checkpoint <checkpoint dir>\\n   --createOnError <Failed to recover from checkpoint, whether to recreated, true or false>\\n\"");
+            "\"Usage: Streaming [options]\\n\\n Options are:\\n   --checkpoint <checkpoint dir>\\n   --createOnError <Failed to recover from checkpoint, whether to recreated, true or false>\\n\"");
         System.exit(1);
     }
 }

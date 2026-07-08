@@ -26,9 +26,9 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(
-            ParameterTool parameter,
-            StreamExecutionEnvironment streamEnv,
-            StreamTableEnvironment tableEnv) {
+                              ParameterTool parameter,
+                              StreamExecutionEnvironment streamEnv,
+                              StreamTableEnvironment tableEnv) {
         super(parameter, streamEnv, tableEnv);
     }
 

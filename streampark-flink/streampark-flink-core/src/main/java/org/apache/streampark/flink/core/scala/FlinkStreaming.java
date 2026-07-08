@@ -46,23 +46,25 @@ public abstract class FlinkStreaming implements Serializable {
     private void init(String[] args) {
         SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkStreaming.class);
         context =
-                new StreamingContext(
-                        FlinkStreamingInitializer.initialize(
-                                new StreamEnvConfig(
-                                        args,
-                                        (environment, parameter) ->
-                                                config(environment, parameter))));
+            new StreamingContext(
+                FlinkStreamingInitializer.initialize(
+                    new StreamEnvConfig(
+                        args,
+                        (environment, parameter) -> config(environment, parameter))));
     }
 
     protected ParameterTool getParameter() {
         return context.parameter;
     }
 
-    protected void ready() {}
+    protected void ready() {
+    }
 
-    protected void config(StreamExecutionEnvironment environment, ParameterTool parameter) {}
+    protected void config(StreamExecutionEnvironment environment, ParameterTool parameter) {
+    }
 
     protected abstract void handle();
 
-    protected void destroy() {}
+    protected void destroy() {
+    }
 }

@@ -30,12 +30,19 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 
 public final class CommandUtils {
+
     private static final Logger LOG = StreamParkLoggerFactory.loggerFactory().getLogger(CommandUtils.class.getName());
-    private CommandUtils() {}
+    private CommandUtils() {
+    }
 
     public static class CommandResult {
-        public final int code; public final String output;
-        public CommandResult(int code, String output) { this.code = code; this.output = output; }
+
+        public final int code;
+        public final String output;
+        public CommandResult(int code, String output) {
+            this.code = code;
+            this.output = output;
+        }
     }
 
     public static CommandResult execute(String command) throws Exception {
@@ -43,9 +50,11 @@ public final class CommandUtils {
         Process process = Runtime.getRuntime().exec(command);
         InputStreamReader reader = new InputStreamReader(process.getInputStream());
         Scanner scanner = new Scanner(reader);
-        while (scanner.hasNextLine()) buffer.append(scanner.nextLine()).append("\n");
+        while (scanner.hasNextLine())
+            buffer.append(scanner.nextLine()).append("\n");
         int code = waitFor(process);
-        reader.close(); scanner.close();
+        reader.close();
+        scanner.close();
         return new CommandResult(code, buffer.toString());
     }
 
@@ -54,26 +63,36 @@ public final class CommandUtils {
             throw new IllegalArgumentException("[StreamPark] CommandUtils.execute: commands must not be null.");
         }
         StringBuilder debug = new StringBuilder();
-        for (String c : commands) debug.append(c).append("\n");
+        for (String c : commands)
+            debug.append(c).append("\n");
         LOG.debug("[StreamPark] Command execute:\n{}", debug);
         List<String> interpreters = Utils.isWindows() ? Arrays.asList("cmd", "/k") : Arrays.asList("/bin/bash");
         ProcessBuilder builder = new ProcessBuilder(interpreters).redirectErrorStream(true);
-        if (directory != null) builder.directory(new File(directory));
+        if (directory != null)
+            builder.directory(new File(directory));
         Process process = builder.start();
         PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream())), true);
         String last = null;
-        for (String cmd : commands) { out.println(cmd); last = cmd; }
-        if (last == null || !last.equalsIgnoreCase("exit")) out.println("exit");
+        for (String cmd : commands) {
+            out.println(cmd);
+            last = cmd;
+        }
+        if (last == null || !last.equalsIgnoreCase("exit"))
+            out.println("exit");
         out.close();
         Scanner scanner = new Scanner(process.getInputStream());
-        while (scanner.hasNextLine()) consumer.accept(scanner.nextLine());
+        while (scanner.hasNextLine())
+            consumer.accept(scanner.nextLine());
         scanner.close();
         return waitFor(process);
     }
 
     private static int waitFor(Process process) throws InterruptedException, java.io.IOException {
         int code = process.waitFor();
-        process.getErrorStream().close(); process.getInputStream().close(); process.getOutputStream().close();
-        process.destroy(); return code;
+        process.getErrorStream().close();
+        process.getInputStream().close();
+        process.getOutputStream().close();
+        process.destroy();
+        return code;
     }
 }

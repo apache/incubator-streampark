@@ -28,6 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class K8sDeploymentEventCV {
+
     private Watcher.Action action;
     private Deployment event;
     private long pollAckTime;

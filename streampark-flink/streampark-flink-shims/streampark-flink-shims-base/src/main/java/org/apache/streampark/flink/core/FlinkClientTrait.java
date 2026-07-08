@@ -37,7 +37,7 @@ public abstract class FlinkClientTrait<T> {
     }
 
     public CompletableFuture<String> triggerSavepoint(
-            JobID jobID, String savepointDir, boolean nativeFormat) {
+                                                      JobID jobID, String savepointDir, boolean nativeFormat) {
         return clusterClient.triggerSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT);
     }
 
@@ -46,21 +46,22 @@ public abstract class FlinkClientTrait<T> {
     }
 
     public CompletableFuture<String> cancelWithSavepoint(
-            JobID jobID, String savepointDir, boolean nativeFormat) {
+                                                         JobID jobID, String savepointDir, boolean nativeFormat) {
         return clusterClient.cancelWithSavepoint(jobID, savepointDir, SavepointFormatType.DEFAULT);
     }
 
     public CompletableFuture<String> stopWithSavepoint(
-            JobID jobID, boolean advanceToEndOfEventTime, String savepointDir) {
+                                                       JobID jobID, boolean advanceToEndOfEventTime,
+                                                       String savepointDir) {
         return stopWithSavepoint(jobID, advanceToEndOfEventTime, savepointDir, false);
     }
 
     public CompletableFuture<String> stopWithSavepoint(
-            JobID jobID,
-            boolean advanceToEndOfEventTime,
-            String savepointDir,
-            boolean nativeFormat) {
+                                                       JobID jobID,
+                                                       boolean advanceToEndOfEventTime,
+                                                       String savepointDir,
+                                                       boolean nativeFormat) {
         return clusterClient.stopWithSavepoint(
-                jobID, advanceToEndOfEventTime, savepointDir, SavepointFormatType.DEFAULT);
+            jobID, advanceToEndOfEventTime, savepointDir, SavepointFormatType.DEFAULT);
     }
 }

@@ -37,8 +37,10 @@ class DefaultOffset extends Offset {
     }
 
     @Override
-    public void update(String groupId, Map<TopicPartition, Long> offsetInfos) {}
+    public void update(String groupId, Map<TopicPartition, Long> offsetInfos) {
+    }
 
     @Override
-    public void delete(String groupId, Set<String> topics) {}
+    public void delete(String groupId, Set<String> topics) {
+    }
 }

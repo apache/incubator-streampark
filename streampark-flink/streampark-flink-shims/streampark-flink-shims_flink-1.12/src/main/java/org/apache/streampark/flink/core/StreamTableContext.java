@@ -32,9 +32,9 @@ import org.apache.flink.table.sources.TableSource;
 public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(
-            ParameterTool parameter,
-            StreamExecutionEnvironment streamEnv,
-            StreamTableEnvironment tableEnv) {
+                              ParameterTool parameter,
+                              StreamExecutionEnvironment streamEnv,
+                              StreamTableEnvironment tableEnv) {
         super(parameter, streamEnv, tableEnv);
     }
 
@@ -53,13 +53,13 @@ public class StreamTableContext extends FlinkStreamTableTrait {
 
     @Override
     public <T> void registerDataStream(
-            String name, DataStream<T> dataStream, String field) {
+                                       String name, DataStream<T> dataStream, String field) {
         getStreamTableEnv().registerDataStream(name, dataStream, field);
     }
 
     @Override
     public <T> void createTemporaryView(
-            String path, DataStream<T> dataStream, String field) {
+                                        String path, DataStream<T> dataStream, String field) {
         getStreamTableEnv().createTemporaryView(path, dataStream, field);
     }
 

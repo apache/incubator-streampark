@@ -28,6 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class FlinkJobStatusChangeEvent implements BuildInEvent {
+
     private TrackId trackId;
     private JobStatusCV jobStatus;
 }
