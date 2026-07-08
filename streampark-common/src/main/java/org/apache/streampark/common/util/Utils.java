@@ -100,9 +100,10 @@ public final class Utils {
     }
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
-        requireCheckJarFile(jarFile.toURI().toURL());
+        File canonicalJar = jarFile.getCanonicalFile();
+        requireCheckJarFile(canonicalJar.toURI().toURL());
         return AutoCloseUtils.using(
-                new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))),
+                new JarInputStream(new BufferedInputStream(new FileInputStream(canonicalJar))),
                 JarInputStream::getManifest);
     }
 

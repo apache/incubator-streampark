@@ -264,9 +264,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
      */
     @Override
     public UploadResponse upload(MultipartFile file) throws IOException {
-        File temp = WebUtils.getAppTempDir();
         String fileName = FilenameUtils.getName(Objects.requireNonNull(file.getOriginalFilename()));
-        File saveFile = new File(temp, fileName);
+        File saveFile = WebUtils.resolveTempFile(fileName);
         if (!saveFile.exists()) {
             // save file to temp dir
             try {
