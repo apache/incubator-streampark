@@ -118,8 +118,16 @@ public final class DateUtils {
     public static TimeUnitPair getTimeUnit(String time) { return getTimeUnit(time, 5, TimeUnit.SECONDS); }
     public static TimeUnitPair getTimeUnit(String time, int defaultNum, TimeUnit defaultUnit) {
         if (time == null || time.isEmpty()) return new TimeUnitPair(defaultNum, defaultUnit);
-        int num = Integer.parseInt(time.replaceAll("\\s++|[a-zA-Z]++$", ""));
-        String unit = time.replaceAll("^\\d++|\\s++", "");
+        String trimmed = time.trim();
+        int digitEnd = 0;
+        while (digitEnd < trimmed.length() && Character.isDigit(trimmed.charAt(digitEnd))) {
+            digitEnd++;
+        }
+        if (digitEnd == 0) {
+            return new TimeUnitPair(defaultNum, defaultUnit);
+        }
+        int num = Integer.parseInt(trimmed.substring(0, digitEnd));
+        String unit = trimmed.substring(digitEnd).trim();
         if (unit.isEmpty()) return new TimeUnitPair(num / 1000, TimeUnit.SECONDS);
         switch (unit) {
             case "s": return new TimeUnitPair(num, TimeUnit.SECONDS);
