@@ -21,11 +21,16 @@ public class SilentPipeWatcher implements PipeWatcher {
 
     @Override
     public void onStart(PipelineSnapshot snapshot) {
+        // intentionally no-op
     }
+
     @Override
     public void onStepStateChange(PipelineSnapshot snapshot) {
+        // intentionally no-op
     }
+
     @Override
     public void onFinish(PipelineSnapshot snapshot, BuildResult result) {
+        // intentionally no-op
     }
 }

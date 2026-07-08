@@ -56,13 +56,13 @@ public class StreamingContext {
         return execute();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public JobExecutionResult execute() {
         String appName = FlinkParameterUtils.getAppName(parameter, true);
         return execute(appName);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public JobExecutionResult execute(String jobName) {
         Utils.printLogo("FlinkStreaming " + jobName + " Starting...");
         try {

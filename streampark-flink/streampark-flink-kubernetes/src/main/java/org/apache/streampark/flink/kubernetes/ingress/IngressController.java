@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public final class IngressController {
 
-    private static final Pattern VERSION_REGEXP = Pattern.compile("(\\d+\\.\\d+)");
+    private static final Pattern VERSION_REGEXP = Pattern.compile("(\\d{1,3}\\.\\d{1,3})");
     private static final double clusterVersion;
     private static final IngressStrategy ingressStrategy;
 

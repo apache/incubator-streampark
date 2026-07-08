@@ -52,7 +52,7 @@ public final class FlinkSqlValidator {
         "org.apache.flink.table.planner.parse.CalciteParser";
 
     private static final Pattern SYNTAX_ERROR_REGEXP =
-        Pattern.compile(".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*");
+        Pattern.compile(".+?at\\s+line\\s+(\\d+),\\s+column\\s+(\\d+).+");
 
     private static final Map<String, SqlParser.Config> SQL_PARSER_CONFIG_MAP;
 

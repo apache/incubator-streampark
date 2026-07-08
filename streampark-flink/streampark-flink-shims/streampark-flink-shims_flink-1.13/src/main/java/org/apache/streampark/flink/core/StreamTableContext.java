@@ -74,7 +74,7 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         return getStreamTableEnv().listFullModules();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public StreamTableDescriptor connect(ConnectorDescriptor connectorDescriptor) {
         return getStreamTableEnv().connect(connectorDescriptor);
@@ -93,43 +93,43 @@ public class StreamTableContext extends FlinkStreamTableTrait {
         return getStreamTableEnv().createStatementSet();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public Table fromTableSource(TableSource<?> source) {
         return getStreamTableEnv().fromTableSource(source);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void insertInto(Table table, String sinkPath, String... sinkPathContinued) {
         getStreamTableEnv().insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void insertInto(String targetPath, Table table) {
         getStreamTableEnv().insertInto(targetPath, table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(Table table) {
         return getStreamTableEnv().explain(table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(Table table, boolean extended) {
         return getStreamTableEnv().explain(table, extended);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(boolean extended) {
         return getStreamTableEnv().explain(extended);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void sqlUpdate(String stmt) {
         getStreamTableEnv().sqlUpdate(stmt);

@@ -36,7 +36,7 @@ public class IngressStrategyV1 extends IngressStrategy {
                     String host = rule.getHost();
                     String path = rule.getHttp().getPaths().get(0).getPath();
                     if (path != null && !path.isEmpty()) {
-                        path = path.replaceAll("/+$", "");
+                        path = path.replaceAll("/++$", "");
                     } else {
                         path = "";
                     }

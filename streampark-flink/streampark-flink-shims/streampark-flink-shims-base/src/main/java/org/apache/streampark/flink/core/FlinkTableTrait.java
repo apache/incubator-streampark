@@ -354,25 +354,25 @@ public abstract class FlinkTableTrait implements TableEnvironment {
         return tableEnv.createStatementSet();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void registerTable(String name, Table table) {
         tableEnv.registerTable(name, table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public Table scan(String... tablePath) {
         return tableEnv.scan(tablePath);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);

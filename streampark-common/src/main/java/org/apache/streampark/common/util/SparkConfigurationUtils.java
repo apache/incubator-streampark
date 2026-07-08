@@ -33,8 +33,6 @@ public final class SparkConfigurationUtils {
 
     private static final Pattern SPARK_PROPERTY_COMPLEX_PATTERN =
         Pattern.compile("^[\"']?([^=]+)=(.*)[\"']?$");
-    private static final String SPARK_ARGUMENT_REGEXP =
-        "\"?(\\s++|$)(?=(([^\"]*\"){2})*+[^\"]*$)\"?";
 
     private SparkConfigurationUtils() {
     }
@@ -50,7 +48,7 @@ public final class SparkConfigurationUtils {
             return new HashMap<>();
         }
         Map<String, String> map = new HashMap<>();
-        for (String x : properties.split("(\\s)*+(--conf|-c)(\\s)++")) {
+        for (String x : splitSparkConfSegments(properties)) {
             if (Utils.isNotEmpty(x) && !x.isEmpty()) {
                 java.util.regex.Matcher p = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(x);
                 if (p.matches()) {
@@ -67,11 +65,66 @@ public final class SparkConfigurationUtils {
             return Lists.newArrayList();
         }
         List<String> result = new ArrayList<>();
-        for (String s : arguments.split(SPARK_ARGUMENT_REGEXP)) {
-            if (!s.isEmpty()) {
-                result.add(s);
+        StringBuilder token = new StringBuilder();
+        boolean inQuote = false;
+        char quoteChar = 0;
+        for (int i = 0; i < arguments.length(); i++) {
+            char c = arguments.charAt(i);
+            if (inQuote) {
+                token.append(c);
+                if (c == quoteChar) {
+                    inQuote = false;
+                }
+            } else if (c == '"' || c == '\'') {
+                inQuote = true;
+                quoteChar = c;
+                token.append(c);
+            } else if (Character.isWhitespace(c)) {
+                if (token.length() > 0) {
+                    result.add(token.toString());
+                    token.setLength(0);
+                }
+            } else {
+                token.append(c);
             }
         }
+        if (token.length() > 0) {
+            result.add(token.toString());
+        }
         return result;
+    }
+
+    private static List<String> splitSparkConfSegments(String properties) {
+        List<String> segments = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int i = 0;
+        while (i < properties.length()) {
+            if (startsWithAt(properties, i, "--conf")) {
+                flushSegment(segments, current);
+                i += 6;
+            } else if (startsWithAt(properties, i, "-c")
+                && (i + 2 >= properties.length() || Character.isWhitespace(properties.charAt(i + 2)))) {
+                flushSegment(segments, current);
+                i += 2;
+            } else {
+                current.append(properties.charAt(i++));
+            }
+        }
+        flushSegment(segments, current);
+        return segments;
+    }
+
+    private static boolean startsWithAt(String value, int index, String token) {
+        if (index + token.length() > value.length()) {
+            return false;
+        }
+        return value.regionMatches(index, token, 0, token.length());
+    }
+
+    private static void flushSegment(List<String> segments, StringBuilder current) {
+        if (current.length() > 0) {
+            segments.add(current.toString().trim());
+            current.setLength(0);
+        }
     }
 }

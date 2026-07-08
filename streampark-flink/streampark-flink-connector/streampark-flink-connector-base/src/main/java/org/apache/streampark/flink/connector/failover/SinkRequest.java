@@ -36,9 +36,9 @@ public class SinkRequest {
 
     private static final Pattern TABLE_REGEXP =
             Pattern.compile(
-                    "(insert\\s+into|update|delete)\\s+(.*?)(\\(|\\s+)", Pattern.CASE_INSENSITIVE);
+                    "(?i)(?:insert\\s+into|update|delete)\\s+(\\S+)");
     private static final Pattern INSERT_REGEXP =
-            Pattern.compile("^(.*?)\\s+(values|value)(.*)", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("(?i)^(.+?)\\s+(?:values?)\\s*(.*)");
 
     private final List<String> records;
     private int attemptCounter;
@@ -76,7 +76,7 @@ public class SinkRequest {
             Matcher valueMatcher = INSERT_REGEXP.matcher(record);
             if (valueMatcher.find()) {
                 String prefix = valueMatcher.group(1);
-                prefixMap.computeIfAbsent(prefix, k -> new ArrayList<>()).add(valueMatcher.group(3));
+                prefixMap.computeIfAbsent(prefix, k -> new ArrayList<>()).add(valueMatcher.group(2));
             } else {
                 LOG.warn("ignore record: {}", record);
             }
@@ -101,7 +101,7 @@ public class SinkRequest {
         }
         Matcher matcher = TABLE_REGEXP.matcher(records.get(0));
         if (matcher.find()) {
-            return matcher.group(2);
+            return matcher.group(1);
         }
         return null;
     }

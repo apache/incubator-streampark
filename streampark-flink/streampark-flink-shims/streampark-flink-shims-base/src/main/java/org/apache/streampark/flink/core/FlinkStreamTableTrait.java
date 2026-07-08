@@ -125,7 +125,7 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return execute(appName);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public JobExecutionResult execute(String jobName) {
         Utils.printLogo("FlinkStreamTable " + jobName + " Starting...");
         if (isConvertedToDataStream) {
@@ -370,18 +370,18 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.getCheckpointConfig().isForceUnalignedCheckpoints();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public StreamExecutionEnvironment $enableCheckpointing(
                                                            long interval, CheckpointingMode mode, boolean force) {
         return streamEnv.enableCheckpointing(interval, mode);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public DataStream<Long> $generateSequence(long from, long to) {
         return streamEnv.fromSequence(from, to);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public DataStream<String> $readFileStream(
                                               String streamPath,
                                               long intervalMillis,
@@ -389,7 +389,7 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.readFileStream(streamPath, intervalMillis, watchType);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public <T> DataStream<T> $readFile(
                                        FileInputFormat<T> inputFormat,
                                        String filePath,
@@ -782,49 +782,49 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return tableEnv.getConfig();
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public <T> void registerFunction(String name, TableFunction<T> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public <T, ACC> void registerFunction(String name, AggregateFunction<T, ACC> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public <T, ACC> void registerFunction(String name, TableAggregateFunction<T, ACC> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public <T> void registerDataStream(String name, DataStream<T> dataStream) {
         tableEnv.registerDataStream(name, dataStream);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void registerTable(String name, Table table) {
         tableEnv.registerTable(name, table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public Table scan(String... tablePath) {
         return tableEnv.scan(tablePath);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);

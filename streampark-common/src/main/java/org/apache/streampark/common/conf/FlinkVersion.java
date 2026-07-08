@@ -43,10 +43,10 @@ public class FlinkVersion implements Serializable {
     private static final Pattern FLINK_VERSION_PATTERN =
         Pattern.compile("^Version: ([^,]*), Commit ID: (.*)$");
     private static final Pattern FLINK_SCALA_VERSION_PATTERN =
-        Pattern.compile("^flink-dist_(\\d\\.\\d+).*\\.jar$");
+        Pattern.compile("^flink-dist_(\\d+\\.\\d+)[^/\\\\]*\\.jar$");
     private static final Pattern APACHE_FLINK_VERSION_PATTERN =
-        Pattern.compile("(^\\d+\\.\\d+\\.\\d+)");
-    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)-?");
+        Pattern.compile("^(\\d+\\.\\d+\\.\\d+)");
+    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("^(\\d+\\.\\d+)-?$");
 
     /** Flink installation directory (Scala {@code flinkHome} accessor). */
     public final String flinkHome;
@@ -189,7 +189,11 @@ public class FlinkVersion implements Serializable {
     public File getFlinkDistJar() {
         if (flinkDistJar == null) {
             File[] distJar =
-                getFlinkLib().listFiles(f -> f.getName().matches("flink-dist.*\\.jar"));
+                getFlinkLib().listFiles(
+                    f -> {
+                        String name = f.getName();
+                        return name.startsWith("flink-dist") && name.endsWith(".jar");
+                    });
             if (distJar == null || distJar.length == 0) {
                 throw new IllegalArgumentException(
                     "[StreamPark] can no found flink-dist jar in " + getFlinkLib());

@@ -48,7 +48,7 @@ public final class FlinkConfigurationUtils {
     private static final Pattern PROPERTY_PATTERN = Pattern.compile("([^=]+)=(.*)");
 
     private static final Pattern MULTI_PROPERTY_PATTERN =
-        Pattern.compile("-D([^=]+)\\s*=\\s*[\"']([^\"']*)[\"']");
+        Pattern.compile("-D([^=]+)\\s*=\\s*[\"']([^\"']*+)[\"']");
 
     private FlinkConfigurationUtils() {
     }
@@ -199,11 +199,11 @@ public final class FlinkConfigurationUtils {
             String v = iter.next();
             if (v.length() >= 2 && v.startsWith("--")) {
                 String kv = iter.next();
-                String regexp = "(.*)=(.*)";
-                if (kv.matches(regexp)) {
-                    String[] values = kv.split("=", 2);
+                int eqIndex = kv.indexOf('=');
+                if (eqIndex > 0) {
+                    String[] values = new String[]{kv.substring(0, eqIndex), kv.substring(eqIndex + 1)};
                     String k1 = values[0].trim();
-                    String v1 = stripOuterQuotes(values[1]);
+                    String v1 = stripOuterQuotes(values[1].trim());
                     String k = v.substring(2);
                     map.computeIfAbsent(k, key -> new LinkedHashMap<>()).put(k1, v1);
                 }

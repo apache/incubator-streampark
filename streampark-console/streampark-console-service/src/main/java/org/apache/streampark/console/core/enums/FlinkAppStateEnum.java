@@ -85,14 +85,14 @@ public enum FlinkAppStateEnum {
      * Lost track of flink job temporarily. A complete loss of flink job tracking translates into LOST
      * state.
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     SILENT(17),
 
     /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
     TERMINATED(18),
 
     /** Flink job has terminated vaguely, maybe FINISHED, CANCELED or FAILED. */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     POS_TERMINATED(19),
 
     /** Job SUCCEEDED on yarn. */
@@ -144,7 +144,7 @@ public enum FlinkAppStateEnum {
     /**
      * Type conversion bridging Deprecated, see {@link
      */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static class Bridge {
 
         /** covert from org.apache.streampark.flink.kubernetes.enums.FlinkJobState */

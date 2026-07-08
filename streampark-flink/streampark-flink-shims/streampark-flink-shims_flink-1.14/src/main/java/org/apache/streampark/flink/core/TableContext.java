@@ -37,43 +37,43 @@ public class TableContext extends FlinkTableTrait {
         this(FlinkTableInitializer.initialize(config));
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public Table fromTableSource(TableSource<?> source) {
         return getTableEnv().fromTableSource(source);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void insertInto(Table table, String sinkPath, String... sinkPathContinued) {
         getTableEnv().insertInto(table, sinkPath, sinkPathContinued);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void insertInto(String targetPath, Table table) {
         getTableEnv().insertInto(targetPath, table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(Table table) {
         return getTableEnv().explain(table);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(Table table, boolean extended) {
         return getTableEnv().explain(table, extended);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public String explain(boolean extended) {
         return getTableEnv().explain(extended);
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Override
     public void sqlUpdate(String stmt) {
         getTableEnv().sqlUpdate(stmt);

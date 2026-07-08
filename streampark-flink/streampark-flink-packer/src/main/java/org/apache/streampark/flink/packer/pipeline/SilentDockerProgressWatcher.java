@@ -21,11 +21,16 @@ public class SilentDockerProgressWatcher implements DockerProgressWatcher {
 
     @Override
     public void onDockerPullProgressChange(DockerPullSnapshot snapshot) {
+        // intentionally no-op
     }
+
     @Override
     public void onDockerBuildProgressChange(DockerBuildSnapshot snapshot) {
+        // intentionally no-op
     }
+
     @Override
     public void onDockerPushProgressChange(DockerPushSnapshot snapshot) {
+        // intentionally no-op
     }
 }

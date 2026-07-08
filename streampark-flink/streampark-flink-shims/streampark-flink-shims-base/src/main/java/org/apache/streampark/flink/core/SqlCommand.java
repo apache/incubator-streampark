@@ -110,11 +110,11 @@ public enum SqlCommand {
 
     // ---- INSERT SET Statements -------------------------------------------------------------
     /** This is SQL Client's syntax, don't use in our platform. */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     BEGIN_STATEMENT_SET(
         "begin statement set", "BEGIN\\s+STATEMENT\\s+SET", SqlCommandConverters.NO_OPERANDS),
     /** This is SQL Client's syntax, don't use in our platform. */
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     END_STATEMENT_SET("end statement set", "END", SqlCommandConverters.NO_OPERANDS),
 
     // Since: 2.1.2 for flink 1.18

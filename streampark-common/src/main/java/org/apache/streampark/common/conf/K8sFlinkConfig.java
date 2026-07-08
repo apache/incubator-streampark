@@ -23,7 +23,7 @@ public final class K8sFlinkConfig {
     private K8sFlinkConfig() {
     }
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption jobStatusTrackTaskTimeoutSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.polling-task-timeout-sec.job-status",
@@ -31,7 +31,7 @@ public final class K8sFlinkConfig {
             Long.class,
             "run timeout seconds of single flink-k8s metrics tracking task");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption jobStatusTrackCacheTimeoutSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.cache-timeout-sec.job-status",
@@ -39,7 +39,7 @@ public final class K8sFlinkConfig {
             Integer.class,
             "status cache timeout seconds of single flink-k8s job status tracking task");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption metricTrackTaskTimeoutSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
@@ -47,7 +47,7 @@ public final class K8sFlinkConfig {
             Long.class,
             "run timeout seconds of single flink-k8s job status tracking task");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption jobStatueTrackTaskIntervalSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.polling-interval-sec.job-status",
@@ -55,7 +55,7 @@ public final class K8sFlinkConfig {
             Long.class,
             "interval seconds between two single flink-k8s metrics tracking task");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption metricTrackTaskIntervalSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.polling-interval-sec.cluster-metric",
@@ -63,7 +63,7 @@ public final class K8sFlinkConfig {
             Long.class,
             "interval seconds between two single flink-k8s metrics tracking task");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final InternalOption silentStateJobKeepTrackingSec =
         new InternalOption(
             "streampark.flink-k8s.tracking.silent-state-keep-sec",
@@ -78,6 +78,6 @@ public final class K8sFlinkConfig {
             String.class,
             "Direct ingress to the ingress controller.");
 
-    @Deprecated
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public static final String DEFAULT_KUBERNETES_NAMESPACE = "default";
 }
