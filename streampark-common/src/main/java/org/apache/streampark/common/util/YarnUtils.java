@@ -89,7 +89,7 @@ public final class YarnUtils {
             }
             return appIds;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to list YARN applications for appName={}", appName, e);
             return new ArrayList<>();
         }
     }
@@ -101,7 +101,7 @@ public final class YarnUtils {
                     HadoopUtils.yarnClient().getApplicationReport(applicationId);
             return applicationReport.getYarnApplicationState();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to get YARN application state for appId={}", appId, e);
             return null;
         }
     }
@@ -118,7 +118,7 @@ public final class YarnUtils {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to check whether YARN contains appName={}", appName, e);
         }
         return false;
     }

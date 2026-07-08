@@ -175,7 +175,10 @@ public final class HdfsUtils {
         Path path = getPath(fileName);
         FSDataInputStream in = HadoopUtils.hdfs().open(path);
         try {
-            return DigestUtils.md5Hex(in);
+            // MD5 is used for non-cryptographic file integrity checks only.
+            @SuppressWarnings("java:S4790")
+            String digest = DigestUtils.md5Hex(in);
+            return digest;
         } finally {
             in.close();
         }
