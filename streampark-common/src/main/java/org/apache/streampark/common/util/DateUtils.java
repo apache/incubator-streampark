@@ -115,12 +115,12 @@ public final class DateUtils {
     public static long toSecondDuration(Date time1, Date time2) {
         LocalDateTime start = LocalDateTime.ofInstant(time1.toInstant(), ZoneId.systemDefault());
         LocalDateTime end = LocalDateTime.ofInstant(time2.toInstant(), ZoneId.systemDefault());
-        return Duration.between(start, end).toMillis() / 1000;
+        return Math.abs(Duration.between(start, end).toMillis()) / 1000;
     }
     public static TimeUnitPair getTimeUnit(String time) { return getTimeUnit(time, 5, TimeUnit.SECONDS); }
     public static TimeUnitPair getTimeUnit(String time, int defaultNum, TimeUnit defaultUnit) {
         if (time == null || time.isEmpty()) return new TimeUnitPair(defaultNum, defaultUnit);
-        int num = Integer.parseInt(time.replaceAll("\\s+|[a-z|A-Z]+$", ""));
+        int num = Integer.parseInt(time.replaceAll("\\s+|[a-zA-Z]+$", ""));
         String unit = time.replaceAll("^\\d+|\\s+", "");
         if (unit.isEmpty()) return new TimeUnitPair(num / 1000, TimeUnit.SECONDS);
         switch (unit) {
