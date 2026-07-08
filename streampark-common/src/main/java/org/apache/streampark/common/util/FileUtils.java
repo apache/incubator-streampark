@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,25 +43,27 @@ public final class FileUtils {
     private FileUtils() {}
 
     public static File toCanonicalFile(String path) throws IOException {
-        return new File(path).getCanonicalFile();
+        Path normalized = Paths.get(path).normalize();
+        if (normalized.toString().contains("..")) {
+            throw new IOException("Invalid path: " + path);
+        }
+        return normalized.toFile().getCanonicalFile();
     }
 
     public static File resolveChildFile(File baseDir, String... childSegments) throws IOException {
-        File base = baseDir.getCanonicalFile();
-        File current = base;
+        Path base = baseDir.getCanonicalFile().toPath();
+        Path current = base;
         for (String segment : childSegments) {
             if (segment == null || segment.isEmpty() || segment.contains("..")) {
                 throw new IOException("Invalid path segment: " + segment);
             }
-            current = new File(current, segment);
+            current = current.resolve(segment);
         }
-        File resolved = current.getCanonicalFile();
-        String basePath = base.getPath();
-        String resolvedPath = resolved.getPath();
-        if (!resolvedPath.equals(basePath) && !resolvedPath.startsWith(basePath + File.separator)) {
-            throw new IOException("Resolved path escapes base directory: " + resolvedPath);
+        Path resolved = current.normalize().toAbsolutePath();
+        if (!resolved.startsWith(base)) {
+            throw new IOException("Resolved path escapes base directory: " + resolved);
         }
-        return resolved;
+        return resolved.toFile();
     }
 
     private static String bytesToHexString(byte[] src) {
@@ -244,12 +247,12 @@ public final class FileUtils {
     }
 
     public static String readFile(File file) throws IOException {
-        File canonicalFile = file.getCanonicalFile();
-        if (canonicalFile.length() >= Integer.MAX_VALUE) {
+        Path canonicalPath = file.getCanonicalFile().toPath();
+        if (Files.size(canonicalPath) >= Integer.MAX_VALUE) {
             throw new IOException("Too large file, unexpected!");
         }
-        byte[] array = new byte[(int) canonicalFile.length()];
-        try (InputStream is = Files.newInputStream(canonicalFile.toPath())) {
+        byte[] array = new byte[(int) Files.size(canonicalPath)];
+        try (InputStream is = Files.newInputStream(canonicalPath)) {
             readInputStream(is, array);
         }
         return new String(array, StandardCharsets.UTF_8);

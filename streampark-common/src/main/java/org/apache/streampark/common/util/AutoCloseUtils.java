@@ -30,32 +30,13 @@ public final class AutoCloseUtils {
 
     public static <T extends AutoCloseable, R> R using(
             T autoCloseable, Function<T, R> func, Function<Throwable, R> excFunc) {
-        Throwable exception = null;
-        try {
-            return func.apply(autoCloseable);
+        try (T resource = autoCloseable) {
+            return func.apply(resource);
         } catch (Throwable e) {
-            exception = e;
             if (excFunc != null) {
                 return excFunc.apply(e);
             }
             throw e;
-        } finally {
-            try {
-                if (autoCloseable != null) {
-                    autoCloseable.close();
-                }
-            } catch (Throwable e) {
-                if (exception != null) {
-                    e.addSuppressed(exception);
-                }
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException) e;
-                }
-                if (e instanceof Error) {
-                    throw (Error) e;
-                }
-                throw new RuntimeException(e);
-            }
         }
     }
 }

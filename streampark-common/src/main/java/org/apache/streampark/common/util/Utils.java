@@ -81,7 +81,7 @@ public final class Utils {
     public static void requireCheckJarFile(URL jar) throws IOException {
         File jarFile;
         try {
-            jarFile = new File(jar.toURI());
+            jarFile = new File(jar.toURI()).getCanonicalFile();
         } catch (Exception e) {
             throw new IOException("JAR file path is invalid " + jar, e);
         }
