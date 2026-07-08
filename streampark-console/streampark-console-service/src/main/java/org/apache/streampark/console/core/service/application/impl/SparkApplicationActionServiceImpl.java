@@ -292,7 +292,7 @@ public class SparkApplicationActionServiceImpl
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), sparkSql.getSql());
             sparkSql.setSql(DeflaterUtils.zipString(realSql));
-            extraParameter.put(ConfigKeys.KEY_SPARK_SQL(null), sparkSql.getSql());
+            extraParameter.put(ConfigKeys.keySparkSql(null), sparkSql.getSql());
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(sparkEnv, application);
@@ -303,10 +303,10 @@ public class SparkApplicationActionServiceImpl
         if (SparkDeployMode.isYarnMode(application.getDeployModeEnum())) {
             buildResult = new ShadedBuildResponse(null, sparkUserJar, true);
             if (StringUtils.isNotBlank(application.getYarnQueueName())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME(), application.getYarnQueueName());
+                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_NAME, application.getYarnQueueName());
             }
             if (StringUtils.isNotBlank(application.getYarnQueueLabel())) {
-                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL(), application.getYarnQueueLabel());
+                extraParameter.put(ConfigKeys.KEY_SPARK_YARN_QUEUE_LABEL, application.getYarnQueueLabel());
             }
         }
 
@@ -432,7 +432,7 @@ public class SparkApplicationActionServiceImpl
                     : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (SparkDeployMode.YARN_CLUSTER == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.remote().getAppClient();
                     sparkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 break;
@@ -476,7 +476,7 @@ public class SparkApplicationActionServiceImpl
                         case APACHE_SPARK:
                             appConf = String.format(
                                 "json://{\"%s\":\"%s\"}",
-                                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                                ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS, application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(

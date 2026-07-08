@@ -114,7 +114,7 @@ public class SubmitRequest {
     }
 
     public Map<String, String> getSparkParameterMap() {
-        return getParameterMap(ConfigKeys.KEY_SPARK_PROPERTY_PREFIX());
+        return getParameterMap(ConfigKeys.KEY_SPARK_PROPERTY_PREFIX);
     }
 
     public String getAppMain() {
@@ -213,13 +213,13 @@ public class SubmitRequest {
             Files.isSymbolicLink(sparkHomeDir.toPath())
                 ? sparkHomeDir.getCanonicalFile().getName()
                 : sparkHomeDir.getName();
-        String sparkHdfsHome = workspace.APP_SPARK() + "/" + sparkName;
+        String sparkHdfsHome = workspace.getAppSpark() + "/" + sparkName;
         return new HdfsWorkspace(
             sparkName,
             sparkHome,
             sparkHdfsHome + "/jars",
             sparkHdfsHome + "/plugins",
-            workspace.APP_JARS());
+            workspace.getAppJars());
     }
 
     private void checkBuildResult() {

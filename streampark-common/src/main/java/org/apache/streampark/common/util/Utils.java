@@ -30,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -224,7 +225,7 @@ public final class Utils {
         System.out.println("    WebSite:  https://streampark.apache.org                           ");
         System.out.println("    GitHub :  https://github.com/apache/streampark                    ");
         System.out.println("    Info   :  " + info + "                                 ");
-        System.out.println("    Time   :  " + LocalDateTime.now() + "              \n\n");
+        System.out.println("    Time   :  " + LocalDateTime.now(ZoneId.systemDefault()) + "              \n\n");
     }
 
     @FunctionalInterface

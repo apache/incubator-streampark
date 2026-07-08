@@ -106,7 +106,7 @@ public class Project implements Serializable {
     /** get project source */
     @JsonIgnore
     public File getAppSource() {
-        File sourcePath = new File(Workspace.PROJECT_LOCAL_PATH());
+        File sourcePath = new File(Workspace.projectLocalPath());
         if (!sourcePath.exists()) {
             sourcePath.mkdirs();
         } else if (sourcePath.isFile()) {
@@ -148,7 +148,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getDistHome() {
-        return new File(Workspace.APP_LOCAL_DIST(), id.toString());
+        return new File(Workspace.appLocalDist(), id.toString());
     }
 
     @JsonIgnore
@@ -187,7 +187,7 @@ public class Project implements Serializable {
         }
 
         // --settings
-        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH());
+        String setting = InternalConfigHolder.get(CommonConfig.MAVEN_SETTINGS_PATH);
         if (StringUtils.isNotBlank(setting)) {
             File file = new File(setting);
             if (file.exists() && file.isFile()) {

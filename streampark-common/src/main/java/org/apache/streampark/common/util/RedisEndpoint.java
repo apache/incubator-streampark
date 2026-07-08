@@ -62,14 +62,14 @@ public class RedisEndpoint implements Serializable {
 
     public RedisEndpoint(Properties conf) {
         this(
-            conf.getProperty(ConfigKeys.KEY_HOST(), Protocol.DEFAULT_HOST),
+            conf.getProperty(ConfigKeys.KEY_HOST, Protocol.DEFAULT_HOST),
             Integer.parseInt(
-                conf.getProperty(ConfigKeys.KEY_PORT(), String.valueOf(Protocol.DEFAULT_PORT))),
-            conf.getProperty(ConfigKeys.KEY_PASSWORD(), null),
+                conf.getProperty(ConfigKeys.KEY_PORT, String.valueOf(Protocol.DEFAULT_PORT))),
+            conf.getProperty(ConfigKeys.KEY_PASSWORD, null),
             Integer.parseInt(
-                conf.getProperty(ConfigKeys.KEY_DB(), String.valueOf(Protocol.DEFAULT_DATABASE))),
+                conf.getProperty(ConfigKeys.KEY_DB, String.valueOf(Protocol.DEFAULT_DATABASE))),
             Integer.parseInt(
-                conf.getProperty(ConfigKeys.KEY_TIMEOUT(), String.valueOf(Protocol.DEFAULT_TIMEOUT))));
+                conf.getProperty(ConfigKeys.KEY_TIMEOUT, String.valueOf(Protocol.DEFAULT_TIMEOUT))));
     }
 
     public RedisEndpoint(URI uri) {

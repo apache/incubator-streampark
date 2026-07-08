@@ -53,7 +53,7 @@ public class HBaseClient implements Serializable {
     }
 
     public static HBaseClient apply(Properties prop) {
-        Object user = prop.remove(ConfigKeys.KEY_HBASE_AUTH_USER());
+        Object user = prop.remove(ConfigKeys.KEY_HBASE_AUTH_USER);
         for (String key : prop.stringPropertyNames())
             CONF.set(key, prop.getProperty(key));
         return new HBaseClient(() -> {

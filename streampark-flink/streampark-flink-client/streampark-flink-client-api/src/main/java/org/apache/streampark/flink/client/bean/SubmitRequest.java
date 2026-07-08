@@ -140,14 +140,14 @@ public class SubmitRequest {
 
     public Map<String, String> getAppProperties() {
         if (appProperties == null) {
-            appProperties = getParameterMap(ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
+            appProperties = getParameterMap(ConfigKeys.KEY_FLINK_PROPERTY_PREFIX);
         }
         return appProperties;
     }
 
     public Map<String, String> getAppOption() {
         if (appOption == null) {
-            appOption = getParameterMap(ConfigKeys.KEY_FLINK_OPTION_PREFIX());
+            appOption = getParameterMap(ConfigKeys.KEY_FLINK_OPTION_PREFIX);
         }
         return appOption;
     }
@@ -159,7 +159,7 @@ public class SubmitRequest {
             } else if (jobType == FlinkJobType.PYFLINK) {
                 appMain = Constants.PYTHON_FLINK_DRIVER_CLASS_NAME;
             } else {
-                appMain = getAppProperties().get(ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS());
+                appMain = getAppProperties().get(ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS);
             }
         }
         return appMain;
@@ -169,7 +169,7 @@ public class SubmitRequest {
         if (effectiveAppName == null) {
             effectiveAppName =
                 appName == null
-                    ? getAppProperties().get(ConfigKeys.KEY_FLINK_APP_NAME())
+                    ? getAppProperties().get(ConfigKeys.KEY_FLINK_APP_NAME)
                     : appName;
         }
         return effectiveAppName;
@@ -177,7 +177,7 @@ public class SubmitRequest {
 
     public List<URL> getLibs() {
         if (libs == null) {
-            String path = Workspace.local().APP_WORKSPACE() + "/" + id + "/lib";
+            String path = Workspace.local().getAppWorkspace() + "/" + id + "/lib";
             File libDir = new File(path);
             File[] files = libDir.listFiles();
             if (files == null) {
@@ -211,7 +211,7 @@ public class SubmitRequest {
 
     public String getFlinkSQL() {
         if (flinkSQL == null) {
-            Object value = extraParameter.get(ConfigKeys.KEY_FLINK_SQL());
+            Object value = extraParameter.get(ConfigKeys.KEY_FLINK_SQL);
             flinkSQL = value == null ? null : value.toString();
         }
         return flinkSQL;
@@ -298,7 +298,7 @@ public class SubmitRequest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
+            String flinkHdfsHome = workspace.getAppFlink() + "/" + flinkName;
             hdfsWorkspace =
                 HdfsWorkspace.builder()
                     .flinkName(flinkName)
@@ -306,7 +306,7 @@ public class SubmitRequest {
                     .flinkLib(flinkHdfsHome + "/lib")
                     .flinkPlugins(flinkHdfsHome + "/plugins")
                     .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
-                    .appJars(workspace.APP_JARS())
+                    .appJars(workspace.getAppJars())
                     .build();
         }
         return hdfsWorkspace;

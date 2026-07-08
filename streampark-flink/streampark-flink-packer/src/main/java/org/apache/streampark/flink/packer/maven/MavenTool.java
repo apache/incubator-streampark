@@ -171,7 +171,7 @@ public final class MavenTool {
         DefaultRepositorySystemSession sysSession = MavenRepositorySystemUtils.newSession();
         sysSession.setLocalRepositoryManager(
             repoSystem.newLocalRepositoryManager(
-                sysSession, new LocalRepository(Workspace.MAVEN_LOCAL_PATH())));
+                sysSession, new LocalRepository(Workspace.mavenLocalPath())));
         session = sysSession;
 
         List<org.eclipse.aether.artifact.Artifact> artifacts = new ArrayList<>();
@@ -211,9 +211,9 @@ public final class MavenTool {
     private static List<RemoteRepository> getRemoteRepos() {
         RemoteRepository.Builder builder =
             new RemoteRepository.Builder(
-                "central", "default", InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL()));
-        String user = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER());
-        String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD());
+                "central", "default", InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL));
+        String user = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER);
+        String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD);
         RemoteRepository remoteRepository;
         if (user == null || password == null) {
             remoteRepository = builder.build();

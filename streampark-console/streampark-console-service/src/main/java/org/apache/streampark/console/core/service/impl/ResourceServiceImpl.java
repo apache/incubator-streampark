@@ -227,7 +227,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
         String filePath = String.format(
             "%s/%d/%s",
-            Workspace.local().APP_UPLOADS(),
+            Workspace.local().getAppUploads(),
             findResource.getTeamId(),
             findResource.getResourceName());
 
@@ -300,7 +300,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
 
     @Override
     public List<String> listHistoryUploadJars() {
-        return Arrays.stream(LfsOperator.getInstance().listDir(Workspace.of(LFS).APP_UPLOADS()))
+        return Arrays.stream(LfsOperator.getInstance().listDir(Workspace.of(LFS).getAppUploads()))
             .filter(File::isFile)
             .sorted(Comparator.comparingLong(File::lastModified).reversed())
             .map(File::getName)
@@ -459,7 +459,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource>
     }
 
     private void transferTeamResource(Long teamId, String resourcePath) {
-        String teamUploads = String.format("%s/%d", Workspace.local().APP_UPLOADS(), teamId);
+        String teamUploads = String.format("%s/%d", Workspace.local().getAppUploads(), teamId);
         if (!FsOperator.lfs().exists(teamUploads)) {
             FsOperator.lfs().mkdirs(teamUploads);
         }

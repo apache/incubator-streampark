@@ -226,7 +226,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
         try {
             appParam
                 .getFsOperator()
-                .delete(appParam.getWorkspace().APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+                .delete(appParam.getWorkspace().getAppSavepoints().concat("/").concat(appId.toString()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

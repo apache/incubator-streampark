@@ -426,7 +426,7 @@ public class FlinkApplicationActionServiceImpl
             // Get the sql of the replaced placeholder
             String realSql = variableService.replaceVariable(application.getTeamId(), flinkSql.getSql());
             flinkSql.setSql(DeflaterUtils.zipString(realSql));
-            extraParameter.put(ConfigKeys.KEY_FLINK_SQL(null), flinkSql.getSql());
+            extraParameter.put(ConfigKeys.keyFlinkSql(null), flinkSql.getSql());
         }
 
         Tuple2<String, String> userJarAndAppConf = getUserJarAndAppConf(flinkEnv, application);
@@ -513,11 +513,11 @@ public class FlinkApplicationActionServiceImpl
                                    FlinkApplication flinkApplication) {
         applicationLog.setSuccess(true);
         if (response.flinkConfig() != null) {
-            String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY());
+            String jmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_JM_PROCESS_MEMORY);
             if (jmMemory != null) {
                 flinkApplication.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
             }
-            String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY());
+            String tmMemory = response.flinkConfig().get(ConfigKeys.KEY_FLINK_TM_PROCESS_MEMORY);
             if (tmMemory != null) {
                 flinkApplication.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
             }
@@ -654,7 +654,7 @@ public class FlinkApplicationActionServiceImpl
                         : String.format("yaml://%s", applicationConfig.getContent());
                 // 3) client
                 if (FlinkDeployMode.YARN_APPLICATION == deployModeEnum) {
-                    String clientPath = Workspace.remote().APP_CLIENT();
+                    String clientPath = Workspace.remote().getAppClient();
                     flinkUserJar = String.format("%s/%s", clientPath, sqlDistJar);
                 }
                 break;
@@ -681,7 +681,7 @@ public class FlinkApplicationActionServiceImpl
                     appConf =
                         String.format(
                             "json://{\"%s\":\"%s\"}",
-                            ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                            ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS, application.getMainClass());
                 } else {
                     switch (application.getApplicationType()) {
                         case STREAMPARK_FLINK:
@@ -699,7 +699,7 @@ public class FlinkApplicationActionServiceImpl
                             appConf =
                                 String.format(
                                     "json://{\"%s\":\"%s\"}",
-                                    ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS(), application.getMainClass());
+                                    ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS, application.getMainClass());
                             break;
                         default:
                             throw new IllegalArgumentException(
@@ -763,23 +763,23 @@ public class FlinkApplicationActionServiceImpl
                         "The yarn session clusterId=%s cannot be find, maybe the clusterId is wrong or "
                             + "the cluster has been deleted. Please contact the Admin.",
                         application.getFlinkClusterId()));
-                properties.put(ConfigKeys.KEY_YARN_APP_ID(), cluster.getClusterId());
+                properties.put(ConfigKeys.KEY_YARN_APP_ID, cluster.getClusterId());
             } else {
                 String yarnQueue =
-                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE());
+                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_QUEUE);
                 String yarnLabelExpr =
-                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL());
+                    (String) application.getHotParamsMap().get(ConfigKeys.KEY_YARN_APP_NODE_LABEL);
                 Optional.ofNullable(yarnQueue)
-                    .ifPresent(yq -> properties.put(ConfigKeys.KEY_YARN_APP_QUEUE(), yq));
+                    .ifPresent(yq -> properties.put(ConfigKeys.KEY_YARN_APP_QUEUE, yq));
                 Optional.ofNullable(yarnLabelExpr)
-                    .ifPresent(yLabel -> properties.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL(), yLabel));
+                    .ifPresent(yLabel -> properties.put(ConfigKeys.KEY_YARN_APP_NODE_LABEL, yLabel));
             }
         } else if (FlinkDeployMode.isKubernetesMode(application.getDeployModeEnum())) {
-            properties.put(ConfigKeys.KEY_K8S_IMAGE_PULL_POLICY(), "Always");
+            properties.put(ConfigKeys.KEY_K8S_IMAGE_PULL_POLICY, "Always");
         }
 
         if (FlinkDeployMode.isKubernetesApplicationMode(application.getDeployMode())) {
-            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.ARCHIVES_FILE_PATH());
+            properties.put(JobManagerOptions.ARCHIVE_DIR.key(), Workspace.archivesFilePath());
         }
 
         if (application.getAllowNonRestored()) {

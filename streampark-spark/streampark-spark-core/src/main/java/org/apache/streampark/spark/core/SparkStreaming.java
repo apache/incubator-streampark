@@ -54,7 +54,7 @@ public abstract class SparkStreaming extends Spark {
     }
 
     private StreamingContext createContext() {
-        int duration = Integer.parseInt(sparkConf.get(ConfigKeys.KEY_SPARK_BATCH_DURATION(), "5"));
+        int duration = Integer.parseInt(sparkConf.get(ConfigKeys.KEY_SPARK_BATCH_DURATION, "5"));
         return new StreamingContext(sparkSession.sparkContext(), new Duration(duration * 1000L));
     }
 

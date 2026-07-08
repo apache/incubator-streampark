@@ -23,160 +23,96 @@ public final class CommonConfig {
     private CommonConfig() {
     }
 
-    private static final InternalOption STREAMPARK_WORKSPACE_LOCAL_OPTION =
+    public static final InternalOption STREAMPARK_WORKSPACE_LOCAL =
         new InternalOption("streampark.workspace.local", "/streampark", String.class);
 
-    private static final InternalOption STREAMPARK_WORKSPACE_REMOTE_OPTION =
+    public static final InternalOption STREAMPARK_WORKSPACE_REMOTE =
         new InternalOption("streampark.workspace.remote", "/streampark", String.class);
 
-    private static final InternalOption STREAMPARK_HADOOP_USER_NAME_OPTION =
+    public static final InternalOption STREAMPARK_HADOOP_USER_NAME =
         new InternalOption("streampark.hadoop-user-name", "hdfs", String.class);
 
-    private static final InternalOption STREAMPARK_PROXY_YARN_URL_OPTION =
+    public static final InternalOption STREAMPARK_PROXY_YARN_URL =
         new InternalOption(
             "streampark.proxy.yarn-url",
             "",
             String.class,
             "proxy yarn url. ex: knox proxy or other");
 
-    private static final InternalOption STREAMPARK_YARN_AUTH_OPTION =
+    public static final InternalOption STREAMPARK_YARN_AUTH =
         new InternalOption(
             "streampark.yarn.http-auth",
             "",
             String.class,
             "yarn http auth type. ex: simple, kerberos");
 
-    private static final InternalOption DOCKER_HOST_OPTION =
+    public static final InternalOption DOCKER_HOST =
         new InternalOption(
             "streampark.docker.http-client.docker-host",
             "",
             String.class,
             "docker host for DockerHttpClient");
 
-    private static final InternalOption DOCKER_MAX_CONNECTIONS_OPTION =
+    public static final InternalOption DOCKER_MAX_CONNECTIONS =
         new InternalOption(
             "streampark.docker.http-client.max-connections",
             100,
             Integer.class,
             "instantiating max connections for DockerHttpClient");
 
-    private static final InternalOption DOCKER_CONNECTION_TIMEOUT_SEC_OPTION =
+    public static final InternalOption DOCKER_CONNECTION_TIMEOUT_SEC =
         new InternalOption(
             "streampark.docker.http-client.connection-timeout-sec",
             100L,
             Long.class,
             "instantiating connection timeout for DockerHttpClient");
 
-    private static final InternalOption DOCKER_RESPONSE_TIMEOUT_SEC_OPTION =
+    public static final InternalOption DOCKER_RESPONSE_TIMEOUT_SEC =
         new InternalOption(
             "streampark.docker.http-client.response-timeout-sec",
             120L,
             Long.class,
             "instantiating connection timeout for DockerHttpClient");
 
-    private static final InternalOption MAVEN_SETTINGS_PATH_OPTION =
+    public static final InternalOption MAVEN_SETTINGS_PATH =
         new InternalOption(
             "streampark.maven.settings",
             null,
             String.class,
             "maven settings.xml full path");
 
-    private static final InternalOption MAVEN_REMOTE_URL_OPTION =
+    public static final InternalOption MAVEN_REMOTE_URL =
         new InternalOption(
             "streampark.maven.central.repository",
             "https://repo1.maven.org/maven2/",
             String.class,
             "maven repository used for built-in compilation");
 
-    private static final InternalOption MAVEN_AUTH_USER_OPTION =
+    public static final InternalOption MAVEN_AUTH_USER =
         new InternalOption(
             "streampark.maven.auth.user",
             null,
             String.class,
             "maven repository used for built-in compilation");
 
-    private static final InternalOption MAVEN_AUTH_PASSWORD_OPTION =
+    public static final InternalOption MAVEN_AUTH_PASSWORD =
         new InternalOption(
             "streampark.maven.auth.password",
             null,
             String.class,
             "maven repository used for built-in compilation");
 
-    private static final InternalOption KERBEROS_TTL_OPTION =
+    public static final InternalOption KERBEROS_TTL =
         new InternalOption("security.kerberos.ttl", "2h", String.class, "kerberos default ttl");
 
-    private static final InternalOption READ_LOG_MAX_SIZE_OPTION =
+    public static final InternalOption READ_LOG_MAX_SIZE =
         new InternalOption(
             "streampark.read-log.max-size",
             "1mb",
             String.class,
             "The maximum size of the default read log");
 
-    private static final InternalOption SPRING_PROFILES_ACTIVE_OPTION =
+    public static final InternalOption SPRING_PROFILES_ACTIVE =
         new InternalOption(
             "spring.profiles.active", "h2", String.class, "Use the database type");
-
-    public static InternalOption STREAMPARK_WORKSPACE_LOCAL() {
-        return STREAMPARK_WORKSPACE_LOCAL_OPTION;
-    }
-
-    public static InternalOption STREAMPARK_WORKSPACE_REMOTE() {
-        return STREAMPARK_WORKSPACE_REMOTE_OPTION;
-    }
-
-    public static InternalOption STREAMPARK_HADOOP_USER_NAME() {
-        return STREAMPARK_HADOOP_USER_NAME_OPTION;
-    }
-
-    public static InternalOption STREAMPARK_PROXY_YARN_URL() {
-        return STREAMPARK_PROXY_YARN_URL_OPTION;
-    }
-
-    public static InternalOption STREAMPARK_YARN_AUTH() {
-        return STREAMPARK_YARN_AUTH_OPTION;
-    }
-
-    public static InternalOption DOCKER_HOST() {
-        return DOCKER_HOST_OPTION;
-    }
-
-    public static InternalOption DOCKER_MAX_CONNECTIONS() {
-        return DOCKER_MAX_CONNECTIONS_OPTION;
-    }
-
-    public static InternalOption DOCKER_CONNECTION_TIMEOUT_SEC() {
-        return DOCKER_CONNECTION_TIMEOUT_SEC_OPTION;
-    }
-
-    public static InternalOption DOCKER_RESPONSE_TIMEOUT_SEC() {
-        return DOCKER_RESPONSE_TIMEOUT_SEC_OPTION;
-    }
-
-    public static InternalOption MAVEN_SETTINGS_PATH() {
-        return MAVEN_SETTINGS_PATH_OPTION;
-    }
-
-    public static InternalOption MAVEN_REMOTE_URL() {
-        return MAVEN_REMOTE_URL_OPTION;
-    }
-
-    public static InternalOption MAVEN_AUTH_USER() {
-        return MAVEN_AUTH_USER_OPTION;
-    }
-
-    public static InternalOption MAVEN_AUTH_PASSWORD() {
-        return MAVEN_AUTH_PASSWORD_OPTION;
-    }
-
-    public static InternalOption KERBEROS_TTL() {
-        return KERBEROS_TTL_OPTION;
-    }
-
-    public static InternalOption READ_LOG_MAX_SIZE() {
-        return READ_LOG_MAX_SIZE_OPTION;
-    }
-
-    public static InternalOption SPRING_PROFILES_ACTIVE() {
-        return SPRING_PROFILES_ACTIVE_OPTION;
-    }
 }
