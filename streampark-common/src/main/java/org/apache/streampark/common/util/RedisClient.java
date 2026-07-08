@@ -29,7 +29,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,7 +64,7 @@ public final class RedisClient {
         if (endpoints.length == 0) {
             throw new IllegalArgumentException("[StreamPark] The RedisEndpoint array is empty!!!");
         }
-        int index = Math.abs(new Random().nextInt()) % endpoints.length;
+        int index = ThreadLocalRandom.current().nextInt(endpoints.length);
         try {
             return connect(endpoints[index]);
         } catch (Exception e) {

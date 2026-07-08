@@ -27,8 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -36,7 +34,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.locks.LockSupport;
-import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -81,17 +78,16 @@ public final class Utils {
     }
 
     public static void requireCheckJarFile(URL jar) throws IOException {
-        Path jarPath = SafePathUtils.resolveJarPath(jar);
-        try (JarFile jf = new JarFile(jarPath.toFile())) {
+        try (InputStream in = SafePathUtils.openJarFile(jar);
+                JarInputStream ignored = new JarInputStream(new BufferedInputStream(in))) {
             // verify jar is readable
         } catch (IOException e) {
-            throw new IOException("Error while opening jar file '" + jarPath + "'", e);
+            throw new IOException("Error while opening jar file '" + jar + "'", e);
         }
     }
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
-        Path jarPath = SafePathUtils.resolveJarPath(jarFile.toURI().toURL());
-        try (InputStream in = Files.newInputStream(jarPath);
+        try (InputStream in = SafePathUtils.openJarFile(jarFile.toURI().toURL());
                 JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
             return jarInputStream.getManifest();
         }

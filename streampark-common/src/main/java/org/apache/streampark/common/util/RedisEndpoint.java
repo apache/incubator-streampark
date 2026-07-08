@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -223,8 +223,7 @@ class RedisConfig implements Serializable {
     }
 
     public RedisNode getRandomNode() {
-        int rnd = Math.abs(new Random().nextInt()) % hosts.length;
-        return hosts[rnd];
+        return hosts[ThreadLocalRandom.current().nextInt(hosts.length)];
     }
 
     public RedisNode[] getNodesBySlots(int sPos, int ePos) {
