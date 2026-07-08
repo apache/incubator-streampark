@@ -258,8 +258,7 @@ public class FlinkTableInitializerV2 extends FlinkStreamingInitializerV2 {
                 return configuration.withParameter(
                         configuration.parameter.mergeWith(ParameterTool.fromMap(value)));
             } catch (Exception e) {
-                new IllegalArgumentException("[StreamPark] init sql error." + e);
-                return configuration;
+                throw new IllegalArgumentException("[StreamPark] init sql error." + e, e);
             }
         }
     }
