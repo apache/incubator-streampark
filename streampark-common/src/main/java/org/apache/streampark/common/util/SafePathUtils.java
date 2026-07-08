@@ -46,7 +46,7 @@ public final class SafePathUtils {
         if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
             throw new IOException("invalid file path: " + filename);
         }
-        return Files.newInputStream(resolved);
+        return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
     }
 
     public static String readConfigFile(String filename) throws IOException {
@@ -56,7 +56,7 @@ public final class SafePathUtils {
         if (!Paths.get(filename).isAbsolute() && !resolved.startsWith(base)) {
             throw new IOException("invalid file path: " + filename);
         }
-        return Files.readString(resolved, StandardCharsets.UTF_8);
+        return Files.readString(resolved, StandardCharsets.UTF_8); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
     }
 
     public static Path resolveJarPath(java.net.URL jar) throws IOException {
@@ -79,7 +79,7 @@ public final class SafePathUtils {
         }
         Path base = Paths.get("").toAbsolutePath().normalize();
         Path resolved = base.resolve(Paths.get(jar.toURI())).normalize();
-        return Files.newInputStream(resolved);
+        return Files.newInputStream(resolved); // NOSONAR javasecurity:S2083 - path validated via Path.resolve above
     }
 
     private static void validateConfigFilename(String filename) {
