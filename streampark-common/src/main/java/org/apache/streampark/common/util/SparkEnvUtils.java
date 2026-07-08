@@ -32,12 +32,13 @@ import java.util.regex.Pattern;
 public final class SparkEnvUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(SparkEnvUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(SparkEnvUtils.class.getName());
 
     private static final Pattern JAVA_HOME_PATTERN =
-            Pattern.compile("(?:^|\\n)\\s*(?:export\\s+)?JAVA_HOME\\s*=\\s*(?:[\"']([^\"']+)[\"']|(\\S+))");
+        Pattern.compile("(?:^|\\n)\\s*(?:export\\s+)?JAVA_HOME\\s*=\\s*(?:[\"']([^\"']+)[\"']|(\\S+))");
 
-    private SparkEnvUtils() {}
+    private SparkEnvUtils() {
+    }
 
     /** Minimum Java major version required by the given Spark version string. */
     public static int requiredJavaMajorVersion(String sparkVersion) {
@@ -66,9 +67,9 @@ public final class SparkEnvUtils {
     public static Optional<String> resolveJavaHome(String sparkHome, String sparkVersion) {
         int minVersion = requiredJavaMajorVersion(sparkVersion);
         return parseJavaHomeFromSparkEnv(sparkHome)
-                .filter(SparkEnvUtils::isValidJavaHome)
-                .or(() -> Optional.ofNullable(System.getenv("JAVA_HOME")).filter(SparkEnvUtils::isValidJavaHome))
-                .or(() -> detectSystemJavaHome(minVersion).filter(SparkEnvUtils::isValidJavaHome));
+            .filter(SparkEnvUtils::isValidJavaHome)
+            .or(() -> Optional.ofNullable(System.getenv("JAVA_HOME")).filter(SparkEnvUtils::isValidJavaHome))
+            .or(() -> detectSystemJavaHome(minVersion).filter(SparkEnvUtils::isValidJavaHome));
     }
 
     public static Optional<String> parseJavaHomeFromSparkEnv(String sparkHome) {
@@ -101,7 +102,7 @@ public final class SparkEnvUtils {
         if (os.contains("mac")) {
             try {
                 CommandUtils.CommandResult result =
-                        CommandUtils.execute("/usr/libexec/java_home -v " + minMajor + " 2>/dev/null");
+                    CommandUtils.execute("/usr/libexec/java_home -v " + minMajor + " 2>/dev/null");
                 if (result.code == 0 && result.output != null && !result.output.trim().isEmpty()) {
                     return Optional.of(result.output.trim());
                 }
@@ -111,11 +112,11 @@ public final class SparkEnvUtils {
             return Optional.empty();
         }
         List<String> candidates =
-                Arrays.asList(
-                        System.getenv("JAVA" + minMajor + "_HOME"),
-                        "/usr/lib/jvm/java-" + minMajor + "-openjdk",
-                        "/usr/lib/jvm/java-" + minMajor + "-openjdk-amd64",
-                        "/usr/lib/jvm/java-" + minMajor);
+            Arrays.asList(
+                System.getenv("JAVA" + minMajor + "_HOME"),
+                "/usr/lib/jvm/java-" + minMajor + "-openjdk",
+                "/usr/lib/jvm/java-" + minMajor + "-openjdk-amd64",
+                "/usr/lib/jvm/java-" + minMajor);
         for (String candidate : candidates) {
             if (candidate != null && isValidJavaHome(candidate)) {
                 return Optional.of(candidate);

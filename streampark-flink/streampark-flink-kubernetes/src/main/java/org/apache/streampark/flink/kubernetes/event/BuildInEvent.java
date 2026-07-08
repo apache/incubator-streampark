@@ -18,4 +18,5 @@
 package org.apache.streampark.flink.kubernetes.event;
 
 /** Marker interface for build-in k8s watcher events. */
-public interface BuildInEvent {}
+public interface BuildInEvent {
+}

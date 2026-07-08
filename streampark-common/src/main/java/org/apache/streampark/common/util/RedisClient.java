@@ -18,6 +18,7 @@
 package org.apache.streampark.common.util;
 
 import org.apache.streampark.common.constants.Constants;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import redis.clients.jedis.HostAndPort;
@@ -29,15 +30,15 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /** Redis connection pool and cluster client factory. */
 public final class RedisClient {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(RedisClient.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(RedisClient.class.getName());
 
     private static final ConcurrentHashMap<RedisEndpoint, JedisPool> POOLS = new ConcurrentHashMap<>();
 
@@ -58,7 +59,8 @@ public final class RedisClient {
         POOL_CONFIG = poolConfig;
     }
 
-    private RedisClient() {}
+    private RedisClient() {
+    }
 
     public static Jedis connect(RedisEndpoint[] endpoints) {
         if (endpoints.length == 0) {
@@ -87,7 +89,7 @@ public final class RedisClient {
                 conn = pool.getResource();
             } catch (JedisConnectionException e) {
                 if (e.getCause() != null
-                        && e.getCause().toString().contains("ERR max number of clients reached")) {
+                    && e.getCause().toString().contains("ERR max number of clients reached")) {
                     if (sleepTime < 500) {
                         sleepTime *= 2;
                     }
@@ -109,12 +111,12 @@ public final class RedisClient {
         RedisEndpoint endpointEn = endpoint.withAuth(Constants.DEFAULT_DATAMASK_STRING);
         LOG.info("[StreamPark] RedisClient: createJedisPool with {}", endpointEn);
         return new JedisPool(
-                POOL_CONFIG,
-                endpoint.getHost(),
-                endpoint.getPort(),
-                endpoint.getTimeout(),
-                endpoint.getAuth(),
-                endpoint.getDb());
+            POOL_CONFIG,
+            endpoint.getHost(),
+            endpoint.getPort(),
+            endpoint.getTimeout(),
+            endpoint.getAuth(),
+            endpoint.getDb());
     }
 
     public static JedisCluster connectCluster(RedisEndpoint... endpoints) {
@@ -123,14 +125,14 @@ public final class RedisClient {
         }
         RedisEndpoint head = endpoints[0];
         return CLUSTERS.computeIfAbsent(
-                head,
-                key -> {
-                    Set<HostAndPort> hostPorts = new HashSet<>();
-                    for (RedisEndpoint r : endpoints) {
-                        hostPorts.add(new HostAndPort(r.getHost(), r.getPort()));
-                    }
-                    return new JedisCluster(hostPorts, head.getTimeout(), 1000, 1, head.getAuth(), POOL_CONFIG);
-                });
+            head,
+            key -> {
+                Set<HostAndPort> hostPorts = new HashSet<>();
+                for (RedisEndpoint r : endpoints) {
+                    hostPorts.add(new HostAndPort(r.getHost(), r.getPort()));
+                }
+                return new JedisCluster(hostPorts, head.getTimeout(), 1000, 1, head.getAuth(), POOL_CONFIG);
+            });
     }
 
     public static void close() {

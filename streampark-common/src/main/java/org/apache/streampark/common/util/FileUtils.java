@@ -40,7 +40,8 @@ import java.util.stream.Collectors;
 
 public final class FileUtils {
 
-    private FileUtils() {}
+    private FileUtils() {
+    }
 
     public static File toCanonicalFile(String path) throws IOException {
         Path normalized = Paths.get(path).normalize();
@@ -87,17 +88,17 @@ public final class FileUtils {
             throw new RuntimeException("The inputStream can not be null");
         }
         return AutoCloseUtils.using(
-                        input,
-                        in -> {
-                            byte[] b = new byte[4];
-                            try {
-                                in.read(b, 0, b.length);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            return bytesToHexString(b);
-                        })
-                .equals("504B0304");
+            input,
+            in -> {
+                byte[] b = new byte[4];
+                try {
+                    in.read(b, 0, b.length);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return bytesToHexString(b);
+            })
+            .equals("504B0304");
     }
 
     public static boolean isJarFileType(File file) throws IOException {
@@ -118,14 +119,14 @@ public final class FileUtils {
             }
         }
         throw new IllegalStateException(
-                "[StreamPark] Failed to create directory within "
-                        + TEMP_DIR_ATTEMPTS
-                        + "  attempts (tried "
-                        + baseName
-                        + " 0 to "
-                        + baseName
-                        + (TEMP_DIR_ATTEMPTS - 1)
-                        + ")");
+            "[StreamPark] Failed to create directory within "
+                + TEMP_DIR_ATTEMPTS
+                + "  attempts (tried "
+                + baseName
+                + " 0 to "
+                + baseName
+                + (TEMP_DIR_ATTEMPTS - 1)
+                + ")");
     }
 
     public static void mkdir(File dir) throws IOException {
@@ -153,7 +154,7 @@ public final class FileUtils {
         File file = new File(parent, child);
         if (!file.exists()) {
             throw new IllegalArgumentException(
-                    "[StreamPark] FileUtils.resolvePath: " + file.getAbsolutePath() + " is not exist!");
+                "[StreamPark] FileUtils.resolvePath: " + file.getAbsolutePath() + " is not exist!");
         }
         return file.getAbsolutePath();
     }
@@ -256,7 +257,7 @@ public final class FileUtils {
 
     public static void writeFile(String content, File file) throws IOException {
         java.nio.channels.WritableByteChannel channel =
-                Channels.newChannel(Files.newOutputStream(file.toPath()));
+            Channels.newChannel(Files.newOutputStream(file.toPath()));
         ByteBuffer buffer = ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8));
         channel.write(buffer);
         Utils.close(channel);
@@ -279,10 +280,10 @@ public final class FileUtils {
     public static byte[] readFileFromOffset(File file, long startOffset, long maxSize) throws IOException {
         if (file.length() < startOffset) {
             throw new IllegalArgumentException(
-                    "The startOffset "
-                            + startOffset
-                            + " is great than the file length "
-                            + file.length());
+                "The startOffset "
+                    + startOffset
+                    + " is great than the file length "
+                    + file.length());
         }
         try (RandomAccessFile raFile = new RandomAccessFile(file, "r")) {
             long readSize = Math.min(maxSize, file.length() - startOffset);

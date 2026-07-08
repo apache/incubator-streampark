@@ -17,8 +17,8 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.ParameterTool;
 
 @FunctionalInterface
 public interface StreamEnvConfigFunction {

@@ -17,8 +17,9 @@
 
 package org.apache.streampark.common.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.shaded.org.slf4j.Logger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 
@@ -41,8 +42,8 @@ import java.util.regex.Pattern;
 public final class FlinkConfigurationUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory()
-                    .getLogger(FlinkConfigurationUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory()
+            .getLogger(FlinkConfigurationUtils.class.getName());
 
     private static final Pattern PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)");
 
@@ -50,15 +51,16 @@ public final class FlinkConfigurationUtils {
 
     private static final Pattern MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP);
 
-    private FlinkConfigurationUtils() {}
+    private FlinkConfigurationUtils() {
+    }
 
     public static Map<String, String> loadFlinkConf(File file) {
         AssertUtils.required(
-                file != null && file.exists() && file.isFile(),
-                "[StreamPark] loadFlinkConfYaml: file must not be null");
+            file != null && file.exists() && file.isFile(),
+            "[StreamPark] loadFlinkConfYaml: file must not be null");
         try {
             return loadFlinkConf(
-                    org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
+                org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -66,17 +68,17 @@ public final class FlinkConfigurationUtils {
 
     public static Map<String, String> loadFlinkConf(String yaml) {
         AssertUtils.required(
-                yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
+            yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
         return PropertiesUtils.fromYamlText(yaml);
     }
 
     public static Map<String, String> loadLegacyFlinkConf(File file) {
         AssertUtils.required(
-                file != null && file.exists() && file.isFile(),
-                "[StreamPark] loadFlinkConfYaml: file must not be null");
+            file != null && file.exists() && file.isFile(),
+            "[StreamPark] loadFlinkConfYaml: file must not be null");
         try {
             return loadLegacyFlinkConf(
-                    org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
+                org.apache.commons.io.FileUtils.readFileToString(file, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,7 +86,7 @@ public final class FlinkConfigurationUtils {
 
     public static Map<String, String> loadLegacyFlinkConf(String yaml) {
         AssertUtils.required(
-                yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
+            yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
         Map<String, String> flinkConf = new LinkedHashMap<>();
         java.util.Scanner scanner = new java.util.Scanner(yaml);
         AtomicInteger lineNo = new AtomicInteger(0);
@@ -102,15 +104,15 @@ public final class FlinkConfigurationUtils {
                         flinkConf.put(key, value);
                     } else {
                         LOG.warn(
-                                "[StreamPark] Error after splitting key and value in configuration {}: {}",
-                                lineNo.get(),
-                                line);
+                            "[StreamPark] Error after splitting key and value in configuration {}: {}",
+                            lineNo.get(),
+                            line);
                     }
                 } else {
                     LOG.warn(
-                            "[StreamPark] Error while trying to split key and value in configuration. {} : {}",
-                            lineNo.get(),
-                            line);
+                        "[StreamPark] Error while trying to split key and value in configuration. {} : {}",
+                        lineNo.get(),
+                        line);
                 }
             }
         }

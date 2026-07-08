@@ -46,9 +46,9 @@ import java.util.List;
 public class StreamTableContext extends FlinkStreamTableTraitV2 {
 
     public StreamTableContext(
-            ParameterTool parameter,
-            StreamExecutionEnvironment streamEnv,
-            StreamTableEnvironment tableEnv) {
+                              ParameterTool parameter,
+                              StreamExecutionEnvironment streamEnv,
+                              StreamTableEnvironment tableEnv) {
         super(parameter, streamEnv, tableEnv);
     }
 
@@ -83,7 +83,7 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
 
     @Override
     public Table fromChangelogStream(
-            DataStream<Row> dataStream, Schema schema, ChangelogMode changelogMode) {
+                                     DataStream<Row> dataStream, Schema schema, ChangelogMode changelogMode) {
         return getStreamTableEnv().fromChangelogStream(dataStream, schema, changelogMode);
     }
 
@@ -95,7 +95,7 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
     @Deprecated
     @Override
     public <T> void createTemporaryView(
-            String path, DataStream<T> dataStream, Expression... expressions) {
+                                        String path, DataStream<T> dataStream, Expression... expressions) {
         getStreamTableEnv().createTemporaryView(path, dataStream, expressions);
     }
 
@@ -131,7 +131,7 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
 
     @Override
     public DataStream<Row> toChangelogStream(
-            Table table, Schema targetSchema, ChangelogMode changelogMode) {
+                                             Table table, Schema targetSchema, ChangelogMode changelogMode) {
         isConvertedToDataStream = true;
         return getStreamTableEnv().toChangelogStream(table, targetSchema, changelogMode);
     }
@@ -188,22 +188,22 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
 
     @Override
     public void createFunction(
-            String path,
-            String className,
-            List<ResourceUri> resourceUris,
-            boolean ignoreIfExists) {
+                               String path,
+                               String className,
+                               List<ResourceUri> resourceUris,
+                               boolean ignoreIfExists) {
         getStreamTableEnv().createFunction(path, className, resourceUris, ignoreIfExists);
     }
 
     @Override
     public void createTemporaryFunction(
-            String path, String className, List<ResourceUri> resourceUris) {
+                                        String path, String className, List<ResourceUri> resourceUris) {
         getStreamTableEnv().createTemporaryFunction(path, className, resourceUris);
     }
 
     @Override
     public void createTemporarySystemFunction(
-            String name, String className, List<ResourceUri> resourceUris) {
+                                              String name, String className, List<ResourceUri> resourceUris) {
         getStreamTableEnv().createTemporarySystemFunction(name, className, resourceUris);
     }
 
@@ -227,7 +227,7 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
     @Deprecated
     @Override
     public <T> DataStream<Tuple2<Boolean, T>> toRetractStream(
-            Table table, TypeInformation<T> typeInformation) {
+                                                              Table table, TypeInformation<T> typeInformation) {
         isConvertedToDataStream = true;
         return getStreamTableEnv().toRetractStream(table, typeInformation);
     }
@@ -251,7 +251,7 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
 
     @Override
     public void createTemporaryTable(
-            String path, TableDescriptor descriptor, boolean ignoreIfExists) {
+                                     String path, TableDescriptor descriptor, boolean ignoreIfExists) {
         getStreamTableEnv().createTemporaryTable(path, descriptor, ignoreIfExists);
     }
 

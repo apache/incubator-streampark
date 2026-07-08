@@ -20,13 +20,12 @@ package org.apache.streampark.flink.client.bean;
 import org.apache.streampark.common.conf.FlinkVersion;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.common.enums.FlinkK8sRestExposedType;
 import org.apache.streampark.flink.util.FlinkUtils;
+
+import org.apache.commons.io.FileUtils;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
 
@@ -43,17 +42,18 @@ public class DeployRequest implements DeployRequestTrait {
     private String clusterId;
     private long id;
 
-    @Nullable private KubernetesDeployParam k8sParam;
+    @Nullable
+    private KubernetesDeployParam k8sParam;
 
     private transient HdfsWorkspace hdfsWorkspace;
 
     public DeployRequest(
-            FlinkVersion flinkVersion,
-            FlinkDeployMode deployMode,
-            Map<String, Object> properties,
-            String clusterId,
-            long id,
-            KubernetesDeployParam k8sParam) {
+                         FlinkVersion flinkVersion,
+                         FlinkDeployMode deployMode,
+                         Map<String, Object> properties,
+                         String clusterId,
+                         long id,
+                         KubernetesDeployParam k8sParam) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = properties;
@@ -70,22 +70,22 @@ public class DeployRequest implements DeployRequestTrait {
             String flinkName;
             try {
                 flinkName =
-                        FileUtils.isSymlink(flinkHomeDir)
-                                ? flinkHomeDir.getCanonicalFile().getName()
-                                : flinkHomeDir.getName();
+                    FileUtils.isSymlink(flinkHomeDir)
+                        ? flinkHomeDir.getCanonicalFile().getName()
+                        : flinkHomeDir.getName();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
             hdfsWorkspace =
-                    HdfsWorkspace.builder()
-                            .flinkName(flinkName)
-                            .flinkHome(flinkHome)
-                            .flinkLib(flinkHdfsHome + "/lib")
-                            .flinkPlugins(flinkHdfsHome + "/plugins")
-                            .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
-                            .appJars(workspace.APP_JARS())
-                            .build();
+                HdfsWorkspace.builder()
+                    .flinkName(flinkName)
+                    .flinkHome(flinkHome)
+                    .flinkLib(flinkHdfsHome + "/lib")
+                    .flinkPlugins(flinkHdfsHome + "/plugins")
+                    .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
+                    .appJars(workspace.APP_JARS())
+                    .build();
         }
         return hdfsWorkspace;
     }

@@ -53,11 +53,12 @@ public class SqlClient {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]");
+                    "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]");
         }
     }
 
     private static final class BatchSqlApp extends SparkBatch {
+
         @Override
         protected Dataset<Row> handle(String sql) {
             return super.handle(sql);
@@ -65,6 +66,7 @@ public class SqlClient {
     }
 
     private static final class StreamSqlApp extends SparkStreaming {
+
         @Override
         protected Dataset<Row> handle(String sql) {
             return super.handle(sql);

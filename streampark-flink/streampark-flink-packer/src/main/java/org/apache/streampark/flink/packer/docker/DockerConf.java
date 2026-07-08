@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import com.github.dockerjava.api.model.AuthConfig;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -28,7 +28,9 @@ import javax.annotation.Nullable;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class DockerConf {
-    @Nullable private String registerAddress;
+
+    @Nullable
+    private String registerAddress;
     private String imageNamespace;
     private String registerUsername;
     private String registerPassword;
@@ -40,7 +42,8 @@ public class DockerConf {
             .withPassword(registerPassword);
     }
 
-    public static DockerConf of(@Nullable String registerAddress, String imageNameSpace, String registerUsername, String registerPassword) {
+    public static DockerConf of(@Nullable String registerAddress, String imageNameSpace, String registerUsername,
+                                String registerPassword) {
         return new DockerConf(registerAddress, imageNameSpace, registerUsername, registerPassword);
     }
 }

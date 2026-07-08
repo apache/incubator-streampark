@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.util.Utils;
@@ -29,6 +30,7 @@ import java.util.Map;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class PipelineSnapshot {
+
     private String appName;
     private PipelineTypeEnum pipeType;
     private PipelineStatusEnum pipeStatus;
@@ -38,7 +40,9 @@ public class PipelineSnapshot {
     private PipeError error;
     private long emitTime;
 
-    public double percent() { return Utils.calPercent(curStep, allSteps); }
+    public double percent() {
+        return Utils.calPercent(curStep, allSteps);
+    }
 
     public Map<Integer, PipelineStepStatusEnum> pureStepStatusAsJava() {
         Map<Integer, PipelineStepStatusEnum> map = new HashMap<>();

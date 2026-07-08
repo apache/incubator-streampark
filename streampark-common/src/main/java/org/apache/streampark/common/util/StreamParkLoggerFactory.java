@@ -59,7 +59,8 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
         CONTEXT_SELECTOR_BINDER = selectorBinder;
     }
 
-    private StreamParkLoggerFactory() {}
+    private StreamParkLoggerFactory() {
+    }
 
     /** Returns the SLF4J logger factory for StreamPark shaded logging. */
     public static ILoggerFactory loggerFactory() {
@@ -70,9 +71,9 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
     public ILoggerFactory getLoggerFactory() {
         if (CONTEXT_SELECTOR_BINDER.getContextSelector() == null) {
             throw new IllegalStateException(
-                    "'contextSelector' cannot be null. See also "
-                            + CoreConstants.CODES_URL
-                            + "#null_CS");
+                "'contextSelector' cannot be null. See also "
+                    + CoreConstants.CODES_URL
+                    + "#null_CS");
         }
         return CONTEXT_SELECTOR_BINDER.getContextSelector().getLoggerContext();
     }
@@ -101,21 +102,21 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
                 configurator.setContext(loggerContext);
                 try {
                     String text =
-                            FileUtils.readFile(new File(path))
-                                    .replaceAll("org.slf4j", SHADED_PACKAGE + ".org.slf4j")
-                                    .replaceAll("ch.qos.logback", SHADED_PACKAGE + ".ch.qos.logback")
-                                    .replaceAll("org.apache.log4j", SHADED_PACKAGE + ".org.apache.log4j");
+                        FileUtils.readFile(new File(path))
+                            .replaceAll("org.slf4j", SHADED_PACKAGE + ".org.slf4j")
+                            .replaceAll("ch.qos.logback", SHADED_PACKAGE + ".ch.qos.logback")
+                            .replaceAll("org.apache.log4j", SHADED_PACKAGE + ".org.apache.log4j");
                     ByteArrayInputStream input =
-                            new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+                        new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
                     configurator.doConfigure(input);
                 } catch (Exception e) {
                     throw new LogbackException("Failed to configure logger context from " + url, e);
                 }
             } else {
                 throw new LogbackException(
-                        "Unexpected filename extension of file ["
-                                + url
-                                + "]. Should be .xml");
+                    "Unexpected filename extension of file ["
+                        + url
+                        + "]. Should be .xml");
             }
         }
     }

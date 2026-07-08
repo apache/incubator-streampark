@@ -88,14 +88,14 @@ public class FlinkK8sWatchController implements AutoCloseable {
     public FlinkMetricCV collectAccGroupMetric(String groupId) {
         FlinkMetricCV empty = FlinkMetricCV.empty(groupId);
         Set<TrackId> activeIds =
-                getActiveWatchingIds().stream()
-                        .filter(id -> groupId.equals(id.groupId()))
-                        .collect(Collectors.toSet());
+            getActiveWatchingIds().stream()
+                .filter(id -> groupId.equals(id.groupId()))
+                .collect(Collectors.toSet());
         if (activeIds.isEmpty()) {
             return empty;
         }
         Set<ClusterKey> keys =
-                activeIds.stream().map(ClusterKey::of).collect(Collectors.toSet());
+            activeIds.stream().map(ClusterKey::of).collect(Collectors.toSet());
         Map<ClusterKey, FlinkMetricCV> metrics = flinkMetrics.getAll(keys);
         if (metrics.isEmpty()) {
             return empty;
@@ -122,6 +122,7 @@ public class FlinkK8sWatchController implements AutoCloseable {
     }
 
     public static final class TrackIdCache {
+
         private final Cache<CacheKey, TrackId> cache = Caffeine.newBuilder().build();
 
         static TrackIdCache build() {
@@ -160,13 +161,14 @@ public class FlinkK8sWatchController implements AutoCloseable {
     }
 
     public static final class JobStatusCache {
+
         private final Cache<CacheKey, JobStatusCV> cache;
 
         JobStatusCache(int timeout) {
             cache =
-                    Caffeine.newBuilder()
-                            .expireAfterWrite(timeout, TimeUnit.SECONDS)
-                            .build();
+                Caffeine.newBuilder()
+                    .expireAfterWrite(timeout, TimeUnit.SECONDS)
+                    .build();
         }
 
         static JobStatusCache build(int timeout) {
@@ -212,8 +214,9 @@ public class FlinkK8sWatchController implements AutoCloseable {
     }
 
     public static final class EndpointCache {
+
         private final Cache<ClusterKey, String> cache =
-                Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
+            Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build();
 
         static EndpointCache build() {
             return new EndpointCache();
@@ -233,6 +236,7 @@ public class FlinkK8sWatchController implements AutoCloseable {
     }
 
     public static final class K8sDeploymentEventCache {
+
         private final Cache<K8sEventKey, K8sDeploymentEventCV> cache = Caffeine.newBuilder().build();
 
         static K8sDeploymentEventCache build() {
@@ -257,6 +261,7 @@ public class FlinkK8sWatchController implements AutoCloseable {
     }
 
     public static final class MetricCache {
+
         private final Cache<ClusterKey, FlinkMetricCV> cache = Caffeine.newBuilder().build();
 
         static MetricCache build() {

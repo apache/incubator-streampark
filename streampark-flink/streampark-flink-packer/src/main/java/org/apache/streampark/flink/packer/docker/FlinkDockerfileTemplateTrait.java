@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import org.apache.streampark.common.constants.Constants;
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 public abstract class FlinkDockerfileTemplateTrait {
+
     protected static final String DEFAULT_DOCKER_FILE_NAME = "Dockerfile";
     protected static final String FLINK_LIB_PATH = "lib";
     protected static final String FLINK_HOME = "$FLINK_HOME";
@@ -62,11 +64,13 @@ public abstract class FlinkDockerfileTemplateTrait {
         LfsOperator.getInstance().mkCleanDirs(workspace().toString() + "/" + FLINK_LIB_PATH);
         for (String libPath : flinkExtraLibPaths()) {
             File f = new File(libPath);
-            if (!f.exists() || !f.getName().endsWith(Constants.JAR_SUFFIX)) continue;
+            if (!f.exists() || !f.getName().endsWith(Constants.JAR_SUFFIX))
+                continue;
             if (f.isDirectory()) {
                 for (File jar : f.listFiles()) {
                     if (jar.isFile() && jar.getName().endsWith(Constants.JAR_SUFFIX)) {
-                        LfsOperator.getInstance().copy(jar.getAbsolutePath(), workspace().toString() + "/" + FLINK_LIB_PATH);
+                        LfsOperator.getInstance().copy(jar.getAbsolutePath(),
+                            workspace().toString() + "/" + FLINK_LIB_PATH);
                     }
                 }
             } else {

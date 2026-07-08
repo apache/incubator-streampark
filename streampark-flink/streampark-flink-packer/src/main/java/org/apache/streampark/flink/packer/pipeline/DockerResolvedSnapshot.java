@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,6 +27,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerResolvedSnapshot {
+
     private DockerPullSnapshot pull;
     private DockerBuildSnapshot build;
     private DockerPushSnapshot push;

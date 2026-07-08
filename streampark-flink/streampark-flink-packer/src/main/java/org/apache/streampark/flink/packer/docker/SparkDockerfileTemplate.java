@@ -27,6 +27,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class SparkDockerfileTemplate extends SparkDockerfileTemplateTrait {
+
     private String workspacePath;
     private String sparkBaseImage;
     private String sparkMainJarPath;
@@ -35,19 +36,19 @@ public class SparkDockerfileTemplate extends SparkDockerfileTemplateTrait {
     @Override
     public String offerDockerfileContent() {
         return "FROM "
-                + sparkBaseImage
-                + "\nUSER root\nRUN mkdir -p "
-                + SPARK_HOME
-                + "/usrlib\nCOPY "
-                + mainJarName()
-                + " "
-                + SPARK_HOME
-                + "/usrlib/"
-                + mainJarName()
-                + "\nCOPY "
-                + extraLibName()
-                + " "
-                + SPARK_HOME
-                + "/lib/\n";
+            + sparkBaseImage
+            + "\nUSER root\nRUN mkdir -p "
+            + SPARK_HOME
+            + "/usrlib\nCOPY "
+            + mainJarName()
+            + " "
+            + SPARK_HOME
+            + "/usrlib/"
+            + mainJarName()
+            + "\nCOPY "
+            + extraLibName()
+            + " "
+            + SPARK_HOME
+            + "/lib/\n";
     }
 }

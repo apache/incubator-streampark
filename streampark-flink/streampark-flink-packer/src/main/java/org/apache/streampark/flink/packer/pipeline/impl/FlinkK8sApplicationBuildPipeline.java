@@ -36,16 +36,15 @@ import org.apache.streampark.flink.packer.pipeline.FlinkK8sApplicationBuildReque
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
 import org.apache.streampark.flink.packer.pipeline.SilentDockerProgressWatcher;
 
-import com.github.dockerjava.api.command.PushImageCmd;
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.dockerjava.core.command.HackBuildImageCmd;
 import com.github.dockerjava.core.command.HackPullImageCmd;
 import com.github.dockerjava.core.command.HackPushImageCmd;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -55,14 +54,14 @@ import java.util.concurrent.TimeUnit;
 public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
 
     private static final ThreadPoolExecutor DOCKER_EXEC_POOL =
-            new ThreadPoolExecutor(
-                    Runtime.getRuntime().availableProcessors() * 5,
-                    Runtime.getRuntime().availableProcessors() * 10,
-                    60L,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>(2048),
-                    ThreadUtils.threadFactory("streampark-docker-progress-watcher-executor"),
-                    new ThreadPoolExecutor.DiscardOldestPolicy());
+        new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors() * 5,
+            Runtime.getRuntime().availableProcessors() * 10,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(2048),
+            ThreadUtils.threadFactory("streampark-docker-progress-watcher-executor"),
+            new ThreadPoolExecutor.DiscardOldestPolicy());
 
     private final FlinkK8sApplicationBuildRequest request;
     private DockerProgressWatcher dockerProcessWatcher = new SilentDockerProgressWatcher();
@@ -93,20 +92,20 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
     @Override
     protected BuildResult buildProcess() throws Throwable {
         String buildWorkspace =
-                execStep(
-                                1,
-                                () -> {
-                                    String ws =
-                                            request.workspace()
-                                                    + "/"
-                                                    + request.clusterId()
-                                                    + "@"
-                                                    + request.k8sNamespace();
-                                    LfsOperator.getInstance().mkCleanDirs(ws);
-                                    log.info("Recreate building workspace: {}", ws);
-                                    return ws;
-                                })
-                        .orElseThrow(() -> getError().exception());
+            execStep(
+                1,
+                () -> {
+                    String ws =
+                        request.workspace()
+                            + "/"
+                            + request.clusterId()
+                            + "@"
+                            + request.k8sNamespace();
+                    LfsOperator.getInstance().mkCleanDirs(ws);
+                    log.info("Recreate building workspace: {}", ws);
+                    return ws;
+                })
+                    .orElseThrow(() -> getError().exception());
 
         Map<String, String> podTemplatePaths;
         if (request.flinkPodTemplate() == null || request.flinkPodTemplate().isEmpty()) {
@@ -114,37 +113,37 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
             podTemplatePaths = Collections.emptyMap();
         } else {
             podTemplatePaths =
-                    execStep(
-                                    2,
-                                    () -> {
-                                        Map<String, String> files =
-                                                PodTemplateTool.preparePodTemplateFiles(
-                                                                buildWorkspace,
-                                                                request.flinkPodTemplate())
-                                                        .tmplFiles();
-                                        log.info(
-                                                "Export flink podTemplates: {}",
-                                                String.join(",", files.values()));
-                                        return files;
-                                    })
-                            .orElseThrow(() -> getError().exception());
+                execStep(
+                    2,
+                    () -> {
+                        Map<String, String> files =
+                            PodTemplateTool.preparePodTemplateFiles(
+                                buildWorkspace,
+                                request.flinkPodTemplate())
+                                .tmplFiles();
+                        log.info(
+                            "Export flink podTemplates: {}",
+                            String.join(",", files.values()));
+                        return files;
+                    })
+                        .orElseThrow(() -> getError().exception());
         }
 
         File shadedJar;
         java.util.Set<String> extJarLibs;
         var step3 =
-                execStep(
-                        3,
-                        () -> {
-                            String shadedJarOutputPath = request.getShadedJarPath(buildWorkspace);
-                            File jar =
-                                    MavenTool.buildFatJar(
-                                            request.mainClass(),
-                                            request.providedLibs(),
-                                            shadedJarOutputPath);
-                            log.info("Output shaded flink job jar: {}", jar.getAbsolutePath());
-                            return Map.entry(jar, request.dependencyInfo().extJarLibs());
-                        });
+            execStep(
+                3,
+                () -> {
+                    String shadedJarOutputPath = request.getShadedJarPath(buildWorkspace);
+                    File jar =
+                        MavenTool.buildFatJar(
+                            request.mainClass(),
+                            request.providedLibs(),
+                            shadedJarOutputPath);
+                    log.info("Output shaded flink job jar: {}", jar.getAbsolutePath());
+                    return Map.entry(jar, request.dependencyInfo().extJarLibs());
+                });
         if (step3.isEmpty()) {
             throw getError().exception();
         }
@@ -154,32 +153,32 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
         File dockerfile;
         FlinkDockerfileTemplateTrait dockerFileTemplate;
         var step4 =
-                execStep(
-                        4,
-                        () -> {
-                            FlinkDockerfileTemplateTrait template;
-                            if (request.integrateWithHadoop()) {
-                                template =
-                                        FlinkHadoopDockerfileTemplate.fromSystemHadoopConf(
-                                                buildWorkspace,
-                                                request.flinkBaseImage(),
-                                                shadedJar.getAbsolutePath(),
-                                                extJarLibs);
-                            } else {
-                                template =
-                                        new FlinkDockerfileTemplate(
-                                                buildWorkspace,
-                                                request.flinkBaseImage(),
-                                                shadedJar.getAbsolutePath(),
-                                                extJarLibs);
-                            }
-                            File file = template.writeDockerfile();
-                            log.info(
-                                    "Output flink dockerfile: {}, content: \n{}",
-                                    file.getAbsolutePath(),
-                                    template.offerDockerfileContent());
-                            return Map.entry(file, template);
-                        });
+            execStep(
+                4,
+                () -> {
+                    FlinkDockerfileTemplateTrait template;
+                    if (request.integrateWithHadoop()) {
+                        template =
+                            FlinkHadoopDockerfileTemplate.fromSystemHadoopConf(
+                                buildWorkspace,
+                                request.flinkBaseImage(),
+                                shadedJar.getAbsolutePath(),
+                                extJarLibs);
+                    } else {
+                        template =
+                            new FlinkDockerfileTemplate(
+                                buildWorkspace,
+                                request.flinkBaseImage(),
+                                shadedJar.getAbsolutePath(),
+                                extJarLibs);
+                    }
+                    File file = template.writeDockerfile();
+                    log.info(
+                        "Output flink dockerfile: {}, content: \n{}",
+                        file.getAbsolutePath(),
+                        template.offerDockerfileContent());
+                    return Map.entry(file, template);
+                });
         if (step4.isEmpty()) {
             throw getError().exception();
         }
@@ -192,175 +191,168 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
             throw new IllegalArgumentException("k8sNamespace or clusterId cannot be empty");
         }
         String pushImageTag =
-                compileTag(
-                        "streampark-flinkjob-" + request.k8sNamespace() + "-" + request.clusterId(),
-                        dockerConf.registerAddress(),
-                        dockerConf.imageNamespace());
+            compileTag(
+                "streampark-flinkjob-" + request.k8sNamespace() + "-" + request.clusterId(),
+                dockerConf.registerAddress(),
+                dockerConf.imageNamespace());
 
         execStep(
-                        5,
-                        () -> {
-                            DockerClients.usingDockerClient(
-                                    dockerClient -> {
-                                        boolean imgExists =
-                                                dockerClient.listImagesCmd().exec().stream()
-                                                        .anyMatch(
-                                                                image ->
-                                                                        image.getRepoTags() != null
-                                                                                && java.util.Arrays
-                                                                                        .stream(
-                                                                                                image
-                                                                                                        .getRepoTags())
-                                                                                        .anyMatch(
-                                                                                                tag ->
-                                                                                                        tag.contains(
-                                                                                                                baseImageTag)));
-                                        if (imgExists) {
-                                            log.info(
-                                                    "found local docker image {}, no need to pull from remote.",
-                                                    baseImageTag);
-                                            return null;
-                                        }
-                                        HackPullImageCmd pullImageCmd =
-                                                (HackPullImageCmd) dockerClient.pullImageCmd(baseImageTag);
-                                        if (dockerConf.registerAddress() == null
-                                                || baseImageTag.startsWith(dockerConf.registerAddress())) {
-                                            pullImageCmd.withAuthConfig(dockerConf.toAuthConf());
-                                        }
-                                        try {
-                                            pullImageCmd
-                                                    .start(
-                                                            DockerClients.watchDockerPullProcess(
-                                                                    pullRsp -> {
-                                                                        dockerProcess.getPull().update(pullRsp);
-                                                                        DOCKER_EXEC_POOL.execute(
-                                                                                () ->
-                                                                                        dockerProcessWatcher
-                                                                                                .onDockerPullProgressChange(
-                                                                                                        dockerProcess
-                                                                                                                .getPull()
-                                                                                                                .snapshot()));
-                                                                    }))
-                                                    .awaitCompletion();
-                                        } catch (InterruptedException e) {
-                                            Thread.currentThread().interrupt();
-                                            throw new RuntimeException(e);
-                                        }
-                                        log.info(
-                                                "Already pulled docker image from remote register, imageTag={}",
-                                                baseImageTag);
-                                        return null;
-                                    },
-                                    err -> {
-                                        throw new RuntimeException(
-                                                "Pull docker image failed, imageTag=" + baseImageTag, err);
-                                    });
+            5,
+            () -> {
+                DockerClients.usingDockerClient(
+                    dockerClient -> {
+                        boolean imgExists =
+                            dockerClient.listImagesCmd().exec().stream()
+                                .anyMatch(
+                                    image -> image.getRepoTags() != null
+                                        && java.util.Arrays
+                                            .stream(
+                                                image
+                                                    .getRepoTags())
+                                            .anyMatch(
+                                                tag -> tag.contains(
+                                                    baseImageTag)));
+                        if (imgExists) {
+                            log.info(
+                                "found local docker image {}, no need to pull from remote.",
+                                baseImageTag);
                             return null;
-                        })
+                        }
+                        HackPullImageCmd pullImageCmd =
+                            (HackPullImageCmd) dockerClient.pullImageCmd(baseImageTag);
+                        if (dockerConf.registerAddress() == null
+                            || baseImageTag.startsWith(dockerConf.registerAddress())) {
+                            pullImageCmd.withAuthConfig(dockerConf.toAuthConf());
+                        }
+                        try {
+                            pullImageCmd
+                                .start(
+                                    DockerClients.watchDockerPullProcess(
+                                        pullRsp -> {
+                                            dockerProcess.getPull().update(pullRsp);
+                                            DOCKER_EXEC_POOL.execute(
+                                                () -> dockerProcessWatcher
+                                                    .onDockerPullProgressChange(
+                                                        dockerProcess
+                                                            .getPull()
+                                                            .snapshot()));
+                                        }))
+                                .awaitCompletion();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                        log.info(
+                            "Already pulled docker image from remote register, imageTag={}",
+                            baseImageTag);
+                        return null;
+                    },
+                    err -> {
+                        throw new RuntimeException(
+                            "Pull docker image failed, imageTag=" + baseImageTag, err);
+                    });
+                return null;
+            })
                 .orElseThrow(() -> getError().exception());
 
         execStep(
-                        6,
-                        () -> {
-                            DockerClients.usingDockerClient(
-                                    dockerClient -> {
-                                        HackBuildImageCmd buildImageCmd =
-                                                (HackBuildImageCmd)
-                                                        dockerClient
-                                                                .buildImageCmd()
-                                                                .withBaseDirectory(new File(buildWorkspace))
-                                                                .withDockerfile(dockerfile)
-                                                                .withTags(Sets.newHashSet(pushImageTag));
-                                        String imageId =
-                                                buildImageCmd
-                                                        .start(
-                                                                DockerClients.watchDockerBuildStep(
-                                                                        buildStep -> {
-                                                                            dockerProcess.getBuild().update(buildStep);
-                                                                            DOCKER_EXEC_POOL.execute(
-                                                                                    () ->
-                                                                                            dockerProcessWatcher
-                                                                                                    .onDockerBuildProgressChange(
-                                                                                                            dockerProcess
-                                                                                                                    .getBuild()
-                                                                                                                    .snapshot()));
-                                                                        }))
-                                                        .awaitImageId();
-                                        log.info(
-                                                "Built docker image, imageId={}, imageTag={}",
-                                                imageId,
-                                                pushImageTag);
-                                        return null;
-                                    },
-                                    err -> {
-                                        throw new RuntimeException(
-                                                "Build docker image failed. tag=" + pushImageTag, err);
-                                    });
-                            return null;
-                        })
+            6,
+            () -> {
+                DockerClients.usingDockerClient(
+                    dockerClient -> {
+                        HackBuildImageCmd buildImageCmd =
+                            (HackBuildImageCmd) dockerClient
+                                .buildImageCmd()
+                                .withBaseDirectory(new File(buildWorkspace))
+                                .withDockerfile(dockerfile)
+                                .withTags(Sets.newHashSet(pushImageTag));
+                        String imageId =
+                            buildImageCmd
+                                .start(
+                                    DockerClients.watchDockerBuildStep(
+                                        buildStep -> {
+                                            dockerProcess.getBuild().update(buildStep);
+                                            DOCKER_EXEC_POOL.execute(
+                                                () -> dockerProcessWatcher
+                                                    .onDockerBuildProgressChange(
+                                                        dockerProcess
+                                                            .getBuild()
+                                                            .snapshot()));
+                                        }))
+                                .awaitImageId();
+                        log.info(
+                            "Built docker image, imageId={}, imageTag={}",
+                            imageId,
+                            pushImageTag);
+                        return null;
+                    },
+                    err -> {
+                        throw new RuntimeException(
+                            "Build docker image failed. tag=" + pushImageTag, err);
+                    });
+                return null;
+            })
                 .orElseThrow(() -> getError().exception());
 
         execStep(
-                        7,
-                        () -> {
-                            DockerClients.usingDockerClient(
-                                    dockerClient -> {
-                                        HackPushImageCmd pushCmd =
-                                                (HackPushImageCmd)
-                                                        dockerClient
-                                                                .pushImageCmd(pushImageTag)
-                                                                .withAuthConfig(dockerConf.toAuthConf());
-                                        try {
-                                            pushCmd.start(
-                                                            DockerClients.watchDockerPushProcess(
-                                                                    pushRsp -> {
-                                                                        dockerProcess.getPush().update(pushRsp);
-                                                                        DOCKER_EXEC_POOL.execute(
-                                                                                () ->
-                                                                                        dockerProcessWatcher
-                                                                                                .onDockerPushProgressChange(
-                                                                                                        dockerProcess
-                                                                                                                .getPush()
-                                                                                                                .snapshot()));
-                                                                    }))
-                                                    .awaitCompletion();
-                                        } catch (InterruptedException e) {
-                                            Thread.currentThread().interrupt();
-                                            throw new RuntimeException(e);
-                                        }
-                                        log.info(
-                                                "Already pushed docker image, imageTag={}",
-                                                pushImageTag);
-                                        return null;
-                                    },
-                                    err -> {
-                                        throw new RuntimeException(
-                                                "Push docker image failed. tag=" + pushImageTag, err);
-                                    });
-                            return null;
-                        })
+            7,
+            () -> {
+                DockerClients.usingDockerClient(
+                    dockerClient -> {
+                        HackPushImageCmd pushCmd =
+                            (HackPushImageCmd) dockerClient
+                                .pushImageCmd(pushImageTag)
+                                .withAuthConfig(dockerConf.toAuthConf());
+                        try {
+                            pushCmd.start(
+                                DockerClients.watchDockerPushProcess(
+                                    pushRsp -> {
+                                        dockerProcess.getPush().update(pushRsp);
+                                        DOCKER_EXEC_POOL.execute(
+                                            () -> dockerProcessWatcher
+                                                .onDockerPushProgressChange(
+                                                    dockerProcess
+                                                        .getPush()
+                                                        .snapshot()));
+                                    }))
+                                .awaitCompletion();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                        log.info(
+                            "Already pushed docker image, imageTag={}",
+                            pushImageTag);
+                        return null;
+                    },
+                    err -> {
+                        throw new RuntimeException(
+                            "Push docker image failed. tag=" + pushImageTag, err);
+                    });
+                return null;
+            })
                 .orElseThrow(() -> getError().exception());
 
         if (StringUtils.isBlank(request.ingressTemplate())) {
             skipStep(8);
         } else {
             execStep(
-                            8,
-                            () -> {
-                                String ingressOutputPath =
-                                        IngressController.prepareIngressTemplateFiles(
-                                                buildWorkspace, request.ingressTemplate());
-                                log.info("Export flink ingress: {}", ingressOutputPath);
-                                return ingressOutputPath;
-                            })
+                8,
+                () -> {
+                    String ingressOutputPath =
+                        IngressController.prepareIngressTemplateFiles(
+                            buildWorkspace, request.ingressTemplate());
+                    log.info("Export flink ingress: {}", ingressOutputPath);
+                    return ingressOutputPath;
+                })
                     .orElseThrow(() -> getError().exception());
         }
 
         return new DockerImageBuildResponse(
-                buildWorkspace,
-                pushImageTag,
-                podTemplatePaths,
-                dockerFileTemplate.innerMainJarPath());
+            buildWorkspace,
+            pushImageTag,
+            podTemplatePaths,
+            dockerFileTemplate.innerMainJarPath());
     }
 
     private String compileTag(String tag, String registerAddress, String imageNamespace) {

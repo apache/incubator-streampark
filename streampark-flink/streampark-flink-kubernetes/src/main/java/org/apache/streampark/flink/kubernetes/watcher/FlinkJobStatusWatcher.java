@@ -36,7 +36,6 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.runtime.history.FsJobArchivist;
 import org.apache.hc.client5.http.fluent.Request;
-import org.apache.hc.core5.util.Timeout;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +44,6 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -67,9 +65,9 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkJobStatusWatcher(
-            JobStatusWatcherConfig conf,
-            FlinkK8sWatchController watchController,
-            ChangeEventBus eventBus) {
+                                 JobStatusWatcherConfig conf,
+                                 FlinkK8sWatchController watchController,
+                                 ChangeEventBus eventBus) {
         this.conf = conf;
         this.watchController = watchController;
         this.eventBus = eventBus;
@@ -78,11 +76,11 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
     @Override
     protected void doStart() {
         timerSchedule =
-                watchExecutor.scheduleAtFixedRate(
-                        this::doWatch,
-                        0,
-                        conf.requestIntervalSec(),
-                        TimeUnit.SECONDS);
+            watchExecutor.scheduleAtFixedRate(
+                this::doWatch,
+                0,
+                conf.requestIntervalSec(),
+                TimeUnit.SECONDS);
         log.info("[flink-k8s] FlinkJobStatusWatcher started.");
     }
 
@@ -112,118 +110,110 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         }
 
         Set<CompletableFuture<Optional<JobStatusCV>>> appFutures =
-                trackIds.stream()
-                        .filter(id -> id.executeMode() == FlinkK8sDeployMode.APPLICATION)
-                        .map(
-                                id ->
-                                        CompletableFuture.supplyAsync(
-                                                        () -> touchApplicationJob(id),
-                                                        watchExecutor)
-                                                .whenComplete(
-                                                        (jobState, error) ->
-                                                                jobState.ifPresent(
-                                                                        state ->
-                                                                                updateState(
-                                                                                        id.copy()
-                                                                                                .jobId(
-                                                                                                        state
-                                                                                                                .jobId()),
-                                                                                        state))))
-                        .collect(Collectors.toSet());
+            trackIds.stream()
+                .filter(id -> id.executeMode() == FlinkK8sDeployMode.APPLICATION)
+                .map(
+                    id -> CompletableFuture.supplyAsync(
+                        () -> touchApplicationJob(id),
+                        watchExecutor)
+                        .whenComplete(
+                            (jobState, error) -> jobState.ifPresent(
+                                state -> updateState(
+                                    id.copy()
+                                        .jobId(
+                                            state
+                                                .jobId()),
+                                    state))))
+                .collect(Collectors.toSet());
 
         Set<TrackId> sessionIds =
-                trackIds.stream()
-                        .filter(id -> id.executeMode() == FlinkK8sDeployMode.SESSION)
-                        .collect(Collectors.toSet());
+            trackIds.stream()
+                .filter(id -> id.executeMode() == FlinkK8sDeployMode.SESSION)
+                .collect(Collectors.toSet());
         Set<TrackId> sessionCluster =
-                sessionIds.stream()
-                        .collect(
-                                Collectors.groupingBy(
-                                        id -> id.toClusterKey().toString(),
-                                        Collectors.toSet()))
-                        .values()
-                        .stream()
-                        .flatMap(Set::stream)
-                        .collect(Collectors.toSet());
+            sessionIds.stream()
+                .collect(
+                    Collectors.groupingBy(
+                        id -> id.toClusterKey().toString(),
+                        Collectors.toSet()))
+                .values()
+                .stream()
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
 
         Set<CompletableFuture<Map<TrackId, JobStatusCV>>> sessionFutures =
-                sessionCluster.stream()
-                        .map(
-                                trackId ->
-                                        CompletableFuture.supplyAsync(
-                                                        () -> touchSessionAllJob(trackId),
-                                                        watchExecutor)
-                                                .whenComplete(
-                                                        (map, error) -> {
-                                                            if (map == null) {
-                                                                return;
-                                                            }
-                                                            Optional<Map.Entry<TrackId, JobStatusCV>> matched =
-                                                                    map.entrySet().stream()
-                                                                            .filter(
-                                                                                    e ->
-                                                                                            e.getKey()
-                                                                                                    .jobId()
-                                                                                                    .equals(
-                                                                                                            trackId
-                                                                                                                    .jobId()))
-                                                                            .findFirst();
-                                                            matched.ifPresent(
-                                                                    job ->
-                                                                            updateState(
-                                                                                    job.getKey()
-                                                                                            .copy()
-                                                                                            .appId(
-                                                                                                    trackId
-                                                                                                            .appId()),
-                                                                                    job.getValue()));
-                                                            if (!matched.isPresent()) {
-                                                                touchSessionJob(trackId)
-                                                                        .ifPresent(
-                                                                                state ->
-                                                                                        updateState(
-                                                                                                trackId,
-                                                                                                state));
-                                                            }
-                                                        }))
-                        .collect(Collectors.toSet());
+            sessionCluster.stream()
+                .map(
+                    trackId -> CompletableFuture.supplyAsync(
+                        () -> touchSessionAllJob(trackId),
+                        watchExecutor)
+                        .whenComplete(
+                            (map, error) -> {
+                                if (map == null) {
+                                    return;
+                                }
+                                Optional<Map.Entry<TrackId, JobStatusCV>> matched =
+                                    map.entrySet().stream()
+                                        .filter(
+                                            e -> e.getKey()
+                                                .jobId()
+                                                .equals(
+                                                    trackId
+                                                        .jobId()))
+                                        .findFirst();
+                                matched.ifPresent(
+                                    job -> updateState(
+                                        job.getKey()
+                                            .copy()
+                                            .appId(
+                                                trackId
+                                                    .appId()),
+                                        job.getValue()));
+                                if (!matched.isPresent()) {
+                                    touchSessionJob(trackId)
+                                        .ifPresent(
+                                            state -> updateState(
+                                                trackId,
+                                                state));
+                                }
+                            }))
+                .collect(Collectors.toSet());
 
         try {
             CompletableFuture.allOf(appFutures.toArray(new CompletableFuture[0]))
-                    .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+                .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("[FlinkJobStatusWatcher] interrupted while waiting for application job status");
         } catch (Exception e) {
             log.warn(
-                    "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native application mode timeout, limitSeconds={}, trackIds={}",
-                    conf.requestTimeoutSec(),
-                    trackIds);
+                "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native application mode timeout, limitSeconds={}, trackIds={}",
+                conf.requestTimeoutSec(),
+                trackIds);
         }
 
         try {
             CompletableFuture.allOf(sessionFutures.toArray(new CompletableFuture[0]))
-                    .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+                .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("[FlinkJobStatusWatcher] interrupted while waiting for session job status");
         } catch (Exception e) {
             log.warn(
-                    "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session mode timeout, limitSeconds={}, trackIds={}",
-                    conf.requestTimeoutSec(),
-                    trackIds);
+                "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session mode timeout, limitSeconds={}, trackIds={}",
+                conf.requestTimeoutSec(),
+                trackIds);
         }
     }
 
     public Optional<JobStatusCV> touchSessionJob(@Nonnull TrackId trackId) {
         return touchSessionAllJob(trackId).entrySet().stream()
-                .filter(
-                        e ->
-                                e.getKey().jobId().equals(trackId.jobId())
-                                        && e.getValue().jobState() != FlinkJobState.SILENT)
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .or(() -> inferState(trackId));
+            .filter(
+                e -> e.getKey().jobId().equals(trackId.jobId())
+                    && e.getValue().jobState() != FlinkJobState.SILENT)
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .or(() -> inferState(trackId));
     }
 
     private Map<TrackId, JobStatusCV> touchSessionAllJob(TrackId trackId) {
@@ -248,7 +238,7 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
             return inferStateFromK8sEvent(trackId, pollEmitTime);
         }
         return Optional.of(
-                jobDetails.get().jobs()[0].toJobStatusCV(pollEmitTime, System.currentTimeMillis()));
+            jobDetails.get().jobs()[0].toJobStatusCV(pollEmitTime, System.currentTimeMillis()));
     }
 
     private void updateState(TrackId trackId, JobStatusCV jobState) {
@@ -261,8 +251,8 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         if (FlinkJobState.isEndState(jobState.jobState())) {
             if (trackId.executeMode() == FlinkK8sDeployMode.APPLICATION) {
                 boolean deployExists =
-                        KubernetesRetriever.isDeploymentExists(
-                                trackId.namespace(), trackId.clusterId());
+                    KubernetesRetriever.isDeploymentExists(
+                        trackId.namespace(), trackId.clusterId());
                 if (!deployExists) {
                     watchController.endpoints.invalidate(trackId.toClusterKey());
                     watchController.unWatching(trackId);
@@ -278,34 +268,34 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         JobStatusCV preCache = watchController.jobStatuses.get(id);
         FlinkJobState state = inferFromPreCache(preCache);
         boolean nonFirstSilent =
-                state == FlinkJobState.SILENT
-                        && preCache != null
-                        && preCache.jobState() == FlinkJobState.SILENT;
+            state == FlinkJobState.SILENT
+                && preCache != null
+                && preCache.jobState() == FlinkJobState.SILENT;
         JobStatusCV jobState;
         if (nonFirstSilent) {
             jobState =
-                    new JobStatusCV(
-                            state,
-                            id.jobId(),
-                            preCache.jobName(),
-                            preCache.jobStartTime(),
-                            preCache.jobEndTime(),
-                            preCache.duration(),
-                            preCache.taskTotal(),
-                            preCache.pollEmitTime(),
-                            preCache.pollAckTime());
+                new JobStatusCV(
+                    state,
+                    id.jobId(),
+                    preCache.jobName(),
+                    preCache.jobStartTime(),
+                    preCache.jobEndTime(),
+                    preCache.duration(),
+                    preCache.taskTotal(),
+                    preCache.pollEmitTime(),
+                    preCache.pollAckTime());
         } else {
             jobState =
-                    new JobStatusCV(
-                            state,
-                            id.jobId(),
-                            "",
-                            -1,
-                            -1,
-                            0,
-                            0,
-                            pollEmitTime,
-                            System.currentTimeMillis());
+                new JobStatusCV(
+                    state,
+                    id.jobId(),
+                    "",
+                    -1,
+                    -1,
+                    0,
+                    0,
+                    pollEmitTime,
+                    System.currentTimeMillis());
         }
         return Optional.of(jobState);
     }
@@ -313,16 +303,16 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
     private Optional<JobDetails> listJobsDetails(ClusterKey clusterKey) {
         try {
             Optional<String> clusterRestUrl =
-                    watchController.getClusterRestUrl(clusterKey).filter(url -> !url.isEmpty());
+                watchController.getClusterRestUrl(clusterKey).filter(url -> !url.isEmpty());
             if (!clusterRestUrl.isPresent()) {
                 return Optional.empty();
             }
             return callJobsOverviewsApi(clusterRestUrl.get());
         } catch (Exception e) {
             log.warn(
-                    "Failed to visit remote flink jobs on kubernetes-native-mode cluster, and the retry access logic is performed.");
+                "Failed to visit remote flink jobs on kubernetes-native-mode cluster, and the retry access logic is performed.");
             Optional<String> clusterRestUrl =
-                    watchController.refreshClusterRestUrl(clusterKey);
+                watchController.refreshClusterRestUrl(clusterKey);
             if (!clusterRestUrl.isPresent()) {
                 return Optional.empty();
             }
@@ -332,8 +322,8 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                 return result;
             } catch (Exception retryError) {
                 log.warn(
-                        "The retry fetch failed, final status failed, errorStack={}.",
-                        retryError.getMessage());
+                    "The retry fetch failed, final status failed, errorStack={}.",
+                    retryError.getMessage());
                 return Optional.empty();
             }
         }
@@ -341,12 +331,12 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
 
     private Optional<JobDetails> callJobsOverviewsApi(String restUrl) throws Exception {
         String json =
-                Request.get(restUrl + "/jobs/overview")
-                        .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                        .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                        .execute()
-                        .returnContent()
-                        .asString(StandardCharsets.UTF_8);
+            Request.get(restUrl + "/jobs/overview")
+                .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                .execute()
+                .returnContent()
+                .asString(StandardCharsets.UTF_8);
         return FlinkRestModels.parseJobDetails(json);
     }
 
@@ -359,19 +349,19 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
             jobState = FlinkJobState.CANCELED;
         } else {
             boolean deployExists =
-                    KubernetesRetriever.isDeploymentExists(trackId.namespace(), trackId.clusterId());
+                KubernetesRetriever.isDeploymentExists(trackId.namespace(), trackId.clusterId());
             boolean isConnection = KubernetesDeploymentHelper.checkConnection();
             if (deployExists) {
                 boolean deployError =
-                        KubernetesDeploymentHelper.isDeploymentError(
-                                trackId.namespace(), trackId.clusterId());
+                    KubernetesDeploymentHelper.isDeploymentError(
+                        trackId.namespace(), trackId.clusterId());
                 if (!deployError) {
                     log.info("Task Enter the initialization process.");
                     jobState = FlinkJobState.K8S_INITIALIZING;
                 } else if (isConnection) {
                     log.info("Enter the task failure deletion process.");
                     KubernetesDeploymentHelper.watchPodTerminatedLog(
-                            trackId.namespace(), trackId.clusterId(), trackId.jobId());
+                        trackId.namespace(), trackId.clusterId(), trackId.jobId());
                     jobState = FlinkJobState.FAILED;
                 } else {
                     jobState = inferFromPreCache(latest);
@@ -379,39 +369,39 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
             } else if (isConnection) {
                 log.info("The deployment is deleted and enters the task failure process.");
                 jobState =
-                        FlinkJobState.of(
-                                FlinkHistoryArchives.getJobStateFromArchiveFile(trackId));
+                    FlinkJobState.of(
+                        FlinkHistoryArchives.getJobStateFromArchiveFile(trackId));
             } else {
                 jobState = inferFromPreCache(latest);
             }
         }
 
         JobStatusCV jobStatusCV =
-                new JobStatusCV(
-                        jobState,
-                        trackId.jobId(),
-                        "",
-                        -1,
-                        -1,
-                        0,
-                        0,
-                        pollEmitTime,
-                        System.currentTimeMillis());
+            new JobStatusCV(
+                jobState,
+                trackId.jobId(),
+                "",
+                -1,
+                -1,
+                0,
+                0,
+                pollEmitTime,
+                System.currentTimeMillis());
 
         if (jobState == FlinkJobState.SILENT
-                && latest != null
-                && latest.jobState() == FlinkJobState.SILENT) {
+            && latest != null
+            && latest.jobState() == FlinkJobState.SILENT) {
             return Optional.of(
-                    new JobStatusCV(
-                            jobState,
-                            trackId.jobId(),
-                            latest.jobName(),
-                            latest.jobStartTime(),
-                            latest.jobEndTime(),
-                            latest.duration(),
-                            latest.taskTotal(),
-                            latest.pollEmitTime(),
-                            latest.pollAckTime()));
+                new JobStatusCV(
+                    jobState,
+                    trackId.jobId(),
+                    latest.jobName(),
+                    latest.jobStartTime(),
+                    latest.jobEndTime(),
+                    latest.duration(),
+                    latest.taskTotal(),
+                    latest.pollEmitTime(),
+                    latest.pollAckTime()));
         }
         return Optional.of(jobStatusCV);
     }
@@ -421,15 +411,14 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
             return FlinkJobState.SILENT;
         }
         if (preCache.jobState() == FlinkJobState.SILENT
-                && System.currentTimeMillis() - preCache.pollAckTime()
-                        >= conf.silentStateJobKeepTrackingSec() * 1000L) {
+            && System.currentTimeMillis() - preCache.pollAckTime() >= conf.silentStateJobKeepTrackingSec() * 1000L) {
             return FlinkJobState.LOST;
         }
         return FlinkJobState.SILENT;
     }
 
     public static FlinkJobState inferFlinkJobStateFromPersist(
-            FlinkJobState current, FlinkJobState previous) {
+                                                              FlinkJobState current, FlinkJobState previous) {
         switch (current) {
             case POS_TERMINATED:
             case TERMINATED:
@@ -440,8 +429,8 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                         return FlinkJobState.FAILED;
                     default:
                         return current == FlinkJobState.POS_TERMINATED
-                                ? FlinkJobState.FINISHED
-                                : FlinkJobState.TERMINATED;
+                            ? FlinkJobState.FINISHED
+                            : FlinkJobState.TERMINATED;
                 }
             default:
                 return current;
@@ -449,13 +438,15 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
     }
 
     static final class FlinkHistoryArchives {
-        private FlinkHistoryArchives() {}
+
+        private FlinkHistoryArchives() {
+        }
 
         static String getJobStateFromArchiveFile(TrackId trackId) {
             try {
                 if (trackId.jobId() == null) {
                     throw new IllegalArgumentException(
-                            "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.");
+                        "[StreamPark] getJobStateFromArchiveFile: JobId cannot be null.");
                 }
                 String archiveDir = trackId.properties().getProperty(JobManagerOptions.ARCHIVE_DIR.key());
                 if (archiveDir == null) {
@@ -470,14 +461,13 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                     if (("/jobs/" + trackId.jobId() + "/exceptions").equals(archivedJson.getPath())) {
                         try {
                             var ok =
-                                    org.apache.streampark.common.util.JsonUtils.read(
-                                            archivedJson.getJson(),
-                                            org.apache.streampark.shaded.com.fasterxml.jackson.databind
-                                                    .JsonNode.class);
+                                org.apache.streampark.common.util.JsonUtils.read(
+                                    archivedJson.getJson(),
+                                    org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode.class);
                             String logText = ok.path("root-exception").asText(null);
                             if (logText != null) {
                                 String path =
-                                        KubernetesDeploymentHelper.getJobErrorLog(trackId.jobId());
+                                    KubernetesDeploymentHelper.getJobErrorLog(trackId.jobId());
                                 FileUtils.writeStringToFile(new File(path), logText, StandardCharsets.UTF_8);
                                 log.info(" error path: {}", path);
                             }
@@ -486,10 +476,9 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                     } else if ("/jobs/overview".equals(archivedJson.getPath())) {
                         try {
                             var ok =
-                                    org.apache.streampark.common.util.JsonUtils.read(
-                                            archivedJson.getJson(),
-                                            org.apache.streampark.shaded.com.fasterxml.jackson.databind
-                                                    .JsonNode.class);
+                                org.apache.streampark.common.util.JsonUtils.read(
+                                    archivedJson.getJson(),
+                                    org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode.class);
                             var jobs = ok.get("jobs");
                             if (jobs != null && jobs.isArray()) {
                                 for (var node : jobs) {

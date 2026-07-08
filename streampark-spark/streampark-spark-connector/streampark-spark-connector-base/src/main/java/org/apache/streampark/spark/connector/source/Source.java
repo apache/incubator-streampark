@@ -18,6 +18,7 @@
 package org.apache.streampark.spark.connector.source;
 
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.spark.SparkConf;
@@ -35,7 +36,7 @@ import scala.Tuple2;
 public abstract class Source implements Serializable {
 
     protected final Logger log =
-            StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(getClass().getName());
 
     protected final transient StreamingContext ssc;
     protected transient SparkConf sparkConf;
@@ -58,10 +59,10 @@ public abstract class Source implements Serializable {
         if (param == null) {
             param = new HashMap<>();
             scala.collection.Iterator<scala.Tuple2<String, String>> iter =
-                    scala.collection.JavaConverters.asScalaIteratorConverter(
-                                    java.util.Arrays.asList(getSparkConf().getAll()).iterator())
-                            .asScala()
-                            .toIterator();
+                scala.collection.JavaConverters.asScalaIteratorConverter(
+                    java.util.Arrays.asList(getSparkConf().getAll()).iterator())
+                    .asScala()
+                    .toIterator();
             String prefix = getPrefix();
             while (iter.hasNext()) {
                 Tuple2<String, String> t = iter.next();

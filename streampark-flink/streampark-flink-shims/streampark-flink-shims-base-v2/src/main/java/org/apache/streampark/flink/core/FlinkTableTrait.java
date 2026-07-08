@@ -20,7 +20,6 @@ package org.apache.streampark.flink.core;
 import org.apache.streampark.common.util.Utils;
 
 import org.apache.flink.api.common.JobExecutionResult;
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.table.api.CompiledPlan;
 import org.apache.flink.table.api.ExplainDetail;
 import org.apache.flink.table.api.ExplainFormat;
@@ -32,15 +31,16 @@ import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.api.TableResult;
-import org.apache.flink.table.catalog.CatalogDescriptor;
-import org.apache.flink.table.module.ModuleEntry;
-import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.CatalogDescriptor;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.module.Module;
+import org.apache.flink.table.module.ModuleEntry;
+import org.apache.flink.table.resource.ResourceUri;
 import org.apache.flink.table.types.AbstractDataType;
+import org.apache.flink.util.ParameterTool;
 
 import java.util.List;
 import java.util.Optional;
@@ -107,28 +107,28 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     @Override
     public void createFunction(
-            String path, String className, List<ResourceUri> resourceUris) {
+                               String path, String className, List<ResourceUri> resourceUris) {
         tableEnv.createFunction(path, className, resourceUris);
     }
 
     @Override
     public void createFunction(
-            String path,
-            String className,
-            List<ResourceUri> resourceUris,
-            boolean ignoreIfExists) {
+                               String path,
+                               String className,
+                               List<ResourceUri> resourceUris,
+                               boolean ignoreIfExists) {
         tableEnv.createFunction(path, className, resourceUris, ignoreIfExists);
     }
 
     @Override
     public void createTemporaryFunction(
-            String path, String className, List<ResourceUri> resourceUris) {
+                                        String path, String className, List<ResourceUri> resourceUris) {
         tableEnv.createTemporaryFunction(path, className, resourceUris);
     }
 
     @Override
     public void createTemporarySystemFunction(
-            String name, String className, List<ResourceUri> resourceUris) {
+                                              String name, String className, List<ResourceUri> resourceUris) {
         tableEnv.createTemporarySystemFunction(name, className, resourceUris);
     }
 
@@ -159,7 +159,7 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     @Override
     public String explainSql(
-            String statement, ExplainFormat format, ExplainDetail... extraDetails) {
+                             String statement, ExplainFormat format, ExplainDetail... extraDetails) {
         return tableEnv.explainSql(statement, format, extraDetails);
     }
 
@@ -195,13 +195,13 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     @Override
     public void createTemporarySystemFunction(
-            String name, Class<? extends UserDefinedFunction> functionClass) {
+                                              String name, Class<? extends UserDefinedFunction> functionClass) {
         tableEnv.createTemporarySystemFunction(name, functionClass);
     }
 
     @Override
     public void createTemporarySystemFunction(
-            String name, UserDefinedFunction functionInstance) {
+                                              String name, UserDefinedFunction functionInstance) {
         tableEnv.createTemporarySystemFunction(name, functionInstance);
     }
 
@@ -217,9 +217,9 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     @Override
     public void createFunction(
-            String path,
-            Class<? extends UserDefinedFunction> functionClass,
-            boolean ignoreIfExists) {
+                               String path,
+                               Class<? extends UserDefinedFunction> functionClass,
+                               boolean ignoreIfExists) {
         tableEnv.createFunction(path, functionClass, ignoreIfExists);
     }
 
@@ -230,7 +230,7 @@ public abstract class FlinkTableTrait implements TableEnvironment {
 
     @Override
     public void createTemporaryFunction(
-            String path, Class<? extends UserDefinedFunction> functionClass) {
+                                        String path, Class<? extends UserDefinedFunction> functionClass) {
         tableEnv.createTemporaryFunction(path, functionClass);
     }
 

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.helper;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
@@ -34,7 +35,8 @@ import java.util.List;
 @Slf4j
 public final class KubernetesDeploymentHelper {
 
-    private KubernetesDeploymentHelper() {}
+    private KubernetesDeploymentHelper() {
+    }
 
     private static List<Pod> getPods(String nameSpace, String deploymentName) {
         try {
@@ -59,7 +61,8 @@ public final class KubernetesDeploymentHelper {
     public static boolean isDeploymentError(String nameSpace, String deploymentName) {
         try {
             List<Pod> pods = getPods(nameSpace, deploymentName);
-            if (pods.isEmpty()) return true;
+            if (pods.isEmpty())
+                return true;
             var podStatus = pods.get(0).getStatus();
             switch (podStatus.getPhase()) {
                 case "Unknown":
@@ -114,7 +117,9 @@ public final class KubernetesDeploymentHelper {
                     return null;
                 }
             },
-            error -> { throw new RuntimeException(error); });
+            error -> {
+                throw new RuntimeException(error);
+            });
     }
 
     public static String getJobLog(String jobId) {

@@ -22,7 +22,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.Time;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;

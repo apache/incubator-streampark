@@ -14,24 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer;
 
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.constants.Constants;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 
 @Slf4j
 public final class PackerResourceGC {
+
     private static final String APP_WORKSPACE_PATH = Workspace.local().APP_WORKSPACE();
-    private PackerResourceGC() {}
+    private PackerResourceGC() {
+    }
 
     public static void startGc(Integer expiredHours) {
         File appWorkspace = new File(APP_WORKSPACE_PATH);
-        if (!appWorkspace.exists()) return;
+        if (!appWorkspace.exists())
+            return;
         long evictedBarrier = System.currentTimeMillis() - expiredHours * 3600L * 1000L;
         File[] evictedFiles = java.util.Arrays.stream(appWorkspace.listFiles())
             .filter(File::isDirectory)
@@ -40,12 +45,17 @@ public final class PackerResourceGC {
             .filter(e -> e.getValue() < evictedBarrier)
             .map(java.util.Map.Entry::getKey)
             .toArray(File[]::new);
-        if (evictedFiles.length == 0) return;
+        if (evictedFiles.length == 0)
+            return;
         StringBuilder sb = new StringBuilder();
-        for (File f : evictedFiles) sb.append(f.getAbsolutePath()).append(", ");
+        for (File f : evictedFiles)
+            sb.append(f.getAbsolutePath()).append(", ");
         log.info("Delete expired building resources, {}", sb);
         for (File path : evictedFiles) {
-            try { FileUtils.deleteDirectory(path); } catch (Exception ignored) {}
+            try {
+                FileUtils.deleteDirectory(path);
+            } catch (Exception ignored) {
+            }
         }
     }
 

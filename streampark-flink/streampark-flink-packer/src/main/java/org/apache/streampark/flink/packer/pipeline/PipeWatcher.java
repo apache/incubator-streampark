@@ -14,9 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 public interface PipeWatcher {
+
     void onStart(PipelineSnapshot snapshot) throws Exception;
     void onStepStateChange(PipelineSnapshot snapshot) throws Exception;
     void onFinish(PipelineSnapshot snapshot, BuildResult result) throws Exception;

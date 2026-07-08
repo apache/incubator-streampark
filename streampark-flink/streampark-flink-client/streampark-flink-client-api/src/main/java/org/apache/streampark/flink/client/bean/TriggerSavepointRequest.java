@@ -39,12 +39,14 @@ public class TriggerSavepointRequest implements SavepointRequestTrait {
     private FlinkVersion flinkVersion;
     private FlinkDeployMode deployMode;
 
-    @Nullable private Map<String, Object> properties;
+    @Nullable
+    private Map<String, Object> properties;
 
     private String clusterId;
     private String jobId;
     private String savepointPath;
     private boolean nativeFormat;
 
-    @Nullable private String kubernetesNamespace = Constants.DEFAULT;
+    @Nullable
+    private String kubernetesNamespace = Constants.DEFAULT;
 }

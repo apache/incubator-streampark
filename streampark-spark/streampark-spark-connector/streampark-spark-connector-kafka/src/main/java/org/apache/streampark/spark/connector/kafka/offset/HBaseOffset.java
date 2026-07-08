@@ -116,11 +116,11 @@ class HBaseOffset extends Offset {
                     long finalOffset = offset;
                     if (left != null && left > offset) {
                         log.warn(
-                                "storeType:HBase,consumer group:{},topic:{},partition:{} offsets was timeOut,updated: {}",
-                                groupId,
-                                topicPartition.topic(),
-                                topicPartition.partition(),
-                                left);
+                            "storeType:HBase,consumer group:{},topic:{},partition:{} offsets was timeOut,updated: {}",
+                            groupId,
+                            topicPartition.topic(),
+                            topicPartition.partition(),
+                            left);
                         finalOffset = left;
                     }
                     storedOffsetMap.put(topicPartition, finalOffset);
@@ -166,9 +166,9 @@ class HBaseOffset extends Offset {
             FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
             for (String topic : topics) {
                 filterList.addFilter(
-                        new RowFilter(
-                                CompareFilter.CompareOp.EQUAL,
-                                new BinaryPrefixComparator(Bytes.toBytes(key(groupId, topic) + "#"))));
+                    new RowFilter(
+                        CompareFilter.CompareOp.EQUAL,
+                        new BinaryPrefixComparator(Bytes.toBytes(key(groupId, topic) + "#"))));
             }
             Scan scan = new Scan();
             scan.setFilter(filterList);

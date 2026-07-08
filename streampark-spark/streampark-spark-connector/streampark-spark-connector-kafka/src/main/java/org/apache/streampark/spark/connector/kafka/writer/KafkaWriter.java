@@ -35,13 +35,12 @@ public abstract class KafkaWriter<T> implements Serializable {
 
     @SuppressWarnings("unchecked")
     protected static <K, V> KafkaProducer<K, V> getProducer(Properties config) {
-        return (KafkaProducer<K, V>)
-                PRODUCERS.computeIfAbsent(
-                        config,
-                        k -> {
-                            KafkaProducer<K, V> producer = new KafkaProducer<>(config);
-                            return producer;
-                        });
+        return (KafkaProducer<K, V>) PRODUCERS.computeIfAbsent(
+            config,
+            k -> {
+                KafkaProducer<K, V> producer = new KafkaProducer<>(config);
+                return producer;
+            });
     }
 
     public static <T> KafkaWriter<T> forDStream(DStream<T> dstream) {
@@ -61,5 +60,6 @@ public abstract class KafkaWriter<T> implements Serializable {
     }
 
     public abstract <K, V> void writeToKafka(
-            Properties producerConfig, Function<T, ProducerRecord<K, V>> serializerFunc);
+                                             Properties producerConfig,
+                                             Function<T, ProducerRecord<K, V>> serializerFunc);
 }

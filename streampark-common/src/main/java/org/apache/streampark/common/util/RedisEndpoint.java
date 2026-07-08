@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 /**
  * RedisEndpoint represents a redis connection endpoint info: host, port, auth password db number,
@@ -63,23 +62,23 @@ public class RedisEndpoint implements Serializable {
 
     public RedisEndpoint(Properties conf) {
         this(
-                conf.getProperty(ConfigKeys.KEY_HOST(), Protocol.DEFAULT_HOST),
-                Integer.parseInt(
-                        conf.getProperty(ConfigKeys.KEY_PORT(), String.valueOf(Protocol.DEFAULT_PORT))),
-                conf.getProperty(ConfigKeys.KEY_PASSWORD(), null),
-                Integer.parseInt(
-                        conf.getProperty(ConfigKeys.KEY_DB(), String.valueOf(Protocol.DEFAULT_DATABASE))),
-                Integer.parseInt(
-                        conf.getProperty(ConfigKeys.KEY_TIMEOUT(), String.valueOf(Protocol.DEFAULT_TIMEOUT))));
+            conf.getProperty(ConfigKeys.KEY_HOST(), Protocol.DEFAULT_HOST),
+            Integer.parseInt(
+                conf.getProperty(ConfigKeys.KEY_PORT(), String.valueOf(Protocol.DEFAULT_PORT))),
+            conf.getProperty(ConfigKeys.KEY_PASSWORD(), null),
+            Integer.parseInt(
+                conf.getProperty(ConfigKeys.KEY_DB(), String.valueOf(Protocol.DEFAULT_DATABASE))),
+            Integer.parseInt(
+                conf.getProperty(ConfigKeys.KEY_TIMEOUT(), String.valueOf(Protocol.DEFAULT_TIMEOUT))));
     }
 
     public RedisEndpoint(URI uri) {
         this(
-                uri.getHost(),
-                uri.getPort(),
-                JedisURIHelper.getPassword(uri),
-                JedisURIHelper.getDBIndex(uri),
-                Protocol.DEFAULT_TIMEOUT);
+            uri.getHost(),
+            uri.getPort(),
+            JedisURIHelper.getPassword(uri),
+            JedisURIHelper.getDBIndex(uri),
+            Protocol.DEFAULT_TIMEOUT);
     }
 
     public RedisEndpoint(String uri) {
@@ -124,10 +123,10 @@ public class RedisEndpoint implements Serializable {
         }
         RedisEndpoint that = (RedisEndpoint) o;
         return port == that.port
-                && db == that.db
-                && timeout == that.timeout
-                && Objects.equals(host, that.host)
-                && Objects.equals(auth, that.auth);
+            && db == that.db
+            && timeout == that.timeout
+            && Objects.equals(host, that.host)
+            && Objects.equals(auth, that.auth);
     }
 
     @Override
@@ -138,14 +137,14 @@ public class RedisEndpoint implements Serializable {
     @Override
     public String toString() {
         return "RedisEndpoint{host='"
-                + host
-                + "', port="
-                + port
-                + ", db="
-                + db
-                + ", timeout="
-                + timeout
-                + '}';
+            + host
+            + "', port="
+            + port
+            + ", db="
+            + db
+            + ", timeout="
+            + timeout
+            + '}';
     }
 }
 
@@ -207,7 +206,7 @@ class RedisConfig implements Serializable {
         this.initialAddr = initialHost.getHost();
         this.nodes = getNodes(initialHost);
         this.hosts =
-                Arrays.stream(nodes).filter(node -> node.getIdx() == 0).toArray(RedisNode[]::new);
+            Arrays.stream(nodes).filter(node -> node.getIdx() == 0).toArray(RedisNode[]::new);
     }
 
     public String getInitialAddr() {
@@ -228,9 +227,9 @@ class RedisConfig implements Serializable {
 
     public RedisNode[] getNodesBySlots(int sPos, int ePos) {
         return Arrays.stream(nodes)
-                .filter(node -> intersect(sPos, ePos, node.getStartSlot(), node.getEndSlot()))
-                .filter(node -> node.getIdx() == 0)
-                .toArray(RedisNode[]::new);
+            .filter(node -> intersect(sPos, ePos, node.getStartSlot(), node.getEndSlot()))
+            .filter(node -> node.getIdx() == 0)
+            .toArray(RedisNode[]::new);
     }
 
     public Jedis connectionForKey(String key) {
@@ -240,9 +239,9 @@ class RedisConfig implements Serializable {
     public RedisNode getHost(String key) {
         int slot = JedisClusterCRC16.getSlot(key);
         return Arrays.stream(hosts)
-                .filter(host -> host.getStartSlot() <= slot && host.getEndSlot() >= slot)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("[StreamPark] No redis host for key: " + key));
+            .filter(host -> host.getStartSlot() <= slot && host.getEndSlot() >= slot)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("[StreamPark] No redis host for key: " + key));
     }
 
     public RedisNode[] getNodes(RedisEndpoint endpoint) {
@@ -264,9 +263,9 @@ class RedisConfig implements Serializable {
         try {
             String[] info = conn.info().split("\n");
             String version =
-                    Arrays.stream(info).filter(line -> line.contains("redis_version:")).findFirst().orElse("");
+                Arrays.stream(info).filter(line -> line.contains("redis_version:")).findFirst().orElse("");
             String[] clusterEnable =
-                    Arrays.stream(info).filter(line -> line.contains("cluster_enabled:")).toArray(String[]::new);
+                Arrays.stream(info).filter(line -> line.contains("cluster_enabled:")).toArray(String[]::new);
             int mainVersion = Integer.parseInt(version.substring(14, version.indexOf('.')));
             return mainVersion > 2 && clusterEnable.length > 0 && clusterEnable[0].contains("1");
         } finally {
@@ -287,22 +286,22 @@ class RedisConfig implements Serializable {
 
         if (Arrays.stream(replinfo).anyMatch(line -> line.contains("role:slave"))) {
             String host =
-                    Arrays.stream(replinfo)
-                            .filter(line -> line.contains("master_host:"))
-                            .findFirst()
-                            .orElse("")
-                            .trim()
-                            .substring(12);
+                Arrays.stream(replinfo)
+                    .filter(line -> line.contains("master_host:"))
+                    .findFirst()
+                    .orElse("")
+                    .trim()
+                    .substring(12);
             int port =
-                    Integer.parseInt(
-                            Arrays.stream(replinfo)
-                                    .filter(line -> line.contains("master_port:"))
-                                    .findFirst()
-                                    .orElse("")
-                                    .trim()
-                                    .substring(12));
+                Integer.parseInt(
+                    Arrays.stream(replinfo)
+                        .filter(line -> line.contains("master_port:"))
+                        .findFirst()
+                        .orElse("")
+                        .trim()
+                        .substring(12));
             return getNonClusterNodes(
-                    new RedisEndpoint(host, port, endpoint.getAuth(), endpoint.getDb(), endpoint.getTimeout()));
+                new RedisEndpoint(host, port, endpoint.getAuth(), endpoint.getDb(), endpoint.getTimeout()));
         }
 
         List<String[]> slaves = new ArrayList<>();
@@ -313,10 +312,10 @@ class RedisConfig implements Serializable {
                 String ipPart = parts[0];
                 String portPart = parts[1];
                 slaves.add(
-                        new String[] {
+                    new String[]{
                             ipPart.substring(ipPart.indexOf('=') + 1),
                             portPart.substring(portPart.indexOf('=') + 1)
-                        });
+                    });
             }
         }
 
@@ -325,17 +324,17 @@ class RedisConfig implements Serializable {
         for (int i = 0; i < slaves.size(); i++) {
             String[] slave = slaves.get(i);
             nodeList.add(
-                    new RedisNode(
-                            new RedisEndpoint(
-                                    slave[0],
-                                    Integer.parseInt(slave[1]),
-                                    endpoint.getAuth(),
-                                    endpoint.getDb(),
-                                    endpoint.getTimeout()),
-                            0,
-                            16383,
-                            i + 1,
-                            slaves.size() + 1));
+                new RedisNode(
+                    new RedisEndpoint(
+                        slave[0],
+                        Integer.parseInt(slave[1]),
+                        endpoint.getAuth(),
+                        endpoint.getDb(),
+                        endpoint.getTimeout()),
+                    0,
+                    16383,
+                    i + 1,
+                    slaves.size() + 1));
         }
         return nodeList.toArray(new RedisNode[0]);
     }
@@ -357,17 +356,17 @@ class RedisConfig implements Serializable {
                     String host = SafeEncoder.encode((byte[]) node.get(0));
                     int port = Integer.parseInt(node.get(1).toString());
                     result.add(
-                            new RedisNode(
-                                    new RedisEndpoint(
-                                            host,
-                                            port,
-                                            endpoint.getAuth(),
-                                            endpoint.getDb(),
-                                            endpoint.getTimeout()),
-                                    sPos,
-                                    ePos,
-                                    i,
-                                    total));
+                        new RedisNode(
+                            new RedisEndpoint(
+                                host,
+                                port,
+                                endpoint.getAuth(),
+                                endpoint.getDb(),
+                                endpoint.getTimeout()),
+                            sPos,
+                            ePos,
+                            i,
+                            total));
                 }
             }
             return result.toArray(new RedisNode[0]);

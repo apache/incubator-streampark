@@ -17,13 +17,13 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
-
-import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,12 +34,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ZooKeeperUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(ZooKeeperUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(ZooKeeperUtils.class.getName());
 
     private static final String CONNECT = "localhost:2181";
     private static final Map<String, CuratorFramework> CLIENT_MAP = new ConcurrentHashMap<>();
 
-    private ZooKeeperUtils() {}
+    private ZooKeeperUtils() {
+    }
 
     public static CuratorFramework getClient() {
         return getClient(CONNECT);
@@ -53,11 +54,11 @@ public final class ZooKeeperUtils {
         try {
             RetryPolicy retryPolicy = new RetryNTimes(5, 2000);
             CuratorFramework client =
-                    CuratorFrameworkFactory.builder()
-                            .connectString(url)
-                            .retryPolicy(retryPolicy)
-                            .connectionTimeoutMs(2000)
-                            .build();
+                CuratorFrameworkFactory.builder()
+                    .connectString(url)
+                    .retryPolicy(retryPolicy)
+                    .connectionTimeoutMs(2000)
+                    .build();
             client.start();
             CLIENT_MAP.put(url, client);
             return client;
@@ -90,18 +91,17 @@ public final class ZooKeeperUtils {
         return create(path, null, CONNECT, false);
     }
 
-    public static boolean create(String path, String value, String url, boolean persistent)
-            throws Exception {
+    public static boolean create(String path, String value, String url, boolean persistent) throws Exception {
         try {
             CuratorFramework client = getClient(url);
             if (client.checkExists().forPath(path) == null) {
                 byte[] data =
-                        value == null || value.isEmpty()
-                                ? new byte[0]
-                                : value.getBytes(StandardCharsets.UTF_8);
+                    value == null || value.isEmpty()
+                        ? new byte[0]
+                        : value.getBytes(StandardCharsets.UTF_8);
                 CreateMode mode = persistent ? CreateMode.PERSISTENT : CreateMode.EPHEMERAL;
                 String opResult =
-                        client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data);
+                    client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data);
                 return path.equals(opResult);
             }
             return false;
@@ -111,17 +111,16 @@ public final class ZooKeeperUtils {
         }
     }
 
-    public static boolean update(String path, String value, String url, boolean persistent)
-            throws Exception {
+    public static boolean update(String path, String value, String url, boolean persistent) throws Exception {
         try {
             CuratorFramework client = getClient(url);
             if (client.checkExists().forPath(path) == null) {
                 CreateMode mode = persistent ? CreateMode.PERSISTENT : CreateMode.EPHEMERAL;
                 String opResult =
-                        client.create()
-                                .creatingParentsIfNeeded()
-                                .withMode(mode)
-                                .forPath(path, value.getBytes(StandardCharsets.UTF_8));
+                    client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(mode)
+                        .forPath(path, value.getBytes(StandardCharsets.UTF_8));
                 return path.equals(opResult);
             }
             client.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8));

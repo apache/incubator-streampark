@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.enums.FlinkJobType;
@@ -27,6 +28,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class FlinkYarnApplicationBuildRequest implements BuildParam {
+
     private String appName;
     private String mainClass;
     private String localWorkspace;

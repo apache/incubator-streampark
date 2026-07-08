@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import com.github.dockerjava.api.DockerClient;
@@ -27,26 +28,37 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class DockerClients {
-    private DockerClients() {}
+
+    private DockerClients() {
+    }
 
     public static BuildImageCallbackListener watchDockerBuildStep(Consumer<String> func) {
         return new BuildImageCallbackListener() {
+
             @Override
-            public void watchBuildStep(String buildStepMsg) { func.accept(buildStepMsg); }
+            public void watchBuildStep(String buildStepMsg) {
+                func.accept(buildStepMsg);
+            }
         };
     }
 
     public static PullImageCallbackListener watchDockerPullProcess(Consumer<PullResponseItem> func) {
         return new PullImageCallbackListener() {
+
             @Override
-            public void watchPullProcess(PullResponseItem processDetail) { func.accept(processDetail); }
+            public void watchPullProcess(PullResponseItem processDetail) {
+                func.accept(processDetail);
+            }
         };
     }
 
     public static PushImageCallbackListener watchDockerPushProcess(Consumer<PushResponseItem> func) {
         return new PushImageCallbackListener() {
+
             @Override
-            public void watchPushProcess(PushResponseItem processDetail) { func.accept(processDetail); }
+            public void watchPushProcess(PushResponseItem processDetail) {
+                func.accept(processDetail);
+            }
         };
     }
 

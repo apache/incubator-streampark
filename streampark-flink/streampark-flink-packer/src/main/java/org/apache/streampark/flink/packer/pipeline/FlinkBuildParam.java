@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import org.apache.streampark.common.conf.FlinkVersion;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class FlinkBuildParam implements BuildParam {
+
     protected final Workspace localWorkspace = Workspace.local();
 
     public abstract String workspace();

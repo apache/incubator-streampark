@@ -61,10 +61,9 @@ public class KafkaSink<T> extends Sink<T> {
     public void sink(JavaRDD<T> rdd, Time time) {
         String outputTopic = getProp().getProperty("topic");
         new RDDKafkaWriter<>(rdd)
-                .writeToKafka(
-                        getProp(),
-                        x ->
-                                new ProducerRecord<>(
-                                        outputTopic, UUID.randomUUID().toString(), x.toString()));
+            .writeToKafka(
+                getProp(),
+                x -> new ProducerRecord<>(
+                    outputTopic, UUID.randomUUID().toString(), x.toString()));
     }
 }

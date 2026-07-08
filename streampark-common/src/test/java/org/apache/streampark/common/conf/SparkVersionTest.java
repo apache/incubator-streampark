@@ -39,9 +39,9 @@ class SparkVersionTest {
         assertThat(jarsDir.mkdirs()).isTrue();
         assertThat(new File(jarsDir, "spark-core_2.13-4.1.2.jar").createNewFile()).isTrue();
         Files.writeString(
-                new File(sparkHome, "RELEASE").toPath(),
-                "Spark 4.1.2 (git revision f0bb2e6a47d) built for Hadoop 3.4.2\n",
-                StandardCharsets.UTF_8);
+            new File(sparkHome, "RELEASE").toPath(),
+            "Spark 4.1.2 (git revision f0bb2e6a47d) built for Hadoop 3.4.2\n",
+            StandardCharsets.UTF_8);
 
         SparkVersion sparkVersion = new SparkVersion(sparkHome.getAbsolutePath());
 

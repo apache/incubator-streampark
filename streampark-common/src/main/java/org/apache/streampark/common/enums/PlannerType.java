@@ -19,6 +19,7 @@ package org.apache.streampark.common.enums;
 
 /** Flink table planner type. */
 public enum PlannerType {
+
     BLINK,
     OLD,
     ANY;

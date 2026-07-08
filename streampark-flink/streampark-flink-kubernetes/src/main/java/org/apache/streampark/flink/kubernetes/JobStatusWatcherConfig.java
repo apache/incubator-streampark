@@ -25,6 +25,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @AllArgsConstructor
 public class JobStatusWatcherConfig {
+
     private long requestTimeoutSec;
     private long requestIntervalSec;
     private int silentStateJobKeepTrackingSec;

@@ -51,202 +51,201 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
     @Override
     public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         FlinkConfigurationEnhancer.safeSet(
-                flinkConfig, YarnConfigOptions.APPLICATION_NAME, submitRequest.getEffectiveAppName());
+            flinkConfig, YarnConfigOptions.APPLICATION_NAME, submitRequest.getEffectiveAppName());
         FlinkConfigurationEnhancer.safeSet(
-                flinkConfig,
-                YarnConfigOptions.APPLICATION_TYPE,
-                submitRequest.getApplicationType().getName());
+            flinkConfig,
+            YarnConfigOptions.APPLICATION_TYPE,
+            submitRequest.getApplicationType().getName());
         FlinkConfigurationEnhancer.safeSet(flinkConfig, YarnConfigOptions.APPLICATION_TAGS, "streampark");
     }
 
     private <R extends SavepointRequestTrait, O> O executeClientAction(
-            R request, Configuration flinkConf, ClusterClientAction<O, ApplicationId> actionFunc)
-            throws Exception {
+                                                                       R request, Configuration flinkConf,
+                                                                       ClusterClientAction<O, ApplicationId> actionFunc) throws Exception {
         JobID jobID = getJobID(request.getJobId());
         FlinkConfigurationEnhancer.safeSet(flinkConf, YarnConfigOptions.APPLICATION_ID, request.getClusterId());
         YarnClusterDescriptorResult descriptorResult = getYarnClusterDescriptor(flinkConf);
         ApplicationId applicationId = descriptorResult.applicationId;
         YarnClusterDescriptor clusterDescriptor = descriptorResult.clusterDescriptor;
         ClusterClient<ApplicationId> clusterClient =
-                clusterDescriptor.retrieve(applicationId).getClusterClient();
+            clusterDescriptor.retrieve(applicationId).getClusterClient();
 
         try {
             return actionFunc.apply(jobID, clusterClient);
         } catch (Exception e) {
             throw new FlinkException(
-                    "[StreamPark] Do "
-                            + request.getClass().getSimpleName()
-                            + " for the job "
-                            + request.getJobId()
-                            + " failed. detail: "
-                            + ExceptionUtils.stringifyException(e));
+                "[StreamPark] Do "
+                    + request.getClass().getSimpleName()
+                    + " for the job "
+                    + request.getJobId()
+                    + " failed. detail: "
+                    + ExceptionUtils.stringifyException(e));
         }
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
-            TriggerSavepointRequest savepointRequest, Configuration flinkConf) throws Exception {
+                                                TriggerSavepointRequest savepointRequest,
+                                                Configuration flinkConf) throws Exception {
         return executeClientAction(
-                savepointRequest,
-                flinkConf,
-                (jid, client) ->
-                        new SavepointResponse(triggerSavepoint(savepointRequest, jid, client)));
+            savepointRequest,
+            flinkConf,
+            (jid, client) -> new SavepointResponse(triggerSavepoint(savepointRequest, jid, client)));
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf)
-            throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws Exception {
         return executeClientAction(
-                cancelRequest,
-                flinkConf,
-                (jid, client) -> new CancelResponse(cancelJob(cancelRequest, jid, client)));
+            cancelRequest,
+            flinkConf,
+            (jid, client) -> new CancelResponse(cancelJob(cancelRequest, jid, client)));
     }
 
     protected ClusterClientProvider<ApplicationId> deployInternal(
-            YarnClusterDescriptor clusterDescriptor,
-            ClusterSpecification clusterSpecification,
-            String applicationName,
-            String yarnClusterEntrypoint,
-            JobGraph jobGraph,
-            Boolean detached)
-            throws Exception {
+                                                                  YarnClusterDescriptor clusterDescriptor,
+                                                                  ClusterSpecification clusterSpecification,
+                                                                  String applicationName,
+                                                                  String yarnClusterEntrypoint,
+                                                                  JobGraph jobGraph,
+                                                                  Boolean detached) throws Exception {
         if (deployInternalMethod == null) {
             Class<?>[] paramClass =
-                    new Class<?>[] {
+                new Class<?>[]{
                         ClusterSpecification.class,
                         String.class,
                         String.class,
                         JobGraph.class,
                         boolean.class
-                    };
+                };
             deployInternalMethod =
-                    YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
+                YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
             deployInternalMethod.setAccessible(true);
         }
-        return (ClusterClientProvider<ApplicationId>)
-                deployInternalMethod.invoke(
-                        clusterDescriptor,
-                        clusterSpecification,
-                        applicationName,
-                        yarnClusterEntrypoint,
-                        jobGraph,
-                        detached);
+        return (ClusterClientProvider<ApplicationId>) deployInternalMethod.invoke(
+            clusterDescriptor,
+            clusterSpecification,
+            applicationName,
+            yarnClusterEntrypoint,
+            jobGraph,
+            detached);
     }
 
-    protected YarnClusterDescriptorResult getYarnClusterDescriptor(Configuration flinkConfig)
-            throws Exception {
+    protected YarnClusterDescriptorResult getYarnClusterDescriptor(Configuration flinkConfig) throws Exception {
         return getYarnClusterDescriptor(flinkConfig, "");
     }
 
     protected YarnClusterDescriptorResult getYarnClusterDescriptor(
-            Configuration flinkConfig, String user) throws Exception {
+                                                                   Configuration flinkConfig,
+                                                                   String user) throws Exception {
         try {
             return doAsYarnClusterDescriptor(
-                    user,
-                    () -> {
-                        YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
-                        ApplicationId yarnClusterId = clientFactory.getClusterId(flinkConfig);
-                        if (yarnClusterId == null) {
-                            throw new IllegalArgumentException("yarnClusterId is null");
-                        }
-                        YarnClusterDescriptor clusterDescriptor =
-                                clientFactory.createClusterDescriptor(flinkConfig);
-                        return new YarnClusterDescriptorResult(yarnClusterId, clusterDescriptor);
-                    });
+                user,
+                () -> {
+                    YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
+                    ApplicationId yarnClusterId = clientFactory.getClusterId(flinkConfig);
+                    if (yarnClusterId == null) {
+                        throw new IllegalArgumentException("yarnClusterId is null");
+                    }
+                    YarnClusterDescriptor clusterDescriptor =
+                        clientFactory.createClusterDescriptor(flinkConfig);
+                    return new YarnClusterDescriptorResult(yarnClusterId, clusterDescriptor);
+                });
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "[StreamPark] access ClusterDescriptor error: " + e, e);
+                "[StreamPark] access ClusterDescriptor error: " + e, e);
         }
     }
 
     protected YarnClusterDeployDescriptorResult getYarnClusterDeployDescriptor(
-            Configuration flinkConfig) throws Exception {
+                                                                               Configuration flinkConfig) throws Exception {
         return getYarnClusterDeployDescriptor(flinkConfig, "");
     }
 
     protected YarnClusterDeployDescriptorResult getYarnClusterDeployDescriptor(
-            Configuration flinkConfig, String user) throws Exception {
+                                                                               Configuration flinkConfig,
+                                                                               String user) throws Exception {
         try {
             return doAsYarnClusterDescriptorDeploy(user, flinkConfig);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "[StreamPark] access ClusterDescriptor error: " + e, e);
+                "[StreamPark] access ClusterDescriptor error: " + e, e);
         }
     }
 
     private YarnClusterDeployDescriptorResult doAsYarnClusterDescriptorDeploy(
-            String user, Configuration flinkConfig) throws Exception {
+                                                                              String user,
+                                                                              Configuration flinkConfig) throws Exception {
         UserGroupInformation ugi = HadoopUtils.getUgi();
         UserGroupInformation finalUgi =
-                user != null
-                                && !user.isEmpty()
-                                && !ugi.getShortUserName().equals(user)
-                        ? UserGroupInformation.createProxyUser(user, ugi)
-                        : ugi;
+            user != null
+                && !user.isEmpty()
+                && !ugi.getShortUserName().equals(user)
+                    ? UserGroupInformation.createProxyUser(user, ugi)
+                    : ugi;
         try {
             return finalUgi.doAs(
-                    (PrivilegedAction<YarnClusterDeployDescriptorResult>) () -> {
-                        try {
-                            YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
-                            ClusterSpecification clusterSpecification =
-                                    clientFactory.getClusterSpecification(flinkConfig);
-                            YarnClusterDescriptor clusterDescriptor =
-                                    clientFactory.createClusterDescriptor(flinkConfig);
-                            return new YarnClusterDeployDescriptorResult(
-                                    clusterSpecification, clusterDescriptor);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                (PrivilegedAction<YarnClusterDeployDescriptorResult>) () -> {
+                    try {
+                        YarnClusterClientFactory clientFactory = new YarnClusterClientFactory();
+                        ClusterSpecification clusterSpecification =
+                            clientFactory.getClusterSpecification(flinkConfig);
+                        YarnClusterDescriptor clusterDescriptor =
+                            clientFactory.createClusterDescriptor(flinkConfig);
+                        return new YarnClusterDeployDescriptorResult(
+                            clusterSpecification, clusterDescriptor);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         } catch (Exception e) {
             throw new RuntimeException(
-                    "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
+                "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
         }
     }
 
-    private <T> T doAsYarnClusterDescriptor(String user, YarnClusterSupplier<T> func)
-            throws Exception {
+    private <T> T doAsYarnClusterDescriptor(String user, YarnClusterSupplier<T> func) throws Exception {
         UserGroupInformation ugi = HadoopUtils.getUgi();
         UserGroupInformation finalUgi =
-                user != null
-                                && !user.isEmpty()
-                                && !ugi.getShortUserName().equals(user)
-                        ? UserGroupInformation.createProxyUser(user, ugi)
-                        : ugi;
+            user != null
+                && !user.isEmpty()
+                && !ugi.getShortUserName().equals(user)
+                    ? UserGroupInformation.createProxyUser(user, ugi)
+                    : ugi;
         try {
             return finalUgi.doAs(
-                    (PrivilegedAction<T>)
-                            () -> {
-                                try {
-                                    return func.get();
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
+                (PrivilegedAction<T>) () -> {
+                    try {
+                        return func.get();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         } catch (Exception e) {
             throw new RuntimeException(
-                    "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
+                "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user, e);
         }
     }
 
     protected static final class YarnClusterDescriptorResult {
+
         public final ApplicationId applicationId;
         public final YarnClusterDescriptor clusterDescriptor;
 
         YarnClusterDescriptorResult(
-                ApplicationId applicationId, YarnClusterDescriptor clusterDescriptor) {
+                                    ApplicationId applicationId, YarnClusterDescriptor clusterDescriptor) {
             this.applicationId = applicationId;
             this.clusterDescriptor = clusterDescriptor;
         }
     }
 
     protected static final class YarnClusterDeployDescriptorResult {
+
         public final ClusterSpecification clusterSpecification;
         public final YarnClusterDescriptor clusterDescriptor;
 
         YarnClusterDeployDescriptorResult(
-                ClusterSpecification clusterSpecification,
-                YarnClusterDescriptor clusterDescriptor) {
+                                          ClusterSpecification clusterSpecification,
+                                          YarnClusterDescriptor clusterDescriptor) {
             this.clusterSpecification = clusterSpecification;
             this.clusterDescriptor = clusterDescriptor;
         }
@@ -254,6 +253,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
 
     @FunctionalInterface
     private interface YarnClusterSupplier<T> {
+
         T get() throws Exception;
     }
 }

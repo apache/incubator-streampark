@@ -24,13 +24,13 @@ import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExecutionOptions;
-import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.ParameterTool;
 
 import java.util.Arrays;
 import java.util.HashMap;

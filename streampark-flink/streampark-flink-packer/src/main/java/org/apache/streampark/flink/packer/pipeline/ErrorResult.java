@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -29,5 +29,6 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorResult implements BuildResult {
+
     private boolean pass = false;
 }

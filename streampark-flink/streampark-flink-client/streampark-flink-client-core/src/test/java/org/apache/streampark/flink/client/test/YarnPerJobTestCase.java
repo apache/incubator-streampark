@@ -20,6 +20,7 @@ package org.apache.streampark.flink.client.test;
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.core.conf.FlinkRunOption;
+
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.commons.cli.Options;
@@ -36,8 +37,8 @@ import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.GlobalConfiguration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
-import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.configuration.MemorySize.MemoryUnit;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.yarn.YarnClusterDescriptor;
@@ -56,12 +57,12 @@ import java.util.Objects;
 public final class YarnPerJobTestCase {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(YarnPerJobTestCase.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(YarnPerJobTestCase.class.getName());
 
     private static final String FLINK_HOME = System.getenv("FLINK_HOME");
 
     private static final String USER_JAR =
-            FLINK_HOME + "/examples/streaming/SocketWindowWordCount.jar";
+        FLINK_HOME + "/examples/streaming/SocketWindowWordCount.jar";
 
     private static final String PROGRAM_ARGS = "--hostname localhost --port 9999";
 
@@ -79,43 +80,42 @@ public final class YarnPerJobTestCase {
         FLINK_DEFAULT_CONFIGURATION = GlobalConfiguration.loadConfiguration(FLINK_HOME + "/conf");
         try {
             CUSTOM_COMMAND_LINES =
-                    CliFrontend.loadCustomCommandLines(
-                            FLINK_DEFAULT_CONFIGURATION, FLINK_HOME + "/conf");
+                CliFrontend.loadCustomCommandLines(
+                    FLINK_DEFAULT_CONFIGURATION, FLINK_HOME + "/conf");
             Class<?>[] paramClass =
-                    new Class<?>[] {
+                new Class<?>[]{
                         ClusterSpecification.class,
                         String.class,
                         String.class,
                         JobGraph.class,
                         boolean.class
-                    };
+                };
             DEPLOY_INTERNAL_METHOD =
-                    YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
+                YarnClusterDescriptor.class.getDeclaredMethod("deployInternal", paramClass);
             DEPLOY_INTERNAL_METHOD.setAccessible(true);
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
     }
 
-    private YarnPerJobTestCase() {}
+    private YarnPerJobTestCase() {
+    }
 
     @SuppressWarnings("unchecked")
     private static ClusterClientProvider<ApplicationId> deployInternal(
-            YarnClusterDescriptor clusterDescriptor,
-            ClusterSpecification clusterSpecification,
-            String applicationName,
-            String yarnClusterEntrypoint,
-            JobGraph jobGraph,
-            Boolean detached)
-            throws Exception {
-        return (ClusterClientProvider<ApplicationId>)
-                DEPLOY_INTERNAL_METHOD.invoke(
-                        clusterDescriptor,
-                        clusterSpecification,
-                        applicationName,
-                        yarnClusterEntrypoint,
-                        jobGraph,
-                        detached);
+                                                                       YarnClusterDescriptor clusterDescriptor,
+                                                                       ClusterSpecification clusterSpecification,
+                                                                       String applicationName,
+                                                                       String yarnClusterEntrypoint,
+                                                                       JobGraph jobGraph,
+                                                                       Boolean detached) throws Exception {
+        return (ClusterClientProvider<ApplicationId>) DEPLOY_INTERNAL_METHOD.invoke(
+            clusterDescriptor,
+            clusterSpecification,
+            applicationName,
+            yarnClusterEntrypoint,
+            jobGraph,
+            detached);
     }
 
     public static void main(String[] args) throws Exception {
@@ -125,10 +125,10 @@ public final class YarnPerJobTestCase {
             customCommandLine.addRunOptions(customCommandLineOptions);
         }
         Options commandLineOptions =
-                FlinkRunOption.mergeOptions(
-                        CliFrontendParser.getRunCommandOptions(), customCommandLineOptions);
+            FlinkRunOption.mergeOptions(
+                CliFrontendParser.getRunCommandOptions(), customCommandLineOptions);
         org.apache.commons.cli.CommandLine commandLine =
-                FlinkRunOption.parse(commandLineOptions, OPTION.split("\\s+"), true);
+            FlinkRunOption.parse(commandLineOptions, OPTION.split("\\s+"), true);
 
         CustomCommandLine activeCommandLine = null;
         LOG.info("Custom commandlines: {}", CUSTOM_COMMAND_LINES);
@@ -146,72 +146,72 @@ public final class YarnPerJobTestCase {
         Configuration flinkConfig = new Configuration(executorConfig);
         flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName());
         flinkConfig.set(
-                org.apache.flink.client.deployment.application.ApplicationConfiguration.APPLICATION_ARGS,
-                Arrays.asList(PROGRAM_ARGS.split("\\s+")));
+            org.apache.flink.client.deployment.application.ApplicationConfiguration.APPLICATION_ARGS,
+            Arrays.asList(PROGRAM_ARGS.split("\\s+")));
         flinkConfig.set(
-                JobManagerOptions.TOTAL_FLINK_MEMORY, MemorySize.parse("1024", MemoryUnit.MEGA_BYTES));
+            JobManagerOptions.TOTAL_FLINK_MEMORY, MemorySize.parse("1024", MemoryUnit.MEGA_BYTES));
         flinkConfig.set(
-                TaskManagerOptions.TOTAL_FLINK_MEMORY, MemorySize.parse("1024", MemoryUnit.MEGA_BYTES));
+            TaskManagerOptions.TOTAL_FLINK_MEMORY, MemorySize.parse("1024", MemoryUnit.MEGA_BYTES));
 
         DefaultClusterClientServiceLoader clusterClientServiceLoader =
-                new DefaultClusterClientServiceLoader();
+            new DefaultClusterClientServiceLoader();
         org.apache.flink.client.deployment.ClusterClientFactory<ApplicationId> clientFactory =
-                clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
+            clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
 
         YarnClusterDescriptor clusterDescriptor =
-                (YarnClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
+            (YarnClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
         String[] distJars =
-                new File(FLINK_HOME + "/lib")
-                        .list((dir, name) -> name.matches("flink-dist.*\\.jar"));
+            new File(FLINK_HOME + "/lib")
+                .list((dir, name) -> name.matches("flink-dist.*\\.jar"));
         if (distJars == null || distJars.length == 0) {
             throw new IllegalArgumentException(
-                    "[StreamPark] can no found flink-dist jar in " + FLINK_HOME + "/lib");
+                "[StreamPark] can no found flink-dist jar in " + FLINK_HOME + "/lib");
         }
         if (distJars.length > 1) {
             throw new IllegalArgumentException(
-                    "[StreamPark] found multiple flink-dist jar in "
-                            + FLINK_HOME
-                            + "/lib,["
-                            + String.join(",", distJars)
-                            + "]");
+                "[StreamPark] found multiple flink-dist jar in "
+                    + FLINK_HOME
+                    + "/lib,["
+                    + String.join(",", distJars)
+                    + "]");
         }
         clusterDescriptor.setLocalJarPath(new Path(FLINK_HOME + "/lib/" + distJars[0]));
 
         try {
             ClusterSpecification clusterSpecification =
-                    clientFactory.getClusterSpecification(flinkConfig);
+                clientFactory.getClusterSpecification(flinkConfig);
             LOG.info("------------------<<specification>>------------------");
             LOG.info("{}", clusterSpecification);
             LOG.info("------------------------------------");
 
             PackagedProgram packagedProgram =
-                    PackagedProgram.newBuilder()
-                            .setJarFile(new File(USER_JAR))
-                            .setArguments(PROGRAM_ARGS.split("\\s+"))
-                            .build();
+                PackagedProgram.newBuilder()
+                    .setJarFile(new File(USER_JAR))
+                    .setArguments(PROGRAM_ARGS.split("\\s+"))
+                    .build();
             JobGraph jobGraph =
-                    PackagedProgramUtils.createJobGraph(packagedProgram, flinkConfig, 1, false);
+                PackagedProgramUtils.createJobGraph(packagedProgram, flinkConfig, 1, false);
             LOG.info("------------------<<jobId>>------------------");
             LOG.info("{}", jobGraph.getJobID());
             LOG.info("------------------------------------");
 
             org.apache.flink.client.program.ClusterClient<ApplicationId> clusterClient =
-                    deployInternal(
-                                    clusterDescriptor,
-                                    clusterSpecification,
-                                    "MyJob",
-                                    YarnJobClusterEntrypoint.class.getName(),
-                                    jobGraph,
-                                    false)
-                            .getClusterClient();
+                deployInternal(
+                    clusterDescriptor,
+                    clusterSpecification,
+                    "MyJob",
+                    YarnJobClusterEntrypoint.class.getName(),
+                    jobGraph,
+                    false)
+                        .getClusterClient();
             ApplicationId applicationId = clusterClient.getClusterId();
             LOG.info("------------------<<applicationId>>-------------------");
             LOG.info("Flink Job Started: applicationId: {} ", applicationId);
             LOG.info("-------------------------------------");
             SubmitResponse.builder()
-                    .clusterId(applicationId.toString())
-                    .flinkConfig(flinkConfig.toMap())
-                    .build();
+                .clusterId(applicationId.toString())
+                .flinkConfig(flinkConfig.toMap())
+                .build();
         } finally {
             clusterDescriptor.close();
         }

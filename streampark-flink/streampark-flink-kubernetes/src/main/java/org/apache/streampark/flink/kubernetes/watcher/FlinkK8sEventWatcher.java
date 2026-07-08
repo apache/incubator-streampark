@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.watcher;
 
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatchController;
@@ -21,8 +22,8 @@ import org.apache.streampark.flink.kubernetes.KubernetesRetriever;
 import org.apache.streampark.flink.kubernetes.model.K8sDeploymentEventCV;
 import org.apache.streampark.flink.kubernetes.model.K8sEventKey;
 
-import org.apache.flink.kubernetes.kubeclient.resources.CompatibleKubernetesWatcher;
 import org.apache.flink.kubernetes.kubeclient.resources.CompKubernetesDeployment;
+import org.apache.flink.kubernetes.kubeclient.resources.CompatibleKubernetesWatcher;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.api.model.apps.Deployment;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.flink.kubernetes.shaded.io.fabric8.kubernetes.client.Watcher;
@@ -76,6 +77,7 @@ public class FlinkK8sEventWatcher extends FlinkWatcher {
         try {
             k8sClient.apps().deployments().withLabel("type", "flink-native-kubernetes")
                 .watch(new CompatibleKubernetesWatcher<Deployment, CompKubernetesDeployment>() {
+
                     @Override
                     public void eventReceived(Watcher.Action action, Deployment event) {
                         handleDeploymentEvent(action, event);

@@ -26,37 +26,43 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class HostsUtils {
-    private HostsUtils() {}
+
+    private HostsUtils() {
+    }
 
     public static Map<String, String> getSortSystemHosts() {
         Map<String, String> ipMap = new HashMap<>();
         try {
             HostsFileParser.parseSilently()
-                    .inet4Entries()
-                    .forEach((hostname, addr) -> ipMap.put(hostname, addr.getHostAddress()));
+                .inet4Entries()
+                .forEach((hostname, addr) -> ipMap.put(hostname, addr.getHostAddress()));
         } catch (Exception ignored) {
             // ignore
         }
         return ipMap.entrySet().stream()
             .sorted((a, b) -> Integer.compare(b.getKey().length(), a.getKey().length()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a,b)->a, LinkedHashMap::new));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
-    public static Map<String, String> getSystemHosts() { return getSystemHosts(false); }
+    public static Map<String, String> getSystemHosts() {
+        return getSystemHosts(false);
+    }
     public static Map<String, String> getSystemHosts(boolean excludeLocalHost) {
         Map<String, String> map = new HashMap<>();
         try {
             HostsFileParser.parseSilently()
-                    .inet4Entries()
-                    .forEach((hostname, addr) -> map.put(hostname, addr.getHostAddress()));
+                .inet4Entries()
+                .forEach((hostname, addr) -> map.put(hostname, addr.getHostAddress()));
         } catch (Exception ignored) {
             // ignore
         }
         if (excludeLocalHost) {
             try {
                 String localHostName = InetAddress.getLocalHost().getHostName();
-                map.entrySet().removeIf(e -> "localhost".equals(e.getKey()) || localHostName.equals(e.getKey()) || "127.0.0.1".equals(e.getValue()));
-            } catch (Exception ignored) {}
+                map.entrySet().removeIf(e -> "localhost".equals(e.getKey()) || localHostName.equals(e.getKey())
+                    || "127.0.0.1".equals(e.getValue()));
+            } catch (Exception ignored) {
+            }
         }
         return map;
     }

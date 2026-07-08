@@ -39,139 +39,150 @@ import java.util.function.ToLongFunction;
 /** Static helpers for {@link DataStream} extensions (formerly Scala implicit enrichments). */
 public final class DataStreamUtils {
 
-    private DataStreamUtils() {}
+    private DataStreamUtils() {
+    }
 
     public static <T> DataStream<T> sideOut(
-            DataStream<T> dataStream, BiConsumer<T, ProcessFunction<T, T>.Context> fun) {
+                                            DataStream<T> dataStream,
+                                            BiConsumer<T, ProcessFunction<T, T>.Context> fun) {
         return dataStream.process(
-                new ProcessFunction<T, T>() {
-                    @Override
-                    public void processElement(
-                            T value, Context ctx, Collector<T> out) {
-                        fun.accept(value, ctx);
-                        out.collect(value);
-                    }
-                });
+            new ProcessFunction<T, T>() {
+
+                @Override
+                public void processElement(
+                                           T value, Context ctx, Collector<T> out) {
+                    fun.accept(value, ctx);
+                    out.collect(value);
+                }
+            });
     }
 
     public static <T, R> DataStream<R> sideGet(
-            SingleOutputStreamOperator<T> dataStream, String sideTag) {
-        return dataStream.getSideOutput(new OutputTag<R>(sideTag) {});
+                                               SingleOutputStreamOperator<T> dataStream, String sideTag) {
+        return dataStream.getSideOutput(new OutputTag<R>(sideTag) {
+        });
     }
 
     public static <T, R> DataStream<R> sideGet(
-            SingleOutputStreamOperator<T> dataStream, OutputTag<R> outputTag) {
+                                               SingleOutputStreamOperator<T> dataStream, OutputTag<R> outputTag) {
         return dataStream.getSideOutput(outputTag);
     }
 
     public static <T> DataStream<T> boundedOutOfOrdernessWatermark(
-            DataStream<T> dataStream, ToLongFunction<T> timestampExtractor, Duration duration) {
+                                                                   DataStream<T> dataStream,
+                                                                   ToLongFunction<T> timestampExtractor,
+                                                                   Duration duration) {
         return dataStream.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<T>forBoundedOutOfOrderness(duration)
-                        .withTimestampAssigner(
-                                (SerializableTimestampAssigner<T>)
-                                        (element, recordTimestamp) ->
-                                                timestampExtractor.applyAsLong(element)));
+            WatermarkStrategy.<T>forBoundedOutOfOrderness(duration)
+                .withTimestampAssigner(
+                    (SerializableTimestampAssigner<T>) (element, recordTimestamp) -> timestampExtractor
+                        .applyAsLong(element)));
     }
 
     public static <T> DataStream<T> timeLagWatermark(
-            DataStream<T> dataStream, ToLongFunction<T> timestampExtractor, Time maxTimeLag) {
+                                                     DataStream<T> dataStream, ToLongFunction<T> timestampExtractor,
+                                                     Time maxTimeLag) {
         AssignerWithPeriodicWatermarks<T> assigner =
-                new AssignerWithPeriodicWatermarks<T>() {
-                    @Override
-                    public long extractTimestamp(T element, long previousElementTimestamp) {
-                        return timestampExtractor.applyAsLong(element);
-                    }
+            new AssignerWithPeriodicWatermarks<T>() {
 
-                    @Override
-                    public Watermark getCurrentWatermark() {
-                        return new Watermark(
-                                System.currentTimeMillis() - maxTimeLag.toMilliseconds());
-                    }
-                };
+                @Override
+                public long extractTimestamp(T element, long previousElementTimestamp) {
+                    return timestampExtractor.applyAsLong(element);
+                }
+
+                @Override
+                public Watermark getCurrentWatermark() {
+                    return new Watermark(
+                        System.currentTimeMillis() - maxTimeLag.toMilliseconds());
+                }
+            };
         return dataStream.assignTimestampsAndWatermarks(
-                WatermarkStrategy.forGenerator(
-                        new AssignerWithPeriodicWatermarksAdapter.Strategy<>(assigner)));
+            WatermarkStrategy.forGenerator(
+                new AssignerWithPeriodicWatermarksAdapter.Strategy<>(assigner)));
     }
 
     public static <T> DataStream<T> punctuatedWatermark(
-            DataStream<T> dataStream,
-            ToLongFunction<T> extractTimeFun,
-            Predicate<T> checkFunc) {
+                                                        DataStream<T> dataStream,
+                                                        ToLongFunction<T> extractTimeFun,
+                                                        Predicate<T> checkFunc) {
         AssignerWithPunctuatedWatermarks<T> assigner =
-                new AssignerWithPunctuatedWatermarks<T>() {
-                    @Override
-                    public long extractTimestamp(T element, long previousElementTimestamp) {
-                        return extractTimeFun.applyAsLong(element);
-                    }
+            new AssignerWithPunctuatedWatermarks<T>() {
 
-                    @Override
-                    public Watermark checkAndGetNextWatermark(
-                            T lastElement, long extractedTimestamp) {
-                        if (checkFunc.test(lastElement)) {
-                            return new Watermark(extractedTimestamp);
-                        }
-                        return null;
+                @Override
+                public long extractTimestamp(T element, long previousElementTimestamp) {
+                    return extractTimeFun.applyAsLong(element);
+                }
+
+                @Override
+                public Watermark checkAndGetNextWatermark(
+                                                          T lastElement, long extractedTimestamp) {
+                    if (checkFunc.test(lastElement)) {
+                        return new Watermark(extractedTimestamp);
                     }
-                };
+                    return null;
+                }
+            };
         return dataStream.assignTimestampsAndWatermarks(
-                WatermarkStrategy.forGenerator(
-                        new AssignerWithPunctuatedWatermarksAdapter.Strategy<>(assigner)));
+            WatermarkStrategy.forGenerator(
+                new AssignerWithPunctuatedWatermarksAdapter.Strategy<>(assigner)));
     }
 
     public static <T, R> DataStream<R> proc(
-            DataStream<T> dataStream,
-            ProcessFunction<T, R> processFunction) {
+                                            DataStream<T> dataStream,
+                                            ProcessFunction<T, R> processFunction) {
         return dataStream.process(processFunction);
     }
 
     public static <T, R> DataStream<R> proc(
-            DataStream<T> dataStream,
-            TriConsumer<T, ProcessFunction<T, R>.Context, Collector<R>> processFunction,
-            OnTimerConsumer<T, R> onTimerFunction) {
+                                            DataStream<T> dataStream,
+                                            TriConsumer<T, ProcessFunction<T, R>.Context, Collector<R>> processFunction,
+                                            OnTimerConsumer<T, R> onTimerFunction) {
         return dataStream.process(
-                new ProcessFunction<T, R>() {
-                    @Override
-                    public void processElement(
-                            T value, Context ctx, Collector<R> out) {
-                        processFunction.accept(value, ctx, out);
-                    }
+            new ProcessFunction<T, R>() {
 
-                    @Override
-                    public void onTimer(long timestamp, OnTimerContext ctx, Collector<R> out)
-                            throws Exception {
-                        if (onTimerFunction != null) {
-                            onTimerFunction.accept(timestamp, ctx, out);
-                        } else {
-                            super.onTimer(timestamp, ctx, out);
-                        }
+                @Override
+                public void processElement(
+                                           T value, Context ctx, Collector<R> out) {
+                    processFunction.accept(value, ctx, out);
+                }
+
+                @Override
+                public void onTimer(long timestamp, OnTimerContext ctx, Collector<R> out) throws Exception {
+                    if (onTimerFunction != null) {
+                        onTimerFunction.accept(timestamp, ctx, out);
+                    } else {
+                        super.onTimer(timestamp, ctx, out);
                     }
-                });
+                }
+            });
     }
 
     public static <T, R> DataStream<R> proc(
-            DataStream<T> dataStream,
-            TriConsumer<T, ProcessFunction<T, R>.Context, Collector<R>> processFunction) {
+                                            DataStream<T> dataStream,
+                                            TriConsumer<T, ProcessFunction<T, R>.Context, Collector<R>> processFunction) {
         return proc(dataStream, processFunction, null);
     }
 
     public static <IN, OUT, R> void sideOut(
-            ProcessFunction<IN, OUT>.Context ctx, String outputTag, R value) {
-        ctx.output(new OutputTag<R>(outputTag) {}, value);
+                                            ProcessFunction<IN, OUT>.Context ctx, String outputTag, R value) {
+        ctx.output(new OutputTag<R>(outputTag) {
+        }, value);
     }
 
     /** Three-argument consumer for process element callbacks. */
     @FunctionalInterface
     public interface TriConsumer<T, U, V> {
+
         void accept(T t, U u, V v);
     }
 
     /** On-timer callback for {@link #proc}. */
     @FunctionalInterface
     public interface OnTimerConsumer<T, R> {
+
         void accept(
-                long timestamp,
-                ProcessFunction<T, R>.OnTimerContext ctx,
-                Collector<R> out);
+                    long timestamp,
+                    ProcessFunction<T, R>.OnTimerContext ctx,
+                    Collector<R> out);
     }
 }

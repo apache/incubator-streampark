@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
 
-import org.apache.streampark.common.util.ThreadUtils;
-
 import org.apache.streampark.common.util.StreamParkLoggerFactory;
+import org.apache.streampark.common.util.ThreadUtils;
 
 import org.apache.streampark.shaded.org.slf4j.Logger;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class BuildPipeline {
 
     protected static final Logger log =
-            StreamParkLoggerFactory.loggerFactory().getLogger(BuildPipeline.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(BuildPipeline.class.getName());
 
     protected static final ThreadPoolExecutor EXEC_POOL = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -82,7 +82,10 @@ public abstract class BuildPipeline {
             error = PipeError.of(cause.getMessage(), cause);
             log.info("[streampark-packer] Building pipeline step[{}/{}] failure => {} | appName={}",
                 seq, getAllSteps(), getPipeType().getSteps().get(seq), offerBuildParam().appName());
-            try { watcher.onStepStateChange(snapshot()); } catch (Exception ignored) {}
+            try {
+                watcher.onStepStateChange(snapshot());
+            } catch (Exception ignored) {
+            }
             return java.util.Optional.empty();
         }
     }
@@ -92,7 +95,10 @@ public abstract class BuildPipeline {
         stepsStatus.put(step, Map.entry(PipelineStepStatusEnum.skipped, System.currentTimeMillis()));
         log.info("[streampark-packer] Building pipeline step[{}/{}] skipped => {} | appName={}",
             step, getAllSteps(), getPipeType().getSteps().get(step), offerBuildParam().appName());
-        try { watcher.onStepStateChange(snapshot()); } catch (Exception ignored) {}
+        try {
+            watcher.onStepStateChange(snapshot());
+        } catch (Exception ignored) {
+        }
     }
 
     public BuildResult launch() {
@@ -102,17 +108,16 @@ public abstract class BuildPipeline {
             log.info("[streampark-packer] Building pipeline is launching, params={} | appName={}",
                 offerBuildParam(), offerBuildParam().appName());
             BuildResult result =
-                    EXEC_POOL
-                            .submit(
-                                    (Callable<BuildResult>)
-                                            () -> {
-                                                try {
-                                                    return buildProcess();
-                                                } catch (Throwable e) {
-                                                    throw new RuntimeException(e);
-                                                }
-                                            })
-                            .get(20, TimeUnit.MINUTES);
+                EXEC_POOL
+                    .submit(
+                        (Callable<BuildResult>) () -> {
+                            try {
+                                return buildProcess();
+                            } catch (Throwable e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                    .get(20, TimeUnit.MINUTES);
             pipeStatus = PipelineStatusEnum.success;
             log.info("[streampark-packer] Building pipeline has finished successfully. | appName={}",
                 offerBuildParam().appName());
@@ -125,7 +130,10 @@ public abstract class BuildPipeline {
             log.error("[streampark-packer] Building pipeline interrupted. | appName={}",
                 offerBuildParam().appName(), e);
             BuildResult result = new ErrorResult();
-            try { watcher.onFinish(snapshot(), result); } catch (Exception ignored) {}
+            try {
+                watcher.onFinish(snapshot(), result);
+            } catch (Exception ignored) {
+            }
             return result;
         } catch (Throwable cause) {
             pipeStatus = PipelineStatusEnum.failure;
@@ -133,16 +141,29 @@ public abstract class BuildPipeline {
             log.error("[streampark-packer] Building pipeline has failed. | appName={}",
                 offerBuildParam().appName(), cause);
             BuildResult result = new ErrorResult();
-            try { watcher.onFinish(snapshot(), result); } catch (Exception ignored) {}
+            try {
+                watcher.onFinish(snapshot(), result);
+            } catch (Exception ignored) {
+            }
             return result;
         }
     }
 
-    public PipelineStatusEnum getPipeStatus() { return pipeStatus; }
-    public PipeError getError() { return error.copy(); }
-    public Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> getStepsStatus() { return stepsStatus; }
-    public int getCurStep() { return curStep; }
-    public int getAllSteps() { return getPipeType().getSteps().size(); }
+    public PipelineStatusEnum getPipeStatus() {
+        return pipeStatus;
+    }
+    public PipeError getError() {
+        return error.copy();
+    }
+    public Map<Integer, Map.Entry<PipelineStepStatusEnum, Long>> getStepsStatus() {
+        return stepsStatus;
+    }
+    public int getCurStep() {
+        return curStep;
+    }
+    public int getAllSteps() {
+        return getPipeType().getSteps().size();
+    }
 
     public PipelineTypeEnum pipeType() {
         return getPipeType();

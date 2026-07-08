@@ -30,47 +30,48 @@ import java.lang.reflect.Method;
 public final class SparkClient {
 
     private static final String SPARK_CLIENT_ENDPOINT_CLASS =
-            "org.apache.streampark.spark.client.SparkClientEndpoint";
+        "org.apache.streampark.spark.client.SparkClientEndpoint";
 
-    private SparkClient() {}
+    private SparkClient() {
+    }
 
     public static SubmitResponse submit(SubmitRequest submitRequest) {
         return proxy(
-                submitRequest,
-                submitRequest.getSparkVersion(),
-                SubmitRequest.class.getName(),
-                "submit");
+            submitRequest,
+            submitRequest.getSparkVersion(),
+            SubmitRequest.class.getName(),
+            "submit");
     }
 
     public static CancelResponse cancel(CancelRequest cancelRequest) {
         return proxy(
-                cancelRequest,
-                cancelRequest.getSparkVersion(),
-                CancelRequest.class.getName(),
-                "cancel");
+            cancelRequest,
+            cancelRequest.getSparkVersion(),
+            CancelRequest.class.getName(),
+            "cancel");
     }
 
     @SuppressWarnings("unchecked")
     private static <T> T proxy(
-            Object request, SparkVersion sparkVersion, String requestClassName, String methodName) {
+                               Object request, SparkVersion sparkVersion, String requestClassName, String methodName) {
         sparkVersion.checkVersion();
         return SparkShimsProxy.proxy(
-                sparkVersion,
-                classLoader -> {
-                    try {
-                        Class<?> endpointClass = classLoader.loadClass(SPARK_CLIENT_ENDPOINT_CLASS);
-                        Class<?> requestClass = classLoader.loadClass(requestClassName);
-                        Method method = endpointClass.getDeclaredMethod(methodName, requestClass);
-                        method.setAccessible(true);
-                        Object obj =
-                                method.invoke(null, SparkShimsProxy.getObject(classLoader, request));
-                        if (obj == null) {
-                            return null;
-                        }
-                        return (T) SparkShimsProxy.getObject(SparkClient.class.getClassLoader(), obj);
-                    } catch (ReflectiveOperationException e) {
-                        throw new RuntimeException(e);
+            sparkVersion,
+            classLoader -> {
+                try {
+                    Class<?> endpointClass = classLoader.loadClass(SPARK_CLIENT_ENDPOINT_CLASS);
+                    Class<?> requestClass = classLoader.loadClass(requestClassName);
+                    Method method = endpointClass.getDeclaredMethod(methodName, requestClass);
+                    method.setAccessible(true);
+                    Object obj =
+                        method.invoke(null, SparkShimsProxy.getObject(classLoader, request));
+                    if (obj == null) {
+                        return null;
                     }
-                });
+                    return (T) SparkShimsProxy.getObject(SparkClient.class.getClassLoader(), obj);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 }

@@ -24,8 +24,6 @@ import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.Utils;
 
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.plugins.shade.DefaultShader;
 import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.filter.Filter;
@@ -33,13 +31,15 @@ import org.apache.maven.plugins.shade.resource.ManifestResourceTransformer;
 import org.apache.maven.plugins.shade.resource.ResourceTransformer;
 import org.apache.maven.plugins.shade.resource.ServicesResourceTransformer;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
@@ -69,23 +69,24 @@ public final class MavenTool {
     private static final Logger PLEXUS_LOG = new ConsoleLogger(Logger.LEVEL_INFO, "streampark-maven");
 
     private static final List<Artifact> EXCLUDE_ARTIFACT =
-            Lists.newArrayList(
-                    Artifact.of("org.apache.flink:force-shading:*"),
-                    Artifact.of("com.google.code.findbugs:jsr305:*"),
-                    Artifact.of("org.apache.logging.log4j:*:*"));
+        Lists.newArrayList(
+            Artifact.of("org.apache.flink:force-shading:*"),
+            Artifact.of("com.google.code.findbugs:jsr305:*"),
+            Artifact.of("org.apache.logging.log4j:*:*"));
 
-    private MavenTool() {}
+    private MavenTool() {
+    }
 
     @Nonnull
     public static File buildFatJar(
-            @Nullable String mainClass, @Nonnull Set<String> jarLibs, @Nonnull String outFatJarPath)
-            throws Exception {
+                                   @Nullable String mainClass, @Nonnull Set<String> jarLibs,
+                                   @Nonnull String outFatJarPath) throws Exception {
         File uberJar = new File(outFatJarPath);
         if (!outFatJarPath.endsWith(Constants.JAR_SUFFIX) || uberJar.isDirectory()) {
             throw new IllegalArgumentException(
-                    "[StreamPark] streampark-packer: outFatJarPath("
-                            + outFatJarPath
-                            + ") should be a JAR file.");
+                "[StreamPark] streampark-packer: outFatJarPath("
+                    + outFatJarPath
+                    + ") should be a JAR file.");
         }
         if (uberJar.exists() && !uberJar.delete()) {
             throw new IllegalStateException("Failed to delete existing fat jar: " + outFatJarPath);
@@ -132,19 +133,18 @@ public final class MavenTool {
 
     @Nonnull
     public static File buildFatJar(
-            @Nullable String mainClass,
-            @Nonnull DependencyInfo dependencyInfo,
-            @Nonnull String outFatJarPath)
-            throws Exception {
+                                   @Nullable String mainClass,
+                                   @Nonnull DependencyInfo dependencyInfo,
+                                   @Nonnull String outFatJarPath) throws Exception {
         Set<String> jarLibs = dependencyInfo.extJarLibs();
         Set<Artifact> arts = dependencyInfo.mavenArts();
         AssertUtils.required(
-                !(jarLibs.isEmpty() && arts.isEmpty()),
-                "[StreamPark] streampark-packer: empty artifacts.");
+            !(jarLibs.isEmpty() && arts.isEmpty()),
+            "[StreamPark] streampark-packer: empty artifacts.");
         List<String> artFilePaths =
-                resolveArtifacts(arts).stream()
-                        .map(File::getAbsolutePath)
-                        .collect(Collectors.toList());
+            resolveArtifacts(arts).stream()
+                .map(File::getAbsolutePath)
+                .collect(Collectors.toList());
         Set<String> allLibs = new HashSet<>(jarLibs);
         allLibs.addAll(artFilePaths);
         return buildFatJar(mainClass, allLibs, outFatJarPath);
@@ -164,14 +164,14 @@ public final class MavenTool {
         RepositorySystemSession session;
         DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
         locator.addService(
-                RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
+            RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
         locator.addService(TransporterFactory.class, FileTransporterFactory.class);
         locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
         repoSystem = locator.getService(RepositorySystem.class);
         DefaultRepositorySystemSession sysSession = MavenRepositorySystemUtils.newSession();
         sysSession.setLocalRepositoryManager(
-                repoSystem.newLocalRepositoryManager(
-                        sysSession, new LocalRepository(Workspace.MAVEN_LOCAL_PATH())));
+            repoSystem.newLocalRepositoryManager(
+                sysSession, new LocalRepository(Workspace.MAVEN_LOCAL_PATH())));
         session = sysSession;
 
         List<org.eclipse.aether.artifact.Artifact> artifacts = new ArrayList<>();
@@ -184,19 +184,18 @@ public final class MavenTool {
         List<org.eclipse.aether.artifact.Artifact> resolvedArtifacts = new ArrayList<>();
         for (org.eclipse.aether.artifact.Artifact artifact : artifacts) {
             ArtifactDescriptorRequest descriptorRequest =
-                    new ArtifactDescriptorRequest(artifact, remoteRepos, null);
+                new ArtifactDescriptorRequest(artifact, remoteRepos, null);
             resolvedArtifacts.addAll(
-                    repoSystem
-                            .readArtifactDescriptor(session, descriptorRequest)
-                            .getDependencies()
-                            .stream()
-                            .filter(d -> "compile".equals(d.getScope()))
-                            .filter(
-                                    x ->
-                                            EXCLUDE_ARTIFACT.stream()
-                                                    .noneMatch(e -> e.eq(x.getArtifact())))
-                            .map(d -> d.getArtifact())
-                            .collect(Collectors.toList()));
+                repoSystem
+                    .readArtifactDescriptor(session, descriptorRequest)
+                    .getDependencies()
+                    .stream()
+                    .filter(d -> "compile".equals(d.getScope()))
+                    .filter(
+                        x -> EXCLUDE_ARTIFACT.stream()
+                            .noneMatch(e -> e.eq(x.getArtifact())))
+                    .map(d -> d.getArtifact())
+                    .collect(Collectors.toList()));
         }
         resolvedArtifacts.addAll(artifacts);
         log.info("resolved dependencies: {}", resolvedArtifacts);
@@ -211,8 +210,8 @@ public final class MavenTool {
 
     private static List<RemoteRepository> getRemoteRepos() {
         RemoteRepository.Builder builder =
-                new RemoteRepository.Builder(
-                        "central", "default", InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL()));
+            new RemoteRepository.Builder(
+                "central", "default", InternalConfigHolder.get(CommonConfig.MAVEN_REMOTE_URL()));
         String user = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_USER());
         String password = InternalConfigHolder.get(CommonConfig.MAVEN_AUTH_PASSWORD());
         RemoteRepository remoteRepository;
@@ -220,12 +219,12 @@ public final class MavenTool {
             remoteRepository = builder.build();
         } else {
             remoteRepository =
-                    builder.setAuthentication(
-                                    new AuthenticationBuilder()
-                                            .addUsername(user)
-                                            .addPassword(password)
-                                            .build())
-                            .build();
+                builder.setAuthentication(
+                    new AuthenticationBuilder()
+                        .addUsername(user)
+                        .addPassword(password)
+                        .build())
+                    .build();
         }
         return List.of(remoteRepository);
     }
@@ -240,6 +239,7 @@ public final class MavenTool {
     }
 
     private static final class ShadeFilter implements Filter {
+
         @Override
         public boolean canFilter(File jar) {
             return true;
@@ -248,10 +248,10 @@ public final class MavenTool {
         @Override
         public boolean isFiltered(String name) {
             boolean filtered =
-                    name.startsWith("META-INF/")
-                            && (name.endsWith(".SF")
-                                    || name.endsWith(".DSA")
-                                    || name.endsWith(".RSA"));
+                name.startsWith("META-INF/")
+                    && (name.endsWith(".SF")
+                        || name.endsWith(".DSA")
+                        || name.endsWith(".RSA"));
             if (filtered) {
                 log.info("shade ignore file: {}", name);
             }
@@ -259,6 +259,7 @@ public final class MavenTool {
         }
 
         @Override
-        public void finished() {}
+        public void finished() {
+        }
     }
 }

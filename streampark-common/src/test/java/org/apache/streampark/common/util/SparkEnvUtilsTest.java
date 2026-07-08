@@ -39,9 +39,9 @@ class SparkEnvUtilsTest {
     @Test
     void extractJavaHomeFromSparkEnvContent() {
         String content =
-                "#!/usr/bin/env bash\n"
-                        + "export JAVA_HOME=\"/opt/jdk-17\"\n"
-                        + "export HADOOP_CONF_DIR=/etc/hadoop\n";
+            "#!/usr/bin/env bash\n"
+                + "export JAVA_HOME=\"/opt/jdk-17\"\n"
+                + "export HADOOP_CONF_DIR=/etc/hadoop\n";
         Optional<String> javaHome = SparkEnvUtils.extractJavaHome(content);
         assertThat(javaHome).contains("/opt/jdk-17");
     }

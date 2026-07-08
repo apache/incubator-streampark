@@ -32,6 +32,7 @@ import java.util.Properties;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrackId {
+
     private FlinkK8sDeployMode executeMode;
     private String namespace = "default";
     private String clusterId;
@@ -64,7 +65,7 @@ public class TrackId {
 
     public TrackId copy() {
         return new TrackId(
-                executeMode, namespace, clusterId, appId, jobId, groupId, properties);
+            executeMode, namespace, clusterId, appId, jobId, groupId, properties);
     }
 
     public TrackId jobId(String jobId) {
@@ -98,23 +99,23 @@ public class TrackId {
     }
 
     public static TrackId onSession(
-            String namespace,
-            String clusterId,
-            Long appId,
-            String jobId,
-            String groupId,
-            Properties properties) {
+                                    String namespace,
+                                    String clusterId,
+                                    Long appId,
+                                    String jobId,
+                                    String groupId,
+                                    Properties properties) {
         return new TrackId(
             FlinkK8sDeployMode.SESSION, namespace, clusterId, appId, jobId, groupId, properties);
     }
 
     public static TrackId onApplication(
-            String namespace,
-            String clusterId,
-            Long appId,
-            String jobId,
-            String groupId,
-            Properties properties) {
+                                        String namespace,
+                                        String clusterId,
+                                        Long appId,
+                                        String jobId,
+                                        String groupId,
+                                        Properties properties) {
         return new TrackId(
             FlinkK8sDeployMode.APPLICATION, namespace, clusterId, appId, jobId, groupId, properties);
     }

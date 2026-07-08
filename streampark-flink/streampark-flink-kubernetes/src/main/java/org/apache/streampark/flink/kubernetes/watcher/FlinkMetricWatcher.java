@@ -58,9 +58,9 @@ public class FlinkMetricWatcher extends FlinkWatcher {
     private ScheduledFuture<?> timerSchedule;
 
     public FlinkMetricWatcher(
-            MetricWatcherConfig conf,
-            FlinkK8sWatchController watchController,
-            ChangeEventBus eventBus) {
+                              MetricWatcherConfig conf,
+                              FlinkK8sWatchController watchController,
+                              ChangeEventBus eventBus) {
         this.conf = conf;
         this.watchController = watchController;
         this.eventBus = eventBus;
@@ -69,8 +69,8 @@ public class FlinkMetricWatcher extends FlinkWatcher {
     @Override
     protected void doStart() {
         timerSchedule =
-                watchExecutor.scheduleAtFixedRate(
-                        this::doWatch, 0, conf.requestIntervalSec(), TimeUnit.SECONDS);
+            watchExecutor.scheduleAtFixedRate(
+                this::doWatch, 0, conf.requestIntervalSec(), TimeUnit.SECONDS);
         log.info("[flink-k8s] FlinkMetricWatcher started.");
     }
 
@@ -103,76 +103,75 @@ public class FlinkMetricWatcher extends FlinkWatcher {
         }
 
         Set<CompletableFuture<Optional<FlinkMetricCV>>> futures =
-                trackIds.stream()
-                        .map(
-                                id ->
-                                        CompletableFuture.supplyAsync(
-                                                        () -> collectMetrics(id), watchExecutor)
-                                                .whenComplete(
-                                                        (metric, error) -> {
-                                                            if (!metric.isPresent()) {
-                                                                return;
-                                                            }
-                                                            ClusterKey clusterKey = id.toClusterKey();
-                                                            FlinkMetricCV payload = metric.get();
-                                                            FlinkMetricCV preMetric =
-                                                                    watchController.flinkMetrics.get(
-                                                                            clusterKey);
-                                                            boolean isMetricChanged =
-                                                                    preMetric == null
-                                                                            || !preMetric.equalsPayload(
-                                                                                    payload);
-                                                            if (isMetricChanged) {
-                                                                eventBus.postAsync(
-                                                                        new FlinkClusterMetricChangeEvent(
-                                                                                id, payload));
-                                                                watchController.flinkMetrics.put(
-                                                                        clusterKey, payload);
-                                                            }
-                                                        }))
-                        .collect(Collectors.toSet());
+            trackIds.stream()
+                .map(
+                    id -> CompletableFuture.supplyAsync(
+                        () -> collectMetrics(id), watchExecutor)
+                        .whenComplete(
+                            (metric, error) -> {
+                                if (!metric.isPresent()) {
+                                    return;
+                                }
+                                ClusterKey clusterKey = id.toClusterKey();
+                                FlinkMetricCV payload = metric.get();
+                                FlinkMetricCV preMetric =
+                                    watchController.flinkMetrics.get(
+                                        clusterKey);
+                                boolean isMetricChanged =
+                                    preMetric == null
+                                        || !preMetric.equalsPayload(
+                                            payload);
+                                if (isMetricChanged) {
+                                    eventBus.postAsync(
+                                        new FlinkClusterMetricChangeEvent(
+                                            id, payload));
+                                    watchController.flinkMetrics.put(
+                                        clusterKey, payload);
+                                }
+                            }))
+                .collect(Collectors.toSet());
 
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+                .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.warn("[FlinkMetricWatcher] interrupted while waiting for metric collection");
         } catch (Exception e) {
             log.error(
-                    "[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",
-                    conf.requestTimeoutSec(),
-                    trackIds);
+                "[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",
+                conf.requestTimeoutSec(),
+                trackIds);
         }
     }
 
     private Optional<FlinkMetricCV> collectMetrics(TrackId id) {
         ClusterKey clusterKey = ClusterKey.of(id);
         Optional<String> flinkJmRestUrl =
-                watchController.getClusterRestUrl(clusterKey).filter(url -> !url.isEmpty());
+            watchController.getClusterRestUrl(clusterKey).filter(url -> !url.isEmpty());
         if (!flinkJmRestUrl.isPresent()) {
             return Optional.empty();
         }
         try {
             String overviewJson =
-                    Request.get(flinkJmRestUrl.get() + "/overview")
-                            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                            .execute()
-                            .returnContent()
-                            .asString(StandardCharsets.UTF_8);
+                Request.get(flinkJmRestUrl.get() + "/overview")
+                    .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                    .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                    .execute()
+                    .returnContent()
+                    .asString(StandardCharsets.UTF_8);
             Optional<FlinkRestOverview> flinkOverview = FlinkRestModels.parseOverview(overviewJson);
             if (!flinkOverview.isPresent()) {
                 return Optional.empty();
             }
 
             String configJson =
-                    Request.get(flinkJmRestUrl.get() + "/jobmanager/config")
-                            .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
-                            .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
-                            .execute()
-                            .returnContent()
-                            .asString(StandardCharsets.UTF_8);
+                Request.get(flinkJmRestUrl.get() + "/jobmanager/config")
+                    .connectTimeout(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC)
+                    .responseTimeout(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC)
+                    .execute()
+                    .returnContent()
+                    .asString(StandardCharsets.UTF_8);
             List<FlinkRestJmConfigItem> configItems = FlinkRestModels.parseJmConfig(configJson);
             if (configItems == null) {
                 return Optional.empty();
@@ -184,24 +183,23 @@ public class FlinkMetricWatcher extends FlinkWatcher {
 
             long ackTime = System.currentTimeMillis();
             String tmMemStr =
-                    flinkJmConfigs.getOrDefault(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), "0b");
+                flinkJmConfigs.getOrDefault(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), "0b");
             String jmMemStr =
-                    flinkJmConfigs.getOrDefault(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), "0b");
+                flinkJmConfigs.getOrDefault(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), "0b");
             FlinkMetricCV flinkMetricCV =
-                    new FlinkMetricCV(
-                            id.groupId(),
-                            (int) MemorySize.parse(jmMemStr).getMebiBytes(),
-                            (int)
-                                    (MemorySize.parse(tmMemStr).getMebiBytes()
-                                            * flinkOverview.get().taskManagers()),
-                            flinkOverview.get().taskManagers(),
-                            flinkOverview.get().slotsTotal(),
-                            flinkOverview.get().slotsAvailable(),
-                            flinkOverview.get().jobsRunning(),
-                            flinkOverview.get().jobsFinished(),
-                            flinkOverview.get().jobsCancelled(),
-                            flinkOverview.get().jobsFailed(),
-                            ackTime);
+                new FlinkMetricCV(
+                    id.groupId(),
+                    (int) MemorySize.parse(jmMemStr).getMebiBytes(),
+                    (int) (MemorySize.parse(tmMemStr).getMebiBytes()
+                        * flinkOverview.get().taskManagers()),
+                    flinkOverview.get().taskManagers(),
+                    flinkOverview.get().slotsTotal(),
+                    flinkOverview.get().slotsAvailable(),
+                    flinkOverview.get().jobsRunning(),
+                    flinkOverview.get().jobsFinished(),
+                    flinkOverview.get().jobsCancelled(),
+                    flinkOverview.get().jobsFailed(),
+                    ackTime);
             return Optional.of(flinkMetricCV);
         } catch (Exception e) {
             return Optional.empty();

@@ -22,5 +22,6 @@ import java.util.Optional;
 /** Converts regex capture groups into command operands. */
 @FunctionalInterface
 public interface SqlCommandConverter {
+
     Optional<String[]> convert(String[] groups);
 }

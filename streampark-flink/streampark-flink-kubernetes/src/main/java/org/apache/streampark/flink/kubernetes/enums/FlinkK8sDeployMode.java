@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 
 /** Execution mode of flink on kubernetes. */
 public enum FlinkK8sDeployMode {
+
     SESSION("kubernetes-session"),
     APPLICATION("kubernetes-application");
 

@@ -64,49 +64,48 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
     @Override
     protected BuildResult buildProcess() throws Throwable {
         execStep(
-                        1,
-                        () -> {
-                            if (request.jobType() == SparkJobType.SPARK_SQL) {
-                                LfsOperator.getInstance().mkCleanDirs(request.localWorkspace());
-                                HdfsOperator.getInstance().mkCleanDirs(request.yarnProvidedPath());
-                            }
-                            return null;
-                        })
+            1,
+            () -> {
+                if (request.jobType() == SparkJobType.SPARK_SQL) {
+                    LfsOperator.getInstance().mkCleanDirs(request.localWorkspace());
+                    HdfsOperator.getInstance().mkCleanDirs(request.yarnProvidedPath());
+                }
+                return null;
+            })
                 .orElseThrow(() -> getError().exception());
 
         List<String> mavenJars =
-                execStep(
-                                2,
-                                () -> {
-                                    if (request.jobType() == SparkJobType.SPARK_SQL) {
-                                        List<String> paths = new ArrayList<>();
-                                        MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts())
-                                                .forEach(f -> paths.add(f.getAbsolutePath()));
-                                        paths.addAll(request.dependencyInfo().extJarLibs());
-                                        return paths;
-                                    }
-                                    return Collections.<String>emptyList();
-                                })
-                        .orElseThrow(() -> getError().exception());
+            execStep(
+                2,
+                () -> {
+                    if (request.jobType() == SparkJobType.SPARK_SQL) {
+                        List<String> paths = new ArrayList<>();
+                        MavenTool.resolveArtifacts(request.dependencyInfo().mavenArts())
+                            .forEach(f -> paths.add(f.getAbsolutePath()));
+                        paths.addAll(request.dependencyInfo().extJarLibs());
+                        return paths;
+                    }
+                    return Collections.<String>emptyList();
+                })
+                    .orElseThrow(() -> getError().exception());
 
         execStep(
-                        3,
-                        () -> {
-                            for (String jar : mavenJars) {
-                                uploadJarToHdfsOrLfs(
-                                        FsOperator.lfs(), jar, request.localWorkspace());
-                                uploadJarToHdfsOrLfs(
-                                        FsOperator.hdfs(), jar, request.yarnProvidedPath());
-                            }
-                            return null;
-                        })
+            3,
+            () -> {
+                for (String jar : mavenJars) {
+                    uploadJarToHdfsOrLfs(
+                        FsOperator.lfs(), jar, request.localWorkspace());
+                    uploadJarToHdfsOrLfs(
+                        FsOperator.hdfs(), jar, request.yarnProvidedPath());
+                }
+                return null;
+            })
                 .orElseThrow(() -> getError().exception());
         return new SimpleBuildResponse();
     }
 
     @SuppressWarnings("java:S4790")
-    private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target)
-            throws Exception {
+    private void uploadJarToHdfsOrLfs(FsOperator fsOperator, String origin, String target) throws Exception {
         File originFile = new File(origin);
         if (!fsOperator.exists(target)) {
             fsOperator.mkdirs(target);
@@ -116,7 +115,7 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
                 fsOperator.copy(originFile.getAbsolutePath(), target);
             } else {
                 String uploadFile =
-                        Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
+                    Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
                 if (fsOperator.exists(uploadFile)) {
                     try (FileInputStream in = new FileInputStream(originFile)) {
                         String localMd5 = DigestUtils.md5Hex(in); // NOSONAR java:S4790 - upload integrity check only

@@ -17,9 +17,11 @@
 
 package org.apache.streampark.common.util;
 
-import com.typesafe.config.ConfigFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.shaded.org.slf4j.Logger;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.typesafe.config.ConfigFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -29,7 +31,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -38,9 +39,10 @@ import java.util.Scanner;
 public final class PropertiesUtils {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(PropertiesUtils.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(PropertiesUtils.class.getName());
 
-    private PropertiesUtils() {}
+    private PropertiesUtils() {
+    }
 
     public static String readFile(String filename) {
         Path path = SafePathUtils.resolveConfigPath(filename);
@@ -115,8 +117,8 @@ public final class PropertiesUtils {
 
     public static Map<String, String> fromYamlFile(InputStream inputStream) {
         AssertUtils.required(
-                inputStream != null,
-                "[StreamPark] fromYamlFile: Properties inputStream  must not be null");
+            inputStream != null,
+            "[StreamPark] fromYamlFile: Properties inputStream  must not be null");
         try {
             Map<String, Object> map = new Yaml().load(inputStream);
             return flatten(map);
@@ -144,20 +146,20 @@ public final class PropertiesUtils {
     private static Map<String, String> parseHoconByReader(java.io.Reader reader) throws IOException {
         Map<String, String> result = new HashMap<>();
         ConfigFactory.parseReader(reader)
-                .entrySet()
-                .forEach(
-                        x -> {
-                            String k = x.getKey().trim().replaceAll("\"", "");
-                            String v = x.getValue().unwrapped().toString().trim();
-                            result.put(k, v);
-                        });
+            .entrySet()
+            .forEach(
+                x -> {
+                    String k = x.getKey().trim().replaceAll("\"", "");
+                    String v = x.getValue().unwrapped().toString().trim();
+                    result.put(k, v);
+                });
         return result;
     }
 
     public static Map<String, String> fromPropertiesFile(InputStream inputStream) {
         if (inputStream == null) {
             throw new IllegalArgumentException(
-                    "[StreamPark] fromPropertiesFile: Properties inputStream  must not be null");
+                "[StreamPark] fromPropertiesFile: Properties inputStream  must not be null");
         }
         try {
             Properties properties = new Properties();
@@ -169,7 +171,7 @@ public final class PropertiesUtils {
             return result;
         } catch (IOException e) {
             throw new IllegalArgumentException(
-                    "[StreamPark] Failed when loading properties from inputStream", e);
+                "[StreamPark] Failed when loading properties from inputStream", e);
         }
     }
 

@@ -14,13 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.pipeline;
+
+import org.apache.streampark.common.util.Utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.streampark.common.util.Utils;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DockerPullSnapshot {
+
     private List<DockerLayerProgress> detail;
     private String error;
     private long emitTime;

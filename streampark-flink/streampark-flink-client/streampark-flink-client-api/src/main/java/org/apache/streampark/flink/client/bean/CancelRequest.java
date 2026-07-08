@@ -38,7 +38,8 @@ public class CancelRequest implements SavepointRequestTrait {
     private FlinkVersion flinkVersion;
     private FlinkDeployMode deployMode;
 
-    @Nullable private Map<String, Object> properties;
+    @Nullable
+    private Map<String, Object> properties;
 
     private String clusterId;
     private String jobId;
@@ -47,5 +48,6 @@ public class CancelRequest implements SavepointRequestTrait {
     private String savepointPath;
     private boolean nativeFormat;
 
-    @Nullable private String kubernetesNamespace = Constants.DEFAULT;
+    @Nullable
+    private String kubernetesNamespace = Constants.DEFAULT;
 }

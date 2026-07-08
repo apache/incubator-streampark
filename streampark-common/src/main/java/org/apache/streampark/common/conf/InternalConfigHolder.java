@@ -27,7 +27,6 @@ import org.apache.streampark.shaded.org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,19 +39,20 @@ import java.util.stream.Collectors;
 public final class InternalConfigHolder {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory().getLogger(InternalConfigHolder.class.getName());
+        StreamParkLoggerFactory.loggerFactory().getLogger(InternalConfigHolder.class.getName());
 
     private static final int INITIAL_CAPACITY = 45;
 
     private static final Map<String, Object> CONF_DATA = new ConcurrentHashMap<>(INITIAL_CAPACITY);
     private static final Map<String, InternalOption> CONF_OPTIONS =
-            new ConcurrentHashMap<>(INITIAL_CAPACITY);
+        new ConcurrentHashMap<>(INITIAL_CAPACITY);
 
     static {
         initConfigHub();
     }
 
-    private InternalConfigHolder() {}
+    private InternalConfigHolder() {
+    }
 
     /** Initialize the ConfigHub. */
     public static void initConfigHub() {
@@ -124,12 +124,12 @@ public final class InternalConfigHolder {
             CONF_DATA.remove(conf.getKey());
         } else if (conf.getClassType() != value.getClass()) {
             throw new IllegalArgumentException(
-                    "config value type is not match of "
-                            + conf.getKey()
-                            + ", required: "
-                            + conf.getClassType()
-                            + ", actual: "
-                            + value.getClass());
+                "config value type is not match of "
+                    + conf.getKey()
+                    + ", required: "
+                    + conf.getClassType()
+                    + ", actual: "
+                    + value.getClass());
         } else {
             SystemPropertyUtils.set(conf.getKey(), value.toString());
             CONF_DATA.put(conf.getKey(), value);
@@ -139,18 +139,17 @@ public final class InternalConfigHolder {
     public static void log() {
         Set<String> configKeys = keys();
         String details =
-                configKeys.stream()
-                        .map(
-                                key ->
-                                        key
-                                                + " = "
-                                                + (key.contains("password")
-                                                        ? Constants.DEFAULT_DATAMASK_STRING
-                                                        : get(key)))
-                        .collect(Collectors.joining("\n  "));
+            configKeys.stream()
+                .map(
+                    key -> key
+                        + " = "
+                        + (key.contains("password")
+                            ? Constants.DEFAULT_DATAMASK_STRING
+                            : get(key)))
+                .collect(Collectors.joining("\n  "));
         LOG.info(
-                "[StreamPark] Registered configs:\nConfigHub collected configs: {}\n  {}",
-                configKeys.size(),
-                details);
+            "[StreamPark] Registered configs:\nConfigHub collected configs: {}\n  {}",
+            configKeys.size(),
+            details);
     }
 }

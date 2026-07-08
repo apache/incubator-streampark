@@ -23,8 +23,8 @@ import org.apache.streampark.spark.connector.source.Source;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.streaming.Time;
 import org.apache.spark.streaming.StreamingContext;
+import org.apache.spark.streaming.Time;
 import org.apache.spark.streaming.dstream.DStream;
 import org.apache.spark.streaming.kafka010.HasOffsetRanges;
 import org.apache.spark.streaming.kafka010.OffsetRange;
@@ -72,8 +72,8 @@ public class KafkaSource<K, V> extends Source {
 
     private Set<String> getTopicSet() {
         String topics =
-                overrideParams.getOrDefault(
-                        "consume.topics", getSparkConf().get("spark.source.kafka.consume.topics"));
+            overrideParams.getOrDefault(
+                "consume.topics", getSparkConf().get("spark.source.kafka.consume.topics"));
         Set<String> topicSet = new HashSet<>();
         for (String t : topics.split(",")) {
             topicSet.add(t.trim());
@@ -84,10 +84,10 @@ public class KafkaSource<K, V> extends Source {
     private Map<String, Object> getKafkaParams() {
         Map<String, Object> params = new HashMap<>();
         scala.collection.Iterator<Tuple2<String, String>> iter =
-                scala.collection.JavaConverters.asScalaIteratorConverter(
-                                Arrays.asList(getSparkConf().getAll()).iterator())
-                        .asScala()
-                        .toIterator();
+            scala.collection.JavaConverters.asScalaIteratorConverter(
+                Arrays.asList(getSparkConf().getAll()).iterator())
+                .asScala()
+                .toIterator();
         String prefix = getPrefix();
         while (iter.hasNext()) {
             Tuple2<String, String> t = iter.next();
@@ -109,54 +109,53 @@ public class KafkaSource<K, V> extends Source {
     @SuppressWarnings("unchecked")
     public <R> DStream<R> getDStream(Function<Object, R> recordHandler) {
         DStream<ConsumerRecord<K, V>> stream =
-                kafkaClient.createDirectStream(ssc, getKafkaParams(), getTopicSet());
+            kafkaClient.createDirectStream(ssc, getKafkaParams(), getTopicSet());
         ClassTag<ConsumerRecord<K, V>> recordTag =
-                (ClassTag<ConsumerRecord<K, V>>) (ClassTag<?>) ClassTag$.MODULE$.Any();
+            (ClassTag<ConsumerRecord<K, V>>) (ClassTag<?>) ClassTag$.MODULE$.Any();
         ClassTag<R> resultTag = (ClassTag<R>) (ClassTag<?>) ClassTag$.MODULE$.Any();
         DStream<ConsumerRecord<K, V>> withOffsets =
-                stream.transform(
-                        new Function2<
-                                RDD<ConsumerRecord<K, V>>,
-                                Time,
-                                RDD<ConsumerRecord<K, V>>>() {
-                            @Override
-                            public RDD<ConsumerRecord<K, V>> apply(
-                                    RDD<ConsumerRecord<K, V>> rdd, Time time) {
-                                HasOffsetRanges hasOffsets = (HasOffsetRanges) rdd;
-                                offsetRanges.put(time.milliseconds(), hasOffsets.offsetRanges());
-                                return rdd;
-                            }
-                        },
-                        recordTag);
-        return withOffsets.map(
-                new Function1<ConsumerRecord<K, V>, R>() {
+            stream.transform(
+                new Function2<RDD<ConsumerRecord<K, V>>, Time, RDD<ConsumerRecord<K, V>>>() {
+
                     @Override
-                    public R apply(ConsumerRecord<K, V> record) {
-                        try {
-                            return recordHandler.call(record);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                    public RDD<ConsumerRecord<K, V>> apply(
+                                                           RDD<ConsumerRecord<K, V>> rdd, Time time) {
+                        HasOffsetRanges hasOffsets = (HasOffsetRanges) rdd;
+                        offsetRanges.put(time.milliseconds(), hasOffsets.offsetRanges());
+                        return rdd;
                     }
                 },
-                resultTag);
+                recordTag);
+        return withOffsets.map(
+            new Function1<ConsumerRecord<K, V>, R>() {
+
+                @Override
+                public R apply(ConsumerRecord<K, V> record) {
+                    try {
+                        return recordHandler.call(record);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            },
+            resultTag);
     }
 
     public void updateOffset(Time time) {
         long milliseconds = time.milliseconds();
         getGroupId()
-                .ifPresent(
-                        groupId -> {
-                            log.info(
-                                    "updateOffset with {} for time {} offsetRanges: {}",
-                                    kafkaClient.getOffsetStoreType(),
-                                    milliseconds,
-                                    offsetRanges);
-                            OffsetRange[] offsetRange = offsetRanges.get(milliseconds);
-                            if (offsetRange != null) {
-                                kafkaClient.updateOffset(groupId, offsetRange);
-                            }
-                        });
+            .ifPresent(
+                groupId -> {
+                    log.info(
+                        "updateOffset with {} for time {} offsetRanges: {}",
+                        kafkaClient.getOffsetStoreType(),
+                        milliseconds,
+                        offsetRanges);
+                    OffsetRange[] offsetRange = offsetRanges.get(milliseconds);
+                    if (offsetRange != null) {
+                        kafkaClient.updateOffset(groupId, offsetRange);
+                    }
+                });
         offsetRanges.remove(milliseconds);
     }
 }

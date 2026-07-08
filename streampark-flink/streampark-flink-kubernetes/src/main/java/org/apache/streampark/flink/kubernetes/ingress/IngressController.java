@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.ingress;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
@@ -49,7 +50,8 @@ public final class IngressController {
         ingressStrategy = clusterVersion >= 1.19 ? new IngressStrategyV1() : new IngressStrategyV1beta1();
     }
 
-    private IngressController() {}
+    private IngressController() {
+    }
 
     public static void configureIngress(String domainName, String clusterId, String nameSpace) {
         ingressStrategy.configureIngress(domainName, clusterId, nameSpace);
@@ -59,8 +61,7 @@ public final class IngressController {
         return ingressStrategy.getIngressUrl(nameSpace, clusterId, clusterClient);
     }
 
-    public static String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates)
-            throws Exception {
+    public static String prepareIngressTemplateFiles(String buildWorkspace, String ingressTemplates) throws Exception {
         return ingressStrategy.prepareIngressTemplateFiles(buildWorkspace, ingressTemplates);
     }
 }

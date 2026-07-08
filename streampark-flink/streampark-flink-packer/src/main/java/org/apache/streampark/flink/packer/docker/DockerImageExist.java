@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.docker;
 
 import com.github.dockerjava.api.exception.NotFoundException;
 
 public class DockerImageExist {
+
     public boolean doesDockerImageExist(String imageName) {
         return DockerClients.usingDockerClient(
             dockerClient -> {
@@ -29,6 +31,8 @@ public class DockerImageExist {
                     return false;
                 }
             },
-            err -> { throw new RuntimeException("Check docker image failed, imageName=" + imageName, err); });
+            err -> {
+                throw new RuntimeException("Check docker image failed, imageName=" + imageName, err);
+            });
     }
 }

@@ -23,7 +23,8 @@ import org.apache.flink.configuration.Configuration;
 /** Flink configuration helper methods. */
 public final class FlinkConfigurationEnhancer {
 
-    private FlinkConfigurationEnhancer() {}
+    private FlinkConfigurationEnhancer() {
+    }
 
     public static <T> Configuration safeSet(Configuration flinkConfig, ConfigOption<T> option, T value) {
         if (value != null && !value.toString().isEmpty()) {

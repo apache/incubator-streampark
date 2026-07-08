@@ -82,7 +82,7 @@ public final class WebUtils {
 
     public static File resolveTempFile(String fileName) throws IOException {
         return org.apache.streampark.common.util.FileUtils.resolveChildFile(
-                getAppTempDir(), org.apache.commons.io.FilenameUtils.getName(fileName));
+            getAppTempDir(), org.apache.commons.io.FilenameUtils.getName(fileName));
     }
 
     public static File getAppLibDir() {

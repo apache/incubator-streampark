@@ -21,17 +21,18 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.util.AssertUtils;
 import org.apache.streampark.common.util.DeflaterUtils;
 
-import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.util.ParameterTool;
 
 import javax.annotation.Nullable;
 
 /** Parameter and table environment helpers for Flink application naming. */
 public final class FlinkParameterUtils {
 
-    private FlinkParameterUtils() {}
+    private FlinkParameterUtils() {
+    }
 
     public static String getAppName(ParameterTool parameterTool) {
         return getAppName(parameterTool, null, false);
@@ -42,7 +43,7 @@ public final class FlinkParameterUtils {
     }
 
     public static String getAppName(
-            ParameterTool parameterTool, @Nullable String name, boolean required) {
+                                    ParameterTool parameterTool, @Nullable String name, boolean required) {
         String appName;
         if (name == null) {
             appName = null;
@@ -62,7 +63,7 @@ public final class FlinkParameterUtils {
         }
         if (required) {
             AssertUtils.required(
-                    appName != null, "[StreamPark] Application name cannot be null");
+                appName != null, "[StreamPark] Application name cannot be null");
         }
         return appName;
     }
@@ -76,7 +77,7 @@ public final class FlinkParameterUtils {
     }
 
     public static StreamTableEnvironment setAppName(
-            StreamTableEnvironment env, ParameterTool parameter) {
+                                                    StreamTableEnvironment env, ParameterTool parameter) {
         String appName = getAppName(parameter);
         if (appName != null) {
             env.getConfig().getConfiguration().setString(PipelineOptions.NAME.key(), appName);

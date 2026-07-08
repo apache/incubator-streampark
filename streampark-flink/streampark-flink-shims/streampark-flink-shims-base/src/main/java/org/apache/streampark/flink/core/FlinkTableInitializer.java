@@ -43,8 +43,8 @@ import java.util.Map;
 public class FlinkTableInitializer extends FlinkStreamingInitializer {
 
     private static final Logger LOG =
-            StreamParkLoggerFactory.loggerFactory()
-                    .getLogger(FlinkTableInitializer.class.getName());
+        StreamParkLoggerFactory.loggerFactory()
+            .getLogger(FlinkTableInitializer.class.getName());
 
     private TableEnvConfigFunction javaTableEnvConfFunc;
 
@@ -62,7 +62,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
         FlinkTableInitializer flinkInitializer = new FlinkTableInitializer(args.args);
         flinkInitializer.javaTableEnvConfFunc = args.conf;
         return new TableInitResult(
-                flinkInitializer.getConfiguration().parameter, flinkInitializer.getTableEnv());
+            flinkInitializer.getConfiguration().parameter, flinkInitializer.getTableEnv());
     }
 
     public static StreamTableInitResult initialize(StreamTableEnvConfig args) {
@@ -70,22 +70,22 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
         flinkInitializer.javaStreamEnvConfFunc = args.streamConfig;
         flinkInitializer.javaTableEnvConfFunc = args.tableConfig;
         return new StreamTableInitResult(
-                flinkInitializer.getConfiguration().parameter,
-                flinkInitializer.getStreamEnv(),
-                flinkInitializer.getStreamTableEnv());
+            flinkInitializer.getConfiguration().parameter,
+            flinkInitializer.getStreamEnv(),
+            flinkInitializer.getStreamTableEnv());
     }
 
     public static StreamTableInitResult initialize(
-            String[] args,
-            StreamEnvConfigFunction streamConfig,
-            TableEnvConfigFunction tableConfig) {
+                                                   String[] args,
+                                                   StreamEnvConfigFunction streamConfig,
+                                                   TableEnvConfigFunction tableConfig) {
         FlinkTableInitializer flinkInitializer = new FlinkTableInitializer(args);
         flinkInitializer.javaStreamEnvConfFunc = streamConfig;
         flinkInitializer.javaTableEnvConfFunc = tableConfig;
         return new StreamTableInitResult(
-                flinkInitializer.getConfiguration().parameter,
-                flinkInitializer.getStreamEnv(),
-                flinkInitializer.getStreamTableEnv());
+            flinkInitializer.getConfiguration().parameter,
+            flinkInitializer.getStreamEnv(),
+            flinkInitializer.getStreamTableEnv());
     }
 
     TableEnvironment getTableEnv() {
@@ -94,8 +94,8 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             EnvironmentSettings.Builder builder = getEnvSettingsBuilder();
             builder.inBatchMode();
             tableEnv =
-                    FlinkParameterUtils.setAppName(
-                            TableEnvironment.create(builder.build()), getParameter());
+                FlinkParameterUtils.setAppName(
+                    TableEnvironment.create(builder.build()), getParameter());
             applyTableEnvConfig(tableEnv.getConfig());
         }
         return tableEnv;
@@ -112,8 +112,8 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
                 javaStreamEnvConfFunc.configuration(getStreamEnv(), getParameter());
             }
             streamTableEnv =
-                    FlinkParameterUtils.setAppName(
-                            StreamTableEnvironment.create(getStreamEnv(), setting), getParameter());
+                FlinkParameterUtils.setAppName(
+                    StreamTableEnvironment.create(getStreamEnv(), setting), getParameter());
             applyTableEnvConfig(streamTableEnv.getConfig());
         }
         return streamTableEnv;
@@ -159,11 +159,11 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
         String flinkConf = parameter.get(ConfigKeys.KEY_FLINK_CONF(), null);
         if (flinkConf == null || flinkConf.isEmpty()) {
             throw new ExceptionInInitializerError(
-                    "[StreamPark] Usage:can't find config,please set \"--flink.conf $conf \" in main arguments");
+                "[StreamPark] Usage:can't find config,please set \"--flink.conf $conf \" in main arguments");
         }
         builder.withConfiguration(
-                Configuration.fromMap(
-                        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))));
+            Configuration.fromMap(
+                PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))));
 
         String catalog = parameter.get(ConfigKeys.KEY_FLINK_TABLE_CATALOG(), null);
         String database = parameter.get(ConfigKeys.KEY_FLINK_TABLE_DATABASE(), null);
@@ -183,7 +183,7 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
     }
 
     private void invokePlannerMethod(
-            EnvironmentSettings.Builder builder, String methodName, String successMessage) {
+                                     EnvironmentSettings.Builder builder, String methodName, String successMessage) {
         try {
             Method method = builder.getClass().getDeclaredMethod(methodName);
             method.setAccessible(true);
@@ -207,34 +207,34 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
             LOG.warn("Usage:can't find config,you can set \"--conf $path \" in main arguments");
             ParameterTool parameter = ParameterTool.fromSystemProperties().mergeWith(argsMap);
             configuration =
-                    new FlinkConfiguration(parameter, new Configuration(), new Configuration());
+                new FlinkConfiguration(parameter, new Configuration(), new Configuration());
         } else {
             Map<String, String> configMap = parseConfig(configFile);
             Map<String, String> sqlConf = new HashMap<>();
             configMap.forEach(
-                    (key, value) -> {
-                        if (key.startsWith(ConfigKeys.KEY_SQL_PREFIX())) {
-                            sqlConf.put(key.substring(ConfigKeys.KEY_SQL_PREFIX().length()), value);
-                        }
-                    });
+                (key, value) -> {
+                    if (key.startsWith(ConfigKeys.KEY_SQL_PREFIX())) {
+                        sqlConf.put(key.substring(ConfigKeys.KEY_SQL_PREFIX().length()), value);
+                    }
+                });
 
             Map<String, String> properConf =
-                    extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_PROPERTY_PREFIX());
             Map<String, String> appConf =
-                    extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_APP_PREFIX());
             Map<String, String> tableConf =
-                    extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_TABLE_PREFIX());
+                extractConfigByPrefix(configMap, ConfigKeys.KEY_FLINK_TABLE_PREFIX());
 
             Configuration tableConfig = Configuration.fromMap(tableConf);
             Configuration envConfig = Configuration.fromMap(properConf);
 
             ParameterTool parameter =
-                    ParameterTool.fromSystemProperties()
-                            .mergeWith(ParameterTool.fromMap(properConf))
-                            .mergeWith(ParameterTool.fromMap(tableConf))
-                            .mergeWith(ParameterTool.fromMap(appConf))
-                            .mergeWith(ParameterTool.fromMap(sqlConf))
-                            .mergeWith(argsMap);
+                ParameterTool.fromSystemProperties()
+                    .mergeWith(ParameterTool.fromMap(properConf))
+                    .mergeWith(ParameterTool.fromMap(tableConf))
+                    .mergeWith(ParameterTool.fromMap(appConf))
+                    .mergeWith(ParameterTool.fromMap(sqlConf))
+                    .mergeWith(argsMap);
 
             configuration = new FlinkConfiguration(parameter, envConfig, tableConfig);
         }
@@ -247,16 +247,16 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
         try {
             String value = DeflaterUtils.unzipString(flinkSql);
             return configuration.withParameter(
-                    configuration.parameter.mergeWith(
-                            ParameterTool.fromMap(
-                                    Map.of(ConfigKeys.KEY_FLINK_SQL(), value))));
+                configuration.parameter.mergeWith(
+                    ParameterTool.fromMap(
+                        Map.of(ConfigKeys.KEY_FLINK_SQL(), value))));
         } catch (Exception ignored) {
             File sqlFile = new File(flinkSql);
             try {
                 Map<String, String> value =
-                        PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath());
+                    PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath());
                 return configuration.withParameter(
-                        configuration.parameter.mergeWith(ParameterTool.fromMap(value)));
+                    configuration.parameter.mergeWith(ParameterTool.fromMap(value)));
             } catch (Exception e) {
                 throw new IllegalArgumentException("[StreamPark] init sql error." + e);
             }
@@ -283,9 +283,9 @@ public class FlinkTableInitializer extends FlinkStreamingInitializer {
         public final StreamTableEnvironment streamTableEnv;
 
         public StreamTableInitResult(
-                ParameterTool parameter,
-                StreamExecutionEnvironment streamEnv,
-                StreamTableEnvironment streamTableEnv) {
+                                     ParameterTool parameter,
+                                     StreamExecutionEnvironment streamEnv,
+                                     StreamTableEnvironment streamTableEnv) {
             this.parameter = parameter;
             this.streamEnv = streamEnv;
             this.streamTableEnv = streamTableEnv;

@@ -20,7 +20,8 @@ package org.apache.streampark.common.util;
 /** String to primitive/boxed type conversion utilities. */
 public final class StringCastUtils {
 
-    private StringCastUtils() {}
+    private StringCastUtils() {
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> T cast(String v, Class<?> classType) {

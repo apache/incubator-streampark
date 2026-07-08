@@ -33,43 +33,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 /** Hadoop client configuration tools mainly for flink use. */
 public final class HadoopConfigUtils {
 
     private static final String[] HADOOP_CLIENT_CONF_FILES =
-            {"core-site.xml", "hdfs-site.xml", "yarn-site.xml"};
+        {"core-site.xml", "hdfs-site.xml", "yarn-site.xml"};
 
     private static final String[] HIVE_CLIENT_CONF_FILES =
-            {"core-site.xml", "hdfs-site.xml", "hive-site.xml"};
+        {"core-site.xml", "hdfs-site.xml", "hive-site.xml"};
 
     private static final Map<String, String> KERBEROS_CONF = loadKerberosConf();
 
     public static final String HADOOP_USER_NAME =
-            InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
+        InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
 
     public static String hadoopUserName() {
         return HADOOP_USER_NAME;
     }
 
     public static final String KERBEROS_DEBUG =
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG(), "false");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_DEBUG(), "false");
 
     public static final boolean KERBEROS_ENABLE =
-            Boolean.parseBoolean(
-                    KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE(), "false"));
+        Boolean.parseBoolean(
+            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_ENABLE(), "false"));
 
     public static final String KERBEROS_PRINCIPAL =
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL(), "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_PRINCIPAL(), "").trim();
 
     public static final String KERBEROS_KEYTAB =
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB(), "").trim();
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KEYTAB(), "").trim();
 
     public static final String KERBEROS_KRB5 =
-            KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF(), "");
+        KERBEROS_CONF.getOrDefault(ConfigKeys.KEY_SECURITY_KERBEROS_KRB5_CONF(), "");
 
-    private HadoopConfigUtils() {}
+    private HadoopConfigUtils() {
+    }
 
     private static Map<String, String> loadKerberosConf() {
         Properties props = System.getProperties();
@@ -87,7 +87,7 @@ public final class HadoopConfigUtils {
             return Optional.of(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"));
         } catch (Exception e) {
             String path =
-                    FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop");
+                FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop");
             return Optional.of(path);
         }
     }
@@ -149,7 +149,7 @@ public final class HadoopConfigUtils {
     private static void rewriteHostIpMapper(File configFile, Map<String, String> hostsMap) {
         try {
             List<String> rawLines =
-                    org.apache.commons.io.FileUtils.readLines(configFile, StandardCharsets.UTF_8);
+                org.apache.commons.io.FileUtils.readLines(configFile, StandardCharsets.UTF_8);
             List<String> lines = new ArrayList<>();
             for (String line : rawLines) {
                 if (!line.trim().startsWith("<value>")) {
@@ -181,67 +181,67 @@ public final class HadoopConfigUtils {
 
     public static Map<String, String> readSystemHadoopConf() {
         return getSystemHadoopConfDir()
-                .map(
-                        confDir -> {
-                            Map<String, String> map = new LinkedHashMap<>();
-                            File[] files = LfsOperator.getInstance().listDir(confDir);
-                            if (files != null) {
-                                for (File f : files) {
-                                    boolean matched = false;
-                                    for (String name : HADOOP_CLIENT_CONF_FILES) {
-                                        if (name.equals(f.getName())) {
-                                            matched = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!matched) {
-                                        continue;
-                                    }
-                                    try {
-                                        map.put(
-                                                f.getName(),
-                                                org.apache.commons.io.FileUtils.readFileToString(
-                                                        f, StandardCharsets.UTF_8));
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
+            .map(
+                confDir -> {
+                    Map<String, String> map = new LinkedHashMap<>();
+                    File[] files = LfsOperator.getInstance().listDir(confDir);
+                    if (files != null) {
+                        for (File f : files) {
+                            boolean matched = false;
+                            for (String name : HADOOP_CLIENT_CONF_FILES) {
+                                if (name.equals(f.getName())) {
+                                    matched = true;
+                                    break;
                                 }
                             }
-                            return map;
-                        })
-                .orElse(Collections.emptyMap());
+                            if (!matched) {
+                                continue;
+                            }
+                            try {
+                                map.put(
+                                    f.getName(),
+                                    org.apache.commons.io.FileUtils.readFileToString(
+                                        f, StandardCharsets.UTF_8));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                    return map;
+                })
+            .orElse(Collections.emptyMap());
     }
 
     public static Map<String, String> readSystemHiveConf() {
         return getSystemHiveConfDir()
-                .map(
-                        confDir -> {
-                            Map<String, String> map = new LinkedHashMap<>();
-                            File[] files = LfsOperator.getInstance().listDir(confDir);
-                            if (files != null) {
-                                for (File f : files) {
-                                    boolean matched = false;
-                                    for (String name : HIVE_CLIENT_CONF_FILES) {
-                                        if (name.equals(f.getName())) {
-                                            matched = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!matched) {
-                                        continue;
-                                    }
-                                    try {
-                                        map.put(
-                                                f.getName(),
-                                                org.apache.commons.io.FileUtils.readFileToString(
-                                                        f, StandardCharsets.UTF_8));
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
+            .map(
+                confDir -> {
+                    Map<String, String> map = new LinkedHashMap<>();
+                    File[] files = LfsOperator.getInstance().listDir(confDir);
+                    if (files != null) {
+                        for (File f : files) {
+                            boolean matched = false;
+                            for (String name : HIVE_CLIENT_CONF_FILES) {
+                                if (name.equals(f.getName())) {
+                                    matched = true;
+                                    break;
                                 }
                             }
-                            return map;
-                        })
-                .orElse(Collections.emptyMap());
+                            if (!matched) {
+                                continue;
+                            }
+                            try {
+                                map.put(
+                                    f.getName(),
+                                    org.apache.commons.io.FileUtils.readFileToString(
+                                        f, StandardCharsets.UTF_8));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                    return map;
+                })
+            .orElse(Collections.emptyMap());
     }
 }

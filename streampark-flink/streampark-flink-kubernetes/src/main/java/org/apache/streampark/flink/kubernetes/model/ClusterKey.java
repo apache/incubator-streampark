@@ -30,6 +30,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClusterKey {
+
     private FlinkK8sDeployMode executeMode;
     private String namespace = "default";
     private String clusterId;

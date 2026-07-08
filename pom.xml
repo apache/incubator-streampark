@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>3.0.0-preview</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -113,24 +113,29 @@
         <mysql.version>8.0.27</mysql.version>
         <hikariCP.version>3.4.5</hikariCP.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <typesafe-conf.version>1.4.2</typesafe-conf.version>        <commons-cli.version>1.5.0</commons-cli.version>
+        <typesafe-conf.version>1.4.2</typesafe-conf.version>
+        <commons-cli.version>1.5.0</commons-cli.version>
         <commons-net.version>3.9.0</commons-net.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <assertj.version>3.23.1</assertj.version>
 
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+        <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-spotless-plugin.version>2.27.2</maven-spotless-plugin.version>
-        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <maven-apache-rat-plugin.version>0.13</maven-apache-rat-plugin.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <httpclient5.version>5.1</httpclient5.version>
         <lombok.version>1.18.24</lombok.version>
         <jupiter.version>5.9.1</jupiter.version>
-        <mockito.version>3.4.6</mockito.version>        <assertj.version>3.23.1</assertj.version>
+        <mockito.version>3.4.6</mockito.version>
+        <assertj.version>3.23.1</assertj.version>
         <testcontainer.version>1.19.8</testcontainer.version>
         <spotless.skip>false</spotless.skip>
         <rat.skip>false</rat.skip>
@@ -797,7 +802,8 @@
             <id>fast</id>
             <properties>
                 <enforcer.skip>true</enforcer.skip>
-                <maven.javadoc.skip>true</maven.javadoc.skip>                <skipTests>true</skipTests>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <skipTests>true</skipTests>
                 <rat.skip>true</rat.skip>
                 <owasp.skip>true</owasp.skip>
                 <spotless.skip>true</spotless.skip>

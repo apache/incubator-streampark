@@ -23,7 +23,8 @@ import org.apache.flink.annotation.Public;
 @Public
 public final class FlinkK8sWatcherFactory {
 
-    private FlinkK8sWatcherFactory() {}
+    private FlinkK8sWatcherFactory() {
+    }
 
     public static FlinkK8sWatcher createInstance() {
         return createInstance(FlinkTrackConfig.defaultConf(), false);

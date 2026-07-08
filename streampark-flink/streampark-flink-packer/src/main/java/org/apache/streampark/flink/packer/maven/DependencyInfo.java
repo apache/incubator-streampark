@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.packer.maven;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 public class DependencyInfo {
+
     private final Set<Artifact> mavenArts;
     private final Set<String> extJarLibs;
 
@@ -38,11 +40,16 @@ public class DependencyInfo {
         this(new HashSet<>(mavenArts), new HashSet<>(extJarLibs));
     }
 
-    public Set<Artifact> mavenArts() { return mavenArts; }
-    public Set<String> extJarLibs() { return extJarLibs; }
+    public Set<Artifact> mavenArts() {
+        return mavenArts;
+    }
+    public Set<String> extJarLibs() {
+        return extJarLibs;
+    }
 
     public DependencyInfo merge(Set<String> jarLibs) {
-        if (jarLibs == null) return this;
+        if (jarLibs == null)
+            return this;
         Set<String> merged = new HashSet<>(extJarLibs);
         merged.addAll(jarLibs);
         return new DependencyInfo(mavenArts, merged);
@@ -51,10 +58,14 @@ public class DependencyInfo {
     public DependencyInfo merge(List<Artifact> mvnPoms, List<String> jarLibs) {
         Set<Artifact> arts = new HashSet<>(mavenArts);
         Set<String> libs = new HashSet<>(extJarLibs);
-        if (mvnPoms != null) arts.addAll(mvnPoms);
-        if (jarLibs != null) libs.addAll(jarLibs);
+        if (mvnPoms != null)
+            arts.addAll(mvnPoms);
+        if (jarLibs != null)
+            libs.addAll(jarLibs);
         return new DependencyInfo(arts, libs);
     }
 
-    public static DependencyInfo empty() { return new DependencyInfo(); }
+    public static DependencyInfo empty() {
+        return new DependencyInfo();
+    }
 }

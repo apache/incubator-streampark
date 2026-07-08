@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.streampark.flink.kubernetes.ingress;
 
 import org.apache.streampark.common.util.AutoCloseUtils;
@@ -49,7 +50,8 @@ public class IngressStrategyV1 extends IngressStrategy {
     }
 
     private int touchIngressBackendRestPort(DefaultKubernetesClient client, String clusterId, String nameSpace) {
-        var ports = client.services().inNamespace(nameSpace).withName(clusterId + "-" + REST_SERVICE_IDENTIFICATION).get().getSpec().getPorts();
+        var ports = client.services().inNamespace(nameSpace).withName(clusterId + "-" + REST_SERVICE_IDENTIFICATION)
+            .get().getSpec().getPorts();
         return ports.stream()
             .filter(servicePort -> REST_SERVICE_IDENTIFICATION.equalsIgnoreCase(servicePort.getName()))
             .mapToInt(servicePort -> servicePort.getTargetPort().getIntVal())
