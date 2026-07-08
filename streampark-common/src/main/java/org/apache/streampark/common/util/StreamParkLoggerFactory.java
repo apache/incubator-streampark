@@ -45,9 +45,7 @@ public final class StreamParkLoggerFactory implements LoggerFactoryBinder {
         try {
             new ShadedContextInitializer(defaultLoggerContext).autoConfig();
         } catch (Exception e) {
-            System.err.println("Failed to auto configure default logger context");
-            System.err.println("Reported exception:");
-            e.printStackTrace();
+            System.err.println("Failed to auto configure default logger context: " + e);
         }
         if (!StatusUtil.contextHasStatusListener(defaultLoggerContext)) {
             StatusPrinter.printInCaseOfErrorsOrWarnings(defaultLoggerContext);

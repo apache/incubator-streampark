@@ -175,7 +175,10 @@ public final class LfsOperator extends FsOperator {
             throw new IllegalArgumentException("[StreamPark] LFsOperator.fileMd5: file must exists.");
         }
         try {
-            return DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)));
+            // MD5 is used for non-cryptographic file integrity checks only.
+            @SuppressWarnings("java:S4790")
+            String digest = DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)));
+            return digest;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

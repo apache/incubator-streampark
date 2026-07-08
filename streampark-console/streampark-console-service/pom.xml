@@ -35,7 +35,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <postgresql.version>42.5.1</postgresql.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
-        <streampark.flink.shims.version>1.14</streampark.flink.shims.version>
+        <streampark.flink.shims.version>1.17</streampark.flink.shims.version>
         <frontend.project.name>streampark-console-webapp</frontend.project.name>
         <CodeCacheSize>512m</CodeCacheSize>
 
@@ -349,36 +349,6 @@
         <!-- Ensure all Flink shims are built when console-service is built with -am -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.12</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.13</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.14</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.15</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-1.16</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-shims_flink-1.17</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
@@ -398,6 +368,24 @@
         <dependency>
             <groupId>org.apache.streampark</groupId>
             <artifactId>streampark-flink-shims_flink-1.20</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-shims_flink-2.0</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-shims_flink-2.1</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.streampark</groupId>
+            <artifactId>streampark-flink-shims_flink-2.2</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -574,41 +562,6 @@
                     <excludeTransitive>false</excludeTransitive>
                     <stripVersion>false</stripVersion>
                     <artifactItems>
-                        <!-- flink 1.12 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.12</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 1.13 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.13</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 1.14 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.14</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 1.15 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.15</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
-                        <!-- flink 1.16 support-->
-                        <dependency>
-                            <groupId>org.apache.streampark</groupId>
-                            <artifactId>streampark-flink-shims_flink-1.16</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
-                        </dependency>
                         <!-- flink 1.17 support-->
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
@@ -634,6 +587,27 @@
                         <dependency>
                             <groupId>org.apache.streampark</groupId>
                             <artifactId>streampark-flink-shims_flink-1.20</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 2.0 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-2.0</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 2.1 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-2.1</artifactId>
+                            <version>${project.version}</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <!-- flink 2.2 support-->
+                        <dependency>
+                            <groupId>org.apache.streampark</groupId>
+                            <artifactId>streampark-flink-shims_flink-2.2</artifactId>
                             <version>${project.version}</version>
                             <outputDirectory>${project.build.directory}/shims</outputDirectory>
                         </dependency>

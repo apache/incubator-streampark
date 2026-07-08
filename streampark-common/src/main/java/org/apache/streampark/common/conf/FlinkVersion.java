@@ -41,8 +41,11 @@ public class FlinkVersion implements Serializable {
     private static final Pattern FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$");
     private static final Pattern FLINK_VERSION_PATTERN =
             Pattern.compile("^Version: (.*), Commit ID: (.*)$");
-    private static final Pattern FLINK_SCALA_VERSION_PATTERN =
-            Pattern.compile("^flink-dist_(\\d\\.\\d+).*\\.jar$");
+    private static final Pattern FLINK_DIST_UNDERSCORE_PATTERN =
+            Pattern.compile(
+                    "^flink-dist_(\\d+\\.\\d+)-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$");
+    private static final Pattern FLINK_DIST_DASH_PATTERN =
+            Pattern.compile("^flink-dist-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$");
     private static final Pattern APACHE_FLINK_VERSION_PATTERN =
             Pattern.compile("(^\\d+\\.\\d+\\.\\d+)");
     private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)");
@@ -89,8 +92,7 @@ public class FlinkVersion implements Serializable {
 
     public String getScalaVersion() {
         if (scalaVersion == null) {
-            Matcher matcher = FLINK_SCALA_VERSION_PATTERN.matcher(getFlinkDistJar().getName());
-            scalaVersion = matcher.matches() ? matcher.group(1) : "2.12";
+            scalaVersion = parseFromDistJar().map(pair -> pair[1]).orElse("2.12");
         }
         return scalaVersion;
     }
@@ -133,44 +135,10 @@ public class FlinkVersion implements Serializable {
 
     public String getVersion() {
         if (version == null) {
-            List<String> cmd =
-                    Arrays.asList(
-                            "java -classpath "
-                                    + getFlinkDistJar().getName()
-                                    + " org.apache.flink.client.cli.CliFrontend --version");
-            StringBuilder buffer = new StringBuilder();
-            final String[] flinkVersion = {null};
-            try {
-                CommandUtils.execute(
-                        getFlinkLib().getAbsolutePath(),
-                        cmd,
-                        new Consumer<String>() {
-                            @Override
-                            public void accept(String out) {
-                                buffer.append(out).append("\n");
-                                Matcher matcher = FLINK_VERSION_PATTERN.matcher(out);
-                                if (matcher.find()) {
-                                    String ver = matcher.group(1);
-                                    Matcher m1 = APACHE_FLINK_VERSION_PATTERN.matcher(ver);
-                                    if (m1.find()) {
-                                        flinkVersion[0] = ver;
-                                    } else {
-                                        Matcher m2 = OTHER_FLINK_VERSION_PATTERN.matcher(ver);
-                                        if (m2.find()) {
-                                            flinkVersion[0] = ver;
-                                        }
-                                    }
-                                }
-                            }
-                        });
-            } catch (Exception e) {
-                throw new IllegalStateException("[StreamPark] execute flink version command failed", e);
-            }
-            LOG.info("[StreamPark] {}", buffer);
-            if (flinkVersion[0] == null) {
-                throw new IllegalStateException("[StreamPark] parse flink version failed. " + buffer);
-            }
-            version = flinkVersion[0];
+            version =
+                    parseFromDistJar()
+                            .map(pair -> pair[0])
+                            .orElseGet(this::parseFromCliFrontend);
         }
         return version;
     }
@@ -207,10 +175,14 @@ public class FlinkVersion implements Serializable {
 
     public boolean checkVersion(boolean throwException) {
         String[] parts = getVersion().split("\\.");
-        if (parts.length >= 2 && "1".equals(parts[0].trim())) {
+        if (parts.length >= 2) {
             try {
+                int major = Integer.parseInt(parts[0].trim());
                 int minor = Integer.parseInt(parts[1].trim());
-                if (minor >= 12 && minor <= 20) {
+                if (major == 1 && minor >= 17 && minor <= 20) {
+                    return true;
+                }
+                if (major == 2 && minor >= 0 && minor <= 2) {
                     return true;
                 }
             } catch (NumberFormatException ignored) {
@@ -224,13 +196,85 @@ public class FlinkVersion implements Serializable {
 
     public boolean checkVersion(int sinceVersion) {
         String[] parts = getVersion().split("\\.");
-        if (parts.length >= 2 && "1".equals(parts[0].trim())) {
+        if (parts.length >= 2) {
             try {
-                return Integer.parseInt(parts[1].trim()) >= sinceVersion;
+                int major = Integer.parseInt(parts[0].trim());
+                int minor = Integer.parseInt(parts[1].trim());
+                if (major == 1 && minor >= sinceVersion) {
+                    return true;
+                }
+                if (major == 2) {
+                    return true;
+                }
             } catch (NumberFormatException ignored) {
             }
         }
         return false;
+    }
+
+    private java.util.Optional<String[]> parseFromDistJar() {
+        String jarName = getFlinkDistJar().getName();
+        Matcher underscoreMatcher = FLINK_DIST_UNDERSCORE_PATTERN.matcher(jarName);
+        if (underscoreMatcher.matches()) {
+            String parsedVersion = underscoreMatcher.group(2);
+            String parsedScala = underscoreMatcher.group(1);
+            LOG.info(
+                    "Flink version parsed from dist jar name: {}, scala: {}",
+                    parsedVersion,
+                    parsedScala);
+            return java.util.Optional.of(new String[] {parsedVersion, parsedScala});
+        }
+        Matcher dashMatcher = FLINK_DIST_DASH_PATTERN.matcher(jarName);
+        if (dashMatcher.matches()) {
+            String parsedVersion = dashMatcher.group(1);
+            LOG.info(
+                    "Flink version parsed from dist jar name: {}, scala: {}",
+                    parsedVersion,
+                    "2.12");
+            return java.util.Optional.of(new String[] {parsedVersion, "2.12"});
+        }
+        return java.util.Optional.empty();
+    }
+
+    private String parseFromCliFrontend() {
+        final String[] flinkVersion = {null};
+        StringBuilder buffer = new StringBuilder();
+        List<String> cmd =
+                Arrays.asList(
+                        "java -classpath "
+                                + getFlinkDistJar().getName()
+                                + " org.apache.flink.client.cli.CliFrontend --version");
+        try {
+            CommandUtils.execute(
+                    getFlinkLib().getAbsolutePath(),
+                    cmd,
+                    new Consumer<String>() {
+                        @Override
+                        public void accept(String out) {
+                            buffer.append(out).append("\n");
+                            Matcher matcher = FLINK_VERSION_PATTERN.matcher(out);
+                            if (matcher.find()) {
+                                String ver = matcher.group(1);
+                                Matcher m1 = APACHE_FLINK_VERSION_PATTERN.matcher(ver);
+                                if (m1.find()) {
+                                    flinkVersion[0] = ver;
+                                } else {
+                                    Matcher m2 = OTHER_FLINK_VERSION_PATTERN.matcher(ver);
+                                    if (m2.find()) {
+                                        flinkVersion[0] = ver;
+                                    }
+                                }
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            throw new IllegalStateException("[StreamPark] execute flink version command failed", e);
+        }
+        LOG.info("[StreamPark] {}", buffer);
+        if (flinkVersion[0] == null) {
+            throw new IllegalStateException("[StreamPark] parse flink version failed. " + buffer);
+        }
+        return flinkVersion[0];
     }
 
     @Override

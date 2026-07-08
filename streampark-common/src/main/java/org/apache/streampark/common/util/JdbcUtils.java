@@ -22,6 +22,8 @@ import org.apache.streampark.common.conf.ConfigKeys;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -42,6 +44,9 @@ import java.util.function.Consumer;
  * modifications and additions are automatically committed transactions.
  */
 public final class JdbcUtils {
+
+    private static final Logger LOG =
+            StreamParkLoggerFactory.loggerFactory().getLogger(JdbcUtils.class.getName());
 
     private static final ConcurrentHashMap<String, ReentrantLock> LOCK_MAP = new ConcurrentHashMap<>();
 
@@ -81,7 +86,7 @@ public final class JdbcUtils {
             }
             return array.isEmpty() ? Collections.emptyList() : array;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.warn("Failed to execute JDBC select", ex);
             return Collections.emptyList();
         } finally {
             close(result, stmt, conn);
@@ -142,14 +147,14 @@ public final class JdbcUtils {
                 }
                 return total;
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOG.warn("Failed to execute JDBC select", ex);
                 return 0;
             } finally {
                 conn.commit();
                 close(conn);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.warn("Failed to execute JDBC select", ex);
             return 0;
         }
     }
@@ -164,7 +169,7 @@ public final class JdbcUtils {
             statement = conn.createStatement();
             return statement.executeUpdate(sql);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.warn("Failed to execute JDBC select", ex);
             return -1;
         } finally {
             close(statement, conn);
@@ -193,7 +198,7 @@ public final class JdbcUtils {
             }
             return map;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.warn("Failed to execute JDBC select", ex);
             return Collections.emptyMap();
         } finally {
             close(result, stmt, conn);
@@ -210,7 +215,7 @@ public final class JdbcUtils {
             stmt = conn.createStatement();
             return stmt.execute(sql);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.warn("Failed to execute JDBC select", ex);
             return false;
         } finally {
             close(stmt, conn);

@@ -164,7 +164,6 @@ public final class FlinkShimsProxy {
         }
 
         String majorVersion = flinkVersion.majorVersion();
-        String scalaVersion = flinkVersion.scalaVersion();
         File[] files = libPath.listFiles();
         if (files == null) {
             return;
@@ -176,7 +175,7 @@ public final class FlinkShimsProxy {
                 continue;
             }
             if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
-                String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
+                String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "-";
                 if (jarName.startsWith(prefixVer)) {
                     addShimUrl.accept(jar);
                     LOG.info("Include flink shims jar lib: {}", jarName);
@@ -185,7 +184,7 @@ public final class FlinkShimsProxy {
                 if (INCLUDE_PATTERN.matcher(jarName).matches()) {
                     addShimUrl.accept(jar);
                     LOG.info("Include jar lib: {}", jarName);
-                } else if (jarName.matches("^streampark-.*_" + scalaVersion + ".*$")) {
+                } else if (jarName.matches("^streampark-.*\\.jar$")) {
                     addShimUrl.accept(jar);
                     LOG.info("Include streampark lib: {}", jarName);
                 }
