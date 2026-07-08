@@ -75,7 +75,9 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
                 String uploadFile = Workspace.remote().APP_UPLOADS() + "/" + originFile.getName();
                 if (fsOperator.exists(uploadFile)) {
                     try (FileInputStream in = new FileInputStream(originFile)) {
-                        if (!DigestUtils.md5Hex(in).equals(fsOperator.fileMd5(uploadFile))) {
+                        @SuppressWarnings("java:S4790")
+                        String localMd5 = DigestUtils.md5Hex(in);
+                        if (!localMd5.equals(fsOperator.fileMd5(uploadFile))) {
                             fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
                         }
                     }
