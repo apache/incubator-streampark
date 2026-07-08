@@ -22,11 +22,13 @@ import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -79,32 +81,20 @@ public final class Utils {
     }
 
     public static void requireCheckJarFile(URL jar) throws IOException {
-        File jarFile;
-        try {
-            jarFile = new File(jar.toURI()).getCanonicalFile();
-        } catch (Exception e) {
-            throw new IOException("JAR file path is invalid " + jar, e);
-        }
-        if (!jarFile.exists()) {
-            throw new IOException("JAR file does not exist '" + jarFile.getAbsolutePath() + "'");
-        }
-        if (!jarFile.canRead()) {
-            throw new IOException("JAR file can't be read '" + jarFile.getAbsolutePath() + "'");
-        }
-        try (JarFile jf = new JarFile(jarFile)) {
+        Path jarPath = SafePathUtils.resolveJarPath(jar);
+        try (JarFile jf = new JarFile(jarPath.toFile())) {
             // verify jar is readable
         } catch (IOException e) {
-            throw new IOException(
-                    "Error while opening jar file '" + jarFile.getAbsolutePath() + "'", e);
+            throw new IOException("Error while opening jar file '" + jarPath + "'", e);
         }
     }
 
     public static Manifest getJarManifest(File jarFile) throws IOException {
-        File canonicalJar = jarFile.getCanonicalFile();
-        requireCheckJarFile(canonicalJar.toURI().toURL());
-        return AutoCloseUtils.using(
-                new JarInputStream(new BufferedInputStream(new FileInputStream(canonicalJar))),
-                JarInputStream::getManifest);
+        Path jarPath = SafePathUtils.resolveJarPath(jarFile.toURI().toURL());
+        try (InputStream in = Files.newInputStream(jarPath);
+                JarInputStream jarInputStream = new JarInputStream(new BufferedInputStream(in))) {
+            return jarInputStream.getManifest();
+        }
     }
 
     public static String getJarManClass(File jarFile) throws IOException {

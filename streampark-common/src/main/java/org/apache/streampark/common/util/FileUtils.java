@@ -246,16 +246,13 @@ public final class FileUtils {
         }
     }
 
+    public static String readFile(String filename) throws IOException {
+        Path path = SafePathUtils.resolveConfigPath(filename);
+        return Files.readString(path, StandardCharsets.UTF_8);
+    }
+
     public static String readFile(File file) throws IOException {
-        Path canonicalPath = file.getCanonicalFile().toPath();
-        if (Files.size(canonicalPath) >= Integer.MAX_VALUE) {
-            throw new IOException("Too large file, unexpected!");
-        }
-        byte[] array = new byte[(int) Files.size(canonicalPath)];
-        try (InputStream is = Files.newInputStream(canonicalPath)) {
-            readInputStream(is, array);
-        }
-        return new String(array, StandardCharsets.UTF_8);
+        return readFile(file.getPath());
     }
 
     public static void writeFile(String content, File file) throws IOException {
