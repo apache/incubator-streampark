@@ -59,7 +59,7 @@ public class ClickHouseSinkConfigOption implements Serializable {
                 String v = prop.getProperty(k);
                 if (v == null) return new ArrayList<>();
                 return Arrays.stream(v.split(SIGN_COMMA)).filter(s -> !s.isEmpty())
-                    .map(s -> s.replaceAll("\\s+", "").replaceFirst("^http://|^", Constants.HTTP_SCHEMA))
+                    .map(ClickHouseSinkConfigOption::normalizeHostUrl)
                     .collect(Collectors.toList());
             }).build();
 
@@ -80,4 +80,12 @@ public class ClickHouseSinkConfigOption implements Serializable {
 
     public static ClickHouseSinkConfigOption of(Properties properties) { return new ClickHouseSinkConfigOption(CLICKHOUSE_SINK_PREFIX, properties); }
     public Properties getInternalConfig() { return ConfigUtils.getConf(prop, prefix, ""); }
+
+    private static String normalizeHostUrl(String host) {
+        String trimmed = host.replaceAll("\\s++", "");
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return trimmed;
+        }
+        return Constants.HTTP_SCHEMA + trimmed;
+    }
 }

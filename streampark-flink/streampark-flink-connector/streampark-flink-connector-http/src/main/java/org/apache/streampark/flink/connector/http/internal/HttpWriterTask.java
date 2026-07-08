@@ -49,7 +49,12 @@ public class HttpWriterTask implements Runnable, AutoCloseable {
                     future.addListener(() -> { try { Response resp = future.get(); if (resp == null || resp.getStatusCode() != 200) handleFailedResponse(resp, sinkRequest); } catch (Exception e) { handleFailedResponse(null, sinkRequest); }}, callbackService);
                 }
             }
-        } catch (Exception e) { throw new RuntimeException(e); }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         finally { LOG.info("Task id = {} is finished", id); }
     }
     Request buildRequest(String url) {
@@ -91,7 +96,12 @@ public class HttpWriterTask implements Runnable, AutoCloseable {
                 for (String r : sinkRequest.getRecords()) cleaned.add(r.replaceFirst("^[A-Z]+///", ""));
                 failoverWriter.write(new SinkRequest(cleaned, sinkRequest.getAttemptCounter()));
             } else { sinkRequest.incrementCounter(); queue.put(sinkRequest); }
-        } catch (Exception e) { throw new RuntimeException(e); }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override public void close() { isWorking = false; failoverWriter.close(); }
 }

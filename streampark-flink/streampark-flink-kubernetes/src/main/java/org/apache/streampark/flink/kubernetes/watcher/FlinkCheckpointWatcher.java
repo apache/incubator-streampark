@@ -101,18 +101,21 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
                                 id ->
                                         CompletableFuture.supplyAsync(() -> collect(id), watchExecutor)
                                                 .whenComplete(
-                                                        (cp, error) -> {
-                                                            if (cp != null && cp.isPresent()) {
-                                                                eventBus.postAsync(
-                                                                        new FlinkJobCheckpointChangeEvent(
-                                                                                id, cp.get()));
-                                                            }
-                                                        }))
+                                                        (cp, error) ->
+                                                                cp.ifPresent(
+                                                                        checkpoint ->
+                                                                                eventBus.postAsync(
+                                                                                        new FlinkJobCheckpointChangeEvent(
+                                                                                                id,
+                                                                                                checkpoint))))
                         .collect(Collectors.toSet());
 
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                     .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("[FlinkCheckpointWatcher] interrupted while waiting for checkpoint collection");
         } catch (Exception e) {
             log.error(
                     "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",

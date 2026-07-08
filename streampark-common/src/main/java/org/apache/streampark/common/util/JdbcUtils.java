@@ -118,9 +118,7 @@ public final class JdbcUtils {
             return 0;
         }
         if (size == 1) {
-            for (String s : sql) {
-                return update(s, jdbcConfig);
-            }
+            return update(sql.iterator().next(), jdbcConfig);
         }
         Connection conn = getConnection(jdbcConfig);
         try {

@@ -40,7 +40,13 @@ public class ClickHouseWriterTask implements Runnable, AutoCloseable {
                 SinkRequest req = queue.poll(300, TimeUnit.MILLISECONDS);
                 if (req != null) send(req);
             }
-        } catch (Exception e) { LOG.error("Error while inserting data", e); throw new RuntimeException(e); }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            LOG.error("Error while inserting data", e);
+            throw new RuntimeException(e);
+        }
         finally { LOG.info("Task id = {} is finished", id); }
     }
     void send(SinkRequest sinkRequest) {
@@ -68,7 +74,10 @@ public class ClickHouseWriterTask implements Runnable, AutoCloseable {
             failoverWriter.write(sinkRequest);
         } else {
             sinkRequest.incrementCounter();
-            try { queue.put(sinkRequest); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try { queue.put(sinkRequest); } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
     }
     @Override public void close() { isWorking = false; failoverWriter.close(); }

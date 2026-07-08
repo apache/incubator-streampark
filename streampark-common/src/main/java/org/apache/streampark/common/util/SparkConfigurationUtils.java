@@ -33,7 +33,7 @@ public final class SparkConfigurationUtils {
     private static final Pattern SPARK_PROPERTY_COMPLEX_PATTERN =
             Pattern.compile("^[\"']?(.*?)=(.*?)[\"']?$");
     private static final String SPARK_ARGUMENT_REGEXP =
-            "\"?(\\s+|$)(?=(([^\"]*\"){2})*[^\"]*$)\"?";
+            "\"?(\\s++|$)(?=(([^\"]*\"){2})*+[^\"]*$)\"?";
 
     private SparkConfigurationUtils() {}
 
@@ -48,7 +48,7 @@ public final class SparkConfigurationUtils {
             return new HashMap<>();
         }
         Map<String, String> map = new HashMap<>();
-        for (String x : properties.split("(\\s)*(--conf|-c)(\\s)+")) {
+        for (String x : properties.split("(\\s)*+(--conf|-c)(\\s)++")) {
             if (Utils.isNotEmpty(x) && !x.isEmpty()) {
                 java.util.regex.Matcher p = SPARK_PROPERTY_COMPLEX_PATTERN.matcher(x);
                 if (p.matches()) {

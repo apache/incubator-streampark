@@ -175,6 +175,14 @@ public enum SqlCommand {
     }
 
     static String cleanUp(String sql) {
-        return sql.trim().replaceAll("^(['\"])|(['\"])$", "");
+        String trimmed = sql.trim();
+        if (trimmed.length() >= 2) {
+            char first = trimmed.charAt(0);
+            char last = trimmed.charAt(trimmed.length() - 1);
+            if ((first == '\'' && last == '\'') || (first == '"' && last == '"')) {
+                return trimmed.substring(1, trimmed.length() - 1);
+            }
+        }
+        return trimmed;
     }
 }

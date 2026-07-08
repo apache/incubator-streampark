@@ -87,8 +87,8 @@ public final class MavenTool {
                             + outFatJarPath
                             + ") should be a JAR file.");
         }
-        if (uberJar.exists()) {
-            uberJar.delete();
+        if (uberJar.exists() && !uberJar.delete()) {
+            throw new IllegalStateException("Failed to delete existing fat jar: " + outFatJarPath);
         }
         Set<File> jarSet = new HashSet<>();
         for (String lib : jarLibs) {
