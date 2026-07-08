@@ -22,14 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.streampark.shaded.org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,22 +43,15 @@ public final class PropertiesUtils {
     private PropertiesUtils() {}
 
     public static String readFile(String filename) {
-        Path path = toConfigPath(filename, "readFile");
-        File file = path.toFile();
-        if (!file.exists()) {
-            throw new IllegalArgumentException("[StreamPark] readFile: file " + file + " does not exist");
-        }
-        if (!file.isFile()) {
-            throw new IllegalArgumentException("[StreamPark] readFile: file " + file + " is not a normal file");
-        }
-        try (Scanner scanner = new Scanner(file)) {
+        Path path = SafePathUtils.resolveConfigPath(filename);
+        try (Scanner scanner = new Scanner(Files.newBufferedReader(path, StandardCharsets.UTF_8))) {
             StringBuilder buffer = new StringBuilder();
             while (scanner.hasNextLine()) {
                 buffer.append(scanner.nextLine()).append("\r\n");
             }
             return buffer.toString();
         } catch (java.io.FileNotFoundException e) {
-            throw new IllegalArgumentException("[StreamPark] readFile: file " + file + " does not exist", e);
+            throw new IllegalArgumentException("[StreamPark] readFile: file " + path + " does not exist", e);
         }
     }
 
@@ -98,15 +90,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromYamlFile(String filename) {
-        Path path = toConfigPath(filename, "fromYamlFile");
-        File file = path.toFile();
-        if (!file.exists()) {
-            throw new IllegalArgumentException("[StreamPark] fromYamlFile: Yaml file " + file + " does not exist");
-        }
-        if (!file.isFile()) {
-            throw new IllegalArgumentException("[StreamPark] fromYamlFile: Yaml file " + file + " is not a normal file");
-        }
-        try (InputStream inputStream = Files.newInputStream(path)) {
+        try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromYamlFile(inputStream);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed when loading yaml from file", e);
@@ -114,12 +98,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromHoconFile(String filename) {
-        Path path = toConfigPath(filename, "fromHoconFile");
-        File file = path.toFile();
-        if (!file.exists()) {
-            throw new IllegalArgumentException("[StreamPark] fromHoconFile: file " + file + " does not exist");
-        }
-        try (InputStream inputStream = Files.newInputStream(path)) {
+        try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromHoconFile(inputStream);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed when loading Hocon ", e);
@@ -127,17 +106,7 @@ public final class PropertiesUtils {
     }
 
     public static Map<String, String> fromPropertiesFile(String filename) {
-        Path path = toConfigPath(filename, "fromPropertiesFile");
-        File file = path.toFile();
-        if (!file.exists()) {
-            throw new IllegalArgumentException(
-                    "[StreamPark] fromPropertiesFile: Properties file " + file + " does not exist");
-        }
-        if (!file.isFile()) {
-            throw new IllegalArgumentException(
-                    "[StreamPark] fromPropertiesFile: Properties file " + file + " is not a normal file");
-        }
-        try (InputStream inputStream = Files.newInputStream(path)) {
+        try (InputStream inputStream = SafePathUtils.openConfigFile(filename)) {
             return fromPropertiesFile(inputStream);
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed when loading properties from file", e);
@@ -238,25 +207,6 @@ public final class PropertiesUtils {
 
     public static Map<String, String> fromPropertiesFileAsJava(InputStream inputStream) {
         return new HashMap<>(fromPropertiesFile(inputStream));
-    }
-
-    private static Path toConfigPath(String filename, String method) {
-        if (filename == null || filename.isEmpty()) {
-            throw new IllegalArgumentException("[StreamPark] " + method + ": filename must not be blank");
-        }
-        Path path = Paths.get(filename).normalize();
-        if (path.toString().contains("..")) {
-            throw new IllegalArgumentException("[StreamPark] " + method + ": invalid file path " + filename);
-        }
-        if (path.isAbsolute()) {
-            return path;
-        }
-        Path base = Paths.get("").toAbsolutePath().normalize();
-        Path resolved = base.resolve(path).normalize();
-        if (!resolved.startsWith(base)) {
-            throw new IllegalArgumentException("[StreamPark] " + method + ": invalid file path " + filename);
-        }
-        return resolved;
     }
 
     @SuppressWarnings("unchecked")
