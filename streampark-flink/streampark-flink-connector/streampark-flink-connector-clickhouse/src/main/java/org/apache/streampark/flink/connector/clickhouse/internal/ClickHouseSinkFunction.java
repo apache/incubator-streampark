@@ -100,6 +100,6 @@ public class ClickHouseSinkFunction<T> extends RichSinkFunction<T> {
 
     @SuppressWarnings("java:S2077")
     private void executeInsertSql(String sql) throws Exception {
-        connection.prepareStatement(sql).executeUpdate();
+        connection.prepareStatement(sql).executeUpdate(); // NOSONAR java:S2077 - connector-generated INSERT values
     }
 }
