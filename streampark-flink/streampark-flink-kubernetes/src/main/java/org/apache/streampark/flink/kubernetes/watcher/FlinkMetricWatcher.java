@@ -110,7 +110,7 @@ public class FlinkMetricWatcher extends FlinkWatcher {
                                                         () -> collectMetrics(id), watchExecutor)
                                                 .whenComplete(
                                                         (metric, error) -> {
-                                                            if (metric == null || !metric.isPresent()) {
+                                                            if (!metric.isPresent()) {
                                                                 return;
                                                             }
                                                             ClusterKey clusterKey = id.toClusterKey();

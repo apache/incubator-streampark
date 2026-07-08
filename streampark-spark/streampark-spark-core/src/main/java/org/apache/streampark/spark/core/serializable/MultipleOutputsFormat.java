@@ -97,6 +97,9 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
                                     NullWritable.class,
                                     NullWritable.class);
                     multipleOutputs = multipleOutputsMaker.create(ioContext);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException(e);
                 } catch (Exception e) {
                     throw new IOException(e);
                 }
