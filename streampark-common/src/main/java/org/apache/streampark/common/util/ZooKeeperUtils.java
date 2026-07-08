@@ -23,6 +23,8 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ZooKeeperUtils {
+
+    private static final Logger LOG =
+            StreamParkLoggerFactory.loggerFactory().getLogger(ZooKeeperUtils.class.getName());
 
     private static final String CONNECT = "localhost:2181";
     private static final Map<String, CuratorFramework> CLIENT_MAP = new ConcurrentHashMap<>();
@@ -101,7 +106,7 @@ public final class ZooKeeperUtils {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to create ZooKeeper path {}", path, e);
             return false;
         }
     }
@@ -122,7 +127,7 @@ public final class ZooKeeperUtils {
             client.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to update ZooKeeper path {}", path, e);
             return false;
         }
     }
@@ -138,7 +143,7 @@ public final class ZooKeeperUtils {
                 client.delete().deletingChildrenIfNeeded().forPath(path);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to delete ZooKeeper path {}", path, e);
         }
     }
 
@@ -154,7 +159,7 @@ public final class ZooKeeperUtils {
             }
             return new String(client.getData().forPath(path));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn("Failed to read ZooKeeper path {}", path, e);
             return null;
         }
     }
