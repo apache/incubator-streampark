@@ -91,8 +91,8 @@ public final class FlinkConfigurationUtils {
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             lineNo.incrementAndGet();
-            String[] comments = line.split("^#|\\s+#", 2);
-            String conf = comments[0].trim();
+            int commentStart = line.indexOf('#');
+            String conf = (commentStart >= 0 ? line.substring(0, commentStart) : line).trim();
             if (!conf.isEmpty()) {
                 String[] kv = conf.split(": ", 2);
                 if (kv.length == 2) {
@@ -141,7 +141,7 @@ public final class FlinkConfigurationUtils {
             String opts = matcher.group();
             int index = opts.indexOf('=');
             String key = opts.substring(2, index).trim();
-            String value = opts.substring(index + 1).trim().replaceAll("(^[\"|']|[\"|']$)", "");
+            String value = stripOuterQuotes(opts.substring(index + 1).trim());
             map.put(key, value);
         }
         return map;
@@ -197,7 +197,7 @@ public final class FlinkConfigurationUtils {
                 if (kv.matches(regexp)) {
                     String[] values = kv.split("=", 2);
                     String k1 = values[0].trim();
-                    String v1 = values[1].replaceAll("^['|\"]|['|\"]$", "");
+                    String v1 = stripOuterQuotes(values[1]);
                     String k = v.substring(2);
                     map.computeIfAbsent(k, key -> new LinkedHashMap<>()).put(k1, v1);
                 }
@@ -218,5 +218,17 @@ public final class FlinkConfigurationUtils {
             result.put(entry.getKey(), new HashMap<>(entry.getValue()));
         }
         return result;
+    }
+
+    private static String stripOuterQuotes(String value) {
+        if (value == null || value.length() < 2) {
+            return value;
+        }
+        char first = value.charAt(0);
+        char last = value.charAt(value.length() - 1);
+        if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 }

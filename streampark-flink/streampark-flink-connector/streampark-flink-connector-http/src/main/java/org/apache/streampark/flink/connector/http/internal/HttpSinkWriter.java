@@ -54,6 +54,9 @@ public class HttpSinkWriter implements SinkWriter {
             ThreadUtils.shutdownExecutorService(service);
             ThreadUtils.shutdownExecutorService(callbackService);
             asyncHttpClient.close();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

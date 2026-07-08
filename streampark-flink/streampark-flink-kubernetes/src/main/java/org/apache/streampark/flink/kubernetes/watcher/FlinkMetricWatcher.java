@@ -114,19 +114,20 @@ public class FlinkMetricWatcher extends FlinkWatcher {
                                                                 return;
                                                             }
                                                             ClusterKey clusterKey = id.toClusterKey();
+                                                            FlinkMetricCV payload = metric.get();
                                                             FlinkMetricCV preMetric =
                                                                     watchController.flinkMetrics.get(
                                                                             clusterKey);
                                                             boolean isMetricChanged =
                                                                     preMetric == null
                                                                             || !preMetric.equalsPayload(
-                                                                                    metric.get());
+                                                                                    payload);
                                                             if (isMetricChanged) {
                                                                 eventBus.postAsync(
                                                                         new FlinkClusterMetricChangeEvent(
-                                                                                id, metric.get()));
+                                                                                id, payload));
                                                                 watchController.flinkMetrics.put(
-                                                                        clusterKey, metric.get());
+                                                                        clusterKey, payload);
                                                             }
                                                         }))
                         .collect(Collectors.toSet());
@@ -134,6 +135,9 @@ public class FlinkMetricWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                     .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("[FlinkMetricWatcher] interrupted while waiting for metric collection");
         } catch (Exception e) {
             log.error(
                     "[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout, limitSeconds={}, trackingClusterKeys={}",

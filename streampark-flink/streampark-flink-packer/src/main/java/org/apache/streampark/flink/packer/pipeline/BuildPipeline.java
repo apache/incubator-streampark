@@ -118,6 +118,15 @@ public abstract class BuildPipeline {
                 offerBuildParam().appName());
             watcher.onFinish(snapshot(), result);
             return result;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            pipeStatus = PipelineStatusEnum.failure;
+            error = PipeError.of(e.getMessage(), e);
+            log.error("[streampark-packer] Building pipeline interrupted. | appName={}",
+                offerBuildParam().appName(), e);
+            BuildResult result = new ErrorResult();
+            try { watcher.onFinish(snapshot(), result); } catch (Exception ignored) {}
+            return result;
         } catch (Throwable cause) {
             pipeStatus = PipelineStatusEnum.failure;
             error = PipeError.of(cause.getMessage(), cause);
