@@ -60,25 +60,25 @@ public class KafkaSource {
             WatermarkStrategy<KafkaRecord<T>> strategy,
             Serializable topicParam) {
 
-        Properties prop = ConfigUtils.getConf(ctx.parameter.toMap(), ConfigKeys.KAFKA_SOURCE_PREFIX() + alias);
+        Properties prop = ConfigUtils.getConf(ctx.parameter.toMap(), ConfigKeys.KAFKA_SOURCE_PREFIX + alias);
         Utils.copyProperties(property, prop);
 
-        boolean hasTopic = prop.containsKey(ConfigKeys.KEY_KAFKA_TOPIC());
-        boolean hasPattern = prop.containsKey(ConfigKeys.KEY_KAFKA_PATTERN());
+        boolean hasTopic = prop.containsKey(ConfigKeys.KEY_KAFKA_TOPIC);
+        boolean hasPattern = prop.containsKey(ConfigKeys.KEY_KAFKA_PATTERN);
         if (prop.isEmpty() || (!hasTopic && !hasPattern)) {
             throw new IllegalArgumentException("[StreamPark] kafka source config error");
         }
 
         Long timestamp = parseLong(prop.getProperty(
-                ConfigKeys.KEY_KAFKA_START_FROM() + "." + ConfigKeys.KEY_KAFKA_START_FROM_TIMESTAMP()));
+                ConfigKeys.KEY_KAFKA_START_FROM + "." + ConfigKeys.KEY_KAFKA_START_FROM_TIMESTAMP));
         StartFrom[] startFrom = StartFrom.startFrom(prop);
         if (timestamp != null && startFrom.length > 0) {
             throw new IllegalArgumentException(
                     "[StreamPark] start.form timestamp and offset cannot be defined at the same time");
         }
 
-        String topicOpt = (String) prop.remove(ConfigKeys.KEY_KAFKA_TOPIC());
-        String regexOpt = (String) prop.remove(ConfigKeys.KEY_KAFKA_PATTERN());
+        String topicOpt = (String) prop.remove(ConfigKeys.KEY_KAFKA_TOPIC);
+        String regexOpt = (String) prop.remove(ConfigKeys.KEY_KAFKA_PATTERN);
 
         KafkaDeserializer<T> kfkDeserializer = new KafkaDeserializer<>(deserializer);
         FlinkKafkaConsumer<KafkaRecord<T>> consumer;
@@ -288,17 +288,17 @@ public class KafkaSource {
         public static StartFrom[] startFrom(Properties prop) {
             Map<String, String> startProp = new HashMap<>();
             for (String key : prop.stringPropertyNames()) {
-                if (key.startsWith(ConfigKeys.KEY_KAFKA_START_FROM())) {
+                if (key.startsWith(ConfigKeys.KEY_KAFKA_START_FROM)) {
                     startProp.put(key, prop.getProperty(key));
                     prop.remove(key);
                 }
             }
             String topicKey =
-                    ConfigKeys.KEY_KAFKA_START_FROM()
+                    ConfigKeys.KEY_KAFKA_START_FROM
                             + "."
-                            + ConfigKeys.KEY_KAFKA_START_FROM_OFFSET()
+                            + ConfigKeys.KEY_KAFKA_START_FROM_OFFSET
                             + "."
-                            + ConfigKeys.KEY_KAFKA_TOPIC();
+                            + ConfigKeys.KEY_KAFKA_TOPIC;
             String topicStr = startProp.get(topicKey);
             if (topicStr == null || topicStr.isEmpty()) {
                 return new StartFrom[0];
@@ -307,9 +307,9 @@ public class KafkaSource {
             List<StartFrom> result = new ArrayList<>();
             for (String topic : topicNames) {
                 String offsetKey =
-                        ConfigKeys.KEY_KAFKA_START_FROM()
+                        ConfigKeys.KEY_KAFKA_START_FROM
                                 + "."
-                                + ConfigKeys.KEY_KAFKA_START_FROM_OFFSET()
+                                + ConfigKeys.KEY_KAFKA_START_FROM_OFFSET
                                 + "."
                                 + topic;
                 String offset = startProp.get(offsetKey);

@@ -70,13 +70,13 @@ public class SparkApplicationBackup {
             case LOCAL:
                 this.path = String.format(
                     "%s/%d/%d",
-                    Workspace.local().APP_BACKUPS(), application.getId(), createTime.getTime());
+                    Workspace.local().getAppBackups(), application.getId(), createTime.getTime());
                 break;
             case YARN_CLUSTER:
             case YARN_CLIENT:
                 this.path = String.format(
                     "%s/%d/%d",
-                    Workspace.remote().APP_BACKUPS(), application.getId(), createTime.getTime());
+                    Workspace.remote().getAppBackups(), application.getId(), createTime.getTime());
                 break;
             default:
                 throw new UnsupportedOperationException(

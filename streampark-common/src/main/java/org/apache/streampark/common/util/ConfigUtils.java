@@ -50,11 +50,11 @@ public final class ConfigUtils {
     }
 
     public static Properties getHBaseConfig(Map<String, String> parameter) {
-        return getConf(parameter, ConfigKeys.HBASE_PREFIX(), ConfigKeys.HBASE_PREFIX(), "");
+        return getConf(parameter, ConfigKeys.HBASE_PREFIX, ConfigKeys.HBASE_PREFIX, "");
     }
 
     public static Properties getInfluxConfig(Map<String, String> parameter) {
-        return getConf(parameter, ConfigKeys.INFLUX_PREFIX(), "", "");
+        return getConf(parameter, ConfigKeys.INFLUX_PREFIX, "", "");
     }
 
     public static Properties getKafkaSinkConf(Map<String, String> parameter, String topic) {
@@ -63,7 +63,7 @@ public final class ConfigUtils {
 
     public static Properties getKafkaSinkConf(
                                               Map<String, String> parameter, String topic, String alias) {
-        String prefix = ConfigKeys.KAFKA_SINK_PREFIX() + alias;
+        String prefix = ConfigKeys.KAFKA_SINK_PREFIX + alias;
         if (!prefix.endsWith(".")) {
             prefix = prefix + ".";
         }
@@ -77,7 +77,7 @@ public final class ConfigUtils {
         }
         String resolvedTopic = topic;
         if (Constants.EMPTY_STRING.equals(topic)) {
-            Object top = kafkaProperty.get(ConfigKeys.KEY_KAFKA_TOPIC());
+            Object top = kafkaProperty.get(ConfigKeys.KEY_KAFKA_TOPIC);
             if (top == null || top.toString().split(",|\\s+").length > 1) {
                 throw new IllegalArgumentException(
                     "Can't find a unique topic!!!,you must be input a topic");
@@ -86,7 +86,7 @@ public final class ConfigUtils {
         }
         boolean hasTopic = true;
         for (Map.Entry<Object, Object> entry : kafkaProperty.entrySet()) {
-            if (ConfigKeys.KEY_KAFKA_TOPIC().equals(entry.getKey())) {
+            if (ConfigKeys.KEY_KAFKA_TOPIC.equals(entry.getKey())) {
                 for (String t : entry.getValue().toString().split(",|\\s+")) {
                     if (t.equals(resolvedTopic)) {
                         hasTopic = false;
@@ -98,7 +98,7 @@ public final class ConfigUtils {
         if (hasTopic) {
             throw new IllegalArgumentException("Can't find a topic of:" + resolvedTopic + "!!!");
         }
-        kafkaProperty.put(ConfigKeys.KEY_KAFKA_TOPIC(), resolvedTopic);
+        kafkaProperty.put(ConfigKeys.KEY_KAFKA_TOPIC, resolvedTopic);
         return kafkaProperty;
     }
 
@@ -109,14 +109,17 @@ public final class ConfigUtils {
     public static Properties getJdbcConf(Map<String, String> parameter, String alias) {
         String prefix;
         if (alias == null || alias.isEmpty()) {
-            prefix = ConfigKeys.KEY_JDBC_PREFIX();
+            prefix = ConfigKeys.KEY_JDBC_PREFIX;
         } else {
-            prefix = (ConfigKeys.KEY_JDBC_PREFIX() + alias).replaceFirst("\\.+$|$", ".");
+            prefix = ConfigKeys.KEY_JDBC_PREFIX + alias;
+            if (!prefix.endsWith(".")) {
+                prefix = prefix + ".";
+            }
         }
-        String driver = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_DRIVER(), null);
-        String url = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_URL(), null);
-        String user = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_USER(), null);
-        String password = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_PASSWORD(), null);
+        String driver = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_DRIVER, null);
+        String url = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_URL, null);
+        String user = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_USER, null);
+        String password = parameter.getOrDefault(prefix + ConfigKeys.KEY_JDBC_PASSWORD, null);
         if (driver == null || url == null) {
             throw new IllegalArgumentException(
                 "Jdbc instance:" + prefix + " error,[driver|url] must not be null");
@@ -130,8 +133,8 @@ public final class ConfigUtils {
         Map<String, String> param = filterParam(parameter, prefix);
         Properties properties = new Properties();
         String aliasName = alias == null || alias.trim().isEmpty() ? "default" : alias;
-        properties.put(ConfigKeys.KEY_ALIAS(), aliasName);
-        properties.put(ConfigKeys.KEY_JDBC_DRIVER(), driver);
+        properties.put(ConfigKeys.KEY_ALIAS, aliasName);
+        properties.put(ConfigKeys.KEY_JDBC_DRIVER, driver);
         for (Map.Entry<String, String> entry : param.entrySet()) {
             properties.put(entry.getKey(), entry.getValue());
         }

@@ -54,7 +54,7 @@ public class JdbcSinkFunction<T> extends RichSinkFunction<T> {
         }
         this.jdbc = jdbc;
         this.toSQLFunc = toSQLFn;
-        Object batch = jdbc.remove(ConfigKeys.KEY_JDBC_INSERT_BATCH());
+        Object batch = jdbc.remove(ConfigKeys.KEY_JDBC_INSERT_BATCH);
         if (batch == null) {
             this.batchSize = ConfigKeys.DEFAULT_JDBC_INSERT_BATCH;
         } else {

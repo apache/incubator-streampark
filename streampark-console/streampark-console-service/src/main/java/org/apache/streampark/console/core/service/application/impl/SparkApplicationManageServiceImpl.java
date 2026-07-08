@@ -194,9 +194,9 @@ public class SparkApplicationManageServiceImpl
         try {
             application
                 .getFsOperator()
-                .delete(application.getWorkspace().APP_WORKSPACE().concat("/").concat(appId.toString()));
+                .delete(application.getWorkspace().getAppWorkspace().concat("/").concat(appId.toString()));
             // try to delete yarn-application, and leave no trouble.
-            String path = Workspace.of(StorageType.HDFS).APP_WORKSPACE().concat("/").concat(appId.toString());
+            String path = Workspace.of(StorageType.HDFS).getAppWorkspace().concat("/").concat(appId.toString());
             if (HdfsOperator.getInstance().exists(path)) {
                 HdfsOperator.getInstance().delete(path);
             }
@@ -280,7 +280,7 @@ public class SparkApplicationManageServiceImpl
             try {
                 jarFile =
                     FileUtils.resolveChildFile(
-                        new File(Workspace.local().APP_UPLOADS()),
+                        new File(Workspace.local().getAppUploads()),
                         String.valueOf(appParam.getTeamId()),
                         org.apache.commons.io.FilenameUtils.getName(appParam.getJar()));
             } catch (IOException e) {

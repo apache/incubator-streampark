@@ -86,6 +86,7 @@ import java.util.function.Consumer;
  * <p>Once a Table has been converted to a DataStream, the DataStream job must be executed using the
  * execute method of the StreamExecutionEnvironment.
  */
+@SuppressWarnings("java:S100")
 public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
 
     public final ParameterTool parameter;

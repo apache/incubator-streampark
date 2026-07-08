@@ -48,7 +48,7 @@ class MySQLOffset extends Offset {
         user = params.get("mysql.user");
         password = params.get("mysql.password");
         jdbcConfig = new Properties();
-        jdbcConfig.setProperty(ConfigKeys.KEY_ALIAS(), "spark-kafka-offset");
+        jdbcConfig.setProperty(ConfigKeys.KEY_ALIAS, "spark-kafka-offset");
         jdbcConfig.setProperty("jdbcUrl", jdbcURL);
         jdbcConfig.setProperty("username", user);
         jdbcConfig.setProperty("password", password);

@@ -41,7 +41,7 @@ public class SparkVersion implements Serializable {
         org.apache.streampark.common.util.StreamParkLoggerFactory.loggerFactory()
             .getLogger(SparkVersion.class.getName());
 
-    private static final Pattern SPARK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$");
+    private static final Pattern SPARK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(?:\\..*)?$");
     private static final Pattern SPARK_VERSION_PATTERN =
         Pattern.compile("\\s{2}version\\s(\\d+\\.\\d+\\.\\d+)");
     private static final Pattern SPARK_SCALA_VERSION_PATTERN =

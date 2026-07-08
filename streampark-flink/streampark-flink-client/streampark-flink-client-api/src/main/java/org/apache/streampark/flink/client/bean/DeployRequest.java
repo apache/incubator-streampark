@@ -76,7 +76,7 @@ public class DeployRequest implements DeployRequestTrait {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
+            String flinkHdfsHome = workspace.getAppFlink() + "/" + flinkName;
             hdfsWorkspace =
                 HdfsWorkspace.builder()
                     .flinkName(flinkName)
@@ -84,7 +84,7 @@ public class DeployRequest implements DeployRequestTrait {
                     .flinkLib(flinkHdfsHome + "/lib")
                     .flinkPlugins(flinkHdfsHome + "/plugins")
                     .flinkDistJar(FlinkUtils.getFlinkDistJar(flinkHome))
-                    .appJars(workspace.APP_JARS())
+                    .appJars(workspace.getAppJars())
                     .build();
         }
         return hdfsWorkspace;

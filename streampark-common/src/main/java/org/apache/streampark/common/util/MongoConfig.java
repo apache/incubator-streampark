@@ -77,14 +77,14 @@ public final class MongoConfig {
     public static Properties getProperties(Properties properties, String alias) {
         Properties prop = new Properties();
         for (String key : properties.stringPropertyNames()) {
-            if (!key.startsWith(ConfigKeys.MONGO_PREFIX())) {
+            if (!key.startsWith(ConfigKeys.MONGO_PREFIX)) {
                 continue;
             }
             String value = properties.getProperty(key);
             if (value == null || value.isEmpty()) {
                 continue;
             }
-            String k = key.replaceAll(ConfigKeys.MONGO_PREFIX() + alias, "").replaceFirst("^\\.", "");
+            String k = key.replaceAll(ConfigKeys.MONGO_PREFIX + alias, "").replaceFirst("^\\.", "");
             prop.put(k, value.trim());
         }
         return prop;

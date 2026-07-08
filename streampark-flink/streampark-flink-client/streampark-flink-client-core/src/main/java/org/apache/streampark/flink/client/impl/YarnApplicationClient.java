@@ -67,8 +67,8 @@ public final class YarnApplicationClient extends YarnClientTrait {
         providedLibs.add(submitRequest.getHdfsWorkspace().getAppJars());
         if (submitRequest.getJobType() == FlinkJobType.FLINK_SQL) {
             providedLibs.add(
-                workspace.APP_SHIMS() + "/flink-" + submitRequest.getFlinkVersion().majorVersion());
-            String jobLib = workspace.APP_WORKSPACE() + "/" + submitRequest.getId() + "/lib";
+                workspace.getAppShims() + "/flink-" + submitRequest.getFlinkVersion().majorVersion());
+            String jobLib = workspace.getAppWorkspace() + "/" + submitRequest.getId() + "/lib";
             try {
                 if (HdfsUtils.exists(jobLib)) {
                     providedLibs.add(jobLib);
@@ -94,10 +94,10 @@ public final class YarnApplicationClient extends YarnClientTrait {
             submitRequest.getApplicationType().getName());
 
         if (submitRequest.getJobType() == FlinkJobType.PYFLINK) {
-            String pyVenv = workspace.APP_PYTHON_VENV();
+            String pyVenv = workspace.getAppPythonVenv();
             AssertUtils.required(FsOperator.hdfs().exists(pyVenv), pyVenv + " File does not exist");
 
-            String localLib = Workspace.local().APP_WORKSPACE() + "/" + submitRequest.getId() + "/lib";
+            String localLib = Workspace.local().getAppWorkspace() + "/" + submitRequest.getId() + "/lib";
             if (FileUtils.exists(localLib) && FileUtils.directoryNotBlank(localLib)) {
                 FlinkConfigurationEnhancer.safeSet(
                     flinkConfig, PipelineOptions.JARS, java.util.Arrays.asList(localLib));

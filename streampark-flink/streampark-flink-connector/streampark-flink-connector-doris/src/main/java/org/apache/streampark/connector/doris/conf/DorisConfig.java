@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.Properties;
 
 /** Doris sink configuration. */
+@SuppressWarnings("java:S100")
 public class DorisConfig implements Serializable {
 
-    public static final String CSV = "csv";
-    public static final String JSON = "json";
+    public static final String CSV_FORMAT = "csv";
+    public static final String JSON_FORMAT = "json";
 
     public final DorisSinkConfigOption sinkOption;
     public final String user;
@@ -90,14 +91,6 @@ public class DorisConfig implements Serializable {
         return String.format(
                 "{ doris user: %s, password: %s, hosts: %s }",
                 user, Constants.DEFAULT_DATAMASK_STRING, String.join(",", loadUrl));
-    }
-
-    public static String CSV() {
-        return CSV;
-    }
-
-    public static String JSON() {
-        return JSON;
     }
 
     public DorisSinkConfigOption sinkOption() {

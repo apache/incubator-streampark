@@ -69,7 +69,7 @@ public final class WebUtils {
     }
 
     public static String getAppHome() {
-        return System.getProperty(ConfigKeys.KEY_APP_HOME());
+        return System.getProperty(ConfigKeys.KEY_APP_HOME);
     }
 
     public static File getAppDir(String dir) {

@@ -43,7 +43,7 @@ public abstract class FlinkTable {
     }
 
     private void init(String[] args) {
-        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), FlinkTable.class);
+        SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME, FlinkTable.class);
         context =
             new TableContext(
                 FlinkTableInitializer.initialize(

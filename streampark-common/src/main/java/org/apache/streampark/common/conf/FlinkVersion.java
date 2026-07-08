@@ -39,9 +39,9 @@ public class FlinkVersion implements Serializable {
         org.apache.streampark.common.util.StreamParkLoggerFactory.loggerFactory()
             .getLogger(FlinkVersion.class.getName());
 
-    private static final Pattern FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(\\.)?.*$");
+    private static final Pattern FLINK_VER_PATTERN = Pattern.compile("^(\\d+\\.\\d+)(?:\\..*)?$");
     private static final Pattern FLINK_VERSION_PATTERN =
-        Pattern.compile("^Version: (.*), Commit ID: (.*)$");
+        Pattern.compile("^Version: ([^,]*), Commit ID: (.*)$");
     private static final Pattern FLINK_DIST_UNDERSCORE_PATTERN =
         Pattern.compile(
             "^flink-dist_(\\d+\\.\\d+)-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$");
@@ -49,7 +49,7 @@ public class FlinkVersion implements Serializable {
         Pattern.compile("^flink-dist-(\\d+\\.\\d+(?:\\.\\d+)?(?:-SNAPSHOT)?)\\.jar$");
     private static final Pattern APACHE_FLINK_VERSION_PATTERN =
         Pattern.compile("(^\\d+\\.\\d+\\.\\d+)");
-    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)(-*)");
+    private static final Pattern OTHER_FLINK_VERSION_PATTERN = Pattern.compile("(\\d+\\.\\d+)-?");
 
     /** Flink installation directory (Scala {@code flinkHome} accessor). */
     public final String flinkHome;

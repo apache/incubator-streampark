@@ -45,11 +45,10 @@ public final class FlinkConfigurationUtils {
         StreamParkLoggerFactory.loggerFactory()
             .getLogger(FlinkConfigurationUtils.class.getName());
 
-    private static final Pattern PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)");
+    private static final Pattern PROPERTY_PATTERN = Pattern.compile("([^=]+)=(.*)");
 
-    private static final String MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\\\"|'](.*)[\\\"|']";
-
-    private static final Pattern MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP);
+    private static final Pattern MULTI_PROPERTY_PATTERN =
+        Pattern.compile("-D([^=]+)\\s*=\\s*[\"']([^\"']*)[\"']");
 
     private FlinkConfigurationUtils() {
     }
@@ -126,7 +125,7 @@ public final class FlinkConfigurationUtils {
             return Collections.emptyMap();
         }
         Map<String, String> map = new LinkedHashMap<>();
-        String simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "");
+        String simple = MULTI_PROPERTY_PATTERN.matcher(properties).replaceAll("");
         String[] parts = simple.split("\\s?-D");
         if (Utils.isNotEmpty(parts)) {
             for (String x : parts) {
@@ -172,16 +171,21 @@ public final class FlinkConfigurationUtils {
                 }
                 programArgs.add(value.substring(1, value.length() - 1));
             } else {
-                String regexp1 = "(.*)='(.*)'$";
-                if (v.matches(regexp1)) {
-                    programArgs.add(v.replaceAll(regexp1, "$1=$2"));
-                } else {
-                    String regexp2 = "(.*)=\"(.*)\"$";
-                    if (v.matches(regexp2)) {
-                        programArgs.add(v.replaceAll(regexp2, "$1=$2"));
+                int eqIndex = v.indexOf('=');
+                if (eqIndex > 0 && v.length() > 2) {
+                    char open = v.charAt(0);
+                    char close = v.charAt(v.length() - 1);
+                    if ((open == '\'' && close == '\'') || (open == '"' && close == '"')) {
+                        programArgs.add(v.substring(1, v.length() - 1));
+                    } else if (eqIndex > 1 && v.charAt(eqIndex - 1) == '\'' && v.endsWith("'")) {
+                        programArgs.add(v.substring(0, eqIndex - 1) + "=" + v.substring(eqIndex + 1, v.length() - 1));
+                    } else if (eqIndex > 1 && v.charAt(eqIndex - 1) == '"' && v.endsWith("\"")) {
+                        programArgs.add(v.substring(0, eqIndex - 1) + "=" + v.substring(eqIndex + 1, v.length() - 1));
                     } else {
                         programArgs.add(v);
                     }
+                } else {
+                    programArgs.add(v);
                 }
             }
         }
