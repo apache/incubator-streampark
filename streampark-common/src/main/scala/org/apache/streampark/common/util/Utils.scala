@@ -163,7 +163,7 @@ object Utils extends Logger {
     println("      ___/ / /_/ /  /  __/ /_/ / / / / / / /_/ / /_/ / /  / ,<        ")
     println("     /____/\\__/_/   \\___/\\__,_/_/ /_/ /_/ ____/\\__,_/_/  /_/|_|   ")
     println("                                       /_/                        \n\n")
-    println("    Version:  2.2.0-SNAPSHOT                                          ")
+    println("    Version:  3.0.0-SNAPSHOT                                          ")
     println("    WebSite:  https://streampark.apache.org                           ")
     println("    GitHub :  https://github.com/apache/streampark                    ")
     println(s"    Info   :  $info                                 ")
