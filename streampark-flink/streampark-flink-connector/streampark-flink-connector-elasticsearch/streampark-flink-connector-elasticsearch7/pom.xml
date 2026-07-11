@@ -22,7 +22,7 @@
     <parent>
         <artifactId>streampark-flink-connector-elasticsearch</artifactId>
         <groupId>org.apache.streampark</groupId>
-        <version>3.0.0-preview</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-flink-connector-elasticsearch7</artifactId>
