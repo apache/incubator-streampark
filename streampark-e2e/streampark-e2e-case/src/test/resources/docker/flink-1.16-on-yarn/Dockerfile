@@ -28,7 +28,7 @@ RUN sudo chown -R hadoop.hadoop /streampark \
 COPY --from=flink-image /opt/flink /flink-1.16.3
 RUN sudo chown -R hadoop.hadoop /flink-1.16.3
 
-# Install javac
+# Install javac (CentOS 7 mirrors were retired; use vault archive)
 ARG TARGETPLATFORM
 RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
 RUN \
@@ -36,8 +36,11 @@ RUN \
         sudo rm -f /etc/yum.repos.d/*.repo; \
         sudo wget http://mirrors.aliyun.com/repo/Centos-altarch-7.repo -O /etc/yum.repos.d/CentOS-Base.repo; \
         sudo sed -i "s/http:\/\//https:\/\//g" /etc/yum.repos.d/CentOS-Base.repo; \
+        sudo sed -i 's|http://mirror.centos.org|http://vault.centos.org|g' /etc/yum.repos.d/*.repo; \
         sudo yum install -y java-1.8.0-openjdk-devel; \
     elif [ "$TARGETPLATFORM" = "linux/amd64" ];then \
+        sudo sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo; \
+        sudo sed -i 's|http://mirror.centos.org|http://vault.centos.org|g' /etc/yum.repos.d/*.repo; \
         sudo yum install -y java-1.8.0-openjdk-devel; \
     else \
         echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
