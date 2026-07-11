@@ -1,7 +1,7 @@
 {
   "name": "streampark-console-webapp-v2",
   "type": "module",
-  "version": "3.0.0-preview",
+  "version": "3.0.0-SNAPSHOT",
   "private": true,
   "description": "Apache StreamPark Console — Naive UI frontend",
   "author": {
