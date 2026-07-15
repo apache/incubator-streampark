@@ -28,7 +28,7 @@ RUN sudo chown -R hadoop.hadoop /streampark \
 COPY --from=flink-image /opt/flink /flink-1.20.1
 RUN sudo chown -R hadoop.hadoop /flink-1.20.1
 
-# Install javac
+# Install JDK 11 for StreamPark Console (Flink distribution is copied separately above)
 ARG TARGETPLATFORM
 RUN echo "TARGETPLATFORM: $TARGETPLATFORM"
 RUN \
@@ -36,10 +36,14 @@ RUN \
         sudo rm -f /etc/yum.repos.d/*.repo; \
         sudo wget http://mirrors.aliyun.com/repo/Centos-altarch-7.repo -O /etc/yum.repos.d/CentOS-Base.repo; \
         sudo sed -i "s/http:\/\//https:\/\//g" /etc/yum.repos.d/CentOS-Base.repo; \
-        sudo yum install -y java-1.8.0-openjdk-devel; \
+        sudo yum install -y java-11-openjdk-devel; \
+        sudo ln -sfn /usr/lib/jvm/java-11-openjdk.aarch64 /usr/lib/jvm/java-11-openjdk; \
     elif [ "$TARGETPLATFORM" = "linux/amd64" ];then \
-        sudo yum install -y java-1.8.0-openjdk-devel; \
+        sudo yum install -y java-11-openjdk-devel; \
     else \
         echo "unknown TARGETPLATFORM: $TARGETPLATFORM"; \
         exit 2;  \
     fi
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
