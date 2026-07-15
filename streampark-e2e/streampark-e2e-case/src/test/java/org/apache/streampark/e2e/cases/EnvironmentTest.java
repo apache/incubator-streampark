@@ -150,8 +150,6 @@ public class EnvironmentTest {
                 .password(emailPassword)
                 .ok();
 
-        emailSettingForm.buttonOk.click();
-
         Awaitility.await()
             .untilAsserted(
                 () -> assertThat(environmentPage.settingList)
