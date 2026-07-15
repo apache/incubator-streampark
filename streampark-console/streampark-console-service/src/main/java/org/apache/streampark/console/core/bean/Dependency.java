@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -67,11 +68,15 @@ public class Dependency {
             return false;
         }
         File localJar = WebUtils.getAppTempDir();
-        File localUploads = new File(Workspace.local().APP_UPLOADS());
+        File localUploads = new File(Workspace.local().getAppUploads());
         Set<String> otherJars = new HashSet<>(other.jar);
         for (String jarName : jar) {
-            if (!otherJars.contains(jarName)
-                || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+            try {
+                if (!otherJars.contains(jarName)
+                    || !FileUtils.equals(new File(localJar, jarName), new File(localUploads, jarName))) {
+                    return false;
+                }
+            } catch (IOException e) {
                 return false;
             }
         }
@@ -81,7 +86,7 @@ public class Dependency {
     public DependencyInfo toJarPackDeps() {
         List<Artifact> mvnArts = toArtifact();
         List<String> extJars = this.jar.stream()
-            .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
+            .map(jar -> Workspace.local().getAppUploads() + "/" + jar)
             .collect(Collectors.toList());
         return new DependencyInfo(mvnArts, extJars);
     }

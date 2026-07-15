@@ -21,16 +21,24 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink-connector</artifactId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-connector-doris_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-connector-doris</artifactId>
     <name>StreamPark : Flink Connector Doris</name>
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-connector-base_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-connector-base</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -42,7 +50,7 @@
         <!-- provided -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -54,19 +62,9 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
+        
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
+        
 
         <dependency>
             <groupId>org.apache.flink</groupId>

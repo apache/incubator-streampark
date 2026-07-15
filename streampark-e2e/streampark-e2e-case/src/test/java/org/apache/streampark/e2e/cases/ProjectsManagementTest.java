@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.PageFactory;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.time.Duration;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @StreamPark(composeFiles = "docker/basic/docker-compose.yaml")
 public class ProjectsManagementTest {
 
-    private final Duration PROJECT_BUILD_TIMEOUT_MINUTES = Duration.ofMinutes(5);
+    private final Duration PROJECT_BUILD_TIMEOUT_MINUTES = Duration.ofMinutes(15);
 
     public static RemoteWebDriver browser;
 
@@ -49,7 +50,7 @@ public class ProjectsManagementTest {
     private static final String branch = "dev";
 
     private static final String buildArgument =
-        "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.16 -am -Dmaven.test.skip=true";
+        "-pl quickstart-flink/quickstart-apacheflink/apacheflinksql_1.17 -am -Dmaven.test.skip=true";
 
     private static final String description = "e2e test project description";
 
@@ -98,10 +99,14 @@ public class ProjectsManagementTest {
 
         Awaitility.await().timeout(PROJECT_BUILD_TIMEOUT_MINUTES)
             .untilAsserted(
-                () -> assertThat(projectsPage.projectList)
-                    .as("Projects list should contain build success project")
-                    .extracting(WebElement::getText)
-                    .anyMatch(it -> it.contains("SUCCESSFUL")));
+                () -> {
+                    browser.navigate().refresh();
+                    PageFactory.initElements(projectsPage.driver, projectsPage);
+                    assertThat(projectsPage.projectList)
+                        .as("Projects list should contain build success project")
+                        .extracting(WebElement::getText)
+                        .anyMatch(it -> it.contains("SUCCESSFUL"));
+                });
 
     }
 

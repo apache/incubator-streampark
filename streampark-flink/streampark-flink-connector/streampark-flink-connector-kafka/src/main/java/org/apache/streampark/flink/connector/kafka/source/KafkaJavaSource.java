@@ -38,7 +38,8 @@ public class KafkaJavaSource<T> {
 
   public KafkaJavaSource(StreamingContext context) {
     this.context = context;
-    this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
+    this.deserializer =
+        (KafkaDeserializationSchema<T>) new KafkaSource.KafkaStringDeserializationSchema();
   }
 
   public KafkaJavaSource<T> property(Properties property) {

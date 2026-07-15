@@ -26,6 +26,7 @@ import org.apache.streampark.flink.core.scala.StreamingContext;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
+import java.util.Objects;
 import java.util.Properties;
 
 public class JdbcJavaSink<T> {
@@ -55,9 +56,9 @@ public class JdbcJavaSink<T> {
   }
 
   public DataStreamSink<T> sink(DataStream<T> dataStream) {
-    Utils.requireNotNull(sqlFunc, "TransformFunction can not be null");
+    Objects.requireNonNull(sqlFunc, "TransformFunction can not be null");
     this.jdbc =
-        this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
+        this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter.toMap(), alias) : this.jdbc;
     JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
     return dataStream.addSink(sinkFun);
   }

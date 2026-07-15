@@ -71,7 +71,7 @@ public class EnvInitializer implements ApplicationRunner {
     private final FileFilter fileFilter = p -> !".gitkeep".equals(p.getName());
 
     private static final Pattern PATTERN_FLINK_SHIMS_JAR = Pattern.compile(
-        "^streampark-flink-shims_flink-(1.1[2-9]|1\\.2[0-9])_(2.12)-(.*).jar$",
+        "^streampark-flink-shims_flink-(1\\.1[7-9]|1\\.2[0-9]|2\\.[0-2])-(.*).jar$",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @SneakyThrows
@@ -106,8 +106,8 @@ public class EnvInitializer implements ApplicationRunner {
         settingService.getMavenConfig().updateConfig();
 
         // overwrite system variable HADOOP_USER_NAME
-        String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME());
-        overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME(), hadoopUserName);
+        String hadoopUserName = InternalConfigHolder.get(CommonConfig.STREAMPARK_HADOOP_USER_NAME);
+        overrideSystemProp(ConfigKeys.KEY_HADOOP_USER_NAME, hadoopUserName);
     }
 
     private void overrideSystemProp(String key, String defaultValue) {
@@ -142,20 +142,20 @@ public class EnvInitializer implements ApplicationRunner {
     private void prepareWorkspace(
                                   StorageType storageType, FsOperator fsOperator, Workspace workspace) {
         if (LFS == storageType) {
-            fsOperator.mkdirsIfNotExists(Workspace.APP_LOCAL_DIST());
+            fsOperator.mkdirsIfNotExists(Workspace.appLocalDist());
         }
         Arrays.asList(
-            workspace.APP_UPLOADS(),
-            workspace.APP_WORKSPACE(),
-            workspace.APP_BACKUPS(),
-            workspace.APP_SAVEPOINTS(),
-            workspace.APP_PYTHON(),
-            workspace.APP_JARS())
+            workspace.getAppUploads(),
+            workspace.getAppWorkspace(),
+            workspace.getAppBackups(),
+            workspace.getAppSavepoints(),
+            workspace.getAppPython(),
+            workspace.getAppJars())
             .forEach(fsOperator::mkdirsIfNotExists);
     }
 
     private static void createMvnLocalRepoDir() {
-        String localMavenRepo = Workspace.MAVEN_LOCAL_PATH();
+        String localMavenRepo = Workspace.mavenLocalPath();
         if (FsOperator.lfs().exists(localMavenRepo)) {
             FsOperator.lfs().mkdirs(localMavenRepo);
         }
@@ -167,7 +167,7 @@ public class EnvInitializer implements ApplicationRunner {
             client.exists() && client.listFiles().length > 0,
             client.getAbsolutePath().concat(" is not exists or empty directory "));
 
-        String appClient = workspace.APP_CLIENT();
+        String appClient = workspace.getAppClient();
         fsOperator.mkCleanDirs(appClient);
 
         for (File file : client.listFiles(fileFilter)) {
@@ -181,7 +181,7 @@ public class EnvInitializer implements ApplicationRunner {
             .listFiles(pathname -> pathname.getName().matches(PATTERN_FLINK_SHIMS_JAR.pattern()));
         AssertUtils.required(shims != null && shims.length > 0, "streampark-flink-shims jar not exist");
 
-        String appShims = workspace.APP_SHIMS();
+        String appShims = workspace.getAppShims();
         fsOperator.delete(appShims);
 
         for (File file : shims) {
@@ -203,7 +203,7 @@ public class EnvInitializer implements ApplicationRunner {
                 "[StreamPark] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
         Workspace workspace = Workspace.of(storageType);
-        String appFlink = workspace.APP_FLINK();
+        String appFlink = workspace.getAppFlink();
         FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appFlink)) {
             log.info("checkFlinkEnv, now mkdir [{}] starting ...", appFlink);
@@ -228,7 +228,7 @@ public class EnvInitializer implements ApplicationRunner {
                 "[StreamPark] SPARK_HOME is undefined,Make sure that Spark is installed.");
         }
         Workspace workspace = Workspace.of(storageType);
-        String appSpark = workspace.APP_SPARK();
+        String appSpark = workspace.getAppSpark();
         FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appSpark)) {
             log.info("checkSparkEnv, now mkdir [{}] starting ...", appSpark);

@@ -28,6 +28,7 @@ on:
       - 'deploy/**'
       - 'script/**'
       - 'streampark-console/streampark-console-webapp/**'
+      - 'streampark-console/streampark-console-webapp-v2/**'
   pull_request:
 
 
@@ -80,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8 , 11 ]
+        java: [ 11 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

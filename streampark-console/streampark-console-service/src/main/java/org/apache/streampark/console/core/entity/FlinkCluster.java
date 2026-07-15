@@ -142,7 +142,7 @@ public class FlinkCluster implements Serializable {
         }
         Map<String, Object> optionMap = JacksonUtils.read(this.options, Map.class);
         if (FlinkDeployMode.YARN_SESSION == getFlinkDeployModeEnum()) {
-            optionMap.put(ConfigKeys.KEY_YARN_APP_NAME(), this.clusterName);
+            optionMap.put(ConfigKeys.KEY_YARN_APP_NAME, this.clusterName);
             optionMap.putAll(YarnQueueLabelExpression.getQueueLabelMap(yarnQueue));
         }
         optionMap.entrySet().removeIf(entry -> entry.getValue() == null);

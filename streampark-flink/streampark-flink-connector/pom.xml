@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark-flink</artifactId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>streampark-flink-connector</artifactId>
@@ -39,7 +39,13 @@
         <module>streampark-flink-connector-jdbc</module>
         <module>streampark-flink-connector-kafka</module>
         <module>streampark-flink-connector-mongo</module>
+        <module>streampark-flink-connector-redis</module>
     </modules>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
 
     <properties>
         <async.client.version>2.12.3</async.client.version>
@@ -48,6 +54,14 @@
 
     <dependencyManagement>
         <dependencies>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
             <dependency>
                 <groupId>org.asynchttpclient</groupId>
                 <artifactId>async-http-client</artifactId>

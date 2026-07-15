@@ -21,28 +21,13 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark</artifactId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-common_${scala.binary.version}</artifactId>
+    <artifactId>streampark-common</artifactId>
     <name>StreamPark : Common</name>
 
     <dependencies>
-
-        <!-- test -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-scala_${scala.binary.version}</artifactId>
-            <version>${mockito-scala.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.binary.version}</artifactId>
-            <version>${scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -58,10 +43,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- enumeratum -->
         <dependency>
-            <groupId>com.beachape</groupId>
-            <artifactId>enumeratum_${scala.binary.version}</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -152,11 +137,6 @@
             </plugin>
 
             <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
@@ -170,7 +150,6 @@
                             <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
-                                    <include>com.beachape:*</include>
                                     <include>io.netty:netty-resolver</include>
                                 </includes>
                             </artifactSet>
@@ -197,4 +176,24 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jdk9-plus-test-opens</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

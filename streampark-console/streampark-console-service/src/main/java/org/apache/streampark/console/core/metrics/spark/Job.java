@@ -23,8 +23,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
-
-import scala.collection.Map;
+import java.util.Map;
 
 @Getter
 @Setter

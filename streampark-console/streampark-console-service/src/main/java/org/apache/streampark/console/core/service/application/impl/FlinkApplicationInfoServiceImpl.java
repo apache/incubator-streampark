@@ -394,8 +394,12 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
                         future.cancel(true);
                     }
                     if (org.apache.streampark.common.util.FileUtils.exists(path)) {
-                        return org.apache.streampark.common.util.FileUtils.tailOf(path, offset,
-                            limit);
+                        try {
+                            return org.apache.streampark.common.util.FileUtils.tailOf(path, offset,
+                                limit);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                     return null;
                 })
@@ -468,7 +472,11 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             String modulePath = project.getDistHome().getAbsolutePath().concat("/").concat(appParam.getModule());
             jarFile = new File(modulePath, appParam.getJar());
         }
-        return Utils.getJarManClass(jarFile);
+        try {
+            return Utils.getJarManClass(jarFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

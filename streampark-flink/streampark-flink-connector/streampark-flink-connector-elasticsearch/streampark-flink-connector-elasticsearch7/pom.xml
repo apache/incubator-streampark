@@ -22,18 +22,26 @@
     <parent>
         <artifactId>streampark-flink-connector-elasticsearch</artifactId>
         <groupId>org.apache.streampark</groupId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>streampark-flink-connector-elasticsearch7_${scala.binary.version}</artifactId>
+    <artifactId>streampark-flink-connector-elasticsearch7</artifactId>
     <name>StreamPark : Flink Connector Elasticsearch7</name>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-elasticsearch7</artifactId>
@@ -43,7 +51,7 @@
         <!-- provided -->
         <dependency>
             <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}_${scala.binary.version}</artifactId>
+            <artifactId>streampark-flink-shims_flink-${streampark.flink.shims.version}</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -55,19 +63,9 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
+        
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-            <scope>provided</scope>
-        </dependency>
+        
 
         <dependency>
             <groupId>org.apache.flink</groupId>

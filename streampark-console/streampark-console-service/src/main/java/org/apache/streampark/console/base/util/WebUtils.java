@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 /** Web Utils */
@@ -68,7 +69,7 @@ public final class WebUtils {
     }
 
     public static String getAppHome() {
-        return System.getProperty(ConfigKeys.KEY_APP_HOME());
+        return System.getProperty(ConfigKeys.KEY_APP_HOME);
     }
 
     public static File getAppDir(String dir) {
@@ -77,6 +78,11 @@ public final class WebUtils {
 
     public static File getAppTempDir() {
         return getAppDir(TEMP);
+    }
+
+    public static File resolveTempFile(String fileName) throws IOException {
+        return org.apache.streampark.common.util.FileUtils.resolveChildFile(
+            getAppTempDir(), org.apache.commons.io.FilenameUtils.getName(fileName));
     }
 
     public static File getAppLibDir() {
