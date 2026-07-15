@@ -17,10 +17,9 @@
 
 package org.apache.streampark.flink.cli
 
-import org.apache.streampark.common.conf.ConfigKeys.{KEY_APP_CONF, KEY_FLINK_SQL, KEY_FLINK_TABLE_MODE}
-import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
-import org.apache.streampark.flink.core.{SqlCommand, SqlCommandParser}
-import org.apache.streampark.flink.core.scala.{FlinkStreamTable, FlinkTable}
+import org.apache.streampark.common.conf.ConfigKeys.{KEY_APP_CONF, KEY_APP_HOME, KEY_FLINK_SQL, KEY_FLINK_TABLE_MODE}
+import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils, SystemPropertyUtils}
+import org.apache.streampark.flink.core.{FlinkTableInitializer, SqlCommand, SqlCommandParser, StreamTableContext, TableContext}
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.RuntimeExecutionMode
@@ -85,12 +84,22 @@ object SqlClient extends App {
         "Usage: runtime execution-mode invalid, optional [STREAMING|BATCH|AUTOMATIC]")
   }
 
-  private[this] object BatchSqlApp extends FlinkTable {
-    override def handle(): Unit = context.sql()
+  private[this] object BatchSqlApp {
+    def main(args: Array[String]): Unit = {
+      SystemPropertyUtils.setAppHome(KEY_APP_HOME, SqlClient.getClass)
+      val context = new TableContext(FlinkTableInitializer.initialize(args, null))
+      context.sql()
+      context.start()
+    }
   }
 
-  private[this] object StreamSqlApp extends FlinkStreamTable {
-    override def handle(): Unit = context.sql()
+  private[this] object StreamSqlApp {
+    def main(args: Array[String]): Unit = {
+      SystemPropertyUtils.setAppHome(KEY_APP_HOME, SqlClient.getClass)
+      val context = new StreamTableContext(FlinkTableInitializer.initialize(args, null, null))
+      context.sql()
+      context.start()
+    }
   }
 
 }
