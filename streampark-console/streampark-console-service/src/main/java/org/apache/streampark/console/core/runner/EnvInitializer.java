@@ -96,7 +96,7 @@ public class EnvInitializer implements ApplicationRunner {
             .filter(env::containsProperty)
             .forEach(
                 key -> {
-                    InternalOption config = InternalConfigHolder.getConfig(key);
+                    InternalOption<?> config = InternalConfigHolder.getConfig(key);
                     AssertUtils.notNull(config);
                     InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
                 });

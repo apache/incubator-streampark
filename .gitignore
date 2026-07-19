@@ -46,3 +46,4 @@ hs_err_pid*
 **/node
 dist/
 dist-license-check/
+.flattened-pom.xml
