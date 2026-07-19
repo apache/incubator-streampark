@@ -20,7 +20,7 @@ package org.apache.streampark.console.core.runner;
 import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.common.conf.InternalConfigHolder;
-import org.apache.streampark.common.conf.InternalOption;
+import org.apache.streampark.common.conf.InternalOptionSpec;
 import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.StorageType;
 import org.apache.streampark.common.fs.FsOperator;
@@ -96,7 +96,7 @@ public class EnvInitializer implements ApplicationRunner {
             .filter(env::containsProperty)
             .forEach(
                 key -> {
-                    InternalOption<?> config = InternalConfigHolder.getConfig(key);
+                    InternalOptionSpec config = InternalConfigHolder.getConfig(key);
                     AssertUtils.notNull(config);
                     InternalConfigHolder.set(config, env.getProperty(key, config.classType()));
                 });
