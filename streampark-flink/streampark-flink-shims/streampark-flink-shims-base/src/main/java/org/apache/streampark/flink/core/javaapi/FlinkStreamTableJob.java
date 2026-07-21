@@ -22,7 +22,8 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Java lifecycle base class for jobs that mix the DataStream API and the Table API.
@@ -39,42 +40,19 @@ import java.util.function.Consumer;
  * made directly on {@link #getTableEnv()}, that auto-detection is not possible — call {@link
  * #markConvertedToDataStream()} explicitly after such a conversion in {@link #handle()}.
  */
-public abstract class FlinkStreamTableJob {
+public abstract class FlinkStreamTableJob extends AbstractFlinkJob {
 
-    protected final ParameterTool parameter;
+    private static final Logger LOG = LoggerFactory.getLogger(FlinkStreamTableJob.class);
 
     protected final StreamExecutionEnvironment env;
-
-    protected final StreamTableEnvironment tableEnv;
 
     private boolean convertedToDataStream = false;
 
     protected FlinkStreamTableJob(
                                   ParameterTool parameter, StreamExecutionEnvironment env,
                                   StreamTableEnvironment tableEnv) {
-        this.parameter = parameter;
+        super(parameter, tableEnv);
         this.env = env;
-        this.tableEnv = tableEnv;
-    }
-
-    /** Recommended entry point to start the job. */
-    public final JobExecutionResult start() throws Exception {
-        ready();
-        handle();
-        JobExecutionResult result = execute(getAppName());
-        destroy();
-        return result;
-    }
-
-    /** Hook called before {@link #handle()}. Override for pre-job setup. */
-    protected void ready() {
-    }
-
-    /** User job logic goes here — build the DataStream / Table pipeline. */
-    protected abstract void handle() throws Exception;
-
-    /** Hook called after {@link #execute(String)}. Override for cleanup. */
-    protected void destroy() {
     }
 
     /**
@@ -83,34 +61,15 @@ public abstract class FlinkStreamTableJob {
      * DataStream} (see {@link #markConvertedToDataStream()}); pure Table/SQL pipelines are already
      * triggered inside {@link #handle()} via {@code executeSql} / {@code StatementSet#execute()}.
      */
+    @Override
     protected JobExecutionResult execute(String jobName) throws Exception {
-        // TODO: replace with Utils.printLogo(...) once streampark-common Java migration (Phase 1) lands
-        System.out.println("[StreamPark] FlinkStreamTable " + jobName + " Starting...");
+        // TODO(#4408): replace with Utils.printLogo(...) once streampark-common Java migration
+        // (Phase 1) lands
+        LOG.info("[StreamPark] FlinkStreamTable {} Starting...", jobName);
         if (convertedToDataStream) {
             return env.execute(jobName);
         }
         return null;
-    }
-
-    /**
-     * Convenience shortcut for running a single SQL statement, matching legacy {@code sql(...)}.
-     * Statement result lines (e.g. from {@code SHOW TABLES}, {@code EXPLAIN}) are logged by
-     * default — use {@link #sql(String, Consumer)} to receive them instead.
-     */
-    public void sql(String sql) {
-        sql(sql, null);
-    }
-
-    /**
-     * Runs a single SQL statement, routing any result lines to the given callback instead of the
-     * default log output.
-     *
-     * <p>{@code FlinkSqlExecutor.executeSql} (not yet migrated off Scala — see Phase 3) takes a
-     * Scala {@code String => Unit} as its 4th argument; this bridges a plain Java {@link Consumer}
-     * to that type so the public surface of this class stays Scala-free.
-     */
-    public void sql(String sql, Consumer<String> callback) {
-        FlinkJobSupport.executeSql(sql, parameter, tableEnv, callback);
     }
 
     /**
@@ -129,14 +88,6 @@ public abstract class FlinkStreamTableJob {
 
     /** Direct access to the Table API — use this instead of delegate methods. */
     public StreamTableEnvironment getTableEnv() {
-        return tableEnv;
-    }
-
-    public ParameterTool getParameter() {
-        return parameter;
-    }
-
-    private String getAppName() {
-        return FlinkJobSupport.requireAppName(parameter);
+        return (StreamTableEnvironment) tableEnv;
     }
 }

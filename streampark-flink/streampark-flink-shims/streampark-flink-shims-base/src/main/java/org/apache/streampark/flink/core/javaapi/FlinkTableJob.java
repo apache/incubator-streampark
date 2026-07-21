@@ -21,7 +21,8 @@ import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.table.api.TableEnvironment;
 
-import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Java lifecycle base class for Flink Table API (batch) jobs.
@@ -47,38 +48,12 @@ import java.util.function.Consumer;
  * }
  * }</pre>
  */
-public abstract class FlinkTableJob {
+public abstract class FlinkTableJob extends AbstractFlinkJob {
 
-    protected final ParameterTool parameter;
-
-    protected final TableEnvironment tableEnv;
+    private static final Logger LOG = LoggerFactory.getLogger(FlinkTableJob.class);
 
     protected FlinkTableJob(ParameterTool parameter, TableEnvironment tableEnv) {
-        this.parameter = parameter;
-        this.tableEnv = tableEnv;
-    }
-
-    /**
-     * Recommended entry point to start the job. Mirrors the legacy trait's {@code start()}: runs
-     * the fixed lifecycle and executes under the required {@code app.name} parameter.
-     */
-    public final JobExecutionResult start() throws Exception {
-        ready();
-        handle();
-        JobExecutionResult result = execute(getAppName());
-        destroy();
-        return result;
-    }
-
-    /** Hook called before {@link #handle()}. Override for pre-job setup (e.g. catalogs, UDFs). */
-    protected void ready() {
-    }
-
-    /** User job logic goes here — build and register the Table API pipeline. */
-    protected abstract void handle() throws Exception;
-
-    /** Hook called after {@link #execute(String)}. Override for cleanup. */
-    protected void destroy() {
+        super(parameter, tableEnv);
     }
 
     /**
@@ -87,43 +62,16 @@ public abstract class FlinkTableJob {
      * #handle()}, so this returns {@code null} by default — override if a specific job result is
      * needed.
      */
-    protected JobExecutionResult execute(String jobName) throws Exception {
-        // TODO: replace with Utils.printLogo(...) once streampark-common Java migration (Phase 1) lands
-        System.out.println("[StreamPark] FlinkTable " + jobName + " Starting...");
+    @Override
+    protected JobExecutionResult execute(String jobName) {
+        // TODO(#4408): replace with Utils.printLogo(...) once streampark-common Java migration
+        // (Phase 1) lands
+        LOG.info("[StreamPark] FlinkTable {} Starting...", jobName);
         return null;
-    }
-
-    /**
-     * Convenience shortcut for running a single SQL statement, matching legacy {@code sql(...)}.
-     * Statement result lines (e.g. from {@code SHOW TABLES}, {@code EXPLAIN}) are logged by
-     * default — use {@link #sql(String, Consumer)} to receive them instead.
-     */
-    public void sql(String sql) {
-        sql(sql, null);
-    }
-
-    /**
-     * Runs a single SQL statement, routing any result lines to the given callback instead of the
-     * default log output.
-     *
-     * <p>{@code FlinkSqlExecutor.executeSql} (not yet migrated off Scala — see Phase 3) takes a
-     * Scala {@code String => Unit} as its 4th argument; this bridges a plain Java {@link Consumer}
-     * to that type so the public surface of this class stays Scala-free.
-     */
-    public void sql(String sql, Consumer<String> callback) {
-        FlinkJobSupport.executeSql(sql, parameter, tableEnv, callback);
     }
 
     /** Direct access to the underlying Table API — use this instead of delegate methods. */
     public TableEnvironment getTableEnv() {
         return tableEnv;
-    }
-
-    public ParameterTool getParameter() {
-        return parameter;
-    }
-
-    private String getAppName() {
-        return FlinkJobSupport.requireAppName(parameter);
     }
 }
