@@ -36,12 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /** Smoke tests for {@link FlinkTableJob} — verifies the lifecycle contract and SQL bridging. */
 class FlinkTableJobTest {
 
-    private static ParameterTool paramWithAppName(String appName) {
-        Map<String, String> map = new HashMap<>();
-        map.put("app.name", appName);
-        return ParameterTool.fromMap(map);
-    }
-
     private static TableEnvironment newBatchTableEnv() {
         return TableEnvironment.create(EnvironmentSettings.newInstance().inBatchMode().build());
     }
@@ -52,7 +46,7 @@ class FlinkTableJobTest {
         TableEnvironment tableEnv = newBatchTableEnv();
 
         FlinkTableJob job =
-            new FlinkTableJob(paramWithAppName("test-table-job"), tableEnv) {
+            new FlinkTableJob(JobTestParams.withAppName("test-table-job"), tableEnv) {
 
                 @Override
                 protected void ready() {

@@ -17,18 +17,12 @@
 
 package org.apache.streampark.flink.core.javaapi;
 
-import org.apache.streampark.flink.core.FlinkSqlExecutor$;
-
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.util.function.Consumer;
-
-import scala.Function1;
-import scala.runtime.AbstractFunction1;
-import scala.runtime.BoxedUnit;
 
 /**
  * Java lifecycle base class for jobs that mix the DataStream API and the Table API.
@@ -116,18 +110,7 @@ public abstract class FlinkStreamTableJob {
      * to that type so the public surface of this class stays Scala-free.
      */
     public void sql(String sql, Consumer<String> callback) {
-        Function1<String, BoxedUnit> scalaCallback =
-            callback == null
-                ? null
-                : new AbstractFunction1<String, BoxedUnit>() {
-
-                    @Override
-                    public BoxedUnit apply(String result) {
-                        callback.accept(result);
-                        return BoxedUnit.UNIT;
-                    }
-                };
-        FlinkSqlExecutor$.MODULE$.executeSql(sql, parameter, tableEnv, scalaCallback);
+        FlinkJobSupport.executeSql(sql, parameter, tableEnv, callback);
     }
 
     /**
@@ -154,11 +137,6 @@ public abstract class FlinkStreamTableJob {
     }
 
     private String getAppName() {
-        // TODO: mirror EnhancerImplicit#getAppName(required = true) once ported to Java (Phase 1.3)
-        String appName = parameter.get("app.name");
-        if (appName == null || appName.isEmpty()) {
-            throw new IllegalArgumentException("[StreamPark] \"app.name\" is required");
-        }
-        return appName;
+        return FlinkJobSupport.requireAppName(parameter);
     }
 }

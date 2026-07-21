@@ -17,7 +17,6 @@
 
 package org.apache.streampark.flink.core.javaapi;
 
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
@@ -28,20 +27,11 @@ import org.apache.flink.types.Row;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 /** Smoke tests for {@link FlinkStreamTableJob} — verifies composition and the dataStream flag. */
 class FlinkStreamTableJobTest {
-
-    private static ParameterTool paramWithAppName(String appName) {
-        Map<String, String> map = new HashMap<>();
-        map.put("app.name", appName);
-        return ParameterTool.fromMap(map);
-    }
 
     @Test
     void handleGetsDirectAccessToEnvAndTableEnv() throws Exception {
@@ -50,7 +40,7 @@ class FlinkStreamTableJobTest {
             StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
 
         FlinkStreamTableJob job =
-            new FlinkStreamTableJob(paramWithAppName("test-stream-table-job"), env, tableEnv) {
+            new FlinkStreamTableJob(JobTestParams.withAppName("test-stream-table-job"), env, tableEnv) {
 
                 @Override
                 protected void handle() {
@@ -69,7 +59,7 @@ class FlinkStreamTableJobTest {
             StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
 
         FlinkStreamTableJob job =
-            new FlinkStreamTableJob(paramWithAppName("test-stream-table-job"), env, tableEnv) {
+            new FlinkStreamTableJob(JobTestParams.withAppName("test-stream-table-job"), env, tableEnv) {
 
                 @Override
                 protected void handle() {
