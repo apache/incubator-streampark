@@ -113,6 +113,8 @@ class FlinkTableJobTest {
 
                 @Override
                 protected void handle() {
+                    // Intentionally empty — start() must throw on the missing "app.name" before
+                    // handle() is ever reached, so this body is never executed.
                 }
             };
 
