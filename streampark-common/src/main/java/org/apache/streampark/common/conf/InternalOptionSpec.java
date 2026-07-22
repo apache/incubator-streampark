@@ -15,24 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.conf
+package org.apache.streampark.common.conf;
 
 /**
- * Internal use of the system
- *
- * @param key
- *   key of configuration that consistent with the spring config.
- * @param defaultValue
- *   default value of configuration that <b>should not be null</b>.
- * @param classType
- *   the class type of value. <b>please use java class type</b>.
- * @param description
- *   description of configuration.
+ * Non-generic view of {@link InternalOption} used where the type parameter is unknown at compile
+ * time (e.g. when looking up options by key from a map).
  */
-case class InternalOption(
-    key: String,
-    defaultValue: Any,
-    classType: Class[_],
-    description: String = "") {
-  InternalConfigHolder.register(this)
+public interface InternalOptionSpec {
+
+    String getKey();
+
+    Object getDefaultValue();
+
+    Class<?> getClassType();
+
+    String getDescription();
+
+    // Scala-compatible accessors
+    String key();
+
+    Object defaultValue();
+
+    Class<?> classType();
+
+    String description();
 }
