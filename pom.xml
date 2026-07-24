@@ -26,7 +26,7 @@
 
     <groupId>org.apache.streampark</groupId>
     <artifactId>streampark</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>StreamPark Project Parent POM</name>
 
@@ -82,7 +82,8 @@
     </issueManagement>
 
     <properties>
-        <project.build.jdk>1.8</project.build.jdk>
+        <revision>3.0.0-SNAPSHOT</revision>
+        <project.build.jdk>11</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -138,6 +139,7 @@
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <maven-scalastyle-plugin.version>1.0.0</maven-scalastyle-plugin.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <streampark.shaded.package>org.apache.streampark.shaded</streampark.shaded.package>
         <httpclient5.version>5.1</httpclient5.version>
         <lombok.version>1.18.24</lombok.version>
@@ -697,8 +699,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${project.build.jdk}</source>
-                        <target>${project.build.jdk}</target>
+                        <release>${project.build.jdk}</release>
                         <encoding>UTF-8</encoding>
                         <!-- The semantics of this option are reversed, see MCOMPILER-209. -->
                         <useIncrementalCompilation>false</useIncrementalCompilation>
@@ -715,7 +716,7 @@
                     <artifactId>scala-maven-plugin</artifactId>
                     <version>${scala-maven-plugin.version}</version>
                     <configuration>
-                        <addScalacArgs>-target:jvm-${project.build.jdk}</addScalacArgs>
+                        <addScalacArgs>-target:${project.build.jdk}</addScalacArgs>
                         <target>${project.build.jdk}</target>
                         <source>${project.build.jdk}</source>
                         <args>
@@ -854,6 +855,32 @@
                     <version>${maven-deploy-plugin.version}</version>
                 </plugin>
 
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten-maven-plugin.version}</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                            <phase>process-resources</phase>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                            <phase>clean</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <!--mvn apache-rat:check-->
                 <plugin>
                     <groupId>org.apache.rat</groupId>
@@ -898,7 +925,6 @@
                             <exclude>src/main/resources/*.dict</exclude>
 
                             <exclude>streampark-console-webapp/**</exclude>
-                            <exclude>streampark-console-webapp-v2/**</exclude>
                         </excludes>
                     </configuration>
                     <executions>
@@ -953,6 +979,11 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
         </plugins>
 
@@ -1009,6 +1040,24 @@
                 <owasp.skip>true</owasp.skip>
                 <spotless.skip>true</spotless.skip>
             </properties>
+        </profile>
+
+        <profile>
+            <id>jdk9-plus-test-opens</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

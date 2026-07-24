@@ -37,6 +37,9 @@ labelPRBasedOnFilePath:
   component=streampark-console-webapp:
     - streampark-console/streampark-console-webapp/**
 
+  component=streampark-console-webapp-v2:
+    - streampark-console/streampark-console-webapp-v2/**
+
   component=streampark-e2e:
     - streampark-e2e/**/*
 

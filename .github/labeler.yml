@@ -41,6 +41,7 @@ DOCS:
 
 WEB UI:
   - "streampark-console/streampark-console-webapp/**/*"
+  - "streampark-console/streampark-console-webapp-v2/**/*"
 
 BACKEND:
   - "streampark-console/streampark-console-service/**/*"

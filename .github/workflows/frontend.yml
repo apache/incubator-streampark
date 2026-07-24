@@ -43,7 +43,8 @@ jobs:
         with:
           filters: |
             not-ignore:
-              - '!**/*.md'
+              - 'streampark-console/streampark-console-webapp-v2/**'
+              - '.github/workflows/frontend.yml'
   build:
     name: Build
     runs-on: ${{ matrix.os }}
@@ -71,7 +72,7 @@ jobs:
     name: Frontend - Result
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ paths-filter, build, build ]
+    needs: [ paths-filter, build ]
     if: always()
     steps:
       - uses: actions/checkout@v4

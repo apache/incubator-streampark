@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.streampark</groupId>
         <artifactId>streampark</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>streampark-spark</artifactId>
@@ -30,7 +30,6 @@
 
     <modules>
         <module>streampark-spark-core</module>
-        <module>streampark-spark-connector</module>
         <module>streampark-spark-client</module>
         <module>streampark-spark-sqlclient</module>
     </modules>

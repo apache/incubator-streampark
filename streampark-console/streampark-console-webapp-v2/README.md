@@ -55,6 +55,25 @@ pnpm build
 pnpm preview
 ```
 
+## Maven / 运维集成
+
+Console 发行包通过 `streampark-console-service` 的 `-Pwebapp` profile 构建前端：
+
+```bash
+# 仅前端（在 webapp-v2 目录）
+pnpm install && pnpm build
+
+# 完整 Console 包（含 webapp-v2 dist）
+./mvnw -pl streampark-console/streampark-console-service -am clean package -Pwebapp,dist -DskipTests
+```
+
+| 项 | 说明 |
+|---|---|
+| Maven 变量 | `frontend.project.name=streampark-console-webapp-v2` |
+| 静态资源 | `streampark-console-service` assembly 拷贝 `../streampark-console-webapp-v2/dist` |
+| CI | `.github/workflows/frontend.yml` — Node 20、`pnpm typecheck/build`、i18n/routes 校验 |
+| 开发端口 | v2: `10002`；后端 API: `10000` |
+
 ## 目录说明
 
 ```
