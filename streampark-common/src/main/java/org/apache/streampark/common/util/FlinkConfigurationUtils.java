@@ -38,8 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import scala.collection.JavaConverters;
-
 /** Flink configuration parsing utilities. */
 public final class FlinkConfigurationUtils {
 
@@ -52,6 +50,8 @@ public final class FlinkConfigurationUtils {
     private static final String MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\"|'](.*)[\"|']";
 
     private static final Pattern MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP);
+
+    private static final Pattern QUOTE_TRIM_PATTERN = Pattern.compile("(^[\"']|[\"']$)");
 
     private FlinkConfigurationUtils() {
     }
@@ -71,8 +71,7 @@ public final class FlinkConfigurationUtils {
     public static Map<String, String> loadFlinkConf(String yaml) {
         AssertUtils.required(
             yaml != null && !yaml.isEmpty(), "[StreamPark] loadFlinkConfYaml: yaml must not be null");
-        return new HashMap<>(
-            JavaConverters.mapAsJavaMapConverter(PropertiesUtils.fromYamlText(yaml)).asJava());
+        return new HashMap<>(PropertiesUtils.fromYamlText(yaml));
     }
 
     public static Map<String, String> loadLegacyFlinkConf(File file) {
@@ -129,7 +128,7 @@ public final class FlinkConfigurationUtils {
             return Collections.emptyMap();
         }
         Map<String, String> map = new LinkedHashMap<>();
-        String simple = properties.replaceAll(MULTI_PROPERTY_REGEXP, "");
+        String simple = MULTI_PROPERTY_PATTERN.matcher(properties).replaceAll("");
         String[] parts = simple.split("\\s?-D");
         if (Utils.isNotEmpty(parts)) {
             for (String x : parts) {
@@ -146,7 +145,7 @@ public final class FlinkConfigurationUtils {
             String opts = matcher.group();
             int index = opts.indexOf('=');
             String key = opts.substring(2, index).trim();
-            String value = opts.substring(index + 1).trim().replaceAll("(^[\"']|[\"']$)", "");
+            String value = QUOTE_TRIM_PATTERN.matcher(opts.substring(index + 1).trim()).replaceAll("");
             map.put(key, value);
         }
         return map;

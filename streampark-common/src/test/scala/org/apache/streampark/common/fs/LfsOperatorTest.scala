@@ -188,10 +188,10 @@ class LfsOperatorTest {
       assertDoesNotThrow {
         // not delete origin file
         val file = genRandomFile(outputDir)
-        LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-7", delSrc = false)
+        LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-7", false, true)
         assertTrue(file.exists)
         // delete origin file
-        LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-8", delSrc = true)
+        LfsOperator.copy(file.getAbsolutePath, s"$outputDir/out-8", true, true)
         assertFalse(file.exists)
       }
 
@@ -201,7 +201,7 @@ class LfsOperatorTest {
       assertDoesNotThrow {
         val out = genRandomFile(s"$outputDir/out-9", "114514-233.dat")
         val md5Before = md5Hex(out)
-        LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, overwrite = true)
+        LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, false, true)
         val md5After = md5Hex(new File(out.getAbsolutePath))
         assertNotEquals(md5Before, md5After)
         assertEquals(md5After, md5Hex(file))
@@ -210,7 +210,7 @@ class LfsOperatorTest {
       assertDoesNotThrow {
         val out = genRandomFile(s"$outputDir/out-10", "114514-233.dat")
         val md5Before = md5Hex(out)
-        LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, overwrite = false)
+        LfsOperator.copy(file.getAbsolutePath, out.getAbsolutePath, false, false)
         val md5After = md5Hex(new File(out.getAbsolutePath))
         assertEquals(md5Before, md5After)
         assertNotEquals(md5After, md5Hex(file))
@@ -249,10 +249,10 @@ class LfsOperatorTest {
       assertDoesNotThrow {
         // not delete origin dir
         val sourceDir = genRandomDir(s"$outputDir/in-4")._1
-        LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-4", delSrc = false)
+        LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-4", false, true)
         assertTrue(sourceDir.exists)
         // delete origin dir
-        LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-5", delSrc = true)
+        LfsOperator.copyDir(sourceDir.getAbsolutePath, s"$outputDir/out-5", true, true)
         assertFalse(sourceDir.exists)
       }
 

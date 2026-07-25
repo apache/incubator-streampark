@@ -17,8 +17,9 @@
 
 package org.apache.streampark.flink.cli
 
-import org.apache.streampark.common.conf.ConfigKeys.{KEY_APP_CONF, KEY_APP_HOME, KEY_FLINK_SQL, KEY_FLINK_TABLE_MODE}
+import org.apache.streampark.common.conf.ConfigKeys
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils, SystemPropertyUtils}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.core.{FlinkTableInitializer, SqlCommand, SqlCommandParser, StreamTableContext, TableContext}
 
 import org.apache.commons.lang3.StringUtils
@@ -36,7 +37,7 @@ object SqlClient extends App {
   private[this] val parameterTool = ParameterTool.fromArgs(args)
 
   private[this] val flinkSql = {
-    val sql = parameterTool.get(KEY_FLINK_SQL())
+    val sql = parameterTool.get(ConfigKeys.KEY_FLINK_SQL())
     require(StringUtils.isNotBlank(sql), "Usage: flink sql cannot be null")
     Try(DeflaterUtils.unzipString(sql)) match {
       case Success(value) => value
@@ -61,13 +62,14 @@ object SqlClient extends App {
         // 2) dynamic properties execution.runtime-mode
         parameterTool.get(ExecutionOptions.RUNTIME_MODE.key(), null) match {
           case null =>
-            val m = parameterTool.get(KEY_APP_CONF(), null) match {
+            val m = parameterTool.get(ConfigKeys.KEY_APP_CONF(), null) match {
               case null => defaultMode
               case f =>
-                val parameter = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
+                val parameter: Map[String, String] =
+                  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(f.drop(7)))
                 // 3) application conf execution.runtime-mode
                 parameter
-                  .getOrElse(KEY_FLINK_TABLE_MODE, defaultMode)
+                  .getOrElse(ConfigKeys.KEY_FLINK_TABLE_MODE(), defaultMode)
                   .toUpperCase()
             }
             arguments += s"-D${ExecutionOptions.RUNTIME_MODE.key()}=$m"
@@ -86,7 +88,7 @@ object SqlClient extends App {
 
   private[this] object BatchSqlApp {
     def main(args: Array[String]): Unit = {
-      SystemPropertyUtils.setAppHome(KEY_APP_HOME, SqlClient.getClass)
+      SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.getClass)
       val context = new TableContext(FlinkTableInitializer.initialize(args, null))
       context.sql()
       context.start()
@@ -95,7 +97,7 @@ object SqlClient extends App {
 
   private[this] object StreamSqlApp {
     def main(args: Array[String]): Unit = {
-      SystemPropertyUtils.setAppHome(KEY_APP_HOME, SqlClient.getClass)
+      SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.getClass)
       val context = new StreamTableContext(FlinkTableInitializer.initialize(args, null, null))
       context.sql()
       context.start()

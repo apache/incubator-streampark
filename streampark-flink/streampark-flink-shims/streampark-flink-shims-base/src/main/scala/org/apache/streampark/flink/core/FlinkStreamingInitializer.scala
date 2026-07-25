@@ -118,7 +118,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       }
     }
 
-    val map = config match {
+    val map: Map[String, String] = config match {
       case x if x.startsWith("yaml://") => PropertiesUtils.fromYamlText(content)
       case x if x.startsWith("conf://") =>
         PropertiesUtils.fromHoconText(content)

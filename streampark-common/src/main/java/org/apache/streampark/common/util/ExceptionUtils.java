@@ -17,6 +17,8 @@
 
 package org.apache.streampark.common.util;
 
+import org.apache.streampark.shaded.org.slf4j.Logger;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -24,6 +26,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public final class ExceptionUtils {
+
+    private static final Logger LOG =
+        StreamParkLoggerFactory.loggerFactory().getLogger(ExceptionUtils.class.getName());
 
     private ExceptionUtils() {
     }
@@ -38,7 +43,8 @@ public final class ExceptionUtils {
         try {
             throwable.printStackTrace(writer);
             return stm.toString();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            LOG.warn("[StreamPark] error while printing stack trace", e);
             return e.getClass().getName() + " (error while printing stack trace)";
         } finally {
             Utils.close(writer, stm);
@@ -54,6 +60,9 @@ public final class ExceptionUtils {
     public static <I, O> O wrapRuntimeException(I input, WrapperRuntimeExceptionHandler<I, O> handler) {
         try {
             return handler.handle(input);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

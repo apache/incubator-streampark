@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.core.conf
 
 import org.apache.streampark.common.conf.ConfigKeys
-import org.apache.streampark.common.conf.ConfigKeys.{KEY_FLINK_OPTION_PREFIX, KEY_FLINK_PROPERTY_PREFIX}
+import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.common.util.PropertiesUtils
 
 import org.apache.commons.cli.{DefaultParser, Options}
@@ -31,8 +31,8 @@ import scala.util.{Failure, Success, Try}
 
 object ParameterCli {
 
-  private[this] val propertyPrefix = KEY_FLINK_PROPERTY_PREFIX
-  private[this] val optionPrefix = KEY_FLINK_OPTION_PREFIX
+  private[this] val propertyPrefix = ConfigKeys.KEY_FLINK_PROPERTY_PREFIX()
+  private[this] val optionPrefix = ConfigKeys.KEY_FLINK_OPTION_PREFIX()
   private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
   lazy val flinkOptions: Options = FlinkRunOption.allOptions
@@ -52,7 +52,7 @@ object ParameterCli {
         }
       case action =>
         val conf = args(1)
-        val map = Try {
+        val map: Map[String, String] = Try {
           val extension = conf.split("\\.").last.toLowerCase
           extension match {
             case "yml" | "yaml" => PropertiesUtils.fromYamlFile(conf)
@@ -96,7 +96,7 @@ object ParameterCli {
                 x =>
                   val key = x._1.drop(propertyPrefix.length).trim
                   val value = x._2.trim
-                  if (key == ConfigKeys.KEY_FLINK_APP_NAME) {
+                  if (key == ConfigKeys.KEY_FLINK_APP_NAME()) {
                     buffer.append(s" -D$key=${value.replace(" ", "_")}")
                   } else {
                     buffer.append(s" -D$key=$value")
@@ -105,7 +105,7 @@ object ParameterCli {
             buffer.toString.trim
           case "--name" =>
             map
-              .getOrElse(propertyPrefix.concat(ConfigKeys.KEY_FLINK_APP_NAME), "")
+              .getOrElse(propertyPrefix.concat(ConfigKeys.KEY_FLINK_APP_NAME()), "")
               .trim match {
               case appName if appName.nonEmpty => appName
               case _ => ""

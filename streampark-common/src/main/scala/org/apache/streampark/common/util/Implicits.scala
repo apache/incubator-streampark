@@ -53,6 +53,15 @@ object Implicits extends ToScalaImplicits with ToJavaImplicits with DecorateAsJa
 
   type JavaShort = java.lang.Short
 
+  /** Converts plain Java maps to immutable Scala maps (excludes ConcurrentMap to avoid ambiguity). */
+  implicit def javaLinkedHashMapToScalaMap[K, V](map: JavaLinkedMap[K, V]): Map[K, V] = {
+    if (map == null) Map.empty else map.asScala.toMap
+  }
+
+  implicit def javaHashMapToScalaMap[K, V](map: JavaHashMap[K, V]): Map[K, V] = {
+    if (map == null) Map.empty else map.asScala.toMap
+  }
+
   implicit class AutoCloseImplicits[T <: AutoCloseable](autoCloseable: T) {
     implicit def using[R](func: T => R)(implicit excFunc: Throwable => R = null): R = {
       var exception: Option[Throwable] = Option.empty

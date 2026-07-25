@@ -38,12 +38,15 @@ import java.util.UUID;
 import java.util.concurrent.locks.LockSupport;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 
 /** General utility methods. */
 public final class Utils {
 
     private static final Logger LOG =
         StreamParkLoggerFactory.loggerFactory().getLogger(Utils.class.getName());
+
+    private static final Pattern UUID_DASH_PATTERN = Pattern.compile("-");
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
@@ -77,7 +80,7 @@ public final class Utils {
     }
 
     public static String uuid() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
+        return UUID_DASH_PATTERN.matcher(UUID.randomUUID().toString()).replaceAll("");
     }
 
     public static void requireCheckJarFile(URL jar) throws IOException {
@@ -192,6 +195,9 @@ public final class Utils {
         }
         try {
             return java.util.Optional.of(supplier.get());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return java.util.Optional.empty();
         } catch (Exception e) {
             if (retryCount > 0) {
                 LOG.warn("[StreamPark] Retry failed, execution caused by: ", e);
