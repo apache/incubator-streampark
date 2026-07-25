@@ -15,24 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.core
+package org.apache.streampark.flink.core;
 
-import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient
-import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService
+public class TableEnvConfig {
 
-import java.util.Optional
+    private final String[] args;
+    private final TableEnvConfigFunction conf;
 
-abstract class FlinkKubernetesClientTrait(kubeClient: FlinkKubeClient) {
+    public TableEnvConfig(String[] args, TableEnvConfigFunction conf) {
+        this.args = args;
+        this.conf = conf;
+    }
 
-  /**
-   * Get the kubernetes service of the given flink clusterId.
-   *
-   * @param serviceName
-   *   the name of the service
-   * @return
-   *   Return the optional kubernetes service of the specified name.
-   */
-  def getService(serviceName: String): Optional[KubernetesService] =
-    kubeClient.getService(serviceName)
+    public String[] getArgs() {
+        return args;
+    }
 
+    public TableEnvConfigFunction getConf() {
+        return conf;
+    }
+
+    /** Scala API alias for {@link #getArgs()}. */
+    public String[] args() {
+        return args;
+    }
+
+    /** Scala API alias for {@link #getConf()}. */
+    public TableEnvConfigFunction conf() {
+        return conf;
+    }
 }

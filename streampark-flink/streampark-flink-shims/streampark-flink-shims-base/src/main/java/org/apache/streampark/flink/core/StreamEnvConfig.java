@@ -15,12 +15,33 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.core.conf
+package org.apache.streampark.flink.core;
 
-import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.Configuration
+public class StreamEnvConfig {
 
-case class FlinkConfiguration(
-    parameter: ParameterTool,
-    envConfig: Configuration,
-    tableConfig: Configuration)
+    private final String[] args;
+    private final StreamEnvConfigFunction conf;
+
+    public StreamEnvConfig(String[] args, StreamEnvConfigFunction conf) {
+        this.args = args;
+        this.conf = conf;
+    }
+
+    public String[] getArgs() {
+        return args;
+    }
+
+    public StreamEnvConfigFunction getConf() {
+        return conf;
+    }
+
+    /** Scala API alias for {@link #getArgs()}. */
+    public String[] args() {
+        return args;
+    }
+
+    /** Scala API alias for {@link #getConf()}. */
+    public StreamEnvConfigFunction conf() {
+        return conf;
+    }
+}

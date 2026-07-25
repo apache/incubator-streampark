@@ -15,13 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.core
+package org.apache.streampark.flink.core;
 
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
+import org.apache.flink.kubernetes.kubeclient.FlinkKubeClient;
+import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
 
-class StreamTableEnvConfig(
-    val args: Array[String],
-    val streamConfig: StreamEnvConfigFunction,
-    val tableConfig: TableEnvConfigFunction)
+import java.util.Optional;
 
-class TableEnvConfig(val args: Array[String], val conf: TableEnvConfigFunction)
+public abstract class FlinkKubernetesClientTrait {
+
+    protected final FlinkKubeClient kubeClient;
+
+    protected FlinkKubernetesClientTrait(FlinkKubeClient kubeClient) {
+        this.kubeClient = kubeClient;
+    }
+
+    /**
+     * Get the kubernetes service of the given flink clusterId.
+     *
+     * @param serviceName the name of the service
+     * @return Return the optional kubernetes service of the specified name.
+     */
+    public Optional<KubernetesService> getService(String serviceName) {
+        return kubeClient.getService(serviceName);
+    }
+}

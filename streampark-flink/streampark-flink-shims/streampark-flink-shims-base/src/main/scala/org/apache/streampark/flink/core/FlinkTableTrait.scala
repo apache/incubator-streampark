@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
@@ -36,7 +35,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool, private val tableEn
   extends TableEnvironment {
 
   def start(): JobExecutionResult = {
-    val appName = parameter.getAppName(required = true)
+    val appName = FlinkEnvironmentUtils.getAppName(parameter, null, true)
     execute(appName)
   }
 

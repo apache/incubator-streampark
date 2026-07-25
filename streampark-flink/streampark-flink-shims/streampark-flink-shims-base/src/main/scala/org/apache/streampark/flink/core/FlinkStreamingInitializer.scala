@@ -98,7 +98,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       .mergeWith(argsMap)
 
     val envConfig = Configuration.fromMap(properConf)
-    FlinkConfiguration(parameter, envConfig, null)
+    new FlinkConfiguration(parameter, envConfig, null)
   }
 
   def parseConfig(config: String): Map[String, String] = {

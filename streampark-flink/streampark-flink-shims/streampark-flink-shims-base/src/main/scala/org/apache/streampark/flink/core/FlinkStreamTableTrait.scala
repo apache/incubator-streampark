@@ -19,7 +19,6 @@ package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.util.Implicits.JavaList
 import org.apache.streampark.common.util.Utils
-import org.apache.streampark.flink.core.EnhancerImplicit._
 
 import com.esotericsoftware.kryo.Serializer
 import org.apache.flink.api.common.{JobExecutionResult, RuntimeExecutionMode}
@@ -74,7 +73,7 @@ abstract class FlinkStreamTableTrait(
 
   /** Recommended to use this Api to start tasks */
   def start(name: String = null): JobExecutionResult = {
-    val appName = parameter.getAppName(name, true)
+    val appName = FlinkEnvironmentUtils.getAppName(parameter, name, true)
     execute(appName)
   }
 

@@ -21,7 +21,6 @@ import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.{ApiType, PlannerType}
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.common.util.Implicits._
-import org.apache.streampark.flink.core.EnhancerImplicit._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration
 
 import org.apache.flink.api.java.utils.ParameterTool
@@ -145,7 +144,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
   lazy val tableEnv: TableEnvironment = {
     logInfo(s"job working in batch mode")
     envSettings.inBatchMode()
-    val tableEnv = TableEnvironment.create(envSettings.build()).setAppName
+    val tableEnv = FlinkEnvironmentUtils.setAppName(TableEnvironment.create(envSettings.build()), parameter)
     apiType match {
       case ApiType.JAVA if javaTableEnvConfFunc != null =>
         javaTableEnvConfFunc.configuration(tableEnv.getConfig, parameter)
@@ -168,7 +167,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
       javaStreamEnvConfFunc.configuration(streamEnv.getJavaEnv, parameter)
     }
     val streamTableEnv =
-      StreamTableEnvironment.create(streamEnv, setting).setAppName
+      FlinkEnvironmentUtils.setAppName(StreamTableEnvironment.create(streamEnv, setting), parameter)
     apiType match {
       case ApiType.JAVA if javaTableEnvConfFunc != null =>
         javaTableEnvConfFunc.configuration(streamTableEnv.getConfig, parameter)
@@ -189,7 +188,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
           logWarn("Usage:can't find config,you can set \"--conf $path \" in main arguments")
           val parameter =
             ParameterTool.fromSystemProperties().mergeWith(argsMap)
-          FlinkConfiguration(parameter, new Configuration(), new Configuration())
+          new FlinkConfiguration(parameter, new Configuration(), new Configuration())
         case file =>
           val configMap = parseConfig(file)
           // set sql..
@@ -218,7 +217,7 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
             .mergeWith(ParameterTool.fromMap(sqlConf))
             .mergeWith(argsMap)
 
-          FlinkConfiguration(parameter, envConfig, tableConfig)
+          new FlinkConfiguration(parameter, envConfig, tableConfig)
       }
     }
 
@@ -228,13 +227,14 @@ private[flink] class FlinkTableInitializer(args: Array[String], apiType: ApiType
         // for streampark-console
         Try(DeflaterUtils.unzipString(param)) match {
           case Success(value) =>
-            configuration.copy(parameter = configuration.parameter.mergeWith(
-              ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value))))
+            configuration.withParameter(
+              configuration.parameter.mergeWith(
+                ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value))))
           case Failure(_) =>
             val sqlFile = new File(param)
             Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
               case Success(value) =>
-                configuration.copy(parameter =
+                configuration.withParameter(
                   configuration.parameter.mergeWith(ParameterTool.fromMap(value)))
               case Failure(e) =>
                 new IllegalArgumentException(s"[StreamPark] init sql error.$e")
