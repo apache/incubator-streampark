@@ -19,7 +19,6 @@ package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.{ApiType, PlannerType}
-import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.core.EnhancerImplicit._

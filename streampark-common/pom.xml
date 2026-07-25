@@ -49,12 +49,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- enumeratum: kept for Scala downstream compatibility during staged migration -->
-        <dependency>
-            <groupId>com.beachape</groupId>
-            <artifactId>enumeratum_${scala.binary.version}</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -138,16 +132,6 @@
         <plugins>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
@@ -166,7 +150,6 @@
                             <dependencyReducedPomLocation>${project.basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
-                                    <include>com.beachape:*</include>
                                     <include>io.netty:netty-resolver</include>
                                 </includes>
                             </artifactSet>

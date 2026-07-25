@@ -15,9 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.enums
+package org.apache.streampark.common.enums;
 
-object PlannerType extends Enumeration {
-  type PlannerType = Value
-  val BLINK, OLD, ANY = Value
+import javax.annotation.Nonnull;
+
+/** Flink application API type. */
+public enum ApiType {
+
+    JAVA,
+    SCALA;
+
+    /**
+     * Resolve enum constant by name (Scala {@code Enumeration.withName} compatibility).
+     *
+     * @param name enum constant name
+     * @return matching {@link ApiType}
+     */
+    @Nonnull
+    public static ApiType withName(@Nonnull String name) {
+        return valueOf(name);
+    }
 }

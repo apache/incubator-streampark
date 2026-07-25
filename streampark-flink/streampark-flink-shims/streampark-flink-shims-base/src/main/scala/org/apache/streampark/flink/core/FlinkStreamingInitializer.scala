@@ -19,7 +19,6 @@ package org.apache.streampark.flink.core
 
 import org.apache.streampark.common.conf.ConfigKeys._
 import org.apache.streampark.common.enums.ApiType
-import org.apache.streampark.common.enums.ApiType.ApiType
 import org.apache.streampark.common.util._
 import org.apache.streampark.common.util.Implicits._
 import org.apache.streampark.flink.core.conf.FlinkConfiguration

@@ -15,9 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.common.enums
+package org.apache.streampark.common.enums;
 
-object TableMode extends Enumeration {
-  type TableMode = Value
-  val BATCH, STREAMING = Value
+import javax.annotation.Nonnull;
+
+/** Flink table execution mode. */
+public enum TableMode {
+
+    BATCH,
+    STREAMING;
+
+    /**
+     * Resolve enum constant by name (Scala {@code Enumeration.withName} compatibility).
+     *
+     * @param name enum constant name
+     * @return matching {@link TableMode}
+     */
+    @Nonnull
+    public static TableMode withName(@Nonnull String name) {
+        return valueOf(name);
+    }
 }
