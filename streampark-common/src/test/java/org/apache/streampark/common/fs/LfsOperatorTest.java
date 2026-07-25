@@ -177,7 +177,7 @@ class LfsOperatorTest {
         }
     }
 
-    private boolean sameFilesHex(File[] f1, File[] f2) throws Exception {
+    private boolean sameFilesHex(File[] f1, File[] f2) {
         List<String> names1 = sortedNames(f1);
         List<String> names2 = sortedNames(f2);
         if (!names1.equals(names2)) {

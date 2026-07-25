@@ -17,7 +17,12 @@
 
 package org.apache.streampark.common.conf;
 
-/** Configuration key constants. */
+/**
+ * Configuration key constants.
+ *
+ * <p>Parameterless {@code KEY_XXX()} methods mirror the original Scala API for downstream modules.
+ */
+@SuppressWarnings({"java:S100", "java:S3400"})
 public final class ConfigKeys {
 
     private ConfigKeys() {

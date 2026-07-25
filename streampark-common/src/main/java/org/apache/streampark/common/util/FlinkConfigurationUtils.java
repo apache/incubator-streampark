@@ -47,11 +47,8 @@ public final class FlinkConfigurationUtils {
 
     private static final Pattern PROPERTY_PATTERN = Pattern.compile("(.*?)=(.*?)");
 
-    private static final String MULTI_PROPERTY_REGEXP = "-D(.*?)\\s*=\\s*[\"|'](.*)[\"|']";
-
-    private static final Pattern MULTI_PROPERTY_PATTERN = Pattern.compile(MULTI_PROPERTY_REGEXP);
-
-    private static final Pattern QUOTE_TRIM_PATTERN = Pattern.compile("(^[\"']|[\"']$)");
+    private static final Pattern MULTI_PROPERTY_PATTERN =
+        Pattern.compile("-D(.*?)\\s*=\\s*([\"'])(.*)\\2");
 
     private FlinkConfigurationUtils() {
     }
@@ -142,11 +139,7 @@ public final class FlinkConfigurationUtils {
         }
         Matcher matcher = MULTI_PROPERTY_PATTERN.matcher(properties);
         while (matcher.find()) {
-            String opts = matcher.group();
-            int index = opts.indexOf('=');
-            String key = opts.substring(2, index).trim();
-            String value = QUOTE_TRIM_PATTERN.matcher(opts.substring(index + 1).trim()).replaceAll("");
-            map.put(key, value);
+            map.put(matcher.group(1).trim(), matcher.group(3));
         }
         return map;
     }

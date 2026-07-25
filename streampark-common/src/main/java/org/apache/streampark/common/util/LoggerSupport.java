@@ -25,7 +25,7 @@ public abstract class LoggerSupport {
 
     private static final String PREFIX = "[StreamPark]";
 
-    private transient org.apache.streampark.shaded.org.slf4j.Logger slf4jLogger;
+    private org.apache.streampark.shaded.org.slf4j.Logger slf4jLogger;
 
     protected String logName() {
         String name = getClass().getName();
