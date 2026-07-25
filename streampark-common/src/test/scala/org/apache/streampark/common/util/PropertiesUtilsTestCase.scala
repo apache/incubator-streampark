@@ -57,13 +57,13 @@ class PropertiesUtilsTestCase {
         |""".stripMargin
 
     val map = FlinkConfigurationUtils.extractDynamicProperties(dynamicProperties)
-    Assertions.assertEquals(map("env.java.opts1"), "-Dfile.encoding=UTF-8")
-    Assertions.assertEquals(map("env.java.opts2"), "-Dfile.enc\\\"oding=UTF-8")
-    Assertions.assertEquals(map("env.java.opts3"), " -Dfile.encoding=UTF-8")
-    Assertions.assertEquals(map("yarn.application.id"), "123")
-    Assertions.assertEquals(map("yarn.application.name"), "streampark job")
-    Assertions.assertEquals(map("yarn.application.queue"), "flink")
-    Assertions.assertEquals(map("diy.param.name"), "apache streampark")
+    Assertions.assertEquals(map.get("env.java.opts1"), "-Dfile.encoding=UTF-8")
+    Assertions.assertEquals(map.get("env.java.opts2"), "-Dfile.enc\\\"oding=UTF-8")
+    Assertions.assertEquals(map.get("env.java.opts3"), " -Dfile.encoding=UTF-8")
+    Assertions.assertEquals(map.get("yarn.application.id"), "123")
+    Assertions.assertEquals(map.get("yarn.application.name"), "streampark job")
+    Assertions.assertEquals(map.get("yarn.application.queue"), "flink")
+    Assertions.assertEquals(map.get("diy.param.name"), "apache streampark")
   }
 
 }
