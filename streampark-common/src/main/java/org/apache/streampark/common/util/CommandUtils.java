@@ -57,6 +57,9 @@ public final class CommandUtils {
             reader.close();
             scanner.close();
             return new CommandResult(code, buffer.toString());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -91,6 +94,9 @@ public final class CommandUtils {
                 consumer.accept(scanner.nextLine());
             scanner.close();
             return waitFor(process);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

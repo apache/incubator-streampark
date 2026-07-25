@@ -146,7 +146,7 @@ public final class FlinkConfigurationUtils {
             String opts = matcher.group();
             int index = opts.indexOf('=');
             String key = opts.substring(2, index).trim();
-            String value = opts.substring(index + 1).trim().replaceAll("(^[\"|']|[\"|']$)", "");
+            String value = opts.substring(index + 1).trim().replaceAll("(^[\"']|[\"']$)", "");
             map.put(key, value);
         }
         return map;
