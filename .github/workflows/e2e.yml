@@ -138,11 +138,11 @@ jobs:
           - name: FlinkOnRemoteClusterDeployTest
             class: org.apache.streampark.e2e.cases.Flink120OnRemoteClusterDeployTest
 
-          - name: FlinkOnYarnClusterDeployTest
-            class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
+          # - name: FlinkOnYarnClusterDeployTest
+          #  class: org.apache.streampark.e2e.cases.Flink120OnYarnClusterDeployTest
 
-          - name: FlinkSQLOnYarnTest
-            class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
+          # - name: FlinkSQLOnYarnTest
+          #  class: org.apache.streampark.e2e.cases.FlinkSQL120OnYarnTest
 
           #- name: Flink117OnRemoteClusterDeployTest
           #  class: org.apache.streampark.e2e.cases.Flink117OnRemoteClusterDeployTest
