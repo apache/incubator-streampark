@@ -36,22 +36,30 @@ public final class Workspace {
     /** Scala-friendly remote workspace singleton. */
     public static final Workspace remote = REMOTE;
 
+    static {
+        LOCAL.initPaths();
+    }
+
     private final StorageType storageType;
 
-    /** Public fields for Scala field-style access (e.g. {@code Workspace.local.APP_JARS}). */
-    public String WORKSPACE;
-    public String APP_PLUGINS;
-    public String APP_CLIENT;
-    public String APP_SHIMS;
-    public String APP_UPLOADS;
-    public String APP_PYTHON;
-    public String APP_PYTHON_VENV;
-    public String APP_WORKSPACE;
-    public String APP_FLINK;
-    public String APP_SPARK;
-    public String APP_BACKUPS;
-    public String APP_SAVEPOINTS;
-    public String APP_JARS;
+    /**
+     * Path fields are private so Scala field-style access (e.g. {@code Workspace.local.APP_JARS})
+     * resolves to accessor methods and triggers lazy initialization. Public fields would bypass
+     * {@link #ensurePathsInitialized()} and stay null when remote paths are deferred.
+     */
+    private String WORKSPACE;
+    private String APP_PLUGINS;
+    private String APP_CLIENT;
+    private String APP_SHIMS;
+    private String APP_UPLOADS;
+    private String APP_PYTHON;
+    private String APP_PYTHON_VENV;
+    private String APP_WORKSPACE;
+    private String APP_FLINK;
+    private String APP_SPARK;
+    private String APP_BACKUPS;
+    private String APP_SAVEPOINTS;
+    private String APP_JARS;
 
     private volatile boolean pathsInitialized;
 
