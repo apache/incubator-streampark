@@ -66,17 +66,17 @@ class DateUtilsTest {
     @Test
     void minuteOfDayShouldReturnCorrectMinute() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.FULL_FORMAT);
-        assertEquals(0, DateUtils.minuteOfDay(sdf.parse(DATE_TEST_CASE), GMT8));
-        assertEquals(1, DateUtils.minuteOfDay(sdf.parse("2000-01-01 00:01:01"), GMT8));
-        assertEquals(61, DateUtils.minuteOfDay(sdf.parse("2000-01-01 01:01:01"), GMT8));
+        assertEquals(0, DateUtils.minuteOfDay(sdf.parse(DATE_TEST_CASE)));
+        assertEquals(1, DateUtils.minuteOfDay(sdf.parse("2000-01-01 00:01:01")));
+        assertEquals(61, DateUtils.minuteOfDay(sdf.parse("2000-01-01 01:01:01")));
     }
 
     @Test
     void secondOfDayShouldReturnCorrectSecond() throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.FULL_FORMAT);
-        assertEquals(1, DateUtils.secondOfDay(sdf.parse(DATE_TEST_CASE), GMT8));
-        assertEquals(61, DateUtils.secondOfDay(sdf.parse("2000-01-01 00:01:01"), GMT8));
-        assertEquals(3661, DateUtils.secondOfDay(sdf.parse("2000-01-01 01:01:01"), GMT8));
+        assertEquals(1, DateUtils.secondOfDay(sdf.parse(DATE_TEST_CASE)));
+        assertEquals(61, DateUtils.secondOfDay(sdf.parse("2000-01-01 00:01:01")));
+        assertEquals(3661, DateUtils.secondOfDay(sdf.parse("2000-01-01 01:01:01")));
     }
 
     @Test
@@ -118,7 +118,9 @@ class DateUtilsTest {
 
     @Test
     void getTimeShouldReturnMilliseconds() {
-        assertEquals(TIME_STAMP_TEST_CASE, DateUtils.getTime(DATE_TEST_CASE));
+        assertEquals(
+            TIME_STAMP_TEST_CASE,
+            DateUtils.getTime(DATE_TEST_CASE, DateUtils.FULL_FORMAT, GMT8));
     }
 
     @Test

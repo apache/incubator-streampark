@@ -36,11 +36,6 @@ public final class Workspace {
     /** Scala-friendly remote workspace singleton. */
     public static final Workspace remote = REMOTE;
 
-    static {
-        LOCAL.initPaths();
-        REMOTE.initPaths();
-    }
-
     private final StorageType storageType;
 
     /** Public fields for Scala field-style access (e.g. {@code Workspace.local.APP_JARS}). */

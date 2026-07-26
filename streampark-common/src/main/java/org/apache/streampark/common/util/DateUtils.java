@@ -68,6 +68,11 @@ public final class DateUtils {
     public static int minuteOfDay() {
         return minuteOfDay(new Date(), TimeZone.getDefault());
     }
+
+    public static int minuteOfDay(Date date) {
+        return minuteOfDay(date, TimeZone.getDefault());
+    }
+
     public static int minuteOfDay(Date date, TimeZone timeZone) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(timeZone);
@@ -89,6 +94,11 @@ public final class DateUtils {
     public static int secondOfDay() {
         return secondOfDay(new Date(), TimeZone.getDefault());
     }
+
+    public static int secondOfDay(Date date) {
+        return secondOfDay(date, TimeZone.getDefault());
+    }
+
     public static int secondOfDay(Date date, TimeZone timeZone) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(timeZone);
@@ -223,7 +233,10 @@ public final class DateUtils {
     }
     public static String formatCSTTime(String date, String format) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-        return new SimpleDateFormat(format).format(sdf.parse(date));
+        Date parsed = sdf.parse(date);
+        SimpleDateFormat output = new SimpleDateFormat(format);
+        output.setTimeZone(sdf.getTimeZone());
+        return output.format(parsed);
     }
     public static final class TimeUnitPair {
 

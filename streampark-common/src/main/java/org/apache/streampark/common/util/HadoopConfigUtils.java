@@ -92,9 +92,12 @@ public final class HadoopConfigUtils {
         try {
             return Optional.of(FileUtils.getPathFromEnv("HADOOP_CONF_DIR"));
         } catch (Exception e) {
-            String path =
-                FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop");
-            return Optional.of(path);
+            try {
+                return Optional.of(
+                    FileUtils.resolvePath(FileUtils.getPathFromEnv("HADOOP_HOME"), "/etc/hadoop"));
+            } catch (Exception ignored) {
+                return Optional.empty();
+            }
         }
     }
 

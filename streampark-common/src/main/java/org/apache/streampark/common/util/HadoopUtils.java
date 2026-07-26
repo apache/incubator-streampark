@@ -91,8 +91,12 @@ public final class HadoopUtils {
             try {
                 hadoopConfDir = FileUtils.getPathFromEnv(HADOOP_CONF_DIR);
             } catch (Exception e) {
-                hadoopConfDir =
-                    FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
+                try {
+                    hadoopConfDir =
+                        FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX);
+                } catch (Exception ignored) {
+                    hadoopConfDir = "";
+                }
             }
         }
         return hadoopConfDir;
