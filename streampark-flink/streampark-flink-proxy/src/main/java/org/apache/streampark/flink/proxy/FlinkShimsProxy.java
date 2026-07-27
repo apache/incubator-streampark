@@ -28,6 +28,7 @@ import org.apache.streampark.common.util.LoggerSupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getObject(ClassLoader loader, Object obj) throws Exception {
+    public static <T> T getObject(ClassLoader loader, Object obj) throws IOException, ClassNotFoundException {
         try (
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(arrayOutputStream)) {
@@ -185,22 +186,27 @@ public final class FlinkShimsProxy extends LoggerSupport {
             if (!jarName.endsWith(Constants.JAR_SUFFIX)) {
                 continue;
             }
-            if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
-                String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
-                if (jarName.startsWith(prefixVer)) {
-                    addShimUrl.accept(jar);
-                    LOG.logInfo("Include flink shims jar lib: " + jarName);
-                }
-            } else {
-                if (INCLUDE_PATTERN.matcher(jarName).matches()) {
-                    addShimUrl.accept(jar);
-                    LOG.logInfo("Include jar lib: " + jarName);
-                } else if (jarName.matches("^streampark-.*_" + scalaVersion + ".*$")) {
-                    addShimUrl.accept(jar);
-                    LOG.logInfo("Include streampark lib: " + jarName);
-                }
+            String includeReason = matchShimIncludeReason(jarName, majorVersion, scalaVersion);
+            if (includeReason != null) {
+                addShimUrl.accept(jar);
+                LOG.logInfo(includeReason + jarName);
             }
         }
+    }
+
+    private static String matchShimIncludeReason(
+                                                 String jarName, String majorVersion, String scalaVersion) {
+        if (jarName.startsWith(FLINK_SHIMS_PREFIX)) {
+            String prefixVer = FLINK_SHIMS_PREFIX + "-" + majorVersion + "_" + scalaVersion;
+            return jarName.startsWith(prefixVer) ? "Include flink shims jar lib: " : null;
+        }
+        if (INCLUDE_PATTERN.matcher(jarName).matches()) {
+            return "Include jar lib: ";
+        }
+        if (jarName.matches("^streampark-.*_" + scalaVersion + ".*$")) {
+            return "Include streampark lib: ";
+        }
+        return null;
     }
 
     private static ClassLoader getFlinkShimsClassLoader(FlinkVersion flinkVersion) {
