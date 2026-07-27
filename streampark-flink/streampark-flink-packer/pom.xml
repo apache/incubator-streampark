@@ -32,7 +32,6 @@
         <maven.aether.version>3.3.9</maven.aether.version>
         <maven.shade.version>3.2.4</maven.shade.version>
         <docker.client.version>3.3.6</docker.client.version>
-        <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
     <dependencies>
@@ -142,7 +141,28 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.12.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <streampark.workspace.local>${project.build.directory}/streampark-workspace</streampark.workspace.local>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
