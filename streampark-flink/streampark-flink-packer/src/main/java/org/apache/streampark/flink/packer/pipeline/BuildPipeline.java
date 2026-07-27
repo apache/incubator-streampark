@@ -186,6 +186,14 @@ public abstract class BuildPipeline extends LoggerSupport
             logInfo("Building pipeline has finished successfully.");
             notifyFinish(result);
             return result;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            pipeStatus = PipelineStatusEnum.failure;
+            error = PipeError.of(e.getMessage(), e);
+            logError("Building pipeline has failed.", e);
+            BuildResult result = new ErrorResult();
+            notifyFinish(result);
+            return result;
         } catch (Throwable cause) {
             pipeStatus = PipelineStatusEnum.failure;
             error = PipeError.of(cause.getMessage(), cause);

@@ -140,7 +140,11 @@ public final class MavenTool extends LoggerSupport {
                     + outFatJarPath
                     + ") should be a JAR file.");
         }
-        uberJar.delete();
+        if (uberJar.exists() && !uberJar.delete()) {
+            throw new java.io.IOException(
+                "[StreamPark] streampark-packer: failed to delete existing uber jar: "
+                    + outFatJarPath);
+        }
         Set<File> jarSet = new HashSet<>();
         for (String lib : jarLibs) {
             File libFile = new File(lib);
