@@ -1,0 +1,81 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.streampark.flink.core;
+
+/** Call of SQL command with operands and command type. */
+public class SqlCommandCall {
+
+    private final int lineStart;
+    private final int lineEnd;
+    private final SqlCommand command;
+    private final String[] operands;
+    private final String originSql;
+
+    public SqlCommandCall(
+                          int lineStart,
+                          int lineEnd,
+                          SqlCommand command,
+                          String[] operands,
+                          String originSql) {
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
+        this.command = command;
+        this.operands = operands;
+        this.originSql = originSql;
+    }
+
+    public int lineStart() {
+        return lineStart;
+    }
+
+    public int getLineStart() {
+        return lineStart;
+    }
+
+    public int lineEnd() {
+        return lineEnd;
+    }
+
+    public int getLineEnd() {
+        return lineEnd;
+    }
+
+    public SqlCommand command() {
+        return command;
+    }
+
+    public SqlCommand getCommand() {
+        return command;
+    }
+
+    public String[] operands() {
+        return operands;
+    }
+
+    public String[] getOperands() {
+        return operands;
+    }
+
+    public String originSql() {
+        return originSql;
+    }
+
+    public String getOriginSql() {
+        return originSql;
+    }
+}
