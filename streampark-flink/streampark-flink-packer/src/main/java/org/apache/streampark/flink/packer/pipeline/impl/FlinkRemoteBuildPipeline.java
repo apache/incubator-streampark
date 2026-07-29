@@ -51,7 +51,7 @@ public class FlinkRemoteBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public ShadedBuildResponse buildProcess() throws Throwable {
+    public ShadedBuildResponse buildProcess() {
         if (request.skipBuild()) {
             return new ShadedBuildResponse(request.workspace(), request.customFlinkUserJar());
         }

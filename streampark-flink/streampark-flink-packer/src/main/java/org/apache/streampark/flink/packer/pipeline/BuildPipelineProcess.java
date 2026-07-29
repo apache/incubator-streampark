@@ -27,7 +27,7 @@ public interface BuildPipelineProcess {
      * the actual build process. the effective steps progress should be implemented in multiple
      * BuildPipeline.execStep() functions.
      */
-    BuildResult buildProcess() throws Throwable;
+    BuildResult buildProcess();
 
     /** the build params of build process */
     BuildParam offerBuildParam();

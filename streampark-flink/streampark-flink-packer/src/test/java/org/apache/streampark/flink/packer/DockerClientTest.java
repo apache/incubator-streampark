@@ -21,7 +21,10 @@ import org.apache.streampark.common.conf.CommonConfig;
 import org.apache.streampark.common.conf.InternalConfigHolder;
 import org.apache.streampark.flink.packer.docker.DockerImageExist;
 import org.apache.streampark.flink.packer.docker.DockerRetriever;
+import org.apache.streampark.flink.packer.docker.DockerUtils;
 
+import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,15 +41,43 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DockerClientTest {
 
+    private static final String TEST_IMAGE = "flink:1.18.1-scala_2.12-java8";
+
     private static boolean dockerAvailable;
 
     @BeforeAll
-    static void detectDocker() {
+    static void prepareDocker() {
         String dockerHost = System.getenv("DOCKER_HOST");
         if (dockerHost == null) {
             dockerHost = "/var/run/docker.sock";
         }
         dockerAvailable = Files.exists(Paths.get(dockerHost.replace("unix://", "")));
+        if (!dockerAvailable) {
+            return;
+        }
+        DockerUtils.usingDockerClient(
+            client -> {
+                try {
+                    client.inspectImageCmd(TEST_IMAGE).exec();
+                } catch (NotFoundException e) {
+                    try {
+                        client.pullImageCmd("hello-world:latest")
+                            .exec(new PullImageResultCallback())
+                            .awaitCompletion(2, TimeUnit.MINUTES);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(
+                            "Interrupted while pulling docker test image: hello-world:latest",
+                            interrupted);
+                    }
+                    client.tagImageCmd("hello-world:latest", "flink", "1.18.1-scala_2.12-java8")
+                        .exec();
+                }
+                return null;
+            },
+            err -> {
+                throw new RuntimeException("Failed to prepare docker test image: " + TEST_IMAGE, err);
+            });
     }
 
     @Test
@@ -68,8 +100,7 @@ class DockerClientTest {
     void returnTrueIfImageExists() {
         Assumptions.assumeTrue(dockerAvailable, "Docker daemon is not available");
         DockerImageExist dockerImageExist = new DockerImageExist();
-        String imageName = "flink:1.18.1-scala_2.12-java8";
-        assertTrue(dockerImageExist.doesDockerImageExist(imageName));
+        assertTrue(dockerImageExist.doesDockerImageExist(TEST_IMAGE));
     }
 
     @Test

@@ -24,9 +24,11 @@ import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** Building pipeline abstract class. */
 public abstract class BuildPipeline extends LoggerSupport
@@ -122,7 +124,7 @@ public abstract class BuildPipeline extends LoggerSupport
             logInfo("Building pipeline step[" + seq + "/" + allSteps() + "] success");
             notifyStepChange();
             return java.util.Optional.of(result);
-        } catch (Throwable cause) {
+        } catch (Exception cause) {
             stepsStatus.put(
                 seq,
                 new AbstractMap.SimpleEntry<>(
@@ -165,23 +167,7 @@ public abstract class BuildPipeline extends LoggerSupport
             notifyStart();
             logInfo("Building pipeline is launching, params=" + offerBuildParam());
             BuildResult result =
-                EXEC_POOL
-                    .submit(
-                        new Callable<BuildResult>() {
-
-                            @Override
-                            public BuildResult call() throws Exception {
-                                try {
-                                    return buildProcess();
-                                } catch (Throwable t) {
-                                    if (t instanceof Exception) {
-                                        throw (Exception) t;
-                                    }
-                                    throw new Exception(t);
-                                }
-                            }
-                        })
-                    .get(20, TimeUnit.MINUTES);
+                EXEC_POOL.submit(this::buildProcess).get(20, TimeUnit.MINUTES);
             pipeStatus = PipelineStatusEnum.success;
             logInfo("Building pipeline has finished successfully.");
             notifyFinish(result);
@@ -194,10 +180,21 @@ public abstract class BuildPipeline extends LoggerSupport
             BuildResult result = new ErrorResult();
             notifyFinish(result);
             return result;
-        } catch (Throwable cause) {
+        } catch (ExecutionException e) {
             pipeStatus = PipelineStatusEnum.failure;
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
             error = PipeError.of(cause.getMessage(), cause);
             logError("Building pipeline has failed.", cause);
+            BuildResult result = new ErrorResult();
+            notifyFinish(result);
+            return result;
+        } catch (TimeoutException e) {
+            pipeStatus = PipelineStatusEnum.failure;
+            error = PipeError.of(e.getMessage(), e);
+            logError("Building pipeline has failed.", e);
             BuildResult result = new ErrorResult();
             notifyFinish(result);
             return result;

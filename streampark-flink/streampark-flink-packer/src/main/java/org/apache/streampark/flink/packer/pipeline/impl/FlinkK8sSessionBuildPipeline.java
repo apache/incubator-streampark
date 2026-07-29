@@ -46,7 +46,7 @@ public class FlinkK8sSessionBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public ShadedBuildResponse buildProcess() throws Throwable {
+    public ShadedBuildResponse buildProcess() {
         String buildWorkspace =
             execStep(
                 1,

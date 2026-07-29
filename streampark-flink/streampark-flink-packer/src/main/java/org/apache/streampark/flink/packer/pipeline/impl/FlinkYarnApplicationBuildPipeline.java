@@ -58,7 +58,7 @@ public class FlinkYarnApplicationBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public SimpleBuildResponse buildProcess() throws Throwable {
+    public SimpleBuildResponse buildProcess() {
         execStep(
             1,
             () -> {

@@ -100,7 +100,7 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
     }
 
     @Override
-    public DockerImageBuildResponse buildProcess() throws Throwable {
+    public DockerImageBuildResponse buildProcess() {
         String buildWorkspace =
             execStep(
                 1,
