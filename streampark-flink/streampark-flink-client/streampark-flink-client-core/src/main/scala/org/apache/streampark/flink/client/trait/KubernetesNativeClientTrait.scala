@@ -33,6 +33,8 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.Service
 
 import javax.annotation.Nonnull
 
+import scala.collection.JavaConverters.mapAsScalaMapConverter
+
 /** kubernetes native mode submit */
 trait KubernetesNativeClientTrait extends FlinkClientTrait {
 
@@ -48,7 +50,7 @@ trait KubernetesNativeClientTrait extends FlinkClientTrait {
     if (submitRequest.buildResult != null && submitRequest.deployMode == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
       val buildResult =
         submitRequest.buildResult.asInstanceOf[DockerImageBuildResponse]
-      buildResult.podTemplatePaths.foreach(p => {
+      buildResult.podTemplatePaths.asScala.foreach(p => {
         if (PodTemplateTool.KUBERNETES_POD_TEMPLATE.key.equals(p._1)) {
           flinkConfig.safeSet(KubernetesConfigOptions.KUBERNETES_POD_TEMPLATE, p._2)
         } else if (PodTemplateTool.KUBERNETES_JM_POD_TEMPLATE.key.equals(p._1)) {
