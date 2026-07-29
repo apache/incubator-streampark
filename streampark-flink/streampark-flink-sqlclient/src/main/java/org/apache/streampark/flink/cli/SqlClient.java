@@ -34,6 +34,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.ExecutionOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +45,7 @@ public final class SqlClient {
     }
 
     public static void main(String[] args) {
-        List<String> arguments = new ArrayList<>();
-        for (String arg : args) {
-            arguments.add(arg);
-        }
+        List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
 
@@ -77,10 +75,10 @@ public final class SqlClient {
         switch (mode) {
             case "STREAMING":
             case "AUTOMATIC":
-                StreamSqlApp.main(arguments.toArray(new String[0]));
+                StreamSqlApp.run(arguments.toArray(new String[0]));
                 break;
             case "BATCH":
-                BatchSqlApp.main(arguments.toArray(new String[0]));
+                BatchSqlApp.run(arguments.toArray(new String[0]));
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -128,7 +126,7 @@ public final class SqlClient {
         private BatchSqlApp() {
         }
 
-        static void main(String[] args) {
+        static void run(String[] args) {
             SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
             TableContext context = new TableContext(FlinkTableInitializer.initialize(args, null));
             context.sql();
@@ -141,7 +139,7 @@ public final class SqlClient {
         private StreamSqlApp() {
         }
 
-        static void main(String[] args) {
+        static void run(String[] args) {
             SystemPropertyUtils.setAppHome(ConfigKeys.KEY_APP_HOME(), SqlClient.class);
             StreamTableContext context =
                 new StreamTableContext(FlinkTableInitializer.initialize(args, null, null));
