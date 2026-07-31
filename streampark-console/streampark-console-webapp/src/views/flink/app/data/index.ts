@@ -71,6 +71,11 @@ export const deployModes = [
     disabled: false,
   },
   {
+    label: 'managed application',
+    value: DeployMode.MANAGED_APPLICATION,
+    disabled: false,
+  },
+  {
     label: 'yarn per-job (deprecated, please use yarn-application mode)',
     value: DeployMode.YARN_PER_JOB,
     disabled: false,

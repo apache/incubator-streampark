@@ -46,6 +46,40 @@ datasource:
     url:
 
 streampark:
+    managed-flink:
+        # Managed Flink remains hidden and read-only until schema, credentials, and providers are ready.
+        enabled: false
+        credentials:
+            # Comma-separated version=Base64(AES key) entries injected by the deployment environment.
+            master-keys: ${STREAMPARK_MANAGED_FLINK_CREDENTIAL_MASTER_KEYS:}
+            active-key-version: ${STREAMPARK_MANAGED_FLINK_CREDENTIAL_ACTIVE_KEY_VERSION:0}
+        watcher:
+            # Enable only after the managed schema, credential keys, and provider are configured.
+            enabled: false
+            scheduler-delay-ms: 1000
+            scheduler-initial-delay-ms: 5000
+            batch-size: 20
+            lease-seconds: 30
+            transition-interval-seconds: 5
+            running-interval-seconds: 15
+            observation-interval-seconds: 30
+            lost-failure-threshold: 3
+            max-backoff-seconds: 60
+            jitter-percent: 10
+        providers:
+            volcengine:
+                enabled: false
+                client:
+                    # Official Volcengine OpenAPI endpoint. Account-level custom endpoints remain disabled.
+                    endpoint: https://open.volcengineapi.com
+                    connect-timeout-ms: 3000
+                    request-timeout-ms: 10000
+                    max-read-retries: 2
+                    initial-backoff-ms: 200
+                    max-backoff-ms: 2000
+                    max-concurrent-requests-per-account: 4
+                    min-request-interval-ms: 50
+                    capability-ttl-minutes: 10
     workspace:
         # Local workspace, storage directory of clone projects and compiled projects,Do not set under $APP_HOME. Set it to a directory outside of $APP_HOME.
         local: /tmp/streampark
@@ -97,4 +131,3 @@ sso:
         principalNameAttribute:
         # Optional, change by authentication client
         # Please replace and fill in your client config below when enabled SSO
-

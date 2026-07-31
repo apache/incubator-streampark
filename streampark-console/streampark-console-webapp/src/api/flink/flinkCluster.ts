@@ -18,7 +18,7 @@ import { AxiosResponse } from 'axios';
 import { FlinkCluster } from './flinkCluster.type';
 import { Result } from '/#/axios';
 import { defHttp } from '/@/utils/http/axios';
-import type { BasicTableParams } from '../model/baseModel';
+import type { BasicFetchResult, BasicTableParams } from '../model/baseModel';
 
 enum FLINK_API {
   PAGE = '/flink/cluster/page',
@@ -37,7 +37,7 @@ enum FLINK_API {
  * @returns Promise<FlinkEnv[]>
  */
 export function fetchFlinkClusterPage(data: BasicTableParams) {
-  return defHttp.post<FlinkCluster[]>({
+  return defHttp.post<BasicFetchResult<FlinkCluster>>({
     url: FLINK_API.PAGE,
     data,
   });

@@ -85,4 +85,25 @@ export default {
   view: {
     clusterId: 'ClusterId',
   },
+  managed: {
+    deployMode: 'Managed Application',
+    cloudAccount: 'Cloud Account',
+    region: 'Region',
+    project: 'Project',
+    resourcePool: 'Resource Pool',
+    draftDirectoryId: 'Draft Directory ID',
+    probe: 'Test Environment',
+    probeSuccess: 'The managed Flink environment is available',
+    probeFailed: 'The managed Flink environment probe failed',
+    metadataUnavailable: 'Managed environment metadata is unavailable. Refresh and retry.',
+    placeholder: {
+      draftDirectoryId: 'Enter the provider draft directory ID',
+    },
+    required: {
+      cloudAccount: 'Cloud Account is required',
+      project: 'Project is required',
+      resourcePool: 'Resource Pool is required',
+      draftDirectoryId: 'A positive Draft Directory ID is required',
+    },
+  },
 };

@@ -49,7 +49,10 @@ public enum FlinkDeployMode {
     KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
 
     /** kubernetes application */
-    KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
+    KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application"),
+
+    /** managed application */
+    MANAGED_APPLICATION(7, "managed-application");
     private final Integer mode;
 
     private final String name;
@@ -181,11 +184,38 @@ public enum FlinkDeployMode {
         return KUBERNETES_NATIVE_APPLICATION == of(value);
     }
 
+    /** Judge the mode value whether is managed application execution mode. */
+    public static boolean isManagedMode(@Nullable Integer value) {
+        return isManagedMode(of(value));
+    }
+
+    /** Judge the given flink execution mode whether is managed application execution mode. */
+    public static boolean isManagedMode(@Nullable FlinkDeployMode mode) {
+        return MANAGED_APPLICATION == mode;
+    }
+
     /** Get all k8s mode values into a list. */
     @Nonnull
     public static List<Integer> getKubernetesMode() {
         return Lists.newArrayList(
             KUBERNETES_NATIVE_SESSION.getMode(), KUBERNETES_NATIVE_APPLICATION.getMode());
+    }
+
+    /** Get all legacy application modes tracked through Flink REST or Yarn. */
+    @Nonnull
+    public static List<Integer> getHttpWatcherModes() {
+        return Lists.newArrayList(
+            LOCAL.getMode(),
+            REMOTE.getMode(),
+            YARN_PER_JOB.getMode(),
+            YARN_SESSION.getMode(),
+            YARN_APPLICATION.getMode());
+    }
+
+    /** Get all legacy cluster modes tracked through Flink REST or Yarn. */
+    @Nonnull
+    public static List<Integer> getClusterWatcherModes() {
+        return Lists.newArrayList(REMOTE.getMode(), YARN_SESSION.getMode());
     }
 
     /** Judge the given flink execution mode whether is session execution mode. */

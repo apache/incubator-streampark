@@ -42,6 +42,8 @@ export const useAppTableAction = (
   openSavepointModal: Fn,
   openLogModal: Fn,
   openBuildDrawer: Fn,
+  openManagedReleaseModal: Fn,
+  openManagedLifecycleModal: Fn,
   handlePageDataReload: Fn,
   optionApps: Recordable,
 ) => {
@@ -81,7 +83,13 @@ export const useAppTableAction = (
           ].includes(record.release) && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:release',
         icon: 'ant-design:cloud-upload-outlined',
-        onClick: handleCheckReleaseApp.bind(null, record),
+        onClick: () => {
+          if (record.deployMode === DeployMode.MANAGED_APPLICATION) {
+            openManagedReleaseModal(true, { application: record, mode: 'release' });
+            return;
+          }
+          handleCheckReleaseApp(record);
+        },
       },
       {
         tooltip: { title: t('flink.app.operation.releaseDetail') },
@@ -90,15 +98,42 @@ export const useAppTableAction = (
           record['optionState'] == OptionStateEnum.RELEASING,
         auth: 'app:release',
         icon: 'ant-design:container-outlined',
-        onClick: () => openBuildDrawer(true, { appId: record.id }),
+        onClick: () => {
+          if (record.deployMode === DeployMode.MANAGED_APPLICATION) {
+            openManagedReleaseModal(true, { application: record, mode: 'progress' });
+            return;
+          }
+          openBuildDrawer(true, { appId: record.id });
+        },
       },
       {
         class: 'e2e-flinkapp-startup-btn',
         tooltip: { title: t('flink.app.operation.start') },
-        ifShow: handleIsStart(record, optionApps),
+        ifShow:
+          record.deployMode === DeployMode.MANAGED_APPLICATION
+            ? [AppStateEnum.ADDED, AppStateEnum.CANCELED].includes(record.state) &&
+              record.release === ReleaseStateEnum.DONE &&
+              record['optionState'] === OptionStateEnum.NONE
+            : handleIsStart(record, optionApps),
         auth: 'app:start',
         icon: 'ant-design:play-circle-outlined',
-        onClick: handleAppCheckStart.bind(null, record),
+        onClick: () => {
+          if (record.deployMode === DeployMode.MANAGED_APPLICATION) {
+            openManagedLifecycleModal(true, { application: record, action: 'START' });
+            return;
+          }
+          handleAppCheckStart(record);
+        },
+      },
+      {
+        tooltip: { title: t('flink.app.managed.restart') },
+        ifShow:
+          record.deployMode === DeployMode.MANAGED_APPLICATION &&
+          record.state === AppStateEnum.RUNNING &&
+          record['optionState'] === OptionStateEnum.NONE,
+        auth: 'app:start',
+        icon: 'ant-design:reload-outlined',
+        onClick: () => openManagedLifecycleModal(true, { application: record, action: 'RESTART' }),
       },
       {
         class: 'e2e-flinkapp-cancel-btn',
@@ -107,7 +142,26 @@ export const useAppTableAction = (
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
-        onClick: handleCancel.bind(null, record),
+        onClick: () => {
+          if (record.deployMode === DeployMode.MANAGED_APPLICATION) {
+            openManagedLifecycleModal(true, { application: record, action: 'STOP' });
+            return;
+          }
+          handleCancel(record);
+        },
+      },
+      {
+        tooltip: { title: t('flink.app.managed.lifecycleProgressDetail') },
+        ifShow:
+          record.deployMode === DeployMode.MANAGED_APPLICATION &&
+          [
+            OptionStateEnum.STARTING,
+            OptionStateEnum.CANCELLING,
+            OptionStateEnum.SAVEPOINTING,
+          ].includes(record['optionState']),
+        auth: 'app:detail',
+        icon: 'ant-design:container-outlined',
+        onClick: () => openManagedLifecycleModal(true, { application: record, action: 'PROGRESS' }),
       },
       {
         tooltip: { title: t('flink.app.operation.detail') },
@@ -131,11 +185,17 @@ export const useAppTableAction = (
           record.state == AppStateEnum.RUNNING && record['optionState'] == OptionStateEnum.NONE,
         auth: 'savepoint:trigger',
         icon: 'ant-design:camera-outlined',
-        onClick: handleSavepoint.bind(null, record),
+        onClick: () => {
+          if (record.deployMode === DeployMode.MANAGED_APPLICATION) {
+            openManagedLifecycleModal(true, { application: record, action: 'SNAPSHOT' });
+            return;
+          }
+          handleSavepoint(record);
+        },
       },
       {
         tooltip: { title: t('flink.app.operation.abort') },
-        ifShow: handleCanStop(record),
+        ifShow: record.deployMode !== DeployMode.MANAGED_APPLICATION && handleCanStop(record),
         auth: 'app:cancel',
         icon: 'ant-design:pause-circle-outlined',
         onClick: handleAbort.bind(null, record),

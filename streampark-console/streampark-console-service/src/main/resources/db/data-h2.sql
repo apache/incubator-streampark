@@ -144,6 +144,7 @@ insert into `t_menu` values (140100, 140000, 'setting.system', '/setting/system'
 insert into `t_menu` values (140200, 140000, 'setting.alarm', '/setting/alarm', 'setting/alarm/View', null, null, '0', 1, 2, now(), now());
 insert into `t_menu` values (140300, 140000, 'setting.externalLink', '/setting/extlink', 'setting/extlink/View', 'menu:view', null, '0', 1, 5, now(), now());
 insert into `t_menu` values (140400, 140000, 'setting.yarnQueue', '/setting/yarn-queue', 'setting/yarn-queue/View', 'menu:view', null, '0', 1, 6, now(), now());
+insert into `t_menu` values (140500, 140000, 'setting.cloudAccount.title', '/setting/cloud-account', 'setting/cloud-account/View', 'cloud-account:view', null, '0', 1, 7, now(), now());
 insert into `t_menu` values (140101, 140100, 'setting view', null, null, 'setting:view', null, '1', 1, null, now(), now());
 insert into `t_menu` values (140102, 140100, 'setting update', null, null, 'setting:update', null, '1', 1, null, now(), now());
 
@@ -154,6 +155,11 @@ insert into `t_menu` values (140304, 140300, 'link delete', null, null, 'externa
 insert into `t_menu` values (140401, 140400, 'yarn queue add', null, null, 'yarnQueue:create', '', '1', 0, null, now(), now());
 insert into `t_menu` values (140402, 140400, 'yarn queue edit', null, null, 'yarnQueue:update', '', '1', 0, null, now(), now());
 insert into `t_menu` values (140403, 140400, 'yarn queue delete', null, null, 'yarnQueue:delete', '', '1', 0, null, now(), now());
+insert into `t_menu` values (140501, 140500, 'cloud account view', null, null, 'cloud-account:view', null, '1', 1, null, now(), now());
+insert into `t_menu` values (140502, 140500, 'cloud account create', null, null, 'cloud-account:create', null, '1', 1, null, now(), now());
+insert into `t_menu` values (140503, 140500, 'cloud account update', null, null, 'cloud-account:update', null, '1', 1, null, now(), now());
+insert into `t_menu` values (140504, 140500, 'cloud account delete', null, null, 'cloud-account:delete', null, '1', 1, null, now(), now());
+insert into `t_menu` values (140505, 140500, 'cloud account grant', null, null, 'cloud-account:grant', null, '1', 1, null, now(), now());
 
 insert into `t_menu` values (150100, 150000, 'system.user', '/system/user', 'system/user/View', null, null, '0', 1, 1, now(), now());
 insert into `t_menu` values (150200, 150000, 'system.role', '/system/role', 'system/role/View', null, null, '0', 1, 2, now(), now());

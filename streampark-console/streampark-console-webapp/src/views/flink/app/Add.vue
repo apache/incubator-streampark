@@ -22,8 +22,8 @@
 <script setup lang="ts" name="AppCreate">
   import { useGo } from '/@/hooks/web/usePage';
   import ProgramArgs from './components/ProgramArgs.vue';
-  import { Switch } from 'ant-design-vue';
-  import { onMounted, reactive, ref, unref } from 'vue';
+  import { Col, Form, Row, Select, Switch } from 'ant-design-vue';
+  import { computed, nextTick, reactive, ref, unref } from 'vue';
   import { PageWrapper } from '/@/components/Page';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
 
@@ -52,6 +52,8 @@
     JobTypeEnum,
     ResourceFromEnum,
   } from '/@/enums/flinkEnum';
+  import { deployModes } from './data';
+  import ManagedApplicationForm from './components/ManagedFlink/ManagedApplicationForm.vue';
 
   const FlinkSqlEditor = createAsyncComponent(() => import('./components/FlinkSql.vue'), {
     loading: true,
@@ -64,6 +66,7 @@
   const flinkSql = ref();
   const dependencyRef = ref();
   const submitLoading = ref(false);
+  const selectedDeployMode = ref<number>();
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -81,6 +84,9 @@
 
   const { flinkEnvs, flinkClusters, getCreateFormSchema, suggestions } =
     useCreateSchema(dependencyRef);
+  const legacyFormSchema = computed(() =>
+    unref(getCreateFormSchema).filter((schema) => schema.field !== 'deployMode'),
+  );
 
   const [registerAppForm, { setFieldsValue, getFieldsValue, submit }] = useForm({
     labelCol: { lg: { span: 5, offset: 0 }, sm: { span: 7, offset: 0 } },
@@ -263,6 +269,7 @@
   async function handleAppCreate(formValue: Recordable) {
     try {
       submitLoading.value = true;
+      formValue.deployMode = unref(selectedDeployMode);
       if (formValue.jobType == JobTypeEnum.SQL) {
         if (formValue.flinkSql == null || formValue.flinkSql.trim() === '') {
           createMessage.warning(t('flink.app.editStreamPark.flinkSqlRequired'));
@@ -280,6 +287,14 @@
     } catch (error) {
       submitLoading.value = false;
     }
+  }
+
+  async function handleDeployModeChange(value: number) {
+    selectedDeployMode.value = value;
+    if (value === DeployMode.MANAGED_APPLICATION) return;
+    await nextTick();
+    await handleInitForm();
+    await setFieldsValue({ deployMode: value });
   }
   /* send create request */
   async function handleCreateApp(params: Recordable) {
@@ -301,15 +316,34 @@
       createMessage.error(data.message);
     }
   }
-
-  onMounted(async () => {
-    handleInitForm();
-  });
 </script>
 
 <template>
   <PageWrapper contentFullHeight contentBackground contentClass="p-26px app_controller">
-    <BasicForm @register="registerAppForm" @submit="handleAppCreate" :schemas="getCreateFormSchema">
+    <Row>
+      <Col :span="24">
+        <Form.Item
+          :label="t('flink.app.deployMode')"
+          :label-col="{ lg: { span: 5 }, sm: { span: 7 } }"
+          :wrapper-col="{ lg: { span: 16 }, sm: { span: 17 } }"
+          required
+        >
+          <Select
+            :value="selectedDeployMode"
+            :options="deployModes"
+            :placeholder="t('flink.app.addAppTips.deployModePlaceholder')"
+            @change="handleDeployModeChange"
+          />
+        </Form.Item>
+      </Col>
+    </Row>
+    <ManagedApplicationForm v-if="selectedDeployMode === DeployMode.MANAGED_APPLICATION" />
+    <BasicForm
+      v-else-if="selectedDeployMode !== undefined"
+      @register="registerAppForm"
+      @submit="handleAppCreate"
+      :schemas="legacyFormSchema"
+    >
       <template #flinkSql="{ model, field }">
         <FlinkSqlEditor
           ref="flinkSql"

@@ -25,7 +25,7 @@
   import { Icon } from '/@/components/Icon';
   import { useRoute, useRouter } from 'vue-router';
   import { fetchGet, fetchOptionLog, fetchYarn } from '/@/api/flink/app';
-  import { onUnmounted, reactive, h, ref, onMounted } from 'vue';
+  import { computed, onUnmounted, reactive, h, ref, onMounted } from 'vue';
   import { useIntervalFn } from '@vueuse/core';
   import { AppListRecord } from '/@/api/flink/app.type';
   import { Tooltip, Divider, Space } from 'ant-design-vue';
@@ -40,6 +40,7 @@
   import { createDetailProviderContext } from './hooks/useDetailContext';
   import { useDrawer } from '/@/components/Drawer';
   import { LinkBadge } from '/@/components/LinkBadge';
+  import ManagedFlinkDetailPanel from './components/ManagedFlink/DetailPanel.vue';
 
   defineOptions({
     name: 'ApplicationDetail',
@@ -54,6 +55,7 @@
   const yarn = ref('');
   const externalLinks = ref<ExternalLink[]>([]);
   const app = reactive<Partial<AppListRecord>>({});
+  const isManaged = computed(() => app.deployMode === DeployMode.MANAGED_APPLICATION);
   const detailTabs = reactive({
     showConf: false,
     showSaveOption: false,
@@ -68,6 +70,7 @@
       ...(getDescSchema() as any),
       {
         field: 'resetApi',
+        show: (data) => data.deployMode !== DeployMode.MANAGED_APPLICATION,
         label: h('div', null, [
           t('flink.app.detail.resetApi'),
           h(Tooltip, { title: t('flink.app.detail.resetApiToolTip'), placement: 'top' }, () =>
@@ -121,6 +124,12 @@
     handleView(app as any);
   }
 
+  function handleManagedConsoleView() {
+    if (app.managedConsoleUrl) {
+      window.open(app.managedConsoleUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+
   const { pause } = useIntervalFn(
     () => {
       handleGetAppInfo();
@@ -143,10 +152,12 @@
       ) {
         await handleYarn();
       }
-      await handleDetailTabs();
+      if (res.deployMode !== DeployMode.MANAGED_APPLICATION) {
+        await handleDetailTabs();
+      }
     }
     Object.assign(app, res);
-    appNotRunning.value = !app.appControl.allowView;
+    appNotRunning.value = !app.appControl?.allowView;
   }
 
   async function handleDetailTabs() {
@@ -189,7 +200,7 @@
       <div class="mb-15px">
         <span class="app-bar">{{ t('flink.app.detail.detailTitle') }}</span>
         <Space class="-mt-8px">
-          <div v-for="link in externalLinks" :key="link.id">
+          <div v-for="link in externalLinks" v-show="!isManaged" :key="link.id">
             <LinkBadge
               :label="link.badgeLabel"
               :redirect="link.renderedLinkUrl"
@@ -203,6 +214,7 @@
           <Icon icon="ant-design:arrow-left-outlined" />
         </a-button>
         <a-button
+          v-if="!isManaged"
           type="primary"
           @click="handleFlinkView"
           :disabled="appNotRunning"
@@ -211,10 +223,21 @@
           <Icon icon="ant-design:cloud-outlined" />
           {{ t('flink.app.detail.flinkWebUi') }}
         </a-button>
+        <a-button
+          v-else
+          type="primary"
+          @click="handleManagedConsoleView"
+          :disabled="!app.managedConsoleUrl"
+          class="float-right -mt-8px mr-20px"
+        >
+          <Icon icon="ant-design:cloud-outlined" />
+          {{ t('flink.app.managed.openProviderConsole') }}
+        </a-button>
       </div>
       <Description @register="registerDescription" />
       <Divider class="mt-20px -mb-17px" />
-      <DetailTab :app="app" :tabConf="detailTabs" />
+      <ManagedFlinkDetailPanel v-if="isManaged" :app="app" />
+      <DetailTab v-else :app="app" :tabConf="detailTabs" />
 
       <Mergely @register="registerConfDrawer" :readOnly="true" />
       <RequestModal @register="registerOpenApi" />

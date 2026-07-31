@@ -26,6 +26,7 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.core.bean.ResponseResult;
 import org.apache.streampark.console.core.entity.FlinkCluster;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.FlinkClusterMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -100,6 +101,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public ResponseResult<Void> check(FlinkCluster cluster) {
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            cluster.getFlinkDeployModeEnum(), "check");
         ResponseResult<Void> result = new ResponseResult<>();
         result.setStatus(0);
 
@@ -146,6 +149,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @VisibleForTesting
     public boolean internalCreate(FlinkCluster flinkCluster) {
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "create");
         boolean successful = validateQueueIfNeeded(flinkCluster);
         ApiAlertException.throwIfFalse(
             successful, String.format(ERROR_CLUSTER_QUEUE_HINT, flinkCluster.getYarnQueue()));
@@ -167,6 +172,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Override
     public void start(FlinkCluster cluster) {
         FlinkCluster flinkCluster = getById(cluster.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "start");
         try {
             DeployResponse deployResponse = deployInternal(flinkCluster);
             ApiAlertException.throwIfNull(
@@ -198,6 +205,10 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Override
     public void update(FlinkCluster paramOfCluster) {
         FlinkCluster flinkCluster = getById(paramOfCluster.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "update");
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            paramOfCluster.getFlinkDeployModeEnum(), "update");
         boolean success = validateQueueIfNeeded(flinkCluster, paramOfCluster);
         ApiAlertException.throwIfFalse(
             success, String.format(ERROR_CLUSTER_QUEUE_HINT, paramOfCluster.getYarnQueue()));
@@ -241,6 +252,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     @Override
     public void shutdown(FlinkCluster cluster) {
         FlinkCluster flinkCluster = this.getById(cluster.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "shutdown");
 
         try {
             ShutDownResponse shutDownResponse = shutdownInternal(flinkCluster, flinkCluster.getClusterId());
@@ -260,6 +273,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     public Boolean allowShutdownCluster(FlinkCluster cluster) {
         FlinkCluster flinkCluster = this.getById(cluster.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "shutdown");
         // 1) check mode
         String clusterId = flinkCluster.getClusterId();
         ApiAlertException.throwIfTrue(
@@ -310,6 +325,11 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
 
     @Override
     public void updateClusterState(Long id, ClusterState state) {
+        if (state == ClusterState.STARTING || state == ClusterState.CANCELLING) {
+            FlinkCluster cluster = getById(id);
+            ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+                cluster.getFlinkDeployModeEnum(), state.name().toLowerCase());
+        }
         LambdaUpdateWrapper<FlinkCluster> updateWrapper = new LambdaUpdateWrapper<FlinkCluster>()
             .eq(FlinkCluster::getId, id)
             .set(FlinkCluster::getClusterState, state.getState());
@@ -343,6 +363,8 @@ public class FlinkClusterServiceImpl extends ServiceImpl<FlinkClusterMapper, Fli
     public void remove(Long id) {
         FlinkCluster flinkCluster = getById(id);
         ApiAlertException.throwIfNull(flinkCluster, "Flink cluster not exist, please check.");
+        ManagedFlinkRoutingGuard.rejectLegacyClusterRoute(
+            flinkCluster.getFlinkDeployModeEnum(), "delete");
 
         if (FlinkDeployMode.isYarnSessionMode(flinkCluster.getFlinkDeployModeEnum())
             || FlinkDeployMode.isKubernetesSessionMode(flinkCluster.getDeployMode())) {

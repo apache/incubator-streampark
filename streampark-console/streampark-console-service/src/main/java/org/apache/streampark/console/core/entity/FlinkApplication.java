@@ -316,6 +316,21 @@ public class FlinkApplication extends BaseEntity {
 
     private transient AppControl appControl;
 
+    /** Read-only managed Flink metadata projected for list and legacy detail responses. */
+    private transient String managedProviderType;
+    private transient Long managedEnvironmentId;
+    private transient String managedEngineVersion;
+    private transient String managedSyncState;
+    private transient Date managedLastSyncTime;
+    private transient Integer managedConsecutiveSyncFailures;
+    private transient Date managedNextSyncTime;
+    private transient String managedConsoleUrl;
+    private transient String externalApplicationId;
+    private transient String externalInstanceId;
+    private transient String managedLocalDefinitionHash;
+    private transient String managedDeployedDefinitionHash;
+    private transient String managedProviderDefinitionHash;
+
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ? Constants.DEFAULT : k8sNamespace;
     }

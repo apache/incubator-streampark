@@ -17,7 +17,11 @@
 
 package org.apache.streampark.common.fs
 
-import org.apache.streampark.common.util.{HdfsUtils, Logger}
+import org.apache.streampark.common.util.{HadoopUtils, HdfsUtils, Logger}
+
+import org.apache.hadoop.fs.Path
+
+import java.io.InputStream
 
 /** Hadoop File System (aka HDFS) Operator */
 object HdfsOperator extends FsOperator with Logger {
@@ -63,6 +67,12 @@ object HdfsOperator extends FsOperator with Logger {
       "[StreamPark] HdfsOperator.fileMd5: file must not be null.")
     HdfsUtils.fileMd5(toHdfsPath(path))
   }
+
+  override def open(path: String): InputStream =
+    HadoopUtils.hdfs.open(new Path(toHdfsPath(path)))
+
+  override def fileSize(path: String): Long =
+    HadoopUtils.hdfs.getFileStatus(new Path(toHdfsPath(path))).getLen
 
   private def toHdfsPath(path: String): String = {
     path match {

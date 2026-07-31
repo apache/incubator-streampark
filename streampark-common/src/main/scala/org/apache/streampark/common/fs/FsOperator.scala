@@ -19,6 +19,10 @@ package org.apache.streampark.common.fs
 
 import org.apache.streampark.common.enums.StorageType
 
+import org.apache.commons.codec.digest.DigestUtils
+
+import java.io.InputStream
+
 object FsOperator {
 
   lazy val lfs: FsOperator = FsOperator.of(StorageType.LFS)
@@ -81,5 +85,18 @@ abstract class FsOperator {
   def move(srcPath: String, dstPath: String): Unit
 
   def fileMd5(path: String): String
+
+  def open(path: String): InputStream
+
+  def fileSize(path: String): Long
+
+  def fileSha256(path: String): String = {
+    val input = open(path)
+    try {
+      DigestUtils.sha256Hex(input)
+    } finally {
+      input.close()
+    }
+  }
 
 }

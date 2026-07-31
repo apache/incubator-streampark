@@ -138,6 +138,18 @@ object LfsOperator extends FsOperator with Logger {
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
+  override def open(path: String): FileInputStream = {
+    require(path != null && path.nonEmpty, "[StreamPark] LfsOperator.open: path must not be null.")
+    new FileInputStream(path)
+  }
+
+  override def fileSize(path: String): Long = {
+    require(path != null && path.nonEmpty, "[StreamPark] LfsOperator.fileSize: path must not be null.")
+    val file = new File(path)
+    require(file.isFile, "[StreamPark] LfsOperator.fileSize: path must be an existing file.")
+    file.length()
+  }
+
   /** Force delete directory and recreate it. */
   override def mkCleanDirs(path: String): Unit = {
     delete(path)

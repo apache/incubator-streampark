@@ -43,6 +43,7 @@ import org.apache.streampark.console.core.enums.NoticeTypeEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
 import org.apache.streampark.console.core.enums.ResourceTypeEnum;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.ApplicationBuildPipelineMapper;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -429,6 +430,7 @@ public class FlinkApplicationBuildPipelineServiceImpl
      */
     private void checkBuildEnv(Long appId, boolean forceBuild) {
         FlinkApplication app = applicationManageService.getById(appId);
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(app.getDeployModeEnum(), "release build");
 
         // 1) check flink version
         String checkEnvErrorMessage = "Check flink env failed, please check the flink version of this job";

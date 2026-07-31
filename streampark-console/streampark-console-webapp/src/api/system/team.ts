@@ -17,7 +17,7 @@
 import { defHttp } from '/@/utils/http/axios';
 import { Result } from '/#/axios';
 import { AxiosResponse } from 'axios';
-import { BasicTableParams } from '../model/baseModel';
+import { BasicFetchResult, BasicTableParams } from '../model/baseModel';
 import { TeamListRecord, TeamParam } from './model/teamModel';
 
 enum Api {
@@ -32,7 +32,7 @@ enum Api {
  * @param {BasicTableParams} data
  * @returns {Promise<>}
  */
-export function fetTeamList(data: BasicTableParams): Promise<TeamListRecord[]> {
+export function fetTeamList(data: BasicTableParams): Promise<BasicFetchResult<TeamListRecord>> {
   return defHttp.post({ url: Api.LIST, data });
 }
 /**

@@ -40,6 +40,7 @@
   import VariableReview from './components/VariableReview.vue';
   import { useDrawer } from '/@/components/Drawer';
   import { DeployMode, ResourceFromEnum } from '/@/enums/flinkEnum';
+  import ManagedApplicationForm from './components/ManagedFlink/ManagedApplicationForm.vue';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -47,6 +48,7 @@
   const go = useGo();
 
   const submitLoading = ref<boolean>(false);
+  const managedApplication = ref(false);
   const jars = ref<string[]>([]);
 
   const uploadLoading = ref(false);
@@ -181,6 +183,10 @@
       return;
     }
     const value = await handleGetApplication();
+    if (app.deployMode === DeployMode.MANAGED_APPLICATION) {
+      managedApplication.value = true;
+      return;
+    }
     setFieldsValue(value);
     if (app.resourceFrom == ResourceFromEnum.PROJECT) {
       jars.value = await fetchListJars({
@@ -193,7 +199,13 @@
 </script>
 <template>
   <PageWrapper contentBackground content-class="p-26px app_controller">
-    <BasicForm @register="registerForm" @submit="handleAppUpdate" :schemas="getEditFlinkFormSchema">
+    <ManagedApplicationForm v-if="managedApplication" :app-id="String(route.query.appId)" />
+    <BasicForm
+      v-else
+      @register="registerForm"
+      @submit="handleAppUpdate"
+      :schemas="getEditFlinkFormSchema"
+    >
       <template #podTemplate>
         <PomTemplateTab
           ref="podTemplateRef"

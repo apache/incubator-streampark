@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { ManagedFlinkEnvironment } from './managedFlink.type';
+
 export interface FlinkCluster {
   id: string;
   address: string;
@@ -36,4 +38,5 @@ export interface FlinkCluster {
   exception?: any;
   clusterState: number;
   createTime: string;
+  managedEnvironment?: ManagedFlinkEnvironment;
 }

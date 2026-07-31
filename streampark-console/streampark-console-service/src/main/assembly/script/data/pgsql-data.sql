@@ -87,6 +87,7 @@ insert into "public"."t_menu" values (130300, 130000, 'setting.flinkHome', '/set
 insert into "public"."t_menu" values (130400, 130000, 'setting.flinkCluster', '/setting/flinkCluster', 'setting/FlinkCluster/index', 'menu:view', 'cluster', '0', '1', 4, now(), now());
 insert into "public"."t_menu" values (130500, 130000, 'setting.externalLink', '/setting/externalLink', 'setting/ExternalLink/index', 'menu:view', 'link', '0', '1', 5, now(), now());
 insert into "public"."t_menu" values (130600, 130000, 'setting.yarnQueue', '/setting/yarn-queue', 'setting/yarn-queue/View', 'menu:view', 'bars', '0', '1', 6, now(), now());
+insert into "public"."t_menu" values (130700, 130000, 'setting.cloudAccount.title', '/setting/cloud-account', 'setting/cloud-account/View', 'cloud-account:view', 'cloud', '0', '1', 7, now(), now());
 insert into "public"."t_menu" values (110101, 110100, 'add', null, null, 'user:add', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110102, 110100, 'update', null, null, 'user:update', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (110103, 110100, 'delete', null, null, 'user:delete', null, '1', '1', null, now(), now());
@@ -153,6 +154,11 @@ insert into "public"."t_menu" values (130504, 130500, 'link delete', null, null,
 insert into "public"."t_menu" values (130601, 130600, 'add yarn queue', null, null, 'yarnQueue:create', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130602, 130600, 'edit yarn queue', null, null, 'yarnQueue:update', '', '1', '0', null, now(), now());
 insert into "public"."t_menu" values (130603, 130600, 'delete yarn queue', null, null, 'yarnQueue:delete', '', '1', '0', null, now(), now());
+insert into "public"."t_menu" values (130701, 130700, 'cloud account view', null, null, 'cloud-account:view', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (130702, 130700, 'cloud account create', null, null, 'cloud-account:create', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (130703, 130700, 'cloud account update', null, null, 'cloud-account:update', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (130704, 130700, 'cloud account delete', null, null, 'cloud-account:delete', null, '1', '1', null, now(), now());
+insert into "public"."t_menu" values (130705, 130700, 'cloud account grant', null, null, 'cloud-account:grant', null, '1', '1', null, now(), now());
 
 -- ----------------------------
 -- Records of t_role

@@ -34,13 +34,16 @@ import org.apache.streampark.console.core.entity.FlinkApplication;
 import org.apache.streampark.console.core.entity.FlinkApplicationConfig;
 import org.apache.streampark.console.core.entity.FlinkCluster;
 import org.apache.streampark.console.core.entity.FlinkSql;
+import org.apache.streampark.console.core.entity.ManagedFlinkApplication;
 import org.apache.streampark.console.core.entity.Resource;
 import org.apache.streampark.console.core.enums.CandidateTypeEnum;
 import org.apache.streampark.console.core.enums.ChangeTypeEnum;
 import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
+import org.apache.streampark.console.core.mapper.ManagedFlinkApplicationMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEffectiveService;
 import org.apache.streampark.console.core.service.FlinkSqlService;
@@ -147,6 +150,9 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     @Autowired
     private FlinkK8sWatcherWrapper k8sWatcherWrapper;
 
+    @Autowired
+    private ManagedFlinkApplicationMapper managedFlinkApplicationMapper;
+
     @PostConstruct
     public void resetOptionState() {
         this.lambdaUpdate().set(FlinkApplication::getOptionState, OptionStateEnum.NONE.getValue()).update();
@@ -176,6 +182,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
     @Override
     public boolean mapping(FlinkApplication appParam) {
+        FlinkApplication application = getById(appParam.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "application mapping");
         boolean result = this.lambdaUpdate()
             .eq(FlinkApplication::getId, appParam.getId())
             .set(appParam.getClusterId() != null, FlinkApplication::getClusterId, appParam.getClusterId())
@@ -185,7 +193,6 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
             .set(FlinkApplication::getTracking, 1)
             .update();
 
-        FlinkApplication application = getById(appParam.getId());
         if (application.isKubernetesModeJob()) {
             // todo mark
             k8SFlinkTrackMonitor.doWatching(k8sWatcherWrapper.toTrackId(application));
@@ -199,6 +206,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     public Boolean remove(Long appId) {
 
         FlinkApplication application = getById(appId);
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "application removal");
 
         // 1) remove flink sql
         flinkSqlService.removeByAppId(application.getId());
@@ -271,6 +279,14 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
 
         List<Long> appIds = records.stream().map(FlinkApplication::getId).collect(Collectors.toList());
         Map<Long, PipelineStatusEnum> pipeStates = appBuildPipeService.listAppIdPipelineStatusMap(appIds);
+        Map<Long, ManagedFlinkApplication> managedApplications =
+            appIds.isEmpty()
+                ? java.util.Collections.emptyMap()
+                : managedFlinkApplicationMapper.selectBatchIds(appIds).stream()
+                    .collect(
+                        Collectors.toMap(
+                            ManagedFlinkApplication::getAppId,
+                            managed -> managed));
 
         List<FlinkApplication> newRecords = records.stream()
             .peek(
@@ -291,6 +307,7 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
                     }
                     AppControl appControl = getAppControl(record);
                     record.setAppControl(appControl);
+                    enrichManagedMetadata(record, managedApplications.get(record.getId()));
                 })
             .collect(Collectors.toList());
         page.setRecords(newRecords);
@@ -770,8 +787,33 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
         setAppDurationIfNeeded(application, now);
 
         application.setYarnQueueByHotParams();
+        if (application.getDeployModeEnum() == FlinkDeployMode.MANAGED_APPLICATION) {
+            enrichManagedMetadata(
+                application, managedFlinkApplicationMapper.selectById(application.getId()));
+        }
 
         return application;
+    }
+
+    private void enrichManagedMetadata(
+                                       FlinkApplication application,
+                                       ManagedFlinkApplication managed) {
+        if (managed == null) {
+            return;
+        }
+        application.setManagedProviderType(managed.getProviderType());
+        application.setManagedEnvironmentId(managed.getManagedEnvId());
+        application.setManagedEngineVersion(managed.getEngineVersion());
+        application.setManagedSyncState(managed.getSyncState());
+        application.setManagedLastSyncTime(managed.getLastSyncTime());
+        application.setManagedConsecutiveSyncFailures(managed.getConsecutiveSyncFailures());
+        application.setManagedNextSyncTime(managed.getNextSyncTime());
+        application.setManagedConsoleUrl(managed.getConsoleUrl());
+        application.setExternalApplicationId(managed.getExternalApplicationId());
+        application.setExternalInstanceId(managed.getExternalInstanceId());
+        application.setManagedLocalDefinitionHash(managed.getLocalDefinitionHash());
+        application.setManagedDeployedDefinitionHash(managed.getDeployedDefinitionHash());
+        application.setManagedProviderDefinitionHash(managed.getProviderDefinitionHash());
     }
 
     /**

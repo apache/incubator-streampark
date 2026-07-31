@@ -98,8 +98,9 @@ public class FlinkClusterWatcher {
             flinkClusterService.list(
                 new LambdaQueryWrapper<FlinkCluster>()
                     .eq(FlinkCluster::getClusterState, ClusterState.RUNNING.getState())
-                    // excluding flink clusters on kubernetes
-                    .notIn(FlinkCluster::getDeployMode, FlinkDeployMode.getKubernetesMode()));
+                    .in(
+                        FlinkCluster::getDeployMode,
+                        FlinkDeployMode.getClusterWatcherModes()));
         flinkClusters.forEach(cluster -> WATCHER_CLUSTERS.put(cluster.getId(), cluster));
     }
 

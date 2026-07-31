@@ -40,14 +40,35 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { AlertSetting } from '/@/api/setting/types/alert.type';
 import { fetchAlertSetting } from '/@/api/setting/alert';
+import {
+  fetchAvailableCloudAccounts,
+  fetchManagedProjects,
+  fetchManagedResourcePools,
+} from '/@/api/flink/managedFlink';
+import type {
+  ManagedCloudAccount,
+  ManagedCloudProject,
+  ManagedFlinkEnvironment,
+  ManagedResourcePool,
+} from '/@/api/flink/managedFlink.type';
+import { useUserStore } from '/@/store/modules/user';
 
 export const useClusterSetting = () => {
   const { createMessage } = useMessage();
   const { t } = useI18n();
+  const userStore = useUserStore();
 
   const submitLoading = ref(false);
   const flinkEnvs = ref<any[]>([]);
   const alerts = ref<AlertSetting[]>([]);
+  const managedAccounts = ref<ManagedCloudAccount[]>([]);
+  const managedProjects = ref<ManagedCloudProject[]>([]);
+  const managedResourcePools = ref<ManagedResourcePool[]>([]);
+  const accountsLoading = ref(false);
+  const projectsLoading = ref(false);
+  const resourcePoolsLoading = ref(false);
+  let projectRequestSequence = 0;
+  let resourcePoolRequestSequence = 0;
   const historyRecord = reactive<{
     k8sNamespace: string[];
     k8sSessionClusterId: string[];
@@ -101,6 +122,82 @@ export const useClusterSetting = () => {
     );
   }
 
+  function isManagedMode(value: Recordable): boolean {
+    return value.deployMode == DeployMode.MANAGED_APPLICATION;
+  }
+
+  function requireTeamId(): string {
+    const teamId = userStore.getTeamId;
+    if (!teamId) {
+      throw new Error('The active Team is required.');
+    }
+    return teamId;
+  }
+
+  async function loadManagedAccounts() {
+    accountsLoading.value = true;
+    try {
+      managedAccounts.value = await fetchAvailableCloudAccounts(requireTeamId());
+    } finally {
+      accountsLoading.value = false;
+    }
+  }
+
+  async function loadManagedProjects(cloudAccountId?: string) {
+    const sequence = ++projectRequestSequence;
+    ++resourcePoolRequestSequence;
+    managedProjects.value = [];
+    managedResourcePools.value = [];
+    if (!cloudAccountId) {
+      projectsLoading.value = false;
+      resourcePoolsLoading.value = false;
+      return;
+    }
+    projectsLoading.value = true;
+    try {
+      const result = await fetchManagedProjects({
+        teamId: requireTeamId(),
+        cloudAccountId,
+      });
+      if (sequence === projectRequestSequence) {
+        managedProjects.value = result;
+      }
+    } finally {
+      if (sequence === projectRequestSequence) {
+        projectsLoading.value = false;
+      }
+    }
+  }
+
+  async function loadManagedResourcePools(cloudAccountId?: string, projectId?: string) {
+    const sequence = ++resourcePoolRequestSequence;
+    managedResourcePools.value = [];
+    if (!cloudAccountId || !projectId) {
+      resourcePoolsLoading.value = false;
+      return;
+    }
+    resourcePoolsLoading.value = true;
+    try {
+      const result = await fetchManagedResourcePools({
+        teamId: requireTeamId(),
+        cloudAccountId,
+        projectId,
+      });
+      if (sequence === resourcePoolRequestSequence) {
+        managedResourcePools.value = result;
+      }
+    } finally {
+      if (sequence === resourcePoolRequestSequence) {
+        resourcePoolsLoading.value = false;
+      }
+    }
+  }
+
+  async function prepareManagedEnvironment(environment: ManagedFlinkEnvironment) {
+    await loadManagedProjects(environment.cloudAccountId);
+    await loadManagedResourcePools(environment.cloudAccountId, environment.projectId);
+  }
+
   const getClusterSchema = computed((): FormSchema[] => {
     return [
       {
@@ -125,6 +222,10 @@ export const useClusterSetting = () => {
             },
             { label: 'yarn session', value: DeployMode.YARN_SESSION },
             { label: 'kubernetes session', value: DeployMode.KUBERNETES_SESSION },
+            {
+              label: t('setting.flinkCluster.managed.deployMode'),
+              value: DeployMode.MANAGED_APPLICATION,
+            },
           ],
         },
         dynamicRules: () => {
@@ -140,7 +241,105 @@ export const useClusterSetting = () => {
           options: unref(flinkEnvs),
           fieldNames: { label: 'flinkName', value: 'id', options: 'options' },
         },
+        ifShow: ({ values }) => !isManagedMode(values),
         rules: [{ required: true, message: t('setting.flinkCluster.required.versionId') }],
+      },
+      {
+        field: 'cloudAccountId',
+        label: t('setting.flinkCluster.managed.cloudAccount'),
+        component: 'Select',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: ({ formModel }) => ({
+          showSearch: true,
+          allowClear: true,
+          loading: unref(accountsLoading),
+          options: unref(managedAccounts).map((account) => ({
+            label: `${account.accountName} (${account.region})`,
+            value: account.id,
+          })),
+          onChange: async (cloudAccountId?: string) => {
+            formModel.region =
+              unref(managedAccounts).find((account) => account.id === cloudAccountId)?.region || '';
+            formModel.projectId = undefined;
+            formModel.resourcePoolId = undefined;
+            await loadManagedProjects(cloudAccountId);
+          },
+        }),
+        rules: [
+          {
+            required: true,
+            message: t('setting.flinkCluster.managed.required.cloudAccount'),
+          },
+        ],
+      },
+      {
+        field: 'region',
+        label: t('setting.flinkCluster.managed.region'),
+        component: 'Input',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: { disabled: true },
+      },
+      {
+        field: 'projectId',
+        label: t('setting.flinkCluster.managed.project'),
+        component: 'Select',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: ({ formModel }) => ({
+          showSearch: true,
+          allowClear: true,
+          loading: unref(projectsLoading),
+          disabled: !formModel.cloudAccountId,
+          options: unref(managedProjects).map((project) => ({
+            label: project.name,
+            value: project.id,
+          })),
+          onChange: async (projectId?: string) => {
+            formModel.resourcePoolId = undefined;
+            await loadManagedResourcePools(formModel.cloudAccountId, projectId);
+          },
+        }),
+        rules: [{ required: true, message: t('setting.flinkCluster.managed.required.project') }],
+      },
+      {
+        field: 'resourcePoolId',
+        label: t('setting.flinkCluster.managed.resourcePool'),
+        component: 'Select',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: ({ formModel }) => ({
+          showSearch: true,
+          allowClear: true,
+          loading: unref(resourcePoolsLoading),
+          disabled: !formModel.projectId,
+          options: unref(managedResourcePools).map((pool) => ({
+            label: pool.name || pool.fullName,
+            value: pool.id,
+          })),
+        }),
+        rules: [
+          {
+            required: true,
+            message: t('setting.flinkCluster.managed.required.resourcePool'),
+          },
+        ],
+      },
+      {
+        field: 'draftDirectoryId',
+        label: t('setting.flinkCluster.managed.draftDirectoryId'),
+        component: 'Input',
+        ifShow: ({ values }) => isManagedMode(values),
+        componentProps: {
+          placeholder: t('setting.flinkCluster.managed.placeholder.draftDirectoryId'),
+        },
+        rules: [
+          {
+            required: true,
+            message: t('setting.flinkCluster.managed.required.draftDirectoryId'),
+          },
+          {
+            pattern: /^[1-9]\d*$/,
+            message: t('setting.flinkCluster.managed.required.draftDirectoryId'),
+          },
+        ],
       },
       {
         field: 'address',
@@ -379,12 +578,30 @@ export const useClusterSetting = () => {
           address: values.address,
         });
         return params;
+      case DeployMode.MANAGED_APPLICATION: {
+        const project = unref(managedProjects).find((item) => item.id === values.projectId);
+        const resourcePool = unref(managedResourcePools).find(
+          (item) => item.id === values.resourcePoolId,
+        );
+        return {
+          teamId: requireTeamId(),
+          clusterName: values.clusterName,
+          description: values.description,
+          cloudAccountId: values.cloudAccountId,
+          projectId: values.projectId,
+          projectName: project?.name,
+          resourcePoolId: values.resourcePoolId,
+          resourcePoolName: resourcePool?.name || resourcePool?.fullName,
+          draftDirectoryId: values.draftDirectoryId,
+        };
+      }
       default:
         createMessage.error('error deployMode.');
         return {};
     }
   }
   onMounted(() => {
+    loadManagedAccounts();
     fetchListFlinkEnv().then((res) => {
       flinkEnvs.value = res;
     });
@@ -403,5 +620,11 @@ export const useClusterSetting = () => {
       historyRecord.flinkImage = res;
     });
   });
-  return { getClusterSchema, handleSubmitParams, changeLoading, getLoading };
+  return {
+    getClusterSchema,
+    handleSubmitParams,
+    prepareManagedEnvironment,
+    changeLoading,
+    getLoading,
+  };
 };

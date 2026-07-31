@@ -132,6 +132,19 @@ export interface AppListRecord {
   flinkRestUrl?: any;
   buildStatus: number;
   appControl: AppControl;
+  managedProviderType?: string;
+  managedEnvironmentId?: string;
+  managedEngineVersion?: string;
+  managedSyncState?: string;
+  managedLastSyncTime?: string;
+  managedConsecutiveSyncFailures?: number;
+  managedNextSyncTime?: string;
+  managedConsoleUrl?: string;
+  externalApplicationId?: string;
+  externalInstanceId?: string;
+  managedLocalDefinitionHash?: string;
+  managedDeployedDefinitionHash?: string;
+  managedProviderDefinitionHash?: string;
   fsOperator: any;
   workspace: any;
   k8sPodTemplates: {
@@ -145,6 +158,7 @@ interface AppControl {
   allowStart: boolean;
   allowStop: boolean;
   allowBuild: boolean;
+  allowView?: boolean;
 }
 /* cancel params */
 export interface CancelParam {

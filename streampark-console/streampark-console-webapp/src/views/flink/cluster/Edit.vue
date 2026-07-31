@@ -33,15 +33,33 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { fetchAlertSetting } from '/@/api/setting/alert';
   import { AlertSetting } from '/@/api/setting/types/alert.type';
+  import { DeployMode } from '/@/enums/flinkEnum';
+  import {
+    fetchManagedEnvironment,
+    fetchUpdateManagedEnvironment,
+  } from '/@/api/flink/managedFlink';
+  import type {
+    ManagedFlinkEnvironment,
+    ManagedFlinkEnvironmentForm,
+  } from '/@/api/flink/managedFlink.type';
+  import { useUserStore } from '/@/store/modules/user';
 
   const go = useGo();
   const route = useRoute();
   const { t } = useI18n();
   const { Swal } = useMessage();
+  const userStore = useUserStore();
   const { handleResetApplication, defaultOptions } = useEdit();
   const cluster = reactive<Recordable>({});
   const alerts = ref<AlertSetting[]>([]);
-  const { getLoading, changeLoading, getClusterSchema, handleSubmitParams } = useClusterSetting();
+  const {
+    getLoading,
+    changeLoading,
+    getClusterSchema,
+    handleSubmitParams,
+    prepareManagedEnvironment,
+  } = useClusterSetting();
+  const managedEnvironment = ref<ManagedFlinkEnvironment>();
 
   const [registerForm, { submit, setFieldsValue }] = useForm({
     name: 'flink_cluster',
@@ -60,6 +78,27 @@
       const params = handleSubmitParams(values);
 
       if (Object.keys(params).length > 0) {
+        if (values.deployMode === DeployMode.MANAGED_APPLICATION) {
+          const version = managedEnvironment.value?.version;
+          if (version === undefined) {
+            throw new Error(t('setting.flinkCluster.managed.metadataUnavailable'));
+          }
+          await fetchUpdateManagedEnvironment({
+            ...(params as ManagedFlinkEnvironmentForm),
+            clusterId: cluster.id,
+            version,
+          });
+          await Swal.fire({
+            icon: 'success',
+            title: values.clusterName.concat(
+              t('setting.flinkCluster.operateMessage.updateFlinkClusterSuccessful'),
+            ),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          go('/flink/cluster');
+          return;
+        }
         Object.assign(params, {
           id: cluster.id,
         });
@@ -90,6 +129,15 @@
   async function getClusterInfo() {
     const res = await fetchGetCluster({ id: route?.query?.clusterId });
     Object.assign(cluster, res);
+    if (res.deployMode === DeployMode.MANAGED_APPLICATION) {
+      const teamId = userStore.getTeamId;
+      if (!teamId) throw new Error('The active Team is required.');
+      managedEnvironment.value = await fetchManagedEnvironment({
+        teamId,
+        clusterId: res.id,
+      });
+      await prepareManagedEnvironment(managedEnvironment.value);
+    }
     Object.assign(defaultOptions, JSON.parse(res.options || '{}'));
     handleReset();
   }
@@ -116,6 +164,11 @@
         serviceAccount: cluster.serviceAccount,
         k8sConf: cluster.k8sConf,
         k8sNamespace: cluster.k8sNamespace,
+        cloudAccountId: managedEnvironment.value?.cloudAccountId,
+        region: managedEnvironment.value?.region,
+        projectId: managedEnvironment.value?.projectId,
+        resourcePoolId: managedEnvironment.value?.resourcePoolId,
+        draftDirectoryId: managedEnvironment.value?.draftDirectoryId,
         ...resetParams,
       });
     });

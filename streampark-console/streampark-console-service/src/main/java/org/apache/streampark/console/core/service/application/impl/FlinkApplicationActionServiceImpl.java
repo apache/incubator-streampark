@@ -53,6 +53,7 @@ import org.apache.streampark.console.core.enums.FlinkAppStateEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
 import org.apache.streampark.console.core.enums.ReleaseStateEnum;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.FlinkApplicationMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -195,6 +196,7 @@ public class FlinkApplicationActionServiceImpl
         FlinkApplication application = getById(appId);
         ApiAlertException.throwIfNull(
             application, String.format("The application id=%s not found, revoke failed.", appId));
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "revoke");
 
         // 1) delete files that have been published to workspace
         application.getFsOperator().delete(application.getAppHome());
@@ -225,6 +227,9 @@ public class FlinkApplicationActionServiceImpl
     @Override
     public void abort(Long id) {
         FlinkApplication application = this.baseMapper.selectApp(id);
+        if (application != null) {
+            ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "abort");
+        }
         CompletableFuture<SubmitResponse> startFuture = startFutureMap.remove(id);
         CompletableFuture<CancelResponse> cancelFuture = cancelFutureMap.remove(id);
         if (application.isKubernetesModeJob()) {
@@ -244,8 +249,9 @@ public class FlinkApplicationActionServiceImpl
 
     @Override
     public void cancel(FlinkApplication appParam) throws Exception {
-        FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
         FlinkApplication application = getById(appParam.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "cancel");
+        FlinkAppHttpWatcher.setOptionState(appParam.getId(), OptionStateEnum.CANCELLING);
         application.setState(FlinkAppStateEnum.CANCELLING.getValue());
 
         ApplicationLog applicationLog = new ApplicationLog();
@@ -384,6 +390,7 @@ public class FlinkApplicationActionServiceImpl
         // 1) check application
         final FlinkApplication application = getById(appParam.getId());
         AssertUtils.notNull(application);
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "start");
         ApiAlertException.throwIfTrue(
             !application.isCanBeStart(), "[StreamPark] The application cannot be started repeatedly.");
 

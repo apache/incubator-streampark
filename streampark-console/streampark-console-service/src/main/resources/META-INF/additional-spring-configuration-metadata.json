@@ -1,6 +1,149 @@
 {
   "properties": [
     {
+      "name": "streampark.managed-flink.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Whether managed Flink features are globally enabled."
+    },
+    {
+      "name": "streampark.managed-flink.credentials.master-keys",
+      "type": "java.lang.String",
+      "description": "Comma-separated version=Base64(AES key) credential master keys injected by the deployment environment. Never store key values in source control."
+    },
+    {
+      "name": "streampark.managed-flink.credentials.active-key-version",
+      "type": "java.lang.Integer",
+      "defaultValue": 0,
+      "description": "Active credential master key version used for new encryption. Zero keeps credential writes unavailable."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Whether the Volcengine managed Flink provider is enabled. The global managed Flink flag must also be enabled."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.endpoint",
+      "type": "java.lang.String",
+      "defaultValue": "https://open.volcengineapi.com",
+      "description": "Official Volcengine OpenAPI endpoint. Only the official HTTPS host is accepted outside local tests."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.connect-timeout-ms",
+      "type": "java.lang.Integer",
+      "defaultValue": 3000,
+      "description": "Volcengine OpenAPI TCP/TLS connection timeout in milliseconds."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.request-timeout-ms",
+      "type": "java.lang.Integer",
+      "defaultValue": 10000,
+      "description": "Volcengine OpenAPI read request timeout in milliseconds."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.max-read-retries",
+      "type": "java.lang.Integer",
+      "defaultValue": 2,
+      "description": "Maximum retries for retryable read-only Volcengine OpenAPI requests."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.initial-backoff-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 200,
+      "description": "Initial retry backoff for read-only Volcengine OpenAPI requests."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.max-backoff-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 2000,
+      "description": "Maximum retry backoff for read-only Volcengine OpenAPI requests."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.max-concurrent-requests-per-account",
+      "type": "java.lang.Integer",
+      "defaultValue": 4,
+      "description": "Maximum concurrent Volcengine OpenAPI requests for one cloud account."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.min-request-interval-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 50,
+      "description": "Minimum spacing between Volcengine OpenAPI requests for one cloud account."
+    },
+    {
+      "name": "streampark.managed-flink.providers.volcengine.client.capability-ttl-minutes",
+      "type": "java.lang.Long",
+      "defaultValue": 10,
+      "description": "TTL of the verified built-in Volcengine Flink capability metadata."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Whether database-leased managed Flink job synchronization is enabled."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.scheduler-delay-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 1000,
+      "description": "Delay between managed Flink synchronization batch scans."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.scheduler-initial-delay-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 5000,
+      "description": "Initial delay before managed Flink synchronization starts."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.batch-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 20,
+      "description": "Maximum managed Flink applications considered by one synchronization batch."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.lease-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 30,
+      "description": "Database lease duration for one managed Flink status lookup."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.transition-interval-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 5,
+      "description": "Polling interval for managed Flink jobs in a lifecycle transition."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.running-interval-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 15,
+      "description": "Polling interval for running managed Flink jobs."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.observation-interval-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 30,
+      "description": "Polling interval for failed, unknown, or missing managed Flink jobs."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.lost-failure-threshold",
+      "type": "java.lang.Integer",
+      "defaultValue": 3,
+      "description": "Consecutive lookup failures before a managed Flink application becomes LOST."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.max-backoff-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 60,
+      "description": "Maximum managed Flink lookup failure backoff."
+    },
+    {
+      "name": "streampark.managed-flink.watcher.jitter-percent",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "Maximum positive jitter percentage added to managed Flink polling intervals."
+    },
+    {
       "name": "streampark.shiro.anonUrl",
       "type": "java.lang.String",
       "description": "Description for streampark.shiro.anonUrl."

@@ -98,6 +98,16 @@
             <artifactId>guava</artifactId>
         </dependency>
 
+        <!--
+          Keep the managed Gson artifact ahead of StreamPark SQL client fat JARs on the runtime
+          classpath. Those compatibility JARs contain legacy Gson classes, while the Volcengine SDK
+          and Spring Boot require the managed Gson API.
+        -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
         <!--test-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -419,6 +429,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.volcengine</groupId>
+            <artifactId>volcengine-java-sdk-flink20250101</artifactId>
         </dependency>
 
         <!--Test dependencies start.-->

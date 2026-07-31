@@ -19,7 +19,7 @@
   import { nextTick, ref, onUnmounted, onMounted } from 'vue';
   import { useAppTableAction } from './hooks/useAppTableAction';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
+  import { DeployMode, JobTypeEnum, OptionStateEnum, ReleaseStateEnum } from '/@/enums/flinkEnum';
   import { useDebounceFn, useTimeoutFn } from '@vueuse/core';
   import {
     Form,
@@ -47,6 +47,8 @@
   import LogModal from './components/AppView/LogModal.vue';
   import BuildDrawer from './components/AppView/BuildDrawer.vue';
   import AppDashboard from './components/AppView/AppDashboard.vue';
+  import ManagedFlinkReleaseModal from './components/ManagedFlink/ReleaseModal.vue';
+  import ManagedFlinkLifecycleModal from './components/ManagedFlink/LifecycleModal.vue';
   import State, {
     buildStatusMap,
     optionStateMap,
@@ -91,6 +93,8 @@
   const [registerStopModal, { openModal: openStopModal }] = useModal();
   const [registerLogModal, { openModal: openLogModal }] = useModal();
   const [registerBuildDrawer, { openDrawer: openBuildDrawer }] = useDrawer();
+  const [registerManagedReleaseModal, { openModal: openManagedReleaseModal }] = useModal();
+  const [registerManagedLifecycleModal, { openModal: openManagedLifecycleModal }] = useModal();
 
   const [registerTable, { reload, getLoading, setPagination }] = useTable({
     rowKey: 'id',
@@ -206,6 +210,8 @@
     openSavepoint,
     openLogModal,
     openBuildDrawer,
+    openManagedReleaseModal,
+    openManagedLifecycleModal,
     handlePageDataReload,
     optionApps,
   );
@@ -222,6 +228,36 @@
     value: any;
   }) {
     optionApps[data.type].set(data.key, data.value);
+  }
+
+  function handleManagedOperationChange(operation: Recordable) {
+    const optionType = {
+      START: 'starting',
+      RESTART: 'starting',
+      STOP: 'stopping',
+      SNAPSHOT: 'savepointing',
+    }[operation.lifecycleAction || operation.type];
+    handleOptionApp({
+      type: optionType || 'release',
+      key: operation.appId,
+      value: new Date().getTime(),
+    });
+  }
+
+  function managedSyncColor(state?: string) {
+    return (
+      {
+        HEALTHY: 'success',
+        DEGRADED: 'warning',
+        DRIFTED: 'error',
+        NOT_FOUND: 'error',
+        PENDING: 'processing',
+      }[state || ''] || 'default'
+    );
+  }
+
+  function managedSyncLabel(state?: string) {
+    return t(`flink.app.managed.syncStates.${state || 'UNKNOWN'}`);
   }
 
   function handlePageDataReload(polling = false) {
@@ -331,6 +367,22 @@
                     />
                   </Form.Item>
                 </Col>
+                <Col :span="4">
+                  <Form.Item>
+                    <Select
+                      :placeholder="t('flink.app.deployMode')"
+                      allow-clear
+                      v-model:value="searchRef.deployMode"
+                      @change="() => handleResetReload()"
+                      :options="[
+                        {
+                          label: t('flink.app.managed.managedApplications'),
+                          value: DeployMode.MANAGED_APPLICATION,
+                        },
+                      ]"
+                    />
+                  </Form.Item>
+                </Col>
               </Row>
             </Form>
             <div v-auth="'app:create'">
@@ -349,6 +401,12 @@
           <template v-if="column.dataIndex === 'jobName'">
             <span class="app_type app_jar" v-if="record['jobType'] === JobTypeEnum.JAR"> JAR </span>
             <span class="app_type app_sql" v-if="record['jobType'] === JobTypeEnum.SQL"> SQL </span>
+            <Tag v-if="record.deployMode === DeployMode.MANAGED_APPLICATION" color="purple">
+              {{ t('flink.app.managed.managedTag') }}
+              <template v-if="record.managedProviderType">
+                · {{ record.managedProviderType }}
+              </template>
+            </Tag>
             <span class="link cursor-pointer" @click="handleJobView(record)">
               <Popover :title="t('common.detailText')">
                 <template #content>
@@ -387,6 +445,12 @@
               />
             </template>
           </template>
+          <template v-if="column.dataIndex === 'flinkVersion'">
+            <span v-if="record.deployMode === DeployMode.MANAGED_APPLICATION">
+              {{ record.managedEngineVersion || '—' }}
+            </span>
+            <span v-else>{{ record.flinkVersion || '—' }}</span>
+          </template>
           <template v-if="column.dataIndex === 'tags'">
             <Tooltip v-if="record.tags" :title="record.tags">
               <span
@@ -402,7 +466,22 @@
             <State option="task" :data="record" />
           </template>
           <template v-if="column.dataIndex === 'state'">
-            <State option="state" :data="record" :maxTitle="titleLenRef.maxState" />
+            <div>
+              <State option="state" :data="record" :maxTitle="titleLenRef.maxState" />
+              <Tooltip
+                v-if="record.deployMode === DeployMode.MANAGED_APPLICATION"
+                :title="
+                  t('flink.app.managed.syncTooltip', {
+                    time: record.managedLastSyncTime || '—',
+                    failures: record.managedConsecutiveSyncFailures ?? 0,
+                  })
+                "
+              >
+                <Tag class="mt-4px" :color="managedSyncColor(record.managedSyncState)">
+                  {{ managedSyncLabel(record.managedSyncState) }}
+                </Tag>
+              </Tooltip>
+            </div>
           </template>
           <template v-if="column.dataIndex === 'release'">
             <State
@@ -430,6 +509,14 @@
     <StopApplicationModal @register="registerStopModal" @update-option="handleOptionApp" />
     <LogModal @register="registerLogModal" />
     <BuildDrawer @register="registerBuildDrawer" />
+    <ManagedFlinkReleaseModal
+      @register="registerManagedReleaseModal"
+      @operation-change="handleManagedOperationChange"
+    />
+    <ManagedFlinkLifecycleModal
+      @register="registerManagedLifecycleModal"
+      @operation-change="handleManagedOperationChange"
+    />
   </PageWrapper>
 </template>
 <style lang="less">

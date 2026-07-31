@@ -36,6 +36,7 @@ import org.apache.streampark.console.core.enums.CheckPointTypeEnum;
 import org.apache.streampark.console.core.enums.EngineTypeEnum;
 import org.apache.streampark.console.core.enums.OperationEnum;
 import org.apache.streampark.console.core.enums.OptionStateEnum;
+import org.apache.streampark.console.core.managed.service.ManagedFlinkRoutingGuard;
 import org.apache.streampark.console.core.mapper.FlinkSavepointMapper;
 import org.apache.streampark.console.core.service.FlinkClusterService;
 import org.apache.streampark.console.core.service.FlinkEnvService;
@@ -137,6 +138,8 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     @Override
     public String getSavePointPath(FlinkApplication appParam) throws Exception {
         FlinkApplication application = applicationManageService.getById(appParam.getId());
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(
+            application.getDeployModeEnum(), "savepoint path resolution");
 
         // 1) properties have the highest priority, read the properties are set: -Dstate.savepoints.dir
         String savepointPath = getSavepointFromDynamicProps(application.getDynamicProperties());
@@ -164,6 +167,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
     public void trigger(Long appId, @Nullable String savepointPath, @Nullable Boolean nativeFormat) {
         log.info("Start to trigger savepoint for app {}", appId);
         FlinkApplication application = applicationManageService.getById(appId);
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(application.getDeployModeEnum(), "savepoint trigger");
         ApplicationLog applicationLog = getApplicationLog(application);
         FlinkAppHttpWatcher.addSavepoint(application.getId());
 
@@ -199,6 +203,8 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
 
     @Override
     public Boolean remove(Long id, FlinkApplication appParam) throws InternalException {
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(
+            appParam.getDeployModeEnum(), "savepoint file removal");
         FlinkSavepoint savepoint = getById(id);
         try {
             if (StringUtils.isNotBlank(savepoint.getPath())) {
@@ -221,6 +227,8 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
 
     @Override
     public void remove(FlinkApplication appParam) {
+        ManagedFlinkRoutingGuard.rejectLegacyRoute(
+            appParam.getDeployModeEnum(), "savepoint workspace removal");
         Long appId = appParam.getId();
         this.lambdaUpdate().eq(FlinkSavepoint::getAppId, appId).remove();
         try {

@@ -24,6 +24,8 @@ export enum DeployMode {
   KUBERNETES_SESSION = 5,
   /** kubernetes application */
   KUBERNETES_APPLICATION = 6,
+  /** provider-managed application */
+  MANAGED_APPLICATION = 7,
 }
 
 export enum ReleaseStateEnum {

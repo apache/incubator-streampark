@@ -22,6 +22,9 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useGo } from '/@/hooks/web/usePage';
   import { useClusterSetting } from './useClusterSetting';
+  import { DeployMode } from '/@/enums/flinkEnum';
+  import { fetchCreateManagedEnvironment } from '/@/api/flink/managedFlink';
+  import type { ManagedFlinkEnvironmentForm } from '/@/api/flink/managedFlink.type';
 
   const go = useGo();
   const { t } = useI18n();
@@ -44,6 +47,19 @@
       changeLoading(true);
       const params = handleSubmitParams(values);
       if (Object.keys(params).length > 0) {
+        if (values.deployMode === DeployMode.MANAGED_APPLICATION) {
+          await fetchCreateManagedEnvironment(params as ManagedFlinkEnvironmentForm);
+          await Swal.fire({
+            icon: 'success',
+            title: values.clusterName.concat(
+              t('setting.flinkCluster.operateMessage.createFlinkSessionClusterSuccessful'),
+            ),
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          go('/flink/cluster');
+          return;
+        }
         const res = await fetchCheckCluster(params);
         const status = parseInt(res.status);
         if (status === 0) {

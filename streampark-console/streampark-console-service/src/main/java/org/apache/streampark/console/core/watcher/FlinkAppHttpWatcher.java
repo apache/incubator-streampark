@@ -179,7 +179,7 @@ public class FlinkAppHttpWatcher {
         List<FlinkApplication> applications = applicationManageService.list(
             new LambdaQueryWrapper<FlinkApplication>()
                 .eq(FlinkApplication::getTracking, 1)
-                .notIn(FlinkApplication::getDeployMode, FlinkDeployMode.getKubernetesMode()));
+                .in(FlinkApplication::getDeployMode, FlinkDeployMode.getHttpWatcherModes()));
         applications.forEach(app -> {
             Long appId = app.getId();
             WATCHING_APPS.put(appId, app);
