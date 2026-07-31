@@ -370,10 +370,16 @@ public class FlinkApplicationInfoServiceImpl extends ServiceImpl<FlinkApplicatio
             "Job deployMode must be kubernetes-session|kubernetes-application.");
 
         CompletableFuture<String> future = CompletableFuture.supplyAsync(
-            () -> KubernetesDeploymentHelper.watchDeploymentLog(
-                application.getK8sNamespace(),
-                application.getJobName(),
-                application.getJobId()));
+            () -> {
+                try {
+                    return KubernetesDeploymentHelper.watchDeploymentLog(
+                        application.getK8sNamespace(),
+                        application.getJobName(),
+                        application.getJobId());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
         return future
             .exceptionally(

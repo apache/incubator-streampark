@@ -47,8 +47,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.concurrent.Executor;
 
-import scala.Enumeration;
-
 import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.fromK8sFlinkJobState;
 import static org.apache.streampark.console.core.enums.FlinkAppStateEnum.Bridge.toK8sFlinkJobState;
 
@@ -161,9 +159,9 @@ public class FlinkK8sChangeEventListener {
     }
 
     private void setByJobStatusCV(FlinkApplication app, JobStatusCV jobStatus) {
-        // infer the final flink job state
-        Enumeration.Value state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
-            jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
+        FlinkJobState state =
+            FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(
+                jobStatus.jobState(), toK8sFlinkJobState(app.getStateEnum()));
 
         // corrective start-time / end-time / duration
         long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;

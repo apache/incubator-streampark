@@ -56,8 +56,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import scala.collection.JavaConverters;
-
 /** Building pipeline for flink kubernetes-native application mode */
 public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
 
@@ -130,10 +128,8 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
                     2,
                     () -> {
                         Map<String, String> podTemplateFiles =
-                            JavaConverters.mapAsJavaMap(
-                                PodTemplateTool.preparePodTemplateFiles(
-                                    buildWorkspace, podTemplate)
-                                    .tmplFiles());
+                            PodTemplateTool.preparePodTemplateFiles(buildWorkspace, podTemplate)
+                                .tmplFiles();
                         logInfo(
                             "Export flink podTemplates: "
                                 + String.join(",", podTemplateFiles.values()));
