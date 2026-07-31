@@ -20,4 +20,3 @@ docker-compose up -d
 
 http://localhost:10000
 
-#### [more detail](https://streampark.apache.org/docs/get-started/docker-deployment)
