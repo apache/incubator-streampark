@@ -35,31 +35,48 @@ public class IngressStrategyV1beta1 implements IngressStrategy {
     public String getIngressUrl(String nameSpace, String clusterId, ClusterClient<?> clusterClient) {
         return AutoCloseUtils.using(
             new DefaultKubernetesClient(),
-            client -> {
-                try {
-                    Ingress ingress = null;
-                    try {
-                        ingress =
-                            client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
-                    } catch (Exception ignored) {
-                        // fall through
-                    }
-                    if (ingress != null
-                        && ingress.getSpec() != null
-                        && !ingress.getSpec().getRules().isEmpty()
-                        && ingress.getSpec().getRules().get(0).getHttp() != null
-                        && !ingress.getSpec().getRules().get(0).getHttp().getPaths().isEmpty()) {
-                        String host = ingress.getSpec().getRules().get(0).getHost();
-                        String path = ingress.getSpec().getRules().get(0).getHttp().getPaths().get(0).getPath();
-                        if (host != null && path != null) {
-                            return "http://" + host + path;
-                        }
-                    }
-                    return clusterClient.getWebInterfaceURL();
-                } catch (Exception e) {
-                    throw new RuntimeException("[StreamPark] get ingressUrlAddress error: " + e, e);
-                }
-            });
+            client -> resolveIngressUrl(client, nameSpace, clusterId, clusterClient));
+    }
+
+    private String resolveIngressUrl(
+                                     DefaultKubernetesClient client,
+                                     String nameSpace,
+                                     String clusterId,
+                                     ClusterClient<?> clusterClient) {
+        try {
+            Ingress ingress = loadIngress(client, nameSpace, clusterId);
+            String ingressUrl = buildIngressUrl(ingress);
+            if (ingressUrl != null) {
+                return ingressUrl;
+            }
+            return clusterClient.getWebInterfaceURL();
+        } catch (Exception e) {
+            throw new RuntimeException("[StreamPark] get ingressUrlAddress error: " + e, e);
+        }
+    }
+
+    private Ingress loadIngress(DefaultKubernetesClient client, String nameSpace, String clusterId) {
+        try {
+            return client.network().v1beta1().ingresses().inNamespace(nameSpace).withName(clusterId).get();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private String buildIngressUrl(Ingress ingress) {
+        if (ingress == null
+            || ingress.getSpec() == null
+            || ingress.getSpec().getRules().isEmpty()
+            || ingress.getSpec().getRules().get(0).getHttp() == null
+            || ingress.getSpec().getRules().get(0).getHttp().getPaths().isEmpty()) {
+            return null;
+        }
+        String host = ingress.getSpec().getRules().get(0).getHost();
+        String path = ingress.getSpec().getRules().get(0).getHttp().getPaths().get(0).getPath();
+        if (host == null || path == null) {
+            return null;
+        }
+        return "http://" + host + path;
     }
 
     @Override

@@ -99,7 +99,7 @@ public final class PodTemplateTool {
                                       PodTemplateType podTmpl,
                                       Map<String, String> podTempleMap) throws IOException {
         if (StringUtils.isNotBlank(tmplContent)) {
-            String outputPath = buildWorkspace + "/" + podTmpl.fileName();
+            String outputPath = new File(buildWorkspace, podTmpl.fileName()).getPath();
             File outputFile = new File(outputPath);
             FileUtils.write(outputFile, tmplContent, "UTF-8");
             podTempleMap.put(podTmpl.key(), outputPath);

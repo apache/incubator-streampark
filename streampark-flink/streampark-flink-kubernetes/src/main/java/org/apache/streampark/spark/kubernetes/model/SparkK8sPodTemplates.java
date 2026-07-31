@@ -27,10 +27,12 @@ import lombok.Builder;
 @AllArgsConstructor
 public class SparkK8sPodTemplates {
 
+    private static final String EMPTY_TEMPLATE = "";
+
     @Builder.Default
-    private final String driverPodTemplate = "";
+    private final String driverPodTemplate = EMPTY_TEMPLATE;
     @Builder.Default
-    private final String executorPodTemplate = "";
+    private final String executorPodTemplate = EMPTY_TEMPLATE;
 
     public String driverPodTemplate() {
         return driverPodTemplate;

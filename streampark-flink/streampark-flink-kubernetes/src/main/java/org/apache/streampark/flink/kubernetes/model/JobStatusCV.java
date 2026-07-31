@@ -34,18 +34,24 @@ import lombok.Builder;
 @AllArgsConstructor
 public class JobStatusCV {
 
+    private static final String DEFAULT_JOB_NAME = "";
+    private static final Long DEFAULT_JOB_START_TIME = -1L;
+    private static final Long DEFAULT_JOB_END_TIME = -1L;
+    private static final Long DEFAULT_DURATION = 0L;
+    private static final Integer DEFAULT_TASK_TOTAL = 0;
+
     private final FlinkJobState jobState;
     private final String jobId;
     @Builder.Default
-    private final String jobName = "";
+    private final String jobName = DEFAULT_JOB_NAME;
     @Builder.Default
-    private final Long jobStartTime = -1L;
+    private final Long jobStartTime = DEFAULT_JOB_START_TIME;
     @Builder.Default
-    private final Long jobEndTime = -1L;
+    private final Long jobEndTime = DEFAULT_JOB_END_TIME;
     @Builder.Default
-    private final Long duration = 0L;
+    private final Long duration = DEFAULT_DURATION;
     @Builder.Default
-    private final Integer taskTotal = 0;
+    private final Integer taskTotal = DEFAULT_TASK_TOTAL;
     private final Long pollEmitTime;
     private final Long pollAckTime;
 

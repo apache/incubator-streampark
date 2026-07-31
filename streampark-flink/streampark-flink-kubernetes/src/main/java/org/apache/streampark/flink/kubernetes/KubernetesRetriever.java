@@ -45,11 +45,11 @@ public final class KubernetesRetriever extends LoggerSupport {
 
     private static final KubernetesRetriever INSTANCE = new KubernetesRetriever();
 
-    // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
+    /** See {@link org.apache.flink.client.cli.ClientOptions#CLIENT_TIMEOUT}. */
     public static final Timeout FLINK_CLIENT_TIMEOUT_SEC =
         Timeout.ofMilliseconds(ClientOptions.CLIENT_TIMEOUT.defaultValue().toMillis());
 
-    // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
+    /** See {@link org.apache.flink.configuration.RestOptions#AWAIT_LEADER_TIMEOUT}. */
     public static final Timeout FLINK_REST_AWAIT_TIMEOUT_SEC =
         Timeout.ofMilliseconds(RestOptions.AWAIT_LEADER_TIMEOUT.defaultValue().toMillis());
 

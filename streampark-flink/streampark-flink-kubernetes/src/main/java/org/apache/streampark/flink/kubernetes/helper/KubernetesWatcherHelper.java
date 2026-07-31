@@ -27,6 +27,8 @@ import java.util.TimerTask;
 /** Debug helper for FlinkTrackMonitor, only for streampark development, debugging scenarios. */
 public final class KubernetesWatcherHelper extends LoggerSupport {
 
+    private static final String CACHE_COUNT_SUFFIX = " => count=";
+
     private static final KubernetesWatcherHelper INSTANCE = new KubernetesWatcherHelper();
 
     private KubernetesWatcherHelper() {
@@ -69,7 +71,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
                     () -> INSTANCE.logInfo(
                         "[flink-k8s][metric]-"
                             + System.currentTimeMillis()
-                            + " => count="
+                            + CACHE_COUNT_SUFFIX
                             + watcher.watchController.flinkMetrics.asMap().size()
                             + " | "
                             + watcher.watchController.flinkMetrics.asMap())),
@@ -85,7 +87,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
                     () -> INSTANCE.logInfo(
                         "[flink-k8s][status]-"
                             + System.currentTimeMillis()
-                            + " => count="
+                            + CACHE_COUNT_SUFFIX
                             + k8sWatcher.getAllJobStatus().size()
                             + " | "
                             + k8sWatcher.getAllJobStatus())),
@@ -128,7 +130,7 @@ public final class KubernetesWatcherHelper extends LoggerSupport {
                     () -> INSTANCE.logInfo(
                         "[flink-k8s][k8s-event]-"
                             + System.currentTimeMillis()
-                            + " => count="
+                            + CACHE_COUNT_SUFFIX
                             + watcher.watchController.k8sDeploymentEvents.asMap().size()
                             + " | "
                             + watcher.watchController.k8sDeploymentEvents.asMap())),

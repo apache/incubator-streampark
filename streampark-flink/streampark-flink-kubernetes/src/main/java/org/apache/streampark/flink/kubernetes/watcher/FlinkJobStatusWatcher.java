@@ -59,6 +59,8 @@ import java.util.stream.Collectors;
 @ThreadSafe
 public class FlinkJobStatusWatcher extends FlinkWatcher {
 
+    private static final String TRACK_IDS_SUFFIX = ", trackIds=";
+
     private final JobStatusWatcherConfig conf;
     private final FlinkK8sWatchController watchController;
     private final ChangeEventBus eventBus;
@@ -187,16 +189,16 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                     + mode
                     + " mode interrupted, limitSeconds="
                     + conf.requestTimeoutSec()
-                    + ", trackIds="
-                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+                    + TRACK_IDS_SUFFIX
+                    + formatTrackIds(trackIds));
         } catch (ExecutionException | TimeoutException e) {
             logWarn(
                 "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native "
                     + mode
                     + " mode timeout, limitSeconds="
                     + conf.requestTimeoutSec()
-                    + ", trackIds="
-                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+                    + TRACK_IDS_SUFFIX
+                    + formatTrackIds(trackIds));
         }
     }
 
@@ -212,16 +214,20 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                 "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session"
                     + " mode interrupted, limitSeconds="
                     + conf.requestTimeoutSec()
-                    + ", trackIds="
-                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+                    + TRACK_IDS_SUFFIX
+                    + formatTrackIds(trackIds));
         } catch (ExecutionException | TimeoutException e) {
             logWarn(
                 "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session"
                     + " mode timeout, limitSeconds="
                     + conf.requestTimeoutSec()
-                    + ", trackIds="
-                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+                    + TRACK_IDS_SUFFIX
+                    + formatTrackIds(trackIds));
         }
+    }
+
+    private static String formatTrackIds(Set<TrackId> trackIds) {
+        return trackIds.stream().map(Object::toString).collect(Collectors.joining(","));
     }
 
     public Optional<JobStatusCV> touchSessionJob(@Nonnull TrackId trackId) {

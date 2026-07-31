@@ -30,9 +30,11 @@ import java.util.Properties;
 @AllArgsConstructor
 public class TrackId {
 
+    private static final String DEFAULT_NAMESPACE = "default";
+
     private final FlinkK8sDeployMode executeMode;
     @Builder.Default
-    private final String namespace = "default";
+    private final String namespace = DEFAULT_NAMESPACE;
     private final String clusterId;
     private final Long appId;
     private final String jobId;
