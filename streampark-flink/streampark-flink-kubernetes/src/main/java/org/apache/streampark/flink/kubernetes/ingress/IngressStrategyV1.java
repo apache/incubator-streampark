@@ -46,7 +46,7 @@ public class IngressStrategyV1 implements IngressStrategy {
                 String host = ingress.getSpec().getRules().get(0).getHost();
                 String path = ingress.getSpec().getRules().get(0).getHttp().getPaths().get(0).getPath();
                 if (host != null) {
-                    String newPath = path == null || path.isEmpty() ? "" : path.replaceAll("/+$", "");
+                    String newPath = stripTrailingSlashes(path);
                     return "http://" + host + newPath;
                 }
             }
@@ -123,5 +123,16 @@ public class IngressStrategyV1 implements IngressStrategy {
                 client.network().v1().ingresses().inNamespace(nameSpace).create(ingress);
                 return null;
             });
+    }
+
+    private static String stripTrailingSlashes(String path) {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+        int end = path.length();
+        while (end > 0 && path.charAt(end - 1) == '/') {
+            end--;
+        }
+        return path.substring(0, end);
     }
 }

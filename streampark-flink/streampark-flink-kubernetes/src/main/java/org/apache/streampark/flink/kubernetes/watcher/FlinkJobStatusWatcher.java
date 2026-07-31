@@ -45,8 +45,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -114,11 +116,11 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
                             .supplyAsync(() -> touchApplicationJob(id), watchExecutor)
                             .whenComplete(
                                 (jobStateOpt, error) -> {
-                                    if (jobStateOpt != null && jobStateOpt.isPresent()) {
-                                        JobStatusCV jobState = jobStateOpt.get();
-                                        updateState(
-                                            id.toBuilder().jobId(jobState.jobId()).build(),
-                                            jobState);
+                                    if (error == null) {
+                                        jobStateOpt.ifPresent(
+                                            jobState -> updateState(
+                                                id.toBuilder().jobId(jobState.jobId()).build(),
+                                                jobState));
                                     }
                                 }))
                     .collect(Collectors.toSet());
@@ -178,7 +180,16 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logWarn(
+                "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native "
+                    + mode
+                    + " mode interrupted, limitSeconds="
+                    + conf.requestTimeoutSec()
+                    + ", trackIds="
+                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+        } catch (ExecutionException | TimeoutException e) {
             logWarn(
                 "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native "
                     + mode
@@ -195,7 +206,15 @@ public class FlinkJobStatusWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logWarn(
+                "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session"
+                    + " mode interrupted, limitSeconds="
+                    + conf.requestTimeoutSec()
+                    + ", trackIds="
+                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+        } catch (ExecutionException | TimeoutException e) {
             logWarn(
                 "[FlinkJobStatusWatcher] tracking flink job status on kubernetes native session"
                     + " mode timeout, limitSeconds="

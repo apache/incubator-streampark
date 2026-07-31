@@ -36,8 +36,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @ThreadSafe
@@ -101,9 +103,10 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
                         .supplyAsync(() -> collect(id), watchExecutor)
                         .whenComplete(
                             (cpOpt, error) -> {
-                                if (cpOpt != null && cpOpt.isPresent()) {
-                                    eventBus.postAsync(
-                                        new FlinkJobCheckpointChangeEvent(id, cpOpt.get()));
+                                if (error == null) {
+                                    cpOpt.ifPresent(
+                                        cp -> eventBus.postAsync(
+                                            new FlinkJobCheckpointChangeEvent(id, cp)));
                                 }
                             }))
                 .collect(Collectors.toSet());
@@ -111,7 +114,15 @@ public class FlinkCheckpointWatcher extends FlinkWatcher {
         try {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .get(conf.requestTimeoutSec(), TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logError(
+                "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode interrupted,"
+                    + " limitSeconds="
+                    + conf.requestTimeoutSec()
+                    + ", trackingClusterKeys="
+                    + trackIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+        } catch (ExecutionException | TimeoutException e) {
             logError(
                 "[FlinkCheckpointWatcher] tracking flink-job checkpoint on kubernetes mode timeout,"
                     + " limitSeconds="
