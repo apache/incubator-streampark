@@ -17,7 +17,6 @@
 
 package org.apache.streampark.console.core.controller;
 
-import org.apache.streampark.common.util.Utils;
 import org.apache.streampark.common.util.YarnUtils;
 import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
@@ -43,7 +42,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -238,17 +236,6 @@ public class ApplicationController {
   public RestResponse deleteBak(ApplicationBackUp backUp) throws InternalException {
     Boolean deleted = backUpService.delete(backUp.getId());
     return RestResponse.success(deleted);
-  }
-
-  @PostMapping("checkjar")
-  public RestResponse checkjar(String jar) {
-    File file = new File(jar);
-    try {
-      Utils.checkJarFile(file.toURI().toURL());
-      return RestResponse.success(true);
-    } catch (IOException e) {
-      return RestResponse.success(file).message(e.getLocalizedMessage());
-    }
   }
 
   @PostMapping("upload")

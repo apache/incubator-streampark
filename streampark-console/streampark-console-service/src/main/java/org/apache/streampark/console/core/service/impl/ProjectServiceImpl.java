@@ -34,6 +34,7 @@ import org.apache.streampark.console.base.util.FileUtils;
 import org.apache.streampark.console.base.util.GZipUtils;
 import org.apache.streampark.console.base.util.GitUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
+import org.apache.streampark.console.base.util.PathUtils;
 import org.apache.streampark.console.core.entity.Application;
 import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
@@ -45,6 +46,7 @@ import org.apache.streampark.console.core.service.ProjectService;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.MemorySize;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -270,9 +272,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Override
   public List<String> jars(Project project) {
     List<String> list = new ArrayList<>(0);
-    ApiAlertException.throwIfNull(
-        project.getModule(), "Project module can't be null, please check.");
-    File apps = new File(project.getDistHome(), project.getModule());
+    File apps = resolveModuleDir(project);
     for (File file : Objects.requireNonNull(apps.listFiles())) {
       if (file.getName().endsWith(".jar")) {
         list.add(file.getName());
@@ -283,6 +283,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public String getAppConfPath(Long id, String module) {
+    ApiAlertException.throwIfTrue(StringUtils.isBlank(module), "Invalid module.");
+    ApiAlertException.throwIfTrue(StringUtils.containsAny(module, '/', '\\'), "Invalid module.");
     Project project = getById(id);
     File appHome = project.getDistHome();
     File[] files = appHome.listFiles();
@@ -365,8 +367,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public List<Map<String, Object>> listConf(Project project) {
+    // Validate the module name BEFORE entering the try-block, so an invalid name is rejected
+    // with ApiAlertException instead of being swallowed by the file-operation catch below.
+    File file = resolveModuleDir(project);
     try {
-      File file = new File(project.getDistHome(), project.getModule());
       File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
       if (!unzipFile.exists()) {
         GZipUtils.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
@@ -383,6 +387,29 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       log.error(e.getMessage());
     }
     return null;
+  }
+
+  /**
+   * Resolves the module directory/file after validating that the module name is a single-level
+   * entry located directly under the project distribution home.
+   *
+   * @param project the project whose module directory to resolve
+   * @return the canonical module file
+   */
+  private File resolveModuleDir(Project project) {
+    ApiAlertException.throwIfTrue(
+        StringUtils.isBlank(project.getModule()), "Project module can't be null, please check.");
+    ApiAlertException.throwIfTrue(
+        StringUtils.containsAny(project.getModule(), '/', '\\'), "Invalid module.");
+    try {
+      File projectDistHome = project.getDistHome().getCanonicalFile();
+      File moduleDir = new File(projectDistHome, project.getModule()).getCanonicalFile();
+      ApiAlertException.throwIfFalse(
+          PathUtils.isDirectChildPath(projectDistHome, moduleDir), "Invalid module.");
+      return moduleDir;
+    } catch (IOException e) {
+      throw new ApiAlertException("Invalid module.", e);
+    }
   }
 
   private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
