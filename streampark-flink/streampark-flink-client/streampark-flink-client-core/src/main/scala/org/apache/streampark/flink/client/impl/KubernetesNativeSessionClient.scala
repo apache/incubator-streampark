@@ -63,19 +63,20 @@ object KubernetesNativeSessionClient extends KubernetesNativeClientTrait with Lo
       fatJar: File): SubmitResponse = {
 
     // get jm rest url of flink session cluster
-    val clusterKey = ClusterKey(
-      FlinkK8sDeployMode.SESSION,
-      submitRequest.kubernetesNamespace,
-      submitRequest.clusterId)
+    val clusterKey = ClusterKey.builder()
+      .executeMode(FlinkK8sDeployMode.SESSION)
+      .namespace(submitRequest.kubernetesNamespace)
+      .clusterId(submitRequest.clusterId)
+      .build()
     val jmRestUrl = KubernetesRetriever
       .retrieveFlinkRestUrl(clusterKey)
-      .getOrElse(
-        throw new Exception(
+      .orElseThrow(() =>
+        new Exception(
           s"[flink-submit] retrieve flink session rest url failed, clusterKey=$clusterKey"))
     // submit job via rest api
     val jobId =
       FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig)
-    SubmitResponse(clusterKey.clusterId, flinkConfig.toMap, jobId, jmRestUrl)
+    SubmitResponse(clusterKey.clusterId(), flinkConfig.toMap, jobId, jmRestUrl)
   }
 
   /** Submit flink session job with building JobGraph via ClusterClient api. */
