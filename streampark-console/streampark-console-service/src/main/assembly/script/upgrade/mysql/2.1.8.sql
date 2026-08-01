@@ -19,3 +19,6 @@ use streampark;
 
 ALTER TABLE `t_user`
     MODIFY COLUMN `password` varchar(255) collate utf8mb4_general_ci not null comment 'password';
+
+insert into `t_menu` values (130403, 130400, 'delete cluster', null, null, 'cluster:delete', null, '1', 1, null, now(), now());
+insert into `t_role_menu` (role_id, menu_id) values (100002, 130403);

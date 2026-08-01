@@ -119,6 +119,7 @@ insert into "public"."t_menu" values (130101, 130100, 'view', null, null, 'setti
 insert into "public"."t_menu" values (130102, 130100, 'setting update', null, null, 'setting:update', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130401, 130400, 'add cluster', '/setting/add_cluster', 'setting/FlinkCluster/AddCluster', 'cluster:create', '', '0', '0', null, now(), now());
 insert into "public"."t_menu" values (130402, 130400, 'edit cluster', '/setting/edit_cluster', 'setting/FlinkCluster/EditCluster', 'cluster:update', '', '0', '0', null, now(), now());
+insert into "public"."t_menu" values (130403, 130400, 'delete cluster', null, null, 'cluster:delete', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130501, 130500, 'link view', null, null, 'externalLink:view', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130502, 130500, 'link create', null, null, 'externalLink:create', null, '1', '1', null, now(), now());
 insert into "public"."t_menu" values (130503, 130500, 'link update', null, null, 'externalLink:update', null, '1', '1', null, now(), now());

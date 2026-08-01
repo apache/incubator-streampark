@@ -66,6 +66,7 @@ public class FlinkClusterController {
   }
 
   @PostMapping("check")
+  @RequiresPermissions("cluster:create")
   public RestResponse check(FlinkCluster cluster) {
     ResponseResult checkResult = flinkClusterService.check(cluster);
     return RestResponse.success(checkResult);
@@ -92,18 +93,21 @@ public class FlinkClusterController {
   }
 
   @PostMapping("start")
+  @RequiresPermissions("cluster:update")
   public RestResponse start(Long id) {
     flinkClusterService.start(id);
     return RestResponse.success();
   }
 
   @PostMapping("shutdown")
+  @RequiresPermissions("cluster:update")
   public RestResponse shutdown(Long id) {
     flinkClusterService.shutdown(id);
     return RestResponse.success();
   }
 
   @PostMapping("delete")
+  @RequiresPermissions("cluster:delete")
   public RestResponse delete(Long id) {
     flinkClusterService.delete(id);
     return RestResponse.success();

@@ -17,3 +17,6 @@
 
 ALTER TABLE "public"."t_user"
     ALTER COLUMN "password" TYPE varchar(255) collate "pg_catalog"."default";
+
+insert into "public"."t_menu" values (130403, 130400, 'delete cluster', null, null, 'cluster:delete', null, '1', '1', null, now(), now());
+insert into "public"."t_role_menu" (role_id, menu_id) values (100002, 130403);
