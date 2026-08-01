@@ -33,6 +33,7 @@ import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.task.FlinkK8sWatcherWrapper;
 import org.apache.streampark.console.system.authentication.JWTUtil;
 import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.Team;
 import org.apache.streampark.console.system.entity.User;
 import org.apache.streampark.console.system.service.MemberService;
 import org.apache.streampark.console.system.service.UserService;
@@ -70,6 +71,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -183,6 +185,7 @@ public class ProxyServiceImpl implements ProxyService {
     if (cluster == null) {
       return builder.body("The cluster not found.");
     }
+    checkProxyCluster(cluster);
     String url = cluster.getAddress();
     if (StringUtils.isBlank(url)) {
       return builder.body("The cluster address is invalid.");
@@ -217,6 +220,42 @@ public class ProxyServiceImpl implements ProxyService {
     }
     Application app = applicationService.getById(log.getAppId());
     checkProxyApp(app);
+  }
+
+  /**
+   * Verify the current user is allowed to access the proxied Web UI / REST API of the given Flink
+   * cluster. {@code t_flink_cluster} has no {@code team_id} column, so unlike {@link
+   * #checkProxyApp(Application)} this cannot compare against a real team id directly. Ownership is
+   * therefore derived indirectly: the platform administrator, the cluster's creator, or any user
+   * who belongs to a team that has at least one application bound to this cluster (via {@code
+   * Application#flinkClusterId}) is allowed through. Everyone else is denied.
+   *
+   * @param cluster the cluster being proxied, fetched from the database.
+   */
+  public void checkProxyCluster(FlinkCluster cluster) {
+    String token = serviceHelper.getAuthorization();
+    Long userId = token == null ? null : JWTUtil.getUserId(token);
+    if (userId == null) {
+      throw new PermissionDeniedException("Permission denied, please login first.");
+    }
+    if (userId.equals(cluster.getUserId())) {
+      return;
+    }
+    User user = userService.getById(userId);
+    if (user != null && user.getUserType() == UserType.ADMIN) {
+      return;
+    }
+    List<Team> userTeams = memberService.findUserTeams(userId);
+    boolean accessible =
+        userTeams.stream()
+            .anyMatch(
+                team ->
+                    applicationService.getByTeamId(team.getId()).stream()
+                        .anyMatch(app -> cluster.getId().equals(app.getFlinkClusterId())));
+    if (!accessible) {
+      throw new PermissionDeniedException(
+          "Permission denied, this cluster is not accessible from any team the current user belongs to.");
+    }
   }
 
   private HttpEntity<?> getRequestEntity(HttpServletRequest request, String url) throws Exception {

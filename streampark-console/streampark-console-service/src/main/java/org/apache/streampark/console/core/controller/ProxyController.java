@@ -41,6 +41,7 @@ public class ProxyController {
   @Autowired private ProxyService proxyService;
 
   @GetMapping("{type}/{id}/assets/**")
+  @RequiresPermissions("app:view")
   public ResponseEntity<?> proxyFlinkAssets(
       HttpServletRequest request, @PathVariable("type") String type, @PathVariable("id") Long id)
       throws Exception {
