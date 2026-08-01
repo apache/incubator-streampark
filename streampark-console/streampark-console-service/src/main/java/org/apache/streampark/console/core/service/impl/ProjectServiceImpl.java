@@ -28,6 +28,7 @@ import org.apache.streampark.console.base.domain.RestRequest;
 import org.apache.streampark.console.base.domain.RestResponse;
 import org.apache.streampark.console.base.exception.ApiAlertException;
 import org.apache.streampark.console.base.exception.ApiDetailException;
+import org.apache.streampark.console.base.exception.PermissionDeniedException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.FileUtils;
@@ -40,11 +41,16 @@ import org.apache.streampark.console.core.entity.Project;
 import org.apache.streampark.console.core.enums.BuildState;
 import org.apache.streampark.console.core.enums.GitAuthorizedError;
 import org.apache.streampark.console.core.enums.ReleaseState;
+import org.apache.streampark.console.core.enums.UserType;
 import org.apache.streampark.console.core.mapper.ProjectMapper;
 import org.apache.streampark.console.core.service.ApplicationService;
 import org.apache.streampark.console.core.service.ProjectService;
+import org.apache.streampark.console.core.service.ServiceHelper;
 import org.apache.streampark.console.core.task.FlinkAppHttpWatcher;
 import org.apache.streampark.console.core.task.ProjectBuildTask;
+import org.apache.streampark.console.system.entity.Member;
+import org.apache.streampark.console.system.entity.User;
+import org.apache.streampark.console.system.service.MemberService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.MemorySize;
@@ -88,6 +94,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
   @Autowired private ApplicationService applicationService;
 
   @Autowired private FlinkAppHttpWatcher flinkAppHttpWatcher;
+
+  @Autowired private ServiceHelper serviceHelper;
+
+  @Autowired private MemberService memberService;
 
   @Value("${streampark.project.max-build:6}")
   public Long maxProjectBuildNum;
@@ -446,6 +456,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   @Override
   public RestResponse getBuildLog(Long id, Long startOffset) {
+    Project project = getById(id);
+    ApiAlertException.throwIfNull(project, "Project not found, id: " + id);
+    checkProjectTeamAccess(project);
+
     File logFile = Paths.get(getBuildLogPath(id)).toFile();
     if (!logFile.exists()) {
       String errorMsg =
@@ -453,7 +467,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
       log.warn(errorMsg);
       return RestResponse.success().data(errorMsg);
     }
-    boolean isBuilding = this.getById(id).getBuildState() == 0;
+    boolean isBuilding = project.getBuildState() == 0;
     byte[] fileContent;
     long endOffset = 0L;
     boolean readFinished = true;
@@ -485,5 +499,27 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
   private String getBuildLogPath(Long projectId) {
     return String.format("%s/%s/build.log", Workspace.PROJECT_BUILD_LOG_PATH(), projectId);
+  }
+
+  /**
+   * Verify that the currently logged-in user is allowed to access build artifacts (e.g. the build
+   * log) of the given project, by checking membership against the project's REAL, persisted teamId
+   * - never a client-supplied one, which is how this method previously could be bypassed (see
+   * buildLog's now-removed {@code @PermissionScope(team = "#teamId")}, which only validated the
+   * caller-supplied teamId and never cross-checked it against the actual project).
+   *
+   * @param project the project fetched from the database.
+   */
+  private void checkProjectTeamAccess(Project project) {
+    User currentUser = serviceHelper.getLoginUser();
+    ApiAlertException.throwIfNull(currentUser, "Permission denied, please login first.");
+    if (currentUser.getUserType() == UserType.ADMIN) {
+      return;
+    }
+    Member member = memberService.findByUserId(project.getTeamId(), currentUser.getUserId());
+    if (member == null) {
+      throw new PermissionDeniedException(
+          "Permission denied, only members of this project's team can access this resource.");
+    }
   }
 }
