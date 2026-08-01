@@ -42,6 +42,7 @@ import org.apache.streampark.console.base.exception.ApplicationException;
 import org.apache.streampark.console.base.mybatis.pager.MybatisPager;
 import org.apache.streampark.console.base.util.CommonUtils;
 import org.apache.streampark.console.base.util.ObjectUtils;
+import org.apache.streampark.console.base.util.PathUtils;
 import org.apache.streampark.console.base.util.WebUtils;
 import org.apache.streampark.console.core.bean.AppControl;
 import org.apache.streampark.console.core.bean.MavenDependency;
@@ -1243,31 +1244,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new File(StringUtils.removeEnd(moduleArchive.getAbsolutePath(), ".tar.gz"))
             .getCanonicalFile();
     ApiAlertException.throwIfFalse(
-        isDirectChildPath(projectDistHome, moduleArchive), "Invalid module.");
+        PathUtils.isDirectChildPath(projectDistHome, moduleArchive), "Invalid module.");
     ApiAlertException.throwIfFalse(
-        isDirectChildPath(projectDistHome, moduleHome), "Invalid module.");
+        PathUtils.isDirectChildPath(projectDistHome, moduleHome), "Invalid module.");
     ApiAlertException.throwIfFalse(moduleHome.isDirectory(), "Invalid module.");
 
     File confHome = new File(moduleHome, "conf").getCanonicalFile();
-    ApiAlertException.throwIfFalse(isDescendantPath(moduleHome, confHome), "Invalid config.");
+    ApiAlertException.throwIfFalse(
+        PathUtils.isDescendantPath(moduleHome, confHome), "Invalid config.");
     ApiAlertException.throwIfFalse(confHome.isDirectory(), "Invalid config.");
 
     File configFile = new File(application.getConfig()).getCanonicalFile();
 
     ApiAlertException.throwIfFalse(configFile.isFile(), "Invalid config.");
-    ApiAlertException.throwIfFalse(isDescendantPath(confHome, configFile), "Invalid config.");
+    ApiAlertException.throwIfFalse(
+        PathUtils.isDescendantPath(confHome, configFile), "Invalid config.");
     return configFile;
-  }
-
-  private boolean isDescendantPath(File parent, File child) throws IOException {
-    String parentPath = parent.getCanonicalPath();
-    String childPath = child.getCanonicalPath();
-    return childPath.startsWith(parentPath.concat(File.separator));
-  }
-
-  private boolean isDirectChildPath(File parent, File child) throws IOException {
-    File childParent = child.getCanonicalFile().getParentFile();
-    return childParent != null && parent.getCanonicalFile().equals(childParent.getCanonicalFile());
   }
 
   @Override
