@@ -106,7 +106,7 @@ public class VariableController {
   @PostMapping("showOriginal")
   @RequiresPermissions("variable:show_original")
   public RestResponse showOriginal(@RequestParam Long id) {
-    Variable v = this.variableService.getById(id);
+    Variable v = this.variableService.getOriginal(id);
     return RestResponse.success(v);
   }
 
