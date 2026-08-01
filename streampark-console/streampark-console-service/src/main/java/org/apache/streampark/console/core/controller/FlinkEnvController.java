@@ -23,6 +23,8 @@ import org.apache.streampark.console.base.exception.ApiDetailException;
 import org.apache.streampark.console.core.entity.FlinkEnv;
 import org.apache.streampark.console.core.service.FlinkEnvService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +56,14 @@ public class FlinkEnvController {
   }
 
   @PostMapping("check")
+  @RequiresPermissions("env:create")
   public RestResponse check(FlinkEnv version) {
     Integer checkResp = flinkEnvService.check(version);
     return RestResponse.success(checkResp);
   }
 
   @PostMapping("create")
+  @RequiresPermissions("env:create")
   public RestResponse create(FlinkEnv version) {
     try {
       flinkEnvService.create(version);
@@ -77,12 +81,14 @@ public class FlinkEnvController {
   }
 
   @PostMapping("sync")
+  @RequiresPermissions("env:update")
   public RestResponse sync(Long id) throws Exception {
     flinkEnvService.syncConf(id);
     return RestResponse.success();
   }
 
   @PostMapping("update")
+  @RequiresPermissions("env:update")
   public RestResponse update(FlinkEnv version) throws Exception {
     try {
       flinkEnvService.update(version);
@@ -93,18 +99,21 @@ public class FlinkEnvController {
   }
 
   @PostMapping("delete")
+  @RequiresPermissions("env:delete")
   public RestResponse delete(Long id) {
     flinkEnvService.delete(id);
     return RestResponse.success();
   }
 
   @PostMapping("validity")
+  @RequiresPermissions("env:update")
   public RestResponse validity(FlinkEnv version) {
     flinkEnvService.validity(version.getId());
     return RestResponse.success(true);
   }
 
   @PostMapping("default")
+  @RequiresPermissions("env:update")
   public RestResponse setDefault(Long id) {
     flinkEnvService.setDefault(id);
     return RestResponse.success();

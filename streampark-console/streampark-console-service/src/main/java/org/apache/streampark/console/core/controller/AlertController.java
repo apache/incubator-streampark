@@ -27,6 +27,8 @@ import org.apache.streampark.console.core.entity.AlertConfig;
 import org.apache.streampark.console.core.service.alert.AlertConfigService;
 import org.apache.streampark.console.core.service.alert.AlertService;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,30 +57,35 @@ public class AlertController {
   @Autowired private AlertService alertService;
 
   @PostMapping(value = "/add")
+  @RequiresPermissions("alert:add")
   public RestResponse createAlertConfig(@RequestBody AlertConfigWithParams params) {
-    boolean save = alertConfigService.save(AlertConfig.of(params));
+    boolean save = alertConfigService.createAlertConfig(AlertConfig.of(params));
     return RestResponse.success(save);
   }
 
   @PostMapping(value = "/exists")
+  @RequiresPermissions("alert:add")
   public RestResponse verifyAlertConfig(@RequestBody AlertConfigWithParams params) {
     boolean exist = alertConfigService.exist(AlertConfig.of(params));
     return RestResponse.success(exist);
   }
 
   @PostMapping(value = "/update")
+  @RequiresPermissions("alert:update")
   public RestResponse updateAlertConfig(@RequestBody AlertConfigWithParams params) {
-    boolean update = alertConfigService.updateById(AlertConfig.of(params));
+    boolean update = alertConfigService.updateAlertConfig(AlertConfig.of(params));
     return RestResponse.success(update);
   }
 
   @PostMapping("/get")
+  @RequiresPermissions("alert:view")
   public RestResponse getAlertConfig(@RequestBody AlertConfigWithParams params) {
-    AlertConfig alertConfig = alertConfigService.getById(params.getId());
+    AlertConfig alertConfig = alertConfigService.getAlertConfig(params.getId());
     return RestResponse.success(AlertConfigWithParams.of(alertConfig));
   }
 
   @PostMapping(value = "/list")
+  @RequiresPermissions("alert:view")
   public RestResponse alertConfigsPaginationList(
       @RequestBody AlertConfigWithParams params, RestRequest request) {
     IPage<AlertConfigWithParams> page = alertConfigService.page(params, request);
@@ -86,12 +93,14 @@ public class AlertController {
   }
 
   @PostMapping(value = "/listWithOutPage")
+  @RequiresPermissions("alert:view")
   public RestResponse alertConfigsList() {
-    List<AlertConfig> page = alertConfigService.list();
+    List<AlertConfig> page = alertConfigService.listByCurrentUser();
     return RestResponse.success(page);
   }
 
   @DeleteMapping("/delete")
+  @RequiresPermissions("alert:delete")
   public RestResponse deleteAlertConfig(
       @RequestParam("id") @NotNull(message = "config id must not be null") Long id) {
     boolean result = alertConfigService.deleteById(id);
@@ -99,6 +108,7 @@ public class AlertController {
   }
 
   @PostMapping("/send")
+  @RequiresPermissions("alert:view")
   public RestResponse sendAlert(Long id) throws AlertException {
     AlertTemplate alertTemplate = new AlertTemplate();
     alertTemplate.setTitle("Notify: StreamPark alert job for test");
@@ -113,7 +123,8 @@ public class AlertController {
     alertTemplate.setEndTime(DateUtils.format(date, DateUtils.fullFormat(), TimeZone.getDefault()));
     alertTemplate.setDuration("-");
     boolean alert =
-        alertService.alert(AlertConfigWithParams.of(alertConfigService.getById(id)), alertTemplate);
+        alertService.alert(
+            AlertConfigWithParams.of(alertConfigService.getAlertConfig(id)), alertTemplate);
     return RestResponse.success(alert);
   }
 }
