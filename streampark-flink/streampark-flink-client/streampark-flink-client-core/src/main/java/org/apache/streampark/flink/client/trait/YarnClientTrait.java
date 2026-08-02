@@ -104,6 +104,43 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
             user, () -> createYarnClusterDescriptor(flinkConfig));
     }
 
+    public Tuple2<ApplicationId, YarnClusterDescriptor> getYarnClusterDescriptor(
+                                                                                 Configuration flinkConfig)
+        throws FlinkException {
+        return getYarnClusterDescriptor(flinkConfig, "");
+    }
+
+    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
+                                                                                              Configuration flinkConfig,
+                                                                                              String user) throws FlinkException {
+        return accessYarnClusterDescriptor(
+            user, () -> createYarnClusterDeployDescriptor(flinkConfig));
+    }
+
+    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
+                                                                                              Configuration flinkConfig)
+        throws FlinkException {
+        return getYarnClusterDeployDescriptor(flinkConfig, "");
+    }
+
+    protected void logClusterSpecification(ClusterSpecification clusterSpecification) {
+        logInfo(
+            String.format(
+                "%n------------------------<<specification>>-------------------------%n"
+                    + "%s%n"
+                    + "------------------------------------------------------------------%n",
+                clusterSpecification));
+    }
+
+    protected void logYarnJobStarted(Object applicationId) {
+        logInfo(
+            String.format(
+                "%n-------------------------<<applicationId>>------------------------%n"
+                    + "Flink Job Started: applicationId: %s%n"
+                    + "__________________________________________________________________%n",
+                applicationId));
+    }
+
     private Tuple2<ApplicationId, YarnClusterDescriptor> createYarnClusterDescriptor(
                                                                                        Configuration flinkConfig)
         throws FlinkException {
@@ -120,19 +157,6 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
             });
     }
 
-    public Tuple2<ApplicationId, YarnClusterDescriptor> getYarnClusterDescriptor(
-                                                                                 Configuration flinkConfig)
-        throws FlinkException {
-        return getYarnClusterDescriptor(flinkConfig, "");
-    }
-
-    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
-                                                                                              Configuration flinkConfig,
-                                                                                              String user) throws FlinkException {
-        return accessYarnClusterDescriptor(
-            user, () -> createYarnClusterDeployDescriptor(flinkConfig));
-    }
-
     private Tuple2<ClusterSpecification, YarnClusterDescriptor> createYarnClusterDeployDescriptor(
                                                                                                     Configuration flinkConfig)
         throws FlinkException {
@@ -145,12 +169,6 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                     clientFactory.createClusterDescriptor(flinkConfig);
                 return new Tuple2<>(clusterSpecification, clusterDescriptor);
             });
-    }
-
-    public Tuple2<ClusterSpecification, YarnClusterDescriptor> getYarnClusterDeployDescriptor(
-                                                                                              Configuration flinkConfig)
-        throws FlinkException {
-        return getYarnClusterDeployDescriptor(flinkConfig, "");
     }
 
     private <O> O executeClientAction(

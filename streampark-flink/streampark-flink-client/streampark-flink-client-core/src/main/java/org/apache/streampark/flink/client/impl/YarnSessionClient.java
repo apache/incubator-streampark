@@ -66,12 +66,7 @@ public final class YarnSessionClient extends YarnClientTrait {
         super.setConfig(submitRequest, flinkConfig);
         FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
-        logInfo(
-            String.format(
-                "%n------------------------------------------------------------------%n"
-                    + "Effective submit configuration: %s%n"
-                    + "------------------------------------------------------------------%n",
-                flinkConfig));
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     public void deployClusterConfig(DeployRequest deployRequest, Configuration flinkConfig) {
@@ -90,12 +85,7 @@ public final class YarnSessionClient extends YarnClientTrait {
             DeploymentOptionsInternal.CONF_DIR,
             deployRequest.flinkVersion().getFlinkHome() + "/conf");
 
-        logInfo(
-            String.format(
-                "%n------------------------------------------------------------------%n"
-                    + "Effective submit configuration: %s%n"
-                    + "------------------------------------------------------------------%n",
-                flinkConfig));
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     @Override

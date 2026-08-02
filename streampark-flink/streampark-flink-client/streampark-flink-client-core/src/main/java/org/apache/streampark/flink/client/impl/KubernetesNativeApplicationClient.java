@@ -105,10 +105,7 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
 
     @Override
     public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException {
-        FlinkConfigurationOps.safeSet(
-            flinkConf,
-            DeploymentOptions.TARGET,
-            FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getName());
+        setK8sDeployTarget(flinkConf, FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION);
         return super.doCancel(cancelRequest, flinkConf);
     }
 
@@ -116,10 +113,7 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest request,
                                                 Configuration flinkConf) throws FlinkException {
-        FlinkConfigurationOps.safeSet(
-            flinkConf,
-            DeploymentOptions.TARGET,
-            FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getName());
+        setK8sDeployTarget(flinkConf, FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION);
         return super.doTriggerSavepoint(request, flinkConf);
     }
 }

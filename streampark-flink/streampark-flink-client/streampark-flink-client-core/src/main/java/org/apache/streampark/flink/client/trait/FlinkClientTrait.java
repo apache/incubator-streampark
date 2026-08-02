@@ -118,13 +118,8 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     }
 
     protected static <T> T callAsFlinkException(FlinkCallable<T> callable) throws FlinkException {
-        try {
-            return callable.call();
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(callable, e -> {
+        });
     }
 
     protected static <T> T callAsFlinkException(
@@ -167,6 +162,95 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                                                       ClusterClient<?> client) throws FlinkException {
         return callAsFlinkException(
             () -> new SavepointResponse(triggerSavepoint(request, jobId, client)));
+    }
+
+    protected void logEffectiveSubmitConfiguration(Configuration flinkConfig) {
+        logInfo(
+            String.format(
+                "%n------------------------------------------------------------------%n"
+                    + "Effective submit configuration: %s%n"
+                    + "------------------------------------------------------------------%n",
+                flinkConfig));
+    }
+
+    protected void logSavepointClientRequest(String operation, SavepointRequestTrait request) {
+        StringBuilder message =
+            new StringBuilder()
+                .append("\n----------------------------------------- flink job ")
+                .append(operation)
+                .append(" --------------------------------\n")
+                .append("     userFlinkHome     : ")
+                .append(request.flinkVersion().getFlinkHome())
+                .append("\n")
+                .append("     flinkVersion      : ")
+                .append(request.flinkVersion().version())
+                .append("\n")
+                .append("     clusterId         : ")
+                .append(request.clusterId())
+                .append("\n");
+        if (request instanceof CancelRequest) {
+            CancelRequest cancelRequest = (CancelRequest) request;
+            message
+                .append("     withSavePoint     : ")
+                .append(cancelRequest.withSavepoint())
+                .append("\n");
+        }
+        message
+            .append("     savePointPath     : ")
+            .append(request.savepointPath())
+            .append("\n");
+        if (request instanceof CancelRequest) {
+            message
+                .append("     withDrain         : ")
+                .append(((CancelRequest) request).withDrain())
+                .append("\n");
+        }
+        message
+            .append("     nativeFormat      : ")
+            .append(request.nativeFormat())
+            .append("\n")
+            .append("     k8sNamespace      : ")
+            .append(request.kubernetesNamespace())
+            .append("\n")
+            .append("     appId             : ")
+            .append(request.clusterId())
+            .append("\n")
+            .append("     jobId             : ")
+            .append(request.jobId())
+            .append("\n")
+            .append(
+                "-------------------------------------------------------------------------------------------\n");
+        logInfo(message.toString());
+    }
+
+    protected SubmitResponse submitJobGraphToCluster(
+                                                     SubmitRequest submitRequest,
+                                                     Configuration flinkConfig,
+                                                     File jarFile,
+                                                     FlinkCallable<ClusterClient<?>> clientSupplier,
+                                                     FlinkCallable<String> clusterIdSupplier,
+                                                     AutoCloseable... extraResources) throws FlinkException {
+        return callAsFlinkException(
+            () -> {
+                Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, jarFile);
+                PackagedProgram packageProgram = programJobGraph._1();
+                JobGraph jobGraph = programJobGraph._2();
+                ClusterClient<?> client = clientSupplier.call();
+                String jobId = client.submitJob(jobGraph).get().toString();
+                SubmitResponse result =
+                    new SubmitResponse(
+                        clusterIdSupplier.call(),
+                        flinkConfig.toMap(),
+                        jobId,
+                        client.getWebInterfaceURL());
+                AutoCloseable[] resources = new AutoCloseable[extraResources.length + 2];
+                resources[0] = packageProgram;
+                resources[1] = client;
+                System.arraycopy(extraResources, 0, resources, 2, extraResources.length);
+                closeSubmit(submitRequest, resources);
+                return result;
+            });
     }
 
     public SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
@@ -376,73 +460,13 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     public abstract void setConfig(SubmitRequest submitRequest, Configuration flinkConf);
 
     public SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
-        logInfo(
-            "\n"
-                + "----------------------------------------- flink job trigger savepoint ---------------------\n"
-                + "     userFlinkHome  : "
-                + savepointRequest.flinkVersion().getFlinkHome()
-                + "\n"
-                + "     flinkVersion   : "
-                + savepointRequest.flinkVersion().version()
-                + "\n"
-                + "     clusterId      : "
-                + savepointRequest.clusterId()
-                + "\n"
-                + "     savePointPath  : "
-                + savepointRequest.savepointPath()
-                + "\n"
-                + "     nativeFormat   : "
-                + savepointRequest.nativeFormat()
-                + "\n"
-                + "     k8sNamespace   : "
-                + savepointRequest.kubernetesNamespace()
-                + "\n"
-                + "     appId          : "
-                + savepointRequest.clusterId()
-                + "\n"
-                + "     jobId          : "
-                + savepointRequest.jobId()
-                + "\n"
-                + "-------------------------------------------------------------------------------------------\n");
+        logSavepointClientRequest("trigger savepoint", savepointRequest);
         Configuration flinkConf = new Configuration();
         return callAsFlinkException(() -> doTriggerSavepoint(savepointRequest, flinkConf));
     }
 
     public CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
-        logInfo(
-            "\n"
-                + "----------------------------------------- flink job cancel --------------------------------\n"
-                + "     userFlinkHome     : "
-                + cancelRequest.flinkVersion().getFlinkHome()
-                + "\n"
-                + "     flinkVersion      : "
-                + cancelRequest.flinkVersion().version()
-                + "\n"
-                + "     clusterId         : "
-                + cancelRequest.clusterId()
-                + "\n"
-                + "     withSavePoint     : "
-                + cancelRequest.withSavepoint()
-                + "\n"
-                + "     savePointPath     : "
-                + cancelRequest.savepointPath()
-                + "\n"
-                + "     withDrain         : "
-                + cancelRequest.withDrain()
-                + "\n"
-                + "     nativeFormat      : "
-                + cancelRequest.nativeFormat()
-                + "\n"
-                + "     k8sNamespace      : "
-                + cancelRequest.kubernetesNamespace()
-                + "\n"
-                + "     appId             : "
-                + cancelRequest.clusterId()
-                + "\n"
-                + "     jobId             : "
-                + cancelRequest.jobId()
-                + "\n"
-                + "-------------------------------------------------------------------------------------------\n");
+        logSavepointClientRequest("cancel", cancelRequest);
         Configuration flinkConf = new Configuration();
         return callAsFlinkException(() -> doCancel(cancelRequest, flinkConf));
     }

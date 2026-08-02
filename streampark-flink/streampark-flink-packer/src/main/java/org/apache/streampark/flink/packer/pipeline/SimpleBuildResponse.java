@@ -20,46 +20,18 @@ package org.apache.streampark.flink.packer.pipeline;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.io.Serializable;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SimpleBuildResponse implements FlinkBuildResult, Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    private String workspacePath;
-    private boolean pass = true;
+public class SimpleBuildResponse extends AbstractFlinkBuildResponse {
 
     public SimpleBuildResponse() {
     }
 
     public SimpleBuildResponse(String workspacePath, boolean pass) {
-        this.workspacePath = workspacePath;
-        this.pass = pass;
-    }
-
-    @Override
-    public String workspacePath() {
-        return workspacePath;
-    }
-
-    @Override
-    public boolean pass() {
-        return pass;
-    }
-
-    @JsonProperty("workspacePath")
-    public void setWorkspacePath(String workspacePath) {
-        this.workspacePath = workspacePath;
-    }
-
-    @JsonProperty("pass")
-    public void setPass(boolean pass) {
-        this.pass = pass;
+        super(workspacePath, pass);
     }
 
     @Override
     public String toString() {
-        return "{ workspacePath: " + workspacePath + ", pass: " + pass + " }";
+        return "{ workspacePath: " + workspacePath() + ", pass: " + pass() + " }";
     }
 }

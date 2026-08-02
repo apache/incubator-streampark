@@ -135,12 +135,7 @@ public final class YarnApplicationClient extends YarnClientTrait {
                 flinkConfig, ApplicationConfiguration.APPLICATION_ARGS, argsList);
         }
 
-        logInfo(
-            String.format(
-                "%n------------------------------------------------------------------%n"
-                    + "Effective submit configuration: %s%n"
-                    + "------------------------------------------------------------------%n",
-                flinkConfig));
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     @Override
@@ -152,12 +147,7 @@ public final class YarnApplicationClient extends YarnClientTrait {
                     getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
                 ClusterSpecification clusterSpecification = deployDescriptor._1();
                 YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
-                logInfo(
-                    String.format(
-                        "%n------------------------<<specification>>-------------------------%n"
-                            + "%s%n"
-                            + "------------------------------------------------------------------%n",
-                        clusterSpecification));
+                logClusterSpecification(clusterSpecification);
 
                 ApplicationConfiguration applicationConfiguration =
                     ApplicationConfiguration.fromConfiguration(flinkConfig);
@@ -167,12 +157,7 @@ public final class YarnApplicationClient extends YarnClientTrait {
                         .getClusterClient();
                 ApplicationId applicationId = clusterClient.getClusterId();
                 String jobManagerUrl = clusterClient.getWebInterfaceURL();
-                logInfo(
-                    String.format(
-                        "%n-------------------------<<applicationId>>------------------------%n"
-                            + "Flink Job Started: applicationId: %s%n"
-                            + "__________________________________________________________________%n",
-                        applicationId));
+                logYarnJobStarted(applicationId);
 
                 SubmitResponse resp =
                     new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);

@@ -121,29 +121,15 @@ public final class RemoteClient extends FlinkClientTrait {
                                          SubmitRequest submitRequest,
                                          Configuration flinkConfig,
                                          File jarFile) throws FlinkException {
-        return callAsFlinkException(
-            () -> {
-                Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> standAloneDescriptor =
-                    getStandAloneClusterDescriptor(flinkConfig);
-                StandaloneClusterDescriptor clusterDescriptor = standAloneDescriptor._2();
-
-                Tuple2<PackagedProgram, JobGraph> packageProgramJobGraph =
-                    getJobGraph(flinkConfig, submitRequest, jarFile);
-                PackagedProgram packageProgram = packageProgramJobGraph._1();
-                JobGraph jobGraph = packageProgramJobGraph._2();
-
-                ClusterClient<StandaloneClusterId> client =
-                    clusterDescriptor.retrieve(standAloneDescriptor._1()).getClusterClient();
-                String jobId = client.submitJob(jobGraph).get().toString();
-                logInfo(
-                    String.format(
-                        "%s mode submit by jobGraph, WebInterfaceURL %s, jobId: %s",
-                        submitRequest.deployMode(), client.getWebInterfaceURL(), jobId));
-                SubmitResponse result =
-                    new SubmitResponse(null, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-                closeSubmit(submitRequest, packageProgram, client, clusterDescriptor);
-                return result;
-            });
+        Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> standAloneDescriptor =
+            getStandAloneClusterDescriptor(flinkConfig);
+        return submitJobGraphToCluster(
+            submitRequest,
+            flinkConfig,
+            jarFile,
+            () -> standAloneDescriptor._2().retrieve(standAloneDescriptor._1()).getClusterClient(),
+            () -> null,
+            standAloneDescriptor._2());
     }
 
     private <O, R extends SavepointRequestTrait> O executeClientAction(
@@ -163,12 +149,7 @@ public final class RemoteClient extends FlinkClientTrait {
                     RestOptions.PORT,
                     Integer.parseInt(
                         request.properties().get(RestOptions.PORT.key()).toString()));
-                logInfo(
-                    String.format(
-                        "%n------------------------------------------------------------------%n"
-                            + "Effective submit configuration: %s%n"
-                            + "------------------------------------------------------------------%n",
-                        flinkConfig));
+                logEffectiveSubmitConfiguration(flinkConfig);
                 Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> descriptor =
                     getStandAloneClusterDescriptor(flinkConfig);
                 ClusterClient<StandaloneClusterId> clusterClient =

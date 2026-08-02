@@ -103,13 +103,11 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
             flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE);
         }
 
-        logInfo(
-            "\n"
-                + "------------------------------------------------------------------\n"
-                + "Effective submit configuration: "
-                + flinkConfig
-                + "\n"
-                + "------------------------------------------------------------------\n");
+        logEffectiveSubmitConfiguration(flinkConfig);
+    }
+
+    protected void setK8sDeployTarget(Configuration flinkConf, FlinkDeployMode deployMode) {
+        FlinkClientTrait.safeSet(flinkConf, DeploymentOptions.TARGET, deployMode.getName());
     }
 
     @Override

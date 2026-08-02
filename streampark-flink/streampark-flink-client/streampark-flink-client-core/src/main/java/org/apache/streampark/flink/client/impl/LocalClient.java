@@ -53,12 +53,7 @@ public final class LocalClient extends FlinkClientTrait {
     @Override
     public void setConfig(SubmitRequest submitRequest, Configuration flinkConfig) {
         FlinkConfigurationOps.safeSet(flinkConfig, PipelineOptions.NAME, submitRequest.effectiveAppName());
-        logInfo(
-            String.format(
-                "%n------------------------------------------------------------------%n"
-                    + "Effective submit configuration: %s%n"
-                    + "------------------------------------------------------------------%n",
-                flinkConfig));
+        logEffectiveSubmitConfiguration(flinkConfig);
     }
 
     @Override

@@ -116,37 +116,28 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                                          File jarFile) throws FlinkException {
         return callAsFlinkException(
             () -> {
-                KubernetesClusterDescriptor clusterDescriptor = getK8sClusterDescriptor(flinkConfig);
-
-                Tuple2<PackagedProgram, JobGraph> packageProgramJobGraph =
-                    getJobGraph(flinkConfig, submitRequest, jarFile);
-                PackagedProgram packageProgram = packageProgramJobGraph._1();
-                JobGraph jobGraph = packageProgramJobGraph._2();
-
-                ClusterClient<String> client =
-                    clusterDescriptor
-                        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-                        .getClusterClient();
-                String jobId = client.submitJob(jobGraph).get().toString();
                 SubmitResponse result =
-                    new SubmitResponse(
-                        client.getClusterId(), flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+                    submitJobGraphToCluster(
+                        submitRequest,
+                        flinkConfig,
+                        jarFile,
+                        () ->
+                            getK8sClusterDescriptor(flinkConfig)
+                                .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+                                .getClusterClient(),
+                        () -> flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID));
                 logInfo(
                     "[flink-submit] flink job has been submitted. "
                         + flinkConfIdentifierInfo(flinkConfig)
                         + ", jobId: "
-                        + jobId);
-                closeSubmit(submitRequest, packageProgram, client, client);
+                        + result.jobId());
                 return result;
             });
     }
 
     @Override
     public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
-            DeploymentOptions.TARGET,
-            FlinkDeployMode.KUBERNETES_NATIVE_SESSION.getName());
+        setK8sDeployTarget(flinkConfig, FlinkDeployMode.KUBERNETES_NATIVE_SESSION);
         return super.doCancel(cancelRequest, flinkConfig);
     }
 
