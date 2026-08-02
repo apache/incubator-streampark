@@ -87,29 +87,26 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                                         SubmitRequest submitRequest,
                                         Configuration flinkConfig,
                                         File fatJar) throws FlinkException {
-        try {
-            ClusterKey clusterKey =
-                ClusterKey.builder()
-                    .executeMode(FlinkK8sDeployMode.SESSION)
-                    .namespace(submitRequest.kubernetesNamespace())
-                    .clusterId(submitRequest.clusterId())
-                    .build();
-            String jmRestUrl =
-                KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-                    .orElseThrow(
-                        () ->
-                            new FlinkException(
-                                "[flink-submit] retrieve flink session rest url failed, clusterKey="
-                                    + clusterKey));
-            String jobId =
-                FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
-            return new SubmitResponse(
-                clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(
+            () -> {
+                ClusterKey clusterKey =
+                    ClusterKey.builder()
+                        .executeMode(FlinkK8sDeployMode.SESSION)
+                        .namespace(submitRequest.kubernetesNamespace())
+                        .clusterId(submitRequest.clusterId())
+                        .build();
+                String jmRestUrl =
+                    KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
+                        .orElseThrow(
+                            () ->
+                                new FlinkException(
+                                    "[flink-submit] retrieve flink session rest url failed, clusterKey="
+                                        + clusterKey));
+                String jobId =
+                    FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
+                return new SubmitResponse(
+                    clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
+            });
     }
 
     /** Submit flink session job with building JobGraph via ClusterClient api. */
@@ -117,34 +114,31 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                                          SubmitRequest submitRequest,
                                          Configuration flinkConfig,
                                          File jarFile) throws FlinkException {
-        try {
-        KubernetesClusterDescriptor clusterDescriptor = getK8sClusterDescriptor(flinkConfig);
+        return callAsFlinkException(
+            () -> {
+                KubernetesClusterDescriptor clusterDescriptor = getK8sClusterDescriptor(flinkConfig);
 
-        Tuple2<PackagedProgram, JobGraph> packageProgramJobGraph =
-            getJobGraph(flinkConfig, submitRequest, jarFile);
-        PackagedProgram packageProgram = packageProgramJobGraph._1();
-        JobGraph jobGraph = packageProgramJobGraph._2();
+                Tuple2<PackagedProgram, JobGraph> packageProgramJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, jarFile);
+                PackagedProgram packageProgram = packageProgramJobGraph._1();
+                JobGraph jobGraph = packageProgramJobGraph._2();
 
-        ClusterClient<String> client =
-            clusterDescriptor
-                .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
-                .getClusterClient();
-        String jobId = client.submitJob(jobGraph).get().toString();
-        SubmitResponse result =
-            new SubmitResponse(
-                client.getClusterId(), flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-        logInfo(
-            "[flink-submit] flink job has been submitted. "
-                + flinkConfIdentifierInfo(flinkConfig)
-                + ", jobId: "
-                + jobId);
-        closeSubmit(submitRequest, packageProgram, client, client);
-        return result;
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+                ClusterClient<String> client =
+                    clusterDescriptor
+                        .retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID))
+                        .getClusterClient();
+                String jobId = client.submitJob(jobGraph).get().toString();
+                SubmitResponse result =
+                    new SubmitResponse(
+                        client.getClusterId(), flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+                logInfo(
+                    "[flink-submit] flink job has been submitted. "
+                        + flinkConfIdentifierInfo(flinkConfig)
+                        + ", jobId: "
+                        + jobId);
+                closeSubmit(submitRequest, packageProgram, client, client);
+                return result;
+            });
     }
 
     @Override

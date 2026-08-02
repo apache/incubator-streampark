@@ -111,6 +111,64 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         return new FlinkException(throwable.getMessage(), throwable);
     }
 
+    @FunctionalInterface
+    protected interface FlinkCallable<T> {
+
+        T call() throws Exception;
+    }
+
+    protected static <T> T callAsFlinkException(FlinkCallable<T> callable) throws FlinkException {
+        try {
+            return callable.call();
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
+    }
+
+    protected static <T> T callAsFlinkException(
+                                                FlinkCallable<T> callable,
+                                                java.util.function.Consumer<Exception> onFailure)
+        throws FlinkException {
+        try {
+            return callable.call();
+        } catch (FlinkException e) {
+            onFailure.accept(e);
+            throw e;
+        } catch (Exception e) {
+            onFailure.accept(e);
+            throw asFlinkException(e);
+        }
+    }
+
+    protected static <T> T callAsFlinkException(
+                                                FlinkCallable<T> callable,
+                                                java.util.function.Function<Exception, FlinkException> exceptionMapper)
+        throws FlinkException {
+        try {
+            return callable.call();
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw exceptionMapper.apply(e);
+        }
+    }
+
+    protected CancelResponse toCancelResponse(
+                                              CancelRequest request, JobID jobId, ClusterClient<?> client)
+        throws FlinkException {
+        return callAsFlinkException(() -> new CancelResponse(cancelJob(request, jobId, client)));
+    }
+
+    protected SavepointResponse toSavepointResponse(
+                                                      TriggerSavepointRequest request,
+                                                      JobID jobId,
+                                                      ClusterClient<?> client) throws FlinkException {
+        return callAsFlinkException(
+            () -> new SavepointResponse(triggerSavepoint(request, jobId, client)));
+    }
+
     public SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
         logInfo(
             "\n"
@@ -159,41 +217,24 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
 
-        Configuration flinkConfig;
-        try {
-            flinkConfig = prepareConfig(submitRequest);
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        Configuration flinkConfig = callAsFlinkException(() -> prepareConfig(submitRequest));
         setConfig(submitRequest, flinkConfig);
 
-        try {
-            return doSubmit(submitRequest, flinkConfig);
-        } catch (FlinkException e) {
-            logError(
-                "flink job "
-                    + submitRequest.appName()
-                    + " start failed, "
-                    + "deployMode: "
-                    + submitRequest.deployMode().getName()
-                    + ", "
-                    + "detail: "
-                    + ExceptionUtils.stringifyException(e));
-            throw e;
-        } catch (Exception e) {
-            logError(
-                "flink job "
-                    + submitRequest.appName()
-                    + " start failed, "
-                    + "deployMode: "
-                    + submitRequest.deployMode().getName()
-                    + ", "
-                    + "detail: "
-                    + ExceptionUtils.stringifyException(e));
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(
+            () -> doSubmit(submitRequest, flinkConfig),
+            e -> logSubmitFailure(submitRequest, e));
+    }
+
+    private void logSubmitFailure(SubmitRequest submitRequest, Exception e) {
+        logError(
+            "flink job "
+                + submitRequest.appName()
+                + " start failed, "
+                + "deployMode: "
+                + submitRequest.deployMode().getName()
+                + ", "
+                + "detail: "
+                + ExceptionUtils.stringifyException(e));
     }
 
     private Configuration prepareConfig(SubmitRequest submitRequest) throws Exception {
@@ -364,13 +405,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
         Configuration flinkConf = new Configuration();
-        try {
-            return doTriggerSavepoint(savepointRequest, flinkConf);
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(() -> doTriggerSavepoint(savepointRequest, flinkConf));
     }
 
     public CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
@@ -409,13 +444,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
         Configuration flinkConf = new Configuration();
-        try {
-            return doCancel(cancelRequest, flinkConf);
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(() -> doCancel(cancelRequest, flinkConf));
     }
 
     public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf)

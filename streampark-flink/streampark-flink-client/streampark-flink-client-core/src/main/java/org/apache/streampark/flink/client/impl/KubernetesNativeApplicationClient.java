@@ -61,49 +61,46 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
                     flinkConfig.get(DeploymentOptions.TARGET)));
         }
 
-        try {
-            submitRequest.checkBuildResult();
+        return callAsFlinkException(
+            () -> {
+                submitRequest.checkBuildResult();
 
-            DockerImageBuildResponse buildResult =
-                (DockerImageBuildResponse) submitRequest.buildResult();
+                DockerImageBuildResponse buildResult =
+                    (DockerImageBuildResponse) submitRequest.buildResult();
 
-            FlinkConfigurationOps.safeSet(
-                flinkConfig,
-                PipelineOptions.JARS,
-                Lists.newArrayList(buildResult.dockerInnerMainJarPath()));
-            FlinkConfigurationOps.safeSet(
-                flinkConfig, KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag());
+                FlinkConfigurationOps.safeSet(
+                    flinkConfig,
+                    PipelineOptions.JARS,
+                    Lists.newArrayList(buildResult.dockerInnerMainJarPath()));
+                FlinkConfigurationOps.safeSet(
+                    flinkConfig, KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag());
 
-            Tuple2<KubernetesClusterDescriptor, ClusterSpecification> descriptorAndSpec =
-                getK8sClusterDescriptorAndSpecification(flinkConfig);
-            KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1();
-            ClusterSpecification clusterSpecification = descriptorAndSpec._2();
+                Tuple2<KubernetesClusterDescriptor, ClusterSpecification> descriptorAndSpec =
+                    getK8sClusterDescriptorAndSpecification(flinkConfig);
+                KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1();
+                ClusterSpecification clusterSpecification = descriptorAndSpec._2();
 
-            ApplicationConfiguration applicationConfig =
-                ApplicationConfiguration.fromConfiguration(flinkConfig);
-            ClusterClient<String> clusterClient =
-                clusterDescriptor
-                    .deployApplicationCluster(clusterSpecification, applicationConfig)
-                    .getClusterClient();
+                ApplicationConfiguration applicationConfig =
+                    ApplicationConfiguration.fromConfiguration(flinkConfig);
+                ClusterClient<String> clusterClient =
+                    clusterDescriptor
+                        .deployApplicationCluster(clusterSpecification, applicationConfig)
+                        .getClusterClient();
 
-            String clusterId = clusterClient.getClusterId();
-            SubmitResponse result =
-                new SubmitResponse(
-                    clusterId,
-                    flinkConfig.toMap(),
-                    submitRequest.jobId(),
-                    clusterClient.getWebInterfaceURL());
-            logInfo(
-                "[flink-submit] flink job has been submitted. "
-                    + flinkConfIdentifierInfo(flinkConfig));
+                String clusterId = clusterClient.getClusterId();
+                SubmitResponse result =
+                    new SubmitResponse(
+                        clusterId,
+                        flinkConfig.toMap(),
+                        submitRequest.jobId(),
+                        clusterClient.getWebInterfaceURL());
+                logInfo(
+                    "[flink-submit] flink job has been submitted. "
+                        + flinkConfIdentifierInfo(flinkConfig));
 
-            closeSubmit(submitRequest, clusterDescriptor, clusterClient);
-            return result;
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+                closeSubmit(submitRequest, clusterDescriptor, clusterClient);
+                return result;
+            });
     }
 
     @Override
@@ -112,20 +109,7 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
             flinkConf,
             DeploymentOptions.TARGET,
             FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION.getName());
-        return executeClientAction(
-            cancelRequest,
-            flinkConf,
-            (jobId, client) -> {
-                try {
-                    String resp = cancelJob(cancelRequest, jobId, client);
-                    client.shutDownCluster();
-                    return new CancelResponse(resp);
-                } catch (FlinkException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw asFlinkException(e);
-                }
-            });
+        return super.doCancel(cancelRequest, flinkConf);
     }
 
     @Override

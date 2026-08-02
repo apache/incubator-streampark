@@ -22,21 +22,13 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 
 import javax.annotation.Nullable;
 
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /** Trigger savepoint request. */
-public class TriggerSavepointRequest implements SavepointRequestTrait, Serializable {
+public class TriggerSavepointRequest extends AbstractSavepointClientRequest {
 
     private static final long serialVersionUID = 1L;
 
-    private final long id;
-    private final FlinkVersion flinkVersion;
-    private final FlinkDeployMode deployMode;
-    @Nullable
-    private final Map<String, Serializable> properties;
-    private final JobClientTarget target;
     private final SavepointTriggerOptions savepointOptions;
 
     public TriggerSavepointRequest(
@@ -46,47 +38,8 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
                                    @Nullable Map<String, Object> properties,
                                    JobClientTarget target,
                                    SavepointTriggerOptions savepointOptions) {
-        this.id = id;
-        this.flinkVersion = flinkVersion;
-        this.deployMode = deployMode;
-        this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.target = target;
+        super(id, flinkVersion, deployMode, properties, target);
         this.savepointOptions = savepointOptions;
-    }
-
-    public long id() {
-        return id;
-    }
-
-    @Override
-    public FlinkVersion flinkVersion() {
-        return flinkVersion;
-    }
-
-    @Override
-    public FlinkDeployMode deployMode() {
-        return deployMode;
-    }
-
-    @Override
-    @Nullable
-    public Map<String, Object> properties() {
-        if (properties == null) {
-            return null;
-        }
-        Map<String, Object> result = new HashMap<>();
-        result.putAll(properties);
-        return result;
-    }
-
-    @Override
-    public String clusterId() {
-        return target.clusterId();
-    }
-
-    @Override
-    public String jobId() {
-        return target.jobId();
     }
 
     @Override
@@ -97,10 +50,5 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
     @Override
     public boolean nativeFormat() {
         return savepointOptions.nativeFormat();
-    }
-
-    @Override
-    public String kubernetesNamespace() {
-        return target.kubernetesNamespace();
     }
 }

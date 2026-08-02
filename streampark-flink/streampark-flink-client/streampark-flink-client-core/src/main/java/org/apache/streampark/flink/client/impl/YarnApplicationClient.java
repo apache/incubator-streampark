@@ -146,41 +146,38 @@ public final class YarnApplicationClient extends YarnClientTrait {
     @Override
     public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
         throws FlinkException {
-        try {
-            Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
-                getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
-            ClusterSpecification clusterSpecification = deployDescriptor._1();
-            YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
-            logInfo(
-                String.format(
-                    "%n------------------------<<specification>>-------------------------%n"
-                        + "%s%n"
-                        + "------------------------------------------------------------------%n",
-                    clusterSpecification));
+        return callAsFlinkException(
+            () -> {
+                Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
+                    getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
+                ClusterSpecification clusterSpecification = deployDescriptor._1();
+                YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
+                logInfo(
+                    String.format(
+                        "%n------------------------<<specification>>-------------------------%n"
+                            + "%s%n"
+                            + "------------------------------------------------------------------%n",
+                        clusterSpecification));
 
-            ApplicationConfiguration applicationConfiguration =
-                ApplicationConfiguration.fromConfiguration(flinkConfig);
-            ClusterClient<ApplicationId> clusterClient =
-                clusterDescriptor
-                    .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-                    .getClusterClient();
-            ApplicationId applicationId = clusterClient.getClusterId();
-            String jobManagerUrl = clusterClient.getWebInterfaceURL();
-            logInfo(
-                String.format(
-                    "%n-------------------------<<applicationId>>------------------------%n"
-                        + "Flink Job Started: applicationId: %s%n"
-                        + "__________________________________________________________________%n",
-                    applicationId));
+                ApplicationConfiguration applicationConfiguration =
+                    ApplicationConfiguration.fromConfiguration(flinkConfig);
+                ClusterClient<ApplicationId> clusterClient =
+                    clusterDescriptor
+                        .deployApplicationCluster(clusterSpecification, applicationConfiguration)
+                        .getClusterClient();
+                ApplicationId applicationId = clusterClient.getClusterId();
+                String jobManagerUrl = clusterClient.getWebInterfaceURL();
+                logInfo(
+                    String.format(
+                        "%n-------------------------<<applicationId>>------------------------%n"
+                            + "Flink Job Started: applicationId: %s%n"
+                            + "__________________________________________________________________%n",
+                        applicationId));
 
-            SubmitResponse resp =
-                new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
-            closeSubmit(submitRequest, clusterClient, clusterDescriptor);
-            return resp;
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+                SubmitResponse resp =
+                    new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
+                closeSubmit(submitRequest, clusterClient, clusterDescriptor);
+                return resp;
+            });
     }
 }

@@ -64,22 +64,19 @@ public final class LocalClient extends FlinkClientTrait {
     @Override
     public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
         throws FlinkException {
-        try {
-            Tuple2<PackagedProgram, JobGraph> programJobGraph =
-                getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
-            PackagedProgram packageProgram = programJobGraph._1();
-            JobGraph jobGraph = programJobGraph._2();
-            MiniClusterClient client = createLocalCluster(flinkConfig);
-            String jobId = client.submitJob(jobGraph).get().toString();
-            SubmitResponse resp =
-                new SubmitResponse(jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-            closeSubmit(submitRequest, packageProgram, client);
-            return resp;
-        } catch (FlinkException e) {
-            throw e;
-        } catch (Exception e) {
-            throw asFlinkException(e);
-        }
+        return callAsFlinkException(
+            () -> {
+                Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
+                PackagedProgram packageProgram = programJobGraph._1();
+                JobGraph jobGraph = programJobGraph._2();
+                MiniClusterClient client = createLocalCluster(flinkConfig);
+                String jobId = client.submitJob(jobGraph).get().toString();
+                SubmitResponse resp =
+                    new SubmitResponse(jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+                closeSubmit(submitRequest, packageProgram, client);
+                return resp;
+            });
     }
 
     @Override

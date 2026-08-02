@@ -29,6 +29,16 @@ final class ClientBeanUtils {
     }
 
     @Nullable
+    static Map<String, Object> copyPropertiesMap(@Nullable Map<String, Serializable> properties) {
+        if (properties == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(properties);
+        return result;
+    }
+
+    @Nullable
     static Map<String, Serializable> toSerializableMap(@Nullable Map<String, Object> properties) {
         if (properties == null) {
             return null;

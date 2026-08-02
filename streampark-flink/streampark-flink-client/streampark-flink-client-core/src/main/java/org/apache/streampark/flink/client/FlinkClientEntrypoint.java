@@ -63,32 +63,39 @@ public final class FlinkClientEntrypoint {
     private FlinkClientEntrypoint() {
     }
 
-    public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
-        FlinkClientTrait client = CLIENTS.get(submitRequest.deployMode());
+    @FunctionalInterface
+    private interface ClientInvoker<R> {
+
+        R invoke(FlinkClientTrait client) throws FlinkException;
+    }
+
+    private static <R> R invokeClient(
+                                      FlinkDeployMode deployMode,
+                                      ClientInvoker<R> invoker,
+                                      String action) throws FlinkException {
+        FlinkClientTrait client = CLIENTS.get(deployMode);
         if (client != null) {
-            return client.submit(submitRequest);
+            return invoker.invoke(client);
         }
-        throw new UnsupportedOperationException(
-            "Unsupported " + submitRequest.deployMode() + " submit ");
+        throw new UnsupportedOperationException("Unsupported " + deployMode + " " + action);
+    }
+
+    public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
+        return invokeClient(
+            submitRequest.deployMode(), client -> client.submit(submitRequest), "submit");
     }
 
     public static CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
-        FlinkClientTrait client = CLIENTS.get(cancelRequest.deployMode());
-        if (client != null) {
-            return client.cancel(cancelRequest);
-        }
-        throw new UnsupportedOperationException(
-            "Unsupported " + cancelRequest.deployMode() + " cancel ");
+        return invokeClient(
+            cancelRequest.deployMode(), client -> client.cancel(cancelRequest), "cancel");
     }
 
     public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest)
         throws FlinkException {
-        FlinkClientTrait client = CLIENTS.get(savepointRequest.deployMode());
-        if (client != null) {
-            return client.triggerSavepoint(savepointRequest);
-        }
-        throw new UnsupportedOperationException(
-            "Unsupported " + savepointRequest.deployMode() + " triggerSavepoint ");
+        return invokeClient(
+            savepointRequest.deployMode(),
+            client -> client.triggerSavepoint(savepointRequest),
+            "triggerSavepoint");
     }
 
     public static DeployResponse deploy(DeployRequest deployRequest) throws FlinkException {

@@ -119,17 +119,11 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
             cancelRequest,
             flinkConfig,
             (jobId, client) -> {
-                try {
-                    String resp = cancelJob(cancelRequest, jobId, client);
-                    if (cancelRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
-                        client.shutDownCluster();
-                    }
-                    return new CancelResponse(resp);
-                } catch (FlinkException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw asFlinkException(e);
+                String resp = callAsFlinkException(() -> cancelJob(cancelRequest, jobId, client));
+                if (cancelRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
+                    client.shutDownCluster();
                 }
+                return new CancelResponse(resp);
             });
     }
 
@@ -140,16 +134,7 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
         return executeClientAction(
             savepointRequest,
             flinkConfig,
-            (jobId, clusterClient) -> {
-                try {
-                    return new SavepointResponse(
-                        triggerSavepoint(savepointRequest, jobId, clusterClient));
-                } catch (FlinkException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw asFlinkException(e);
-                }
-            });
+            (jobId, clusterClient) -> toSavepointResponse(savepointRequest, jobId, clusterClient));
     }
 
     public <O> O executeClientAction(
@@ -186,22 +171,10 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
                     .getClusterClient();
             return actFunc.apply(JobID.fromHexString(request.jobId()), client);
         } catch (FlinkException e) {
-            logError(
-                hints
-                    + " mode="
-                    + flinkConfig.get(DeploymentOptions.TARGET)
-                    + ", request="
-                    + request,
-                e);
+            logClientActionFailure(hints, flinkConfig, request, e);
             throw e;
         } catch (Exception e) {
-            logError(
-                hints
-                    + " mode="
-                    + flinkConfig.get(DeploymentOptions.TARGET)
-                    + ", request="
-                    + request,
-                e);
+            logClientActionFailure(hints, flinkConfig, request, e);
             throw asFlinkException(e);
         } finally {
             if (client != null) {
@@ -211,6 +184,20 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
                 clusterDescriptor.close();
             }
         }
+    }
+
+    private void logClientActionFailure(
+                                        String hints,
+                                        Configuration flinkConfig,
+                                        SavepointRequestTrait request,
+                                        Exception e) {
+        logError(
+            hints
+                + " mode="
+                + flinkConfig.get(DeploymentOptions.TARGET)
+                + ", request="
+                + request,
+            e);
     }
 
     public Tuple2<KubernetesClusterDescriptor, ClusterSpecification> getK8sClusterDescriptorAndSpecification(Configuration flinkConfig) {
