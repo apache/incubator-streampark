@@ -24,6 +24,7 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CancelRequest implements SavepointRequestTrait, Serializable {
@@ -34,7 +35,7 @@ public class CancelRequest implements SavepointRequestTrait, Serializable {
     private final FlinkVersion flinkVersion;
     private final FlinkDeployMode deployMode;
     @Nullable
-    private final Map<String, Object> properties;
+    private final Map<String, Serializable> properties;
     private final String clusterId;
     private final String jobId;
     private final boolean withSavepoint;
@@ -43,6 +44,7 @@ public class CancelRequest implements SavepointRequestTrait, Serializable {
     private final boolean nativeFormat;
     private final String kubernetesNamespace;
 
+    @SuppressWarnings("java:S107")
     public CancelRequest(
                          long id,
                          FlinkVersion flinkVersion,
@@ -58,7 +60,7 @@ public class CancelRequest implements SavepointRequestTrait, Serializable {
         this.id = id;
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
-        this.properties = properties;
+        this.properties = ClientBeanUtils.toSerializableMap(properties);
         this.clusterId = clusterId;
         this.jobId = jobId;
         this.withSavepoint = withSavepoint;
@@ -86,7 +88,12 @@ public class CancelRequest implements SavepointRequestTrait, Serializable {
     @Override
     @Nullable
     public Map<String, Object> properties() {
-        return properties;
+        if (properties == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(properties);
+        return result;
     }
 
     @Override

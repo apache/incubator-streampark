@@ -234,6 +234,7 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
     }
 
     @FunctionalInterface
+    @SuppressWarnings("java:S112")
     protected interface ClientAction<O> {
 
         O apply(JobID jobId, ClusterClient<?> clusterClient) throws Exception;

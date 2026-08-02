@@ -166,8 +166,7 @@ public final class RemoteClient extends FlinkClientTrait {
                 standAloneDescriptor._2().retrieve(standAloneDescriptor._1()).getClusterClient();
             return actFunc.apply(JobID.fromHexString(request.jobId()), client);
         } catch (Exception e) {
-            logError("Do " + request.getClass().getSimpleName() + " for flink standalone job fail");
-            e.printStackTrace();
+            logError("Do " + request.getClass().getSimpleName() + " for flink standalone job fail", e);
             throw e;
         } finally {
             if (client != null) {
@@ -191,6 +190,7 @@ public final class RemoteClient extends FlinkClientTrait {
     }
 
     @FunctionalInterface
+    @SuppressWarnings("java:S112")
     private interface ClientAction<O> {
 
         O apply(JobID jobId, ClusterClient<?> clusterClient) throws Exception;

@@ -173,27 +173,10 @@ public final class YarnSessionClient extends YarnClientTrait {
             clusterDescriptor = yarnClusterDescriptor._2();
 
             if (StringUtils.isNotBlank(deployRequest.clusterId())) {
-                try {
-                    FinalApplicationStatus applicationStatus =
-                        clusterDescriptor
-                            .getYarnClient()
-                            .getApplicationReport(
-                                ApplicationId.fromString(deployRequest.clusterId()))
-                            .getFinalApplicationStatus();
-                    if (FinalApplicationStatus.UNDEFINED == applicationStatus) {
-                        ClusterClient<ApplicationId> yarnClient =
-                            clusterDescriptor
-                                .retrieve(ApplicationId.fromString(deployRequest.clusterId()))
-                                .getClusterClient();
-                        if (yarnClient.getWebInterfaceURL() != null) {
-                            return new DeployResponse(
-                                yarnClient.getWebInterfaceURL(),
-                                yarnClient.getClusterId().toString(),
-                                null);
-                        }
-                    }
-                } catch (ApplicationNotFoundException e) {
-                    logInfo("this applicationId have not managed by yarn ,need deploy ...");
+                DeployResponse existingSession =
+                    tryReuseExistingYarnSession(deployRequest, clusterDescriptor);
+                if (existingSession != null) {
+                    return existingSession;
                 }
             }
 
@@ -214,6 +197,36 @@ public final class YarnSessionClient extends YarnClientTrait {
             throw e;
         } finally {
             Utils.close(client, clusterDescriptor);
+        }
+    }
+
+    private DeployResponse tryReuseExistingYarnSession(
+                                                         DeployRequest deployRequest,
+                                                         YarnClusterDescriptor clusterDescriptor) throws Exception {
+        try {
+            FinalApplicationStatus applicationStatus =
+                clusterDescriptor
+                    .getYarnClient()
+                    .getApplicationReport(
+                        ApplicationId.fromString(deployRequest.clusterId()))
+                    .getFinalApplicationStatus();
+            if (FinalApplicationStatus.UNDEFINED != applicationStatus) {
+                return null;
+            }
+            ClusterClient<ApplicationId> yarnClient =
+                clusterDescriptor
+                    .retrieve(ApplicationId.fromString(deployRequest.clusterId()))
+                    .getClusterClient();
+            if (yarnClient.getWebInterfaceURL() == null) {
+                return null;
+            }
+            return new DeployResponse(
+                yarnClient.getWebInterfaceURL(),
+                yarnClient.getClusterId().toString(),
+                null);
+        } catch (ApplicationNotFoundException e) {
+            logInfo("this applicationId have not managed by yarn ,need deploy ...");
+            return null;
         }
     }
 

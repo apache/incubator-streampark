@@ -60,7 +60,7 @@ public class SubmitRequest implements Serializable {
 
     private final FlinkVersion flinkVersion;
     private final FlinkDeployMode deployMode;
-    private final Map<String, Object> properties;
+    private final Map<String, Serializable> properties;
     private final String flinkYaml;
     private final FlinkJobType jobType;
     private final long id;
@@ -75,10 +75,11 @@ public class SubmitRequest implements Serializable {
     private final String clusterId;
     @Nullable
     private final String hadoopUser;
+    @SuppressWarnings("java:S1948")
     @Nullable
     private final BuildResult buildResult;
     @Nullable
-    private final Map<String, Object> extraParameter;
+    private final Map<String, Serializable> extraParameter;
     @Nullable
     private final String kubernetesNamespace;
     @Nullable
@@ -97,6 +98,7 @@ public class SubmitRequest implements Serializable {
     private transient Boolean safePackageProgram;
     private transient HdfsWorkspace hdfsWorkspace;
 
+    @SuppressWarnings("java:S107")
     public SubmitRequest(
                          FlinkVersion flinkVersion,
                          FlinkDeployMode deployMode,
@@ -119,7 +121,7 @@ public class SubmitRequest implements Serializable {
                          @Nullable FlinkK8sRestExposedType flinkRestExposedType) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
-        this.properties = properties;
+        this.properties = ClientBeanUtils.toSerializableMap(properties);
         this.flinkYaml = flinkYaml;
         this.jobType = jobType;
         this.id = id;
@@ -133,7 +135,7 @@ public class SubmitRequest implements Serializable {
         this.clusterId = clusterId;
         this.hadoopUser = hadoopUser;
         this.buildResult = buildResult;
-        this.extraParameter = extraParameter;
+        this.extraParameter = ClientBeanUtils.toSerializableMap(extraParameter);
         this.kubernetesNamespace = kubernetesNamespace;
         this.flinkRestExposedType = flinkRestExposedType;
     }
@@ -147,7 +149,11 @@ public class SubmitRequest implements Serializable {
     }
 
     public Map<String, Object> properties() {
-        return properties;
+        Map<String, Object> result = new HashMap<>();
+        if (properties != null) {
+            result.putAll(properties);
+        }
+        return result;
     }
 
     public String flinkYaml() {
@@ -207,7 +213,12 @@ public class SubmitRequest implements Serializable {
 
     @Nullable
     public Map<String, Object> extraParameter() {
-        return extraParameter;
+        if (extraParameter == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(extraParameter);
+        return result;
     }
 
     @Nullable
@@ -257,8 +268,7 @@ public class SubmitRequest implements Serializable {
 
     public List<URL> libs() {
         if (libs == null) {
-            String path = Workspace.local().APP_WORKSPACE() + "/" + id + "/lib";
-            File libDir = new File(path);
+            File libDir = new File(new File(Workspace.local().APP_WORKSPACE(), String.valueOf(id)), "lib");
             File[] files = libDir.listFiles();
             if (files == null) {
                 libs = Collections.emptyList();
@@ -332,8 +342,8 @@ public class SubmitRequest implements Serializable {
                 userJarFile = null;
             } else {
                 checkBuildResult();
-                userJarFile =
-                    new File(((ShadedBuildResponse) buildResult).shadedJarPath());
+                ShadedBuildResponse shadedBuildResult = buildResult.as(ShadedBuildResponse.class);
+                userJarFile = new File(shadedBuildResult.shadedJarPath());
             }
         }
         return userJarFile;
@@ -365,6 +375,12 @@ public class SubmitRequest implements Serializable {
 
     public Object getProp(String key) {
         return properties.get(key);
+    }
+
+    public void putProperty(String key, Serializable value) {
+        if (properties != null) {
+            properties.put(key, value);
+        }
     }
 
     public boolean hasExtra(String key) {
@@ -441,63 +457,68 @@ public class SubmitRequest implements Serializable {
             return Collections.emptyMap();
         }
         String format = appConf.substring(0, Math.min(appConf.length(), 7));
-        if ("json://".equals(format)) {
-            String json = appConf.substring(7);
-            try {
-                Map<String, String> map =
-                    new ObjectMapper()
-                        .readValue(json, new TypeReference<Map<String, String>>() {
-                        });
-                return map.entrySet().stream()
-                    .filter(e -> e.getValue() != null)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+        Map<String, String> map = loadAppConfMap(format);
+        return filterByPrefix(map, prefix);
+    }
 
+    private Map<String, String> loadAppConfMap(String format) {
+        if ("json://".equals(format)) {
+            return parseJsonAppConf();
+        }
         String content = DeflaterUtils.unzipString(appConf.trim().substring(7));
-        Map<String, String> map;
         switch (format) {
             case "yaml://":
-                map = PropertiesUtils.fromYamlTextAsJava(content);
-                break;
+                return PropertiesUtils.fromYamlTextAsJava(content);
             case "conf://":
-                map = PropertiesUtils.fromHoconTextAsJava(content);
-                break;
+                return PropertiesUtils.fromHoconTextAsJava(content);
             case "prop://":
-                map = PropertiesUtils.fromPropertiesTextAsJava(content);
-                break;
+                return PropertiesUtils.fromPropertiesTextAsJava(content);
             case "hdfs://":
-                try {
-                    String text = HdfsUtils.read(appConf);
-                    String extension = appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
-                    switch (extension) {
-                        case "yml":
-                        case "yaml":
-                            map = PropertiesUtils.fromYamlTextAsJava(text);
-                            break;
-                        case "conf":
-                            map = PropertiesUtils.fromHoconTextAsJava(text);
-                            break;
-                        case "properties":
-                            map = PropertiesUtils.fromPropertiesTextAsJava(text);
-                            break;
-                        default:
-                            throw new IllegalArgumentException(
-                                "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
-                    }
-                } catch (Exception e) {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
-                    throw new RuntimeException(e);
-                }
-                break;
+                return parseHdfsAppConf();
             default:
                 throw new IllegalArgumentException("[StreamPark] application config format error.");
         }
+    }
 
+    private Map<String, String> parseJsonAppConf() {
+        String json = appConf.substring(7);
+        try {
+            Map<String, String> map =
+                new ObjectMapper()
+                    .readValue(json, new TypeReference<Map<String, String>>() {
+                    });
+            return map.entrySet().stream()
+                .filter(e -> e.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<String, String> parseHdfsAppConf() {
+        try {
+            String text = HdfsUtils.read(appConf);
+            String extension = appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
+            switch (extension) {
+                case "yml":
+                case "yaml":
+                    return PropertiesUtils.fromYamlTextAsJava(text);
+                case "conf":
+                    return PropertiesUtils.fromHoconTextAsJava(text);
+                case "properties":
+                    return PropertiesUtils.fromPropertiesTextAsJava(text);
+                default:
+                    throw new IllegalArgumentException(
+                        "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Map<String, String> filterByPrefix(Map<String, String> map, String prefix) {
         Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey();

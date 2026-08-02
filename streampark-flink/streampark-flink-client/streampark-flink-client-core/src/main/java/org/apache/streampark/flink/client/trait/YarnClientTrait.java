@@ -78,6 +78,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
             (jobId, client) -> new CancelResponse(cancelJob(cancelRequest, jobId, client)));
     }
 
+    @SuppressWarnings("java:S112")
     public ClusterClientProvider<ApplicationId> deployInternal(
                                                                YarnClusterDescriptor clusterDescriptor,
                                                                ClusterSpecification clusterSpecification,
@@ -194,6 +195,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
         return deployInternalMethod;
     }
 
+    @SuppressWarnings("java:S112")
     private <T> T doAsYarnClusterDescriptor(String user, YarnDescriptorSupplier<T> func) throws Exception {
         UserGroupInformation ugi = HadoopUtils.getUgi();
         UserGroupInformation finalUgi =
@@ -214,19 +216,21 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                 });
         } catch (RuntimeException e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;
-            throw new RuntimeException(
+            throw new FlinkException(
                 "[StreamPark] Error executing YarnClusterDescriptor operation as user " + user,
                 cause);
         }
     }
 
     @FunctionalInterface
+    @SuppressWarnings("java:S112")
     private interface ClientAction<O> {
 
         O apply(JobID jobId, ClusterClient<?> client) throws Exception;
     }
 
     @FunctionalInterface
+    @SuppressWarnings("java:S112")
     private interface YarnDescriptorSupplier<T> {
 
         T get() throws Exception;

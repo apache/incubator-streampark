@@ -106,10 +106,9 @@ public final class FlinkClient extends LoggerSupport {
                         return null;
                     }
                     return FlinkShimsProxy.getObject(FlinkClient.class.getClassLoader(), obj);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
                     throw new RuntimeException(e);
                 }
             });

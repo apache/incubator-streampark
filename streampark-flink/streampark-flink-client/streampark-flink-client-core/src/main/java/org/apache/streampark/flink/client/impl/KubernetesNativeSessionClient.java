@@ -215,8 +215,8 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
             }
             return null;
         } catch (Exception e) {
-            logError("shutdown flink session fail in " + shutDownRequest.deployMode() + " mode");
-            e.printStackTrace();
+            logError(
+                "shutdown flink session fail in " + shutDownRequest.deployMode() + " mode", e);
             throw e;
         } finally {
             Utils.close(kubeClient);

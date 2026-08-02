@@ -24,6 +24,7 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /** Trigger savepoint request. */
@@ -35,13 +36,14 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
     private final FlinkVersion flinkVersion;
     private final FlinkDeployMode deployMode;
     @Nullable
-    private final Map<String, Object> properties;
+    private final Map<String, Serializable> properties;
     private final String clusterId;
     private final String jobId;
     private final String savepointPath;
     private final boolean nativeFormat;
     private final String kubernetesNamespace;
 
+    @SuppressWarnings("java:S107")
     public TriggerSavepointRequest(
                                    long id,
                                    FlinkVersion flinkVersion,
@@ -55,7 +57,7 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
         this.id = id;
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
-        this.properties = properties;
+        this.properties = ClientBeanUtils.toSerializableMap(properties);
         this.clusterId = clusterId;
         this.jobId = jobId;
         this.savepointPath = savepointPath;
@@ -81,7 +83,12 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
     @Override
     @Nullable
     public Map<String, Object> properties() {
-        return properties;
+        if (properties == null) {
+            return null;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(properties);
+        return result;
     }
 
     @Override

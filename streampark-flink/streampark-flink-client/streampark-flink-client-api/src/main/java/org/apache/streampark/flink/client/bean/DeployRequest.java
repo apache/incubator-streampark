@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DeployRequest implements DeployRequestTrait, Serializable {
@@ -36,7 +37,7 @@ public class DeployRequest implements DeployRequestTrait, Serializable {
 
     private final FlinkVersion flinkVersion;
     private final FlinkDeployMode deployMode;
-    private final Map<String, Object> properties;
+    private final Map<String, Serializable> properties;
     private final String clusterId;
     private final long id;
     @Nullable
@@ -53,7 +54,7 @@ public class DeployRequest implements DeployRequestTrait, Serializable {
                          @Nullable KubernetesDeployParam k8sParam) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
-        this.properties = properties;
+        this.properties = ClientBeanUtils.toSerializableMap(properties);
         this.clusterId = clusterId;
         this.id = id;
         this.k8sParam = k8sParam;
@@ -71,7 +72,11 @@ public class DeployRequest implements DeployRequestTrait, Serializable {
 
     @Override
     public Map<String, Object> properties() {
-        return properties;
+        Map<String, Object> result = new HashMap<>();
+        if (properties != null) {
+            result.putAll(properties);
+        }
+        return result;
     }
 
     @Override
