@@ -37,6 +37,8 @@ import org.apache.streampark.flink.client.impl.YarnPerJobClient;
 import org.apache.streampark.flink.client.impl.YarnSessionClient;
 import org.apache.streampark.flink.client.trait.FlinkClientTrait;
 
+import org.apache.flink.util.FlinkException;
+
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -61,7 +63,7 @@ public final class FlinkClientEntrypoint {
     private FlinkClientEntrypoint() {
     }
 
-    public static SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
+    public static SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
         FlinkClientTrait client = CLIENTS.get(submitRequest.deployMode());
         if (client != null) {
             return client.submit(submitRequest);
@@ -70,7 +72,7 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + submitRequest.deployMode() + " submit ");
     }
 
-    public static CancelResponse cancel(CancelRequest cancelRequest) throws Exception {
+    public static CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
         FlinkClientTrait client = CLIENTS.get(cancelRequest.deployMode());
         if (client != null) {
             return client.cancel(cancelRequest);
@@ -79,7 +81,8 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + cancelRequest.deployMode() + " cancel ");
     }
 
-    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws Exception {
+    public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest)
+        throws FlinkException {
         FlinkClientTrait client = CLIENTS.get(savepointRequest.deployMode());
         if (client != null) {
             return client.triggerSavepoint(savepointRequest);
@@ -88,7 +91,7 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + savepointRequest.deployMode() + " triggerSavepoint ");
     }
 
-    public static DeployResponse deploy(DeployRequest deployRequest) throws Exception {
+    public static DeployResponse deploy(DeployRequest deployRequest) throws FlinkException {
         if (deployRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.deploy(deployRequest);
         }
@@ -99,7 +102,7 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + deployRequest.deployMode() + " deploy cluster ");
     }
 
-    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws Exception {
+    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws FlinkException {
         if (shutDownRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.shutdown(shutDownRequest);
         }
