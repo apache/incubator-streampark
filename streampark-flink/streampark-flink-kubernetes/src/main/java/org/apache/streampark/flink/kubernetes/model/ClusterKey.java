@@ -28,11 +28,9 @@ import lombok.Builder;
 @AllArgsConstructor
 public class ClusterKey {
 
-    private static final String DEFAULT_NAMESPACE = "default";
-
     private final FlinkK8sDeployMode executeMode;
     @Builder.Default
-    private final String namespace = DEFAULT_NAMESPACE;
+    private final String namespace = "default";
     private final String clusterId;
 
     public FlinkK8sDeployMode executeMode() {

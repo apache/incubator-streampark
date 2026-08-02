@@ -27,14 +27,12 @@ import lombok.Builder;
 @AllArgsConstructor
 public class K8sPodTemplates {
 
-    private static final String EMPTY_TEMPLATE = "";
-
     @Builder.Default
-    private final String podTemplate = EMPTY_TEMPLATE;
+    private final String podTemplate = "";
     @Builder.Default
-    private final String jmPodTemplate = EMPTY_TEMPLATE;
+    private final String jmPodTemplate = "";
     @Builder.Default
-    private final String tmPodTemplate = EMPTY_TEMPLATE;
+    private final String tmPodTemplate = "";
 
     public String podTemplate() {
         return podTemplate;

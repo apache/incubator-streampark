@@ -25,28 +25,26 @@ import lombok.Builder;
 @AllArgsConstructor
 public class FlinkMetricCV {
 
-    private static final Integer ZERO = 0;
-
     @Builder.Default
     private final String groupId = null;
     @Builder.Default
-    private final Integer totalJmMemory = ZERO;
+    private final Integer totalJmMemory = 0;
     @Builder.Default
-    private final Integer totalTmMemory = ZERO;
+    private final Integer totalTmMemory = 0;
     @Builder.Default
-    private final Integer totalTm = ZERO;
+    private final Integer totalTm = 0;
     @Builder.Default
-    private final Integer totalSlot = ZERO;
+    private final Integer totalSlot = 0;
     @Builder.Default
-    private final Integer availableSlot = ZERO;
+    private final Integer availableSlot = 0;
     @Builder.Default
-    private final Integer runningJob = ZERO;
+    private final Integer runningJob = 0;
     @Builder.Default
-    private final Integer finishedJob = ZERO;
+    private final Integer finishedJob = 0;
     @Builder.Default
-    private final Integer cancelledJob = ZERO;
+    private final Integer cancelledJob = 0;
     @Builder.Default
-    private final Integer failedJob = ZERO;
+    private final Integer failedJob = 0;
     private final Long pollAckTime;
 
     public String groupId() {
