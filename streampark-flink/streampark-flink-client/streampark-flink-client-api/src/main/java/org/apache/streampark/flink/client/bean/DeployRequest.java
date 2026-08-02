@@ -18,30 +18,15 @@
 package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.conf.Workspace;
 import org.apache.streampark.common.enums.FlinkDeployMode;
-import org.apache.streampark.flink.util.FlinkUtils;
-
-import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
-public class DeployRequest implements DeployRequestTrait, Serializable {
+public class DeployRequest extends AbstractDeployClientRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private final FlinkVersion flinkVersion;
-    private final FlinkDeployMode deployMode;
-    private final Map<String, Serializable> properties;
-    private final String clusterId;
-    private final long id;
-    @Nullable
-    private final KubernetesDeployParam k8sParam;
 
     private transient HdfsWorkspace hdfsWorkspace;
 
@@ -52,72 +37,12 @@ public class DeployRequest implements DeployRequestTrait, Serializable {
                          String clusterId,
                          long id,
                          @Nullable KubernetesDeployParam k8sParam) {
-        this.flinkVersion = flinkVersion;
-        this.deployMode = deployMode;
-        this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.clusterId = clusterId;
-        this.id = id;
-        this.k8sParam = k8sParam;
-    }
-
-    @Override
-    public FlinkVersion flinkVersion() {
-        return flinkVersion;
-    }
-
-    @Override
-    public FlinkDeployMode deployMode() {
-        return deployMode;
-    }
-
-    @Override
-    public Map<String, Object> properties() {
-        Map<String, Object> result = new HashMap<>();
-        if (properties != null) {
-            result.putAll(properties);
-        }
-        return result;
-    }
-
-    @Override
-    public String clusterId() {
-        return clusterId;
-    }
-
-    @Override
-    public long id() {
-        return id;
-    }
-
-    @Override
-    @Nullable
-    public KubernetesDeployParam k8sParam() {
-        return k8sParam;
+        super(flinkVersion, deployMode, properties, clusterId, id, k8sParam);
     }
 
     public HdfsWorkspace hdfsWorkspace() {
         if (hdfsWorkspace == null) {
-            Workspace workspace = Workspace.remote();
-            String flinkHome = flinkVersion.flinkHome;
-            File flinkHomeDir = new File(flinkHome);
-            String flinkName;
-            try {
-                flinkName =
-                    FileUtils.isSymlink(flinkHomeDir)
-                        ? flinkHomeDir.getCanonicalFile().getName()
-                        : flinkHomeDir.getName();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
-            hdfsWorkspace =
-                new HdfsWorkspace(
-                    flinkName,
-                    flinkHome,
-                    FlinkUtils.getFlinkDistJar(flinkHome),
-                    flinkHdfsHome + "/lib",
-                    flinkHdfsHome + "/plugins",
-                    workspace.APP_JARS());
+            hdfsWorkspace = ClientBeanUtils.createHdfsWorkspace(flinkVersion());
         }
         return hdfsWorkspace;
     }

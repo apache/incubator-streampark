@@ -137,9 +137,9 @@ public abstract class FlinkClientTrait extends LoggerSupport {
         }
     }
 
-    protected static <T> T callAsFlinkException(
-                                                FlinkCallable<T> callable,
-                                                java.util.function.Function<Exception, FlinkException> exceptionMapper)
+    protected static <T> T callAsFlinkExceptionMapping(
+                                                           FlinkCallable<T> callable,
+                                                           java.util.function.Function<Exception, FlinkException> exceptionMapper)
         throws FlinkException {
         try {
             return callable.call();
@@ -306,7 +306,9 @@ public abstract class FlinkClientTrait extends LoggerSupport {
 
         return callAsFlinkException(
             () -> doSubmit(submitRequest, flinkConfig),
-            e -> logSubmitFailure(submitRequest, e));
+            e -> {
+                logSubmitFailure(submitRequest, e);
+            });
     }
 
     private void logSubmitFailure(SubmitRequest submitRequest, Exception e) {

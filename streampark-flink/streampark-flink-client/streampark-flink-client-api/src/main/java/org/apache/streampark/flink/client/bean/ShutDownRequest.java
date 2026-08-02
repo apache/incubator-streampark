@@ -22,22 +22,11 @@ import org.apache.streampark.common.enums.FlinkDeployMode;
 
 import javax.annotation.Nullable;
 
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
-public class ShutDownRequest implements DeployRequestTrait, Serializable {
+public class ShutDownRequest extends AbstractDeployClientRequest {
 
     private static final long serialVersionUID = 1L;
-
-    private final FlinkVersion flinkVersion;
-    private final FlinkDeployMode deployMode;
-    @Nullable
-    private final Map<String, Serializable> properties;
-    private final String clusterId;
-    private final long id;
-    @Nullable
-    private final KubernetesDeployParam k8sParam;
 
     public ShutDownRequest(
                            FlinkVersion flinkVersion,
@@ -46,48 +35,6 @@ public class ShutDownRequest implements DeployRequestTrait, Serializable {
                            String clusterId,
                            long id,
                            @Nullable KubernetesDeployParam k8sParam) {
-        this.flinkVersion = flinkVersion;
-        this.deployMode = deployMode;
-        this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.clusterId = clusterId;
-        this.id = id;
-        this.k8sParam = k8sParam;
-    }
-
-    @Override
-    public FlinkVersion flinkVersion() {
-        return flinkVersion;
-    }
-
-    @Override
-    public FlinkDeployMode deployMode() {
-        return deployMode;
-    }
-
-    @Override
-    @Nullable
-    public Map<String, Object> properties() {
-        if (properties == null) {
-            return null;
-        }
-        Map<String, Object> result = new HashMap<>();
-        result.putAll(properties);
-        return result;
-    }
-
-    @Override
-    public String clusterId() {
-        return clusterId;
-    }
-
-    @Override
-    public long id() {
-        return id;
-    }
-
-    @Override
-    @Nullable
-    public KubernetesDeployParam k8sParam() {
-        return k8sParam;
+        super(flinkVersion, deployMode, properties, clusterId, id, k8sParam);
     }
 }

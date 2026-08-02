@@ -32,13 +32,11 @@ import org.apache.streampark.common.util.HdfsUtils;
 import org.apache.streampark.common.util.PropertiesUtils;
 import org.apache.streampark.flink.packer.pipeline.BuildResult;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
-import org.apache.streampark.flink.util.FlinkUtils;
 
 import org.apache.streampark.shaded.com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
 
@@ -61,28 +59,13 @@ public class SubmitRequest implements Serializable {
     private final FlinkVersion flinkVersion;
     private final FlinkDeployMode deployMode;
     private final Map<String, Serializable> properties;
-    private final String flinkYaml;
-    private final FlinkJobType jobType;
-    private final long id;
-    private final String jobId;
-    private final String appName;
-    private final String appConf;
-    private final ApplicationType applicationType;
-    private final String savePoint;
-    private final FlinkRestoreMode restoreMode;
-    private final String args;
+    private final SubmitApplicationSpec application;
     @Nullable
-    private final String clusterId;
-    @Nullable
-    private final String hadoopUser;
+    private final SubmitClusterSpec cluster;
     @Nullable
     private final BuildResult buildResult;
     @Nullable
     private final Map<String, Serializable> extraParameter;
-    @Nullable
-    private final String kubernetesNamespace;
-    @Nullable
-    private final FlinkK8sRestExposedType flinkRestExposedType;
 
     private transient Map<String, String> appProperties;
     private transient Map<String, String> appOption;
@@ -108,20 +91,8 @@ public class SubmitRequest implements Serializable {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.flinkYaml = application.flinkYaml();
-        this.jobType = application.jobType();
-        this.id = application.id();
-        this.jobId = application.jobId();
-        this.appName = application.appName();
-        this.appConf = application.appConf();
-        this.applicationType = application.applicationType();
-        this.savePoint = application.savePoint();
-        this.restoreMode = application.restoreMode();
-        this.args = application.args();
-        this.clusterId = cluster != null ? cluster.clusterId() : null;
-        this.hadoopUser = cluster != null ? cluster.hadoopUser() : null;
-        this.kubernetesNamespace = cluster != null ? cluster.kubernetesNamespace() : null;
-        this.flinkRestExposedType = cluster != null ? cluster.flinkRestExposedType() : null;
+        this.application = application;
+        this.cluster = cluster;
         this.buildResult = buildResult;
         this.extraParameter = ClientBeanUtils.toSerializableMap(extraParameter);
     }
@@ -135,61 +106,57 @@ public class SubmitRequest implements Serializable {
     }
 
     public Map<String, Object> properties() {
-        Map<String, Object> result = new HashMap<>();
-        if (properties != null) {
-            result.putAll(properties);
-        }
-        return result;
+        return ClientBeanUtils.copyPropertiesMap(properties);
     }
 
     public String flinkYaml() {
-        return flinkYaml;
+        return application.flinkYaml();
     }
 
     public FlinkJobType jobType() {
-        return jobType;
+        return application.jobType();
     }
 
     public long id() {
-        return id;
+        return application.id();
     }
 
     public String jobId() {
-        return jobId;
+        return application.jobId();
     }
 
     public String appName() {
-        return appName;
+        return application.appName();
     }
 
     public String appConf() {
-        return appConf;
+        return application.appConf();
     }
 
     public ApplicationType applicationType() {
-        return applicationType;
+        return application.applicationType();
     }
 
     public String savePoint() {
-        return savePoint;
+        return application.savePoint();
     }
 
     public FlinkRestoreMode restoreMode() {
-        return restoreMode;
+        return application.restoreMode();
     }
 
     public String args() {
-        return args;
+        return application.args();
     }
 
     @Nullable
     public String clusterId() {
-        return clusterId;
+        return cluster != null ? cluster.clusterId() : null;
     }
 
     @Nullable
     public String hadoopUser() {
-        return hadoopUser;
+        return cluster != null ? cluster.hadoopUser() : null;
     }
 
     @Nullable
@@ -199,22 +166,17 @@ public class SubmitRequest implements Serializable {
 
     @Nullable
     public Map<String, Object> extraParameter() {
-        if (extraParameter == null) {
-            return null;
-        }
-        Map<String, Object> result = new HashMap<>();
-        result.putAll(extraParameter);
-        return result;
+        return ClientBeanUtils.copyPropertiesMap(extraParameter);
     }
 
     @Nullable
     public String kubernetesNamespace() {
-        return kubernetesNamespace;
+        return cluster != null ? cluster.kubernetesNamespace() : null;
     }
 
     @Nullable
     public FlinkK8sRestExposedType flinkRestExposedType() {
-        return flinkRestExposedType;
+        return cluster != null ? cluster.flinkRestExposedType() : null;
     }
 
     public Map<String, String> appProperties() {
@@ -233,9 +195,9 @@ public class SubmitRequest implements Serializable {
 
     public String appMain() {
         if (appMain == null) {
-            if (jobType == FlinkJobType.FLINK_SQL) {
+            if (jobType() == FlinkJobType.FLINK_SQL) {
                 appMain = Constants.STREAMPARK_FLINKSQL_CLIENT_CLASS;
-            } else if (jobType == FlinkJobType.PYFLINK) {
+            } else if (jobType() == FlinkJobType.PYFLINK) {
                 appMain = Constants.PYTHON_FLINK_DRIVER_CLASS_NAME;
             } else {
                 appMain = appProperties().get(ConfigKeys.KEY_FLINK_APPLICATION_MAIN_CLASS());
@@ -247,14 +209,14 @@ public class SubmitRequest implements Serializable {
     public String effectiveAppName() {
         if (effectiveAppName == null) {
             effectiveAppName =
-                appName == null ? appProperties().get(ConfigKeys.KEY_FLINK_APP_NAME()) : appName;
+                appName() == null ? appProperties().get(ConfigKeys.KEY_FLINK_APP_NAME()) : appName();
         }
         return effectiveAppName;
     }
 
     public List<URL> libs() {
         if (libs == null) {
-            File libDir = new File(new File(Workspace.local().APP_WORKSPACE(), String.valueOf(id)), "lib");
+            File libDir = new File(new File(Workspace.local().APP_WORKSPACE(), String.valueOf(id())), "lib");
             File[] files = libDir.listFiles();
             if (files == null) {
                 libs = Collections.emptyList();
@@ -312,11 +274,11 @@ public class SubmitRequest implements Serializable {
 
     public SavepointRestoreSettings savepointRestoreSettings() {
         if (savepointRestoreSettings == null) {
-            if (savePoint == null || savePoint.isEmpty()) {
+            if (savePoint() == null || savePoint().isEmpty()) {
                 savepointRestoreSettings = SavepointRestoreSettings.none();
             } else {
                 savepointRestoreSettings =
-                    SavepointRestoreSettings.forPath(savePoint, allowNonRestoredState());
+                    SavepointRestoreSettings.forPath(savePoint(), allowNonRestoredState());
             }
         }
         return savepointRestoreSettings;
@@ -324,7 +286,7 @@ public class SubmitRequest implements Serializable {
 
     public File userJarFile() {
         if (userJarFile == null) {
-            if (deployMode == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
+            if (deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
                 userJarFile = null;
             } else {
                 checkBuildResult();
@@ -379,53 +341,33 @@ public class SubmitRequest implements Serializable {
 
     public HdfsWorkspace hdfsWorkspace() {
         if (hdfsWorkspace == null) {
-            Workspace workspace = Workspace.remote();
-            String flinkHome = flinkVersion.flinkHome;
-            File flinkHomeDir = new File(flinkHome);
-            String flinkName;
-            try {
-                flinkName =
-                    FileUtils.isSymlink(flinkHomeDir)
-                        ? flinkHomeDir.getCanonicalFile().getName()
-                        : flinkHomeDir.getName();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
-            hdfsWorkspace =
-                new HdfsWorkspace(
-                    flinkName,
-                    flinkHome,
-                    FlinkUtils.getFlinkDistJar(flinkHome),
-                    flinkHdfsHome + "/lib",
-                    flinkHdfsHome + "/plugins",
-                    workspace.APP_JARS());
+            hdfsWorkspace = ClientBeanUtils.createHdfsWorkspace(flinkVersion);
         }
         return hdfsWorkspace;
     }
 
     public void checkBuildResult() {
-        if (deployMode == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
+        if (deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_SESSION) {
             AssertUtils.required(
                 buildResult != null,
                 "[flink-submit] current job: "
                     + effectiveAppName()
                     + " was not yet built, buildResult is empty"
                     + ",clusterId="
-                    + clusterId
+                    + clusterId()
                     + ","
                     + ",namespace="
-                    + kubernetesNamespace);
+                    + kubernetesNamespace());
             AssertUtils.required(
                 buildResult.pass(),
                 "[flink-submit] current job "
                     + effectiveAppName()
                     + " build failed, clusterId"
                     + ",clusterId="
-                    + clusterId
+                    + clusterId()
                     + ","
                     + ",namespace="
-                    + kubernetesNamespace);
+                    + kubernetesNamespace());
         } else {
             AssertUtils.required(
                 buildResult != null,
@@ -439,10 +381,10 @@ public class SubmitRequest implements Serializable {
     }
 
     private Map<String, String> getParameterMap(String prefix) {
-        if (appConf == null) {
+        if (appConf() == null) {
             return Collections.emptyMap();
         }
-        String format = appConf.substring(0, Math.min(appConf.length(), 7));
+        String format = appConf().substring(0, Math.min(appConf().length(), 7));
         Map<String, String> map = loadAppConfMap(format);
         return filterByPrefix(map, prefix);
     }
@@ -451,7 +393,7 @@ public class SubmitRequest implements Serializable {
         if ("json://".equals(format)) {
             return parseJsonAppConf();
         }
-        String content = DeflaterUtils.unzipString(appConf.trim().substring(7));
+        String content = DeflaterUtils.unzipString(appConf().trim().substring(7));
         switch (format) {
             case "yaml://":
                 return PropertiesUtils.fromYamlTextAsJava(content);
@@ -467,7 +409,7 @@ public class SubmitRequest implements Serializable {
     }
 
     private Map<String, String> parseJsonAppConf() {
-        String json = appConf.substring(7);
+        String json = appConf().substring(7);
         try {
             Map<String, String> map =
                 new ObjectMapper()
@@ -483,8 +425,8 @@ public class SubmitRequest implements Serializable {
 
     private Map<String, String> parseHdfsAppConf() {
         try {
-            String text = HdfsUtils.read(appConf);
-            String extension = appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
+            String text = HdfsUtils.read(appConf());
+            String extension = appConf().split("\\.")[appConf().split("\\.").length - 1].toLowerCase();
             switch (extension) {
                 case "yml":
                 case "yaml":

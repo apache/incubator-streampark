@@ -98,7 +98,7 @@ public final class FlinkClientEntrypoint {
             "triggerSavepoint");
     }
 
-    public static DeployResponse deploy(DeployRequest deployRequest) throws FlinkException {
+    public static DeployResponse deploy(DeployRequest deployRequest) throws Exception {
         if (deployRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.deploy(deployRequest);
         }
@@ -109,7 +109,7 @@ public final class FlinkClientEntrypoint {
             "Unsupported " + deployRequest.deployMode() + " deploy cluster ");
     }
 
-    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws FlinkException {
+    public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) throws Exception {
         if (shutDownRequest.deployMode() == FlinkDeployMode.YARN_SESSION) {
             return YarnSessionClient.INSTANCE.shutdown(shutDownRequest);
         }

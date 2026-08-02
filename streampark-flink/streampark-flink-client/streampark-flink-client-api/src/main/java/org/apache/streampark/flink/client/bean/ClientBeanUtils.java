@@ -17,8 +17,15 @@
 
 package org.apache.streampark.flink.client.bean;
 
+import org.apache.streampark.common.conf.FlinkVersion;
+import org.apache.streampark.common.conf.Workspace;
+import org.apache.streampark.flink.util.FlinkUtils;
+
+import org.apache.commons.io.FileUtils;
+
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +33,29 @@ import java.util.Map;
 final class ClientBeanUtils {
 
     private ClientBeanUtils() {
+    }
+
+    static HdfsWorkspace createHdfsWorkspace(FlinkVersion flinkVersion) {
+        Workspace workspace = Workspace.remote();
+        String flinkHome = flinkVersion.flinkHome;
+        File flinkHomeDir = new File(flinkHome);
+        String flinkName;
+        try {
+            flinkName =
+                FileUtils.isSymlink(flinkHomeDir)
+                    ? flinkHomeDir.getCanonicalFile().getName()
+                    : flinkHomeDir.getName();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        String flinkHdfsHome = workspace.APP_FLINK() + "/" + flinkName;
+        return new HdfsWorkspace(
+            flinkName,
+            flinkHome,
+            FlinkUtils.getFlinkDistJar(flinkHome),
+            flinkHdfsHome + "/lib",
+            flinkHdfsHome + "/plugins",
+            workspace.APP_JARS());
     }
 
     @Nullable

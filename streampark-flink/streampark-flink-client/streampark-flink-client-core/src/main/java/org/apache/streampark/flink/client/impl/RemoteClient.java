@@ -161,8 +161,10 @@ public final class RemoteClient extends FlinkClientTrait {
                     descriptor._2().close();
                 }
             },
-            e -> logError(
-                "Do " + request.getClass().getSimpleName() + " for flink standalone job fail", e));
+            e -> {
+                logError(
+                    "Do " + request.getClass().getSimpleName() + " for flink standalone job fail", e);
+            });
     }
 
     private Tuple2<StandaloneClusterId, StandaloneClusterDescriptor> getStandAloneClusterDescriptor(

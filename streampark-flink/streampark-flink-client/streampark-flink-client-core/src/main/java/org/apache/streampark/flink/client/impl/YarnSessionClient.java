@@ -90,33 +90,36 @@ public final class YarnSessionClient extends YarnClientTrait {
 
     @Override
     public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
-        Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
-            getYarnClusterDescriptor(flinkConfig);
-        ApplicationId yarnClusterId = yarnClusterDescriptor._1();
-        YarnClusterDescriptor clusterDescriptor = yarnClusterDescriptor._2();
+        return callAsFlinkException(
+            () -> {
+                Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
+                    getYarnClusterDescriptor(flinkConfig);
+                ApplicationId yarnClusterId = yarnClusterDescriptor._1();
+                YarnClusterDescriptor clusterDescriptor = yarnClusterDescriptor._2();
 
-        Tuple2<PackagedProgram, JobGraph> programJobGraph =
-            getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
-        PackagedProgram packageProgram = programJobGraph._1();
-        JobGraph jobGraph = programJobGraph._2();
+                Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                    getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
+                PackagedProgram packageProgram = programJobGraph._1();
+                JobGraph jobGraph = programJobGraph._2();
 
-        ClusterClient<ApplicationId> client =
-            clusterDescriptor.retrieve(yarnClusterId).getClusterClient();
-        String jobId = client.submitJob(jobGraph).get().toString();
-        String jobManagerUrl = client.getWebInterfaceURL();
+                ClusterClient<ApplicationId> client =
+                    clusterDescriptor.retrieve(yarnClusterId).getClusterClient();
+                String jobId = client.submitJob(jobGraph).get().toString();
+                String jobManagerUrl = client.getWebInterfaceURL();
 
-        logInfo(
-            String.format(
-                "%n-------------------------<<applicationId>>------------------------%n"
-                    + "Flink Job Started: jobId: %s , applicationId: %s%n"
-                    + "__________________________________________________________________%n",
-                jobId, yarnClusterId));
+                logInfo(
+                    String.format(
+                        "%n-------------------------<<applicationId>>------------------------%n"
+                            + "Flink Job Started: jobId: %s , applicationId: %s%n"
+                            + "__________________________________________________________________%n",
+                        jobId, yarnClusterId));
 
-        SubmitResponse resp =
-            new SubmitResponse(
-                yarnClusterId.toString(), flinkConfig.toMap(), jobId, jobManagerUrl);
-        closeSubmit(submitRequest, packageProgram, client, clusterDescriptor);
-        return resp;
+                SubmitResponse resp =
+                    new SubmitResponse(
+                        yarnClusterId.toString(), flinkConfig.toMap(), jobId, jobManagerUrl);
+                closeSubmit(submitRequest, packageProgram, client, clusterDescriptor);
+                return resp;
+            });
     }
 
     @Override

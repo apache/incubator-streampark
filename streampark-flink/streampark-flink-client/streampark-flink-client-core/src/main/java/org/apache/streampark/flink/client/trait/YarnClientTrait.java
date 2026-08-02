@@ -191,7 +191,7 @@ public abstract class YarnClientTrait extends FlinkClientTrait {
                                       ClientAction<O> actionFunc,
                                       JobID jobID,
                                       ClusterClient<?> clusterClient) throws FlinkException {
-        return callAsFlinkException(
+        return callAsFlinkExceptionMapping(
             () -> actionFunc.apply(jobID, clusterClient),
             e -> new FlinkException(
                 "[StreamPark] Do "
