@@ -24,7 +24,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>streampark-spark-core_2.12</artifactId>
+    <artifactId>streampark-spark-core_${scala.binary.version}</artifactId>
     <name>StreamPark : Spark Core</name>
 
     <!--项目基本依赖-->

@@ -43,16 +43,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.streampark</groupId>
-            <artifactId>streampark-common-scala-bridge_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.beachape</groupId>
-            <artifactId>enumeratum_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.12</artifactId>
             <version>${spark.version}</version>
@@ -84,20 +74,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-ast_2.12</artifactId>
-            <version>${json4s-jackson.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-core_2.12</artifactId>
-            <version>${json4s-jackson.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client-api</artifactId>
             <scope>provided</scope>
@@ -116,14 +92,5 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
