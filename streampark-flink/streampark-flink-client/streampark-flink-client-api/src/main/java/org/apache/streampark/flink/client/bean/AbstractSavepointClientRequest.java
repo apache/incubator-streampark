@@ -38,11 +38,11 @@ abstract class AbstractSavepointClientRequest implements SavepointRequestTrait, 
     private final JobClientTarget target;
 
     AbstractSavepointClientRequest(
-                                     long id,
-                                     FlinkVersion flinkVersion,
-                                     FlinkDeployMode deployMode,
-                                     @Nullable Map<String, Object> properties,
-                                     JobClientTarget target) {
+                                   long id,
+                                   FlinkVersion flinkVersion,
+                                   FlinkDeployMode deployMode,
+                                   @Nullable Map<String, Object> properties,
+                                   JobClientTarget target) {
         this.id = id;
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;

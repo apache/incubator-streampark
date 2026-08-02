@@ -40,12 +40,12 @@ abstract class AbstractDeployClientRequest implements DeployRequestTrait, Serial
     private final KubernetesDeployParam k8sParam;
 
     AbstractDeployClientRequest(
-                                  FlinkVersion flinkVersion,
-                                  FlinkDeployMode deployMode,
-                                  @Nullable Map<String, Object> properties,
-                                  String clusterId,
-                                  long id,
-                                  @Nullable KubernetesDeployParam k8sParam) {
+                                FlinkVersion flinkVersion,
+                                FlinkDeployMode deployMode,
+                                @Nullable Map<String, Object> properties,
+                                String clusterId,
+                                long id,
+                                @Nullable KubernetesDeployParam k8sParam) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = ClientBeanUtils.toSerializableMap(properties);
