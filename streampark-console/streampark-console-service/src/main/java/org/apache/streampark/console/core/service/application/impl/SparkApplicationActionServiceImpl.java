@@ -61,6 +61,7 @@ import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 import org.apache.streampark.spark.client.SparkClient;
 import org.apache.streampark.spark.client.bean.CancelRequest;
 import org.apache.streampark.spark.client.bean.CancelResponse;
+import org.apache.streampark.spark.client.bean.SparkSubmitApplicationSpec;
 import org.apache.streampark.spark.client.bean.SubmitRequest;
 import org.apache.streampark.spark.client.bean.SubmitResponse;
 
@@ -313,21 +314,23 @@ public class SparkApplicationActionServiceImpl
         // Get the args after placeholder replacement
         String applicationArgs = variableService.replaceVariable(application.getTeamId(), application.getAppArgs());
 
-        SubmitRequest submitRequest = new SubmitRequest(
-            sparkEnv.getSparkVersion(),
-            SparkDeployMode.of(application.getDeployMode()),
-            sparkEnv.getSparkConf(),
-            SparkJobType.valueOf(application.getJobType()),
-            application.getId(),
-            application.getAppName(),
-            application.getMainClass(),
-            appConf,
-            SparkConfigurationUtils.extractPropertiesAsJava(application.getAppProperties()),
-            SparkConfigurationUtils.extractArgumentsAsJava(applicationArgs),
-            application.getApplicationType(),
-            application.getHadoopUser(),
-            buildResult,
-            extraParameter);
+        SubmitRequest submitRequest =
+            new SubmitRequest(
+                sparkEnv.getSparkVersion(),
+                SparkDeployMode.of(application.getDeployMode()),
+                sparkEnv.getSparkConf(),
+                new SparkSubmitApplicationSpec(
+                    SparkJobType.valueOf(application.getJobType()),
+                    application.getId(),
+                    application.getAppName(),
+                    application.getMainClass(),
+                    appConf,
+                    SparkConfigurationUtils.extractPropertiesAsJava(application.getAppProperties()),
+                    SparkConfigurationUtils.extractArgumentsAsJava(applicationArgs),
+                    application.getApplicationType(),
+                    application.getHadoopUser()),
+                buildResult,
+                extraParameter);
 
         CompletableFuture<SubmitResponse> future = CompletableFuture
             .supplyAsync(() -> SparkClient.submit(submitRequest), executorService);

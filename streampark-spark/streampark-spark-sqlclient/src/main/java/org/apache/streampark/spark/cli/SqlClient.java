@@ -33,7 +33,7 @@ public final class SqlClient {
             case "AUTOMATIC":
                 SparkSqlExecutor.runStreaming(args);
                 break;
-            case "BATCH":
+            case MODE:
                 SparkSqlExecutor.runBatch(args);
                 break;
             default:

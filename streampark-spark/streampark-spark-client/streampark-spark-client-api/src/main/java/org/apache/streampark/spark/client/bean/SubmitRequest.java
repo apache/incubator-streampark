@@ -67,20 +67,11 @@ public class SubmitRequest implements Serializable {
     private final SparkVersion sparkVersion;
     private final SparkDeployMode deployMode;
     private final String sparkYaml;
-    private final SparkJobType jobType;
-    private final long id;
-    private final String appName;
-    private final String mainClass;
-    private final String appConf;
-    private final Map<String, String> appProperties;
-    private final List<String> appArgs;
-    private final ApplicationType applicationType;
+    private final SparkSubmitApplicationSpec application;
     @Nullable
-    private final String hadoopUser;
+    private transient BuildResult buildResult;
     @Nullable
-    private final BuildResult buildResult;
-    @Nullable
-    private final Map<String, Object> extraParameter;
+    private transient Map<String, Object> extraParameter;
 
     private transient Map<String, String> sparkParameterMap;
     private transient String appMain;
@@ -90,29 +81,13 @@ public class SubmitRequest implements Serializable {
                          SparkVersion sparkVersion,
                          SparkDeployMode deployMode,
                          String sparkYaml,
-                         SparkJobType jobType,
-                         long id,
-                         String appName,
-                         String mainClass,
-                         String appConf,
-                         Map<String, String> appProperties,
-                         List<String> appArgs,
-                         ApplicationType applicationType,
-                         @Nullable String hadoopUser,
+                         SparkSubmitApplicationSpec application,
                          @Nullable BuildResult buildResult,
                          @Nullable Map<String, Object> extraParameter) {
         this.sparkVersion = sparkVersion;
         this.deployMode = deployMode;
         this.sparkYaml = sparkYaml;
-        this.jobType = jobType;
-        this.id = id;
-        this.appName = appName;
-        this.mainClass = mainClass;
-        this.appConf = appConf;
-        this.appProperties = appProperties;
-        this.appArgs = appArgs;
-        this.applicationType = applicationType;
-        this.hadoopUser = hadoopUser;
+        this.application = application;
         this.buildResult = buildResult;
         this.extraParameter = extraParameter;
     }
@@ -142,77 +117,77 @@ public class SubmitRequest implements Serializable {
     }
 
     public SparkJobType jobType() {
-        return jobType;
+        return application.jobType();
     }
 
     public SparkJobType getJobType() {
-        return jobType;
+        return application.jobType();
     }
 
     public long id() {
-        return id;
+        return application.id();
     }
 
     public long getId() {
-        return id;
+        return application.id();
     }
 
     public String appName() {
-        return appName;
+        return application.appName();
     }
 
     public String getAppName() {
-        return appName;
+        return application.appName();
     }
 
     public String mainClass() {
-        return mainClass;
+        return application.mainClass();
     }
 
     public String getMainClass() {
-        return mainClass;
+        return application.mainClass();
     }
 
     public String appConf() {
-        return appConf;
+        return application.appConf();
     }
 
     public String getAppConf() {
-        return appConf;
+        return application.appConf();
     }
 
     public Map<String, String> appProperties() {
-        return appProperties;
+        return application.appProperties();
     }
 
     public Map<String, String> getAppProperties() {
-        return appProperties;
+        return application.appProperties();
     }
 
     public List<String> appArgs() {
-        return appArgs;
+        return application.appArgs();
     }
 
     public List<String> getAppArgs() {
-        return appArgs;
+        return application.appArgs();
     }
 
     public ApplicationType applicationType() {
-        return applicationType;
+        return application.applicationType();
     }
 
     public ApplicationType getApplicationType() {
-        return applicationType;
+        return application.applicationType();
     }
 
     @Nullable
     public String hadoopUser() {
-        return hadoopUser;
+        return application.hadoopUser();
     }
 
     @Nullable
     public String getHadoopUser() {
-        return hadoopUser;
+        return application.hadoopUser();
     }
 
     @Nullable
@@ -244,13 +219,13 @@ public class SubmitRequest implements Serializable {
 
     public String appMain() {
         if (appMain == null) {
-            switch (jobType) {
+            switch (jobType()) {
                 case SPARK_SQL:
                     appMain = Constants.STREAMPARK_SPARKSQL_CLIENT_CLASS;
                     break;
                 case SPARK_JAR:
                 case PYSPARK:
-                    appMain = mainClass;
+                    appMain = mainClass();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown deployment Mode");
@@ -279,30 +254,32 @@ public class SubmitRequest implements Serializable {
             File sparkHomeDir = new File(sparkHome);
             String sparkName;
             try {
-                sparkName = isSymlink(sparkHomeDir)
-                    ? sparkHomeDir.getCanonicalFile().getName()
-                    : sparkHomeDir.getName();
+                sparkName =
+                    Files.isSymbolicLink(sparkHomeDir.toPath())
+                        ? sparkHomeDir.getCanonicalFile().getName()
+                        : sparkHomeDir.getName();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to resolve Spark home path: " + sparkHome, e);
             }
             String sparkHdfsHome = workspace.APP_SPARK() + "/" + sparkName;
-            hdfsWorkspace = new HdfsWorkspace(
-                sparkName,
-                sparkHome,
-                sparkHdfsHome + "/jars",
-                sparkHdfsHome + "/plugins",
-                workspace.APP_JARS());
+            hdfsWorkspace =
+                new HdfsWorkspace(
+                    sparkName,
+                    sparkHome,
+                    sparkHdfsHome + "/jars",
+                    sparkHdfsHome + "/plugins",
+                    workspace.APP_JARS());
         }
         return hdfsWorkspace;
     }
 
     private Map<String, String> getParameterMap(String prefix) {
-        if (appConf == null) {
+        if (appConf() == null) {
             return Collections.emptyMap();
         }
-        String format = appConf.substring(0, Math.min(appConf.length(), 7));
+        String format = appConf().substring(0, Math.min(appConf().length(), 7));
         if ("json://".equals(format)) {
-            String json = appConf.substring(7);
+            String json = appConf().substring(7);
             try {
                 Map<String, String> map =
                     new ObjectMapper().readValue(json, new TypeReference<Map<String, String>>() {
@@ -311,10 +288,10 @@ public class SubmitRequest implements Serializable {
                     .filter(e -> e.getValue() != null)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to parse json application config", e);
             }
         }
-        String content = DeflaterUtils.unzipString(appConf.trim().substring(7));
+        String content = DeflaterUtils.unzipString(appConf().trim().substring(7));
         Map<String, String> map;
         switch (format) {
             case "yaml://":
@@ -329,11 +306,11 @@ public class SubmitRequest implements Serializable {
             case "hdfs://":
                 String text;
                 try {
-                    text = HdfsUtils.read(appConf);
+                    text = HdfsUtils.read(appConf());
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException("Failed to read hdfs application config", e);
                 }
-                String extension = appConf.split("\\.")[appConf.split("\\.").length - 1].toLowerCase();
+                String extension = appConf().split("\\.")[appConf().split("\\.").length - 1].toLowerCase();
                 switch (extension) {
                     case "yml":
                     case "yaml":
@@ -360,21 +337,14 @@ public class SubmitRequest implements Serializable {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private static boolean isSymlink(File file) throws IOException {
-        if (file == null) {
-            throw new NullPointerException("File must not be null");
-        }
-        return Files.isSymbolicLink(file.toPath());
-    }
-
     private void checkBuildResult() {
         if (buildResult == null) {
-            throw new RuntimeException(
-                "[spark-submit] current job: " + appName + " was not yet built, buildResult is empty");
+            throw new IllegalStateException(
+                "[spark-submit] current job: " + appName() + " was not yet built, buildResult is empty");
         }
         if (!buildResult.pass()) {
-            throw new RuntimeException(
-                "[spark-submit] current job " + appName + " build failed, please check");
+            throw new IllegalStateException(
+                "[spark-submit] current job " + appName() + " build failed, please check");
         }
     }
 }

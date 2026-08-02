@@ -229,10 +229,7 @@ public final class SparkShimsProxy extends LoggerSupport {
         }
         List<URL> urls = new ArrayList<>();
         for (File f : files) {
-            if (f.getName().startsWith("log4j") || f.getName().startsWith("slf4j")) {
-                continue;
-            }
-            if (filterFun != null && !filterFun.test(f)) {
+            if (!shouldIncludeJar(f, filterFun)) {
                 continue;
             }
             try {
@@ -242,5 +239,12 @@ public final class SparkShimsProxy extends LoggerSupport {
             }
         }
         return urls;
+    }
+
+    private static boolean shouldIncludeJar(File file, Predicate<File> filterFun) {
+        if (file.getName().startsWith("log4j") || file.getName().startsWith("slf4j")) {
+            return false;
+        }
+        return filterFun == null || filterFun.test(file);
     }
 }

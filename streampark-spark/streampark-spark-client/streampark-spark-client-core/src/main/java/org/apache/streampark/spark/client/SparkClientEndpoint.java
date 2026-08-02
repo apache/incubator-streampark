@@ -25,13 +25,14 @@ import org.apache.streampark.spark.client.bean.SubmitResponse;
 import org.apache.streampark.spark.client.impl.YarnClient;
 import org.apache.streampark.spark.client.trait.SparkClientTrait;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 /** Dispatches Spark client requests to deploy-mode-specific implementations. */
 public final class SparkClientEndpoint {
 
-    private static final Map<SparkDeployMode, SparkClientTrait> CLIENTS = new HashMap<>();
+    private static final Map<SparkDeployMode, SparkClientTrait> CLIENTS =
+        new EnumMap<>(SparkDeployMode.class);
 
     static {
         CLIENTS.put(SparkDeployMode.YARN_CLUSTER, YarnClient.INSTANCE);

@@ -21,6 +21,7 @@ import org.apache.streampark.common.enums.SparkSqlValidationFailedType;
 import org.apache.streampark.common.util.ExceptionUtils;
 import org.apache.streampark.common.util.LoggerSupport;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -32,7 +33,7 @@ public final class SparkSqlValidator extends LoggerSupport {
     private static final String SPARK_SQL_PARSER_CLASS = "org.apache.spark.sql.execution.SparkSqlParser";
 
     private static final Pattern SYNTAX_ERROR_REGEXP =
-        Pattern.compile(".*\\(line\\s(\\d+),\\spos\\s(\\d+)\\).*");
+        Pattern.compile("\\(line\\s+(\\d+),\\s+pos\\s+(\\d+)\\)");
 
     private SparkSqlValidator() {
     }
@@ -41,7 +42,7 @@ public final class SparkSqlValidator extends LoggerSupport {
         SparkSqlValidationResult[] earlyResult = new SparkSqlValidationResult[1];
         List<SqlCommandCall> sqlCommands =
             SqlCommandParser.parseSQL(sql, result -> earlyResult[0] = result);
-        if (sqlCommands == null) {
+        if (earlyResult[0] != null) {
             return earlyResult[0];
         }
 
@@ -52,52 +53,58 @@ public final class SparkSqlValidator extends LoggerSupport {
             method.setAccessible(true);
 
             for (SqlCommandCall call : sqlCommands) {
-                try {
-                    method.invoke(parser, call.originSql());
-                } catch (Exception e) {
-                    String exception = ExceptionUtils.stringifyException(e);
-                    int causedByIndex = exception.indexOf("Caused by:");
-                    String causedBy =
-                        causedByIndex >= 0 ? exception.substring(causedByIndex) : exception;
-                    String cleanUpError = exception.replaceAll("[\r\n]", "");
-                    Matcher matcher = SYNTAX_ERROR_REGEXP.matcher(cleanUpError);
-                    if (matcher.matches()) {
-                        int line = Integer.parseInt(matcher.group(1));
-                        int column = Integer.parseInt(matcher.group(2));
-                        int errorLine = call.lineStart() + line - 1;
-                        return new SparkSqlValidationResult(
-                            false,
-                            SparkSqlValidationFailedType.SYNTAX_ERROR,
-                            call.lineStart(),
-                            call.lineEnd(),
-                            errorLine,
-                            column,
-                            call.originSql(),
-                            causedBy.replaceAll(
-                                "at\\sline\\s" + line, "at line " + errorLine));
-                    }
-                    return new SparkSqlValidationResult(
-                        false,
-                        SparkSqlValidationFailedType.SYNTAX_ERROR,
-                        call.lineStart(),
-                        call.lineEnd(),
-                        0,
-                        0,
-                        call.originSql(),
-                        causedBy);
+                SparkSqlValidationResult syntaxError = validateCommand(method, parser, call);
+                if (syntaxError != null) {
+                    return syntaxError;
                 }
             }
-        } catch (Exception e) {
-            return new SparkSqlValidationResult(
-                false,
-                SparkSqlValidationFailedType.CLASS_ERROR,
-                0,
-                0,
-                0,
-                0,
-                null,
-                ExceptionUtils.stringifyException(e));
+        } catch (ReflectiveOperationException e) {
+            return new SparkSqlValidationResult()
+                .withSuccess(false)
+                .withFailedType(SparkSqlValidationFailedType.CLASS_ERROR)
+                .withException(ExceptionUtils.stringifyException(e));
         }
         return new SparkSqlValidationResult();
+    }
+
+    private static SparkSqlValidationResult validateCommand(
+                                                            Method method,
+                                                            Object parser,
+                                                            SqlCommandCall call) {
+        try {
+            method.invoke(parser, call.originSql());
+            return null;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            Throwable cause = e instanceof InvocationTargetException
+                ? ((InvocationTargetException) e).getTargetException()
+                : e;
+            String exception = ExceptionUtils.stringifyException(cause);
+            int causedByIndex = exception.indexOf("Caused by:");
+            String causedBy = causedByIndex >= 0 ? exception.substring(causedByIndex) : exception;
+            String cleanUpError = exception.replaceAll("[\r\n]", "");
+            Matcher matcher = SYNTAX_ERROR_REGEXP.matcher(cleanUpError);
+            if (matcher.find()) {
+                int line = Integer.parseInt(matcher.group(1));
+                int column = Integer.parseInt(matcher.group(2));
+                int errorLine = call.lineStart() + line - 1;
+                return new SparkSqlValidationResult()
+                    .withSuccess(false)
+                    .withFailedType(SparkSqlValidationFailedType.SYNTAX_ERROR)
+                    .withLineStart(call.lineStart())
+                    .withLineEnd(call.lineEnd())
+                    .withErrorLine(errorLine)
+                    .withErrorColumn(column)
+                    .withSql(call.originSql())
+                    .withException(
+                        causedBy.replaceAll("at\\sline\\s" + line, "at line " + errorLine));
+            }
+            return new SparkSqlValidationResult()
+                .withSuccess(false)
+                .withFailedType(SparkSqlValidationFailedType.SYNTAX_ERROR)
+                .withLineStart(call.lineStart())
+                .withLineEnd(call.lineEnd())
+                .withSql(call.originSql())
+                .withException(causedBy);
+        }
     }
 }

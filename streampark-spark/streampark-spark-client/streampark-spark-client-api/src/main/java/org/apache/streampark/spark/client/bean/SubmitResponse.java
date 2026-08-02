@@ -46,10 +46,6 @@ public class SubmitResponse implements Serializable {
         return sparkAppId;
     }
 
-    public void sparkAppId_$eq(String sparkAppId) {
-        this.sparkAppId = sparkAppId;
-    }
-
     public void setSparkAppId(String sparkAppId) {
         this.sparkAppId = sparkAppId;
     }

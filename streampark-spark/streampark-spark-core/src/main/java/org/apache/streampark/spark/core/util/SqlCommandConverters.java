@@ -25,10 +25,6 @@ final class SqlCommandConverters {
     private SqlCommandConverters() {
     }
 
-    static Optional<String[]> noOperands(String[] groups) {
-        return Optional.of(new String[0]);
-    }
-
     static Optional<String[]> firstGroup(String[] groups) {
         return Optional.of(new String[]{groups[0]});
     }

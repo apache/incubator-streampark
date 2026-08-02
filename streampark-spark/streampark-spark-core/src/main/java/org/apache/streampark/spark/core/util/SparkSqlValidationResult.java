@@ -34,25 +34,6 @@ public class SparkSqlValidationResult {
     public SparkSqlValidationResult() {
     }
 
-    public SparkSqlValidationResult(
-                                    boolean success,
-                                    SparkSqlValidationFailedType failedType,
-                                    int lineStart,
-                                    int lineEnd,
-                                    int errorLine,
-                                    int errorColumn,
-                                    String sql,
-                                    String exception) {
-        this.success = success;
-        this.failedType = failedType;
-        this.lineStart = lineStart;
-        this.lineEnd = lineEnd;
-        this.errorLine = errorLine;
-        this.errorColumn = errorColumn;
-        this.sql = sql;
-        this.exception = exception;
-    }
-
     public boolean success() {
         return success;
     }

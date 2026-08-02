@@ -29,7 +29,6 @@ import org.apache.spark.streaming.Seconds;
 import org.apache.spark.streaming.StreamingContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -57,26 +56,25 @@ public final class SparkSqlExecutor {
     public static void runStreaming(String[] args) {
         SparkSession sparkSession = createSparkSession(args);
         SparkConf sparkConf = sparkSession.sparkContext().getConf();
-        String checkpoint = resolveCheckpoint(args);
-        boolean createOnError = resolveCreateOnError(args);
+        String checkpoint = resolveOption(args, "--checkpoint");
+        boolean createOnError = resolveBooleanOption(args, "--createOnError", true);
 
         StreamingContext context;
-        if ("".equals(checkpoint)) {
+        if (checkpoint.isEmpty()) {
             context =
                 new StreamingContext(
                     sparkSession.sparkContext(),
                     Seconds.apply(sparkConf.getInt(ConfigKeys.KEY_SPARK_BATCH_DURATION(), 1)));
         } else {
-            String checkpointPath = checkpoint;
             context =
                 StreamingContext.getOrCreate(
-                    checkpointPath,
+                    checkpoint,
                     () -> new StreamingContext(
                         sparkSession.sparkContext(),
                         Seconds.apply(sparkConf.getInt(ConfigKeys.KEY_SPARK_BATCH_DURATION(), 1))),
                     null,
                     createOnError);
-            context.checkpoint(checkpointPath);
+            context.checkpoint(checkpoint);
         }
 
         try {
@@ -127,60 +125,65 @@ public final class SparkSqlExecutor {
     }
 
     private static SparkConf initSparkConf(String[] args) {
+        CliArgs cliArgs = parseCliArgs(args);
         SparkConf sparkConf = new SparkConf();
-        List<String> argv = new ArrayList<>(Arrays.asList(args));
-        String conf = null;
-        List<String[]> userArgs = new ArrayList<>();
+        applyConfFile(cliArgs.confPath, sparkConf);
+        applyUserArgs(cliArgs.userArgs, sparkConf);
+        applyAppDefaults(sparkConf);
+        return sparkConf;
+    }
 
-        while (!argv.isEmpty()) {
-            String head = argv.get(0);
-            if ("--conf".equals(head) && argv.size() > 1) {
-                conf = argv.get(1);
-                argv = argv.subList(2, argv.size());
-            } else if ("--checkpoint".equals(head) && argv.size() > 1) {
-                argv = argv.subList(2, argv.size());
-            } else if ("--createOnError".equals(head) && argv.size() > 1) {
-                argv = argv.subList(2, argv.size());
-            } else if (argv.isEmpty()) {
-                break;
-            } else if (head.startsWith(ConfigKeys.PARAM_PREFIX()) && argv.size() > 1) {
-                userArgs.add(new String[]{head.substring(2), argv.get(1)});
-                argv = argv.subList(2, argv.size());
-            } else if (argv.size() == 1) {
-                break;
-            } else {
-                LOG.error("Unrecognized options: " + String.join(" ", argv));
+    private static CliArgs parseCliArgs(String[] args) {
+        CliArgs cliArgs = new CliArgs();
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if ("--conf".equals(arg) && i + 1 < args.length) {
+                cliArgs.confPath = args[++i];
+            } else if ("--checkpoint".equals(arg) && i + 1 < args.length) {
+                i++;
+            } else if ("--createOnError".equals(arg) && i + 1 < args.length) {
+                i++;
+            } else if (arg.startsWith(ConfigKeys.PARAM_PREFIX()) && i + 1 < args.length) {
+                cliArgs.userArgs.add(new String[]{arg.substring(2), args[++i]});
+            } else if (!arg.startsWith("-")) {
+                LOG.error("Unrecognized options: " + arg);
                 printUsageAndExit();
             }
         }
+        return cliArgs;
+    }
 
-        if (conf != null) {
-            Map<String, String> localConf;
-            String extension = conf.split("\\.")[conf.split("\\.").length - 1];
-            switch (extension) {
-                case "conf":
-                    localConf = PropertiesUtils.fromHoconFile(conf);
-                    break;
-                case "properties":
-                    localConf = PropertiesUtils.fromPropertiesFile(conf);
-                    break;
-                case "yaml":
-                case "yml":
-                    localConf = PropertiesUtils.fromYamlFile(conf);
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                        "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
-            }
-            for (Map.Entry<String, String> entry : localConf.entrySet()) {
-                sparkConf.set(entry.getKey(), entry.getValue());
-            }
+    private static void applyConfFile(String conf, SparkConf sparkConf) {
+        if (conf == null) {
+            return;
         }
+        Map<String, String> localConf;
+        String extension = conf.substring(conf.lastIndexOf('.') + 1);
+        switch (extension) {
+            case "conf":
+                localConf = PropertiesUtils.fromHoconFile(conf);
+                break;
+            case "properties":
+                localConf = PropertiesUtils.fromPropertiesFile(conf);
+                break;
+            case "yaml":
+            case "yml":
+                localConf = PropertiesUtils.fromYamlFile(conf);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
+        }
+        localConf.forEach(sparkConf::set);
+    }
 
+    private static void applyUserArgs(List<String[]> userArgs, SparkConf sparkConf) {
         for (String[] arg : userArgs) {
             sparkConf.set(arg[0], arg[1]);
         }
+    }
 
+    private static void applyAppDefaults(SparkConf sparkConf) {
         String appMain =
             sparkConf.get(ConfigKeys.KEY_SPARK_MAIN_CLASS(), "org.apache.streampark.spark.cli.SqlClient");
         if (appMain == null) {
@@ -198,43 +201,24 @@ public final class SparkSqlExecutor {
             sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10");
         }
         sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true");
-        return sparkConf;
     }
 
-    private static String resolveCheckpoint(String[] args) {
-        List<String> argv = new ArrayList<>(Arrays.asList(args));
-        String checkpoint = "";
-        while (!argv.isEmpty()) {
-            if ("--checkpoint".equals(argv.get(0)) && argv.size() > 1) {
-                checkpoint = argv.get(1);
-                argv = argv.subList(2, argv.size());
-            } else if (argv.size() >= 2) {
-                argv = argv.subList(2, argv.size());
-            } else if (argv.size() == 1) {
-                break;
-            } else {
-                break;
+    private static String resolveOption(String[] args, String optionName) {
+        for (int i = 0; i + 1 < args.length; i++) {
+            if (optionName.equals(args[i])) {
+                return args[i + 1];
             }
         }
-        return checkpoint;
+        return "";
     }
 
-    private static boolean resolveCreateOnError(String[] args) {
-        List<String> argv = new ArrayList<>(Arrays.asList(args));
-        boolean createOnError = true;
-        while (!argv.isEmpty()) {
-            if ("--createOnError".equals(argv.get(0)) && argv.size() > 1) {
-                createOnError = Boolean.parseBoolean(argv.get(1));
-                argv = argv.subList(2, argv.size());
-            } else if (argv.size() >= 2) {
-                argv = argv.subList(2, argv.size());
-            } else if (argv.size() == 1) {
-                break;
-            } else {
-                break;
+    private static boolean resolveBooleanOption(String[] args, String optionName, boolean defaultValue) {
+        for (int i = 0; i + 1 < args.length; i++) {
+            if (optionName.equals(args[i])) {
+                return Boolean.parseBoolean(args[i + 1]);
             }
         }
-        return createOnError;
+        return defaultValue;
     }
 
     private static void printUsageAndExit() {
@@ -246,6 +230,12 @@ public final class SparkSqlExecutor {
                 + "   --createOnError <Failed to recover from checkpoint,"
                 + " whether to recreated, true or false>\n");
         System.exit(1);
+    }
+
+    private static final class CliArgs {
+
+        private String confPath;
+        private final List<String[]> userArgs = new ArrayList<>();
     }
 
     private static final class Log extends LoggerSupport {
