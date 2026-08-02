@@ -160,6 +160,7 @@ jobs:
           #  class: org.apache.streampark.e2e.cases.FlinkSQL117OnYarnTest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
+      TESTCONTAINERS_RYUK_CONTAINER_IMAGE: ghcr.io/testcontainers/ryuk:0.7.0
     steps:
       - name: Free Disk Space
         # refer: https://github.com/jlumbroso/free-disk-space
@@ -198,6 +199,22 @@ jobs:
         run: |
           docker load -i /tmp/standalone-image.tar \
           && rm -f /tmp/standalone-image.tar
+      - name: Pre-pull Testcontainers images
+        run: |
+          pull_with_retry() {
+            local image="$1"
+            for attempt in $(seq 1 5); do
+              if docker pull "$image"; then
+                return 0
+              fi
+              echo "Failed to pull $image (attempt $attempt), retrying in ${attempt}0s..."
+              sleep $((attempt * 10))
+            done
+            return 1
+          }
+          pull_with_retry ghcr.io/testcontainers/ryuk:0.7.0 \
+            || pull_with_retry testcontainers/ryuk:0.7.0
+          pull_with_retry selenium/standalone-chrome:4.13.0 || true
       - name: Run Test
         run: |
           ./mvnw -B -f streampark-e2e/pom.xml -am \
