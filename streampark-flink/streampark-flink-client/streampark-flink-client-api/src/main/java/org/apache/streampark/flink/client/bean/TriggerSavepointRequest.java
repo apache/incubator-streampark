@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client.bean;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.constants.Constants;
 import org.apache.streampark.common.enums.FlinkDeployMode;
 
 import javax.annotation.Nullable;
@@ -37,33 +36,22 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
     private final FlinkDeployMode deployMode;
     @Nullable
     private final Map<String, Serializable> properties;
-    private final String clusterId;
-    private final String jobId;
-    private final String savepointPath;
-    private final boolean nativeFormat;
-    private final String kubernetesNamespace;
+    private final JobClientTarget target;
+    private final SavepointTriggerOptions savepointOptions;
 
-    @SuppressWarnings("java:S107")
     public TriggerSavepointRequest(
                                    long id,
                                    FlinkVersion flinkVersion,
                                    FlinkDeployMode deployMode,
                                    @Nullable Map<String, Object> properties,
-                                   String clusterId,
-                                   String jobId,
-                                   String savepointPath,
-                                   boolean nativeFormat,
-                                   String kubernetesNamespace) {
+                                   JobClientTarget target,
+                                   SavepointTriggerOptions savepointOptions) {
         this.id = id;
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.clusterId = clusterId;
-        this.jobId = jobId;
-        this.savepointPath = savepointPath;
-        this.nativeFormat = nativeFormat;
-        this.kubernetesNamespace =
-            kubernetesNamespace != null ? kubernetesNamespace : Constants.DEFAULT;
+        this.target = target;
+        this.savepointOptions = savepointOptions;
     }
 
     public long id() {
@@ -93,26 +81,26 @@ public class TriggerSavepointRequest implements SavepointRequestTrait, Serializa
 
     @Override
     public String clusterId() {
-        return clusterId;
+        return target.clusterId();
     }
 
     @Override
     public String jobId() {
-        return jobId;
+        return target.jobId();
     }
 
     @Override
     public String savepointPath() {
-        return savepointPath;
+        return savepointOptions.savepointPath();
     }
 
     @Override
     public boolean nativeFormat() {
-        return nativeFormat;
+        return savepointOptions.nativeFormat();
     }
 
     @Override
     public String kubernetesNamespace() {
-        return kubernetesNamespace;
+        return target.kubernetesNamespace();
     }
 }

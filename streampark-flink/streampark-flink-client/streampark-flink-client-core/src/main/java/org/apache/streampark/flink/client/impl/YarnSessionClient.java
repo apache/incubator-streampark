@@ -32,6 +32,7 @@ import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -98,7 +99,7 @@ public final class YarnSessionClient extends YarnClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
         Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
             getYarnClusterDescriptor(flinkConfig);
         ApplicationId yarnClusterId = yarnClusterDescriptor._1();
@@ -129,7 +130,7 @@ public final class YarnSessionClient extends YarnClientTrait {
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
         return super.doCancel(cancelRequest, flinkConfig);
@@ -138,7 +139,7 @@ public final class YarnSessionClient extends YarnClientTrait {
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest request,
-                                                Configuration flinkConfig) throws Exception {
+                                                Configuration flinkConfig) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConfig, DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
         return super.doTriggerSavepoint(request, flinkConfig);

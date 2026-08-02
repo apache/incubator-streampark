@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.packer.pipeline;
+package org.apache.streampark.flink.client.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ErrorResult implements BuildResult, java.io.Serializable {
+/** Savepoint trigger options for savepoint requests. */
+public final class SavepointTriggerOptions implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean pass = false;
+    private final String savepointPath;
+    private final boolean nativeFormat;
 
-    public ErrorResult() {
+    public SavepointTriggerOptions(String savepointPath, boolean nativeFormat) {
+        this.savepointPath = savepointPath;
+        this.nativeFormat = nativeFormat;
     }
 
-    @Override
-    public boolean pass() {
-        return pass;
+    public String savepointPath() {
+        return savepointPath;
     }
 
-    @JsonProperty("pass")
-    public void setPass(boolean pass) {
-        this.pass = pass;
+    public boolean nativeFormat() {
+        return nativeFormat;
     }
 }

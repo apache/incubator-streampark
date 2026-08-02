@@ -24,6 +24,7 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
 import org.apache.streampark.flink.util.FlinkUtils;
 
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -63,72 +64,86 @@ public final class YarnPerJobClient extends YarnClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
-        String flinkHome = submitRequest.flinkVersion().getFlinkHome();
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
+        throws FlinkException {
+        try {
+            String flinkHome = submitRequest.flinkVersion().getFlinkHome();
 
-        Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
-            getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
-        ClusterSpecification clusterSpecification = deployDescriptor._1();
-        YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
+            Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
+                getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
+            ClusterSpecification clusterSpecification = deployDescriptor._1();
+            YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
 
-        String flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome);
-        clusterDescriptor.setLocalJarPath(new Path(flinkDistJar));
-        clusterDescriptor.addShipFiles(java.util.Collections.singletonList(new Path(flinkHome + "/lib")));
+            String flinkDistJar = FlinkUtils.getFlinkDistJar(flinkHome);
+            clusterDescriptor.setLocalJarPath(new Path(flinkDistJar));
+            clusterDescriptor.addShipFiles(java.util.Collections.singletonList(new Path(flinkHome + "/lib")));
 
-        PackagedProgram packagedProgram = null;
-        ClusterClient<ApplicationId> clusterClient;
-        logInfo(
-            String.format(
-                "%n------------------------<<specification>>-------------------------%n"
-                    + "%s%n"
-                    + "------------------------------------------------------------------%n",
-                clusterSpecification));
+            PackagedProgram packagedProgram = null;
+            ClusterClient<ApplicationId> clusterClient;
+            logInfo(
+                String.format(
+                    "%n------------------------<<specification>>-------------------------%n"
+                        + "%s%n"
+                        + "------------------------------------------------------------------%n",
+                    clusterSpecification));
 
-        Tuple2<PackagedProgram, JobGraph> programJobGraph =
-            getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
-        packagedProgram = programJobGraph._1();
-        JobGraph jobGraph = programJobGraph._2();
+            Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
+            packagedProgram = programJobGraph._1();
+            JobGraph jobGraph = programJobGraph._2();
 
-        logInfo(
-            String.format(
-                "%n-------------------------<<applicationId>>------------------------%n"
-                    + "jobGraph getJobID: %s%n"
-                    + "__________________________________________________________________%n",
-                jobGraph.getJobID()));
+            logInfo(
+                String.format(
+                    "%n-------------------------<<applicationId>>------------------------%n"
+                        + "jobGraph getJobID: %s%n"
+                        + "__________________________________________________________________%n",
+                    jobGraph.getJobID()));
 
-        clusterClient =
-            deployInternal(
-                clusterDescriptor,
-                clusterSpecification,
-                submitRequest.effectiveAppName(),
-                YarnJobClusterEntrypoint.class.getName(),
-                jobGraph,
-                true)
-                    .getClusterClient();
+            clusterClient =
+                deployInternal(
+                    clusterDescriptor,
+                    clusterSpecification,
+                    submitRequest.effectiveAppName(),
+                    YarnJobClusterEntrypoint.class.getName(),
+                    jobGraph,
+                    true)
+                        .getClusterClient();
 
-        ApplicationId applicationId = clusterClient.getClusterId();
-        String jobManagerUrl = clusterClient.getWebInterfaceURL();
-        logInfo(
-            String.format(
-                "%n-------------------------<<applicationId>>------------------------%n"
-                    + "Flink Job Started: applicationId: %s%n"
-                    + "__________________________________________________________________%n",
-                applicationId));
+            ApplicationId applicationId = clusterClient.getClusterId();
+            String jobManagerUrl = clusterClient.getWebInterfaceURL();
+            logInfo(
+                String.format(
+                    "%n-------------------------<<applicationId>>------------------------%n"
+                        + "Flink Job Started: applicationId: %s%n"
+                        + "__________________________________________________________________%n",
+                    applicationId));
 
-        SubmitResponse resp =
-            new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
-        closeSubmit(submitRequest, packagedProgram, clusterClient, clusterDescriptor);
-        return resp;
+            SubmitResponse resp =
+                new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
+            closeSubmit(submitRequest, packagedProgram, clusterClient, clusterDescriptor);
+            return resp;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
-        CancelResponse response = super.doCancel(cancelRequest, flinkConfig);
-        Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
-            getYarnClusterDescriptor(flinkConfig);
-        yarnClusterDescriptor
-            ._2()
-            .killCluster(ApplicationId.fromString(cancelRequest.clusterId()));
-        return response;
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig)
+        throws FlinkException {
+        try {
+            CancelResponse response = super.doCancel(cancelRequest, flinkConfig);
+            Tuple2<ApplicationId, YarnClusterDescriptor> yarnClusterDescriptor =
+                getYarnClusterDescriptor(flinkConfig);
+            yarnClusterDescriptor
+                ._2()
+                .killCluster(ApplicationId.fromString(cancelRequest.clusterId()));
+            return response;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 }

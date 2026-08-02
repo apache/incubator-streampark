@@ -25,6 +25,7 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.client.trait.FlinkClientTrait;
 
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.executors.RemoteExecutor;
 import org.apache.flink.client.program.MiniClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -61,28 +62,35 @@ public final class LocalClient extends FlinkClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
-        Tuple2<PackagedProgram, JobGraph> programJobGraph =
-            getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
-        PackagedProgram packageProgram = programJobGraph._1();
-        JobGraph jobGraph = programJobGraph._2();
-        MiniClusterClient client = createLocalCluster(flinkConfig);
-        String jobId = client.submitJob(jobGraph).get().toString();
-        SubmitResponse resp =
-            new SubmitResponse(jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
-        closeSubmit(submitRequest, packageProgram, client);
-        return resp;
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
+        throws FlinkException {
+        try {
+            Tuple2<PackagedProgram, JobGraph> programJobGraph =
+                getJobGraph(flinkConfig, submitRequest, submitRequest.userJarFile());
+            PackagedProgram packageProgram = programJobGraph._1();
+            JobGraph jobGraph = programJobGraph._2();
+            MiniClusterClient client = createLocalCluster(flinkConfig);
+            String jobId = client.submitJob(jobGraph).get().toString();
+            SubmitResponse resp =
+                new SubmitResponse(jobId, flinkConfig.toMap(), jobId, client.getWebInterfaceURL());
+            closeSubmit(submitRequest, packageProgram, client);
+            return resp;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest savepointRequest,
-                                                Configuration flinkConfig) throws Exception {
+                                                Configuration flinkConfig) throws FlinkException {
         return RemoteClient.INSTANCE.doTriggerSavepoint(savepointRequest, flinkConfig);
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
         return RemoteClient.INSTANCE.doCancel(cancelRequest, flinkConfig);
     }
 

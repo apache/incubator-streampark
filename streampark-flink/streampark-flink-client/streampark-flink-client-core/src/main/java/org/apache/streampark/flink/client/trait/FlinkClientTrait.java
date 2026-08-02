@@ -101,7 +101,17 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     private final String paramKeyFlinkParallelism =
         ConfigKeys.KEY_FLINK_PARALLELISM(ConfigKeys.PARAM_PREFIX());
 
-    public SubmitResponse submit(SubmitRequest submitRequest) throws Exception {
+    protected static FlinkException asFlinkException(Throwable throwable) {
+        if (throwable instanceof FlinkException) {
+            return (FlinkException) throwable;
+        }
+        if (throwable instanceof Exception) {
+            return new FlinkException((Exception) throwable);
+        }
+        return new FlinkException(throwable.getMessage(), throwable);
+    }
+
+    public SubmitResponse submit(SubmitRequest submitRequest) throws FlinkException {
         logInfo(
             "\n"
                 + "--------------------------------------- flink job start ---------------------------------------\n"
@@ -149,12 +159,19 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
 
-        Configuration flinkConfig = prepareConfig(submitRequest);
+        Configuration flinkConfig;
+        try {
+            flinkConfig = prepareConfig(submitRequest);
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
         setConfig(submitRequest, flinkConfig);
 
         try {
             return doSubmit(submitRequest, flinkConfig);
-        } catch (Exception e) {
+        } catch (FlinkException e) {
             logError(
                 "flink job "
                     + submitRequest.appName()
@@ -165,6 +182,17 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                     + "detail: "
                     + ExceptionUtils.stringifyException(e));
             throw e;
+        } catch (Exception e) {
+            logError(
+                "flink job "
+                    + submitRequest.appName()
+                    + " start failed, "
+                    + "deployMode: "
+                    + submitRequest.deployMode().getName()
+                    + ", "
+                    + "detail: "
+                    + ExceptionUtils.stringifyException(e));
+            throw asFlinkException(e);
         }
     }
 
@@ -306,7 +334,7 @@ public abstract class FlinkClientTrait extends LoggerSupport {
 
     public abstract void setConfig(SubmitRequest submitRequest, Configuration flinkConf);
 
-    public SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws Exception {
+    public SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) throws FlinkException {
         logInfo(
             "\n"
                 + "----------------------------------------- flink job trigger savepoint ---------------------\n"
@@ -336,10 +364,16 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
         Configuration flinkConf = new Configuration();
-        return doTriggerSavepoint(savepointRequest, flinkConf);
+        try {
+            return doTriggerSavepoint(savepointRequest, flinkConf);
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
-    public CancelResponse cancel(CancelRequest cancelRequest) throws Exception {
+    public CancelResponse cancel(CancelRequest cancelRequest) throws FlinkException {
         logInfo(
             "\n"
                 + "----------------------------------------- flink job cancel --------------------------------\n"
@@ -375,33 +409,38 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                 + "\n"
                 + "-------------------------------------------------------------------------------------------\n");
         Configuration flinkConf = new Configuration();
-        return doCancel(cancelRequest, flinkConf);
+        try {
+            return doCancel(cancelRequest, flinkConf);
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
-    @SuppressWarnings("java:S112")
-    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf) throws Exception;
+    public abstract SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConf)
+        throws FlinkException;
 
-    @SuppressWarnings("java:S112")
     public abstract SavepointResponse doTriggerSavepoint(
                                                          TriggerSavepointRequest request,
-                                                         Configuration flinkConf) throws Exception;
+                                                         Configuration flinkConf) throws FlinkException;
 
-    @SuppressWarnings("java:S112")
-    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws Exception;
+    public abstract CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf)
+        throws FlinkException;
 
     protected SubmitResponse trySubmit(
                                        SubmitRequest submitRequest,
                                        Configuration flinkConfig,
                                        File jarFile,
                                        SubmitFunc jobGraphFunc,
-                                       SubmitFunc restApiFunc) throws Exception {
+                                       SubmitFunc restApiFunc) throws FlinkException {
         try {
             logInfo("[flink-submit] Submit job with JobGraph Plan.");
             return jobGraphFunc.apply(submitRequest, flinkConfig, jarFile);
-        } catch (Exception e) {
+        } catch (FlinkException e) {
             try {
                 return restApiFunc.apply(submitRequest, flinkConfig, jarFile);
-            } catch (Exception e1) {
+            } catch (FlinkException fallbackException) {
                 throw new FlinkException(
                     "[flink-submit] Both JobGraph submit plan and Rest API submit plan all failed!\n"
                         + "JobGraph Submit plan failed detail:\n"
@@ -412,10 +451,10 @@ public abstract class FlinkClientTrait extends LoggerSupport {
                         + "\n"
                         + " RestAPI Submit plan failed detail:\n"
                         + " ------------------------------------------------------------------\n"
-                        + ExceptionUtils.stringifyException(e1)
+                        + ExceptionUtils.stringifyException(fallbackException)
                         + "\n"
                         + "------------------------------------------------------------------\n",
-                    e1);
+                    fallbackException);
             }
         }
     }
@@ -778,10 +817,9 @@ public abstract class FlinkClientTrait extends LoggerSupport {
     }
 
     @FunctionalInterface
-    @SuppressWarnings("java:S112")
     protected interface SubmitFunc {
 
-        SubmitResponse apply(SubmitRequest request, Configuration config, File jarFile) throws Exception;
+        SubmitResponse apply(SubmitRequest request, Configuration config, File jarFile) throws FlinkException;
     }
 
     private static final class CommandLineAndConfig {

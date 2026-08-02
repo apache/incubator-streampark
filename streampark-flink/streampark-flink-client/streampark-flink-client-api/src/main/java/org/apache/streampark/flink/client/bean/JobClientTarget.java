@@ -15,28 +15,37 @@
  * limitations under the License.
  */
 
-package org.apache.streampark.flink.packer.pipeline;
+package org.apache.streampark.flink.client.bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.streampark.common.constants.Constants;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ErrorResult implements BuildResult, java.io.Serializable {
+import java.io.Serializable;
+
+/** Cluster and job identity for client cancel/savepoint requests. */
+public final class JobClientTarget implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean pass = false;
+    private final String clusterId;
+    private final String jobId;
+    private final String kubernetesNamespace;
 
-    public ErrorResult() {
+    public JobClientTarget(String clusterId, String jobId, String kubernetesNamespace) {
+        this.clusterId = clusterId;
+        this.jobId = jobId;
+        this.kubernetesNamespace =
+            kubernetesNamespace != null ? kubernetesNamespace : Constants.DEFAULT;
     }
 
-    @Override
-    public boolean pass() {
-        return pass;
+    public String clusterId() {
+        return clusterId;
     }
 
-    @JsonProperty("pass")
-    public void setPass(boolean pass) {
-        this.pass = pass;
+    public String jobId() {
+        return jobId;
+    }
+
+    public String kubernetesNamespace() {
+        return kubernetesNamespace;
     }
 }

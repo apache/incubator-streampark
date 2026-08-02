@@ -18,7 +18,7 @@
 package org.apache.streampark.flink.packer.pipeline;
 
 /** Flink build result with workspace path. */
-public interface FlinkBuildResult extends BuildResult, java.io.Serializable {
+public interface FlinkBuildResult extends BuildResult {
 
     String workspacePath();
 }

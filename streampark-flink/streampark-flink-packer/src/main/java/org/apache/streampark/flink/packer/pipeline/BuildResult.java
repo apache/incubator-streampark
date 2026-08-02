@@ -17,8 +17,10 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import java.io.Serializable;
+
 /** Result of a BuildPipeline instance. */
-public interface BuildResult {
+public interface BuildResult extends Serializable {
 
     /** is pass aka is successfully */
     boolean pass();

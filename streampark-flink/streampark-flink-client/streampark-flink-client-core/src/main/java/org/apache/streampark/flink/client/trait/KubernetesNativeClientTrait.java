@@ -39,6 +39,7 @@ import org.apache.flink.kubernetes.KubernetesClusterClientFactory;
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType;
+import org.apache.flink.util.FlinkException;
 
 import javax.annotation.Nonnull;
 
@@ -112,34 +113,49 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig)
+        throws FlinkException {
         return executeClientAction(
             cancelRequest,
             flinkConfig,
             (jobId, client) -> {
-                String resp = cancelJob(cancelRequest, jobId, client);
-                if (cancelRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
-                    client.shutDownCluster();
+                try {
+                    String resp = cancelJob(cancelRequest, jobId, client);
+                    if (cancelRequest.deployMode() == FlinkDeployMode.KUBERNETES_NATIVE_APPLICATION) {
+                        client.shutDownCluster();
+                    }
+                    return new CancelResponse(resp);
+                } catch (FlinkException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw asFlinkException(e);
                 }
-                return new CancelResponse(resp);
             });
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest savepointRequest,
-                                                Configuration flinkConfig) throws Exception {
+                                                Configuration flinkConfig) throws FlinkException {
         return executeClientAction(
             savepointRequest,
             flinkConfig,
-            (jobId, clusterClient) -> new SavepointResponse(
-                triggerSavepoint(savepointRequest, jobId, clusterClient)));
+            (jobId, clusterClient) -> {
+                try {
+                    return new SavepointResponse(
+                        triggerSavepoint(savepointRequest, jobId, clusterClient));
+                } catch (FlinkException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw asFlinkException(e);
+                }
+            });
     }
 
     public <O> O executeClientAction(
                                      SavepointRequestTrait request,
                                      Configuration flinkConfig,
-                                     ClientAction<O> actFunc) throws Exception {
+                                     ClientAction<O> actFunc) throws FlinkException {
         String hints =
             "[flink-client] execute " + request.getClass().getSimpleName() + " for flink job failed,";
         if (StringUtils.isBlank(request.clusterId())) {
@@ -169,7 +185,7 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
                                     "Kubernetes cluster id is not configured")))
                     .getClusterClient();
             return actFunc.apply(JobID.fromHexString(request.jobId()), client);
-        } catch (Exception e) {
+        } catch (FlinkException e) {
             logError(
                 hints
                     + " mode="
@@ -178,6 +194,15 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
                     + request,
                 e);
             throw e;
+        } catch (Exception e) {
+            logError(
+                hints
+                    + " mode="
+                    + flinkConfig.get(DeploymentOptions.TARGET)
+                    + ", request="
+                    + request,
+                e);
+            throw asFlinkException(e);
         } finally {
             if (client != null) {
                 client.close();
@@ -234,9 +259,8 @@ public abstract class KubernetesNativeClientTrait extends FlinkClientTrait {
     }
 
     @FunctionalInterface
-    @SuppressWarnings("java:S112")
     protected interface ClientAction<O> {
 
-        O apply(JobID jobId, ClusterClient<?> clusterClient) throws Exception;
+        O apply(JobID jobId, ClusterClient<?> clusterClient) throws FlinkException;
     }
 }

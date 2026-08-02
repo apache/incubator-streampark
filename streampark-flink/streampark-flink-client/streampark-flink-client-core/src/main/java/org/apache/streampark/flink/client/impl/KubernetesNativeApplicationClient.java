@@ -28,6 +28,7 @@ import org.apache.streampark.flink.client.trait.KubernetesNativeClientTrait;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.ClusterClient;
@@ -51,7 +52,8 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
+        throws FlinkException {
         if (StringUtils.isBlank(submitRequest.clusterId())) {
             throw new IllegalArgumentException(
                 String.format(
@@ -59,47 +61,53 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
                     flinkConfig.get(DeploymentOptions.TARGET)));
         }
 
-        submitRequest.checkBuildResult();
+        try {
+            submitRequest.checkBuildResult();
 
-        DockerImageBuildResponse buildResult =
-            (DockerImageBuildResponse) submitRequest.buildResult();
+            DockerImageBuildResponse buildResult =
+                (DockerImageBuildResponse) submitRequest.buildResult();
 
-        FlinkConfigurationOps.safeSet(
-            flinkConfig,
-            PipelineOptions.JARS,
-            Lists.newArrayList(buildResult.dockerInnerMainJarPath()));
-        FlinkConfigurationOps.safeSet(
-            flinkConfig, KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag());
+            FlinkConfigurationOps.safeSet(
+                flinkConfig,
+                PipelineOptions.JARS,
+                Lists.newArrayList(buildResult.dockerInnerMainJarPath()));
+            FlinkConfigurationOps.safeSet(
+                flinkConfig, KubernetesConfigOptions.CONTAINER_IMAGE, buildResult.flinkImageTag());
 
-        Tuple2<KubernetesClusterDescriptor, ClusterSpecification> descriptorAndSpec =
-            getK8sClusterDescriptorAndSpecification(flinkConfig);
-        KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1();
-        ClusterSpecification clusterSpecification = descriptorAndSpec._2();
+            Tuple2<KubernetesClusterDescriptor, ClusterSpecification> descriptorAndSpec =
+                getK8sClusterDescriptorAndSpecification(flinkConfig);
+            KubernetesClusterDescriptor clusterDescriptor = descriptorAndSpec._1();
+            ClusterSpecification clusterSpecification = descriptorAndSpec._2();
 
-        ApplicationConfiguration applicationConfig =
-            ApplicationConfiguration.fromConfiguration(flinkConfig);
-        ClusterClient<String> clusterClient =
-            clusterDescriptor
-                .deployApplicationCluster(clusterSpecification, applicationConfig)
-                .getClusterClient();
+            ApplicationConfiguration applicationConfig =
+                ApplicationConfiguration.fromConfiguration(flinkConfig);
+            ClusterClient<String> clusterClient =
+                clusterDescriptor
+                    .deployApplicationCluster(clusterSpecification, applicationConfig)
+                    .getClusterClient();
 
-        String clusterId = clusterClient.getClusterId();
-        SubmitResponse result =
-            new SubmitResponse(
-                clusterId,
-                flinkConfig.toMap(),
-                submitRequest.jobId(),
-                clusterClient.getWebInterfaceURL());
-        logInfo(
-            "[flink-submit] flink job has been submitted. "
-                + flinkConfIdentifierInfo(flinkConfig));
+            String clusterId = clusterClient.getClusterId();
+            SubmitResponse result =
+                new SubmitResponse(
+                    clusterId,
+                    flinkConfig.toMap(),
+                    submitRequest.jobId(),
+                    clusterClient.getWebInterfaceURL());
+            logInfo(
+                "[flink-submit] flink job has been submitted. "
+                    + flinkConfIdentifierInfo(flinkConfig));
 
-        closeSubmit(submitRequest, clusterDescriptor, clusterClient);
-        return result;
+            closeSubmit(submitRequest, clusterDescriptor, clusterClient);
+            return result;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConf) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConf,
             DeploymentOptions.TARGET,
@@ -108,16 +116,22 @@ public final class KubernetesNativeApplicationClient extends KubernetesNativeCli
             cancelRequest,
             flinkConf,
             (jobId, client) -> {
-                String resp = cancelJob(cancelRequest, jobId, client);
-                client.shutDownCluster();
-                return new CancelResponse(resp);
+                try {
+                    String resp = cancelJob(cancelRequest, jobId, client);
+                    client.shutDownCluster();
+                    return new CancelResponse(resp);
+                } catch (FlinkException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw asFlinkException(e);
+                }
             });
     }
 
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest request,
-                                                Configuration flinkConf) throws Exception {
+                                                Configuration flinkConf) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConf,
             DeploymentOptions.TARGET,

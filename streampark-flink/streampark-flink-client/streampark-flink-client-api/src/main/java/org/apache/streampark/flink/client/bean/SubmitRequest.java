@@ -75,7 +75,6 @@ public class SubmitRequest implements Serializable {
     private final String clusterId;
     @Nullable
     private final String hadoopUser;
-    @SuppressWarnings("java:S1948")
     @Nullable
     private final BuildResult buildResult;
     @Nullable
@@ -98,46 +97,33 @@ public class SubmitRequest implements Serializable {
     private transient Boolean safePackageProgram;
     private transient HdfsWorkspace hdfsWorkspace;
 
-    @SuppressWarnings("java:S107")
     public SubmitRequest(
                          FlinkVersion flinkVersion,
                          FlinkDeployMode deployMode,
                          Map<String, Object> properties,
-                         String flinkYaml,
-                         FlinkJobType jobType,
-                         long id,
-                         String jobId,
-                         String appName,
-                         String appConf,
-                         ApplicationType applicationType,
-                         String savePoint,
-                         FlinkRestoreMode restoreMode,
-                         String args,
-                         @Nullable String clusterId,
-                         @Nullable String hadoopUser,
+                         SubmitApplicationSpec application,
+                         @Nullable SubmitClusterSpec cluster,
                          @Nullable BuildResult buildResult,
-                         @Nullable Map<String, Object> extraParameter,
-                         @Nullable String kubernetesNamespace,
-                         @Nullable FlinkK8sRestExposedType flinkRestExposedType) {
+                         @Nullable Map<String, Object> extraParameter) {
         this.flinkVersion = flinkVersion;
         this.deployMode = deployMode;
         this.properties = ClientBeanUtils.toSerializableMap(properties);
-        this.flinkYaml = flinkYaml;
-        this.jobType = jobType;
-        this.id = id;
-        this.jobId = jobId;
-        this.appName = appName;
-        this.appConf = appConf;
-        this.applicationType = applicationType;
-        this.savePoint = savePoint;
-        this.restoreMode = restoreMode;
-        this.args = args;
-        this.clusterId = clusterId;
-        this.hadoopUser = hadoopUser;
+        this.flinkYaml = application.flinkYaml();
+        this.jobType = application.jobType();
+        this.id = application.id();
+        this.jobId = application.jobId();
+        this.appName = application.appName();
+        this.appConf = application.appConf();
+        this.applicationType = application.applicationType();
+        this.savePoint = application.savePoint();
+        this.restoreMode = application.restoreMode();
+        this.args = application.args();
+        this.clusterId = cluster != null ? cluster.clusterId() : null;
+        this.hadoopUser = cluster != null ? cluster.hadoopUser() : null;
+        this.kubernetesNamespace = cluster != null ? cluster.kubernetesNamespace() : null;
+        this.flinkRestExposedType = cluster != null ? cluster.flinkRestExposedType() : null;
         this.buildResult = buildResult;
         this.extraParameter = ClientBeanUtils.toSerializableMap(extraParameter);
-        this.kubernetesNamespace = kubernetesNamespace;
-        this.flinkRestExposedType = flinkRestExposedType;
     }
 
     public FlinkVersion flinkVersion() {

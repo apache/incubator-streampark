@@ -46,7 +46,9 @@ import org.apache.streampark.console.core.service.application.FlinkApplicationMa
 import org.apache.streampark.console.core.util.ServiceHelper;
 import org.apache.streampark.console.core.watcher.FlinkAppHttpWatcher;
 import org.apache.streampark.flink.client.FlinkClient;
+import org.apache.streampark.flink.client.bean.JobClientTarget;
 import org.apache.streampark.flink.client.bean.SavepointResponse;
+import org.apache.streampark.flink.client.bean.SavepointTriggerOptions;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.util.FlinkUtils;
 
@@ -503,10 +505,7 @@ public class FlinkSavepointServiceImpl extends ServiceImpl<FlinkSavepointMapper,
             flinkEnv.getFlinkVersion(),
             application.getDeployModeEnum(),
             properties,
-            clusterId,
-            application.getJobId(),
-            customSavepoint,
-            nativeFormat,
-            application.getK8sNamespace());
+            new JobClientTarget(clusterId, application.getJobId(), application.getK8sNamespace()),
+            new SavepointTriggerOptions(customSavepoint, nativeFormat));
     }
 }

@@ -75,6 +75,10 @@ import org.apache.streampark.console.core.watcher.FlinkK8sWatcherWrapper;
 import org.apache.streampark.flink.client.FlinkClient;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
+import org.apache.streampark.flink.client.bean.JobClientTarget;
+import org.apache.streampark.flink.client.bean.SavepointCancelOptions;
+import org.apache.streampark.flink.client.bean.SubmitApplicationSpec;
+import org.apache.streampark.flink.client.bean.SubmitClusterSpec;
 import org.apache.streampark.flink.client.bean.SubmitRequest;
 import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.kubernetes.FlinkK8sWatcher;
@@ -309,13 +313,12 @@ public class FlinkApplicationActionServiceImpl
                 flinkEnv.getFlinkVersion(),
                 FlinkDeployMode.of(application.getDeployMode()),
                 properties,
-                clusterId,
-                application.getJobId(),
-                appParam.getRestoreOrTriggerSavepoint(),
-                appParam.getDrain(),
-                customSavepoint,
-                appParam.getNativeFormat(),
-                namespace);
+                new JobClientTarget(clusterId, application.getJobId(), namespace),
+                new SavepointCancelOptions(
+                    appParam.getRestoreOrTriggerSavepoint(),
+                    appParam.getDrain(),
+                    customSavepoint,
+                    appParam.getNativeFormat()));
 
         final Date triggerTime = new Date();
         CompletableFuture<CancelResponse> cancelFuture =
@@ -459,22 +462,25 @@ public class FlinkApplicationActionServiceImpl
                 flinkEnv.getFlinkVersion(),
                 FlinkDeployMode.of(application.getDeployMode()),
                 getProperties(application, dynamicProperties),
-                flinkEnv.getFlinkConf(),
-                FlinkJobType.of(application.getJobType()),
-                application.getId(),
-                new JobID().toHexString(),
-                application.getJobName(),
-                appConf,
-                application.getApplicationType(),
-                getSavepointPath(appParam),
-                FlinkRestoreMode.of(appParam.getRestoreMode()),
-                applicationArgs,
-                k8sClusterId,
-                application.getHadoopUser(),
+                SubmitApplicationSpec.builder()
+                    .flinkYaml(flinkEnv.getFlinkConf())
+                    .jobType(FlinkJobType.of(application.getJobType()))
+                    .id(application.getId())
+                    .jobId(new JobID().toHexString())
+                    .appName(application.getJobName())
+                    .appConf(appConf)
+                    .applicationType(application.getApplicationType())
+                    .savePoint(getSavepointPath(appParam))
+                    .restoreMode(FlinkRestoreMode.of(appParam.getRestoreMode()))
+                    .args(applicationArgs)
+                    .build(),
+                new SubmitClusterSpec(
+                    k8sClusterId,
+                    application.getHadoopUser(),
+                    k8sNamespace,
+                    exposedType),
                 buildResult,
-                extraParameter,
-                k8sNamespace,
-                exposedType);
+                extraParameter);
 
         CompletableFuture<SubmitResponse> future =
             CompletableFuture.supplyAsync(() -> FlinkClient.submit(submitRequest), executorService);

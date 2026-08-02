@@ -38,6 +38,7 @@ import org.apache.streampark.flink.kubernetes.enums.FlinkK8sDeployMode;
 import org.apache.streampark.flink.kubernetes.model.ClusterKey;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.PackagedProgram;
@@ -66,7 +67,7 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws FlinkException {
         if (StringUtils.isBlank(submitRequest.clusterId())) {
             throw new IllegalArgumentException(
                 String.format(
@@ -85,30 +86,38 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
     public SubmitResponse restApiSubmit(
                                         SubmitRequest submitRequest,
                                         Configuration flinkConfig,
-                                        File fatJar) throws Exception {
-        ClusterKey clusterKey =
-            ClusterKey.builder()
-                .executeMode(FlinkK8sDeployMode.SESSION)
-                .namespace(submitRequest.kubernetesNamespace())
-                .clusterId(submitRequest.clusterId())
-                .build();
-        String jmRestUrl =
-            KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
-                .orElseThrow(
-                    () -> new Exception(
-                        "[flink-submit] retrieve flink session rest url failed, clusterKey="
-                            + clusterKey));
-        String jobId =
-            FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
-        return new SubmitResponse(
-            clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
+                                        File fatJar) throws FlinkException {
+        try {
+            ClusterKey clusterKey =
+                ClusterKey.builder()
+                    .executeMode(FlinkK8sDeployMode.SESSION)
+                    .namespace(submitRequest.kubernetesNamespace())
+                    .clusterId(submitRequest.clusterId())
+                    .build();
+            String jmRestUrl =
+                KubernetesRetriever.retrieveFlinkRestUrl(clusterKey)
+                    .orElseThrow(
+                        () ->
+                            new FlinkException(
+                                "[flink-submit] retrieve flink session rest url failed, clusterKey="
+                                    + clusterKey));
+            String jobId =
+                FlinkSessionSubmitHelper.submitViaRestApi(jmRestUrl, fatJar, flinkConfig);
+            return new SubmitResponse(
+                clusterKey.clusterId(), flinkConfig.toMap(), jobId, jmRestUrl);
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
     /** Submit flink session job with building JobGraph via ClusterClient api. */
     public SubmitResponse jobGraphSubmit(
                                          SubmitRequest submitRequest,
                                          Configuration flinkConfig,
-                                         File jarFile) throws Exception {
+                                         File jarFile) throws FlinkException {
+        try {
         KubernetesClusterDescriptor clusterDescriptor = getK8sClusterDescriptor(flinkConfig);
 
         Tuple2<PackagedProgram, JobGraph> packageProgramJobGraph =
@@ -131,10 +140,15 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
                 + jobId);
         closeSubmit(submitRequest, packageProgram, client, client);
         return result;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 
     @Override
-    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws Exception {
+    public CancelResponse doCancel(CancelRequest cancelRequest, Configuration flinkConfig) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConfig,
             DeploymentOptions.TARGET,
@@ -226,7 +240,7 @@ public final class KubernetesNativeSessionClient extends KubernetesNativeClientT
     @Override
     public SavepointResponse doTriggerSavepoint(
                                                 TriggerSavepointRequest triggerSavepointRequest,
-                                                Configuration flinkConfig) throws Exception {
+                                                Configuration flinkConfig) throws FlinkException {
         FlinkConfigurationOps.safeSet(
             flinkConfig,
             DeploymentOptions.TARGET,

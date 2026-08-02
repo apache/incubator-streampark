@@ -30,6 +30,7 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.trait.YarnClientTrait;
 import org.apache.streampark.flink.packer.pipeline.ShadedBuildResponse;
 
+import org.apache.flink.util.FlinkException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.ClusterClient;
@@ -143,36 +144,43 @@ public final class YarnApplicationClient extends YarnClientTrait {
     }
 
     @Override
-    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig) throws Exception {
-        Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
-            getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
-        ClusterSpecification clusterSpecification = deployDescriptor._1();
-        YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
-        logInfo(
-            String.format(
-                "%n------------------------<<specification>>-------------------------%n"
-                    + "%s%n"
-                    + "------------------------------------------------------------------%n",
-                clusterSpecification));
+    public SubmitResponse doSubmit(SubmitRequest submitRequest, Configuration flinkConfig)
+        throws FlinkException {
+        try {
+            Tuple2<ClusterSpecification, YarnClusterDescriptor> deployDescriptor =
+                getYarnClusterDeployDescriptor(flinkConfig, submitRequest.hadoopUser());
+            ClusterSpecification clusterSpecification = deployDescriptor._1();
+            YarnClusterDescriptor clusterDescriptor = deployDescriptor._2();
+            logInfo(
+                String.format(
+                    "%n------------------------<<specification>>-------------------------%n"
+                        + "%s%n"
+                        + "------------------------------------------------------------------%n",
+                    clusterSpecification));
 
-        ApplicationConfiguration applicationConfiguration =
-            ApplicationConfiguration.fromConfiguration(flinkConfig);
-        ClusterClient<ApplicationId> clusterClient =
-            clusterDescriptor
-                .deployApplicationCluster(clusterSpecification, applicationConfiguration)
-                .getClusterClient();
-        ApplicationId applicationId = clusterClient.getClusterId();
-        String jobManagerUrl = clusterClient.getWebInterfaceURL();
-        logInfo(
-            String.format(
-                "%n-------------------------<<applicationId>>------------------------%n"
-                    + "Flink Job Started: applicationId: %s%n"
-                    + "__________________________________________________________________%n",
-                applicationId));
+            ApplicationConfiguration applicationConfiguration =
+                ApplicationConfiguration.fromConfiguration(flinkConfig);
+            ClusterClient<ApplicationId> clusterClient =
+                clusterDescriptor
+                    .deployApplicationCluster(clusterSpecification, applicationConfiguration)
+                    .getClusterClient();
+            ApplicationId applicationId = clusterClient.getClusterId();
+            String jobManagerUrl = clusterClient.getWebInterfaceURL();
+            logInfo(
+                String.format(
+                    "%n-------------------------<<applicationId>>------------------------%n"
+                        + "Flink Job Started: applicationId: %s%n"
+                        + "__________________________________________________________________%n",
+                    applicationId));
 
-        SubmitResponse resp =
-            new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
-        closeSubmit(submitRequest, clusterClient, clusterDescriptor);
-        return resp;
+            SubmitResponse resp =
+                new SubmitResponse(applicationId.toString(), flinkConfig.toMap(), "", jobManagerUrl);
+            closeSubmit(submitRequest, clusterClient, clusterDescriptor);
+            return resp;
+        } catch (FlinkException e) {
+            throw e;
+        } catch (Exception e) {
+            throw asFlinkException(e);
+        }
     }
 }
