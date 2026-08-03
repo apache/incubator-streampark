@@ -44,6 +44,7 @@ import javax.annotation.Nullable;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -225,8 +226,8 @@ public class SubmitRequest implements Serializable {
                 for (File file : files) {
                     try {
                         urls.add(file.toURI().toURL());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    } catch (MalformedURLException e) {
+                        throw new IllegalArgumentException("Invalid lib file URL: " + file, e);
                     }
                 }
                 libs = urls;
@@ -250,7 +251,11 @@ public class SubmitRequest implements Serializable {
 
     public String flinkSQL() {
         if (flinkSQL == null) {
-            flinkSQL = extraParameter.get(ConfigKeys.KEY_FLINK_SQL()).toString();
+            if (extraParameter == null) {
+                return null;
+            }
+            Object sql = extraParameter.get(ConfigKeys.KEY_FLINK_SQL());
+            flinkSQL = sql != null ? sql.toString() : null;
         }
         return flinkSQL;
     }
@@ -336,7 +341,7 @@ public class SubmitRequest implements Serializable {
     }
 
     public Object getExtra(String key) {
-        return extraParameter.get(key);
+        return extraParameter != null ? extraParameter.get(key) : null;
     }
 
     public HdfsWorkspace hdfsWorkspace() {
