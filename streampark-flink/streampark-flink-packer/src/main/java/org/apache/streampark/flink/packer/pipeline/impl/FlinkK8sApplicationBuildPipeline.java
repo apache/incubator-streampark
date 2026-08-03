@@ -248,7 +248,7 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
                                     .awaitCompletion();
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
-                                throw new RuntimeException(e);
+                                throw new IllegalStateException(e);
                             }
                             logInfo(
                                 "Already pulled docker image from remote register, imageTag="
@@ -257,7 +257,7 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
                         return null;
                     },
                     err -> {
-                        throw new RuntimeException(
+                        throw new IllegalStateException(
                             "Pull docker image failed, imageTag=" + baseImageTag, err);
                     });
                 return null;
@@ -297,7 +297,7 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
                         return null;
                     },
                     err -> {
-                        throw new RuntimeException(
+                        throw new IllegalStateException(
                             "Build docker image failed. tag=" + pushImageTag, err);
                     });
                 return null;
@@ -328,13 +328,13 @@ public class FlinkK8sApplicationBuildPipeline extends BuildPipeline {
                                 .awaitCompletion();
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-                            throw new RuntimeException(e);
+                            throw new IllegalStateException(e);
                         }
                         logInfo("Already pushed docker image, imageTag=" + pushImageTag);
                         return null;
                     },
                     err -> {
-                        throw new RuntimeException(
+                        throw new IllegalStateException(
                             "Push docker image failed. tag=" + pushImageTag, err);
                     });
                 return null;

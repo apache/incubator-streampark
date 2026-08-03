@@ -129,7 +129,7 @@ public class SparkYarnBuildPipeline extends BuildPipeline {
                                     fsOperator.upload(originFile.getAbsolutePath(), uploadFile);
                                 }
                             } catch (IOException e) {
-                                throw new RuntimeException(e);
+                                throw new IllegalStateException(e);
                             }
                             return null;
                         });

@@ -25,8 +25,7 @@ public interface BuildResult extends Serializable {
     /** is pass aka is successfully */
     boolean pass();
 
-    @SuppressWarnings("unchecked")
     default <T extends BuildResult> T as(Class<T> clz) {
-        return (T) this;
+        return clz.cast(this);
     }
 }

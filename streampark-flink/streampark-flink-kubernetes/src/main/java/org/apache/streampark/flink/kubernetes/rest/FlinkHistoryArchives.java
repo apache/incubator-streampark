@@ -79,8 +79,7 @@ public final class FlinkHistoryArchives extends LoggerSupport {
 
     private static void writeExceptionLog(String json, String jobId) {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> root = JsonUtils.read(json, Map.class);
+            Map<?, ?> root = JsonUtils.read(json, Map.class);
             Object log = root.get("root-exception");
             if (log != null) {
                 String path = KubernetesDeploymentHelper.getJobErrorLog(jobId);

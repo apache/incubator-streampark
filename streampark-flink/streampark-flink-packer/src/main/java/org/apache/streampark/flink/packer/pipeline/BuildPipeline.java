@@ -241,15 +241,15 @@ public abstract class BuildPipeline extends LoggerSupport
         super.logError("[streampark-packer] " + msg + " | " + logSuffix(), throwable);
     }
 
-    protected RuntimeException pipelineException() {
+    protected IllegalStateException pipelineException() {
         Throwable ex = getError().exception();
-        if (ex instanceof RuntimeException) {
-            return (RuntimeException) ex;
+        if (ex instanceof IllegalStateException) {
+            return (IllegalStateException) ex;
         }
         if (ex != null) {
-            return new RuntimeException(ex);
+            return new IllegalStateException(ex.getMessage(), ex);
         }
-        return new RuntimeException(getError().summary());
+        return new IllegalStateException(getError().summary());
     }
 
     /** intercept snapshot */

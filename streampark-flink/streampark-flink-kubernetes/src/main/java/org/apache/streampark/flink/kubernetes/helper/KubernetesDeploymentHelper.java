@@ -134,7 +134,7 @@ public final class KubernetesDeploymentHelper extends LoggerSupport {
                     Files.asCharSink(file, Charsets.UTF_8).write(log);
                     return path;
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException("Failed to write deployment log for job " + jobId, e);
                 }
             });
     }
@@ -161,7 +161,7 @@ public final class KubernetesDeploymentHelper extends LoggerSupport {
                 }
             },
             error -> {
-                throw new RuntimeException(error);
+                throw new IllegalStateException("Failed to read terminated pod log for job " + jobId, error);
             });
     }
 
