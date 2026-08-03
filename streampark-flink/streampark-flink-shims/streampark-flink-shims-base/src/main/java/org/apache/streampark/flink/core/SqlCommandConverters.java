@@ -26,6 +26,9 @@ final class SqlCommandConverters {
     }
 
     static Optional<String[]> noOperands(String[] groups) {
+        if (groups == null) {
+            return Optional.empty();
+        }
         return Optional.of(new String[0]);
     }
 
@@ -44,6 +47,9 @@ final class SqlCommandConverters {
     }
 
     static Optional<String[]> resetAll(String[] groups) {
+        if (groups == null) {
+            return Optional.empty();
+        }
         return Optional.of(new String[]{"ALL"});
     }
 

@@ -69,7 +69,7 @@ final class SqlSplitter {
             if (singleLineComment && ch == '\n') {
                 singleLineComment = false;
                 query.append(ch);
-                if (idx == lastIndex && query.toString().trim().length() > 0) {
+                if (idx == lastIndex && hasNonBlankQuery(query)) {
                     queries.add(query.toString());
                 }
                 continue;
@@ -111,7 +111,7 @@ final class SqlSplitter {
             if (ch == ';' && !singleQuoteString && !doubleQuoteString && !multiLineComment
                 && !singleLineComment) {
                 markLineNumber(lineNum, lineNumMap, lineDescriptor);
-                if (query.toString().trim().length() > 0) {
+                if (hasNonBlankQuery(query)) {
                     queries.add(query.toString());
                     query = new StringBuilder();
                 }
@@ -120,7 +120,7 @@ final class SqlSplitter {
                 if (!singleLineComment && !multiLineComment) {
                     query.append(ch);
                 }
-                if (query.toString().trim().length() > 0) {
+                if (hasNonBlankQuery(query)) {
                     queries.add(query.toString());
                 }
             } else if (!singleLineComment && !multiLineComment) {
@@ -221,6 +221,10 @@ final class SqlSplitter {
 
     private static boolean isMultipleLineComment(String text) {
         return text.trim().startsWith("/*") && text.trim().endsWith("*/");
+    }
+
+    private static boolean hasNonBlankQuery(StringBuilder query) {
+        return !query.toString().trim().isEmpty();
     }
 
     private static boolean isSingleLineComment(char curChar, char nextChar) {

@@ -49,33 +49,31 @@ public final class ParameterCli {
     }
 
     public static String read(String[] args) {
-        switch (args[0]) {
-            case "--vmopt":
-                ClassLoader loader = ClassLoader.getSystemClassLoader();
-                if (loader instanceof URLClassLoader) {
-                    return "";
-                }
-                return "--add-opens java.base/jdk.internal.loader=ALL-UNNAMED "
-                    + "--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED";
+        if ("--vmopt".equals(args[0])) {
+            ClassLoader loader = ClassLoader.getSystemClassLoader();
+            if (loader instanceof URLClassLoader) {
+                return "";
+            }
+            return "--add-opens java.base/jdk.internal.loader=ALL-UNNAMED "
+                + "--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED";
+        }
+        String action = args[0];
+        String conf = args[1];
+        Map<String, String> map = loadConfig(conf);
+        String[] programArgs = new String[args.length - 2];
+        System.arraycopy(args, 2, programArgs, 0, programArgs.length);
+        switch (action) {
+            case "--option":
+                return buildOption(map, programArgs);
+            case "--property":
+                return buildProperty(map);
+            case "--name":
+                return map.getOrDefault(
+                    PROPERTY_PREFIX + ConfigKeys.KEY_FLINK_APP_NAME(), "").trim();
+            case "--detached":
+                return buildDetachedMode(map, programArgs);
             default:
-                String action = args[0];
-                String conf = args[1];
-                Map<String, String> map = loadConfig(conf);
-                String[] programArgs = new String[args.length - 2];
-                System.arraycopy(args, 2, programArgs, 0, programArgs.length);
-                switch (action) {
-                    case "--option":
-                        return buildOption(map, programArgs);
-                    case "--property":
-                        return buildProperty(map);
-                    case "--name":
-                        return map.getOrDefault(
-                            PROPERTY_PREFIX + ConfigKeys.KEY_FLINK_APP_NAME(), "").trim();
-                    case "--detached":
-                        return buildDetachedMode(map, programArgs);
-                    default:
-                        return null;
-                }
+                return null;
         }
     }
 

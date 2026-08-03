@@ -66,108 +66,8 @@ public final class FlinkSqlExecutor {
         List<SqlCommandCall> commands = SqlCommandParser.parseSQL(flinkSql);
 
         for (SqlCommandCall call : commands) {
-            String args = call.operands().length == 0 ? null : call.operands()[0];
-            String command = call.command().getCommandName();
-            switch (call.command()) {
-                case SHOW_CATALOGS:
-                    callback(
-                        callbackFunc,
-                        command + ": " + String.join("\n", context.listCatalogs()));
-                    break;
-                case SHOW_CURRENT_CATALOG:
-                    callback(callbackFunc, command + ": " + context.getCurrentCatalog());
-                    break;
-                case SHOW_DATABASES:
-                    callback(
-                        callbackFunc,
-                        command + ": " + String.join("\n", context.listDatabases()));
-                    break;
-                case SHOW_CURRENT_DATABASE:
-                    callback(callbackFunc, command + ": " + context.getCurrentDatabase());
-                    break;
-                case SHOW_TABLES:
-                    StringBuilder tables = new StringBuilder();
-                    for (String table : context.listTables()) {
-                        if (!table.startsWith("UnnamedTable")) {
-                            if (tables.length() > 0) {
-                                tables.append('\n');
-                            }
-                            tables.append(table);
-                        }
-                    }
-                    callback(callbackFunc, command + ": " + tables);
-                    break;
-                case SHOW_FUNCTIONS:
-                    callback(
-                        callbackFunc,
-                        command + ": " + String.join("\n", context.listUserDefinedFunctions()));
-                    break;
-                case SHOW_MODULES:
-                    callback(
-                        callbackFunc,
-                        command + ": " + String.join("\n", context.listModules()));
-                    break;
-                case DESC:
-                case DESCRIBE:
-                    var schema = context.scan(args).getSchema();
-                    StringBuilder builder = new StringBuilder("Column\tType\n");
-                    for (int i = 0; i <= schema.getFieldCount(); i++) {
-                        builder
-                            .append(schema.getFieldName(i).get())
-                            .append('\t')
-                            .append(schema.getFieldDataType(i).get())
-                            .append('\n');
-                    }
-                    callback(callbackFunc, builder.toString());
-                    break;
-                case EXPLAIN:
-                    TableResult tableResult = context.executeSql(call.originSql());
-                    String explain = tableResult.collect().next().getField(0).toString();
-                    callback(callbackFunc, explain);
-                    break;
-                case SET:
-                    String operand = call.operands()[1];
-                    LOG.info(command + ": " + args + " --> " + operand);
-                    context.getConfig().getConfiguration().setString(args, operand);
-                    break;
-                case RESET:
-                case RESET_ALL:
-                    resetConfiguration(context, call.command(), args);
-                    LOG.info(command + ": " + args);
-                    break;
-                case BEGIN_STATEMENT_SET:
-                case END_STATEMENT_SET:
-                    LOG.warn("SQL Client Syntax: " + call.command().getCommandName());
-                    break;
-                case INSERT:
-                    statementSet.addInsertSql(call.originSql());
-                    hasInsert = true;
-                    break;
-                case SELECT:
-                    LOG.error("StreamPark dose not support 'SELECT' statement now!");
-                    throw new RuntimeException("StreamPark dose not support 'select' statement now!");
-                case DELETE:
-                case UPDATE:
-                    AssertUtils.required(
-                        !"STREAMING".equals(runMode),
-                        "Currently, "
-                            + command.toUpperCase()
-                            + " statement only supports in batch mode, "
-                            + "and it requires the target table connector implements the SupportsRowLevelDelete, "
-                            + "For more details please refer to: https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/table/sql/"
-                            + command.toLowerCase());
-                    break;
-                default:
-                    LOCK.lock();
-                    try {
-                        context.executeSql(call.originSql());
-                        LOG.info(command + ":" + args);
-                    } finally {
-                        if (LOCK.isHeldByCurrentThread()) {
-                            LOCK.unlock();
-                        }
-                    }
-                    break;
+            if (handleCommand(call, context, statementSet, callbackFunc, runMode)) {
+                hasInsert = true;
             }
         }
 
@@ -178,11 +78,136 @@ public final class FlinkSqlExecutor {
             }
         } else {
             LOG.error("No 'INSERT' statement to trigger the execution of the Flink job.");
-            throw new RuntimeException("No 'INSERT' statement to trigger the execution of the Flink job.");
+            throw new IllegalStateException(
+                "No 'INSERT' statement to trigger the execution of the Flink job.");
         }
 
         LOG.info(
             "\n\n\n==============flinkSql==============\n\n " + flinkSql + "\n\n============================\n\n\n");
+    }
+
+    /**
+     * @return {@code true} when an INSERT statement was added to the statement set
+     */
+    private static boolean handleCommand(
+                                         SqlCommandCall call,
+                                         TableEnvironment context,
+                                         StatementSet statementSet,
+                                         Consumer<String> callbackFunc,
+                                         String runMode) {
+        String args = call.operands().length == 0 ? null : call.operands()[0];
+        String command = call.command().getCommandName();
+        switch (call.command()) {
+            case SHOW_CATALOGS:
+                callback(callbackFunc, command + ": " + String.join("\n", context.listCatalogs()));
+                return false;
+            case SHOW_CURRENT_CATALOG:
+                callback(callbackFunc, command + ": " + context.getCurrentCatalog());
+                return false;
+            case SHOW_DATABASES:
+                callback(callbackFunc, command + ": " + String.join("\n", context.listDatabases()));
+                return false;
+            case SHOW_CURRENT_DATABASE:
+                callback(callbackFunc, command + ": " + context.getCurrentDatabase());
+                return false;
+            case SHOW_TABLES:
+                callback(callbackFunc, command + ": " + listVisibleTables(context));
+                return false;
+            case SHOW_FUNCTIONS:
+                callback(
+                    callbackFunc,
+                    command + ": " + String.join("\n", context.listUserDefinedFunctions()));
+                return false;
+            case SHOW_MODULES:
+                callback(callbackFunc, command + ": " + String.join("\n", context.listModules()));
+                return false;
+            case DESC:
+            case DESCRIBE:
+                callback(callbackFunc, describeTable(context, args));
+                return false;
+            case EXPLAIN:
+                TableResult tableResult = context.executeSql(call.originSql());
+                String explain = tableResult.collect().next().getField(0).toString();
+                callback(callbackFunc, explain);
+                return false;
+            case SET:
+                String operand = call.operands()[1];
+                LOG.info(command + ": " + args + " --> " + operand);
+                context.getConfig().getConfiguration().setString(args, operand);
+                return false;
+            case RESET:
+            case RESET_ALL:
+                resetConfiguration(context, call.command(), args);
+                LOG.info(command + ": " + args);
+                return false;
+            case BEGIN_STATEMENT_SET:
+            case END_STATEMENT_SET:
+                LOG.warn("SQL Client Syntax: " + call.command().getCommandName());
+                return false;
+            case INSERT:
+                statementSet.addInsertSql(call.originSql());
+                return true;
+            case SELECT:
+                LOG.error("StreamPark dose not support 'SELECT' statement now!");
+                throw new UnsupportedOperationException(
+                    "StreamPark dose not support 'select' statement now!");
+            case DELETE:
+            case UPDATE:
+                AssertUtils.required(
+                    !"STREAMING".equals(runMode),
+                    "Currently, "
+                        + command.toUpperCase()
+                        + " statement only supports in batch mode, "
+                        + "and it requires the target table connector implements the SupportsRowLevelDelete, "
+                        + "For more details please refer to: https://nightlies.apache.org/flink/flink-docs-release-1.18/docs/dev/table/sql/"
+                        + command.toLowerCase());
+                return false;
+            default:
+                executeDefaultSql(context, call, command, args);
+                return false;
+        }
+    }
+
+    private static String listVisibleTables(TableEnvironment context) {
+        StringBuilder tables = new StringBuilder();
+        for (String table : context.listTables()) {
+            if (!table.startsWith("UnnamedTable")) {
+                if (tables.length() > 0) {
+                    tables.append('\n');
+                }
+                tables.append(table);
+            }
+        }
+        return tables.toString();
+    }
+
+    private static String describeTable(TableEnvironment context, String args) {
+        var schema = context.scan(args).getSchema();
+        StringBuilder builder = new StringBuilder("Column\tType\n");
+        for (int i = 0; i <= schema.getFieldCount(); i++) {
+            builder
+                .append(schema.getFieldName(i).get())
+                .append('\t')
+                .append(schema.getFieldDataType(i).get())
+                .append('\n');
+        }
+        return builder.toString();
+    }
+
+    private static void executeDefaultSql(
+                                          TableEnvironment context,
+                                          SqlCommandCall call,
+                                          String command,
+                                          String args) {
+        LOCK.lock();
+        try {
+            context.executeSql(call.originSql());
+            LOG.info(command + ":" + args);
+        } finally {
+            if (LOCK.isHeldByCurrentThread()) {
+                LOCK.unlock();
+            }
+        }
     }
 
     private static void callback(Consumer<String> callbackFunc, String message) {

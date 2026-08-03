@@ -71,15 +71,13 @@ public final class TableExt {
         }
 
         public <T> DataStream<T> toAppendStream(StreamTableContext context, TypeInformation<T> typeInfo) {
-            context.isConvertedToDataStream = true;
-            return super.toAppendStream(typeInfo);
+            return appendStream(context, typeInfo);
         }
 
         public <T> DataStream<scala.Tuple2<Object, T>> toRetractStream(
                                                                        StreamTableContext context,
                                                                        TypeInformation<T> typeInfo) {
-            context.isConvertedToDataStream = true;
-            return super.toRetractStream(typeInfo);
+            return retractStream(context, typeInfo);
         }
 
         public TableConversions(Table table) {

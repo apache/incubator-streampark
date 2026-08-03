@@ -46,7 +46,7 @@ public final class FlinkSqlValidator {
         "org.apache.flink.table.planner.parse.CalciteParser";
 
     private static final Pattern SYNTAX_ERROR_PATTERN =
-        Pattern.compile(".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*");
+        Pattern.compile("at\\sline\\s(\\d+),\\scolumn\\s(\\d+)");
 
     private static final Map<String, SqlParser.Config> SQL_PARSER_CONFIG_MAP = createSqlParserConfigMap();
 
@@ -86,30 +86,7 @@ public final class FlinkSqlValidator {
                         hasInsert = true;
                     }
                     try {
-                        Class<?> calciteClass;
-                        try {
-                            calciteClass = Class.forName(FLINK112_CALCITE_PARSER_CLASS);
-                        } catch (ClassNotFoundException e) {
-                            calciteClass = Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS);
-                        }
-                        String dialectUpper = sqlDialect.toUpperCase();
-                        if ("HIVE".equals(dialectUpper)) {
-                            // skip calcite validation for HIVE dialect
-                        } else if ("DEFAULT".equals(dialectUpper)) {
-                            Constructor<?> constructor =
-                                calciteClass.getConstructor(SqlParser.Config.class);
-                            Object parser =
-                                constructor.newInstance(
-                                    SQL_PARSER_CONFIG_MAP.get(sqlDialect.toUpperCase()));
-                            Method method = parser.getClass().getDeclaredMethod("parse", String.class);
-                            method.setAccessible(true);
-                            method.invoke(parser, call.originSql());
-                        } else {
-                            throw new UnsupportedOperationException(
-                                "unsupported dialect: " + sqlDialect);
-                        }
-                    } catch (ReflectiveOperationException e) {
-                        return syntaxErrorResult(call, e);
+                        validateSqlCommand(call, sqlDialect);
                     } catch (RuntimeException e) {
                         return syntaxErrorResult(call, e);
                     }
@@ -120,8 +97,7 @@ public final class FlinkSqlValidator {
         if (hasInsert) {
             return new FlinkSqlValidationResult();
         }
-        return new FlinkSqlValidationResult(
-            false,
+        return FlinkSqlValidationResult.failure(
             FlinkSqlValidationFailedType.SYNTAX_ERROR,
             sqlCommands.get(0).lineStart(),
             sqlCommands.get(sqlCommands.size() - 1).lineEnd(),
@@ -131,17 +107,44 @@ public final class FlinkSqlValidator {
             "No 'INSERT' statement to trigger the execution of the Flink job.");
     }
 
+    private static void validateSqlCommand(SqlCommandCall call, String sqlDialect) {
+        if ("HIVE".equalsIgnoreCase(sqlDialect)) {
+            return;
+        }
+        if (!"DEFAULT".equalsIgnoreCase(sqlDialect)) {
+            throw new UnsupportedOperationException("unsupported dialect: " + sqlDialect);
+        }
+        try {
+            Class<?> calciteClass = resolveCalciteParserClass();
+            Constructor<?> constructor = calciteClass.getConstructor(SqlParser.Config.class);
+            Object parser =
+                constructor.newInstance(SQL_PARSER_CONFIG_MAP.get(sqlDialect.toUpperCase()));
+            Method method = parser.getClass().getDeclaredMethod("parse", String.class);
+            method.setAccessible(true);
+            method.invoke(parser, call.originSql());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to parse SQL with Calcite", e);
+        }
+    }
+
+    private static Class<?> resolveCalciteParserClass() throws ClassNotFoundException {
+        try {
+            return Class.forName(FLINK112_CALCITE_PARSER_CLASS);
+        } catch (ClassNotFoundException e) {
+            return Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS);
+        }
+    }
+
     private static FlinkSqlValidationResult syntaxErrorResult(SqlCommandCall call, Throwable e) {
         String exception = ExceptionUtils.stringifyException(e);
         String causedBy = exception.substring(exception.indexOf("Caused by:"));
         String cleanUpError = exception.replaceAll("[\r\n]", "");
         Matcher matcher = SYNTAX_ERROR_PATTERN.matcher(cleanUpError);
-        if (matcher.matches()) {
+        if (matcher.find()) {
             int line = Integer.parseInt(matcher.group(1));
             int column = Integer.parseInt(matcher.group(2));
             int errorLine = call.lineStart() + line - 1;
-            return new FlinkSqlValidationResult(
-                false,
+            return FlinkSqlValidationResult.failure(
                 FlinkSqlValidationFailedType.SYNTAX_ERROR,
                 call.lineStart(),
                 call.lineEnd(),
@@ -150,8 +153,7 @@ public final class FlinkSqlValidator {
                 call.originSql(),
                 causedBy.replaceAll("at\\sline\\s" + line, "at line " + errorLine));
         }
-        return new FlinkSqlValidationResult(
-            false,
+        return FlinkSqlValidationResult.failure(
             FlinkSqlValidationFailedType.SYNTAX_ERROR,
             call.lineStart(),
             call.lineEnd(),

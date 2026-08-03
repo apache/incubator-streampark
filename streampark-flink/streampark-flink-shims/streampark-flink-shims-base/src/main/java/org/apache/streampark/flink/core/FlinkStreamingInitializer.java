@@ -115,48 +115,7 @@ public class FlinkStreamingInitializer extends org.apache.streampark.common.util
         String format = config.contains(".")
             ? config.substring(config.lastIndexOf('.') + 1).toLowerCase()
             : "";
-        java.util.function.Function<String, Map<String, String>> readConfig =
-            text -> {
-                switch (format) {
-                    case "yml":
-                    case "yaml":
-                        return PropertiesUtils.fromYamlText(text);
-                    case "conf":
-                        return PropertiesUtils.fromHoconText(text);
-                    case "properties":
-                        return PropertiesUtils.fromPropertiesText(text);
-                    default:
-                        throw new IllegalArgumentException(
-                            "[StreamPark] Usage: application config file error,must be [yaml|conf|properties]");
-                }
-            };
-
-        Map<String, String> map;
-        if (config.startsWith("yaml://")) {
-            map = PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(config.substring(7)));
-        } else if (config.startsWith("conf://")) {
-            map = PropertiesUtils.fromHoconText(DeflaterUtils.unzipString(config.substring(7)));
-        } else if (config.startsWith("prop://")) {
-            map = PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(config.substring(7)));
-        } else if (config.startsWith("hdfs://")) {
-            try {
-                map = readConfig.apply(HdfsUtils.read(config));
-            } catch (java.io.IOException e) {
-                throw new IllegalStateException("Failed to read HDFS config: " + config, e);
-            }
-        } else {
-            File configFile = new File(config);
-            if (!configFile.exists()) {
-                throw new IllegalArgumentException(
-                    "[StreamPark] Usage: application config file: " + configFile + " is not found!!!");
-            }
-            try {
-                map = readConfig.apply(FileUtils.readFile(configFile));
-            } catch (java.io.IOException e) {
-                throw new IllegalStateException("Failed to read config file: " + configFile, e);
-            }
-        }
-
+        Map<String, String> map = readConfigContent(config, format);
         Map<String, String> filtered = new HashMap<>();
         map.forEach((key, value) -> {
             if (value != null && !value.isEmpty()) {
@@ -164,6 +123,50 @@ public class FlinkStreamingInitializer extends org.apache.streampark.common.util
             }
         });
         return filtered;
+    }
+
+    private Map<String, String> readConfigContent(String config, String format) {
+        if (config.startsWith("yaml://")) {
+            return readConfigText(format, DeflaterUtils.unzipString(config.substring(7)));
+        }
+        if (config.startsWith("conf://")) {
+            return readConfigText(format, DeflaterUtils.unzipString(config.substring(7)));
+        }
+        if (config.startsWith("prop://")) {
+            return readConfigText(format, DeflaterUtils.unzipString(config.substring(7)));
+        }
+        if (config.startsWith("hdfs://")) {
+            try {
+                return readConfigText(format, HdfsUtils.read(config));
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException("Failed to read HDFS config: " + config, e);
+            }
+        }
+        File configFile = new File(config);
+        if (!configFile.exists()) {
+            throw new IllegalArgumentException(
+                "[StreamPark] Usage: application config file: " + configFile + " is not found!!!");
+        }
+        try {
+            return readConfigText(format, FileUtils.readFile(configFile));
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("Failed to read config file: " + configFile, e);
+        }
+    }
+
+    private Map<String, String> readConfigText(String format, String text) {
+        switch (format) {
+            case "yml":
+            case "yaml":
+                return PropertiesUtils.fromYamlText(text);
+            case "conf":
+                return PropertiesUtils.fromHoconText(text);
+            case "properties":
+                return PropertiesUtils.fromPropertiesText(text);
+            default:
+                throw new IllegalArgumentException(
+                    "[StreamPark] Usage: application config file error,must be [yaml|conf|properties]");
+        }
     }
 
     Map<String, String> extractConfigByPrefix(Map<String, String> configMap, String prefix) {

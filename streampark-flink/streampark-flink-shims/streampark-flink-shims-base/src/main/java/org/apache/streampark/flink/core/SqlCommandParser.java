@@ -22,6 +22,7 @@ import org.apache.streampark.common.enums.FlinkSqlValidationFailedType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -51,7 +52,7 @@ public final class SqlCommandParser extends org.apache.streampark.common.util.Lo
                         .withSuccess(false)
                         .withFailedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
                         .withException(sqlEmptyError));
-                return null;
+                return Collections.emptyList();
             }
             throw new IllegalArgumentException(sqlEmptyError);
         }
@@ -70,7 +71,7 @@ public final class SqlCommandParser extends org.apache.streampark.common.util.Lo
                         .withLineEnd(segment.end())
                         .withException("unsupported sql")
                         .withSql(segment.sql()));
-                return null;
+                return Collections.emptyList();
             } else {
                 throw new UnsupportedOperationException("unsupported sql: " + segment.sql());
             }
@@ -83,7 +84,7 @@ public final class SqlCommandParser extends org.apache.streampark.common.util.Lo
                         .withSuccess(false)
                         .withFailedType(FlinkSqlValidationFailedType.VERIFY_FAILED)
                         .withException("flink sql syntax error, no executable sql"));
-                return null;
+                return Collections.emptyList();
             }
             throw new UnsupportedOperationException("flink sql syntax error, no executable sql");
         }
