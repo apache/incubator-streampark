@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +55,11 @@ public final class PodTemplateParser {
      * @param podTemplateContent original pod template
      * @return complemented pod template
      */
-    @SuppressWarnings("unchecked")
     public static String completeInitPodTemplate(String podTemplateContent) {
         if (podTemplateContent == null || podTemplateContent.trim().isEmpty()) {
             return POD_TEMPLATE_INIT_CONTENT;
         }
-        Yaml yaml = new Yaml();
-        Map<String, Object> root = yaml.load(podTemplateContent);
+        Map<String, Object> root = loadYamlMap(podTemplateContent);
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("apiVersion", root.getOrDefault("apiVersion", "v1"));
@@ -68,13 +67,11 @@ public final class PodTemplateParser {
         Object metadata = root.getOrDefault("metadata", defaultMetadata());
         res.put("metadata", metadata);
 
-        if (root.containsKey("spec")) {
-            Object spec = root.get("spec");
-            if (spec instanceof Map && !((Map<?, ?>) spec).isEmpty()) {
-                res.put("spec", spec);
-            }
+        Map<String, Object> spec = getStringObjectMap(root.get(KEY_SPEC));
+        if (!spec.isEmpty()) {
+            res.put(KEY_SPEC, spec);
         }
-        return yaml.dumpAsMap(res);
+        return new Yaml().dumpAsMap(res);
     }
 
     private static Map<String, Object> defaultMetadata() {
@@ -91,7 +88,6 @@ public final class PodTemplateParser {
      * @param podTemplateContent pod template content
      * @return pod template content
      */
-    @SuppressWarnings("unchecked")
     public static String completeHostAliasSpec(Map<String, String> hosts, String podTemplateContent) {
         if (hosts.isEmpty()) {
             return podTemplateContent;
@@ -99,17 +95,17 @@ public final class PodTemplateParser {
         try {
             String content = completeInitPodTemplate(podTemplateContent);
             List<Map<String, Object>> hostAlias = covertHostsMapToHostAliasNode(hosts);
-            Yaml yaml = new Yaml();
-            Map<String, Object> root = yaml.load(content);
-            if (!root.containsKey("spec")) {
+            Map<String, Object> root = loadYamlMap(content);
+            if (!root.containsKey(KEY_SPEC)) {
                 Map<String, Object> spec = new LinkedHashMap<>();
                 spec.put(KEY_HOST_ALIASES, hostAlias);
                 root.put(KEY_SPEC, spec);
-                return yaml.dumpAsMap(root);
+                return new Yaml().dumpAsMap(root);
             }
-            Map<String, Object> spec = (Map<String, Object>) root.get(KEY_SPEC);
+            Map<String, Object> spec = getStringObjectMap(root.get(KEY_SPEC));
             spec.put(KEY_HOST_ALIASES, hostAlias);
-            return yaml.dumpAsMap(root);
+            root.put(KEY_SPEC, spec);
+            return new Yaml().dumpAsMap(root);
         } catch (Throwable e) {
             return podTemplateContent;
         }
@@ -140,23 +136,21 @@ public final class PodTemplateParser {
      * @param podTemplateContent pod template content
      * @return hostname -> ipv4
      */
-    @SuppressWarnings("unchecked")
     public static Map<String, String> extractHostAliasMap(String podTemplateContent) {
         Map<String, String> hosts = new LinkedHashMap<>(0);
         if (podTemplateContent == null || podTemplateContent.isEmpty()) {
             return hosts;
         }
         try {
-            Yaml yaml = new Yaml();
-            Map<String, Object> root = yaml.load(podTemplateContent);
+            Map<String, Object> root = loadYamlMap(podTemplateContent);
             if (!root.containsKey(KEY_SPEC)) {
                 return hosts;
             }
-            Map<String, Object> spec = (Map<String, Object>) root.get(KEY_SPEC);
+            Map<String, Object> spec = getStringObjectMap(root.get(KEY_SPEC));
             if (!spec.containsKey(KEY_HOST_ALIASES)) {
                 return hosts;
             }
-            List<Map<String, Object>> hostAliases = (List<Map<String, Object>>) spec.get(KEY_HOST_ALIASES);
+            List<Map<String, Object>> hostAliases = getMapList(spec.get(KEY_HOST_ALIASES));
             if (CollectionUtils.isEmpty(hostAliases)) {
                 return hosts;
             }
@@ -169,20 +163,16 @@ public final class PodTemplateParser {
         return hosts;
     }
 
-    @SuppressWarnings("unchecked")
     private static void collectHostAliasEntry(Map<String, String> hosts, Map<String, Object> hostAlias) {
         if (!hostAlias.containsKey(KEY_IP) || !hostAlias.containsKey(KEY_HOSTNAMES)) {
             return;
         }
-        String ip = (String) hostAlias.get(KEY_IP);
-        if (StringUtils.isBlank(ip)) {
+        Object ipValue = hostAlias.get(KEY_IP);
+        if (!(ipValue instanceof String) || StringUtils.isBlank((String) ipValue)) {
             return;
         }
-        List<String> hostnames = (List<String>) hostAlias.get(KEY_HOSTNAMES);
-        if (hostnames == null) {
-            return;
-        }
-        for (String hostname : hostnames) {
+        String ip = (String) ipValue;
+        for (String hostname : getStringList(hostAlias.get(KEY_HOSTNAMES))) {
             if (StringUtils.isNotBlank(hostname)) {
                 hosts.put(hostname, ip);
             }
@@ -200,5 +190,58 @@ public final class PodTemplateParser {
         Map<String, Object> root = new LinkedHashMap<>();
         root.put(KEY_HOST_ALIASES, hostAlias);
         return new Yaml().dumpAsMap(root);
+    }
+
+    private static Map<String, Object> loadYamlMap(String content) {
+        Object loaded = new Yaml().load(content);
+        if (!(loaded instanceof Map)) {
+            return new LinkedHashMap<>();
+        }
+        return toStringObjectMap((Map<?, ?>) loaded);
+    }
+
+    private static Map<String, Object> getStringObjectMap(Object value) {
+        if (!(value instanceof Map)) {
+            return new LinkedHashMap<>();
+        }
+        return toStringObjectMap((Map<?, ?>) value);
+    }
+
+    private static Map<String, Object> toStringObjectMap(Map<?, ?> source) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : source.entrySet()) {
+            if (entry.getKey() instanceof String) {
+                result.put((String) entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    private static List<String> getStringList(Object value) {
+        if (!(value instanceof List)) {
+            return Collections.emptyList();
+        }
+        List<?> raw = (List<?>) value;
+        List<String> result = new ArrayList<>(raw.size());
+        for (Object item : raw) {
+            if (item instanceof String) {
+                result.add((String) item);
+            }
+        }
+        return result;
+    }
+
+    private static List<Map<String, Object>> getMapList(Object value) {
+        if (!(value instanceof List)) {
+            return Collections.emptyList();
+        }
+        List<?> raw = (List<?>) value;
+        List<Map<String, Object>> result = new ArrayList<>(raw.size());
+        for (Object item : raw) {
+            if (item instanceof Map) {
+                result.add(toStringObjectMap((Map<?, ?>) item));
+            }
+        }
+        return result;
     }
 }

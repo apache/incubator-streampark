@@ -143,7 +143,7 @@ public class FlinkCheckpointProcessor {
                 try {
                     applicationActionService.restart(application);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException("Failed to restart application after checkpoint failure", e);
                 }
                 break;
             default:

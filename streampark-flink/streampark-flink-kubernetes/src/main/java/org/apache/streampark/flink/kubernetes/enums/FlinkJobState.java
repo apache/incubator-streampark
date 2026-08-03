@@ -24,34 +24,40 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /** flink job status on kubernetes */
-@SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum FlinkJobState {
 
-    // flink job has been submit by the streampark.
+    /** Flink job has been submitted by StreamPark. */
     STARTING,
-    // flink k8s resources are being initialized.
+    /** Flink Kubernetes resources are being initialized. */
     K8S_INITIALIZING,
-    // lost track of flink job temporarily.
+    /** Lost track of Flink job temporarily. */
     SILENT,
-    // flink job has terminated positively (maybe FINISHED or CANCELED)
+    /** Flink job terminated positively (FINISHED or CANCELED). */
     POS_TERMINATED,
-    // flink job has terminated (maybe FINISHED, CANCELED or FAILED)
+    /** Flink job terminated (FINISHED, CANCELED, or FAILED). */
     TERMINATED,
-    // lost track of flink job completely.
+    /** Lost track of Flink job completely. */
     LOST,
-    // other flink state
+    /** Other Flink job state. */
     OTHER,
 
-    // the following enum have the same meaning as the native flink state enum.
-    // @see org.apache.flink.api.common.JobStatus
+    /** Native Flink state: initializing. */
     INITIALIZING,
+    /** Native Flink state: created. */
     CREATED,
+    /** Native Flink state: running. */
     RUNNING,
+    /** Native Flink state: failing. */
     FAILING,
+    /** Native Flink state: failed. */
     FAILED,
+    /** Native Flink state: cancelling. */
     CANCELLING,
+    /** Native Flink state: canceled. */
     CANCELED,
+    /** Native Flink state: finished. */
     FINISHED,
+    /** Native Flink state: restarting. */
     RESTARTING;
 
     private static final Set<FlinkJobState> ENDING_STATES =

@@ -97,7 +97,7 @@ public final class RedisClient {
                         Thread.sleep(sleepTime);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        throw new RuntimeException(ie);
+                        throw new IllegalStateException("Interrupted while waiting for Redis connection", ie);
                     }
                 } else {
                     throw e;

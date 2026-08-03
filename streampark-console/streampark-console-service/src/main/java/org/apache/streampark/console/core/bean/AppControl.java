@@ -17,6 +17,8 @@
 
 package org.apache.streampark.console.core.bean;
 
+import org.apache.streampark.flink.packer.pipeline.PipelineStatusEnum;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -36,4 +38,18 @@ public class AppControl {
     private boolean allowBuild;
 
     private boolean allowView;
+
+    public static AppControl fromPipelineBuildStatus(
+                                                     Integer buildStatus,
+                                                     boolean shouldTracking,
+                                                     boolean running) {
+        return new AppControl()
+            .setAllowBuild(
+                buildStatus == null
+                    || !PipelineStatusEnum.RUNNING.getCode().equals(buildStatus))
+            .setAllowStart(
+                !shouldTracking && PipelineStatusEnum.SUCCESS.getCode().equals(buildStatus))
+            .setAllowStop(running)
+            .setAllowView(shouldTracking);
+    }
 }

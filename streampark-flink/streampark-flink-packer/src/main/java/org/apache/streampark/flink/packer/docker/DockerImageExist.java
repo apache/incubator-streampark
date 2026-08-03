@@ -33,7 +33,7 @@ public class DockerImageExist {
                 }
             },
             err -> {
-                throw new RuntimeException(
+                throw new IllegalStateException(
                     "Check docker image failed, imageName=" + imageName, err);
             });
     }

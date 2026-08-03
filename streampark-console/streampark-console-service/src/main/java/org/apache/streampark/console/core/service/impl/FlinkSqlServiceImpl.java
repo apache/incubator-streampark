@@ -175,7 +175,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
             backUpService.rollbackFlinkSql(application, sql);
         } catch (Exception e) {
             log.error("Backup and Roll back FlinkSql before start failed.");
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalStateException("Backup and rollback FlinkSql failed", e);
         }
     }
 
@@ -193,7 +193,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
                     if (result == null) {
                         return null;
                     }
-                    return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
+                    return FlinkShimsProxy.getObject(
+                        this.getClass().getClassLoader(), result, FlinkSqlValidationResult.class);
                 } catch (Throwable e) {
                     log.error(
                         "verifySql invocationTargetException: {}",

@@ -23,8 +23,10 @@ import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -123,13 +125,13 @@ public class FlinkVersion implements Serializable {
     public List<URL> getFlinkLibs() throws Exception {
         File[] files = getFlinkLib().listFiles();
         if (files == null) {
-            return Arrays.asList();
+            return Collections.emptyList();
         }
         return Arrays.stream(files).map(f -> {
             try {
                 return f.toURI().toURL();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("Invalid Flink lib URL: " + f, e);
             }
         }).collect(Collectors.toList());
     }

@@ -40,8 +40,7 @@ public interface BuildPipelineExpose {
     /** launch the pipeline instance */
     BuildResult launch();
 
-    @SuppressWarnings("unchecked")
     default <T extends BuildPipeline> T as(Class<T> clz) {
-        return (T) this;
+        return clz.cast(this);
     }
 }

@@ -85,7 +85,7 @@ public final class FileUtils {
 
     public static boolean isJarFileType(InputStream input) {
         if (input == null) {
-            throw new RuntimeException("The inputStream can not be null");
+            throw new IllegalArgumentException("The inputStream can not be null");
         }
         return AutoCloseUtils.using(
             input,
@@ -94,7 +94,7 @@ public final class FileUtils {
                 try {
                     in.read(b, 0, b.length);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalStateException("Failed to read jar file header", e);
                 }
                 return bytesToHexString(b);
             })
@@ -103,7 +103,7 @@ public final class FileUtils {
 
     public static boolean isJarFileType(File file) throws IOException {
         if (!file.exists() || !file.isFile()) {
-            throw new RuntimeException("The file does not exist or the path is a directory");
+            throw new IllegalArgumentException("The file does not exist or the path is a directory");
         }
         return isJarFileType(new FileInputStream(file));
     }
@@ -174,7 +174,7 @@ public final class FileUtils {
                     try {
                         urls.add(f.toURI().toURL());
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new IllegalStateException("Failed to convert file to URL: " + f, e);
                     }
                 }
                 return urls;
@@ -206,7 +206,7 @@ public final class FileUtils {
         try {
             return equalsInternal(file1, file2);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to compare files", e);
         }
     }
 
@@ -310,7 +310,7 @@ public final class FileUtils {
             }
             return null;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to read tail of file: " + path, e);
         }
     }
 

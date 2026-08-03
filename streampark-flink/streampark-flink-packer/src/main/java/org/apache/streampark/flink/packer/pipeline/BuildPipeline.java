@@ -17,11 +17,19 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.fs.HdfsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.flink.packer.maven.DependencyInfo;
+import org.apache.streampark.flink.packer.maven.MavenTool;
 
+import java.io.File;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /** Building pipeline abstract class. */
 public abstract class BuildPipeline extends LoggerSupport
@@ -46,7 +55,7 @@ public abstract class BuildPipeline extends LoggerSupport
             ThreadUtils.threadFactory("streampark-pipeline-watcher-executor"),
             new ThreadPoolExecutor.AbortPolicy());
 
-    protected PipelineStatusEnum pipeStatus = PipelineStatusEnum.pending;
+    protected PipelineStatusEnum pipeStatus = PipelineStatusEnum.PENDING;
 
     protected PipeError error = PipeError.empty();
 
@@ -64,7 +73,7 @@ public abstract class BuildPipeline extends LoggerSupport
                 (seq, desc) -> stepsStatus.put(
                     seq,
                     new AbstractMap.SimpleEntry<>(
-                        PipelineStepStatusEnum.waiting, System.currentTimeMillis())));
+                        PipelineStepStatusEnum.WAITING, System.currentTimeMillis())));
     }
 
     /** use to identify the log record that belongs to which pipeline instance */
@@ -107,7 +116,7 @@ public abstract class BuildPipeline extends LoggerSupport
             stepsStatus.put(
                 seq,
                 new AbstractMap.SimpleEntry<>(
-                    PipelineStepStatusEnum.running, System.currentTimeMillis()));
+                    PipelineStepStatusEnum.RUNNING, System.currentTimeMillis()));
             logInfo(
                 "Building pipeline step["
                     + seq
@@ -120,7 +129,7 @@ public abstract class BuildPipeline extends LoggerSupport
             stepsStatus.put(
                 seq,
                 new AbstractMap.SimpleEntry<>(
-                    PipelineStepStatusEnum.success, System.currentTimeMillis()));
+                    PipelineStepStatusEnum.SUCCESS, System.currentTimeMillis()));
             logInfo("Building pipeline step[" + seq + "/" + allSteps() + "] success");
             notifyStepChange();
             return java.util.Optional.of(result);
@@ -128,8 +137,8 @@ public abstract class BuildPipeline extends LoggerSupport
             stepsStatus.put(
                 seq,
                 new AbstractMap.SimpleEntry<>(
-                    PipelineStepStatusEnum.failure, System.currentTimeMillis()));
-            pipeStatus = PipelineStatusEnum.failure;
+                    PipelineStepStatusEnum.FAILURE, System.currentTimeMillis()));
+            pipeStatus = PipelineStatusEnum.FAILURE;
             error = PipeError.of(cause.getMessage(), cause);
             logInfo(
                 "Building pipeline step["
@@ -148,7 +157,7 @@ public abstract class BuildPipeline extends LoggerSupport
         stepsStatus.put(
             step,
             new AbstractMap.SimpleEntry<>(
-                PipelineStepStatusEnum.skipped, System.currentTimeMillis()));
+                PipelineStepStatusEnum.SKIPPED, System.currentTimeMillis()));
         logInfo(
             "Building pipeline step["
                 + step
@@ -162,26 +171,26 @@ public abstract class BuildPipeline extends LoggerSupport
     /** Launch the building pipeline. */
     @Override
     public BuildResult launch() {
-        pipeStatus = PipelineStatusEnum.running;
+        pipeStatus = PipelineStatusEnum.RUNNING;
         try {
             notifyStart();
             logInfo("Building pipeline is launching, params=" + offerBuildParam());
             BuildResult result =
                 EXEC_POOL.submit(this::buildProcess).get(20, TimeUnit.MINUTES);
-            pipeStatus = PipelineStatusEnum.success;
+            pipeStatus = PipelineStatusEnum.SUCCESS;
             logInfo("Building pipeline has finished successfully.");
             notifyFinish(result);
             return result;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            pipeStatus = PipelineStatusEnum.failure;
+            pipeStatus = PipelineStatusEnum.FAILURE;
             error = PipeError.of(e.getMessage(), e);
             logError("Building pipeline has failed.", e);
             BuildResult result = new ErrorResult();
             notifyFinish(result);
             return result;
         } catch (ExecutionException e) {
-            pipeStatus = PipelineStatusEnum.failure;
+            pipeStatus = PipelineStatusEnum.FAILURE;
             Throwable cause = e.getCause();
             if (cause == null) {
                 cause = e;
@@ -192,7 +201,7 @@ public abstract class BuildPipeline extends LoggerSupport
             notifyFinish(result);
             return result;
         } catch (TimeoutException e) {
-            pipeStatus = PipelineStatusEnum.failure;
+            pipeStatus = PipelineStatusEnum.FAILURE;
             error = PipeError.of(e.getMessage(), e);
             logError("Building pipeline has failed.", e);
             BuildResult result = new ErrorResult();
@@ -241,15 +250,59 @@ public abstract class BuildPipeline extends LoggerSupport
         super.logError("[streampark-packer] " + msg + " | " + logSuffix(), throwable);
     }
 
-    protected RuntimeException pipelineException() {
+    protected IllegalStateException pipelineException() {
         Throwable ex = getError().exception();
-        if (ex instanceof RuntimeException) {
-            return (RuntimeException) ex;
+        if (ex instanceof IllegalStateException) {
+            return (IllegalStateException) ex;
         }
         if (ex != null) {
-            return new RuntimeException(ex);
+            return new IllegalStateException(ex.getMessage(), ex);
         }
-        return new RuntimeException(getError().summary());
+        return new IllegalStateException(getError().summary());
+    }
+
+    protected void runYarnSqlBuildSteps(
+                                        String localWorkspace,
+                                        String yarnProvidedPath,
+                                        boolean sqlMode,
+                                        DependencyInfo dependencyInfo) {
+        execStep(
+            1,
+            () -> {
+                if (sqlMode) {
+                    LfsOperator.mkCleanDirs(localWorkspace);
+                    HdfsOperator.mkCleanDirs(yarnProvidedPath);
+                }
+                logInfo("Recreate building workspace: " + yarnProvidedPath);
+                return null;
+            })
+                .orElseThrow(this::pipelineException);
+
+        List<String> mavenJars =
+            execStep(
+                2,
+                () -> {
+                    if (!sqlMode) {
+                        return Collections.<String>emptyList();
+                    }
+                    List<File> mavenArts = MavenTool.resolveArtifacts(dependencyInfo.mavenArts());
+                    List<String> paths =
+                        mavenArts.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+                    paths.addAll(dependencyInfo.extJarLibs());
+                    return paths;
+                })
+                    .orElseThrow(this::pipelineException);
+
+        execStep(
+            3,
+            () -> {
+                for (String jar : mavenJars) {
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, localWorkspace);
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, yarnProvidedPath);
+                }
+                return null;
+            })
+                .orElseThrow(this::pipelineException);
     }
 
     /** intercept snapshot */

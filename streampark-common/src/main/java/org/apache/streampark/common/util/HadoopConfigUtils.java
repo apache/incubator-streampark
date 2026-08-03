@@ -179,7 +179,7 @@ public final class HadoopConfigUtils {
             }
             org.apache.commons.io.FileUtils.writeLines(configFile, lines);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to rewrite Hadoop configuration file: " + configFile, e);
         }
     }
 
@@ -194,67 +194,47 @@ public final class HadoopConfigUtils {
 
     public static Map<String, String> readSystemHadoopConf() {
         return getSystemHadoopConfDirOptional()
-            .map(
-                confDir -> {
-                    Map<String, String> map = new LinkedHashMap<>();
-                    File[] files = LfsOperator.listDir(confDir);
-                    if (files != null) {
-                        for (File f : files) {
-                            boolean matched = false;
-                            for (String name : HADOOP_CLIENT_CONF_FILES) {
-                                if (name.equals(f.getName())) {
-                                    matched = true;
-                                    break;
-                                }
-                            }
-                            if (!matched) {
-                                continue;
-                            }
-                            try {
-                                map.put(
-                                    f.getName(),
-                                    org.apache.commons.io.FileUtils.readFileToString(
-                                        f, StandardCharsets.UTF_8));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
-                    return map;
-                })
+            .map(dir -> readSystemConfFiles(dir, HADOOP_CLIENT_CONF_FILES, "Hadoop"))
             .orElse(Collections.emptyMap());
     }
 
     public static Map<String, String> readSystemHiveConf() {
         return getSystemHiveConfDirOptional()
-            .map(
-                confDir -> {
-                    Map<String, String> map = new LinkedHashMap<>();
-                    File[] files = LfsOperator.listDir(confDir);
-                    if (files != null) {
-                        for (File f : files) {
-                            boolean matched = false;
-                            for (String name : HIVE_CLIENT_CONF_FILES) {
-                                if (name.equals(f.getName())) {
-                                    matched = true;
-                                    break;
-                                }
-                            }
-                            if (!matched) {
-                                continue;
-                            }
-                            try {
-                                map.put(
-                                    f.getName(),
-                                    org.apache.commons.io.FileUtils.readFileToString(
-                                        f, StandardCharsets.UTF_8));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
-                    return map;
-                })
+            .map(dir -> readSystemConfFiles(dir, HIVE_CLIENT_CONF_FILES, "Hive"))
             .orElse(Collections.emptyMap());
+    }
+
+    private static Map<String, String> readSystemConfFiles(
+                                                           String confDir,
+                                                           String[] confFileNames,
+                                                           String confLabel) {
+        Map<String, String> map = new LinkedHashMap<>();
+        File[] files = LfsOperator.listDir(confDir);
+        if (files == null) {
+            return map;
+        }
+        for (File f : files) {
+            if (!matchesConfFile(f.getName(), confFileNames)) {
+                continue;
+            }
+            try {
+                map.put(
+                    f.getName(),
+                    org.apache.commons.io.FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                    "Failed to read " + confLabel + " configuration file: " + f.getAbsolutePath(), e);
+            }
+        }
+        return map;
+    }
+
+    private static boolean matchesConfFile(String fileName, String[] confFileNames) {
+        for (String name : confFileNames) {
+            if (name.equals(fileName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

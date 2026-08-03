@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -31,9 +30,11 @@ import org.apache.streampark.flink.client.bean.SubmitResponse;
 import org.apache.streampark.flink.client.bean.TriggerSavepointRequest;
 import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
-import java.util.function.Function;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-public final class FlinkClient extends LoggerSupport {
+public final class FlinkClient {
 
     private static final String FLINK_CLIENT_ENTRYPOINT_CLASS =
         "org.apache.streampark.flink.client.FlinkClientEntrypoint";
@@ -60,57 +61,85 @@ public final class FlinkClient extends LoggerSupport {
         SecurityManager securityManager = System.getSecurityManager();
         try {
             System.setSecurityManager(new ExitSecurityManager());
-            return proxy(submitRequest, submitRequest.flinkVersion(), SUBMIT_REQUEST, "submit");
+            return invokeClient(
+                submitRequest,
+                submitRequest.flinkVersion(),
+                SUBMIT_REQUEST,
+                "submit",
+                SubmitResponse.class);
         } finally {
             System.setSecurityManager(securityManager);
         }
     }
 
     public static CancelResponse cancel(CancelRequest stopRequest) {
-        return proxy(stopRequest, stopRequest.flinkVersion(), CANCEL_REQUEST, "cancel");
+        return invokeClient(
+            stopRequest, stopRequest.flinkVersion(), CANCEL_REQUEST, "cancel", CancelResponse.class);
     }
 
     public static DeployResponse deploy(DeployRequest deployRequest) {
-        return proxy(deployRequest, deployRequest.flinkVersion(), DEPLOY_REQUEST, "deploy");
+        return invokeClient(
+            deployRequest, deployRequest.flinkVersion(), DEPLOY_REQUEST, "deploy", DeployResponse.class);
     }
 
     public static ShutDownResponse shutdown(ShutDownRequest shutDownRequest) {
-        return proxy(shutDownRequest, shutDownRequest.flinkVersion(), SHUTDOWN_REQUEST, "shutdown");
+        return invokeClient(
+            shutDownRequest,
+            shutDownRequest.flinkVersion(),
+            SHUTDOWN_REQUEST,
+            "shutdown",
+            ShutDownResponse.class);
     }
 
     public static SavepointResponse triggerSavepoint(TriggerSavepointRequest savepointRequest) {
-        return proxy(
-            savepointRequest, savepointRequest.flinkVersion(), SAVEPOINT_REQUEST, "triggerSavepoint");
+        return invokeClient(
+            savepointRequest,
+            savepointRequest.flinkVersion(),
+            SAVEPOINT_REQUEST,
+            "triggerSavepoint",
+            SavepointResponse.class);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T proxy(
-                               Object request,
-                               FlinkVersion flinkVersion,
-                               String requestClassName,
-                               String methodName) {
+    private static <R> R invokeClient(
+                                      Object request,
+                                      FlinkVersion flinkVersion,
+                                      String requestClassName,
+                                      String methodName,
+                                      Class<R> responseType) {
         flinkVersion.checkVersion();
         return FlinkShimsProxy.proxy(
             flinkVersion,
-            (Function<ClassLoader, T>) classLoader -> {
+            classLoader -> {
                 try {
-                    Class<?> submitClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS);
+                    Class<?> entrypointClass = classLoader.loadClass(FLINK_CLIENT_ENTRYPOINT_CLASS);
                     Class<?> requestClass = classLoader.loadClass(requestClassName);
-                    java.lang.reflect.Method method =
-                        submitClass.getDeclaredMethod(methodName, requestClass);
+                    Method method = entrypointClass.getDeclaredMethod(methodName, requestClass);
                     method.setAccessible(true);
-                    Object obj =
-                        method.invoke(
-                            null, FlinkShimsProxy.getObject(classLoader, request));
-                    if (obj == null) {
+                    Object shimsRequest =
+                        FlinkShimsProxy.getObject(classLoader, request, requestClass);
+                    Object result = method.invoke(null, shimsRequest);
+                    if (result == null) {
                         return null;
                     }
-                    return FlinkShimsProxy.getObject(FlinkClient.class.getClassLoader(), obj);
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    return FlinkShimsProxy.getObject(
+                        FlinkClient.class.getClassLoader(), result, responseType);
+                } catch (InvocationTargetException e) {
+                    throw unwrapInvocationTarget(e);
+                } catch (ReflectiveOperationException | IOException e) {
+                    throw new IllegalStateException(
+                        "Failed to invoke Flink client via shims proxy: " + methodName, e);
                 }
             });
+    }
+
+    private static RuntimeException unwrapInvocationTarget(InvocationTargetException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof RuntimeException) {
+            return (RuntimeException) cause;
+        }
+        if (cause instanceof Error) {
+            throw (Error) cause;
+        }
+        return new IllegalStateException("Failed to invoke Flink client method", e);
     }
 }

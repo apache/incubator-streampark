@@ -249,7 +249,7 @@ public final class YarnUtils {
         try {
             return HadoopUtils.yarnClient().getApplicationReport(applicationId).getTrackingUrl();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to get Yarn application tracking URL for " + applicationId, e);
         }
     }
 

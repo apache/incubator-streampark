@@ -59,9 +59,9 @@ public final class CommandUtils {
             return new CommandResult(code, buffer.toString());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -96,9 +96,9 @@ public final class CommandUtils {
             return waitFor(process);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

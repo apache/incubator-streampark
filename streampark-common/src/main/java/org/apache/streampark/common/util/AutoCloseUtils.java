@@ -44,7 +44,7 @@ public final class AutoCloseUtils {
             if (e instanceof Error) {
                 throw (Error) e;
             }
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 }

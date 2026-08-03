@@ -39,7 +39,7 @@ public class IngressStrategyV1 implements IngressStrategy {
             }
             return clusterClient.getWebInterfaceURL();
         } catch (Exception e) {
-            throw new RuntimeException("[StreamPark] get ingressUrlAddress error: " + e, e);
+            throw new IllegalStateException("[StreamPark] get ingressUrlAddress error: " + e, e);
         }
     }
 

@@ -626,7 +626,8 @@ public class FlinkApplicationActionServiceImpl
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException("The yarn api is abnormal. Ensure that yarn is running properly.");
+            throw new IllegalStateException(
+                "The yarn api is abnormal. Ensure that yarn is running properly.", e);
         }
     }
 

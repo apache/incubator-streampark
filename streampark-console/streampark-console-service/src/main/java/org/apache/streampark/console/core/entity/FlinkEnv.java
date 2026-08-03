@@ -177,7 +177,7 @@ public class FlinkEnv implements Serializable {
         if (StringUtils.isNotBlank(this.version)) {
             return Float.parseFloat(getVersionOfFirst() + "." + getVersionOfMiddle());
         }
-        throw new RuntimeException("Flink version is null");
+        throw new IllegalStateException("Flink version is null");
     }
 
     public boolean isLegacyFlinkConf() {

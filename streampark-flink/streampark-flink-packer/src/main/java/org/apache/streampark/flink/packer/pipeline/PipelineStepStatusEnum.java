@@ -36,10 +36,20 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * └──────────────────────────────────┘
  * </pre>
  */
-@SuppressWarnings("AlibabaEnumConstantsMustHaveComment")
 public enum PipelineStepStatusEnum {
 
-    unknown(0), waiting(1), running(2), success(3), failure(4), skipped(5);
+    /** Unknown step status. */
+    UNKNOWN(0),
+    /** Step is waiting to run. */
+    WAITING(1),
+    /** Step is running. */
+    RUNNING(2),
+    /** Step finished successfully. */
+    SUCCESS(3),
+    /** Step finished with failure. */
+    FAILURE(4),
+    /** Step was skipped. */
+    SKIPPED(5);
 
     private final Integer code;
 
@@ -54,7 +64,7 @@ public enum PipelineStepStatusEnum {
                 return status;
             }
         }
-        return unknown;
+        return UNKNOWN;
     }
 
     @JsonValue
@@ -63,6 +73,6 @@ public enum PipelineStepStatusEnum {
     }
 
     public boolean isUnknown() {
-        return this == unknown;
+        return this == UNKNOWN;
     }
 }

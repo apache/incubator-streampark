@@ -55,10 +55,8 @@ public final class SqlClient {
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: flink sql cannot be null");
         }
-        String flinkSql;
-        try {
-            flinkSql = DeflaterUtils.unzipString(sql);
-        } catch (Exception e) {
+        String flinkSql = DeflaterUtils.unzipString(sql);
+        if (StringUtils.isBlank(flinkSql)) {
             throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check");
         }
 

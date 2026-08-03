@@ -27,11 +27,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 class FlinkSqlExecuteTest {
 
-    private void execute(String sql, Consumer<String> callback) {
+    private void execute(String sql) {
         List<String> args = new ArrayList<>();
         args.add(ConfigKeys.KEY_FLINK_SQL(ConfigKeys.PARAM_PREFIX()));
         args.add(DeflaterUtils.zipString(sql));
@@ -73,7 +72,6 @@ class FlinkSqlExecuteTest {
                 + "insert into sink_kafka1\n"
                 + "select id, name, age\n"
                 + "from source_kafka1;\n"
-                + "\n",
-            System.out::println);
+                + "\n");
     }
 }

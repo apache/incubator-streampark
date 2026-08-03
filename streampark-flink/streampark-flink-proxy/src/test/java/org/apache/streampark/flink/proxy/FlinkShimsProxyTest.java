@@ -28,7 +28,8 @@ class FlinkShimsProxyTest {
     void getObjectShouldDeserializeAcrossClassLoaders() throws Exception {
         String payload = "streampark-proxy-test";
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Serializable roundTripped = FlinkShimsProxy.getObject(loader, payload);
+        Serializable roundTripped =
+            FlinkShimsProxy.getObject(loader, payload, String.class);
         Assertions.assertEquals(payload, roundTripped);
     }
 
@@ -36,7 +37,7 @@ class FlinkShimsProxyTest {
     void getObjectShouldPreserveCustomSerializableType() throws Exception {
         TestBean original = new TestBean("app-1", 42);
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        TestBean roundTripped = FlinkShimsProxy.getObject(loader, original);
+        TestBean roundTripped = FlinkShimsProxy.getObject(loader, original, TestBean.class);
         Assertions.assertEquals(original, roundTripped);
     }
 

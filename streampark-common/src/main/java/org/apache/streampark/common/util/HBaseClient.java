@@ -76,7 +76,7 @@ public class HBaseClient implements Serializable {
                             }));
                 return connection;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to create HBase connection", e);
             }
         });
     }

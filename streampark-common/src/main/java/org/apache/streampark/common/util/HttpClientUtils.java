@@ -78,7 +78,7 @@ public final class HttpClientUtils {
             try {
                 httpGet = new HttpGet(uriBuilder.build());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to build HTTP GET URI for " + url, e);
             }
         }
         if (config != null) {
@@ -195,7 +195,7 @@ public final class HttpClientUtils {
                     return null;
                 });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("HTTP request failed", e);
         }
     }
 }

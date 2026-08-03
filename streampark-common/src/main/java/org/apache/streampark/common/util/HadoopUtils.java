@@ -138,7 +138,7 @@ public final class HadoopUtils {
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to resolve kerberos TTL configuration", e);
             }
         }
         return tgtRefreshTime;
@@ -179,7 +179,7 @@ public final class HadoopUtils {
             try {
                 ClassLoaderUtils.loadResource(getHadoopConfDir());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to load Hadoop resources from " + getHadoopConfDir(), e);
             }
 
             if (StringUtils.isBlank(reusableConf.get("hadoop.tmp.dir"))) {
@@ -260,7 +260,7 @@ public final class HadoopUtils {
             LOG.info("[StreamPark] kerberos authentication successful");
             return kerberosUgi;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Kerberos authentication failed", e);
         }
     }
 
@@ -274,7 +274,7 @@ public final class HadoopUtils {
                                 try {
                                     return FileSystem.get(hadoopConf());
                                 } catch (IOException e) {
-                                    throw new RuntimeException(e);
+                                    throw new IllegalStateException("Failed to obtain HDFS FileSystem", e);
                                 }
                             });
                 if (HadoopConfigUtils.KERBEROS_ENABLE) {

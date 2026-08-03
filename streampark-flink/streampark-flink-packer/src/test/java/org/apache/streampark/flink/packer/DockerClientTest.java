@@ -66,7 +66,7 @@ class DockerClientTest {
                             .awaitCompletion(2, TimeUnit.MINUTES);
                     } catch (InterruptedException interrupted) {
                         Thread.currentThread().interrupt();
-                        throw new RuntimeException(
+                        throw new IllegalStateException(
                             "Interrupted while pulling docker test image: hello-world:latest",
                             interrupted);
                     }
@@ -76,7 +76,7 @@ class DockerClientTest {
                 return null;
             },
             err -> {
-                throw new RuntimeException("Failed to prepare docker test image: " + TEST_IMAGE, err);
+                throw new IllegalStateException("Failed to prepare docker test image: " + TEST_IMAGE, err);
             });
     }
 

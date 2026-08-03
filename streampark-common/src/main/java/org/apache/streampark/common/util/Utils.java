@@ -110,7 +110,7 @@ public final class Utils {
             }
             return mainClass;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to read jar manifest: " + jarFile, e);
         }
     }
 

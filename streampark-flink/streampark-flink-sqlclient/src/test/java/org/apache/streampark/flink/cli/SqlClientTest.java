@@ -17,6 +17,7 @@
 
 package org.apache.streampark.flink.cli;
 
+import org.apache.streampark.common.conf.ConfigKeys;
 import org.apache.streampark.flink.core.SqlCommand;
 import org.apache.streampark.flink.core.SqlCommandCall;
 
@@ -78,5 +79,26 @@ class SqlClientTest {
 
         assertEquals("BATCH", mode);
         assertTrue(arguments.isEmpty());
+    }
+
+    @Test
+    void resolveExecutionModeFromAppConfYaml() {
+        List<String> arguments = new ArrayList<>();
+        String yamlContent = ConfigKeys.KEY_FLINK_TABLE_MODE() + ": batch\n";
+        String appConf = "yaml://" + org.apache.streampark.common.util.DeflaterUtils.zipString(yamlContent);
+        Map<String, String> params = new HashMap<>();
+        params.put(ConfigKeys.KEY_APP_CONF(), appConf);
+        ParameterTool parameterTool = ParameterTool.fromMap(params);
+
+        String mode =
+            SqlClient.resolveExecutionMode(
+                parameterTool,
+                Collections.emptyList(),
+                arguments,
+                RuntimeExecutionMode.STREAMING.name());
+
+        assertEquals("BATCH", mode);
+        assertTrue(
+            arguments.contains("-D" + ExecutionOptions.RUNTIME_MODE.key() + "=BATCH"));
     }
 }
