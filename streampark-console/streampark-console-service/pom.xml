@@ -644,25 +644,9 @@
             </plugin>
 
             <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <configuration>
-                    <compileOrder>JavaThenScala</compileOrder>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${maven-spotless-plugin.version}</version>
-                <configuration>
-                    <scala>
-                        <scalafmt>
-                            <version>${spotless.scalafmt.version}</version>
-                            <file>${maven.multiModuleProjectDirectory}/tools/checkstyle/.scalafmt.conf</file>
-                        </scalafmt>
-                    </scala>
-                </configuration>
                 <executions>
                     <execution>
                         <id>spotless-check</id>

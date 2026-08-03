@@ -18,8 +18,7 @@
 package org.apache.streampark.common.util;
 
 /**
- * Java logging support using {@link StreamParkLoggerFactory}. Scala modules mix in {@code Logger}
- * from streampark-common-scala-bridge instead.
+ * Java logging support using {@link StreamParkLoggerFactory}.
  */
 public abstract class LoggerSupport {
 
