@@ -306,17 +306,8 @@ public class FlinkApplicationManageServiceImpl extends ServiceImpl<FlinkApplicat
     }
 
     private AppControl getAppControl(FlinkApplication record) {
-        return new AppControl()
-            .setAllowBuild(
-                record.getBuildStatus() == null
-                    || !PipelineStatusEnum.RUNNING.getCode()
-                        .equals(record.getBuildStatus()))
-            .setAllowStart(
-                !record.shouldTracking()
-                    && PipelineStatusEnum.SUCCESS.getCode()
-                        .equals(record.getBuildStatus()))
-            .setAllowStop(record.isRunning())
-            .setAllowView(record.shouldTracking());
+        return AppControl.fromPipelineBuildStatus(
+            record.getBuildStatus(), record.shouldTracking(), record.isRunning());
     }
 
     @Override

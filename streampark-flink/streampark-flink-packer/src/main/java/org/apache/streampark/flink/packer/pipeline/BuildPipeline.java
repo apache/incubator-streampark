@@ -17,11 +17,19 @@
 
 package org.apache.streampark.flink.packer.pipeline;
 
+import org.apache.streampark.common.fs.FsOperator;
+import org.apache.streampark.common.fs.HdfsOperator;
+import org.apache.streampark.common.fs.LfsOperator;
 import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.common.util.ThreadUtils;
+import org.apache.streampark.flink.packer.maven.DependencyInfo;
+import org.apache.streampark.flink.packer.maven.MavenTool;
 
+import java.io.File;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /** Building pipeline abstract class. */
 public abstract class BuildPipeline extends LoggerSupport
@@ -250,6 +259,50 @@ public abstract class BuildPipeline extends LoggerSupport
             return new IllegalStateException(ex.getMessage(), ex);
         }
         return new IllegalStateException(getError().summary());
+    }
+
+    protected void runYarnSqlBuildSteps(
+                                        String localWorkspace,
+                                        String yarnProvidedPath,
+                                        boolean sqlMode,
+                                        DependencyInfo dependencyInfo) {
+        execStep(
+            1,
+            () -> {
+                if (sqlMode) {
+                    LfsOperator.mkCleanDirs(localWorkspace);
+                    HdfsOperator.mkCleanDirs(yarnProvidedPath);
+                }
+                logInfo("Recreate building workspace: " + yarnProvidedPath);
+                return null;
+            })
+                .orElseThrow(this::pipelineException);
+
+        List<String> mavenJars =
+            execStep(
+                2,
+                () -> {
+                    if (!sqlMode) {
+                        return Collections.<String>emptyList();
+                    }
+                    List<File> mavenArts = MavenTool.resolveArtifacts(dependencyInfo.mavenArts());
+                    List<String> paths =
+                        mavenArts.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+                    paths.addAll(dependencyInfo.extJarLibs());
+                    return paths;
+                })
+                    .orElseThrow(this::pipelineException);
+
+        execStep(
+            3,
+            () -> {
+                for (String jar : mavenJars) {
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.lfs(), jar, localWorkspace);
+                    YarnJarUploader.uploadJarToHdfsOrLfs(FsOperator.hdfs(), jar, yarnProvidedPath);
+                }
+                return null;
+            })
+                .orElseThrow(this::pipelineException);
     }
 
     /** intercept snapshot */

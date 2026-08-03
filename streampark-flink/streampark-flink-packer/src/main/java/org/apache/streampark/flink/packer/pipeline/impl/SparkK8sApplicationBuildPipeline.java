@@ -23,38 +23,21 @@ import org.apache.streampark.flink.packer.docker.DockerConf;
 import org.apache.streampark.flink.packer.docker.SparkDockerfileTemplate;
 import org.apache.streampark.flink.packer.docker.SparkDockerfileTemplateTrait;
 import org.apache.streampark.flink.packer.docker.SparkHadoopDockerfileTemplate;
-import org.apache.streampark.flink.packer.pipeline.BuildPipeline;
-import org.apache.streampark.flink.packer.pipeline.DockerBuildProgress;
 import org.apache.streampark.flink.packer.pipeline.DockerImageBuildResponse;
-import org.apache.streampark.flink.packer.pipeline.DockerProgressWatcher;
-import org.apache.streampark.flink.packer.pipeline.DockerPullProgress;
-import org.apache.streampark.flink.packer.pipeline.DockerPushProgress;
-import org.apache.streampark.flink.packer.pipeline.DockerResolveProgress;
 import org.apache.streampark.flink.packer.pipeline.K8sDockerBuildSupport;
 import org.apache.streampark.flink.packer.pipeline.PipelineTypeEnum;
-import org.apache.streampark.flink.packer.pipeline.SilentDockerProgressWatcher;
 import org.apache.streampark.flink.packer.pipeline.SparkK8sApplicationBuildRequest;
-import org.apache.streampark.spark.kubernetes.model.SparkK8sPodTemplates;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /** Building pipeline for Spark kubernetes-native application mode */
-public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
+public class SparkK8sApplicationBuildPipeline extends AbstractK8sApplicationBuildPipeline {
 
     private final SparkK8sApplicationBuildRequest request;
-
-    private DockerProgressWatcher dockerProcessWatcher = new SilentDockerProgressWatcher();
-
-    private final DockerResolveProgress dockerProcess =
-        new DockerResolveProgress(
-            DockerPullProgress.empty(),
-            DockerBuildProgress.empty(),
-            DockerPushProgress.empty());
 
     public SparkK8sApplicationBuildPipeline(SparkK8sApplicationBuildRequest request) {
         this.request = request;
@@ -70,10 +53,6 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
         return request;
     }
 
-    public void registerDockerProgressWatcher(DockerProgressWatcher watcher) {
-        this.dockerProcessWatcher = watcher;
-    }
-
     @Override
     public DockerImageBuildResponse buildProcess() {
         String buildWorkspace =
@@ -85,52 +64,30 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                     logInfo("Recreate building workspace: " + workspace);
                     return workspace;
                 })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
+                    .orElseThrow(this::pipelineException);
 
-        Map<String, String> podTemplatePaths;
-        SparkK8sPodTemplates podTemplate = request.sparkPodTemplate();
-        if (podTemplate.isEmpty()) {
-            skipStep(2);
-            podTemplatePaths = Collections.emptyMap();
-        } else {
-            podTemplatePaths =
-                execStep(
-                    2,
-                    () -> {
-                        Map<String, String> podTemplateFiles =
-                            PodTemplateTool.preparePodTemplateFiles(buildWorkspace, podTemplate)
-                                .tmplFiles();
-                        logInfo(
-                            "Export spark podTemplates: "
-                                + String.join(",", podTemplateFiles.values()));
-                        return podTemplateFiles;
-                    })
-                        .orElseThrow(() -> {
-                            throw pipelineException();
-                        });
-        }
+        Map<String, String> podTemplatePaths =
+            preparePodTemplateStep(
+                buildWorkspace,
+                2,
+                request.sparkPodTemplate().isEmpty(),
+                () -> PodTemplateTool.preparePodTemplateFiles(buildWorkspace, request.sparkPodTemplate())
+                    .tmplFiles(),
+                "spark");
 
         final String mainJarPath =
             execStep(
                 3,
                 () -> {
-                    String mainJarName =
-                        Paths.get(request.mainJar()).getFileName().toString();
+                    String mainJarName = Paths.get(request.mainJar()).getFileName().toString();
                     String path = buildWorkspace + "/" + mainJarName;
                     LfsOperator.copy(request.mainJar(), path);
                     logInfo("Prepared spark job jar: " + path);
                     return path;
                 })
-                    .orElseThrow(
-                        () -> {
-                            throw pipelineException();
-                        });
+                    .orElseThrow(this::pipelineException);
         final Set<String> extJarLibs = new HashSet<>();
 
-        File dockerfile;
-        SparkDockerfileTemplateTrait dockerFileTemplate;
         Object[] dockerResult =
             execStep(
                 4,
@@ -159,65 +116,22 @@ public class SparkK8sApplicationBuildPipeline extends BuildPipeline {
                             + template.offerDockerfileContent());
                     return new Object[]{dockerFile, template};
                 })
-                    .orElseThrow(() -> {
-                        throw pipelineException();
-                    });
-        dockerfile = (File) dockerResult[0];
-        dockerFileTemplate = (SparkDockerfileTemplateTrait) dockerResult[1];
+                    .orElseThrow(this::pipelineException);
+        File dockerfile = (File) dockerResult[0];
+        SparkDockerfileTemplateTrait dockerFileTemplate = (SparkDockerfileTemplateTrait) dockerResult[1];
 
         DockerConf dockerConf = request.dockerConfig();
         String baseImageTag = request.sparkBaseImage().trim();
         if (request.k8sNamespace().isEmpty() || request.appName().isEmpty()) {
             throw new IllegalArgumentException("k8sNamespace or appName cannot be empty");
         }
-        String expectedImageTag =
-            "streampark-sparkjob-" + request.k8sNamespace() + "-" + request.appName();
         String pushImageTag =
             K8sDockerBuildSupport.compileTag(
-                expectedImageTag, dockerConf.registerAddress(), dockerConf.imageNamespace());
+                "streampark-sparkjob-" + request.k8sNamespace() + "-" + request.appName(),
+                dockerConf.registerAddress(),
+                dockerConf.imageNamespace());
 
-        execStep(
-            5,
-            () -> {
-                K8sDockerBuildSupport.pullImage(
-                    dockerConf,
-                    baseImageTag,
-                    dockerProcess,
-                    dockerProcessWatcher,
-                    this::logInfo,
-                    false);
-                return null;
-            })
-                .orElseThrow(() -> {
-                    throw pipelineException();
-                });
-
-        execStep(
-            6,
-            () -> {
-                K8sDockerBuildSupport.buildImage(
-                    buildWorkspace,
-                    dockerfile,
-                    pushImageTag,
-                    dockerProcess,
-                    dockerProcessWatcher,
-                    this::logInfo);
-                return null;
-            })
-                .orElseThrow(() -> {
-                    throw pipelineException();
-                });
-
-        execStep(
-            7,
-            () -> {
-                K8sDockerBuildSupport.pushImage(
-                    dockerConf, pushImageTag, dockerProcess, dockerProcessWatcher, this::logInfo);
-                return null;
-            })
-                .orElseThrow(() -> {
-                    throw pipelineException();
-                });
+        runDockerBuildSteps(buildWorkspace, dockerfile, dockerConf, baseImageTag, pushImageTag, false);
 
         return new DockerImageBuildResponse(
             buildWorkspace,
