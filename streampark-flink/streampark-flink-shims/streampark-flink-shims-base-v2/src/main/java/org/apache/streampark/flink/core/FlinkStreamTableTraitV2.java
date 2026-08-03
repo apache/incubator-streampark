@@ -21,7 +21,6 @@ import org.apache.streampark.common.util.Utils;
 
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.cache.DistributedCache;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.io.FileInputFormat;
@@ -48,7 +47,6 @@ import org.apache.flink.table.api.TableConfig;
 import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.api.TableResult;
-import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.CatalogDescriptor;
@@ -685,66 +683,5 @@ public abstract class FlinkStreamTableTraitV2 implements StreamTableEnvironment 
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
-    }
-
-    @Override
-    public StreamStatementSet createStatementSet() {
-        return tableEnv.createStatementSet();
-    }
-
-    @Override
-    public boolean createTable(String path, TableDescriptor descriptor, boolean ignoreIfExists) {
-        return tableEnv.createTable(path, descriptor, ignoreIfExists);
-    }
-
-    @Override
-    public void createTemporaryTable(
-                                     String path, TableDescriptor descriptor, boolean ignoreIfExists) {
-        tableEnv.createTemporaryTable(path, descriptor, ignoreIfExists);
-    }
-
-    @Override
-    public boolean createView(String path, Table view, boolean ignoreIfExists) {
-        return tableEnv.createView(path, view, ignoreIfExists);
-    }
-
-    @Override
-    public void createView(String path, Table view) {
-        tableEnv.createView(path, view);
-    }
-
-    @Override
-    public boolean dropTable(String path, boolean ignoreIfNotExists) {
-        return tableEnv.dropTable(path, ignoreIfNotExists);
-    }
-
-    @Override
-    public boolean dropTable(String path) {
-        return tableEnv.dropTable(path);
-    }
-
-    @Override
-    public boolean dropView(String path, boolean ignoreIfNotExists) {
-        return tableEnv.dropView(path, ignoreIfNotExists);
-    }
-
-    @Override
-    public boolean dropView(String path) {
-        return tableEnv.dropView(path);
-    }
-
-    @Deprecated
-    @Override
-    public <T> DataStream<T> toAppendStream(Table table, TypeInformation<T> typeInformation) {
-        isConvertedToDataStream = true;
-        return tableEnv.toAppendStream(table, typeInformation);
-    }
-
-    @Deprecated
-    @Override
-    public <T> DataStream<Tuple2<Boolean, T>> toRetractStream(
-                                                              Table table, TypeInformation<T> typeInformation) {
-        isConvertedToDataStream = true;
-        return tableEnv.toRetractStream(table, typeInformation);
     }
 }

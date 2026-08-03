@@ -19,9 +19,10 @@ package org.apache.streampark.flink.core;
 
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-/** Flink 1.17+ stream-table environment context. */
+/** Flink 1.19 stream-table environment context. */
 public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(
@@ -37,5 +38,10 @@ public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(StreamTableEnvConfig config) {
         this(FlinkTableInitializer.initialize(config));
+    }
+
+    @Override
+    public StreamStatementSet createStatementSet() {
+        return getStreamTableEnv().createStatementSet();
     }
 }

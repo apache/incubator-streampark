@@ -376,45 +376,4 @@ public abstract class FlinkTableTrait implements TableEnvironment {
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
     }
-
-    @Override
-    public boolean createTable(String path, TableDescriptor descriptor, boolean ignoreIfExists) {
-        return tableEnv.createTable(path, descriptor, ignoreIfExists);
-    }
-
-    @Override
-    public void createTemporaryTable(
-                                     String path, TableDescriptor descriptor, boolean ignoreIfExists) {
-        tableEnv.createTemporaryTable(path, descriptor, ignoreIfExists);
-    }
-
-    @Override
-    public boolean createView(String path, Table view, boolean ignoreIfExists) {
-        return tableEnv.createView(path, view, ignoreIfExists);
-    }
-
-    @Override
-    public void createView(String path, Table view) {
-        tableEnv.createView(path, view);
-    }
-
-    @Override
-    public boolean dropTable(String path, boolean ignoreIfNotExists) {
-        return tableEnv.dropTable(path, ignoreIfNotExists);
-    }
-
-    @Override
-    public boolean dropTable(String path) {
-        return tableEnv.dropTable(path);
-    }
-
-    @Override
-    public boolean dropView(String path, boolean ignoreIfNotExists) {
-        return tableEnv.dropView(path, ignoreIfNotExists);
-    }
-
-    @Override
-    public boolean dropView(String path) {
-        return tableEnv.dropView(path);
-    }
 }

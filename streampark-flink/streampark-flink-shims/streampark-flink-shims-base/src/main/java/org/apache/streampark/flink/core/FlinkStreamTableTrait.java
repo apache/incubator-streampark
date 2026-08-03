@@ -829,9 +829,4 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);
     }
-
-    @Override
-    public org.apache.flink.table.api.bridge.java.StreamStatementSet createStatementSet() {
-        return tableEnv.createStatementSet();
-    }
 }
