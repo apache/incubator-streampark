@@ -77,7 +77,7 @@ public final class YarnApplicationClient extends YarnClientTrait {
                     providedLibs.add(jobLib);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException("Failed to check Flink SQL job lib path: " + jobLib, e);
             }
         }
 

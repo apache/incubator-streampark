@@ -185,7 +185,7 @@ public final class YarnSessionClient extends YarnClientTrait {
             return new DeployResponse(
                 null,
                 null,
-                new RuntimeException("get the cluster getWebInterfaceURL failed."));
+                new IllegalStateException("Failed to get YARN session cluster WebInterfaceURL"));
         } catch (Exception e) {
             logError("start flink session fail in " + deployRequest.deployMode() + " mode");
             throw e;
