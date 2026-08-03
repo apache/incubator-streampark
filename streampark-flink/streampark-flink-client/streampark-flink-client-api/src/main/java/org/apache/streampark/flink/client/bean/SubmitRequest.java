@@ -445,8 +445,6 @@ public class SubmitRequest implements Serializable {
                     throw new IllegalArgumentException(
                         "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
             }
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to parse HDFS app config: " + appConf(), e);
         }

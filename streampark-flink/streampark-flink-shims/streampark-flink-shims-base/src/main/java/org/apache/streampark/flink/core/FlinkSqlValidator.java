@@ -128,7 +128,8 @@ public final class FlinkSqlValidator {
 
     private static FlinkSqlValidationResult syntaxErrorResult(SqlCommandCall call, Throwable e) {
         String exception = ExceptionUtils.stringifyException(e);
-        String causedBy = exception.substring(exception.indexOf("Caused by:"));
+        int causedByIndex = exception.indexOf("Caused by:");
+        String causedBy = causedByIndex >= 0 ? exception.substring(causedByIndex) : exception;
         String cleanUpError = exception.replaceAll("[\r\n]", "");
         Matcher matcher = SYNTAX_ERROR_PATTERN.matcher(cleanUpError);
         if (matcher.find()) {

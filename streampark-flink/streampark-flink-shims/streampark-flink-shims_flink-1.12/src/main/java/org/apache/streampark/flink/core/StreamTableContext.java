@@ -20,13 +20,16 @@ package org.apache.streampark.flink.core;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment;
+import org.apache.flink.table.api.StatementSet;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment;
+import org.apache.flink.table.descriptors.ConnectorDescriptor;
+import org.apache.flink.table.descriptors.StreamTableDescriptor;
+import org.apache.flink.table.sources.TableSource;
 
 import scala.Tuple3;
 
-/**
- * Integration api of stream and table
- */
+/** Integration api of stream and table */
 public class StreamTableContext extends FlinkStreamTableTrait {
 
     public StreamTableContext(
@@ -46,8 +49,7 @@ public class StreamTableContext extends FlinkStreamTableTrait {
     }
 
     @Override
-    public org.apache.flink.table.descriptors.StreamTableDescriptor connect(
-                                                                            org.apache.flink.table.descriptors.ConnectorDescriptor connectorDescriptor) {
+    public StreamTableDescriptor connect(ConnectorDescriptor connectorDescriptor) {
         return tableEnv().connect(connectorDescriptor);
     }
 
@@ -60,32 +62,32 @@ public class StreamTableContext extends FlinkStreamTableTrait {
     }
 
     @Override
-    public org.apache.flink.table.api.StatementSet createStatementSet() {
+    public StatementSet createStatementSet() {
         return tableEnv().createStatementSet();
     }
 
     @Override
-    public org.apache.flink.table.api.Table fromTableSource(org.apache.flink.table.sources.TableSource<?> source) {
+    public Table fromTableSource(TableSource<?> source) {
         return tableEnv().fromTableSource(source);
     }
 
     @Override
-    public void insertInto(org.apache.flink.table.api.Table table, String sinkPath, String... sinkPathContinued) {
+    public void insertInto(Table table, String sinkPath, String... sinkPathContinued) {
         tableEnv().insertInto(table, sinkPath, sinkPathContinued);
     }
 
     @Override
-    public void insertInto(String targetPath, org.apache.flink.table.api.Table table) {
+    public void insertInto(String targetPath, Table table) {
         tableEnv().insertInto(targetPath, table);
     }
 
     @Override
-    public String explain(org.apache.flink.table.api.Table table) {
+    public String explain(Table table) {
         return tableEnv().explain(table);
     }
 
     @Override
-    public String explain(org.apache.flink.table.api.Table table, boolean extended) {
+    public String explain(Table table, boolean extended) {
         return tableEnv().explain(table, extended);
     }
 
@@ -98,5 +100,4 @@ public class StreamTableContext extends FlinkStreamTableTrait {
     public void sqlUpdate(String stmt) {
         tableEnv().sqlUpdate(stmt);
     }
-
 }

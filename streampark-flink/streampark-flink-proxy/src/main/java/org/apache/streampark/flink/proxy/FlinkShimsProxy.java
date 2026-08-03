@@ -109,8 +109,8 @@ public final class FlinkShimsProxy extends LoggerSupport {
         return ClassLoaderUtils.runAsClassLoader(shimsClassLoader, () -> func.apply(shimsClassLoader));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T getObject(ClassLoader loader, Object obj) throws IOException, ClassNotFoundException {
+    public static <T> T getObject(ClassLoader loader, Object obj,
+                                  Class<T> type) throws IOException, ClassNotFoundException {
         try (
             ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(arrayOutputStream)) {
@@ -120,7 +120,7 @@ public final class FlinkShimsProxy extends LoggerSupport {
                     new ByteArrayInputStream(arrayOutputStream.toByteArray());
                 ClassLoaderObjectInputStream in =
                     new ClassLoaderObjectInputStream(loader, byteArrayInputStream)) {
-                return (T) in.readObject();
+                return type.cast(in.readObject());
             }
         }
     }

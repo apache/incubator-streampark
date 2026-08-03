@@ -193,7 +193,8 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql>
                     if (result == null) {
                         return null;
                     }
-                    return FlinkShimsProxy.getObject(this.getClass().getClassLoader(), result);
+                    return FlinkShimsProxy.getObject(
+                        this.getClass().getClassLoader(), result, FlinkSqlValidationResult.class);
                 } catch (Throwable e) {
                     log.error(
                         "verifySql invocationTargetException: {}",
