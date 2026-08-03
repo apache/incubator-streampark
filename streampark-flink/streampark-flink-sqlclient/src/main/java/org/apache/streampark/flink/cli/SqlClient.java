@@ -57,8 +57,8 @@ public final class SqlClient {
         String flinkSql;
         try {
             flinkSql = DeflaterUtils.unzipString(sql);
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check", e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Usage: flink sql is invalid or null, please check");
         }
 
         List<SqlCommandCall> sets = new ArrayList<>();

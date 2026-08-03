@@ -30,7 +30,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,7 +140,11 @@ public final class FlinkShimsProxy extends LoggerSupport {
                     flinkVersion,
                     file -> {
                         if (file.getName().startsWith("streampark-flink-shims")) {
-                            shimsUrls.add(toUrl(file));
+                            try {
+                                shimsUrls.add(file.toURI().toURL());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     });
 
@@ -220,7 +223,11 @@ public final class FlinkShimsProxy extends LoggerSupport {
                     flinkVersion,
                     file -> {
                         if (file != null) {
-                            shimsUrls.add(toUrl(file));
+                            try {
+                                shimsUrls.add(file.toURI().toURL());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     });
 
@@ -247,17 +254,13 @@ public final class FlinkShimsProxy extends LoggerSupport {
         List<URL> urls = new ArrayList<>();
         for (File f : files) {
             if (filterFun.test(f)) {
-                urls.add(toUrl(f));
+                try {
+                    urls.add(f.toURI().toURL());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return urls;
-    }
-
-    private static URL toUrl(File file) {
-        try {
-            return file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Invalid file URL: " + file, e);
-        }
     }
 }

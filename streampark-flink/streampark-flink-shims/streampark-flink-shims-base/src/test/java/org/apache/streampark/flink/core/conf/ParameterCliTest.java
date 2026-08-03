@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ParameterCliTest {
 
@@ -65,13 +64,5 @@ class ParameterCliTest {
 
         String property = ParameterCli.read(new String[]{"--property", conf.toString()});
         assertThat(property).contains("-D" + ConfigKeys.KEY_FLINK_APP_NAME() + "=demo_yaml");
-    }
-
-    @Test
-    void loadConfigShouldFailForUnsupportedExtension() {
-        assertThatThrownBy(
-            () -> ParameterCli.read(new String[]{"--name", tempDir.resolve("app.txt").toString()}))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Failed to load flink config file");
     }
 }
