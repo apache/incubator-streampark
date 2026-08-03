@@ -17,44 +17,19 @@
 
 package org.apache.streampark.flink.core;
 
+/** Stream and table environment configuration. */
 public class StreamTableEnvConfig {
 
-    private final String[] args;
-    private final StreamEnvConfigFunction streamConfig;
-    private final TableEnvConfigFunction tableConfig;
+    public final String[] args;
+    public final StreamEnvConfigFunction streamConfig;
+    public final TableEnvConfigFunction tableConfig;
 
     public StreamTableEnvConfig(
-                                String[] args, StreamEnvConfigFunction streamConfig,
+                                String[] args,
+                                StreamEnvConfigFunction streamConfig,
                                 TableEnvConfigFunction tableConfig) {
         this.args = args;
         this.streamConfig = streamConfig;
         this.tableConfig = tableConfig;
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public StreamEnvConfigFunction getStreamConfig() {
-        return streamConfig;
-    }
-
-    public TableEnvConfigFunction getTableConfig() {
-        return tableConfig;
-    }
-
-    /** Scala API alias for {@link #getArgs()}. */
-    public String[] args() {
-        return args;
-    }
-
-    /** Scala API alias for {@link #getStreamConfig()}. */
-    public StreamEnvConfigFunction streamConfig() {
-        return streamConfig;
-    }
-
-    /** Scala API alias for {@link #getTableConfig()}. */
-    public TableEnvConfigFunction tableConfig() {
-        return tableConfig;
     }
 }

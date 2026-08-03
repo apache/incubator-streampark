@@ -19,6 +19,9 @@ package org.apache.streampark.flink.core;
 
 import org.apache.streampark.common.enums.FlinkSqlValidationFailedType;
 import org.apache.streampark.common.util.ExceptionUtils;
+import org.apache.streampark.common.util.StreamParkLoggerFactory;
+
+import org.apache.streampark.shaded.org.slf4j.Logger;
 
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.parser.SqlParser;
@@ -27,17 +30,20 @@ import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.config.TableConfigOptions;
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Validates Flink SQL syntax using Calcite parser. */
+/** Validates Flink SQL syntax. */
 public final class FlinkSqlValidator {
+
+    private static final Logger LOG =
+        StreamParkLoggerFactory.loggerFactory()
+            .getLogger(FlinkSqlValidator.class.getName());
 
     private static final String FLINK112_CALCITE_PARSER_CLASS =
         "org.apache.flink.table.planner.calcite.CalciteParser";
@@ -45,41 +51,45 @@ public final class FlinkSqlValidator {
     private static final String FLINK113_PLUS_CALCITE_PARSER_CLASS =
         "org.apache.flink.table.planner.parse.CalciteParser";
 
-    private static final Pattern SYNTAX_ERROR_PATTERN =
+    private static final Pattern SYNTAX_ERROR_REGEXP =
         Pattern.compile(".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*");
 
-    private static final Map<String, SqlParser.Config> SQL_PARSER_CONFIG_MAP = createSqlParserConfigMap();
+    private static final Map<String, SqlParser.Config> SQL_PARSER_CONFIG_MAP;
 
-    private static final Log LOG = new Log();
+    static {
+        Map<String, SqlParser.Config> configMap = new HashMap<>();
+        configMap.put(SqlDialect.DEFAULT.name(), getConfig(SqlDialect.DEFAULT));
+        configMap.put(SqlDialect.HIVE.name(), getConfig(SqlDialect.HIVE));
+        SQL_PARSER_CONFIG_MAP = Collections.unmodifiableMap(configMap);
+    }
 
     private FlinkSqlValidator() {
     }
 
     public static FlinkSqlValidationResult verifySql(String sql) {
-        AtomicReference<FlinkSqlValidationResult> earlyReturn = new AtomicReference<>();
+        final FlinkSqlValidationResult[] earlyReturn = new FlinkSqlValidationResult[1];
         List<SqlCommandCall> sqlCommands =
-            SqlCommandParser.parseSQL(sql, earlyReturn::set);
-        FlinkSqlValidationResult earlyResult = earlyReturn.get();
-        if (earlyResult != null) {
-            return earlyResult;
+            SqlCommandParser.parseSQL(sql, result -> earlyReturn[0] = result);
+        if (earlyReturn[0] != null) {
+            return earlyReturn[0];
         }
 
         String sqlDialect = SqlDialect.DEFAULT.name().toLowerCase();
         boolean hasInsert = false;
         for (SqlCommandCall call : sqlCommands) {
-            String args = call.operands()[0];
-            SqlCommand command = call.command();
+            String args = call.operands[0];
+            SqlCommand command = call.command;
             switch (command) {
                 case SET:
-                case RESET:
-                    if (command == SqlCommand.SET
-                        && args.equals(TableConfigOptions.TABLE_SQL_DIALECT.key())) {
-                        sqlDialect = call.operands()[call.operands().length - 1];
+                    if (TableConfigOptions.TABLE_SQL_DIALECT.key().equals(args)) {
+                        sqlDialect = call.operands[call.operands.length - 1];
                     }
+                    break;
+                case RESET:
                     break;
                 case BEGIN_STATEMENT_SET:
                 case END_STATEMENT_SET:
-                    LOG.warn("SQL Client Syntax: " + call.command().getCommandName());
+                    LOG.warn("SQL Client Syntax: {} ", call.command.getName());
                     break;
                 default:
                     if (command == SqlCommand.INSERT) {
@@ -92,89 +102,85 @@ public final class FlinkSqlValidator {
                         } catch (ClassNotFoundException e) {
                             calciteClass = Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS);
                         }
-                        String dialectUpper = sqlDialect.toUpperCase();
-                        if ("HIVE".equals(dialectUpper)) {
-                            // skip calcite validation for HIVE dialect
-                        } else if ("DEFAULT".equals(dialectUpper)) {
-                            Constructor<?> constructor =
-                                calciteClass.getConstructor(SqlParser.Config.class);
-                            Object parser =
-                                constructor.newInstance(
-                                    SQL_PARSER_CONFIG_MAP.get(sqlDialect.toUpperCase()));
-                            Method method = parser.getClass().getDeclaredMethod("parse", String.class);
-                            method.setAccessible(true);
-                            method.invoke(parser, call.originSql());
-                        } else {
-                            throw new UnsupportedOperationException(
-                                "unsupported dialect: " + sqlDialect);
+                        switch (sqlDialect.toUpperCase()) {
+                            case "HIVE":
+                                break;
+                            case "DEFAULT":
+                                Object parser =
+                                    calciteClass
+                                        .getConstructor(SqlParser.Config.class)
+                                        .newInstance(
+                                            SQL_PARSER_CONFIG_MAP.get(
+                                                sqlDialect.toUpperCase()));
+                                Method method =
+                                    parser.getClass().getDeclaredMethod("parse", String.class);
+                                method.setAccessible(true);
+                                method.invoke(parser, call.originSql);
+                                break;
+                            default:
+                                throw new UnsupportedOperationException(
+                                    "unsupported dialect: " + sqlDialect);
                         }
-                    } catch (ReflectiveOperationException e) {
-                        return syntaxErrorResult(call, e);
-                    } catch (RuntimeException e) {
-                        return syntaxErrorResult(call, e);
+                    } catch (Exception e) {
+                        String exception = ExceptionUtils.stringifyException(e);
+                        int causedByIndex = exception.indexOf("Caused by:");
+                        String causedBy =
+                            causedByIndex >= 0
+                                ? exception.substring(causedByIndex)
+                                : exception;
+                        String cleanUpError = exception.replaceAll("[\r\n]", "");
+                        Matcher syntaxMatcher = SYNTAX_ERROR_REGEXP.matcher(cleanUpError);
+                        if (syntaxMatcher.find()) {
+                            int line = Integer.parseInt(syntaxMatcher.group(1));
+                            int column = Integer.parseInt(syntaxMatcher.group(2));
+                            int errorLine = call.lineStart + line - 1;
+                            return FlinkSqlValidationResult.builder()
+                                .success(false)
+                                .failedType(FlinkSqlValidationFailedType.SYNTAX_ERROR)
+                                .lineStart(call.lineStart)
+                                .lineEnd(call.lineEnd)
+                                .errorLine(errorLine)
+                                .errorColumn(column)
+                                .sql(call.originSql)
+                                .exception(
+                                    causedBy.replaceAll(
+                                        "at\\sline\\s" + line,
+                                        "at line " + errorLine))
+                                .build();
+                        }
+                        return FlinkSqlValidationResult.builder()
+                            .success(false)
+                            .failedType(FlinkSqlValidationFailedType.SYNTAX_ERROR)
+                            .lineStart(call.lineStart)
+                            .lineEnd(call.lineEnd)
+                            .sql(call.originSql)
+                            .exception(causedBy)
+                            .build();
                     }
-                    break;
             }
         }
 
         if (hasInsert) {
-            return new FlinkSqlValidationResult();
+            return FlinkSqlValidationResult.ok();
         }
-        return new FlinkSqlValidationResult(
-            false,
-            FlinkSqlValidationFailedType.SYNTAX_ERROR,
-            sqlCommands.get(0).lineStart(),
-            sqlCommands.get(sqlCommands.size() - 1).lineEnd(),
-            0,
-            0,
-            null,
-            "No 'INSERT' statement to trigger the execution of the Flink job.");
-    }
-
-    private static FlinkSqlValidationResult syntaxErrorResult(SqlCommandCall call, Throwable e) {
-        String exception = ExceptionUtils.stringifyException(e);
-        String causedBy = exception.substring(exception.indexOf("Caused by:"));
-        String cleanUpError = exception.replaceAll("[\r\n]", "");
-        Matcher matcher = SYNTAX_ERROR_PATTERN.matcher(cleanUpError);
-        if (matcher.matches()) {
-            int line = Integer.parseInt(matcher.group(1));
-            int column = Integer.parseInt(matcher.group(2));
-            int errorLine = call.lineStart() + line - 1;
-            return new FlinkSqlValidationResult(
-                false,
-                FlinkSqlValidationFailedType.SYNTAX_ERROR,
-                call.lineStart(),
-                call.lineEnd(),
-                errorLine,
-                column,
-                call.originSql(),
-                causedBy.replaceAll("at\\sline\\s" + line, "at line " + errorLine));
-        }
-        return new FlinkSqlValidationResult(
-            false,
-            FlinkSqlValidationFailedType.SYNTAX_ERROR,
-            call.lineStart(),
-            call.lineEnd(),
-            0,
-            0,
-            call.originSql(),
-            causedBy);
-    }
-
-    private static Map<String, SqlParser.Config> createSqlParserConfigMap() {
-        Map<String, SqlParser.Config> map = new HashMap<>();
-        map.put(SqlDialect.DEFAULT.name(), getConfig(SqlDialect.DEFAULT));
-        map.put(SqlDialect.HIVE.name(), getConfig(SqlDialect.HIVE));
-        return map;
+        return FlinkSqlValidationResult.builder()
+            .success(false)
+            .failedType(FlinkSqlValidationFailedType.SYNTAX_ERROR)
+            .lineStart(sqlCommands.get(0).lineStart)
+            .lineEnd(sqlCommands.get(sqlCommands.size() - 1).lineEnd)
+            .exception("No 'INSERT' statement to trigger the execution of the Flink job.")
+            .build();
     }
 
     private static SqlParser.Config getConfig(SqlDialect sqlDialect) {
-        org.apache.calcite.sql.validate.SqlConformance conformance;
+        FlinkSqlConformance conformance;
         if (sqlDialect == SqlDialect.HIVE) {
             try {
                 conformance = FlinkSqlConformance.DEFAULT;
             } catch (NoSuchFieldError e) {
                 conformance = FlinkSqlConformance.DEFAULT;
+            } catch (Throwable e) {
+                throw new IllegalArgumentException("Init Flink sql Dialect error: ", e);
             }
         } else if (sqlDialect == SqlDialect.DEFAULT) {
             conformance = FlinkSqlConformance.DEFAULT;
@@ -186,12 +192,5 @@ public final class FlinkSqlValidator {
             .withConformance(conformance)
             .withLex(Lex.JAVA)
             .withIdentifierMaxLength(256);
-    }
-
-    private static final class Log extends org.apache.streampark.common.util.LoggerSupport {
-
-        void warn(String msg) {
-            logWarn(msg);
-        }
     }
 }

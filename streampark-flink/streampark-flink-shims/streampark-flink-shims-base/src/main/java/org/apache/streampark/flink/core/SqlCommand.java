@@ -20,14 +20,16 @@ package org.apache.streampark.flink.core;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Supported Flink SQL command types. */
+/** Flink SQL command types. */
 public enum SqlCommand {
 
+    // ---- SELECT Statements -----------------------------------------------------------------
     SELECT("select", "(SELECT\\s+.+)"),
+
+    // ---- CREATE Statements -----------------------------------------------------------------
     CREATE_TABLE("create table", "(CREATE\\s+(TEMPORARY\\s+|)TABLE\\s+.+)"),
     CREATE_CATALOG("create catalog", "(CREATE\\s+CATALOG\\s+.+)"),
     CREATE_DATABASE("create database", "(CREATE\\s+DATABASE\\s+.+)"),
@@ -37,26 +39,39 @@ public enum SqlCommand {
     CREATE_FUNCTION(
         "create function",
         "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+(IF\\s+NOT\\s+EXISTS\\s+|)(\\S+)\\s+AS\\s+.*)"),
+
+    // ---- DROP Statements -------------------------------------------------------------------
     DROP_CATALOG("drop catalog", "(DROP\\s+CATALOG\\s+.+)"),
     DROP_TABLE("drop table", "(DROP\\s+(TEMPORARY\\s+|)TABLE\\s+.+)"),
     DROP_DATABASE("drop database", "(DROP\\s+DATABASE\\s+.+)"),
     DROP_VIEW("drop view", "(DROP\\s+(TEMPORARY\\s+|)VIEW\\s+.+)"),
     DROP_FUNCTION(
-        "drop function",
-        "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.+)"),
+        "drop function", "(DROP\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.+)"),
+
+    // ---- ALTER Statements ------------------------------------------------------------------
     ALTER_TABLE("alter table", "(ALTER\\s+TABLE\\s+.+)"),
     ALTER_VIEW("alter view", "(ALTER\\s+VIEW\\s+.+)"),
     ALTER_DATABASE("alter database", "(ALTER\\s+DATABASE\\s+.+)"),
     ALTER_FUNCTION(
         "alter function",
         "(ALTER\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.+)"),
+
+    // ---- INSERT Statement ------------------------------------------------------------------
     INSERT("insert", "(INSERT\\s+(INTO|OVERWRITE)\\s+.+)"),
+
+    // ---- DESCRIBE Statement ----------------------------------------------------------------
     DESC("desc", "(DESC\\s+.+)"),
     DESCRIBE("describe", "(DESCRIBE\\s+.+)"),
+
+    // ---- EXPLAIN Statement -----------------------------------------------------------------
     EXPLAIN("explain", "(EXPLAIN\\s+.+)"),
+
+    // ---- USE Statements --------------------------------------------------------------------
     USE_CATALOG("use catalog", "(USE\\s+CATALOG\\s+.+)"),
     USE_MODULES("use modules", "(USE\\s+MODULES\\s+.+)"),
     USE_DATABASE("use database", "(USE\\s+(?!(CATALOG|MODULES)).+)"),
+
+    // ---- SHOW Statements -------------------------------------------------------------------
     SHOW_CATALOGS("show catalogs", "(SHOW\\s+CATALOGS\\s*)"),
     SHOW_CURRENT_CATALOG("show current catalog", "(SHOW\\s+CURRENT\\s+CATALOG\\s*)"),
     SHOW_DATABASES("show databases", "(SHOW\\s+DATABASES\\s*)"),
@@ -68,65 +83,88 @@ public enum SqlCommand {
     SHOW_CREATE_VIEW("show create view", "(SHOW\\s+CREATE\\s+VIEW\\s+.+)"),
     SHOW_FUNCTIONS("show functions", "(SHOW\\s+(USER\\s+|)FUNCTIONS\\s*)"),
     SHOW_MODULES("show modules", "(SHOW\\s+(FULL\\s+|)MODULES\\s*)"),
+
+    // ---- LOAD Statements -------------------------------------------------------------------
     LOAD_MODULE("load module", "(LOAD\\s+MODULE\\s+.+)"),
+
+    // ---- UNLOAD Statements -----------------------------------------------------------------
     UNLOAD_MODULE("unload module", "(UNLOAD\\s+MODULE\\s+.+)"),
-    SET("set", "SET(\\s+(\\S+)\\s*=(.*))?", SqlCommandConverters::setOperands),
+
+    // ---- SET Statements --------------------------------------------------------------------
+    SET(
+        "set",
+        "SET(\\s+(\\S+)\\s*=(.*))?",
+        groups -> {
+            if (groups.length < 3) {
+                return Optional.empty();
+            }
+            if (groups[0] == null) {
+                return Optional.of(new String[]{cleanUp(groups[0])});
+            }
+            return Optional.of(new String[]{cleanUp(groups[1]), cleanUp(groups[2])});
+        }),
+
+    // ---- RESET Statements ------------------------------------------------------------------
     RESET("reset", "RESET\\s+'(.*)'"),
-    RESET_ALL("reset all", "RESET", SqlCommandConverters::resetAll),
+    RESET_ALL("reset all", "RESET", groups -> Optional.of(new String[]{"ALL"})),
+
+    // ---- INSERT SET Statements -------------------------------------------------------------
+    /** This is SQL Client's syntax, don't use in our platform. */
+    @Deprecated
     BEGIN_STATEMENT_SET(
-        "begin statement set", "BEGIN\\s+STATEMENT\\s+SET", SqlCommandConverters::noOperands),
-    END_STATEMENT_SET("end statement set", "END", SqlCommandConverters::noOperands),
+        "begin statement set", "BEGIN\\s+STATEMENT\\s+SET", SqlCommandConverters.NO_OPERANDS),
+    /** This is SQL Client's syntax, don't use in our platform. */
+    @Deprecated
+    END_STATEMENT_SET("end statement set", "END", SqlCommandConverters.NO_OPERANDS),
+
+    // Since: 2.1.2 for flink 1.18
     DELETE("delete", "(DELETE\\s+FROM\\s+.+)"),
     UPDATE("update", "(UPDATE\\s+.+)");
 
-    private final String commandName;
+    private static final int PATTERN_FLAGS = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
+
+    private final String name;
     private final String regex;
-    private final Function<String[], Optional<String[]>> converter;
+    private final SqlCommandConverter converter;
     private Matcher matcher;
 
-    SqlCommand(String commandName, String regex) {
-        this(commandName, regex, SqlCommandConverters::firstGroup);
+    SqlCommand(String name, String regex) {
+        this(name, regex, SqlCommandConverters.DEFAULT);
     }
 
-    SqlCommand(
-               String commandName,
-               String regex,
-               Function<String[], Optional<String[]>> converter) {
-        this.commandName = commandName;
+    SqlCommand(String name, String regex, SqlCommandConverter converter) {
+        this.name = name;
         this.regex = regex;
         this.converter = converter;
     }
 
-    /** Scala field-style access (lowercase command label). */
-    public String commandName() {
-        return commandName;
+    /** Command label (e.g. {@code "select"}, {@code "create table"}). */
+    public String getName() {
+        return name;
     }
 
-    public String getCommandName() {
-        return commandName;
+    public String getRegex() {
+        return regex;
     }
 
-    public Matcher matcher() {
-        return matcher;
+    public SqlCommandConverter getConverter() {
+        return converter;
     }
 
     public Matcher getMatcher() {
         return matcher;
     }
 
-    public Optional<String[]> convert(String[] groups) {
-        return converter.apply(groups);
-    }
-
     public boolean matches(String input) {
         if (StringUtils.isBlank(regex)) {
             return false;
         }
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Pattern pattern = Pattern.compile(regex, PATTERN_FLAGS);
         matcher = pattern.matcher(input);
         return matcher.matches();
     }
 
+    /** Resolve the first matching command for the given statement. */
     public static SqlCommand get(String stmt) {
         for (SqlCommand command : values()) {
             if (command.matches(stmt)) {
@@ -134,5 +172,17 @@ public enum SqlCommand {
             }
         }
         return null;
+    }
+
+    static String cleanUp(String sql) {
+        String trimmed = sql.trim();
+        if (trimmed.length() >= 2) {
+            char first = trimmed.charAt(0);
+            char last = trimmed.charAt(trimmed.length() - 1);
+            if ((first == '\'' && last == '\'') || (first == '"' && last == '"')) {
+                return trimmed.substring(1, trimmed.length() - 1);
+            }
+        }
+        return trimmed;
     }
 }

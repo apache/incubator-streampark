@@ -17,16 +17,37 @@
 
 package org.apache.streampark.flink.util;
 
+import org.apache.flink.api.common.state.ListState;
+import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.util.TimeUtils;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/** Flink utility methods. */
 public final class FlinkUtils {
 
     private FlinkUtils() {
+    }
+
+    public static <R> ListState<R> getUnionListState(
+                                                     FunctionInitializationContext context,
+                                                     String descriptorName,
+                                                     TypeInformation<R> typeInformation) {
+        try {
+            return context.getOperatorStateStore()
+                .getUnionListState(
+                    new ListStateDescriptor<>(
+                        descriptorName, typeInformation.getTypeClass()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getFlinkDistJar(String flinkHome) {
@@ -44,14 +65,15 @@ public final class FlinkUtils {
             "[StreamPark] found multiple flink-dist jar in "
                 + flinkHome
                 + "/lib,["
-                + String.join(",", jars)
+                + Arrays.stream(jars).collect(Collectors.joining(","))
                 + "]");
     }
 
     public static boolean isCheckpointEnabled(Map<String, String> map) {
         Duration checkpointInterval =
             TimeUtils.parseDuration(
-                map.getOrDefault(ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL.key(), "0ms"));
+                map.getOrDefault(
+                    ExecutionCheckpointingOptions.CHECKPOINTING_INTERVAL.key(), "0ms"));
         return checkpointInterval.toMillis() > 0;
     }
 }

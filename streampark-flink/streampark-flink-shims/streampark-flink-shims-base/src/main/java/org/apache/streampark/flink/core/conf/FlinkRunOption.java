@@ -21,9 +21,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
-/** Applies to all optional parameters under flink run */
+/** Applies to all optional parameters under flink run. */
 public final class FlinkRunOption {
 
     public static final Option HELP_OPTION = new Option("h", "help", false, null);
@@ -48,14 +47,12 @@ public final class FlinkRunOption {
         new Option("z", "zookeeperNamespace", true, null);
     public static final Option CANCEL_WITH_SAVEPOINT_OPTION =
         new Option("s", "withSavepoint", true, null);
-    public static final Option STOP_WITH_SAVEPOINT_PATH =
-        new Option("p", "savepointPath", true, null);
+    public static final Option STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, null);
     public static final Option STOP_AND_DRAIN = new Option("d", "drain", false, null);
     public static final Option PY_OPTION = new Option("py", "python", true, null);
     public static final Option PYFILES_OPTION = new Option("pyfs", "pyFiles", true, null);
     public static final Option PYMODULE_OPTION = new Option("pym", "pyModule", true, null);
-    public static final Option PYREQUIREMENTS_OPTION =
-        new Option("pyreq", "pyRequirements", true, null);
+    public static final Option PYREQUIREMENTS_OPTION = new Option("pyreq", "pyRequirements", true, null);
     public static final Option PYARCHIVE_OPTION = new Option("pyarch", "pyArchives", true, null);
     public static final Option PYEXEC_OPTION = new Option("pyexec", "pyExecutable", true, null);
     public static final Option EXECUTOR_OPTION = new Option("e", "executor", true, null);
@@ -122,7 +119,9 @@ public final class FlinkRunOption {
         PYMODULE_OPTION.setArgName("pythonModule");
 
         PYREQUIREMENTS_OPTION.setRequired(false);
+
         PYARCHIVE_OPTION.setRequired(false);
+
         PYEXEC_OPTION.setRequired(false);
     }
 
@@ -130,11 +129,13 @@ public final class FlinkRunOption {
     }
 
     public static Options allOptions() {
+        Options commOptions = getRunCommandOptions();
+        Options yarnOptions = getYARNOptions();
         Options resultOptions = new Options();
-        for (Option option : getRunCommandOptions().getOptions()) {
+        for (Option option : commOptions.getOptions()) {
             resultOptions.addOption(option);
         }
-        for (Option option : getYarnOptions().getOptions()) {
+        for (Option option : yarnOptions.getOptions()) {
             if (!resultOptions.hasOption(option.getOpt())) {
                 resultOptions.addOption(option);
             }
@@ -153,7 +154,7 @@ public final class FlinkRunOption {
         return options;
     }
 
-    public static Options getYarnOptions() {
+    public static Options getYARNOptions() {
         Options allOptions = new Options();
         allOptions.addOption(DETACHED_OPTION);
         allOptions.addOption(YARN_DETACHED_OPTION);
@@ -186,10 +187,10 @@ public final class FlinkRunOption {
     }
 
     public static Options mergeOptions(Options optionsA, Options optionsB) {
+        Options resultOptions = new Options();
         if (optionsA == null || optionsB == null) {
             throw new IllegalArgumentException("options must not be null");
         }
-        Options resultOptions = new Options();
         for (Option option : optionsA.getOptions()) {
             resultOptions.addOption(option);
         }
@@ -199,7 +200,12 @@ public final class FlinkRunOption {
         return resultOptions;
     }
 
-    public static CommandLine parse(Options options, String[] args, boolean stopAtNonOptions) throws ParseException {
-        return new DefaultParser().parse(options, args, stopAtNonOptions);
+    public static CommandLine parse(Options options, String[] args, boolean stopAtNonOptions) {
+        DefaultParser parser = new DefaultParser();
+        try {
+            return parser.parse(options, args, stopAtNonOptions);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

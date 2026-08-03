@@ -20,11 +20,12 @@ package org.apache.streampark.flink.core.conf;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 
-public final class FlinkConfiguration {
+/** Flink runtime configuration holder. */
+public class FlinkConfiguration {
 
-    private final ParameterTool parameter;
-    private final Configuration envConfig;
-    private final Configuration tableConfig;
+    public final ParameterTool parameter;
+    public final Configuration envConfig;
+    public final Configuration tableConfig;
 
     public FlinkConfiguration(
                               ParameterTool parameter, Configuration envConfig, Configuration tableConfig) {
@@ -33,34 +34,7 @@ public final class FlinkConfiguration {
         this.tableConfig = tableConfig;
     }
 
-    public ParameterTool getParameter() {
-        return parameter;
-    }
-
-    public Configuration getEnvConfig() {
-        return envConfig;
-    }
-
-    public Configuration getTableConfig() {
-        return tableConfig;
-    }
-
-    /** Scala API alias for {@link #getParameter()}. */
-    public ParameterTool parameter() {
-        return parameter;
-    }
-
-    /** Scala API alias for {@link #getEnvConfig()}. */
-    public Configuration envConfig() {
-        return envConfig;
-    }
-
-    /** Scala API alias for {@link #getTableConfig()}. */
-    public Configuration tableConfig() {
-        return tableConfig;
-    }
-
-    public FlinkConfiguration withParameter(ParameterTool newParameter) {
-        return new FlinkConfiguration(newParameter, envConfig, tableConfig);
+    public FlinkConfiguration withParameter(ParameterTool parameter) {
+        return new FlinkConfiguration(parameter, envConfig, tableConfig);
     }
 }

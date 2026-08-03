@@ -17,40 +17,16 @@
 
 package org.apache.streampark.flink.core;
 
-/** A segment of SQL text with line range metadata. */
+/** SQL segment with line range and content. */
 public class SqlSegment {
 
-    private final int start;
-    private final int end;
-    private final String sql;
+    public final int start;
+    public final int end;
+    public final String sql;
 
     public SqlSegment(int start, int end, String sql) {
         this.start = start;
         this.end = end;
         this.sql = sql;
-    }
-
-    public int start() {
-        return start;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public int end() {
-        return end;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
-    public String sql() {
-        return sql;
-    }
-
-    public String getSql() {
-        return sql;
     }
 }

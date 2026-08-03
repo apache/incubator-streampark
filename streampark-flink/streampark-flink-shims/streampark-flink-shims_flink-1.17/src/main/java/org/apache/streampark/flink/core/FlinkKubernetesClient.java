@@ -23,6 +23,7 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesService;
 
 import java.util.Optional;
 
+/** Flink 1.17 Kubernetes client. */
 public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
 
     public FlinkKubernetesClient(FlinkKubeClient kubeClient) {
@@ -31,7 +32,6 @@ public class FlinkKubernetesClient extends FlinkKubernetesClientTrait {
 
     @Override
     public Optional<KubernetesService> getService(String serviceName) {
-        return kubeClient.getService(
-            ExternalServiceDecorator.getExternalServiceName(serviceName));
+        return kubeClient.getService(ExternalServiceDecorator.getExternalServiceName(serviceName));
     }
 }

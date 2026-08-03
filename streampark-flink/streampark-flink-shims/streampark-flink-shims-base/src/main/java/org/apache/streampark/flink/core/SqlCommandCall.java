@@ -20,11 +20,11 @@ package org.apache.streampark.flink.core;
 /** Call of SQL command with operands and command type. */
 public class SqlCommandCall {
 
-    private final int lineStart;
-    private final int lineEnd;
-    private final SqlCommand command;
-    private final String[] operands;
-    private final String originSql;
+    public final int lineStart;
+    public final int lineEnd;
+    public final SqlCommand command;
+    public final String[] operands;
+    public final String originSql;
 
     public SqlCommandCall(
                           int lineStart,
@@ -37,45 +37,5 @@ public class SqlCommandCall {
         this.command = command;
         this.operands = operands;
         this.originSql = originSql;
-    }
-
-    public int lineStart() {
-        return lineStart;
-    }
-
-    public int getLineStart() {
-        return lineStart;
-    }
-
-    public int lineEnd() {
-        return lineEnd;
-    }
-
-    public int getLineEnd() {
-        return lineEnd;
-    }
-
-    public SqlCommand command() {
-        return command;
-    }
-
-    public SqlCommand getCommand() {
-        return command;
-    }
-
-    public String[] operands() {
-        return operands;
-    }
-
-    public String[] getOperands() {
-        return operands;
-    }
-
-    public String originSql() {
-        return originSql;
-    }
-
-    public String getOriginSql() {
-        return originSql;
     }
 }
