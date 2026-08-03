@@ -17,8 +17,6 @@
 
 package org.apache.streampark.flink.core;
 
-import org.apache.streampark.common.util.Utils;
-
 import org.apache.flink.api.common.JobExecutionResult;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.table.api.Table;
