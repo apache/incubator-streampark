@@ -52,6 +52,7 @@ public final class FlinkSqlExecutor {
     private FlinkSqlExecutor() {
     }
 
+    @SuppressWarnings("java:S3776")
     public static void executeSql(String sql, ParameterTool parameter, TableEnvironment context) {
         executeSql(sql, parameter, context, null);
     }

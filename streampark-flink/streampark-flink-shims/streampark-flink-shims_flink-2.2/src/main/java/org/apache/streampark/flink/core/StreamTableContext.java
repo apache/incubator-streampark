@@ -69,7 +69,8 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
         return getStreamTableEnv().fromDataStream(dataStream, schema);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> Table fromDataStream(DataStream<T> dataStream, Expression... expressions) {
         return getStreamTableEnv().fromDataStream(dataStream, expressions);
@@ -96,7 +97,8 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
         getStreamTableEnv().createTemporaryView(path, dataStream, schema);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> void createTemporaryView(
                                         String path, DataStream<T> dataStream, Expression... expressions) {
@@ -221,14 +223,16 @@ public class StreamTableContext extends FlinkStreamTableTraitV2 {
         getStreamTableEnv().createCatalog(catalogName, catalogDescriptor);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> DataStream<T> toAppendStream(Table table, TypeInformation<T> typeInformation) {
         isConvertedToDataStream = true;
         return getStreamTableEnv().toAppendStream(table, typeInformation);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> DataStream<Tuple2<Boolean, T>> toRetractStream(
                                                               Table table, TypeInformation<T> typeInformation) {

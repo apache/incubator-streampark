@@ -30,27 +30,27 @@ public final class TableExt {
     /** Table alias helper (Scala {@code ->} operator equivalent: {@code as}). */
     public static final class Table {
 
-        private final org.apache.flink.table.api.Table table;
+        private final org.apache.flink.table.api.Table flinkTable;
 
         public Table(org.apache.flink.table.api.Table table) {
-            this.table = table;
+            this.flinkTable = table;
         }
 
         public org.apache.flink.table.api.Table as(String field, String... fields) {
-            return table.as(field, fields);
+            return flinkTable.as(field, fields);
         }
     }
 
     /** Table-to-DataStream conversion helpers. */
     public static class TableConversions {
 
-        private final org.apache.flink.table.api.Table table;
+        private final org.apache.flink.table.api.Table flinkTable;
 
         private final StreamTableEnvironment streamTableEnv;
 
         public TableConversions(
                                 org.apache.flink.table.api.Table table, StreamTableEnvironment streamTableEnv) {
-            this.table = table;
+            this.flinkTable = table;
             this.streamTableEnv = streamTableEnv;
         }
 

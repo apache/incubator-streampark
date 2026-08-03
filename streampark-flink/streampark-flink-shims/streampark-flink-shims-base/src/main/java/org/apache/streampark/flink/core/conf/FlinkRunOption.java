@@ -25,6 +25,8 @@ import org.apache.commons.cli.Options;
 /** Applies to all optional parameters under flink run. */
 public final class FlinkRunOption {
 
+    private static final String SAVEPOINT_PATH_ARG = "savepointPath";
+
     public static final Option HELP_OPTION = new Option("h", "help", false, null);
     public static final Option JAR_OPTION = new Option("j", "jarfile", true, null);
     public static final Option CLASS_OPTION = new Option("c", "class", true, null);
@@ -47,7 +49,8 @@ public final class FlinkRunOption {
         new Option("z", "zookeeperNamespace", true, null);
     public static final Option CANCEL_WITH_SAVEPOINT_OPTION =
         new Option("s", "withSavepoint", true, null);
-    public static final Option STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, null);
+    public static final Option STOP_WITH_SAVEPOINT_PATH =
+        new Option("p", SAVEPOINT_PATH_ARG, true, null);
     public static final Option STOP_AND_DRAIN = new Option("d", "drain", false, null);
     public static final Option PY_OPTION = new Option("py", "python", true, null);
     public static final Option PYFILES_OPTION = new Option("pyfs", "pyFiles", true, null);
@@ -92,7 +95,7 @@ public final class FlinkRunOption {
         SCHEDULED_OPTION.setRequired(false);
 
         SAVEPOINT_PATH_OPTION.setRequired(false);
-        SAVEPOINT_PATH_OPTION.setArgName("savepointPath");
+        SAVEPOINT_PATH_OPTION.setArgName(SAVEPOINT_PATH_ARG);
 
         SAVEPOINT_ALLOW_NON_RESTORED_OPTION.setRequired(false);
 
@@ -104,7 +107,7 @@ public final class FlinkRunOption {
         CANCEL_WITH_SAVEPOINT_OPTION.setOptionalArg(true);
 
         STOP_WITH_SAVEPOINT_PATH.setRequired(false);
-        STOP_WITH_SAVEPOINT_PATH.setArgName("savepointPath");
+        STOP_WITH_SAVEPOINT_PATH.setArgName(SAVEPOINT_PATH_ARG);
         STOP_WITH_SAVEPOINT_PATH.setOptionalArg(true);
 
         STOP_AND_DRAIN.setRequired(false);

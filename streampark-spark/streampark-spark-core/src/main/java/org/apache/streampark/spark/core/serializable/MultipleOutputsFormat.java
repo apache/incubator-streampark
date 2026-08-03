@@ -128,6 +128,7 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
 
         @Override
         public void setupJob(JobContext jobContext) throws IOException {
+            // Dummy committer: no setup required.
         }
 
         @Override
@@ -137,14 +138,17 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
 
         @Override
         public void setupTask(TaskAttemptContext taskContext) throws IOException {
+            // Dummy committer: no setup required.
         }
 
         @Override
         public void commitTask(TaskAttemptContext taskContext) throws IOException {
+            // Dummy committer: no commit required.
         }
 
         @Override
         public void abortTask(TaskAttemptContext taskContext) throws IOException {
+            // Dummy committer: no abort required.
         }
     }
 
@@ -152,10 +156,12 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
 
         @Override
         public void write(K key, V value) throws IOException {
+            // Dummy writer: discards all output.
         }
 
         @Override
         public void close(TaskAttemptContext context) throws IOException {
+            // Dummy writer: nothing to close.
         }
     }
 
@@ -178,6 +184,7 @@ public abstract class MultipleOutputsFormat<K, V> extends OutputFormat<scala.Tup
 
         @Override
         public void close() throws IOException {
+            // Dummy iterator: no resources to close.
         }
 
         @Override

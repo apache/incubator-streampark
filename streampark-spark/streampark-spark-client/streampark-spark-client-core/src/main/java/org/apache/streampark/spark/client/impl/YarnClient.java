@@ -74,18 +74,15 @@ public final class YarnClient extends SparkClientTrait {
     }
 
     private void yarnKill(String appId) throws Exception {
-        try {
-            HadoopUtils.yarnClient().killApplication(ApplicationId.fromString(appId));
-            logger.info(
-                "[StreamPark][Spark][YarnClient] spark job: {} is killed by yarn successfully.",
-                appId);
-        } catch (Exception e) {
-            throw e;
-        }
+        HadoopUtils.yarnClient().killApplication(ApplicationId.fromString(appId));
+        logger.info(
+            "[StreamPark][Spark][YarnClient] spark job: {} is killed by yarn successfully.",
+            appId);
     }
 
     @Override
     protected void setConfig(SubmitRequest submitRequest) {
+        // Yarn submit config is applied in doSubmit via SparkLauncher.
     }
 
     @Override
@@ -97,7 +94,7 @@ public final class YarnClient extends SparkClientTrait {
             logger.info(
                 "[StreamPark][Spark][YarnClient] spark job: {} submit failed.",
                 submitRequest.getAppName());
-            throw new RuntimeException(handle.getError().get());
+            throw new IllegalStateException(handle.getError().get());
         }
         logger.info(
             "[StreamPark][Spark][YarnClient] spark job: {} submit successfully, appid: {}, state: {}",
@@ -178,7 +175,7 @@ public final class YarnClient extends SparkClientTrait {
                 .setMaster("yarn")
                 .setDeployMode(deployMode);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to create SparkLauncher", e);
         }
     }
 

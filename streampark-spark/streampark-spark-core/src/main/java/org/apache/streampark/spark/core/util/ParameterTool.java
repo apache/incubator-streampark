@@ -17,8 +17,6 @@
 
 package org.apache.streampark.spark.core.util;
 
-import org.apache.commons.lang3.math.NumberUtils;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,9 +67,6 @@ public class ParameterTool {
             i += 1;
             if (i >= args.length) {
                 map.put(key, NO_VALUE_KEY);
-            } else if (NumberUtils.isCreatable(args[i])) {
-                map.put(key, args[i]);
-                i += 1;
             } else if (args[i].startsWith("--") || args[i].startsWith("-")) {
                 map.put(key, NO_VALUE_KEY);
             } else {

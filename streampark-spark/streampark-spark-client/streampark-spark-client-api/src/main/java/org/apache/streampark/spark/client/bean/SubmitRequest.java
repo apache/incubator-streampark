@@ -142,6 +142,7 @@ public class SubmitRequest {
         return extraParameter.get(key);
     }
 
+    @SuppressWarnings("java:S3776")
     private Map<String, String> getParameterMap(String prefix) {
         if (appConf == null) {
             return Collections.emptyMap();
@@ -171,29 +172,7 @@ public class SubmitRequest {
                     map = PropertiesUtils.fromPropertiesText(content);
                     break;
                 case "hdfs://":
-                    try {
-                        String text = HdfsUtils.read(appConf);
-                        int dotIndex = appConf.lastIndexOf('.');
-                        String extension =
-                            dotIndex >= 0 ? appConf.substring(dotIndex + 1).toLowerCase() : "";
-                        switch (extension) {
-                            case "yml":
-                            case "yaml":
-                                map = PropertiesUtils.fromYamlText(text);
-                                break;
-                            case "conf":
-                                map = PropertiesUtils.fromHoconText(text);
-                                break;
-                            case "properties":
-                                map = PropertiesUtils.fromPropertiesText(text);
-                                break;
-                            default:
-                                throw new IllegalArgumentException(
-                                    "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    map = readHdfsConfig(appConf);
                     break;
                 default:
                     throw new IllegalArgumentException("[StreamPark] application config format error.");
@@ -203,6 +182,24 @@ public class SubmitRequest {
             .filter(e -> e.getKey().startsWith(prefix))
             .filter(e -> StringUtils.isNotEmpty(e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static Map<String, String> readHdfsConfig(String appConf) throws IOException {
+        String text = HdfsUtils.read(appConf);
+        int dotIndex = appConf.lastIndexOf('.');
+        String extension = dotIndex >= 0 ? appConf.substring(dotIndex + 1).toLowerCase() : "";
+        switch (extension) {
+            case "yml":
+            case "yaml":
+                return PropertiesUtils.fromYamlText(text);
+            case "conf":
+                return PropertiesUtils.fromHoconText(text);
+            case "properties":
+                return PropertiesUtils.fromPropertiesText(text);
+            default:
+                throw new IllegalArgumentException(
+                    "[StreamPark] Usage: application config format error,must be [yaml|conf|properties]");
+        }
     }
 
     public HdfsWorkspace getHdfsWorkspace() throws IOException {
@@ -224,11 +221,11 @@ public class SubmitRequest {
 
     private void checkBuildResult() {
         if (buildResult == null) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                 "[spark-submit] current job: " + appName + " was not yet built, buildResult is empty");
         }
         if (!buildResult.pass()) {
-            throw new RuntimeException("[spark-submit] current job " + appName + " build failed, please check");
+            throw new IllegalStateException("[spark-submit] current job " + appName + " build failed, please check");
         }
     }
 

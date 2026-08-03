@@ -22,6 +22,7 @@ import org.apache.streampark.common.enums.SparkSqlValidationFailedType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -49,7 +50,7 @@ public final class SqlCommandParser {
                         .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
                         .exception(SQL_EMPTY_ERROR)
                         .build());
-                return null;
+                return Collections.emptyList();
             }
             throw new IllegalArgumentException(SQL_EMPTY_ERROR);
         }
@@ -63,7 +64,7 @@ public final class SqlCommandParser {
                         .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
                         .exception(SQL_EMPTY_ERROR)
                         .build());
-                return null;
+                return Collections.emptyList();
             }
             throw new IllegalArgumentException(SQL_EMPTY_ERROR);
         }
@@ -96,7 +97,7 @@ public final class SqlCommandParser {
                         .failedType(SparkSqlValidationFailedType.VERIFY_FAILED)
                         .exception("spark sql syntax error, no executable sql")
                         .build());
-                return null;
+                return Collections.emptyList();
             }
             throw new UnsupportedOperationException("spark sql syntax error, no executable sql");
         }

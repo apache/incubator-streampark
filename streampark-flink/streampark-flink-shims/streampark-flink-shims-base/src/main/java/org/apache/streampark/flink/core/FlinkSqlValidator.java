@@ -52,7 +52,7 @@ public final class FlinkSqlValidator {
         "org.apache.flink.table.planner.parse.CalciteParser";
 
     private static final Pattern SYNTAX_ERROR_REGEXP =
-        Pattern.compile(".*at\\sline\\s(\\d+),\\scolumn\\s(\\d+).*");
+        Pattern.compile("at\\sline\\s(\\d+),\\scolumn\\s(\\d+)");
 
     private static final Map<String, SqlParser.Config> SQL_PARSER_CONFIG_MAP;
 
@@ -66,6 +66,7 @@ public final class FlinkSqlValidator {
     private FlinkSqlValidator() {
     }
 
+    @SuppressWarnings("java:S3776")
     public static FlinkSqlValidationResult verifySql(String sql) {
         final FlinkSqlValidationResult[] earlyReturn = new FlinkSqlValidationResult[1];
         List<SqlCommandCall> sqlCommands =
@@ -106,12 +107,7 @@ public final class FlinkSqlValidator {
                         hasInsert = true;
                     }
                     try {
-                        Class<?> calciteClass;
-                        try {
-                            calciteClass = Class.forName(FLINK112_CALCITE_PARSER_CLASS);
-                        } catch (ClassNotFoundException e) {
-                            calciteClass = Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS);
-                        }
+                        Class<?> calciteClass = loadCalciteParserClass();
                         switch (sqlDialect.toUpperCase()) {
                             case "HIVE":
                                 break;
@@ -180,6 +176,14 @@ public final class FlinkSqlValidator {
             .lineEnd(sqlCommands.get(sqlCommands.size() - 1).lineEnd)
             .exception("No 'INSERT' statement to trigger the execution of the Flink job.")
             .build();
+    }
+
+    private static Class<?> loadCalciteParserClass() throws ClassNotFoundException {
+        try {
+            return Class.forName(FLINK112_CALCITE_PARSER_CLASS);
+        } catch (ClassNotFoundException e) {
+            return Class.forName(FLINK113_PLUS_CALCITE_PARSER_CLASS);
+        }
     }
 
     private static SqlParser.Config getConfig(SqlDialect sqlDialect) {

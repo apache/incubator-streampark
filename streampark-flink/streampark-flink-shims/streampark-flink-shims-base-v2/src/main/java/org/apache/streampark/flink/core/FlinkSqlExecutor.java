@@ -56,6 +56,7 @@ public final class FlinkSqlExecutor {
         executeSql(sql, parameter, context, null);
     }
 
+    @SuppressWarnings("java:S3776")
     public static void executeSql(
                                   String sql,
                                   ParameterTool parameter,
@@ -173,7 +174,7 @@ public final class FlinkSqlExecutor {
                     break;
                 case SELECT:
                     LOG.error("StreamPark dose not support 'SELECT' statement now!");
-                    throw new RuntimeException(
+                    throw new UnsupportedOperationException(
                         "StreamPark dose not support 'select' statement now!");
                 case DELETE:
                 case UPDATE:
@@ -214,7 +215,7 @@ public final class FlinkSqlExecutor {
             }
         } else {
             LOG.error("No 'INSERT' statement to trigger the execution of the Flink job.");
-            throw new RuntimeException(
+            throw new IllegalStateException(
                 "No 'INSERT' statement to trigger the execution of the Flink job.");
         }
 

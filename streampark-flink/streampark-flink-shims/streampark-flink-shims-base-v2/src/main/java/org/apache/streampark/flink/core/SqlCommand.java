@@ -109,12 +109,12 @@ public enum SqlCommand {
     RESET_ALL("reset all", "RESET", groups -> Optional.of(new String[]{"ALL"})),
 
     // ---- INSERT SET Statements -------------------------------------------------------------
-    /** This is SQL Client's syntax, don't use in our platform. */
-    @Deprecated
+    /** @deprecated SQL Client syntax; not supported on this platform. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     BEGIN_STATEMENT_SET(
         "begin statement set", "BEGIN\\s+STATEMENT\\s+SET", SqlCommandConverters.NO_OPERANDS),
-    /** This is SQL Client's syntax, don't use in our platform. */
-    @Deprecated
+    /** @deprecated SQL Client syntax; not supported on this platform. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     END_STATEMENT_SET("end statement set", "END", SqlCommandConverters.NO_OPERANDS),
 
     // Since: 2.1.2 for flink 1.18

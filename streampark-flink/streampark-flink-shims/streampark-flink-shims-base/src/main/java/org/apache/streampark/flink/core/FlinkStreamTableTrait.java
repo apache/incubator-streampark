@@ -125,7 +125,8 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return execute(appName);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     public JobExecutionResult execute(String jobName) {
         Utils.printLogo("FlinkStreamTable " + jobName + " Starting...");
         if (isConvertedToDataStream) {
@@ -370,18 +371,21 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.getCheckpointConfig().isForceUnalignedCheckpoints();
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     public StreamExecutionEnvironment $enableCheckpointing(
                                                            long interval, CheckpointingMode mode, boolean force) {
         return streamEnv.enableCheckpointing(interval, mode);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     public DataStream<Long> $generateSequence(long from, long to) {
         return streamEnv.fromSequence(from, to);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     public DataStream<String> $readFileStream(
                                               String streamPath,
                                               long intervalMillis,
@@ -389,7 +393,8 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return streamEnv.readFileStream(streamPath, intervalMillis, watchType);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     public <T> DataStream<T> $readFile(
                                        FileInputFormat<T> inputFormat,
                                        String filePath,
@@ -782,49 +787,57 @@ public abstract class FlinkStreamTableTrait implements StreamTableEnvironment {
         return tableEnv.getConfig();
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> void registerFunction(String name, TableFunction<T> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T, ACC> void registerFunction(String name, AggregateFunction<T, ACC> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T, ACC> void registerFunction(String name, TableAggregateFunction<T, ACC> function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public <T> void registerDataStream(String name, DataStream<T> dataStream) {
         tableEnv.registerDataStream(name, dataStream);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public void registerTable(String name, Table table) {
         tableEnv.registerTable(name, table);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public Table scan(String... tablePath) {
         return tableEnv.scan(tablePath);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public String[] getCompletionHints(String statement, int position) {
         return tableEnv.getCompletionHints(statement, position);

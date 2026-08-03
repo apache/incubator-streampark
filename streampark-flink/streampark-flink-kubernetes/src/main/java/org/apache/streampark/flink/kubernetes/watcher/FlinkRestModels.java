@@ -24,6 +24,7 @@ import org.apache.streampark.flink.kubernetes.model.JobStatusCV;
 import org.apache.streampark.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +94,7 @@ final class FlinkRestModels {
         try {
             JsonNode root = JsonUtils.read(json, JsonNode.class);
             if (!root.isArray()) {
-                return null;
+                return Collections.emptyList();
             }
             List<FlinkRestJmConfigItem> items = new ArrayList<>();
             for (JsonNode node : root) {
@@ -101,7 +102,7 @@ final class FlinkRestModels {
             }
             return items;
         } catch (Exception e) {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -164,6 +165,7 @@ final class FlinkRestModels {
         private final long lastModification;
         private final JobTask tasks;
 
+        @SuppressWarnings("java:S107")
         JobDetail(
                   String jid,
                   String name,
@@ -215,6 +217,7 @@ final class FlinkRestModels {
         private final int reconciling;
         private final int initializing;
 
+        @SuppressWarnings("java:S107")
         JobTask(
                 int total,
                 int created,
@@ -252,6 +255,7 @@ final class FlinkRestModels {
         private final Integer jobsFailed;
         private final String flinkVersion;
 
+        @SuppressWarnings("java:S107")
         FlinkRestOverview(
                           Integer taskManagers,
                           Integer slotsTotal,

@@ -35,6 +35,7 @@ import org.apache.spark.sql.SparkSession;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -52,14 +53,23 @@ public abstract class Spark implements Serializable {
     protected boolean createOnError = true;
     private final ReentrantReadWriteLock.WriteLock lock = new ReentrantReadWriteLock().writeLock();
 
+    @SuppressWarnings("java:S3051")
     public final void main(String[] args) {
         init(args);
         config(sparkConf);
+        applySystemProperties();
+        createSparkSession();
+        applySparkSqlConf();
+        ready();
+        executeSqlCommands(args);
+        start();
+        destroy();
+    }
 
+    private void applySystemProperties() {
         scala.collection.Iterator<scala.Tuple2<String, String>> sysProps =
             scala.collection.JavaConverters.asScalaIteratorConverter(
-                java.util.Arrays.asList(
-                    sparkConf.getAllWithPrefix("spark.config.system.properties"))
+                Arrays.asList(sparkConf.getAllWithPrefix("spark.config.system.properties"))
                     .iterator())
                 .asScala()
                 .toIterator();
@@ -67,19 +77,20 @@ public abstract class Spark implements Serializable {
             scala.Tuple2<String, String> x = sysProps.next();
             System.getProperties().setProperty(x._1().substring(1), x._2());
         }
+    }
 
+    private void createSparkSession() {
         SparkSession.Builder builder = SparkSession.builder().config(sparkConf);
-        boolean enableHive =
-            sparkConf.getBoolean("spark.config.enable.hive.support", false);
-        if (enableHive) {
+        if (sparkConf.getBoolean("spark.config.enable.hive.support", false)) {
             builder.enableHiveSupport();
         }
         sparkSession = builder.getOrCreate();
+    }
 
+    private void applySparkSqlConf() {
         scala.collection.Iterator<scala.Tuple2<String, String>> sparkSql =
             scala.collection.JavaConverters.asScalaIteratorConverter(
-                java.util.Arrays.asList(
-                    sparkConf.getAllWithPrefix("spark.config.spark.sql"))
+                Arrays.asList(sparkConf.getAllWithPrefix("spark.config.spark.sql"))
                     .iterator())
                 .asScala()
                 .toIterator();
@@ -87,15 +98,15 @@ public abstract class Spark implements Serializable {
             scala.Tuple2<String, String> x = sparkSql.next();
             sparkSession.sparkContext().getConf().set(x._1().substring(1), x._2());
         }
+    }
 
-        ready();
-
+    private void executeSqlCommands(String[] args) {
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
-        String sparkSqls;
         String sql = parameterTool.get(ConfigKeys.KEY_SPARK_SQL);
         if (StringUtils.isBlank(sql)) {
             throw new IllegalArgumentException("Usage: spark sql cannot be null");
         }
+        String sparkSqls;
         try {
             sparkSqls = DeflaterUtils.unzipString(sql);
         } catch (Exception e) {
@@ -109,7 +120,7 @@ public abstract class Spark implements Serializable {
             String command = x.command.getName();
             try {
                 lock.lock();
-                Dataset<Row> dataFrame = handle(x.originSql);
+                handle(x.originSql);
                 LOG.info("{}:{}", command, args0);
             } finally {
                 if (lock.isHeldByCurrentThread()) {
@@ -117,16 +128,11 @@ public abstract class Spark implements Serializable {
                 }
             }
         }
-
-        start();
-        destroy();
     }
 
+    @SuppressWarnings("java:S3776")
     private void init(String[] args) {
-        List<String> argv = new ArrayList<>();
-        for (String arg : args) {
-            argv.add(arg);
-        }
+        List<String> argv = new ArrayList<>(Arrays.asList(args));
         String conf = null;
         List<Map.Entry<String, String>> userArgs = new ArrayList<>();
 
@@ -155,27 +161,7 @@ public abstract class Spark implements Serializable {
         }
 
         if (conf != null) {
-            Map<String, String> localConf;
-            String ext =
-                conf.contains(".")
-                    ? conf.substring(conf.lastIndexOf('.') + 1)
-                    : "";
-            switch (ext) {
-                case "conf":
-                    localConf = PropertiesUtils.fromHoconFile(conf);
-                    break;
-                case "properties":
-                    localConf = PropertiesUtils.fromPropertiesFile(conf);
-                    break;
-                case "yaml":
-                case "yml":
-                    localConf = PropertiesUtils.fromYamlFile(conf);
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                        "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
-            }
-            localConf.forEach((k, v) -> sparkConf.set(k, v));
+            loadConfigFile(conf).forEach((k, v) -> sparkConf.set(k, v));
         }
         userArgs.forEach(e -> sparkConf.set(e.getKey(), e.getValue()));
 
@@ -207,6 +193,23 @@ public abstract class Spark implements Serializable {
                 + sparkConf.get("spark.extraListeners", "");
         if (!extraListeners.equals(",")) {
             sparkConf.set("spark.extraListeners", extraListeners);
+        }
+    }
+
+    private static Map<String, String> loadConfigFile(String conf) {
+        String ext =
+            conf.contains(".") ? conf.substring(conf.lastIndexOf('.') + 1) : "";
+        switch (ext) {
+            case "conf":
+                return PropertiesUtils.fromHoconFile(conf);
+            case "properties":
+                return PropertiesUtils.fromPropertiesFile(conf);
+            case "yaml":
+            case "yml":
+                return PropertiesUtils.fromYamlFile(conf);
+            default:
+                throw new IllegalArgumentException(
+                    "[StreamPark] Usage: config file error,must be [properties|yaml|conf]");
         }
     }
 

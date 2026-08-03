@@ -43,10 +43,12 @@ public final class ParameterCli {
     private ParameterCli() {
     }
 
+    @SuppressWarnings({"java:S106", "java:S3776"})
     public static void main(String[] args) {
         System.out.print(read(args));
     }
 
+    @SuppressWarnings("java:S3776")
     public static String read(String[] args) {
         switch (args[0]) {
             case "--vmopt":
@@ -155,6 +157,7 @@ public final class ParameterCli {
         }
     }
 
+    @SuppressWarnings("java:S3776")
     public static String[] getOption(Map<String, String> map, String[] args) {
         Map<String, Object> optionMap = new HashMap<>();
         for (Map.Entry<String, String> entry : map.entrySet()) {

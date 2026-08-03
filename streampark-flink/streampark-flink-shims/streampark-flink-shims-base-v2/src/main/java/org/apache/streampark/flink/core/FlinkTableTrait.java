@@ -359,19 +359,22 @@ public abstract class FlinkTableTrait implements TableEnvironment {
         return tableEnv.getCompletionHints(statement, position);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public Table scan(String... tablePath) {
         return tableEnv.scan(tablePath);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public void registerTable(String name, Table table) {
         tableEnv.registerTable(name, table);
     }
 
-    @Deprecated
+    /** @deprecated Retained for backward compatibility with legacy Flink Table API. */
+    @Deprecated(since = "2.1.0", forRemoval = false)
     @Override
     public void registerFunction(String name, ScalarFunction function) {
         tableEnv.registerFunction(name, function);

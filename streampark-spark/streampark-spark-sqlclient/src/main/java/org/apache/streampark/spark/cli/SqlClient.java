@@ -24,8 +24,6 @@ import org.apache.streampark.spark.core.SparkStreaming;
 import org.apache.streampark.spark.core.util.ParameterTool;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
 
 /** Spark SQL client entry. */
 public class SqlClient {
@@ -58,18 +56,8 @@ public class SqlClient {
     }
 
     private static final class BatchSqlApp extends SparkBatch {
-
-        @Override
-        protected Dataset<Row> handle(String sql) {
-            return super.handle(sql);
-        }
     }
 
     private static final class StreamSqlApp extends SparkStreaming {
-
-        @Override
-        protected Dataset<Row> handle(String sql) {
-            return super.handle(sql);
-        }
     }
 }

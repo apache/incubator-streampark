@@ -46,7 +46,7 @@ public final class SerializationExtensions {
         try {
             return avroJob(clazz, Job.getInstance(new Configuration()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to initialize Avro job", e);
         }
     }
 
@@ -57,15 +57,15 @@ public final class SerializationExtensions {
         return job;
     }
 
-    public static boolean isDefined(GenericRecord record, String field) {
-        if (record.get(field) != null) {
+    public static boolean isDefined(GenericRecord avroRecord, String field) {
+        if (avroRecord.get(field) != null) {
             return true;
         }
         LOGGER.warn(
             "Expected field '"
                 + field
                 + "' to be defined, but it was not on record of type '"
-                + record.getClass()
+                + avroRecord.getClass()
                 + "'");
         return false;
     }

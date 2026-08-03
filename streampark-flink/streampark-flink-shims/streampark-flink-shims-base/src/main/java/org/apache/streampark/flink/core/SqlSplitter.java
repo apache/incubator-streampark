@@ -50,6 +50,7 @@ public final class SqlSplitter {
      * multiple sql statements. Step 2, refine the results. Replace the preceding sql statements with
      * empty lines, so that we can get the correct line number in the parsing error message.
      */
+    @SuppressWarnings("java:S3776")
     public static List<SqlSegment> splitSql(String sql) {
         List<String> queries = new ArrayList<>();
         int lastIndex = StringUtils.isNotBlank(sql) ? sql.length() - 1 : 0;

@@ -47,6 +47,9 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -99,6 +102,13 @@ public final class YarnPerJobTestCase {
     }
 
     private YarnPerJobTestCase() {
+    }
+
+    @Test
+    void requiresFlinkHomeForManualIntegration() {
+        Assumptions.assumeTrue(
+            System.getenv("FLINK_HOME") != null,
+            "Manual YARN integration harness; set FLINK_HOME to run main()");
     }
 
     @SuppressWarnings("unchecked")

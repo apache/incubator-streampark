@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** some simple tests */
+@SuppressWarnings("java:S8786")
 class RegExpTest {
 
     /**
