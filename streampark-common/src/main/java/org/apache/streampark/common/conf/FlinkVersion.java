@@ -25,13 +25,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import scala.collection.JavaConverters;
 
 /** @param flinkHome actual flink home that must be a readable local path */
 public class FlinkVersion implements Serializable {
@@ -85,11 +84,6 @@ public class FlinkVersion implements Serializable {
         return getVersion();
     }
 
-    /** Scala API alias for {@link #getFlinkLibs()}. */
-    public scala.collection.immutable.List<URL> flinkLibs() throws Exception {
-        return JavaConverters.asScalaIteratorConverter(getFlinkLibs().iterator()).asScala().toList();
-    }
-
     public String getScalaVersion() {
         if (scalaVersion == null) {
             Matcher matcher = FLINK_SCALA_VERSION_PATTERN.matcher(getFlinkDistJar().getName());
@@ -123,7 +117,7 @@ public class FlinkVersion implements Serializable {
     public List<URL> getFlinkLibs() throws Exception {
         File[] files = getFlinkLib().listFiles();
         if (files == null) {
-            return Arrays.asList();
+            return Collections.emptyList();
         }
         return Arrays.stream(files).map(f -> {
             try {

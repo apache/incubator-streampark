@@ -426,7 +426,8 @@ public class SubmitRequest implements Serializable {
     private Map<String, String> parseHdfsAppConf() {
         try {
             String text = HdfsUtils.read(appConf());
-            String extension = appConf().split("\\.")[appConf().split("\\.").length - 1].toLowerCase();
+            String[] parts = appConf().split("\\.");
+            String extension = parts[parts.length - 1].toLowerCase();
             switch (extension) {
                 case "yml":
                 case "yaml":

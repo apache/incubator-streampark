@@ -18,7 +18,6 @@
 package org.apache.streampark.flink.client;
 
 import org.apache.streampark.common.conf.FlinkVersion;
-import org.apache.streampark.common.util.LoggerSupport;
 import org.apache.streampark.flink.client.bean.CancelRequest;
 import org.apache.streampark.flink.client.bean.CancelResponse;
 import org.apache.streampark.flink.client.bean.DeployRequest;
@@ -33,7 +32,7 @@ import org.apache.streampark.flink.proxy.FlinkShimsProxy;
 
 import java.util.function.Function;
 
-public final class FlinkClient extends LoggerSupport {
+public final class FlinkClient {
 
     private static final String FLINK_CLIENT_ENTRYPOINT_CLASS =
         "org.apache.streampark.flink.client.FlinkClientEntrypoint";

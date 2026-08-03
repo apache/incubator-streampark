@@ -20,7 +20,7 @@ package org.apache.streampark.flink.client;
 import java.security.Permission;
 
 /** Used to mask JVM requests for external operations. */
-public class ExitSecurityManager extends SecurityManager {
+public final class ExitSecurityManager extends SecurityManager {
 
     @Override
     public void checkExit(int status) {
